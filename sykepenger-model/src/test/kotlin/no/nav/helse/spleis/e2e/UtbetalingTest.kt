@@ -55,7 +55,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertEquals(20, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag[0].grad)
+        assertEquals(20, inspektør.utbetaling(0).arbeidsgiverOppdrag[0].grad)
     }
 
     @Test
@@ -101,8 +101,8 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.desember til 16.desember), inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
 
         assertEquals(2, inspektør(ORGNUMMER).utbetalinger.size)
-        assertEquals(1.januar til 31.januar, inspektør(ORGNUMMER).utbetalinger.first().inspektør.periode)
-        assertEquals(13.november til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().inspektør.periode)
-        assertNotEquals(inspektør(ORGNUMMER).utbetalinger[0].inspektør.korrelasjonsId, inspektør(ORGNUMMER).utbetalinger[1].inspektør.korrelasjonsId)
+        assertEquals(1.januar til 31.januar, inspektør(ORGNUMMER).utbetalinger.first().periode)
+        assertEquals(13.november til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().periode)
+        assertNotEquals(inspektør(ORGNUMMER).utbetaling(0).korrelasjonsId, inspektør(ORGNUMMER).utbetaling(1).korrelasjonsId)
     }
 }

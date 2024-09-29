@@ -63,7 +63,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        val arbeidsgiverOppdrag = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val arbeidsgiverOppdrag = inspektør.utbetalinger.first().arbeidsgiverOppdrag
         val oppdragInspektør = arbeidsgiverOppdrag.inspektør
         assertEquals(sisteArbeidsgiverdag.plusDays(1), arbeidsgiverOppdrag.first().inspektør.fom)
         assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)

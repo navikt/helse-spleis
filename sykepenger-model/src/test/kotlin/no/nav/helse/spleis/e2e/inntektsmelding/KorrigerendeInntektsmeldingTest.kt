@@ -254,9 +254,9 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
 
-        val utbetalingFebruar = inspektør.utbetaling(2).inspektør
+        val utbetalingFebruar = inspektør.utbetaling(2)
 
-        val revurdering1Vedtaksperiode = inspektør.utbetaling(3).inspektør
+        val revurdering1Vedtaksperiode = inspektør.utbetaling(3)
         revurdering1Vedtaksperiode.also { utbetalingInspektør ->
             assertEquals(revurdering1Vedtaksperiode.korrelasjonsId, utbetalingFebruar.korrelasjonsId)
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
@@ -267,14 +267,14 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
                 assertEquals(26.januar, oppdragInspektør.datoStatusFom(0))
             }
         }
-        val revurdering2Vedtaksperiode = inspektør.utbetaling(4).inspektør
+        val revurdering2Vedtaksperiode = inspektør.utbetaling(4)
         revurdering2Vedtaksperiode.also { utbetalingInspektør ->
             assertNotEquals(revurdering2Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
             assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
         }
-        val revurdering3Vedtaksperiode = inspektør.utbetaling(5).inspektør
+        val revurdering3Vedtaksperiode = inspektør.utbetaling(5)
         revurdering3Vedtaksperiode.also { utbetalingInspektør ->
             assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
             assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering2Vedtaksperiode.korrelasjonsId)

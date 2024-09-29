@@ -22,8 +22,8 @@ internal class VarselVedNegativtBeløpE2ETest: AbstractDslTest() {
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, Inntekt.INGEN)))
             ))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(-15741, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(15741, inspektør.utbetalinger.last().inspektør.personOppdrag.inspektør.nettoBeløp)
+            assertEquals(-15741, inspektør.utbetalinger.last().arbeidsgiverOppdrag.inspektør.nettoBeløp)
+            assertEquals(15741, inspektør.utbetalinger.last().personOppdrag.inspektør.nettoBeløp)
             assertVarsel(RV_UT_23)
         }
     }
@@ -36,8 +36,8 @@ internal class VarselVedNegativtBeløpE2ETest: AbstractDslTest() {
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, INNTEKT)))
             ))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(15741, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(-15741, inspektør.utbetalinger.last().inspektør.personOppdrag.inspektør.nettoBeløp)
+            assertEquals(15741, inspektør.utbetalinger.last().arbeidsgiverOppdrag.inspektør.nettoBeløp)
+            assertEquals(-15741, inspektør.utbetalinger.last().personOppdrag.inspektør.nettoBeløp)
             assertVarsel(RV_UT_23)
         }
     }
@@ -52,8 +52,8 @@ internal class VarselVedNegativtBeløpE2ETest: AbstractDslTest() {
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT*0.8, ".", null, emptyList())
             ))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(-3146, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(0, inspektør.utbetalinger.last().inspektør.personOppdrag.inspektør.nettoBeløp)
+            assertEquals(-3146, inspektør.utbetalinger.last().arbeidsgiverOppdrag.inspektør.nettoBeløp)
+            assertEquals(0, inspektør.utbetalinger.last().personOppdrag.inspektør.nettoBeløp)
             assertVarsel(RV_UT_23)
         }
     }

@@ -106,8 +106,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        inspektør.utbetaling(1).also { utbetalingInspektør ->
             assertNotEquals(førsteUtbetaling.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
             assertNotEquals(førsteUtbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             assertNotEquals(førsteUtbetaling.personOppdrag.inspektør.fagsystemId(), utbetalingInspektør.personOppdrag.inspektør.fagsystemId())

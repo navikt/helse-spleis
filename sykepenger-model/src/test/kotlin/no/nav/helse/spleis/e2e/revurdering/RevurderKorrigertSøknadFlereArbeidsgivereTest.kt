@@ -253,8 +253,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             assertEquals(4, inspektør.utbetalinger.size)
 
-            inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
-                val revurdering = inspektør.utbetaling(2).inspektør
+            inspektør.utbetaling(0).also { januarutbetaling ->
+                val revurdering = inspektør.utbetaling(2)
                 assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(januar, januarutbetaling.periode)
                 assertEquals(januar, revurdering.periode)
@@ -271,8 +271,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 }
             }
 
-            inspektør.utbetaling(1).inspektør.also { marsutbetaling ->
-                val revurdering = inspektør.utbetaling(3).inspektør
+            inspektør.utbetaling(1).also { marsutbetaling ->
+                val revurdering = inspektør.utbetaling(3)
                 assertEquals(marsutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(24.februar til 24.mars, marsutbetaling.periode)
                 assertEquals(24.februar til 24.mars, revurdering.periode)
@@ -283,8 +283,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
         a2 {
             assertEquals(2, inspektør.utbetalinger.size)
-            inspektør.utbetaling(0).inspektør.also { februarutbetaling ->
-                val revurdering = inspektør.utbetaling(1).inspektør
+            inspektør.utbetaling(0).also { februarutbetaling ->
+                val revurdering = inspektør.utbetaling(1)
                 assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(25.januar til 25.februar, februarutbetaling.periode)
                 assertEquals(25.januar til 25.februar, revurdering.periode)
@@ -318,7 +318,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(1.vedtaksperiode)
             assertEquals(Feriedag::class, inspektør.sykdomstidslinje[18.januar]::class)
             assertEquals(Feriedag::class, inspektør.sykdomstidslinje[19.januar]::class)
-            val arbeidsgiverOppdrag = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
+            val arbeidsgiverOppdrag = inspektør.utbetalinger.last().arbeidsgiverOppdrag
             assertEquals(2, arbeidsgiverOppdrag.size)
             arbeidsgiverOppdrag[0].inspektør.let { utbetalingslinjeInspektør ->
                 assertEquals(17.januar, utbetalingslinjeInspektør.fom)
@@ -555,8 +555,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             assertEquals(4, inspektør.utbetalinger.size)
 
-            inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
-                val revurdering = inspektør.utbetaling(2).inspektør
+            inspektør.utbetaling(0).also { januarutbetaling ->
+                val revurdering = inspektør.utbetaling(2)
                 assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(januar, januarutbetaling.periode)
                 assertEquals(januar, revurdering.periode)
@@ -565,8 +565,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
             }
 
-            inspektør.utbetaling(1).inspektør.also { marsutbetaling ->
-                val revurdering = inspektør.utbetaling(3).inspektør
+            inspektør.utbetaling(1).also { marsutbetaling ->
+                val revurdering = inspektør.utbetaling(3)
                 assertEquals(marsutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(24.februar til 24.mars, marsutbetaling.periode)
                 assertEquals(24.februar til 24.mars, revurdering.periode)
@@ -579,8 +579,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a2 {
             assertEquals(2, inspektør.utbetalinger.size)
 
-            inspektør.utbetaling(0).inspektør.also { februarutbetaling ->
-                val revurdering = inspektør.utbetaling(1).inspektør
+            inspektør.utbetaling(0).also { februarutbetaling ->
+                val revurdering = inspektør.utbetaling(1)
                 assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(25.januar til 25.februar, februarutbetaling.periode)
                 assertEquals(25.januar til 25.februar, revurdering.periode)

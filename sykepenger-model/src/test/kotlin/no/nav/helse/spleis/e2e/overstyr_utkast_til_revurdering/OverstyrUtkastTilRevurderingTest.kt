@@ -83,7 +83,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(33235, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(33235, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString())
 
@@ -101,14 +101,14 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
-        assertEquals(10153, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(10153, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         // 12694 = round((25000 * 12) / 260) * 11 (11 nav-dager i januar)
-        assertEquals(12694, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(12694, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
@@ -151,14 +151,14 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val utbetalinger = inspektør.utbetalinger
-        assertTrue(utbetalinger[0].inspektør.erUtbetalt)
-        assertTrue(utbetalinger[1].inspektør.erForkastet)
-        assertTrue(utbetalinger[2].inspektør.erUtbetalt)
+        assertTrue(inspektør.utbetaling(0).erUtbetalt)
+        assertTrue(inspektør.utbetaling(1).erForkastet)
+        assertTrue(inspektør.utbetaling(2).erUtbetalt)
         assertEquals(
-            utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp(),
-            -1 * utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp()
+            utbetalinger.first().arbeidsgiverOppdrag.nettoBeløp(),
+            -1 * utbetalinger.last().arbeidsgiverOppdrag.nettoBeløp()
         )
-        assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
+        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
     }
 
     @Test
@@ -171,13 +171,13 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(38773, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(38773, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(41314, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(41314, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)

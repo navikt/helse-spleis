@@ -110,9 +110,9 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
 
         assertEquals(4, inspektør.utbetalinger.size)
-        inspektør.utbetaling(2).inspektør.also {
-            assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).inspektør.korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        inspektør.utbetaling(2).also {
+            assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).korrelasjonsId)
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId())
             assertEquals(2, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.ENDR, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.januar, it.arbeidsgiverOppdrag[0].inspektør.fom)
@@ -121,9 +121,9 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             assertEquals(20.januar, it.arbeidsgiverOppdrag[1].inspektør.fom)
             assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
         }
-        inspektør.utbetaling(3).inspektør.also {
-            assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).inspektør.korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        inspektør.utbetaling(3).also {
+            assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).korrelasjonsId)
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId())
             assertEquals(1, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.mai, it.arbeidsgiverOppdrag[0].inspektør.fom)

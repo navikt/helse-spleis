@@ -71,7 +71,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
                 assertEquals(forventetSykepengegrunnlag, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(inntektA1, sykepengegrunnlagInspektør.beregningsgrunnlag)
             }
-            inspektør.utbetaling(0).inspektør.also { utbetalingInspektør ->
+            inspektør.utbetaling(0).also { utbetalingInspektør ->
                 utbetalingInspektør.utbetalingstidslinje.also { utbetalingstidslinje ->
                     utbetalingstidslinje[1.februar].also { dagen ->
                         val forventetTotalgrad = 100.prosent // TODO: Skal det være 37.5.prosent her?
@@ -140,7 +140,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
                     assertEquals(inntektA1, sykepengegrunnlagInspektør.omregnetÅrsinntekt)
                 }
             }
-            inspektør.utbetaling(0).inspektør.also { utbetalingInspektør ->
+            inspektør.utbetaling(0).also { utbetalingInspektør ->
                 utbetalingInspektør.utbetalingstidslinje[1.februar].also { dagen ->
                     val forventetTotalgrad = 100.0.prosent
                     val forventetUtbetaling = (forventetSykepengegrunnlag * forventetTotalgrad)

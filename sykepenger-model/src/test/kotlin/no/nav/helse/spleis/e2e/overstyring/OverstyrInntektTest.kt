@@ -153,9 +153,9 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        assertEquals(0, utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
-        assertTrue(utbetalinger.last().erAvsluttet())
-        assertTrue(utbetalinger.first().inspektør.erForkastet)
+        assertEquals(0, utbetalinger.last().arbeidsgiverOppdrag.nettoBeløp())
+        assertTrue(utbetalinger.last().erAvsluttet)
+        assertTrue(utbetalinger.first().erForkastet)
     }
 
 }

@@ -788,13 +788,13 @@ private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: S
         .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
 
     return inspektør(orgnummer).utbetalinger
-        .filter { it.inspektør.tilstand in setOf(Utbetalingstatus.OVERFØRT) }
-        .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.inspektør.periode }}" } }
-        .firstOrNull { it.inspektør.utbetalingId in utbetalingsbehovUtbetalingIder }
+        .filter { it.tilstand in setOf(Utbetalingstatus.OVERFØRT) }
+        .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.periode }}" } }
+        .firstOrNull { it.utbetalingId in utbetalingsbehovUtbetalingIder }
         ?.let {
-            it.inspektør.utbetalingId to listOfNotNull(
-                it.inspektør.arbeidsgiverOppdrag.fagsytemIdOrNull(),
-                it.inspektør.personOppdrag.fagsytemIdOrNull()
+            it.utbetalingId to listOfNotNull(
+                it.arbeidsgiverOppdrag.fagsytemIdOrNull(),
+                it.personOppdrag.fagsytemIdOrNull()
             )
         }
 }
@@ -815,7 +815,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 
 internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    utbetalingId: UUID = inspektør.utbetalinger.last().inspektør.utbetalingId,
+    utbetalingId: UUID = inspektør.utbetalinger.last().utbetalingId,
     opprettet: LocalDateTime = LocalDateTime.now()
 ) {
     AnnullerUtbetaling(

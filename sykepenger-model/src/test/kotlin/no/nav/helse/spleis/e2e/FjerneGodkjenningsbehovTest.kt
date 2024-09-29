@@ -5,7 +5,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -148,7 +147,7 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
-            assertEquals(IKKE_GODKJENT, inspektør.utbetalinger.single { it.inspektør.utbetalingId == utbetalingId }.inspektør.tilstand)
+            assertEquals(IKKE_GODKJENT, inspektør.utbetalinger.single { it.utbetalingId == utbetalingId }.tilstand)
 
             val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
                 håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)

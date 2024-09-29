@@ -546,13 +546,13 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar))
         håndterSøknad(Sykdom(5.februar, 10.februar, 100.prosent))
-        håndterAnnullering(inspektør.utbetalinger[0].inspektør.utbetalingId)
-        håndterAnnullering(inspektør.utbetalinger[0].inspektør.utbetalingId)
+        håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
+        håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullering(inspektør.utbetalinger[0].inspektør.utbetalingId)
+        håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
 
-        assertTrue(inspektør.utbetalinger[0].inspektør.erUtbetalt)
-        assertTrue(inspektør.utbetalinger[1].inspektør.erAnnullering)
+        assertTrue(inspektør.utbetaling(0).erUtbetalt)
+        assertTrue(inspektør.utbetaling(1).erAnnullering)
 
         assertEquals(2, inspektør.utbetalinger.size)
     }

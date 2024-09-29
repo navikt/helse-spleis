@@ -64,13 +64,13 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        assertEquals(10, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
+        assertEquals(10, inspektør.utbetalinger.last().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
 
         nyPeriode(januar, orgnummer = a2, grad = 10.prosent)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 81000.månedlig, orgnummer = a2)
         håndterYtelser(orgnummer = a1)
 
-        assertEquals(19, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
+        assertEquals(19, inspektør.utbetalinger.last().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
 
         håndterSimulering(orgnummer = a1)
         håndterUtbetalingsgodkjenning(orgnummer = a1)

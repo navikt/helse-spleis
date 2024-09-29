@@ -69,11 +69,11 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertEquals(1082.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(1082.daglig, inspektør.utbetalinger.last().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(349.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(349.daglig, inspektør.utbetalinger.last().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
         }
     }
 
@@ -107,13 +107,13 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(0, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
+            assertEquals(0, inspektør.utbetalinger.last().arbeidsgiverOppdrag.nettoBeløp())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(462.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
-            assertEquals(969.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
+            assertEquals(462.daglig, inspektør.utbetalinger.last().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(969.daglig, inspektør.utbetalinger.last().utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
         }
     }
 
@@ -224,7 +224,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
+            inspektør.utbetaling(1).also { utbetalingInspektør ->
                 utbetalingInspektør.utbetalingstidslinje[1.januar].also { dag ->
                     assertEquals(100, dag.økonomi.inspektør.totalGrad)
                 }

@@ -95,7 +95,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 28.januar)
         nyttVedtak(3.februar til 28.februar)
         forlengVedtak(mars)
-        val marsutbetaling = inspektør.utbetaling(2).inspektør
+        val marsutbetaling = inspektør.utbetaling(2)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 25.februar))
         håndterSøknad(Sykdom(29.januar, 25.februar, 100.prosent))
 
@@ -106,7 +106,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         forlengVedtak(april)
         assertEquals(4, inspektør.utbetalinger.size)
 
-        inspektør.utbetalinger.last().inspektør.also { utbetalinginspektør ->
+        inspektør.utbetalinger.last().also { utbetalinginspektør ->
             assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
 
@@ -174,7 +174,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_OS_2)
 
-        val arbeidsgiverOppdrag = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
+        val arbeidsgiverOppdrag = inspektør.utbetalinger.last().arbeidsgiverOppdrag
         assertEquals(2, arbeidsgiverOppdrag.size)
         arbeidsgiverOppdrag[0].inspektør.let { utbetalingslinjeInspektør ->
             assertEquals(17.januar, utbetalingslinjeInspektør.fom)
@@ -425,8 +425,8 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
         assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
-        val utbetalingInspektør = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør
-        val utbetalingInspektørRevurdering = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør
+        val utbetalingInspektør = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør
+        val utbetalingInspektørRevurdering = inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør
         assertEquals(utbetalingInspektør.fagsystemId(), utbetalingInspektørRevurdering.fagsystemId())
         assertEquals(1, utbetalingInspektørRevurdering.antallLinjer())
         assertEquals(17.januar til 19.januar, utbetalingInspektørRevurdering.fom(0) til utbetalingInspektørRevurdering.tom(0))

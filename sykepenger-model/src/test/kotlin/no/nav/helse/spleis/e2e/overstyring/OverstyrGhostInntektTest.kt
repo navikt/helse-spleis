@@ -100,9 +100,9 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        assertEquals(0, utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
-        Assertions.assertTrue(utbetalinger.last().erAvsluttet())
-        Assertions.assertTrue(utbetalinger.first().inspektør.erForkastet)
+        assertEquals(0, utbetalinger.last().arbeidsgiverOppdrag.nettoBeløp())
+        Assertions.assertTrue(utbetalinger.last().erAvsluttet)
+        Assertions.assertTrue(utbetalinger.first().erForkastet)
 
     }
 

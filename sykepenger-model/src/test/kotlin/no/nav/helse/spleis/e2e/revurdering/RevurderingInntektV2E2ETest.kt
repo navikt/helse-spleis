@@ -245,7 +245,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         assertDiff(-11126)
 
-        assertEquals(33235, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(33235, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
     }
@@ -274,9 +274,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        assertTrue(utbetalinger[0].inspektør.erUtbetalt)
-        assertTrue(utbetalinger[1].inspektør.erUbetalt)
-        assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
+        assertTrue(utbetalinger[0].erUtbetalt)
+        assertTrue(utbetalinger[1].erUbetalt)
+        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
         assertDiff(-2112)
     }
 
@@ -373,9 +373,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertEquals(korrelasjonsIdPåUtbetaling1, korrelasjonsIdPåUtbetaling2)
         assertDiff(506)
-        inspektør.utbetaling(2).inspektør.also { revurdering ->
-            val januarutbetaling = inspektør.utbetaling(0).inspektør
-            val februarutbetaling = inspektør.utbetaling(1).inspektør
+        inspektør.utbetaling(2).also { revurdering ->
+            val januarutbetaling = inspektør.utbetaling(0)
+            val februarutbetaling = inspektør.utbetaling(1)
             assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
@@ -463,9 +463,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(5000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
 
-        val utbetalinger = inspektør.utbetalinger
         var opprinneligFagsystemId: String?
-        utbetalinger[0].inspektør.arbeidsgiverOppdrag.apply {
+        inspektør.utbetaling(0).arbeidsgiverOppdrag.apply {
             assertEquals(Endringskode.NY, inspektør.endringskode)
             opprinneligFagsystemId = fagsystemId()
             assertEquals(1, size)
@@ -476,7 +475,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
                 assertEquals(null, refFagsystemId)
             }
         }
-        utbetalinger[1].inspektør.arbeidsgiverOppdrag.apply {
+        inspektør.utbetaling(1).arbeidsgiverOppdrag.apply {
             assertEquals(Endringskode.ENDR, inspektør.endringskode)
             assertEquals(opprinneligFagsystemId, fagsystemId())
             assertEquals(1, size)
@@ -488,7 +487,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
                 assertEquals(17.januar, datoStatusFom)
             }
         }
-        utbetalinger[2].inspektør.arbeidsgiverOppdrag.apply {
+        inspektør.utbetaling(2).arbeidsgiverOppdrag.apply {
             assertEquals(Endringskode.ENDR, inspektør.endringskode)
             assertEquals(opprinneligFagsystemId, fagsystemId())
             assertEquals(1, size)
@@ -621,13 +620,13 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
-        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
-        assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
-        assertEquals(17.januar, inspektør.utbetaling(1).arbeidsgiverOppdrag().first().inspektør.datoStatusFom)
+        assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
+        assertEquals(17.januar, inspektør.utbetaling(1).arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
 
-        assertEquals(15741, inspektør.utbetaling(1).personOppdrag().nettoBeløp())
-        assertEquals(-15741, inspektør.utbetaling(1).arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(15741, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
+        assertEquals(-15741, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
     }
 
     @Test
@@ -645,13 +644,13 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
-        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
-        assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+        assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag))
 
-        assertEquals(3047, inspektør.utbetaling(1).personOppdrag().nettoBeløp())
-        assertEquals(-3047, inspektør.utbetaling(1).arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(3047, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
+        assertEquals(-3047, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
     }
 
     @Test
@@ -706,6 +705,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertDiff(diff: Int) {
-        assertEquals(diff, inspektør.utbetalinger.last().inspektør.nettobeløp)
+        assertEquals(diff, inspektør.utbetalinger.last().nettobeløp)
     }
 }

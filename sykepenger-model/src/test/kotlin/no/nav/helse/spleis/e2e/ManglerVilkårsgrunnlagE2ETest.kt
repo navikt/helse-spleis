@@ -84,7 +84,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         // utbetalingen endres -ikke- fordi det fremdeles lages agp-dager for februar, siden 1.vedtaksperiode ikke åpnes opp
         assertIngenVarsel(Varselkode.RV_OS_2)
-        inspektør.utbetaling(1).inspektør.also { utbetalinginspektør ->
+        inspektør.utbetaling(1).also { utbetalinginspektør ->
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
             assertEquals(17.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
             assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.periode)

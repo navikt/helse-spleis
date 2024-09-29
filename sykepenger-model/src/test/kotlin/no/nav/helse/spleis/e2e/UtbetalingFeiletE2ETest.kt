@@ -50,8 +50,8 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val første = inspektør.utbetaling(0)
-        inspektør.utbetaling(2).inspektør.also { utbetalingInspektør ->
-            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        inspektør.utbetaling(2).also { utbetalingInspektør ->
+            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.arbeidsgiverOppdrag.inspektør.fagsystemId())
             assertEquals(Endringskode.ENDR, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(2, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
@@ -76,7 +76,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertEquals(1, inspektør.utbetalinger.size)
-        assertEquals(UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
+        assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
     }
@@ -91,7 +91,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertEquals(2, inspektør.utbetalinger.size)
-        assertEquals(UTBETALT, inspektør.utbetaling(1).inspektør.tilstand)
+        assertEquals(UTBETALT, inspektør.utbetaling(1).tilstand)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
@@ -111,11 +111,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
+            fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
         )
         håndterUtbetalt(
             status = Oppdragstatus.AVVIST,
-            fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId()
+            fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
         )
         nullstillTilstandsendringer()
 
@@ -123,11 +123,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         assertEquals(1, hendelselogg.behov().size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId()
+            fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
         )
 
         assertEquals(1, inspektør.utbetalinger.size)
-        assertEquals(UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
+        assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
     }
@@ -146,11 +146,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(
             status = Oppdragstatus.AVVIST,
-            fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
+            fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
         )
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId()
+            fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
         )
         nullstillTilstandsendringer()
 
@@ -158,11 +158,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         assertEquals(1, hendelselogg.behov().size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
+            fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
         )
 
         assertEquals(1, inspektør.utbetalinger.size)
-        assertEquals(UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
+        assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
     }

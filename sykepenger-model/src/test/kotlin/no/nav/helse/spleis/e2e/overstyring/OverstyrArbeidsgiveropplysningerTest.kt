@@ -57,8 +57,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ))
         ), meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val revurdering = inspektør.utbetaling(1).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val revurdering = inspektør.utbetaling(1)
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(0, revurdering.personOppdrag.size)
         revurdering.arbeidsgiverOppdrag.also { oppdrag ->
@@ -127,8 +127,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         ), meldingsreferanseId = overstyring2Id)
         håndterYtelser(1.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val revurdering = inspektør.utbetaling(2).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val revurdering = inspektør.utbetaling(2)
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(0, revurdering.personOppdrag.size)
         revurdering.arbeidsgiverOppdrag.also { oppdrag ->
@@ -170,8 +170,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val revurdering = inspektør.utbetaling(3).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val revurdering = inspektør.utbetaling(3)
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(1, revurdering.personOppdrag.size)
         revurdering.arbeidsgiverOppdrag.also { oppdrag ->
@@ -221,7 +221,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode)
         assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(UEND, inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(UEND, inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.endringskode)
         assertEquals(gammelInntekt, inspektør.inntektISykepengegrunnlaget(1.januar))
     }
 
@@ -242,8 +242,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(gammelInntekt, inspektør.inntektISykepengegrunnlaget(1.januar))
         assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, gammelInntekt/2)), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar))
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val revurdering = inspektør.utbetaling(1).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val revurdering = inspektør.utbetaling(1)
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
         assertEquals(1431, førsteUtbetaling.arbeidsgiverOppdrag.single().inspektør.beløp)
@@ -522,10 +522,10 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, ikkeForkastedeUtbetalinger(a1).size)
         assertEquals(2, ikkeForkastedeUtbetalinger(a2).size)
 
-        assertEquals(ikkeForkastedeUtbetalinger(a1).first().inspektør.korrelasjonsId, ikkeForkastedeUtbetalinger(a1).last().inspektør.korrelasjonsId)
-        assertEquals(ikkeForkastedeUtbetalinger(a2).first().inspektør.korrelasjonsId, ikkeForkastedeUtbetalinger(a2).last().inspektør.korrelasjonsId)
+        assertEquals(ikkeForkastedeUtbetalinger(a1).first().korrelasjonsId, ikkeForkastedeUtbetalinger(a1).last().korrelasjonsId)
+        assertEquals(ikkeForkastedeUtbetalinger(a2).first().korrelasjonsId, ikkeForkastedeUtbetalinger(a2).last().korrelasjonsId)
 
-        ikkeForkastedeUtbetalinger(a1).first().inspektør.let { opprinneligUtbetaling ->
+        ikkeForkastedeUtbetalinger(a1).first().let { opprinneligUtbetaling ->
             assertEquals(0, opprinneligUtbetaling.personOppdrag.size)
             assertEquals(1, opprinneligUtbetaling.arbeidsgiverOppdrag.size)
             opprinneligUtbetaling.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
@@ -536,7 +536,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             }
         }
 
-        ikkeForkastedeUtbetalinger(a1).last().inspektør.let { revurdering ->
+        ikkeForkastedeUtbetalinger(a1).last().let { revurdering ->
             assertEquals(1, revurdering.personOppdrag.size)
             assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
             revurdering.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
@@ -553,7 +553,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             }
         }
 
-        ikkeForkastedeUtbetalinger(a2).first().inspektør.let { opprinneligUtbetaling ->
+        ikkeForkastedeUtbetalinger(a2).first().let { opprinneligUtbetaling ->
             assertEquals(0, opprinneligUtbetaling.personOppdrag.size)
             assertEquals(1, opprinneligUtbetaling.arbeidsgiverOppdrag.size)
             opprinneligUtbetaling.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
@@ -563,7 +563,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 assertEquals(NY, utbetalingslinje.inspektør.endringskode)
             }
         }
-        ikkeForkastedeUtbetalinger(a2).last().inspektør.let { revurdering ->
+        ikkeForkastedeUtbetalinger(a2).last().let { revurdering ->
             assertEquals(1, revurdering.personOppdrag.size)
             assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
             revurdering.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
@@ -729,5 +729,5 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }
 
     private fun ikkeForkastedeUtbetalinger(orgnr: String) =
-        inspektør(orgnr).utbetalinger.filterNot { it.inspektør.erForkastet }
+        inspektør(orgnr).utbetalinger.filterNot { it.erForkastet }
 }

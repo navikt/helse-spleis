@@ -49,7 +49,7 @@ internal class TestArbeidsgiverInspektør(
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver.inspektør.inntektshistorikk)
     internal lateinit var sykdomshistorikk: SykdomshistorikkInspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
-    internal val utbetalinger = mutableListOf<Utbetaling>()
+    internal val utbetalinger = mutableListOf<UtbetalingInspektør>()
     internal val feriepengeoppdrag = mutableListOf<Feriepengeoppdrag>()
     internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
@@ -117,7 +117,7 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-        this.utbetalinger.addAll(utbetalinger)
+        this.utbetalinger.addAll(utbetalinger.map { it.inspektør })
     }
 
     override fun preVisitOppdrag(
@@ -235,9 +235,9 @@ internal class TestArbeidsgiverInspektør(
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.erAvsluttet() }
     internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger
-    internal fun utbetalingtilstand(indeks: Int) = utbetalinger[indeks].inspektør.tilstand
+    internal fun utbetalingtilstand(indeks: Int) = utbetalinger[indeks].tilstand
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
-    internal fun utbetalingId(indeks: Int) = utbetalinger[indeks].id
+    internal fun utbetalingId(indeks: Int) = utbetalinger[indeks].utbetalingId
     internal fun utbetalingUtbetalingstidslinje(indeks: Int) = utbetalinger[indeks].utbetalingstidslinje
     internal fun sisteUtbetalingUtbetalingstidslinje() = utbetalinger.last().utbetalingstidslinje
     internal fun periode(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter.id(orgnummer))

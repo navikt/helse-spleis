@@ -240,7 +240,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        utbetalinger.last().inspektør.also { overstyringen ->
+        utbetalinger.last().also { overstyringen ->
             assertEquals(1, overstyringen.personOppdrag.size)
             assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
@@ -295,7 +295,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        utbetalinger.last().inspektør.also { overstyringen ->
+        utbetalinger.last().also { overstyringen ->
             assertEquals(1, overstyringen.personOppdrag.size)
             assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
@@ -319,7 +319,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        utbetalinger.last().inspektør.also { overstyringen ->
+        utbetalinger.last().also { overstyringen ->
             assertEquals(1, overstyringen.personOppdrag.size)
             assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
@@ -344,7 +344,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        utbetalinger.last().inspektør.also { overstyringen ->
+        utbetalinger.last().also { overstyringen ->
             assertEquals(0, overstyringen.personOppdrag.size)
             assertEquals(1, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -371,7 +371,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        val utbetaling = inspektør.utbetalinger.single().inspektør
+        val utbetaling = inspektør.utbetalinger.single()
         assertTrue(utbetaling.arbeidsgiverOppdrag.isEmpty())
         assertEquals(1, utbetaling.personOppdrag.size)
         assertEquals(1.januar til 1.januar, utbetaling.personOppdrag[0].periode)

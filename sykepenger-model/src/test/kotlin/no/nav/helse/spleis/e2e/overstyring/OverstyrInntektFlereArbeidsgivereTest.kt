@@ -231,24 +231,24 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1).utbetaling(1).also { utbetaling ->
-            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
-            utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
+            utbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(358, linje.beløp)
                 assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             }
-            assertEquals(1, utbetaling.inspektør.personOppdrag.size)
-            utbetaling.inspektør.personOppdrag[0].inspektør.also { linje ->
+            assertEquals(1, utbetaling.personOppdrag.size)
+            utbetaling.personOppdrag[0].inspektør.also { linje ->
                 assertEquals(11, linje.beløp)
                 assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             }
         }
         inspektør(a2).utbetaling(1).also { utbetaling ->
-            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
-            utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
+            utbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(358, linje.beløp)
                 assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             }
-            assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
+            assertTrue(utbetaling.personOppdrag.isEmpty())
         }
     }
 

@@ -186,9 +186,9 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         val utbetalingslinje1 = inspektør(a1).utbetalingslinjer(0)
         val utbetalingslinje2 = inspektør(a1).utbetalingslinjer(1)
 
-        assertEquals(1081, inspektør(a1).utbetaling(0).inspektør.arbeidsgiverOppdrag[0].beløp)
-        assertEquals(1080, inspektør(a2).utbetaling(0).inspektør.arbeidsgiverOppdrag[0].beløp)
-        assertEquals(1080, inspektør(a1).utbetaling(1).inspektør.arbeidsgiverOppdrag[1].beløp)
+        assertEquals(1081, inspektør(a1).utbetaling(0).arbeidsgiverOppdrag[0].beløp)
+        assertEquals(1080, inspektør(a2).utbetaling(0).arbeidsgiverOppdrag[0].beløp)
+        assertEquals(1080, inspektør(a1).utbetaling(1).arbeidsgiverOppdrag[1].beløp)
 
         assertNotEquals(utbetalingslinje1, utbetalingslinje2)
         assertNotEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)

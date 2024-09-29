@@ -145,8 +145,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val andreUtbetaling = inspektør.utbetaling(1)
 
         assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
         assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
@@ -182,9 +182,9 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val andreUtbetaling = inspektør.utbetaling(1).inspektør
-        val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val andreUtbetaling = inspektør.utbetaling(1)
+        val tredjeUtbetaling = inspektør.utbetaling(2)
 
         assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
         assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
@@ -217,8 +217,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        val andreUtbetaling = inspektør.utbetaling(1)
 
         assertNotEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
         assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)

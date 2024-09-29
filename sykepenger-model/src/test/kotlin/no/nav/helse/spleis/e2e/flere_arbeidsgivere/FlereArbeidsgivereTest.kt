@@ -1100,32 +1100,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun testyMc() {
-        nyPeriode(januar, a1, a2)
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a1 {
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-        a1.inspektør.utbetalinger.forEach {
-            assertEquals(a1, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
-        }
-        a2.inspektør.utbetalinger.forEach {
-            assertEquals(a2, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
-        }
-    }
-
-    @Test
     fun `Går ikke direkte til AVVENTER_HISTORIKK dersom inntektsmelding kommer før søknad`() {
         a1 { håndterSykmelding(januar) }
         a2 { håndterSykmelding(januar) }

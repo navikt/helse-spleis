@@ -130,7 +130,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser()
 
-        assertEquals(0, inspektør.utbetalinger.single().inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
+        assertEquals(0, inspektør.utbetalinger.single().utbetalingstidslinje.inspektør.avvistDagTeller)
     }
 
     private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {

@@ -298,9 +298,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
 
-        val juniutbetaling = inspektør.utbetaling(0).inspektør
-        val augustutbetalingFør = inspektør.utbetaling(1).inspektør
-        val augustutbetalingEtter = inspektør.utbetaling(2).inspektør
+        val juniutbetaling = inspektør.utbetaling(0)
+        val augustutbetalingFør = inspektør.utbetaling(1)
+        val augustutbetalingEtter = inspektør.utbetaling(2)
 
         assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetalingFør.korrelasjonsId)
         assertEquals(juniutbetaling.korrelasjonsId, augustutbetalingEtter.korrelasjonsId)
@@ -438,10 +438,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(3, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
-        assertEquals(30, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].grad)
-        assertEquals(23.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[2].fom)
+        assertEquals(3, inspektør.utbetalinger.last().arbeidsgiverOppdrag.size)
+        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[0].tom)
+        assertEquals(30, inspektør.utbetalinger.last().arbeidsgiverOppdrag[1].grad)
+        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[2].fom)
     }
 
     @Test
@@ -459,9 +459,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(2, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
-        assertEquals(23.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].fom)
+        assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag.size)
+        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[0].tom)
+        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[1].fom)
     }
 
     @Test
@@ -479,9 +479,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(2, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
-        assertEquals(24.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].fom)
+        assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag.size)
+        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[0].tom)
+        assertEquals(24.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[1].fom)
     }
 
     @Test
@@ -556,7 +556,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(33235, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(33235, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
@@ -574,14 +574,14 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         agp.forEach {
             assertSykdomstidslinjedag(it, Dag.SykedagNav::class, "Inntektsmelding")
         }
-        val førsteUtbetalingsdag = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag[0].fom
+        val førsteUtbetalingsdag = inspektør.utbetaling(0).arbeidsgiverOppdrag[0].fom
         assertEquals(1.januar, førsteUtbetalingsdag)
         håndterOverstyrTidslinje(agp.map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
         håndterYtelser(1.vedtaksperiode)
         agp.forEach {
             assertSykdomstidslinjedag(it, Dag.Sykedag::class, OverstyrTidslinje::class)
         }
-        val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag[0].fom
+        val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetaling(1).arbeidsgiverOppdrag[0].fom
         assertEquals(17.januar, førsteUtbetalingsdagEtterOverstyring)
     }
 

@@ -96,8 +96,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         forlengVedtak(juni)
 
-        val utbetaling5 = inspektør.utbetaling(5).inspektør
-        val utbetaling6 = inspektør.utbetaling(6).inspektør
+        val utbetaling5 = inspektør.utbetaling(5)
+        val utbetaling6 = inspektør.utbetaling(6)
         assertEquals(utbetaling6.korrelasjonsId, utbetaling5.korrelasjonsId)
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, utbetaling5.tilstand)
         assertEquals(Utbetalingstatus.UTBETALT, utbetaling6.tilstand)
@@ -257,9 +257,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         assertEquals(3, inspektør.utbetalinger.size)
-        inspektør.utbetaling(2).inspektør.also { revurdering ->
-            val januarutbetaling = inspektør.utbetaling(0).inspektør
-            val februarutbetaling = inspektør.utbetaling(1).inspektør
+        inspektør.utbetaling(2).also { revurdering ->
+            val januarutbetaling = inspektør.utbetaling(0)
+            val februarutbetaling = inspektør.utbetaling(1)
             assertEquals(revurdering.korrelasjonsId, januarutbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
@@ -385,11 +385,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
         assertEquals(5, inspektør.utbetalinger.size)
-        inspektør.utbetaling(4).inspektør.also { revurdering ->
-            val januar1utbetaling = inspektør.utbetaling(0).inspektør
-            val januar2utbetaling = inspektør.utbetaling(1).inspektør
-            val februarutbetaling = inspektør.utbetaling(2).inspektør
-            val marsutbetaling = inspektør.utbetaling(3).inspektør
+        inspektør.utbetaling(4).also { revurdering ->
+            val januar1utbetaling = inspektør.utbetaling(0)
+            val januar2utbetaling = inspektør.utbetaling(1)
+            val februarutbetaling = inspektør.utbetaling(2)
+            val marsutbetaling = inspektør.utbetaling(3)
             assertEquals(revurdering.korrelasjonsId, januar1utbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, januar2utbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
@@ -910,8 +910,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        val revurdering1 = inspektør.utbetaling(1).inspektør
-        val revurdering2 = inspektør.utbetaling(2).inspektør
+        val revurdering1 = inspektør.utbetaling(1)
+        val revurdering2 = inspektør.utbetaling(2)
         assertEquals(revurdering1.korrelasjonsId, revurdering2.korrelasjonsId)
         revurdering1.also { utbetalingInspektør ->
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
@@ -1084,6 +1084,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertDiff(diff: Int) {
-        assertEquals(diff, inspektør.utbetalinger.last().inspektør.nettobeløp)
+        assertEquals(diff, inspektør.utbetalinger.last().nettobeløp)
     }
 }

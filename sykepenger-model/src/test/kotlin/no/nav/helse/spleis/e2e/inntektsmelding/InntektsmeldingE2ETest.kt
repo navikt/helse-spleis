@@ -483,10 +483,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[10.januar]::class)
                 assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[20.januar]::class)
                 assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[30.januar]::class)
-                assertEquals(13.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+                assertEquals(13.februar, inspektør.utbetaling(0).arbeidsgiverOppdrag.first().inspektør.fom)
             },
             ønsket = {
-                assertEquals(1.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+                assertEquals(1.februar, inspektør.utbetaling(0).arbeidsgiverOppdrag.first().inspektør.fom)
                 fail("""\_(ツ)_/¯""")
             }
         )
@@ -588,7 +588,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                     "De spredte sykedagene er innenfor 16 dager fra hverandre, slik at de teller med i samme arbeidsgiverperiodetelling." +
                     "Dette medfører at vi starter utbetaling tidligere enn det arbeidsgiver har ment å fortelle oss er riktig.",
             nå = {
-                assertEquals(19.januar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+                assertEquals(19.januar, inspektør.utbetaling(0).arbeidsgiverOppdrag.first().inspektør.fom)
                 assertTilstander(
                     2.vedtaksperiode,
                     START,
@@ -1390,8 +1390,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertFalse(inspektør.utbetaling(0).inspektør.personOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag))
+        assertFalse(inspektør.utbetaling(0).personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).arbeidsgiverOppdrag))
 
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(INGEN, null, emptyList()))
         håndterYtelser(1.vedtaksperiode)
@@ -1416,8 +1416,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             AktivitetsloggFilter.person()
         )
-        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
+        assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
     }
 
     @Test
@@ -1850,7 +1850,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
-        assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
+        assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().periode)
     }
     @Test
     fun `vedtaksperiode i AVSLUTTET_UTEN_UTBETALING burde utvides ved replay av inntektsmelding`() {

@@ -173,7 +173,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `annullere iverksatt vedtak`() {
         a1 {
             nyttVedtak(januar)
-            håndterAnnullering(inspektør.utbetalinger.single().inspektør.utbetalingId)
+            håndterAnnullering(inspektør.utbetalinger.single().utbetalingId)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
@@ -199,7 +199,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
             nyttVedtak(10.mars til 31.mars, arbeidsgiverperiode = listOf(10.mars til 25.mars))
-            håndterAnnullering(inspektør.utbetalinger.last().inspektør.utbetalingId)
+            håndterAnnullering(inspektør.utbetalinger.last().utbetalingId)
             assertEquals(4, inspektør.utbetalinger.size)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -260,7 +260,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-            håndterAnnullering(inspektør.utbetalinger.single().inspektør.utbetalingId)
+            håndterAnnullering(inspektør.utbetalinger.single().utbetalingId)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
@@ -274,8 +274,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
-            håndterAnnullering(inspektør.utbetalinger.first().inspektør.utbetalingId)
-            assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).inspektør.tilstand)
+            håndterAnnullering(inspektør.utbetalinger.first().utbetalingId)
+            assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
@@ -292,7 +292,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, reberegning = true)
-            assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).inspektør.tilstand)
+            assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).tilstand)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
                 assertEquals(VEDTAK_IVERKSATT, behandlinger[0].tilstand)

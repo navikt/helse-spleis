@@ -545,8 +545,8 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val utbetaling1 = inspektør.utbetaling(0).inspektør
-        val revurdering = inspektør.utbetaling(1).inspektør
+        val utbetaling1 = inspektør.utbetaling(0)
+        val revurdering = inspektør.utbetaling(1)
 
         assertEquals(utbetaling1.korrelasjonsId, revurdering.korrelasjonsId)
         val oppdragInspektør = revurdering.arbeidsgiverOppdrag.inspektør

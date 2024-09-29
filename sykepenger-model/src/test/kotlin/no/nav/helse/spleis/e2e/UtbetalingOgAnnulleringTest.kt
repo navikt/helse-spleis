@@ -29,7 +29,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -74,7 +73,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(ORGNUMMER)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).inspektør.tilstand)
+        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
     }
 
     @Test
@@ -96,8 +95,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        val utbetaling = inspektør.utbetaling(0).inspektør
-        val revurdering = inspektør.utbetaling(1).inspektør
+        val utbetaling = inspektør.utbetaling(0)
+        val revurdering = inspektør.utbetaling(1)
         assertEquals(utbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
         revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -120,7 +119,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        val utbetalingId = inspektør.utbetalinger.aktive().last().inspektør.utbetalingId
+        val utbetalingId = inspektør.utbetalinger.last().utbetalingId
         håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
@@ -153,7 +152,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar,)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
-        val utbetalingId = inspektør.utbetalinger.aktive().last().inspektør.utbetalingId
+        val utbetalingId = inspektør.utbetalinger.last().utbetalingId
         håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
@@ -204,7 +203,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertEquals(3, inspektør.utbetalinger.size)
-        assertTrue(inspektør.utbetalinger[2].inspektør.erAnnullering)
+        assertTrue(inspektør.utbetaling(2).erAnnullering)
     }
 
     @Test
@@ -225,7 +224,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
         assertEquals(2, inspektør.utbetalinger.size)
-        assertFalse(inspektør.utbetalinger[1].inspektør.erAnnullering)
+        assertFalse(inspektør.utbetaling(1).erAnnullering)
     }
 
     @Test
@@ -399,7 +398,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
-        assertTrue(inspektør.utbetalinger.last().inspektør.erAnnullering)
+        assertTrue(inspektør.utbetalinger.last().erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
         assertEquals(2,
             person.personLogg.behov()

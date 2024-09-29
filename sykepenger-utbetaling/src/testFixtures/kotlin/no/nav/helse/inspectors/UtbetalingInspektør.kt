@@ -28,4 +28,5 @@ class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
     val erEtterutbetaling get() = type == Utbetalingtype.ETTERUTBETALING
     val erAnnullering get() = type == Utbetalingtype.ANNULLERING
     val erUtbetalt get() = tilstand == Utbetalingstatus.ANNULLERT || tilstand == Utbetalingstatus.UTBETALT
+    val erAvsluttet get() = erUtbetalt || tilstand == Utbetalingstatus.GODKJENT_UTEN_UTBETALING
 }

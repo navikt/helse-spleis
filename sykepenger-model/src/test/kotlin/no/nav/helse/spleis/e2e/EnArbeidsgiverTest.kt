@@ -41,7 +41,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`(){
         nyttVedtak(5.desember(2017) til 5.januar)
-        val korrelasjonsIdAugust2017 = inspektør.utbetalinger.single().inspektør.korrelasjonsId
+        val korrelasjonsIdAugust2017 = inspektør.utbetalinger.single().korrelasjonsId
 
         // Forlengelse med arbeid og ferie
         håndterSøknad(Sykdom(6.januar, 4.februar, 100.prosent), Arbeid(6.januar, 4.februar))
@@ -55,10 +55,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(2, inspektør.utbetalinger.size)
-        assertEquals(5.desember(2017) til 5.januar, inspektør.utbetalinger[0].inspektør.periode)
-        assertEquals(korrelasjonsIdAugust2017,inspektør.utbetalinger[0].inspektør.korrelasjonsId)
-        val korrelasjonsIdFebruar2018 = inspektør.utbetalinger[1].inspektør.korrelasjonsId
-        assertEquals(5.februar til 24.februar, inspektør.utbetalinger[1].inspektør.periode)
+        assertEquals(5.desember(2017) til 5.januar, inspektør.utbetaling(0).periode)
+        assertEquals(korrelasjonsIdAugust2017,inspektør.utbetaling(0).korrelasjonsId)
+        val korrelasjonsIdFebruar2018 = inspektør.utbetaling(1).korrelasjonsId
+        assertEquals(5.februar til 24.februar, inspektør.utbetaling(1).periode)
         assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)
 
         // Inntektsmelding som flytter arbeidsgiverperioden en uke frem
@@ -75,14 +75,14 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(3, inspektør.utbetalinger.size)
         val utbetalingenSomTrekkerPenger = inspektør.utbetalinger[2]
-        assertEquals(REVURDERING, utbetalingenSomTrekkerPenger.inspektør.type)
-        assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.inspektør.korrelasjonsId)
-        assertEquals(5.februar til 24.februar, utbetalingenSomTrekkerPenger.inspektør.periode)
+        assertEquals(REVURDERING, utbetalingenSomTrekkerPenger.type)
+        assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.korrelasjonsId)
+        assertEquals(5.februar til 24.februar, utbetalingenSomTrekkerPenger.periode)
 
-        val opphørslinje = utbetalingenSomTrekkerPenger.inspektør.arbeidsgiverOppdrag[0]
+        val opphørslinje = utbetalingenSomTrekkerPenger.arbeidsgiverOppdrag[0]
         assertEquals(21.februar, opphørslinje.inspektør.datoStatusFom)
         assertEquals("OPPH", opphørslinje.inspektør.statuskode)
-        assertEquals(-4293, utbetalingenSomTrekkerPenger.inspektør.nettobeløp)
+        assertEquals(-4293, utbetalingenSomTrekkerPenger.nettobeløp)
 
         // Det kommer en forlengelse som skal lage en ny utbetaling som hekter seg på forrige utbetaling
         nullstillTilstandsendringer()
@@ -90,22 +90,22 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(4.vedtaksperiode)
 
         assertEquals(4, inspektør.utbetalinger.size)
-        assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.inspektør.korrelasjonsId)
+        assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.korrelasjonsId)
         val nyUtbetaling = inspektør.utbetalinger[3]
-        assertEquals(1, nyUtbetaling.inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(1, nyUtbetaling.arbeidsgiverOppdrag.size)
 
-        val utbetalingslinje = inspektør.utbetalinger[3].inspektør.arbeidsgiverOppdrag[0]
+        val utbetalingslinje = inspektør.utbetaling(3).arbeidsgiverOppdrag[0]
         assertEquals(28.februar, utbetalingslinje.inspektør.fom)
         assertEquals(15.mars, utbetalingslinje.inspektør.tom)
 
         // Utbetalingene er knyttet opp mot riktige vedtaksperioder
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertFalse(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(1.vedtaksperiode))
+        assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(1.vedtaksperiode))
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, AVSLUTTET)
-        assertTrue(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(3.vedtaksperiode))
+        assertTrue(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(3.vedtaksperiode))
         assertTilstander(4.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertFalse(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(4.vedtaksperiode))
+        assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(4.vedtaksperiode))
     }
 
     private fun utbetalingIder(vedtaksperiode: IdInnhenter) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
@@ -130,7 +130,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(3, inspektør.utbetalinger.size)
         val januar = inspektør.utbetalinger.first()
         val mars = inspektør.utbetalinger.last()
-        assertNotEquals(januar.inspektør.korrelasjonsId, mars.inspektør.korrelasjonsId)
+        assertNotEquals(januar.korrelasjonsId, mars.korrelasjonsId)
     }
 
     @Test

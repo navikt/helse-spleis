@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
@@ -50,8 +49,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
         val event = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
-        assertEquals(inspektør.utbetaling(0).inspektør.utbetalingId, event.utbetalingId)
-        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
+        assertEquals(inspektør.utbetaling(0).utbetalingId, event.utbetalingId)
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).tilstand)
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
             omregnetÅrsinntekt = 372000.0,
             `6G` = 561804.0,
@@ -88,8 +87,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
         val event = observatør.avsluttetMedVedtakEvent.getValue(2.vedtaksperiode.id(ORGNUMMER))
-        assertEquals(inspektør.utbetaling(1).inspektør.utbetalingId, event.utbetalingId)
-        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).inspektør.tilstand)
+        assertEquals(inspektør.utbetaling(1).utbetalingId, event.utbetalingId)
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).tilstand)
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
             omregnetÅrsinntekt = 372000.0,
             `6G` = 561804.0,
@@ -241,7 +240,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(liste, meldingsreferanseId = overstyringId)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val utbetaling = inspektør.utbetalinger.single()
-        assertEquals(Utbetalingstatus.FORKASTET, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)

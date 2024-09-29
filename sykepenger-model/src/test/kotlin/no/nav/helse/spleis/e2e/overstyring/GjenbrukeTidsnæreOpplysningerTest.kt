@@ -442,8 +442,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertUtbetalingsdag(18.januar, Utbetalingsdag.ArbeidsgiverperiodeDag::class, Inntekt.INGEN, Inntekt.INGEN)
             assertUtbetalingsdag(19.januar, Utbetalingsdag.NavDag::class, 1431.daglig, Inntekt.INGEN)
 
-            val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-            val revurdering = inspektør.utbetaling(1).inspektør
+            val førsteUtbetaling = inspektør.utbetaling(0)
+            val revurdering = inspektør.utbetaling(1)
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
@@ -483,9 +483,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(17.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
 
-            val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-            val revurdering = inspektør.utbetaling(1).inspektør
-            val februarutbetaling = inspektør.utbetaling(2).inspektør
+            val førsteUtbetaling = inspektør.utbetaling(0)
+            val revurdering = inspektør.utbetaling(1)
+            val februarutbetaling = inspektør.utbetaling(2)
 
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(januar, revurdering.periode)
@@ -527,8 +527,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(11.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
 
-            val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-            val revurdering = inspektør.utbetaling(1).inspektør
+            val førsteUtbetaling = inspektør.utbetaling(0)
+            val revurdering = inspektør.utbetaling(1)
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(januar, revurdering.periode)
             revurdering.arbeidsgiverOppdrag.also { oppdrag ->
@@ -577,8 +577,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(11.mars, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(mars, inspektør.periode(2.vedtaksperiode))
 
-            val førsteUtbetaling = inspektør.utbetaling(1).inspektør
-            val revurdering = inspektør.utbetaling(2).inspektør
+            val førsteUtbetaling = inspektør.utbetaling(1)
+            val revurdering = inspektør.utbetaling(2)
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(mars, revurdering.periode)
             assertEquals(1.mars til 31.mars, førsteUtbetaling.utbetalingstidslinje.periode())
@@ -630,10 +630,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(17.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(14.februar til 10.mars, inspektør.periode(2.vedtaksperiode))
 
-            val januarutbetaling = inspektør.utbetaling(0).inspektør
-            val februarutbetaling = inspektør.utbetaling(1).inspektør
-            val revurderingJanuar = inspektør.utbetaling(2).inspektør
-            val revurderingFebruar = inspektør.utbetaling(3).inspektør
+            val januarutbetaling = inspektør.utbetaling(0)
+            val februarutbetaling = inspektør.utbetaling(1)
+            val revurderingJanuar = inspektør.utbetaling(2)
+            val revurderingFebruar = inspektør.utbetaling(3)
 
             assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(januar, januarutbetaling.periode)
@@ -705,10 +705,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(17.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(14.februar til 10.mars, inspektør.periode(2.vedtaksperiode))
 
-            val januarutbetaling = inspektør.utbetaling(0).inspektør
-            val februarutbetaling = inspektør.utbetaling(1).inspektør
-            val revurderingJanuar = inspektør.utbetaling(2).inspektør
-            val revurderingFebruar = inspektør.utbetaling(3).inspektør
+            val januarutbetaling = inspektør.utbetaling(0)
+            val februarutbetaling = inspektør.utbetaling(1)
+            val revurderingJanuar = inspektør.utbetaling(2)
+            val revurderingFebruar = inspektør.utbetaling(3)
 
             assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(januar, januarutbetaling.periode)
@@ -1190,7 +1190,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.assertUtbetalingsdag(dato: LocalDate, dagtype: KClass<out Utbetalingsdag>, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
-        val sisteUtbetaling = inspektør.utbetalinger.last().inspektør
+        val sisteUtbetaling = inspektør.utbetalinger.last()
         val utbetalingstidslinje = sisteUtbetaling.utbetalingstidslinje
         val dagen = utbetalingstidslinje[dato]
 

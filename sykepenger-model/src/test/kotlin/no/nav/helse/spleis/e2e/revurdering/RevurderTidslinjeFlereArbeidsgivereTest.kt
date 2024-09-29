@@ -160,7 +160,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertIngenFunksjonelleFeil()
-            assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
+            assertEquals(3, utbetalinger.filter { it.erAvsluttet }.size)
         }
 
         inspektør(a2) {
@@ -175,7 +175,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertIngenFunksjonelleFeil()
-            assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
+            assertEquals(3, utbetalinger.filter { it.erAvsluttet }.size)
         }
     }
 
@@ -205,7 +205,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertIngenFunksjonelleFeil()
-            assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
+            assertEquals(2, utbetalinger.filter { it.erAvsluttet }.size)
         }
 
         inspektør(a1) {
@@ -218,7 +218,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertIngenFunksjonelleFeil()
-            assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
+            assertEquals(2, utbetalinger.filter { it.erAvsluttet }.size)
         }
     }
 
@@ -256,7 +256,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_INNTEKTSMELDING
             )
             assertIngenFunksjonelleFeil()
-            assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
+            assertEquals(2, utbetalinger.filter { it.erAvsluttet }.size)
         }
 
         inspektør(a1) {
@@ -269,7 +269,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertIngenFunksjonelleFeil()
-            assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
+            assertEquals(2, utbetalinger.filter { it.erAvsluttet }.size)
         }
     }
 

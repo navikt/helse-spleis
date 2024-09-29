@@ -59,7 +59,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
 
             val utbetalinger = inspektør.utbetalinger
             assertEquals(2, utbetalinger.size)
-            utbetalinger.last().inspektør.also { revurderingen ->
+            utbetalinger.last().also { revurderingen ->
                 assertEquals(0, revurderingen.personOppdrag.size)
                 assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
                 revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -97,7 +97,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
 
             val utbetalinger = inspektør.utbetalinger
             assertEquals(3, utbetalinger.size)
-            utbetalinger.last().inspektør.also { utbetalingen ->
+            utbetalinger.last().also { utbetalingen ->
                 assertEquals(0, utbetalingen.personOppdrag.size)
                 assertEquals(1, utbetalingen.arbeidsgiverOppdrag.size)
                 utbetalingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
