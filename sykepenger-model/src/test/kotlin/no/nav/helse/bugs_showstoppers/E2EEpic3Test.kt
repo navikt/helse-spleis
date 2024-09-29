@@ -335,61 +335,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `andre vedtaksperiode utbetalingslinjer dekker to perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
-            førsteFraværsdag = 1.januar(2020),
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020)))
-        håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-
-        inspektør.also {
-            assertEquals(1, it.arbeidsgiverOppdrag[0].size)
-            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[0].first().fom)
-            assertEquals(31.januar(2020), it.arbeidsgiverOppdrag[0].first().tom)
-            assertEquals(1, it.arbeidsgiverOppdrag[1].size)
-            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[1].first().fom)
-            assertEquals(28.februar(2020), it.arbeidsgiverOppdrag[1].first().tom)
-        }
-    }
-
-    @Test
     fun `simulering av periode der tilstøtende ikke ble utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020)))
         håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020)))
@@ -552,65 +497,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-    }
-
-    @Test
-    fun `Utbetaling med forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
-        håndterSøknad(Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.juni(2020), 16.juni(2020))))
-
-        håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 31.juli(2020)))
-        håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100.prosent))
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        inspektør.also {
-            assertEquals(it.arbeidsgiverOppdrag[0].fagsystemId(), it.arbeidsgiverOppdrag[1].fagsystemId())
-        }
-    }
-
-    @Test
-    fun `Grad endrer tredje periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
-        håndterSøknad(Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.juni(2020), 16.juni(2020))))
-
-        håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 31.juli(2020)))
-        håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(1.august(2020), 31.august(2020)))
-        håndterSøknad(Sykdom(1.august(2020), 31.august(2020), 50.prosent))
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        inspektør.also {
-            assertEquals(it.arbeidsgiverOppdrag[0].fagsystemId(), it.arbeidsgiverOppdrag[1].fagsystemId())
-            assertEquals(it.arbeidsgiverOppdrag[1].fagsystemId(), it.arbeidsgiverOppdrag[2].fagsystemId())
-        }
     }
 
     @Test

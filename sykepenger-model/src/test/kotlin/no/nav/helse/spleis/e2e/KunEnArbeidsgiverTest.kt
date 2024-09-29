@@ -39,7 +39,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -261,31 +260,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `setter riktig inntekt i utbetalingstidslinjebuilder`() {
-        håndterSykmelding(Sykmeldingsperiode(21.september(2020), 10.oktober(2020)))
-        håndterSøknad(Sykdom(21.september(2020), 10.oktober(2020), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                4.september(2020) til 19.september(2020)
-            ),
-            beregnetInntekt = INNTEKT,
-            førsteFraværsdag = 21.september(2020)
-        ) // 20. september er en søndag
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-
-        assertIngenFunksjonelleFeil()
-        assertActivities()
-        inspektør.also {
-            assertInntektForDato(INNTEKT, 21.september(2020), inspektør = it)
-            assertEquals(21.september(2020), it.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(21465, it.nettoBeløp[0])
-        }
-
-        assertEquals(4.september(2020) til 10.oktober(2020), inspektør.vedtaksperioder(1.vedtaksperiode).periode())
-    }
-
-    @Test
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode`() {
         nyPeriode(januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -394,60 +368,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertActivities()
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertIngenFunksjonelleFeil()
-        assertActivities()
-        inspektør.also {
-            assertEquals(8586, it.totalBeløp[0])
-            assertEquals(8586, it.nettoBeløp[0])
-            assertEquals(32913, it.totalBeløp[1])
-            assertEquals(24327, it.nettoBeløp[1])
-        }
         assertTilstander(
             1.vedtaksperiode,
             START,

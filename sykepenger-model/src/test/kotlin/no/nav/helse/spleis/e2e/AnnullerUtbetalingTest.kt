@@ -87,9 +87,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals("OPPH", statusForUtbetaling)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
-        assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(1, person.personLogg.behov().size - behovTeller)
-        inspektør.arbeidsgiverOppdrag[1].inspektør.also {
+        inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.also {
             assertEquals(19.januar, it.fom(0))
             assertEquals(26.januar, it.tom(0))
             assertEquals(19.januar, it.datoStatusFom(0))

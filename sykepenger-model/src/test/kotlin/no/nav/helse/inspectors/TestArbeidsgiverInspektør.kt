@@ -26,8 +26,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.fail
 
 internal class TestArbeidsgiverInspektør(
@@ -39,15 +37,15 @@ internal class TestArbeidsgiverInspektør(
             this.apply(blokk)
         }
     }
-    private val personInspektør = person.inspektør
+    internal var arbeidsgiver: Arbeidsgiver = person.arbeidsgivere.first { it.organisasjonsnummer() == orgnummer }
 
+    private val personInspektør = person.inspektør
     internal var vedtaksperiodeTeller: Int = 0
         private set
     private var vedtaksperiodeindeks = 0
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
-    internal lateinit var arbeidsgiver: Arbeidsgiver
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver.inspektør.inntektshistorikk)
     internal lateinit var sykdomshistorikk: SykdomshistorikkInspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
@@ -57,12 +55,6 @@ internal class TestArbeidsgiverInspektør(
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpPerson = mutableListOf<Double>()
-    private val utbetalingstilstander = mutableListOf<Utbetalingstatus>()
-    private val utbetalingIder = mutableListOf<UUID>()
-    private val utbetalingutbetalingstidslinjer = mutableListOf<Utbetalingstidslinje>()
-    internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
-    internal val totalBeløp = mutableListOf<Int>()
-    internal val nettoBeløp = mutableListOf<Int>()
     private val vedtaksperioder = mutableMapOf<UUID, Vedtaksperiode>()
     private var forkastetPeriode = false
     private var inFeriepengeutbetaling = false
@@ -71,7 +63,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun vilkårsgrunnlagHistorikkInnslag() = person.vilkårsgrunnlagHistorikk.inspektør.vilkårsgrunnlagHistorikkInnslag()
 
     init {
-        person.arbeidsgivere.first { it.organisasjonsnummer() == orgnummer }.accept(this)
+        this.arbeidsgiver.accept(this)
     }
 
     override fun preVisitArbeidsgiver(
@@ -80,7 +72,6 @@ internal class TestArbeidsgiverInspektør(
         organisasjonsnummer: String,
         sykdomshistorikk: Sykdomshistorikk
     ) {
-        this.arbeidsgiver = arbeidsgiver
         this.sykdomshistorikk = sykdomshistorikk.inspektør
     }
 
@@ -192,16 +183,6 @@ internal class TestArbeidsgiverInspektør(
         val statuskode: String? = null
     )
 
-    override fun visitUtbetaling(utbetaling: Utbetaling) {
-        utbetalingIder.add(utbetaling.id)
-        utbetalingstilstander.add(utbetaling.inspektør.tilstand)
-        utbetalingutbetalingstidslinjer.add(utbetaling.utbetalingstidslinje)
-
-        this.arbeidsgiverOppdrag.add(utbetaling.arbeidsgiverOppdrag)
-        this.totalBeløp.add(utbetaling.arbeidsgiverOppdrag.totalbeløp())
-        this.nettoBeløp.add(utbetaling.arbeidsgiverOppdrag.nettoBeløp())
-    }
-
     override fun preVisitFeriepengeutbetaling(
         feriepengeutbetaling: Feriepengeutbetaling,
         infotrygdFeriepengebeløpPerson: Double,
@@ -254,11 +235,11 @@ internal class TestArbeidsgiverInspektør(
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.erAvsluttet() }
     internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger
-    internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
+    internal fun utbetalingtilstand(indeks: Int) = utbetalinger[indeks].inspektør.tilstand
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
-    internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
-    internal fun utbetalingUtbetalingstidslinje(indeks: Int) = utbetalingutbetalingstidslinjer[indeks]
-    internal fun sisteUtbetalingUtbetalingstidslinje() = utbetalingutbetalingstidslinjer.last()
+    internal fun utbetalingId(indeks: Int) = utbetalinger[indeks].id
+    internal fun utbetalingUtbetalingstidslinje(indeks: Int) = utbetalinger[indeks].utbetalingstidslinje
+    internal fun sisteUtbetalingUtbetalingstidslinje() = utbetalinger.last().utbetalingstidslinje
     internal fun periode(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun periode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.periode
     internal fun vedtaksperiodeSykdomstidslinje(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.sykdomstidslinje
@@ -278,7 +259,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun vilkårsgrunnlag(vedtaksperiodeId: UUID) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeId))
     internal fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate) = person.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
+    internal fun utbetalingslinjer(indeks: Int) = utbetalinger[indeks].arbeidsgiverOppdrag
 
     internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
 
