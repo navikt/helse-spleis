@@ -1894,6 +1894,7 @@ internal class Vedtaksperiode private constructor(
         ): Tilstand {
             if (!vedtaksperiode.forventerInntekt()) return ForventerIkkeInntekt
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
+            if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) return TrengerInntektsmeldingLæll
             if (vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
 
@@ -1908,6 +1909,15 @@ internal class Vedtaksperiode private constructor(
             fun venterPå(): Vedtaksperiode? = null
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse)
         }
+
+        private data class HarFlereSkjæringstidspunkt(private val vedtaksperiode: Vedtaksperiode): Tilstand {
+            override fun venterPå() = vedtaksperiode
+            override fun venteårsak() = HJELP fordi FLERE_SKJÆRINGSTIDSPUNKT
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+                hendelse.info("Denne perioden har flere skjæringstidspunkt slik den står nå. Saksbehandler må inn å vurdere om det kan overstyres dager på en slik måte at det kun er ett skjæringstidspunkt. Om ikke må den kastes ut av Speil.")
+            }
+        }
+
         private data object TrengerInntektsmeldingLæll: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Perioden hadde tidligere nødvendig inntekt og refusjon, men endringer har gjort at hen trenger inntektsmelding allikevel.")

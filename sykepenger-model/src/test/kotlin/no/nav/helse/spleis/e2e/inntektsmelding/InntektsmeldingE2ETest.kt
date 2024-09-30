@@ -128,21 +128,20 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertEquals(5.august, it.inspektør.skjæringstidspunkt)
         }
         nullstillTilstandsendringer()
+        observatør.vedtaksperiodeVenter.clear()
 
         håndterInntektsmelding(listOf(27.august til 27.august, 4.september til 18.september))
         inspektør.vedtaksperioder(2.vedtaksperiode).let {
             assertEquals("AAAARR SAAAARR ASSSSHH SSSSSHH SSSS", it.sykdomstidslinje.toShortString())
             assertEquals(4.september, it.inspektør.skjæringstidspunkt)
         }
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
 
-        assertEquals(
-            "Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-08-27",
-            assertThrows<IllegalStateException> { håndterYtelser(2.vedtaksperiode) }.message
-        )
+        val venterPå = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(ORGNUMMER) }.venterPå
+        assertEquals(2.vedtaksperiode.id(ORGNUMMER), venterPå.vedtaksperiodeId)
+        assertEquals("HJELP", venterPå.venteårsak.hva)
+        assertEquals("FLERE_SKJÆRINGSTIDSPUNKT", venterPå.venteårsak.hvorfor)
     }
-
 
     @Test
     fun `altinn-inntektsmelding oppgir opphør av refusjon tilbake i tid i forhold til første fraværsdag`() {
