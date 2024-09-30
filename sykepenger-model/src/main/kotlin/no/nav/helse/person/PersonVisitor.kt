@@ -25,7 +25,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
@@ -197,8 +196,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
     ) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor,
-    UtbetalingVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -207,8 +205,6 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
     ) {
     }
 
-    fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
-    fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
     fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
     fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}

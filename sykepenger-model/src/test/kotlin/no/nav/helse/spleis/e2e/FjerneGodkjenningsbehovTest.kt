@@ -147,7 +147,7 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
-            assertEquals(IKKE_GODKJENT, inspektør.utbetalinger.single { it.utbetalingId == utbetalingId }.tilstand)
+            assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 
             val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
                 håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)

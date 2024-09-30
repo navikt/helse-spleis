@@ -209,9 +209,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
-        a1 { assertEquals(1, inspektør.utbetalinger.size) }
-        a2 { assertEquals(1, inspektør.utbetalinger.size) }
-        a3 { assertEquals(1, inspektør.utbetalinger.size) }
+        a1 { assertEquals(1, inspektør.antallUtbetalinger) }
+        a2 { assertEquals(1, inspektør.antallUtbetalinger) }
+        a3 { assertEquals(1, inspektør.antallUtbetalinger) }
     }
 
     @Test
@@ -251,9 +251,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
         }
-        a1 { assertEquals(1, inspektør.utbetalinger.size) }
-        a2 { assertEquals(1, inspektør.utbetalinger.size) }
-        a3 { assertEquals(1, inspektør.utbetalinger.size) }
+        a1 { assertEquals(1, inspektør.antallUtbetalinger) }
+        a2 { assertEquals(1, inspektør.antallUtbetalinger) }
+        a3 { assertEquals(1, inspektør.antallUtbetalinger) }
     }
 
     @Test

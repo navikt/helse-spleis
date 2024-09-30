@@ -787,8 +787,7 @@ private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: S
         .filter { it.type == Behovtype.Utbetaling }
         .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
 
-    return inspektør(orgnummer).utbetalinger
-        .filter { it.tilstand in setOf(Utbetalingstatus.OVERFØRT) }
+    return inspektør(orgnummer).utbetalingerInFlight()
         .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.periode }}" } }
         .firstOrNull { it.utbetalingId in utbetalingsbehovUtbetalingIder }
         ?.let {
@@ -815,7 +814,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 
 internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    utbetalingId: UUID = inspektør.utbetalinger.last().utbetalingId,
+    utbetalingId: UUID = inspektør.sisteUtbetaling().utbetalingId,
     opprettet: LocalDateTime = LocalDateTime.now()
 ) {
     AnnullerUtbetaling(

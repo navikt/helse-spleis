@@ -251,7 +251,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
-            assertEquals(4, inspektør.utbetalinger.size)
+            assertEquals(4, inspektør.antallUtbetalinger)
 
             inspektør.utbetaling(0).also { januarutbetaling ->
                 val revurdering = inspektør.utbetaling(2)
@@ -282,7 +282,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             }
         }
         a2 {
-            assertEquals(2, inspektør.utbetalinger.size)
+            assertEquals(2, inspektør.antallUtbetalinger)
             inspektør.utbetaling(0).also { februarutbetaling ->
                 val revurdering = inspektør.utbetaling(1)
                 assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
@@ -318,7 +318,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(1.vedtaksperiode)
             assertEquals(Feriedag::class, inspektør.sykdomstidslinje[18.januar]::class)
             assertEquals(Feriedag::class, inspektør.sykdomstidslinje[19.januar]::class)
-            val arbeidsgiverOppdrag = inspektør.utbetalinger.last().arbeidsgiverOppdrag
+            val arbeidsgiverOppdrag = inspektør.sisteUtbetaling().arbeidsgiverOppdrag
             assertEquals(2, arbeidsgiverOppdrag.size)
             arbeidsgiverOppdrag[0].inspektør.let { utbetalingslinjeInspektør ->
                 assertEquals(17.januar, utbetalingslinjeInspektør.fom)
@@ -553,7 +553,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
-            assertEquals(4, inspektør.utbetalinger.size)
+            assertEquals(4, inspektør.antallUtbetalinger)
 
             inspektør.utbetaling(0).also { januarutbetaling ->
                 val revurdering = inspektør.utbetaling(2)
@@ -577,7 +577,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a2 {
-            assertEquals(2, inspektør.utbetalinger.size)
+            assertEquals(2, inspektør.antallUtbetalinger)
 
             inspektør.utbetaling(0).also { februarutbetaling ->
                 val revurdering = inspektør.utbetaling(1)

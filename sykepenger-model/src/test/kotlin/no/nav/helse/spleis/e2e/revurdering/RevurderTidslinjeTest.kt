@@ -539,7 +539,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.antallUtbetalinger)
         val førsteUtbetaling = inspektør.utbetaling(0)
         val andreUtbetaling = inspektør.utbetaling(1)
         val annulleringenAvMars = inspektør.utbetaling(2)

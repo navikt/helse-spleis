@@ -438,10 +438,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(3, inspektør.utbetalinger.last().arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[0].tom)
-        assertEquals(30, inspektør.utbetalinger.last().arbeidsgiverOppdrag[1].grad)
-        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[2].fom)
+        assertEquals(3, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.size)
+        assertEquals(21.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[0].tom)
+        assertEquals(30, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[1].grad)
+        assertEquals(23.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[2].fom)
     }
 
     @Test
@@ -459,9 +459,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[0].tom)
-        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[1].fom)
+        assertEquals(2, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.size)
+        assertEquals(21.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[0].tom)
+        assertEquals(23.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[1].fom)
     }
 
     @Test
@@ -479,9 +479,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[0].tom)
-        assertEquals(24.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag[1].fom)
+        assertEquals(2, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.size)
+        assertEquals(21.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[0].tom)
+        assertEquals(24.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[1].fom)
     }
 
     @Test
@@ -556,7 +556,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(33235, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(33235, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)

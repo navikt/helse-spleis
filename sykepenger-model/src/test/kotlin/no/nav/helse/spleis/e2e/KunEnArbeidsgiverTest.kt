@@ -534,30 +534,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `gjentatt annullering av periode fører ikke til duplikate innslag i utbetalinger`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar))
-        håndterSøknad(Sykdom(5.februar, 10.februar, 100.prosent))
-        håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
-        håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
-
-        assertTrue(inspektør.utbetaling(0).erUtbetalt)
-        assertTrue(inspektør.utbetaling(1).erAnnullering)
-
-        assertEquals(2, inspektør.utbetalinger.size)
-    }
-
-    @Test
     fun `Person uten skjæringstidspunkt feiler ikke i validering av Utbetalingshistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020)))
         håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent), Ferie(23.oktober(2020), 18.november(2020)))

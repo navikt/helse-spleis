@@ -151,11 +151,10 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val utbetalinger = inspektør.utbetalinger
-        assertEquals(2, utbetalinger.size)
-        assertEquals(0, utbetalinger.last().arbeidsgiverOppdrag.nettoBeløp())
-        assertTrue(utbetalinger.last().erAvsluttet)
-        assertTrue(utbetalinger.first().erForkastet)
+        assertEquals(2, inspektør.antallUtbetalinger)
+        assertEquals(0, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+        assertTrue(inspektør.utbetaling(1).erAvsluttet)
+        assertTrue(inspektør.utbetaling(0).erForkastet)
     }
 
 }

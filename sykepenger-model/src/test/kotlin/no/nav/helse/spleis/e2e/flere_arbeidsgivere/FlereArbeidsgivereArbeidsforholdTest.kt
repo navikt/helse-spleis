@@ -246,7 +246,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(
             692.0,
             inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje[19.mars].økonomi.inspektør.arbeidsgiverbeløp?.daglig)
-        val a2Linje = inspektør(a2).utbetalinger.last().arbeidsgiverOppdrag.last()
+        val a2Linje = inspektør(a2).utbetaling(0).arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
         assertEquals(692, a2Linje.beløp)
@@ -378,7 +378,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val utbetaling = inspektør(a2).utbetalinger.single()
+        val utbetaling = inspektør(a2).utbetaling(0)
         val linje = utbetaling.arbeidsgiverOppdrag.linjerUtenOpphør().single()
         assertEquals(100, inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje[20.februar].økonomi.brukTotalGrad { totalGrad -> totalGrad })
         assertEquals(

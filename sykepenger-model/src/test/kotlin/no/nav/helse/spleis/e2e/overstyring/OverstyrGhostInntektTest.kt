@@ -98,11 +98,10 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
-        val utbetalinger = inspektør.utbetalinger
-        assertEquals(2, utbetalinger.size)
-        assertEquals(0, utbetalinger.last().arbeidsgiverOppdrag.nettoBeløp())
-        Assertions.assertTrue(utbetalinger.last().erAvsluttet)
-        Assertions.assertTrue(utbetalinger.first().erForkastet)
+        assertEquals(2, inspektør.antallUtbetalinger)
+        assertEquals(0, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+        Assertions.assertTrue(inspektør.utbetaling(1).erAvsluttet)
+        Assertions.assertTrue(inspektør.utbetaling(0).erForkastet)
 
     }
 

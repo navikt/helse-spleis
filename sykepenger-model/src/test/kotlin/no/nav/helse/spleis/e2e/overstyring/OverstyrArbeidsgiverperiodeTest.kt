@@ -57,9 +57,8 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            val utbetalinger = inspektør.utbetalinger
-            assertEquals(2, utbetalinger.size)
-            utbetalinger.last().also { revurderingen ->
+            assertEquals(2, inspektør.antallUtbetalinger)
+            inspektør.sisteUtbetaling().also { revurderingen ->
                 assertEquals(0, revurderingen.personOppdrag.size)
                 assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
                 revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -95,9 +94,8 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
-            val utbetalinger = inspektør.utbetalinger
-            assertEquals(3, utbetalinger.size)
-            utbetalinger.last().also { utbetalingen ->
+            assertEquals(3, inspektør.antallUtbetalinger)
+            inspektør.sisteUtbetaling().also { utbetalingen ->
                 assertEquals(0, utbetalingen.personOppdrag.size)
                 assertEquals(1, utbetalingen.arbeidsgiverOppdrag.size)
                 utbetalingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->

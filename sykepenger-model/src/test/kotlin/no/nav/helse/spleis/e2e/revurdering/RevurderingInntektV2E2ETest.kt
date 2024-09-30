@@ -245,7 +245,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         assertDiff(-11126)
 
-        assertEquals(33235, inspektør.utbetalinger.last().arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(33235, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
     }
@@ -273,10 +273,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val utbetalinger = inspektør.utbetalinger
-        assertTrue(utbetalinger[0].erUtbetalt)
-        assertTrue(utbetalinger[1].erUbetalt)
-        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
+        assertTrue(inspektør.utbetaling(0).erUtbetalt)
+        assertTrue(inspektør.utbetaling(1).erUbetalt)
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId())
         assertDiff(-2112)
     }
 
@@ -287,7 +286,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertThrows<IllegalStateException> { håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar) }
         assertIngenFunksjonelleFeil(AktivitetsloggFilter.person())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(1, inspektør.antallUtbetalinger)
     }
 
     @Test
@@ -315,7 +314,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING
         )
 
-        assertEquals(3, inspektør.utbetalinger.size)
+        assertEquals(3, inspektør.antallUtbetalinger)
         val korrelasjonsIdPåUtbetaling2 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
         val korrelasjonsIdPåUtbetaling3 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
 
@@ -334,7 +333,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
 
-        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.antallUtbetalinger)
         val korrelasjonsIdPåUtbetaling4 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
         val korrelasjonsIdPåUtbetaling5 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
 
@@ -366,7 +365,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING
         )
 
-        assertEquals(3, inspektør.utbetalinger.size)
+        assertEquals(3, inspektør.antallUtbetalinger)
 
         val korrelasjonsIdPåUtbetaling1 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
         val korrelasjonsIdPåUtbetaling2 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
@@ -425,7 +424,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING
         )
 
-        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.antallUtbetalinger)
         assertDiff(-15741)
 
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
@@ -452,7 +451,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING
         )
 
-        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.antallUtbetalinger)
         assertDiff(-2541)
 
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
@@ -559,7 +558,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
@@ -705,6 +704,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertDiff(diff: Int) {
-        assertEquals(diff, inspektør.utbetalinger.last().nettobeløp)
+        assertEquals(diff, inspektør.sisteUtbetaling().nettobeløp)
     }
 }

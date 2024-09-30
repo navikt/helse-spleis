@@ -109,7 +109,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         håndterYtelser(3.vedtaksperiode)
 
-        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.antallUtbetalinger)
         inspektør.utbetaling(2).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId())

@@ -60,9 +60,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() {
         nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag.isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag.isEmpty())
+        assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.sisteUtbetaling().personOppdrag.isEmpty())
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
     }
@@ -83,9 +83,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
         )
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag.isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag.isEmpty())
+        assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.sisteUtbetaling().personOppdrag.isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 26.februar)
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 27.februar til 27.februar)
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 28.februar til 28.februar)
@@ -182,9 +182,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
 
 
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag.isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag.isEmpty())
+        assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.sisteUtbetaling().personOppdrag.isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 1.mars til 16.mars)
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 17.mars til 31.mars)
     }
@@ -278,9 +278,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
 
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag.isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag.isEmpty())
+        assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.sisteUtbetaling().personOppdrag.isEmpty())
 
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, 17.januar til 24.januar)
@@ -634,7 +634,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertEquals(1, inspektør(a2).utbetalinger.size)
+        assertEquals(1, inspektør(a2).antallUtbetalinger)
         inspektør(a1).utbetaling(0).also { utbetaling ->
             assertEquals(2, utbetaling.arbeidsgiverOppdrag.size)
             utbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -647,7 +647,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             }
             assertTrue(utbetaling.personOppdrag.isEmpty())
         }
-        assertEquals(1, inspektør(a2).utbetalinger.size)
+        assertEquals(1, inspektør(a2).antallUtbetalinger)
         inspektør(a2).utbetaling(0).also { utbetaling ->
             assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
             utbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -744,14 +744,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertEquals(1, inspektør(a1).utbetalinger.size)
+        assertEquals(1, inspektør(a1).antallUtbetalinger)
         inspektør(a1).utbetaling(0).also { utbetaling ->
             val linje = utbetaling.arbeidsgiverOppdrag[0].inspektør
             assertEquals(1431, linje.beløp)
             assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             assertTrue(utbetaling.personOppdrag.isEmpty())
         }
-        assertEquals(1, inspektør(a2).utbetalinger.size)
+        assertEquals(1, inspektør(a2).antallUtbetalinger)
         inspektør(a2).utbetaling(0).also { utbetaling ->
             val linje = utbetaling.personOppdrag[0].inspektør
             assertEquals(730, linje.beløp)

@@ -104,9 +104,9 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar, 2.februar, 100.prosent, INNTEKT))
         forlengVedtak(april)
-        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.antallUtbetalinger)
 
-        inspektør.utbetalinger.last().also { utbetalinginspektør ->
+        inspektør.sisteUtbetaling().also { utbetalinginspektør ->
             assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
 
@@ -174,7 +174,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_OS_2)
 
-        val arbeidsgiverOppdrag = inspektør.utbetalinger.last().arbeidsgiverOppdrag
+        val arbeidsgiverOppdrag = inspektør.sisteUtbetaling().arbeidsgiverOppdrag
         assertEquals(2, arbeidsgiverOppdrag.size)
         arbeidsgiverOppdrag[0].inspektør.let { utbetalingslinjeInspektør ->
             assertEquals(17.januar, utbetalingslinjeInspektør.fom)

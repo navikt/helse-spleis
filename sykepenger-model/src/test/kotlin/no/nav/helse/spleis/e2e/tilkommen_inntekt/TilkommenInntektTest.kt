@@ -153,11 +153,11 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             val dagsatsFørstegangs =
-                inspektør.utbetalinger.single().utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
+                inspektør.utbetaling(0).utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
             assertEquals(1431.daglig, dagsatsFørstegangs)
             håndterYtelser(2.vedtaksperiode)
             val dagsatsForlengelse =
-                inspektør.utbetalinger.last().utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
+                inspektør.sisteUtbetaling().utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
             assertEquals(969.daglig, dagsatsForlengelse)
             // bruker har en tilkommen inntekt på 10K, slik at inntektstapet i perioden er 31K - 10K = 21K.
             // utbetalingen på forlengelsen justeres derfor ned med denne brøken 21/31

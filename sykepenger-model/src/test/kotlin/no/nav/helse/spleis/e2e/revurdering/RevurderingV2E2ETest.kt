@@ -256,7 +256,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
-        assertEquals(3, inspektør.utbetalinger.size)
+        assertEquals(3, inspektør.antallUtbetalinger)
         inspektør.utbetaling(2).also { revurdering ->
             val januarutbetaling = inspektør.utbetaling(0)
             val februarutbetaling = inspektør.utbetaling(1)
@@ -384,7 +384,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
-        assertEquals(5, inspektør.utbetalinger.size)
+        assertEquals(5, inspektør.antallUtbetalinger)
         inspektør.utbetaling(4).also { revurdering ->
             val januar1utbetaling = inspektør.utbetaling(0)
             val januar2utbetaling = inspektør.utbetaling(1)
@@ -1084,6 +1084,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertDiff(diff: Int) {
-        assertEquals(diff, inspektør.utbetalinger.last().nettobeløp)
+        assertEquals(diff, inspektør.sisteUtbetaling().nettobeløp)
     }
 }

@@ -31,6 +31,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
+import no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -39,11 +40,11 @@ import org.slf4j.LoggerFactory
 
 class Utbetaling private constructor(
     val id: UUID,
-    val korrelasjonsId: UUID,
-    val periode: Periode,
+    private val korrelasjonsId: UUID,
+    private val periode: Periode,
     val utbetalingstidslinje: Utbetalingstidslinje,
-    val arbeidsgiverOppdrag: Oppdrag,
-    val personOppdrag: Oppdrag,
+    private val arbeidsgiverOppdrag: Oppdrag,
+    private val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
     tilstand: Tilstand,
     val type: Utbetalingtype,
@@ -57,6 +58,18 @@ class Utbetaling private constructor(
     private var avsluttet: LocalDateTime?,
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
+
+    val view get() = UtbetalingView(
+        id = id,
+        korrelasjonsId = korrelasjonsId,
+        periode = periode,
+        utbetalingstidslinje = utbetalingstidslinje,
+        arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+        personOppdrag = personOppdrag,
+        status = tilstand.status,
+        type = type
+    )
+
     constructor(
         korrelerendeUtbetaling: Utbetaling?,
         periode: Periode,
@@ -444,10 +457,6 @@ class Utbetaling private constructor(
         }
     }
 
-    fun accept(visitor: UtbetalingVisitor) {
-        visitor.visitUtbetaling(this)
-    }
-
     private fun overførBegge(hendelse: IAktivitetslogg) {
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == ANNULLERING })
         vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == ANNULLERING })
@@ -668,11 +677,6 @@ class Utbetaling private constructor(
         private val tidspunkt: LocalDateTime,
         private val automatiskBehandling: Boolean
     ) {
-
-        fun accept(visitor: UtbetalingVurderingVisitor) {
-            visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
-        }
-
         fun annullert(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingAnnullert(
@@ -857,3 +861,14 @@ enum class Klassekode(val verdi: String) {
         }
     }
 }
+
+data class UtbetalingView(
+    val id: UUID,
+    val korrelasjonsId: UUID,
+    val periode: Periode,
+    val utbetalingstidslinje: Utbetalingstidslinje,
+    val arbeidsgiverOppdrag: Oppdrag,
+    val personOppdrag: Oppdrag,
+    val status: Utbetalingstatus,
+    val type: Utbetalingtype
+)

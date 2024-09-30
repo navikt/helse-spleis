@@ -17,7 +17,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
     fun `annullere tidligere utbetaling på samme arbeidsgiver`() {
         a1 {
             nyttVedtak(januar)
-            val utbetalingId = inspektør.utbetalinger.single().utbetalingId
+            val utbetalingId = inspektør.utbetaling(0).utbetalingId
             nyttVedtak(mars)
             håndterAnnullering(utbetalingId)
             håndterUtbetalt()
@@ -31,7 +31,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
         }
-        val utbetalingId = inspektør.utbetalinger.single().utbetalingId
+        val utbetalingId = inspektør.utbetaling(0).utbetalingId
         a2 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
             håndterInntektsmelding(listOf(1.mars til 16.mars))
@@ -44,7 +44,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         a1 {
             håndterAnnullering(utbetalingId)
             assertIngenFunksjonelleFeil()
-            Assertions.assertEquals(Utbetalingtype.ANNULLERING, inspektør.utbetalinger.last().type)
+            Assertions.assertEquals(Utbetalingtype.ANNULLERING, inspektør.sisteUtbetaling().type)
         }
     }
 }

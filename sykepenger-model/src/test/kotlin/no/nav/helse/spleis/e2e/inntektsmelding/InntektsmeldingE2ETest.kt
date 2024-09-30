@@ -1850,7 +1850,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
-        assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().periode)
+        assertEquals(1.januar til 31.mars, inspektør.sisteUtbetaling().periode)
     }
     @Test
     fun `vedtaksperiode i AVSLUTTET_UTEN_UTBETALING burde utvides ved replay av inntektsmelding`() {

@@ -1190,7 +1190,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.assertUtbetalingsdag(dato: LocalDate, dagtype: KClass<out Utbetalingsdag>, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
-        val sisteUtbetaling = inspektør.utbetalinger.last()
+        val sisteUtbetaling = inspektør.sisteUtbetaling()
         val utbetalingstidslinje = sisteUtbetaling.utbetalingstidslinje
         val dagen = utbetalingstidslinje[dato]
 

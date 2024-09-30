@@ -75,7 +75,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingpåminnelse(0, OVERFØRT)
         håndterUtbetalt()
 
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(1, inspektør.antallUtbetalinger)
         assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
@@ -90,7 +90,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingpåminnelse(1, OVERFØRT)
         håndterUtbetalt()
 
-        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(UTBETALT, inspektør.utbetaling(1).tilstand)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -126,7 +126,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
         )
 
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(1, inspektør.antallUtbetalinger)
         assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -161,7 +161,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
         )
 
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(1, inspektør.antallUtbetalinger)
         assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

@@ -32,7 +32,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ForkastingTest : AbstractEndToEndTest() {
@@ -45,7 +44,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             inntektshistorikk = emptyList()
         )
         håndterSøknad(1.februar til 23.februar)
-        assertTrue(inspektør.utbetalinger.isEmpty())
+        assertEquals(0, inspektør.antallUtbetalinger)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 

@@ -60,11 +60,11 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.antallUtbetalinger)
         val marsutbetalingen = inspektør.utbetaling(1)
         håndterAnnullering(marsutbetalingen.utbetalingId)
 
-        assertEquals(5, inspektør.utbetalinger.size)
+        assertEquals(5, inspektør.antallUtbetalinger)
         val annulleringen = inspektør.utbetaling(4)
         assertTrue(annulleringen.erAnnullering)
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
@@ -95,7 +95,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
 
-        assertEquals(5, inspektør.utbetalinger.size)
+        assertEquals(5, inspektør.antallUtbetalinger)
         val januarutbetaling = inspektør.utbetaling(0)
         val marsutbetaling = inspektør.utbetaling(1)
         val annulleringAvJanuar = inspektør.utbetaling(2)
@@ -202,7 +202,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         nyttVedtak(mars)
 
-        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.antallUtbetalinger)
 
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
@@ -210,7 +210,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(6, inspektør.utbetalinger.size)
+        assertEquals(6, inspektør.antallUtbetalinger)
         val januarutbetaling = inspektør.utbetaling(0)
         val marsutbetaling = inspektør.utbetaling(1)
         val annulleringAvJanuarForkastet = inspektør.utbetaling(2)
@@ -241,7 +241,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(3, inspektør.utbetalinger.size)
+        assertEquals(3, inspektør.antallUtbetalinger)
         val januarutbetaling = inspektør.utbetaling(0)
         val marsutbetaling = inspektør.utbetaling(1)
         val revurderingAvMars = inspektør.utbetaling(2)
@@ -294,7 +294,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(6, inspektør.utbetalinger.size)
+            assertEquals(6, inspektør.antallUtbetalinger)
             val januarutbetaling = inspektør.utbetaling(0)
             val februarutbetaling = inspektør.utbetaling(1)
             val marsutbetaling = inspektør.utbetaling(2)

@@ -126,7 +126,10 @@ internal class Arbeidsgiver private constructor(
         utbetalinger.forEach { it.registrer(this) }
     }
 
-    fun view(): ArbeidsgiverView = ArbeidsgiverView(organisasjonsnummer)
+    fun view(): ArbeidsgiverView = ArbeidsgiverView(
+        organisasjonsnummer = organisasjonsnummer,
+        utbetalinger = utbetalinger.map { it.view }
+    )
 
     internal companion object {
         internal fun List<Arbeidsgiver>.finn(yrkesaktivitet: Yrkesaktivitet) = find { it.erSammeYrkesaktivitet(yrkesaktivitet) }
@@ -280,9 +283,6 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer, sykdomshistorikk)
         inntektshistorikk.accept(visitor)
         sykmeldingsperioder.accept(visitor)
-        visitor.preVisitUtbetalinger(utbetalinger)
-        utbetalinger.forEach { it.accept(visitor) }
-        visitor.postVisitUtbetalinger(utbetalinger)
         visitor.preVisitPerioder(vedtaksperioder)
         vedtaksperioder.forEach { it.accept(visitor) }
         visitor.postVisitPerioder(vedtaksperioder)
