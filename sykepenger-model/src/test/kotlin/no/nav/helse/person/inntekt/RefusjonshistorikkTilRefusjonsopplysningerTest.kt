@@ -11,6 +11,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -72,7 +73,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 meldingsreferanseId = im,
                 førsteFraværsdag = 20.januar,
                 arbeidsgiverperioder = emptyList(),
-                beløp = 0.daglig,
+                beløp = 1000.daglig,
                 sisteRefusjonsdag = 3.januar,
                 endringerIRefusjon = emptyList(),
                 tidsstempel = LocalDateTime.now(),
