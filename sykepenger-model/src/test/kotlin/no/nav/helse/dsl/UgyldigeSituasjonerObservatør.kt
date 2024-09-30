@@ -30,7 +30,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
@@ -393,8 +392,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         override fun preVisitArbeidsgiver(
             arbeidsgiver: Arbeidsgiver,
             id: UUID,
-            organisasjonsnummer: String,
-            sykdomshistorikk: Sykdomshistorikk
+            organisasjonsnummer: String
         ) {
             orgnr = organisasjonsnummer
         }

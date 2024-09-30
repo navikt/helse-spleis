@@ -11,7 +11,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 
 internal val Arbeidsgiver.inspektør get() = ArbeidsgiverInspektør(this)
 
@@ -27,8 +26,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal lateinit var refusjonshistorikk: Refusjonshistorikk
         private set
 
-    internal lateinit var sykdomshistorikk: SykdomshistorikkInspektør
-        private set
+    val sykdomshistorikk = arbeidsgiver.view().sykdomshistorikk.inspektør
 
     init {
         arbeidsgiver.accept(this)
@@ -42,11 +40,9 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
-        organisasjonsnummer: String,
-        sykdomshistorikk: Sykdomshistorikk
+        organisasjonsnummer: String
     ) {
         this.organisasjonsnummer = organisasjonsnummer
-        this.sykdomshistorikk = sykdomshistorikk.inspektør
     }
 
     override fun preVisitVedtaksperiode(

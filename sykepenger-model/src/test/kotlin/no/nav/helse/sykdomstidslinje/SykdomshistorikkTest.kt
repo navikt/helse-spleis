@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 
 internal class SykdomshistorikkTest {
     private lateinit var historikk: Sykdomshistorikk
+    private val Sykdomshistorikk.inspektør get() = historikk.view().inspektør
 
     @BeforeEach
     fun setup() {

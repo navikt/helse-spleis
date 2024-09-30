@@ -48,7 +48,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver.inspektør.inntektshistorikk)
-    internal lateinit var sykdomshistorikk: SykdomshistorikkInspektør
+    val sykdomshistorikk = arbeidsgiver.view().sykdomshistorikk.inspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
     private val utbetalinger = arbeidsgiver.view().utbetalinger.map { it.inspektør }
     internal val antallUtbetalinger get() = utbetalinger.size
@@ -66,15 +66,6 @@ internal class TestArbeidsgiverInspektør(
 
     init {
         this.arbeidsgiver.accept(this)
-    }
-
-    override fun preVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String,
-        sykdomshistorikk: Sykdomshistorikk
-    ) {
-        this.sykdomshistorikk = sykdomshistorikk.inspektør
     }
 
     override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {

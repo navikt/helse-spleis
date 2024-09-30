@@ -2,12 +2,13 @@ package no.nav.helse.inspectors
 
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkElementView
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkView
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
-internal val Sykdomshistorikk.inspektør get() = SykdomshistorikkInspektør(this)
+internal val SykdomshistorikkView.inspektør get() = SykdomshistorikkInspektør(this.elementer)
 
-internal class SykdomshistorikkInspektør(historikk: Sykdomshistorikk) {
+internal class SykdomshistorikkInspektør(historikk: Collection<SykdomshistorikkElementView>) {
     private val tidslinjer = mutableListOf<Sykdomstidslinje>()
     private val perioderPerHendelse = mutableMapOf<UUID, MutableList<Periode>>()
 

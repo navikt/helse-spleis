@@ -20,7 +20,6 @@ import no.nav.helse.person.inntekt.InntektsmeldingVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
@@ -200,8 +199,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
-        organisasjonsnummer: String,
-        sykdomshistorikk: Sykdomshistorikk
+        organisasjonsnummer: String
     ) {
     }
 
