@@ -2,7 +2,9 @@ package no.nav.helse.person.beløp
 
 import java.time.LocalDate
 import java.util.SortedMap
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
 
 data class Beløpstidslinje private constructor(private val dager: SortedMap<LocalDate, Beløpsdag>) : Iterable<Dag> {
@@ -30,6 +32,15 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
     internal operator fun plus(other: Beløpstidslinje) = Beløpstidslinje((this.dager + other.dager))
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
+
+    internal fun subset(periode: Periode): Beløpstidslinje {
+        if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()
+        return Beløpstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag))
+    }
+
+    companion object {
+        fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
+    }
 }
 
 sealed interface Dag {

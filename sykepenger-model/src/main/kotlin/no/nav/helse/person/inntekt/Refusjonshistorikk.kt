@@ -9,10 +9,14 @@ import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonshistorikkUtDto
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.RefusjonshistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -44,6 +48,30 @@ internal class Refusjonshistorikk {
     ) {
         private fun muligDuplikat(other: Refusjon) =
             this.meldingsreferanseId == other.meldingsreferanseId && this.utledetFørsteFraværsdag() == other.utledetFørsteFraværsdag()
+
+        internal fun beløpstidslinje(tilOgMed: LocalDate): Beløpstidslinje {
+            val kilde = Kilde(meldingsreferanseId, Avsender.ARBEIDSGIVER)
+            val startskuddet = startskuddet()
+            if (tilOgMed < startskuddet) return Beløpstidslinje()
+
+            val opphørstidslinje = sisteRefusjonsdag?.let { Beløpstidslinje.fra(it.nesteDag til tilOgMed, INGEN, kilde) } ?: Beløpstidslinje()
+
+            if (sisteRefusjonsdag != null && sisteRefusjonsdag < startskuddet) return opphørstidslinje
+
+            val basistidslinje = Beløpstidslinje.fra(startskuddet til tilOgMed, beløp ?: INGEN, kilde)
+
+            val endringstidslinjer = endringerIRefusjon
+                .filter { it.endringsdato > startskuddet }
+                .filter { it.endringsdato <= tilOgMed }
+                .map { Beløpstidslinje.fra(it.endringsdato til tilOgMed, it.beløp, kilde) }
+
+            return endringstidslinjer.fold(basistidslinje, Beløpstidslinje::plus) + opphørstidslinje
+        }
+
+        private fun startskuddet(): LocalDate {
+            if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
+            return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
+        }
 
         internal companion object {
             internal fun MutableList<Refusjon>.leggTilRefusjon(refusjon: Refusjon) {
@@ -93,17 +121,13 @@ internal class Refusjonshistorikk {
             )
         }
 
-        internal class EndringIRefusjon(
-            private val beløp: Inntekt,
-            private val endringsdato: LocalDate
+        internal data class EndringIRefusjon(
+            internal val beløp: Inntekt,
+            internal val endringsdato: LocalDate
         ) {
             internal companion object {
                 internal fun List<EndringIRefusjon>.beløp(dag: LocalDate) = sortedBy { it.endringsdato }.lastOrNull { dag >= it.endringsdato }?.beløp
 
-                private fun Refusjon.startskuddet(): LocalDate {
-                    if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
-                    return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
-                }
                 internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg? = null): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
                     val aktuelle = refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }
