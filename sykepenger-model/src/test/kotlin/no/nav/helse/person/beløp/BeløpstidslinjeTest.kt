@@ -15,6 +15,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -79,8 +80,36 @@ internal class BeløpstidslinjeTest {
 
         assertEquals(UkjentDag, fratrukket[1.januar])
         assertEquals(UkjentDag, fratrukket[4.januar])
-
     }
+
+    @Test
+    fun `Strekker en beløpstidslinje i snuten`() {
+        assertEquals(Beløpstidslinje(), Beløpstidslinje().strekk(januar))
+        val tidslinje = Arbeidsgiver oppgir 1000.daglig hele februar
+        assertEquals(tidslinje, tidslinje.strekk(februar))
+        assertEquals(tidslinje, tidslinje.strekk(2.februar til 28.februar))
+        assertEquals(Arbeidsgiver oppgir 1000.daglig fra 31.januar til 28.februar, tidslinje.strekk(31.januar til 28.februar))
+    }
+
+    @Test
+    fun `Strekker en beløpstidslinje i halen`() {
+        val tidslinje = Arbeidsgiver oppgir 1000.daglig hele februar
+        assertEquals(tidslinje, tidslinje.strekk(februar))
+        assertEquals(tidslinje, tidslinje.strekk(1.februar til 27.februar))
+        assertEquals(Arbeidsgiver oppgir 1000.daglig fra 1.februar til 1.mars, tidslinje.strekk(1.februar til 1.mars))
+    }
+
+    @Test
+    fun `Strekker en beløpstidslinje i snuten og halen`() {
+        val tidslinje = (Arbeidsgiver oppgir 1000.daglig kun 1.februar) og (Saksbehandler oppgir 2000.daglig kun 28.februar)
+        val forventet = (Arbeidsgiver oppgir 1000.daglig fra 31.januar til 1.februar) og (Saksbehandler oppgir 2000.daglig fra 28.februar til 1.mars)
+        assertEquals(forventet, tidslinje.strekk(31.januar til 1.mars))
+        assertEquals(UkjentDag, forventet[2.februar])
+        assertEquals(UkjentDag, forventet[27.februar])
+
+        assertEquals(Systemet oppgir 100.daglig fra 5.januar til 7.januar, (Systemet oppgir 100.daglig kun 6.januar).strekk(5.januar til 7.januar))
+    }
+
 
     private companion object {
         private val ArbeidsgiverId = UUID.fromString("00000000-0000-0000-0000-000000000000")

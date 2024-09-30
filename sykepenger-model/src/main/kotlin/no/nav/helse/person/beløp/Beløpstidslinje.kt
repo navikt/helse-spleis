@@ -2,6 +2,7 @@ package no.nav.helse.person.beløp
 
 import java.time.LocalDate
 import java.util.SortedMap
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -38,8 +39,22 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
         return Beløpstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag))
     }
 
-    companion object {
-        fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
+    private fun snute(snute: LocalDate): Beløpstidslinje {
+        val førsteBeløpsdag = periode?.start?.let { dager.getValue(it) } ?: return Beløpstidslinje()
+        if (snute >= førsteBeløpsdag.dato) return Beløpstidslinje()
+        return Beløpstidslinje((snute til førsteBeløpsdag.dato.forrigeDag).map { Beløpsdag(it, førsteBeløpsdag.beløp, førsteBeløpsdag.kilde) })
+    }
+
+    private fun hale(hale: LocalDate): Beløpstidslinje {
+        val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) } ?: return Beløpstidslinje()
+        if (hale <= sisteBeløpsdag.dato) return Beløpstidslinje()
+        return Beløpstidslinje((sisteBeløpsdag.dato.nesteDag til hale).map { Beløpsdag(it, sisteBeløpsdag.beløp, sisteBeløpsdag.kilde) })
+    }
+
+    internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
+
+    internal companion object {
+        internal fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
     }
 }
 
