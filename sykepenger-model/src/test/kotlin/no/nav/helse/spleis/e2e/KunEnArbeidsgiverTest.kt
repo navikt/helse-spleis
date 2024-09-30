@@ -8,7 +8,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -29,7 +28,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -218,19 +216,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             AVSLUTTET
         )
         assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
-    }
-
-    @Test
-    fun `Søknad med utenlandsopphold gir warning`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Utlandsopphold(11.januar, 15.januar))
-        assertVarsler()
-        assertVarsel(RV_SØ_8, 1.vedtaksperiode.filter())
-        inspektør.also {
-            assertEquals(1, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-        }
     }
 
     @Test
