@@ -63,6 +63,7 @@ internal class Refusjonshistorikk {
             val endringstidslinjer = endringerIRefusjon
                 .filter { it.endringsdato > startskuddet }
                 .filter { it.endringsdato <= tilOgMed }
+                .sortedBy { it.endringsdato }
                 .map { Beløpstidslinje.fra(it.endringsdato til tilOgMed, it.beløp, kilde) }
 
             return endringstidslinjer.fold(basistidslinje, Beløpstidslinje::plus) + opphørstidslinje
@@ -167,6 +168,11 @@ internal class Refusjonshistorikk {
 
                     if (sisteRefusjonsdag == null) return
                     refusjonsopplysningerBuilder.leggTil(Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN), tidsstempel)
+                }
+
+                internal fun Refusjonshistorikk.beløpstidslinje(søkevindu: Periode): Beløpstidslinje {
+                    val aktuelle = refusjoner.filter { it.startskuddet() in søkevindu }
+                    return aktuelle.sortedBy { it.tidsstempel }.map { it.beløpstidslinje(søkevindu.endInclusive) }.fold(Beløpstidslinje(), Beløpstidslinje::plus).subset(søkevindu)
                 }
 
                 internal fun gjenopprett(dto: EndringIRefusjonDto): EndringIRefusjon {
