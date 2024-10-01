@@ -1,39 +1,23 @@
 package no.nav.helse.dsl
 
 import java.lang.IllegalStateException
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverVisitor
-import no.nav.helse.person.Behandlinger
-import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Avsluttet
-import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
-import no.nav.helse.person.Vedtaksperiode.TilInfotrygd
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import kotlin.check
 import kotlin.checkNotNull
 import kotlin.collections.any
@@ -244,18 +228,72 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun validerSykdomstidslinjePåBehandlinger() {
-        arbeidsgivere.forEach { it.accept(SprøSykdomstidslinjePåEndringer()) }
+        arbeidsgivere.forEach {
+            it.view().aktiveVedtaksperioder.forEach {
+                it.behandlinger.behandlinger.forEach {
+                    it.endringer.forEach {
+                        val førsteIkkeUkjenteDag = it.sykdomstidslinje.firstOrNull { it !is UkjentDag }
+                        val førsteDag = it.sykdomstidslinje[it.periode.start]
+                        val normalSykdomstidslinje = førsteDag === førsteIkkeUkjenteDag
+                        if (normalSykdomstidslinje) return
+                        // Inntektsmeldingen driver selvfølgelig å lager noen ukjente dager i snuten når første fraværsdag blir SykedagNav 🫠
+                        val førsteIkkeUkjenteDagErSykedagNav = it.sykdomstidslinje.inspektør.dager[it.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag] is Dag.SykedagNav
+                        if (førsteIkkeUkjenteDagErSykedagNav) return
+
+                        error("""
+                - Nå har det skjedd noe sprøtt.. sykdomstidslinjen starter med UkjentDag.. er du helt sikker på at det er så lurt?
+                Sykdomstidslinje: ${it.sykdomstidslinje.toShortString()}
+                Periode på sykdomstidslinje: ${it.sykdomstidslinje.periode()}
+                FørsteIkkeUkjenteDag=${it.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}
+                Periode på endring: ${it.periode}
+            """)
+                    }
+                }
+            }
+        }
     }
+
+    private fun BehandlingView.gyldigTilInfotrygd() = tilstand == BehandlingView.TilstandView.TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
+    private fun BehandlingView.gyldigAvsluttetUtenUtbetaling() = tilstand == BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
+    private fun BehandlingView.gyldigAvsluttet() = tilstand == BehandlingView.TilstandView.VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
+    private val BehandlingView.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
 
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.accept(BekreftTilstandPåFerdigbehandlePerioder())
+            val view = arbeidsgiver.view()
+
+            view.aktiveVedtaksperioder
+                .filter { it.tilstand in setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD) }
+                .groupBy(keySelector = { it.tilstand }) {
+                    it.behandlinger.behandlinger.last()
+                }
+                .forEach { (tilstand, sisteBehandlinger) ->
+                    when (tilstand) {
+                        TilstandType.TIL_INFOTRYGD -> sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
+                        }
+                        TilstandType.AVSLUTTET_UTEN_UTBETALING -> sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
+                        }
+                        TilstandType.AVSLUTTET -> sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
+                        }
+                        else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
+                    }
+                }
         }
     }
 
     private fun bekreftIngenOverlappende() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.accept(BekreftIngenOverlappendePerioder())
+            var forrigePeriode: VedtaksperiodeView? = null
+            val view = arbeidsgiver.view()
+            view.aktiveVedtaksperioder.forEach { current ->
+                if (forrigePeriode?.periode?.overlapperMed(current.periode) == true) {
+                    error("For Arbeidsgiver ${view.organisasjonsnummer} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")
+                }
+                forrigePeriode = current
+            }
         }
     }
 
@@ -293,134 +331,5 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private enum class Behandlingstatus {
         ÅPEN, LUKKET, AVBRUTT, ANNULLERT, AVSLUTTET
-    }
-
-    private class SprøSykdomstidslinjePåEndringer : ArbeidsgiverVisitor {
-        override fun visitBehandlingendring(
-            id: UUID,
-            tidsstempel: LocalDateTime,
-            sykmeldingsperiode: Periode,
-            periode: Periode,
-            grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
-            utbetaling: Utbetaling?,
-            dokumentsporing: Dokumentsporing,
-            sykdomstidslinje: Sykdomstidslinje,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiverperiode: List<Periode>,
-            utbetalingstidslinje: Utbetalingstidslinje,
-            maksdatoresultat: Maksdatoresultat
-        ) {
-            val førsteIkkeUkjenteDag = sykdomstidslinje.firstOrNull { it !is UkjentDag }
-            val førsteDag = sykdomstidslinje[periode.start]
-            val normalSykdomstidslinje = førsteDag === førsteIkkeUkjenteDag
-            if (normalSykdomstidslinje) return
-            // Inntektsmeldingen driver selvfølgelig å lager noen ukjente dager i snuten når første fraværsdag blir SykedagNav 🫠
-            val førsteIkkeUkjenteDagErSykedagNav = sykdomstidslinje.inspektør.dager[sykdomstidslinje.inspektør.førsteIkkeUkjenteDag] is Dag.SykedagNav
-            if (førsteIkkeUkjenteDagErSykedagNav) return
-
-            error("""
-                - Nå har det skjedd noe sprøtt.. sykdomstidslinjen starter med UkjentDag.. er du helt sikker på at det er så lurt?
-                Sykdomstidslinje: ${sykdomstidslinje.toShortString()}
-                Periode på sykdomstidslinje: ${sykdomstidslinje.periode()}
-                FørsteIkkeUkjenteDag=${sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}
-                Periode på endring: $periode
-            """)
-        }
-    }
-
-    private class BekreftTilstandPåFerdigbehandlePerioder : ArbeidsgiverVisitor {
-        private var aktivePerioder = false
-        private val perioderFordeltPåTilstand = mutableMapOf<Vedtaksperiode.Vedtaksperiodetilstand, MutableList<Behandling>>()
-        private lateinit var forrigeBehandling: Behandling
-
-        private fun Behandling.gyldigTilInfotrygd() = tilstand == TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
-        private fun Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
-        private fun Behandling.gyldigAvsluttet() = tilstand == VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
-        private val Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
-
-        private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
-            perioderFordeltPåTilstand.forEach { (tilstand, sisteBehandlinger) ->
-                when (tilstand) {
-                    TilInfotrygd -> sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let { check(it.isEmpty()) {
-                        "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
-                    }
-                    AvsluttetUtenUtbetaling -> sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let { check(it.isEmpty()) {
-                        "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
-                    }
-                    Avsluttet -> sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let { check(it.isEmpty()) {
-                        "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
-                    }
-                    else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
-                }
-            }
-        }
-
-        override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            aktivePerioder = true
-        }
-        override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            aktivePerioder = false
-            validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
-        }
-
-        override fun postVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {
-            forrigeBehandling = behandlinger.last().inspektør.behandling
-        }
-
-        override fun postVisitVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            id: UUID,
-            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-            opprettet: LocalDateTime,
-            oppdatert: LocalDateTime,
-            periode: Periode,
-            opprinneligPeriode: Periode,
-            skjæringstidspunkt: LocalDate,
-            hendelseIder: Set<Dokumentsporing>
-        ) {
-            if (!tilstand.erFerdigBehandlet) return
-            perioderFordeltPåTilstand.getOrPut(tilstand) { mutableListOf() }.add(forrigeBehandling)
-        }
-    }
-
-    private class BekreftIngenOverlappendePerioder : ArbeidsgiverVisitor {
-        private var aktivePerioder: Boolean = false
-
-        private var orgnr: String? = null
-        private var forrigePeriode: Pair<UUID, Periode>? = null
-
-        override fun preVisitArbeidsgiver(
-            arbeidsgiver: Arbeidsgiver,
-            id: UUID,
-            organisasjonsnummer: String
-        ) {
-            orgnr = organisasjonsnummer
-        }
-
-        override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            aktivePerioder = true
-        }
-        override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            aktivePerioder = false
-        }
-
-        override fun preVisitVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            id: UUID,
-            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-            opprettet: LocalDateTime,
-            oppdatert: LocalDateTime,
-            periode: Periode,
-            opprinneligPeriode: Periode,
-            skjæringstidspunkt: LocalDate,
-            hendelseIder: Set<Dokumentsporing>,
-            egenmeldingsperioder: List<Periode>
-        ) {
-            if (!aktivePerioder) return
-            if (forrigePeriode?.second?.overlapperMed(periode) == true) {
-                error("For Arbeidsgiver $orgnr overlapper Vedtaksperiode $id (${periode}) og Vedtaksperiode ${forrigePeriode?.first} (${forrigePeriode?.second}) med hverandre!")
-            }
-            forrigePeriode = id to periode
-        }
     }
 }

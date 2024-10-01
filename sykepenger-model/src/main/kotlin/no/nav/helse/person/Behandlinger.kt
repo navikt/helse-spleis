@@ -86,6 +86,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.forEach { it.addObserver(observatør) }
     }
 
+    internal fun view() = BehandlingerView(behandlinger = behandlinger.map { it.view() })
+
     internal fun accept(visitor: BehandlingerVisitor) {
         visitor.preVisitBehandlinger(behandlinger)
         behandlinger.forEach { behandling ->
@@ -361,6 +363,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         override fun toString() = "$periode - $tilstand"
 
+        fun view() = BehandlingView(
+            id = id,
+            periode = periode,
+            vedtakFattet = vedtakFattet,
+            avsluttet = avsluttet,
+            tilstand = when (tilstand) {
+                Tilstand.AnnullertPeriode -> BehandlingView.TilstandView.ANNULLERT_PERIODE
+                Tilstand.AvsluttetUtenVedtak -> BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+                Tilstand.Beregnet -> BehandlingView.TilstandView.BEREGNET
+                Tilstand.BeregnetOmgjøring -> BehandlingView.TilstandView.BEREGNET_OMGJØRING
+                Tilstand.BeregnetRevurdering -> BehandlingView.TilstandView.BEREGNET_REVURDERING
+                Tilstand.RevurdertVedtakAvvist -> BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
+                Tilstand.TilInfotrygd -> BehandlingView.TilstandView.TIL_INFOTRYGD
+                Tilstand.Uberegnet -> BehandlingView.TilstandView.UBEREGNET
+                Tilstand.UberegnetOmgjøring -> BehandlingView.TilstandView.UBEREGNET_OMGJØRING
+                Tilstand.UberegnetRevurdering -> BehandlingView.TilstandView.UBEREGNET_REVURDERING
+                Tilstand.VedtakFattet -> BehandlingView.TilstandView.VEDTAK_FATTET
+                Tilstand.VedtakIverksatt -> BehandlingView.TilstandView.VEDTAK_IVERKSATT
+            },
+            endringer = endringer.map { it.view() }
+        )
         fun accept(visitor: BehandlingVisitor) {
             visitor.preVisitBehandling(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
             endringer.forEach { it.accept(visitor) }
@@ -432,6 +455,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 maksdatoresultat = maksdatoresultat
             )
+
+            fun view() = BehandlingendringView(id, sykmeldingsperiode, periode, sykdomstidslinje)
 
             private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode) =
                 beregnSkjæringstidspunkt().beregnSkjæringstidspunkt(periode, sykdomstidslinje.sykdomsperiode())
@@ -1512,3 +1537,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun dto() = BehandlingerUtDto(behandlinger = this.behandlinger.map { it.dto() })
 }
+
+internal data class BehandlingerView(val behandlinger: List<BehandlingView>)
+internal data class BehandlingView(
+    val id: UUID,
+    val periode: Periode,
+    val vedtakFattet: LocalDateTime?,
+    val avsluttet: LocalDateTime?,
+    val tilstand: TilstandView,
+    val endringer: List<BehandlingendringView>
+) {
+    enum class TilstandView {
+        ANNULLERT_PERIODE, AVSLUTTET_UTEN_VEDTAK,
+        BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
+        REVURDERT_VEDTAK_AVVIST,
+        TIL_INFOTRYGD, UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING,
+        VEDTAK_FATTET, VEDTAK_IVERKSATT
+    }
+}
+internal data class BehandlingendringView(
+    val id: UUID,
+    val sykmeldingsperiode: Periode,
+    val periode: Periode,
+    val sykdomstidslinje: Sykdomstidslinje
+)

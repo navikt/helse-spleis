@@ -201,6 +201,14 @@ internal class Vedtaksperiode private constructor(
         behandlinger.addObserver(this)
     }
 
+    internal fun view() = VedtaksperiodeView(
+        id = id,
+        periode = periode,
+        tilstand = tilstand.type,
+        oppdatert = oppdatert,
+        skjæringstidspunkt = skjæringstidspunkt,
+        behandlinger = behandlinger.view()
+    )
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(
             this,
@@ -2832,3 +2840,11 @@ internal class Vedtaksperiode private constructor(
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean
+internal data class VedtaksperiodeView(
+    val id: UUID,
+    val periode: Periode,
+    val tilstand: TilstandType,
+    val oppdatert: LocalDateTime,
+    val skjæringstidspunkt: LocalDate,
+    val behandlinger: BehandlingerView
+)

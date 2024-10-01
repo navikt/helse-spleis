@@ -133,7 +133,8 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk = inntektshistorikk.view(),
         sykmeldingsperioder = sykmeldingsperioder.view(),
         refusjonshistorikk = refusjonshistorikk.view(),
-        feriepengeutbetalinger = feriepengeutbetalinger.map { it.view() }
+        feriepengeutbetalinger = feriepengeutbetalinger.map { it.view() },
+        aktiveVedtaksperioder = vedtaksperioder.map { it.view() }
     )
 
     internal companion object {

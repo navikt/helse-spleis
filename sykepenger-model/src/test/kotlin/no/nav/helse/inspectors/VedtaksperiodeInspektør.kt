@@ -19,20 +19,12 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 internal val Vedtaksperiode.inspektør get() = VedtaksperiodeInspektør(this)
 
 internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
+    private val view = vedtaksperiode.view()
 
-    internal lateinit var id: UUID
-        private set
-
-    internal lateinit var periode: Periode
-        private set
-
-    internal lateinit var tilstand: Vedtaksperiode.Vedtaksperiodetilstand
-        private set
-
-    internal lateinit var oppdatert: LocalDateTime
-        private set
-    internal lateinit var skjæringstidspunkt: LocalDate
-        private set
+    internal val id = view.id
+    internal val periode = view.periode
+    internal val oppdatert = view.oppdatert
+    internal val skjæringstidspunkt = view.skjæringstidspunkt
 
     internal val utbetalingstidslinje: Utbetalingstidslinje get() = behandlinger.last().endringer.last().utbetalingstidslinje
     internal val behandlinger = mutableListOf<Behandling>()
@@ -67,11 +59,6 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         hendelseIder: Set<Dokumentsporing>,
         egenmeldingsperioder: List<Periode>
     ) {
-        this.id = id
-        this.periode = periode
-        this.oppdatert = oppdatert
-        this.skjæringstidspunkt = skjæringstidspunkt
-        this.tilstand = tilstand
         this.egenmeldingsperioder = egenmeldingsperioder
         this.hendelser = hendelseIder
     }
