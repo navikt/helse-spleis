@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -135,6 +136,66 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
         assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
+    }
+
+    @Test
+    fun `Foreldrepenger påvirker skjæringstidspunkt annen arbeidsgiver på periode etter`() {
+        håndterSøknad(januar, a1)
+        håndterSøknad(februar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)), orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "Her legger vi til foreldrepenger selv om det ødelegger for annen ag",
+            nå = {
+                assertEquals(1.februar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+                assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
+            },
+            ønsket = {
+                assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+                håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+                håndterUtbetalt()
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+            }
+        )
+    }
+
+    @Test
+    fun `Foreldrepenger påvirker skjæringstidspunkt annen arbeidsgiver ved delvis overlapp`() {
+        håndterSøknad(januar, a1)
+        håndterSøknad(28.januar til 28.februar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(28.januar til 13.februar), orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "Nå skjer det noe skikkelig spennende i dette case",
+            nå = {
+                assertEquals(
+                    "krever vilkårsgrunnlag for 2018-01-28, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?",
+                    assertThrows<IllegalStateException> {
+                        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)), orgnummer = a1)
+                    }.message
+                )
+            },
+            ønsket = {
+                assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+            }
+        )
     }
 
     @Test
