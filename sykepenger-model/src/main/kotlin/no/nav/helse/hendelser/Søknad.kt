@@ -349,13 +349,13 @@ class Søknad(
                 Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
 
             override fun valider(søknad: Søknad) {
-                if (alleUtlandsdagerErFerieEllerPermisjon(søknad)) return
+                if (alleUtlandsdagerErFerie(søknad)) return
                 søknad.varsel(RV_SØ_8)
             }
 
-            private fun alleUtlandsdagerErFerieEllerPermisjon(søknad:Søknad):Boolean {
-                val ferieEllerPermisjonsPerioder = søknad.perioder.filter { it is Ferie || it is Permisjon }
-                return this.periode.all { utlandsdag -> ferieEllerPermisjonsPerioder.any { ferie -> ferie.periode.contains(utlandsdag)} }
+            private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {
+                val feriePerioder = søknad.perioder.filterIsInstance<Ferie>()
+                return this.periode.all { utlandsdag -> feriePerioder.any { ferie -> ferie.periode.contains(utlandsdag)} }
             }
         }
     }
