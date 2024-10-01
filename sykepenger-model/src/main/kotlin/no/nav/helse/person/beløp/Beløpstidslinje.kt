@@ -30,7 +30,13 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
         }
     }
 
-    internal operator fun plus(other: Beløpstidslinje) = Beløpstidslinje((this.dager + other.dager))
+    internal operator fun plus(other: Beløpstidslinje): Beløpstidslinje {
+        val results = this.dager.toMutableMap()
+        other.dager.forEach { (key, dag) ->
+            results.merge(key, dag, nyesteTidsstempel)
+        }
+        return Beløpstidslinje(results)
+    }
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
 
@@ -54,6 +60,9 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
 
     internal companion object {
+        private val nyesteTidsstempel = { a: Beløpsdag, b: Beløpsdag ->
+            if (a.kilde.tidsstempel > b.kilde.tidsstempel) a else b
+        }
         internal fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
     }
 }

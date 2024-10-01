@@ -64,6 +64,18 @@ internal class BeløpstidslinjeTest {
         assertEquals(forventetTidslinje, gammelTidslinje og nyTidslinje)
     }
 
+    @Test
+    fun `Slår sammen to beløptidslinjer med ulike tidsstempler`() {
+        val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
+        val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
+
+        val gammelTidslinje = Beløpstidslinje.fra(januar, 500.daglig, kilde1)
+        val nyTidslinje = Beløpstidslinje.fra(januar, 1000.daglig, kilde2)
+
+        assertEquals(nyTidslinje, gammelTidslinje + nyTidslinje)
+        assertEquals(nyTidslinje, nyTidslinje + gammelTidslinje)
+    }
+
 
     @Test
     fun `Trekke dager fra på en beløpstidslinje`() {
