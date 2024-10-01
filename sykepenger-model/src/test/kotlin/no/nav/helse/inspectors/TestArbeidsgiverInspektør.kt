@@ -3,7 +3,6 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
@@ -16,13 +15,8 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
 
@@ -50,14 +44,21 @@ internal class TestArbeidsgiverInspektør(
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
     private val utbetalinger = view.utbetalinger.map { it.inspektør }
     internal val antallUtbetalinger get() = utbetalinger.size
-    internal val feriepengeoppdrag = mutableListOf<Feriepengeoppdrag>()
-    internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()
-    internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
-    internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
-    internal val spleisFeriepengebeløpPerson = mutableListOf<Double>()
+
+    internal val feriepengeoppdrag = view.feriepengeutbetalinger
+        .flatMap { listOf(it.oppdrag, it.personoppdrag) }
+        .map {
+            Feriepengeoppdrag(it.fagsystemId(), feriepengeutbetalingslinjer = it.map { linje ->
+                Feriepengeutbetalingslinje(linje.fom, linje.tom, linje.satstype, linje.beløp, linje.grad, linje.klassekode, linje.endringskode, linje.statuskode)
+            })
+        }
+    internal val infotrygdFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpPerson }
+    internal val infotrygdFeriepengebeløpArbeidsgiver = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpArbeidsgiver }
+    internal val spleisFeriepengebeløpArbeidsgiver = view.feriepengeutbetalinger.map { it.spleisFeriepengebeløpArbeidsgiver }
+    internal val spleisFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.spleisFeriepengebeløpPerson }
+
     private val vedtaksperioder = mutableMapOf<UUID, Vedtaksperiode>()
     private var forkastetPeriode = false
-    private var inFeriepengeutbetaling = false
     private val sykmeldingsperioder = view.sykmeldingsperioder.perioder
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = person.vilkårsgrunnlagHistorikk.inspektør.vilkårsgrunnlagHistorikkInnslag()
@@ -107,49 +108,9 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiodeindeks += 1
     }
 
-    override fun preVisitOppdrag(
-        oppdrag: Oppdrag,
-        fagområde: Fagområde,
-        fagsystemId: String,
-        mottaker: String,
-        nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        endringskode: Endringskode,
-        avstemmingsnøkkel: Long?,
-        status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultatDto?
-    ) {
-        if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
-    }
-
-    override fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        satstype: Satstype,
-        beløp: Int?,
-        grad: Int?,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?,
-        endringskode: Endringskode,
-        datoStatusFom: LocalDate?,
-        statuskode: String?,
-        klassekode: Klassekode
-    ) {
-        if(inFeriepengeutbetaling) {
-            feriepengeoppdrag
-                .lastOrNull()
-                ?.feriepengeutbetalingslinjer
-                ?.add(Feriepengeutbetalingslinje(fom, tom, satstype, beløp, grad, klassekode, endringskode, statuskode))
-        }
-    }
-
     internal data class Feriepengeoppdrag(
         val fagsystemId: String,
-        val feriepengeutbetalingslinjer: MutableList<Feriepengeutbetalingslinje> = mutableListOf()
+        val feriepengeutbetalingslinjer: List<Feriepengeutbetalingslinje>
     ) {
         internal companion object {
             val List<Feriepengeoppdrag>.utbetalingslinjer get(): List<Feriepengeutbetalingslinje> {
@@ -169,40 +130,6 @@ internal class TestArbeidsgiverInspektør(
         val endringskode: Endringskode,
         val statuskode: String? = null
     )
-
-    override fun preVisitFeriepengeutbetaling(
-        feriepengeutbetaling: Feriepengeutbetaling,
-        infotrygdFeriepengebeløpPerson: Double,
-        infotrygdFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpPerson: Double,
-        overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        utbetalingId: UUID,
-        sendTilOppdrag: Boolean,
-        sendPersonoppdragTilOS: Boolean,
-    ) {
-        inFeriepengeutbetaling = true
-        this.infotrygdFeriepengebeløpArbeidsgiver.add(infotrygdFeriepengebeløpArbeidsgiver)
-        this.infotrygdFeriepengebeløpPerson.add(infotrygdFeriepengebeløpPerson)
-        this.spleisFeriepengebeløpArbeidsgiver.add(spleisFeriepengebeløpArbeidsgiver)
-        this.spleisFeriepengebeløpPerson.add(spleisFeriepengebeløpPerson)
-    }
-
-    override fun postVisitFeriepengeutbetaling(
-        feriepengeutbetaling: Feriepengeutbetaling,
-        infotrygdFeriepengebeløpPerson: Double,
-        infotrygdFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpPerson: Double,
-        overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        utbetalingId: UUID,
-        sendTilOppdrag: Boolean,
-        sendPersonoppdragTilOS: Boolean,
-    ) {
-        inFeriepengeutbetaling = false
-    }
 
     private fun <V> IdInnhenter.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val IdInnhenter.indeks get() = id(orgnummer).indeks

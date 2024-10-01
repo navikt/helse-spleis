@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Year
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -18,10 +17,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -192,7 +188,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
     ) {}
 }
 
-internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, FeriepengeutbetalingVisitor {
+internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -212,72 +208,6 @@ internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, Feriepengeutbeta
         organisasjonsnummer: String
     ) {
     }
-}
-
-internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
-    fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
-    fun preVisitFeriepengeutbetaling(
-        feriepengeutbetaling: Feriepengeutbetaling,
-        infotrygdFeriepengebeløpPerson: Double,
-        infotrygdFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpPerson: Double,
-        overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        utbetalingId: UUID,
-        sendTilOppdrag: Boolean,
-        sendPersonoppdragTilOS: Boolean,
-    ) {
-    }
-
-    fun preVisitFeriepengerArbeidsgiveroppdrag() {}
-    fun preVisitFeriepengerPersonoppdrag() {}
-
-    fun preVisitFeriepengeberegner(
-        feriepengeberegner: Feriepengeberegner,
-        feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
-        opptjeningsår: Year,
-        utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
-    ) {
-    }
-
-    fun preVisitUtbetaleDager() {}
-    fun postVisitUtbetaleDager() {}
-    fun preVisitFeriepengedager() {}
-    fun postVisitFeriepengedager() {}
-
-    fun visitInfotrygdPersonDag(infotrygdPerson: Feriepengeberegner.UtbetaltDag.InfotrygdPerson, orgnummer: String, dato: LocalDate, beløp: Int) {}
-    fun visitInfotrygdArbeidsgiverDag(
-        infotrygdArbeidsgiver: Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver,
-        orgnummer: String,
-        dato: LocalDate,
-        beløp: Int
-    ) {
-    }
-
-    fun visitSpleisArbeidsgiverDag(spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver, orgnummer: String, dato: LocalDate, beløp: Int) {}
-    fun visitSpleisPersonDag(spleisPerson: Feriepengeberegner.UtbetaltDag.SpleisPerson, orgnummer: String, dato: LocalDate, beløp: Int) {}
-    fun postVisitFeriepengeberegner(
-        feriepengeberegner: Feriepengeberegner,
-        feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
-        opptjeningsår: Year,
-        utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
-    ) {}
-    fun postVisitFeriepengeutbetaling(
-        feriepengeutbetaling: Feriepengeutbetaling,
-        infotrygdFeriepengebeløpPerson: Double,
-        infotrygdFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpPerson: Double,
-        overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        utbetalingId: UUID,
-        sendTilOppdrag: Boolean,
-        sendPersonoppdragTilOS: Boolean,
-    ) {
-    }
-
-    fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
 }
 
 internal interface BehandlingerVisitor : BehandlingVisitor {

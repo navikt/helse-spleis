@@ -5,7 +5,6 @@ import java.time.Year
 import no.nav.helse.Alder
 import no.nav.helse.dto.FeriepengeberegnerDto
 import no.nav.helse.dto.UtbetaltDagDto
-import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD
@@ -29,8 +28,8 @@ private typealias UtbetaltDagSelector = (Feriepengeberegner.UtbetaltDag) -> Bool
 
 internal class Feriepengeberegner(
     private val alder: Alder,
-    private val opptjeningsår: Year,
-    private val utbetalteDager: List<UtbetaltDag>
+    val opptjeningsår: Year,
+    val utbetalteDager: List<UtbetaltDag>
 ) {
     internal companion object {
 
@@ -75,16 +74,6 @@ internal class Feriepengeberegner(
         grunnlagFraSpleis: List<Arbeidsgiverferiepengegrunnlag>
     ) : this(alder, opptjeningsår, utbetalteDager(grunnlagFraInfotrygd, grunnlagFraSpleis, opptjeningsår))
 
-    internal fun accept(visitor: FeriepengeutbetalingVisitor) {
-        visitor.preVisitFeriepengeberegner(this, feriepengedager(), opptjeningsår, utbetalteDager)
-        visitor.preVisitUtbetaleDager()
-        utbetalteDager.forEach { it.accept(visitor) }
-        visitor.postVisitUtbetaleDager()
-        visitor.preVisitFeriepengedager()
-        feriepengedager().forEach { it.accept(visitor) }
-        visitor.postVisitFeriepengedager()
-        visitor.postVisitFeriepengeberegner(this, feriepengedager(), opptjeningsår, utbetalteDager)
-    }
     internal fun gjelderForÅr(år: Year) = opptjeningsår == år
     internal fun feriepengedatoer() = feriepengedager().tilDato()
     internal fun beregnFeriepengerForInfotrygdPerson() = beregnForFilter(INFOTRYGD_PERSON)
@@ -146,9 +135,9 @@ internal class Feriepengeberegner(
     private fun feriepengedager() = utbetalteDager.feriepengedager().flatMap { (_, dagListe) -> dagListe }
 
     internal sealed class UtbetaltDag(
-        protected val orgnummer: String,
-        protected val dato: LocalDate,
-        protected val beløp: Int
+        val orgnummer: String,
+        val dato: LocalDate,
+        val beløp: Int
     ) {
         internal companion object {
             internal fun List<UtbetaltDag>.tilDato() = map { it.dato }.distinct()
@@ -184,16 +173,11 @@ internal class Feriepengeberegner(
                 }
         }
 
-        internal abstract fun accept(visitor: FeriepengeutbetalingVisitor)
-
         internal class InfotrygdPerson(
             orgnummer: String,
             dato: LocalDate,
             beløp: Int
         ) : UtbetaltDag(orgnummer, dato, beløp) {
-            override fun accept(visitor: FeriepengeutbetalingVisitor) {
-                visitor.visitInfotrygdPersonDag(this, orgnummer, dato, beløp)
-            }
             override fun dto() = UtbetaltDagDto.InfotrygdPerson(orgnummer, dato, beløp)
 
             internal companion object {
@@ -212,9 +196,6 @@ internal class Feriepengeberegner(
             dato: LocalDate,
             beløp: Int
         ) : UtbetaltDag(orgnummer, dato, beløp) {
-            override fun accept(visitor: FeriepengeutbetalingVisitor) {
-                visitor.visitInfotrygdArbeidsgiverDag(this, orgnummer, dato, beløp)
-            }
             override fun dto() = UtbetaltDagDto.InfotrygdArbeidsgiver(orgnummer, dato, beløp)
 
             internal companion object {
@@ -233,9 +214,6 @@ internal class Feriepengeberegner(
             dato: LocalDate,
             beløp: Int
         ) : UtbetaltDag(orgnummer, dato, beløp) {
-            override fun accept(visitor: FeriepengeutbetalingVisitor) {
-                visitor.visitSpleisArbeidsgiverDag(this, orgnummer, dato, beløp)
-            }
             override fun dto() = UtbetaltDagDto.SpleisArbeidsgiver(orgnummer, dato, beløp)
 
             internal companion object {
@@ -253,10 +231,6 @@ internal class Feriepengeberegner(
             dato: LocalDate,
             beløp: Int
         ) : UtbetaltDag(orgnummer, dato, beløp) {
-            override fun accept(visitor: FeriepengeutbetalingVisitor) {
-                visitor.visitSpleisPersonDag(this, orgnummer, dato, beløp)
-            }
-
             override fun dto() = UtbetaltDagDto.SpleisPerson(orgnummer, dato, beløp)
 
             internal companion object {

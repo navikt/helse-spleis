@@ -19,14 +19,14 @@ import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 class Utbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
-    internal val satstype: Satstype = Satstype.Daglig,
+    val satstype: Satstype = Satstype.Daglig,
     val beløp: Int?,
     val grad: Int?,
     val refFagsystemId: String? = null,
     private val delytelseId: Int = 1,
     private val refDelytelseId: Int? = null,
-    private val endringskode: Endringskode = NY,
-    private val klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
+    val endringskode: Endringskode = NY,
+    val klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
     private val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
@@ -98,7 +98,7 @@ class Utbetalingslinje(
         }
     }
 
-    private val statuskode get() = datoStatusFom?.let { "OPPH" }
+    val statuskode get() = datoStatusFom?.let { "OPPH" }
 
     val periode get() = fom til tom
 

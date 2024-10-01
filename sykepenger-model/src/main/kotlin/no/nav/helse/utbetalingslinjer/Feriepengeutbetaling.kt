@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
-import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
@@ -57,37 +56,14 @@ internal class Feriepengeutbetaling private constructor(
         }
     }
 
-    internal fun accept(visitor: FeriepengeutbetalingVisitor) {
-        visitor.preVisitFeriepengeutbetaling(
-            this,
-            infotrygdFeriepengebeløpPerson,
-            infotrygdFeriepengebeløpArbeidsgiver,
-            spleisFeriepengebeløpArbeidsgiver,
-            spleisFeriepengebeløpPerson,
-            overføringstidspunkt,
-            avstemmingsnøkkel,
-            utbetalingId,
-            sendTilOppdrag,
-            sendPersonoppdragTilOS,
-        )
-        feriepengeberegner.accept(visitor)
-        visitor.preVisitFeriepengerArbeidsgiveroppdrag()
-        oppdrag.accept(visitor)
-        visitor.preVisitFeriepengerPersonoppdrag()
-        personoppdrag.accept(visitor)
-        visitor.postVisitFeriepengeutbetaling(
-            this,
-            infotrygdFeriepengebeløpPerson,
-            infotrygdFeriepengebeløpArbeidsgiver,
-            spleisFeriepengebeløpArbeidsgiver,
-            spleisFeriepengebeløpPerson,
-            overføringstidspunkt,
-            avstemmingsnøkkel,
-            utbetalingId,
-            sendTilOppdrag,
-            sendPersonoppdragTilOS,
-        )
-    }
+    internal fun view() = FeriepengeutbetalingView(
+        infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
+        infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
+        spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+        spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
+        oppdrag = oppdrag,
+        personoppdrag = personoppdrag
+    )
 
     fun håndter(utbetalingHendelse: UtbetalingHendelse, organisasjonsnummer: String, person: Person) {
         if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId(), personoppdrag.fagsystemId(), utbetalingId)) return
@@ -336,3 +312,12 @@ internal class Feriepengeutbetaling private constructor(
         sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
     )
 }
+
+internal data class FeriepengeutbetalingView(
+    val infotrygdFeriepengebeløpPerson: Double,
+    val infotrygdFeriepengebeløpArbeidsgiver: Double,
+    val spleisFeriepengebeløpArbeidsgiver: Double,
+    val spleisFeriepengebeløpPerson: Double,
+    val oppdrag: Oppdrag,
+    val personoppdrag: Oppdrag
+)

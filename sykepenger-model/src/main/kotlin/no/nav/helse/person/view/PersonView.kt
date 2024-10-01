@@ -4,6 +4,7 @@ import no.nav.helse.person.SykmeldingsperioderView
 import no.nav.helse.person.inntekt.InntektshistorikkView
 import no.nav.helse.person.inntekt.RefusjonshistorikkView
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkView
+import no.nav.helse.utbetalingslinjer.FeriepengeutbetalingView
 import no.nav.helse.utbetalingslinjer.UtbetalingView
 
 internal data class PersonView(val arbeidsgivere: List<ArbeidsgiverView>)
@@ -14,5 +15,6 @@ internal data class ArbeidsgiverView(
     val utbetalinger: List<UtbetalingView>,
     val inntektshistorikk: InntektshistorikkView,
     val sykmeldingsperioder: SykmeldingsperioderView,
-    val refusjonshistorikk: RefusjonshistorikkView
+    val refusjonshistorikk: RefusjonshistorikkView,
+    val feriepengeutbetalinger: List<FeriepengeutbetalingView>
 )
