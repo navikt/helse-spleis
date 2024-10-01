@@ -5,32 +5,25 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -51,25 +44,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @BeforeEach
     fun beforeEach() {
         innslag = VilkårsgrunnlagHistorikk.Innslag(null, emptyList())
-    }
-
-    @Test
-    fun `finner ikke begrunnelser dersom vilkårsgrunnlag ikke er Grunnlagsdata`() {
-        val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, testgrunnlag)
-        val resultat = innslag.avvis(tidslinjer, 1.januar til 1.januar, jurist)
-        assertEquals(0, avvisteDager(resultat).size)
-    }
-
-    @Test
-    fun `finner kun begrunnelser fra vilkårsgrunnlag som er Grunnlagsdata`() {
-        val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, testgrunnlag)
-        innslag.add(1.januar, grunnlagsdata(1.januar, harOpptjening = false))
-        val resultat = innslag.avvis(tidslinjer, 1.januar til 1.januar, jurist)
-        val avvisteDager = avvisteDager(resultat)
-        assertEquals(1, avvisteDager.size)
-        assertNotNull(avvisteDager.first().erAvvistMed(Begrunnelse.ManglerOpptjening))
     }
 
     @Test
@@ -170,35 +144,4 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private fun avvisteDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingsdag.AvvistDag> {
         return tidslinjer.flatMap { it.inspektør.avvistedager }
     }
-
-    private val testgrunnlag
-        get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag, null) {
-            override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
-            override fun vilkårsgrunnlagtype() = "testgrunnlag"
-
-            override fun overstyrArbeidsforhold(
-                hendelse: OverstyrArbeidsforhold,
-                subsumsjonslogg: Subsumsjonslogg
-            ): VilkårsgrunnlagHistorikk.Grunnlagsdata {
-                throw IllegalStateException()
-            }
-
-            override fun kopierMed(
-                hendelse: IAktivitetslogg,
-                inntektsgrunnlag: Inntektsgrunnlag,
-                opptjening: Opptjening?,
-                subsumsjonslogg: Subsumsjonslogg,
-                nyttSkjæringstidspunkt: LocalDate?
-            ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
-                throw IllegalStateException()
-            }
-
-            override fun dto(
-                vilkårsgrunnlagId: UUID,
-                skjæringstidspunkt: LocalDate,
-                sykepengegrunnlag: InntektsgrunnlagUtDto
-            ): VilkårsgrunnlagUtDto {
-                throw IllegalStateException()
-            }
-        }
 }

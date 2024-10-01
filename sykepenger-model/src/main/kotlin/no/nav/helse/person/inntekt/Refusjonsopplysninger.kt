@@ -13,21 +13,20 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 
-class Refusjonsopplysning(
-    private val meldingsreferanseId: UUID,
-    private val fom: LocalDate,
-    private val tom: LocalDate?,
-    private val beløp: Inntekt
+data class Refusjonsopplysning(
+    val meldingsreferanseId: UUID,
+    val fom: LocalDate,
+    val tom: LocalDate?,
+    val beløp: Inntekt
 ) {
     init {
         check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) "}
     }
 
-    private val periode = fom til (tom ?: LocalDate.MAX)
+    val periode = fom til (tom ?: LocalDate.MAX)
 
     private fun trim(periodeSomSkalFjernes: Periode): List<Refusjonsopplysning> {
         return this.periode
@@ -42,9 +41,6 @@ class Refusjonsopplysning(
             }
     }
 
-    internal fun fom() = fom
-    internal fun tom() = tom
-    internal fun beløp() = beløp
     private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
 
     private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
@@ -63,30 +59,10 @@ class Refusjonsopplysning(
     private fun aksepterer(skjæringstidspunkt: LocalDate, dag: LocalDate) =
         dag >= skjæringstidspunkt && dag < fom
 
-    internal fun accept(visitor: RefusjonsopplysningerVisitor) {
-        visitor.visitRefusjonsopplysning(meldingsreferanseId, fom, tom, beløp)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Refusjonsopplysning) return false
-        if (fom != other.fom) return false
-        if (tom != other.tom) return false
-        if (beløp != other.beløp) return false
-        return meldingsreferanseId == other.meldingsreferanseId
-    }
-
     private fun funksjoneltLik(other: Refusjonsopplysning) =
         this.periode == other.periode && this.beløp == other.beløp
 
     override fun toString() = "$periode, ${beløp.daglig} ($meldingsreferanseId)"
-
-    override fun hashCode(): Int {
-        var result = periode.hashCode()
-        result = 31 * result + beløp.hashCode()
-        result = 31 * result + meldingsreferanseId.hashCode()
-        return result
-    }
 
     internal companion object {
         private fun List<Refusjonsopplysning>.mergeInnNyeOpplysninger(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
@@ -118,7 +94,7 @@ class Refusjonsopplysning(
     class Refusjonsopplysninger private constructor(
         refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
-        private val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
+        val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
 
         internal val erTom = validerteRefusjonsopplysninger.isEmpty()
         constructor(): this(emptyList())
@@ -149,12 +125,6 @@ class Refusjonsopplysning(
                 endringerIRefusjon = endringerIRefusjon
             )
             refusjonshistorikk.leggTilRefusjon(refusjon)
-        }
-
-        internal fun accept(visitor: RefusjonsopplysningerVisitor) {
-            visitor.preVisitRefusjonsopplysninger(this)
-            validerteRefusjonsopplysninger.forEach { it.accept(visitor) }
-            visitor.postVisitRefusjonsopplysninger(this)
         }
 
         internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {

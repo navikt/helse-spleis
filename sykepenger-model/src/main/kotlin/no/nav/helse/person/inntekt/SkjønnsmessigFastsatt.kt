@@ -12,16 +12,10 @@ class SkjønnsmessigFastsatt internal constructor(
     dato: LocalDate,
     hendelseId: UUID,
     beløp: Inntekt,
-    private val overstyrtInntekt: Inntektsopplysning?,
+    val overstyrtInntekt: Inntektsopplysning?,
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, null, tidsstempel)
-
-    override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.preVisitSkjønnsmessigFastsatt(this, id, dato, hendelseId, beløp, tidsstempel)
-        overstyrtInntekt?.accept(visitor)
-        visitor.postVisitSkjønnsmessigFastsatt(this, id, dato, hendelseId, beløp, tidsstempel)
-    }
 
     override fun omregnetÅrsinntekt(): Inntektsopplysning {
         return checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.omregnetÅrsinntekt()

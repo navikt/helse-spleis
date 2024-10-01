@@ -25,10 +25,6 @@ class Inntektsmelding internal constructor(
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde = Kilde.Arbeidsgiver, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
 
-    override fun accept(visitor: InntektsopplysningVisitor) {
-        accept(visitor as InntektsmeldingVisitor)
-    }
-
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
 
     internal fun view() = InntektsmeldingView(
@@ -38,9 +34,6 @@ class Inntektsmelding internal constructor(
         beløp = beløp,
         tidsstempel = tidsstempel
     )
-    internal fun accept(visitor: InntektsmeldingVisitor) {
-        visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
-    }
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)

@@ -71,8 +71,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.mars)
         assertNotNull(vilkårsgrunnlag)
 
-        assertEquals(1, vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
-        assertEquals(1, vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a2).size)
+        assertEquals(1, vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
+        assertEquals(1, vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a2 }.ansattPerioder.size)
     }
 
     @Test
@@ -283,7 +283,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold1
         )
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
-        assertEquals(4, grunnlagsdata.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
+        assertEquals(4, grunnlagsdata.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
     }
 
     @Test

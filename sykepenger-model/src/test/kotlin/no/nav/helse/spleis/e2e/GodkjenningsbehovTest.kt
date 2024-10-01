@@ -266,5 +266,5 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     )!!.let { UUID.fromString(it) }
 
     private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1)
-        = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.vilkårsgrunnlagId
+        = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
 }

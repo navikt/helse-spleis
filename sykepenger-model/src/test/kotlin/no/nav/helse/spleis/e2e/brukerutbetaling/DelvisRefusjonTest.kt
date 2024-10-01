@@ -598,7 +598,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertNotNull(vilkårsgrunnlag)
         val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
         assertEquals(INNTEKT+100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
-        assertEquals(INNTEKT/2, inntektsopplysninger.refusjonsopplysninger.inspektør.refusjonsopplysninger.single().inspektør.beløp)
+        assertEquals(INNTEKT/2, inntektsopplysninger.refusjonsopplysninger.single().inspektør.beløp)
     }
 
     @Test
@@ -761,5 +761,5 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger
 }

@@ -71,7 +71,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 assertEquals(1, arbeidsgiverInntektsopplysninger.size)
                 arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
                     assertEquals(nyInntekt, overstyring.inntektsopplysning.inspektør.beløp)
-                    assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, nyInntekt)), overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger)
+                    assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, nyInntekt)), overstyring.refusjonsopplysninger)
                 }
             }
         } ?: fail { "Forventet vilkårsgrunnlag" }
@@ -142,7 +142,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 assertEquals(1, arbeidsgiverInntektsopplysninger.size)
                 arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
                     assertEquals(nyInntekt, overstyring.inntektsopplysning.inspektør.beløp)
-                    assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, nyInntekt)), overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger)
+                    assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, nyInntekt)), overstyring.refusjonsopplysninger)
                 }
             }
         } ?: fail { "Forventet vilkårsgrunnlag" }
@@ -198,9 +198,9 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
                     assertEquals(INNTEKT, overstyring.inntektsopplysning.inspektør.beløp)
                     assertEquals(listOf(
-                        Refusjonsopplysning(overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger.first().inspektør.meldingsreferanseId, 1.januar, 28.februar, INNTEKT),
+                        Refusjonsopplysning(overstyring.refusjonsopplysninger.first().inspektør.meldingsreferanseId, 1.januar, 28.februar, INNTEKT),
                         Refusjonsopplysning(overstyringId, 1.mars, null, INNTEKT/2)
-                    ), overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger)
+                    ), overstyring.refusjonsopplysninger)
                 }
             }
         } ?: fail { "Forventet vilkårsgrunnlag" }
@@ -723,7 +723,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning
 
     private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger
 
     private fun TestArbeidsgiverInspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }

@@ -108,7 +108,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(506, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.nettoBeløp())
 
         val vilkårgrunnlagsinspektør = person.inspektør.vilkårsgrunnlagHistorikk
-        val grunnlagsdataInspektør = vilkårgrunnlagsinspektør.grunnlagsdata(0).inspektør
         assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør

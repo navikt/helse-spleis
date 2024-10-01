@@ -15,10 +15,6 @@ internal class InntektFraSøknad(
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
 
-    override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.visitInntektFraSøknad(this, id, dato, hendelseId, beløp, tidsstempel)
-    }
-
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
     }

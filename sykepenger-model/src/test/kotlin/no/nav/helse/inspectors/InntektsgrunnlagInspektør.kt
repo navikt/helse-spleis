@@ -1,73 +1,22 @@
 package no.nav.helse.inspectors
 
-import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Avviksprosent
-import kotlin.properties.Delegates
 
-internal val Inntektsgrunnlag.inspektør get() = InntektsgrunnlagInspektør(this)
+internal val Inntektsgrunnlag.inspektør get() = view().inspektør
+internal val InntektsgrunnlagView.inspektør get() = InntektsgrunnlagInspektør(this)
 
-internal class InntektsgrunnlagInspektør(inntektsgrunnlag: Inntektsgrunnlag) : VilkårsgrunnlagHistorikkVisitor {
-    lateinit var minsteinntekt: Inntekt
-    var oppfyllerMinsteinntektskrav: Boolean by Delegates.notNull<Boolean>()
-    lateinit var sykepengegrunnlag: Inntekt
-    lateinit var beregningsgrunnlag: Inntekt
-    lateinit var omregnetÅrsinntekt: Inntekt
-    lateinit var `6G`: Inntekt
-    lateinit var deaktiverteArbeidsforhold: List<String>
-    internal val arbeidsgiverInntektsopplysningerPerArbeidsgiver: MutableMap<String, ArbeidsgiverInntektsopplysning> = mutableMapOf()
-    internal lateinit var inntektskilde: UtbetalingInntektskilde
-        private set
-    internal var arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
-        private set
-    internal var deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
-        private set
-
-    init {
-        inntektsgrunnlag.accept(this)
-    }
-
-    override fun preVisitInntektsgrunnlag(
-        inntektsgrunnlag1: Inntektsgrunnlag,
-        skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Inntekt,
-        avviksprosent: Avviksprosent,
-        totalOmregnetÅrsinntekt: Inntekt,
-        beregningsgrunnlag: Inntekt,
-        `6G`: Inntekt,
-        begrensning: Inntektsgrunnlag.Begrensning,
-        vurdertInfotrygd: Boolean,
-        minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
-    ) {
-        this.minsteinntekt = minsteinntekt
-        this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
-        this.`6G` = `6G`
-        this.sykepengegrunnlag = sykepengegrunnlag
-        this.beregningsgrunnlag = beregningsgrunnlag
-        this.omregnetÅrsinntekt = totalOmregnetÅrsinntekt
-        this.inntektskilde = inntektsgrunnlag1.inntektskilde()
-    }
-
-    override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-        this.deaktiverteArbeidsgiverInntektsopplysninger = arbeidsgiverInntektopplysninger
-        this.deaktiverteArbeidsforhold = arbeidsgiverInntektopplysninger.map { it.inspektør.orgnummer }
-    }
-
-    override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-        this.arbeidsgiverInntektsopplysninger = arbeidsgiverInntektopplysninger
-    }
-
-    override fun preVisitArbeidsgiverInntektsopplysning(
-        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
-        orgnummer: String,
-        gjelder: Periode
-    ) {
-        arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer] = arbeidsgiverInntektsopplysning
-    }
+internal class InntektsgrunnlagInspektør(view: InntektsgrunnlagView) {
+    val minsteinntekt: Inntekt = view.minsteinntekt
+    val oppfyllerMinsteinntektskrav = view.oppfyllerMinsteinntektskrav
+    val sykepengegrunnlag: Inntekt = view.sykepengegrunnlag
+    val beregningsgrunnlag = view.beregningsgrunnlag
+    val omregnetÅrsinntekt = view.omregnetÅrsinntekt
+    val `6G` = view.`6G`
+    val deaktiverteArbeidsforhold = view.deaktiverteArbeidsforhold
+    val arbeidsgiverInntektsopplysningerPerArbeidsgiver = view.arbeidsgiverInntektsopplysninger.associateBy { it.orgnummer }
+    val inntektskilde = if (view.arbeidsgiverInntektsopplysninger.size > 1) UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE else UtbetalingInntektskilde.EN_ARBEIDSGIVER
+    val arbeidsgiverInntektsopplysninger = view.arbeidsgiverInntektsopplysninger
 }

@@ -17,13 +17,12 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
 sealed class Inntektsopplysning(
-    protected val id: UUID,
-    protected val hendelseId: UUID,
-    protected val dato: LocalDate,
-    protected val beløp: Inntekt,
-    protected val tidsstempel: LocalDateTime
+    val id: UUID,
+    val hendelseId: UUID,
+    val dato: LocalDate,
+    val beløp: Inntekt,
+    val tidsstempel: LocalDateTime
 ) {
-    internal abstract fun accept(visitor: InntektsopplysningVisitor)
     internal fun fastsattÅrsinntekt() = beløp
     internal open fun omregnetÅrsinntekt() = this
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {

@@ -23,11 +23,11 @@ import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
-class ArbeidsgiverInntektsopplysning(
-    private val orgnummer: String,
-    private val gjelder: Periode,
-    private val inntektsopplysning: Inntektsopplysning,
-    private val refusjonsopplysninger: Refusjonsopplysninger
+data class ArbeidsgiverInntektsopplysning(
+    val orgnummer: String,
+    val gjelder: Periode,
+    val inntektsopplysning: Inntektsopplysning,
+    val refusjonsopplysninger: Refusjonsopplysninger
 ) {
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkt == gjelder.start
@@ -56,13 +56,6 @@ class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
-        visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer, gjelder)
-        inntektsopplysning.accept(visitor)
-        refusjonsopplysninger.accept(visitor)
-        visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer, gjelder)
-    }
-
     private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
         val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
         return overstyring.overstyrer(this)
@@ -85,24 +78,6 @@ class ArbeidsgiverInntektsopplysning(
     private fun deaktiver(forklaring: String, oppfylt: Boolean, subsumsjonslogg: Subsumsjonslogg): ArbeidsgiverInntektsopplysning {
         inntektsopplysning.subsumerArbeidsforhold(subsumsjonslogg, orgnummer, forklaring, oppfylt)
         return this
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ArbeidsgiverInntektsopplysning) return false
-        if (orgnummer != other.orgnummer) return false
-        if (inntektsopplysning != other.inntektsopplysning) return false
-        if (refusjonsopplysninger != other.refusjonsopplysninger) return false
-        if (this.gjelder != other.gjelder) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = orgnummer.hashCode()
-        result = 31 * result + inntektsopplysning.hashCode()
-        result = 31 * result + refusjonsopplysninger.hashCode()
-        result = 31 * result + gjelder.hashCode()
-        return result
     }
 
     internal fun arbeidsgiveropplysningerKorrigert(

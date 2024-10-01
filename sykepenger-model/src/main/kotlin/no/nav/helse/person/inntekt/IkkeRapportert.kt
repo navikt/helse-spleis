@@ -23,10 +23,6 @@ internal class IkkeRapportert(
         return ny.overstyrer(this)
     }
 
-    override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.visitIkkeRapportert(this, id, hendelseId, dato, tidsstempel)
-    }
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is IkkeRapportert && this.dato == other.dato
     }

@@ -22,7 +22,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -70,7 +70,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {
         personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null, Arbeidsforholdtype.ORDINÆRT))
         val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
-        assertEquals(1, grunnlagsdata.opptjening.opptjeningsdager())
+        assertEquals(1, grunnlagsdata.opptjening!!.opptjeningsdager())
         assertEquals(false, grunnlagsdata.opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(orgnummer = a1))
     }
@@ -143,15 +143,13 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         fun AbstractEndToEndTest.assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
             assertNotNull(vilkårsgrunnlag)
-            val opptjening = vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold[arbeidsforhold]
-            assertNotNull(opptjening)
-            assertTrue(opptjening.isNotEmpty())
+            assertTrue(vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.any { it.orgnummer == arbeidsforhold })
         }
 
         fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
             assertNotNull(vilkårsgrunnlag)
-            assertNull(vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold[arbeidsforhold])
+            assertFalse(vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.any { it.orgnummer == arbeidsforhold })
         }
     }
 }

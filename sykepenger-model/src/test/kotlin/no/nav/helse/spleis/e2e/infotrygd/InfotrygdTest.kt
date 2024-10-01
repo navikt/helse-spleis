@@ -44,7 +44,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.size)
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     }
 
     private fun refusjonsopplysninger(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.refusjonsopplysninger(a1).inspektør.refusjonsopplysninger
+        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.orgnummer == a1 }.inspektør.refusjonsopplysninger
 
     private fun inntektsopplysning(vedtaksperiode: IdInnhenter) =
         inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inspektør.inntektsopplysning

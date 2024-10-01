@@ -11,6 +11,7 @@ import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
@@ -39,6 +40,8 @@ internal class Opptjening private constructor(
         antallOpptjeningsdager = opptjeningsdager
     )
 
+    internal fun view() = OpptjeningView(arbeidsforhold = arbeidsforhold)
+
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
 
@@ -61,12 +64,6 @@ internal class Opptjening private constructor(
         }
     }
 
-    internal fun accept(visitor: OpptjeningVisitor) {
-        visitor.preVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
-        arbeidsforhold.forEach { it.accept(visitor) }
-        visitor.postVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
-    }
-
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
@@ -81,13 +78,7 @@ internal class Opptjening private constructor(
         return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt)
     }
 
-    internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforhold>) {
-        internal fun accept(visitor: OpptjeningVisitor) {
-            visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
-            ansattPerioder.forEach { it.accept(visitor) }
-            visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
-        }
-
+    internal data class ArbeidsgiverOpptjeningsgrunnlag(val orgnummer: String, val ansattPerioder: List<Arbeidsforhold>) {
         internal fun ansattVedSkjæringstidspunkt(orgnummer: String, skjæringstidspunkt: LocalDate) =
             this.orgnummer == orgnummer && ansattPerioder.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
 
@@ -106,12 +97,12 @@ internal class Opptjening private constructor(
             return ArbeidsgiverOpptjeningsgrunnlag(this.orgnummer, perioder)
         }
 
-        internal class Arbeidsforhold(
-            private val ansattFom: LocalDate,
-            private val ansattTom: LocalDate?,
-            private val deaktivert: Boolean
+        internal data class Arbeidsforhold(
+            val ansattFom: LocalDate,
+            val ansattTom: LocalDate?,
+            val deaktivert: Boolean
         ) {
-            private val ansettelseperiode = ansattFom til (ansattTom ?: LocalDate.MAX)
+            val ansettelseperiode = ansattFom til (ansattTom ?: LocalDate.MAX)
 
             internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
 
@@ -120,22 +111,6 @@ internal class Opptjening private constructor(
                 val opptjeningsperiode = LocalDate.MIN til skjæringstidspunkt.forrigeDag
                 if (ansettelseperiode.starterEtter(opptjeningsperiode)) return null
                 return ansettelseperiode.subset(opptjeningsperiode)
-            }
-
-            override fun equals(other: Any?) = other is Arbeidsforhold
-                    && ansattFom == other.ansattFom
-                    && ansattTom == other.ansattTom
-                    && deaktivert == other.deaktivert
-
-            override fun hashCode(): Int {
-                var result = ansattFom.hashCode()
-                result = 31 * result + (ansattTom?.hashCode() ?: 0)
-                result = 31 * result + deaktivert.hashCode()
-                return result
-            }
-
-            internal fun accept(visitor: OpptjeningVisitor) {
-                visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = deaktivert)
             }
 
             internal fun deaktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = true)
@@ -247,3 +222,5 @@ internal class Opptjening private constructor(
         erOppfylt = erOppfylt()
     )
 }
+
+internal data class OpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>)

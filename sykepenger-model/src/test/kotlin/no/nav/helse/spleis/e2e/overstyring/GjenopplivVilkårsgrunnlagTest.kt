@@ -19,7 +19,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -41,7 +40,7 @@ internal class GjenopplivVilkårsgrunnlagTest : AbstractDslTest() {
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, reberegning = true)
             fraAvventerHistorikkTilAvsluttet(2.vedtaksperiode)
 
-            assertEquals(Refusjonsopplysning(im, 1.mars, null, inntekt).refusjonsopplysninger, refusjonsopplysninger(1.mars))
+            assertEquals(listOf(Refusjonsopplysning(im, 1.mars, null, inntekt)), refusjonsopplysninger(1.mars))
             assertEquals(1.mars til MAX, inntektGjelder(1.mars))
         }
     }
@@ -63,7 +62,7 @@ internal class GjenopplivVilkårsgrunnlagTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            assertEquals(Refusjonsopplysninger(
+            assertEquals(listOf(
                 Refusjonsopplysning(im, 1.januar, 28.februar, inntekt),
                 Refusjonsopplysning(im, 1.mars, null, inntekt)
             ), refusjonsopplysninger(1.januar))

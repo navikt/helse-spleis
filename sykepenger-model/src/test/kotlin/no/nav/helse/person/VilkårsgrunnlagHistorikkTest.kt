@@ -50,7 +50,7 @@ import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
-    private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
+    private val inspektør get() = Vilkårgrunnlagsinspektør(historikk.view())
     private val subsumsjonslogg = SubsumsjonsListLog()
     private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
@@ -191,7 +191,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertTrue(grunnlagsdataInspektør.vurdertOk)
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
     }
@@ -253,12 +253,12 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør1 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør1 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertTrue(grunnlagsdataInspektør1.vurdertOk)
 
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør2 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør2 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør2.vurdertOk)
 
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
@@ -321,7 +321,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertTrue(grunnlagsdataInspektør.vurdertOk)
     }
 
@@ -346,7 +346,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
     }
 
@@ -414,7 +414,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
@@ -450,7 +450,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()

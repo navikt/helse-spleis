@@ -481,7 +481,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a2 {
-            assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
+            assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar))
             håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, id = a2Inntektsmelding)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -504,7 +504,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertEquals(listOf(
                 Refusjonsopplysning(a2Inntektsmelding, 1.januar, 31.januar, INNTEKT),
                 Refusjonsopplysning(a2Inntektsmelding, 1.februar, null, INNTEKT),
-            ), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
+            ), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar))
 
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
         }
@@ -836,7 +836,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         inspiser(personInspektør).also { inspektør ->
             val vilkårsgrunnlagInnslag = inspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagHistorikkInnslag()
             assertEquals(1, vilkårsgrunnlagInnslag.size)
-            vilkårsgrunnlagInnslag.single().id
         }
     }
 

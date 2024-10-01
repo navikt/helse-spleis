@@ -59,7 +59,8 @@ internal class TestArbeidsgiverInspektør(
 
     private val sykmeldingsperioder = view.sykmeldingsperioder.perioder
 
-    internal fun vilkårsgrunnlagHistorikkInnslag() = person.vilkårsgrunnlagHistorikk.inspektør.vilkårsgrunnlagHistorikkInnslag()
+    internal fun vilkårsgrunnlaghistorikk() = person.view().vilkårsgrunnlaghistorikk.inspektør
+    internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlaghistorikk().vilkårsgrunnlagHistorikkInnslag()
 
     internal data class Feriepengeoppdrag(
         val fagsystemId: String,
@@ -157,6 +158,6 @@ internal class TestArbeidsgiverInspektør(
     private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
 
     internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = person.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt.max()) =
-        personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer]?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()
+        personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer]?.inspektør?.refusjonsopplysninger ?: emptyList()
 
 }

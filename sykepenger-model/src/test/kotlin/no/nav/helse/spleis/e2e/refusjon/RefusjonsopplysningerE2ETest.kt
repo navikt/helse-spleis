@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
@@ -179,9 +180,9 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
+    private fun List<Refusjonsopplysning>.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
         periode.forEach { dag ->
-            assertEquals(beløp, refusjonsbeløpOrNull(dag))
+            assertEquals(beløp, singleOrNull { dag in it.periode }?.beløp)
         }
     }
 }

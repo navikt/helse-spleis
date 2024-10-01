@@ -25,7 +25,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.InntektsgrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -58,6 +57,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTR
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
+import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag private constructor(
@@ -209,6 +209,20 @@ internal class Inntektsgrunnlag private constructor(
         }
     }
 
+    internal fun view() = InntektsgrunnlagView(
+        sykepengegrunnlag = sykepengegrunnlag,
+        avviksprosent = avviksprosent,
+        omregnetÅrsinntekt = omregnetÅrsinntekt,
+        beregningsgrunnlag = beregningsgrunnlag,
+        `6G` = `6G`,
+        begrensning = begrensning,
+        vurdertInfotrygd = vurdertInfotrygd,
+        minsteinntekt = minsteinntekt,
+        oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
+        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
+        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
+    )
+
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
         else aktivitetslogg.varsel(RV_SV_1)
@@ -346,42 +360,6 @@ internal class Inntektsgrunnlag private constructor(
         deaktiverteArbeidsforhold
     )
 
-    internal fun accept(visitor: InntektsgrunnlagVisitor) {
-        visitor.preVisitInntektsgrunnlag(
-            this,
-            skjæringstidspunkt,
-            sykepengegrunnlag,
-            avviksprosent,
-            omregnetÅrsinntekt,
-            beregningsgrunnlag,
-            `6G`,
-            begrensning,
-            vurdertInfotrygd,
-            minsteinntekt,
-            oppfyllerMinsteinntektskrav
-        )
-        visitor.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
-        arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
-        visitor.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
-        sammenligningsgrunnlag.accept(visitor)
-        visitor.preVisitDeaktiverteArbeidsgiverInntektsopplysninger(deaktiverteArbeidsforhold)
-        deaktiverteArbeidsforhold.forEach { it.accept(visitor) }
-        visitor.postVisitDeaktiverteArbeidsgiverInntektsopplysninger(deaktiverteArbeidsforhold)
-        visitor.postVisitInntektsgrunnlag(
-            this,
-            skjæringstidspunkt,
-            sykepengegrunnlag,
-            avviksprosent,
-            omregnetÅrsinntekt,
-            beregningsgrunnlag,
-            `6G`,
-            begrensning,
-            vurdertInfotrygd,
-            minsteinntekt,
-            oppfyllerMinsteinntektskrav
-        )
-    }
-
     internal fun inntektskilde() = when {
         arbeidsgiverInntektsopplysninger.size > 1 -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
         else -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
@@ -486,3 +464,16 @@ internal class Inntektsgrunnlag private constructor(
     )
 }
 
+internal data class InntektsgrunnlagView(
+    val sykepengegrunnlag: Inntekt,
+    val avviksprosent: Avviksprosent,
+    val omregnetÅrsinntekt: Inntekt,
+    val beregningsgrunnlag: Inntekt,
+    val `6G`: Inntekt,
+    val begrensning: Inntektsgrunnlag.Begrensning,
+    val vurdertInfotrygd: Boolean,
+    val minsteinntekt: Inntekt,
+    val oppfyllerMinsteinntektskrav: Boolean,
+    val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+    val deaktiverteArbeidsforhold: List<String>
+)

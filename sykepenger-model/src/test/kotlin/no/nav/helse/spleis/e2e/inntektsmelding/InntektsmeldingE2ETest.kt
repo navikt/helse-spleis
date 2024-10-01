@@ -110,7 +110,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -211,7 +210,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(listOf(1.januar, 26.januar), inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.map { it.inspektør.skjæringstidspunkt })
+        assertEquals(setOf(1.januar, 26.januar), inspektør.vilkårsgrunnlaghistorikk().aktiveSpleisSkjæringstidspunkt)
     }
 
     @Test

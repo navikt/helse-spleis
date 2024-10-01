@@ -175,7 +175,10 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    internal fun view() = PersonView(arbeidsgivere.map{it.view()})
+    internal fun view() = PersonView(
+        arbeidsgivere = arbeidsgivere.map{it.view()},
+        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view()
+    )
 
     fun håndter(sykmelding: Sykmelding) {
         registrer(sykmelding, "Behandler sykmelding")

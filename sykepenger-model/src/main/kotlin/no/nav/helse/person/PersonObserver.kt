@@ -229,9 +229,9 @@ interface PersonObserver {
                         "opplysningstype" to "Refusjon",
                         "forslag" to forespurtOpplysning.forslag.map { forslag ->
                             mapOf(
-                                "fom" to forslag.fom(),
-                                "tom" to forslag.tom(),
-                                "beløp" to forslag.beløp().månedlig
+                                "fom" to forslag.fom,
+                                "tom" to forslag.tom,
+                                "beløp" to forslag.beløp.månedlig
                             )
                         }
                     )

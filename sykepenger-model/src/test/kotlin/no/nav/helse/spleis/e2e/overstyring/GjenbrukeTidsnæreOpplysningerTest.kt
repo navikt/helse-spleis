@@ -42,6 +42,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
@@ -1158,7 +1159,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
 
-    private fun assertTidsnærInntektsopplysning(orgnummer: String, inntektsgrunnlagFør: Inntektsgrunnlag, inntektsgrunnlagEtter: Inntektsgrunnlag) {
+    private fun assertTidsnærInntektsopplysning(orgnummer: String, inntektsgrunnlagFør: InntektsgrunnlagView, inntektsgrunnlagEtter: InntektsgrunnlagView) {
         val inntektsopplysningerFørEndring = inntektsgrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
         val inntektsopplysningerEtterEndring = inntektsgrunnlagEtter.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
 

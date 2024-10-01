@@ -8,7 +8,7 @@ import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Inntektturnering
 import no.nav.helse.økonomi.Inntekt
 import kotlin.reflect.KClass
 
-abstract class AvklarbarSykepengegrunnlag(
+sealed class AvklarbarSykepengegrunnlag(
     id: UUID,
     hendelseId: UUID,
     dato: LocalDate,

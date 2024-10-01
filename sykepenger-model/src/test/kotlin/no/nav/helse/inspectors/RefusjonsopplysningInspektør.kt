@@ -1,42 +1,17 @@
 package no.nav.helse.inspectors
 
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
-import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.økonomi.Inntekt
 
 internal val Refusjonsopplysning.Refusjonsopplysninger.inspektør get() = RefusjonsopplysningerInspektør(this)
 
-internal class RefusjonsopplysningerInspektør(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger): RefusjonsopplysningerVisitor {
-    private val visitedRefusjonsopplysninger = mutableListOf<Refusjonsopplysning>()
-    val refusjonsopplysninger get() = visitedRefusjonsopplysninger.toList()
-    init {
-        refusjonsopplysninger.accept(this)
-    }
-    override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
-        visitedRefusjonsopplysninger.add(Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp))
-    }
+internal class RefusjonsopplysningerInspektør(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {
+    val refusjonsopplysninger = refusjonsopplysninger.validerteRefusjonsopplysninger
 }
 
 internal val Refusjonsopplysning.inspektør get() = RefusjonsopplysningInspektør(this)
 
-internal class RefusjonsopplysningInspektør(refusjonsopplysning: Refusjonsopplysning) : RefusjonsopplysningerVisitor {
-    lateinit var meldingsreferanseId: UUID
-        private set
-    lateinit var beløp: Inntekt
-        private set
-    lateinit var periode: Periode
-        private set
-    init {
-        refusjonsopplysning.accept(this)
-    }
-
-    override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
-        this.meldingsreferanseId = meldingsreferanseId
-        this.beløp = beløp
-        this.periode = fom til (tom ?: LocalDate.MAX)
-    }
+internal class RefusjonsopplysningInspektør(refusjonsopplysning: Refusjonsopplysning) {
+    val meldingsreferanseId = refusjonsopplysning.meldingsreferanseId
+    val beløp = refusjonsopplysning.beløp
+    val periode = refusjonsopplysning.periode
 }

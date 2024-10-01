@@ -170,7 +170,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a1)
         assertEquals(1.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
 
-        val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
+        val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger
         assertEquals(emptyList<Refusjonsopplysning>(), ghostRefusjonsopplysinger)
 
         assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
@@ -355,7 +355,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertEquals(
             listOf(Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig), Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig)),
-            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger
+            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         )
         val korrigerendeInntektsmelding = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.februar til 16.februar),
@@ -372,7 +372,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Refusjonsopplysning(inntektsmelding, 1.februar, 19.februar, beløp = 32000.månedlig),
                 Refusjonsopplysning(korrigerendeInntektsmelding, 20.februar, null, beløp = 30000.månedlig)
             ),
-            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger
+            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         )
     }
 

@@ -20,8 +20,8 @@ internal class SkattSykepengegrunnlag private constructor(
     hendelseId: UUID,
     dato: LocalDate,
     beløp: Inntekt,
-    private val inntektsopplysninger: List<Skatteopplysning>,
-    private val ansattPerioder: List<AnsattPeriode>,
+    val inntektsopplysninger: List<Skatteopplysning>,
+    val ansattPerioder: List<AnsattPeriode>,
     tidsstempel: LocalDateTime
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal companion object {
@@ -55,12 +55,6 @@ internal class SkattSykepengegrunnlag private constructor(
         ansattPerioder: List<AnsattPeriode>,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger), ansattPerioder, tidsstempel)
-
-    override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.preVisitSkattSykepengegrunnlag(this, id, hendelseId, dato, beløp, tidsstempel)
-        inntektsopplysninger.forEach { it.accept(visitor) }
-        visitor.postVisitSkattSykepengegrunnlag(this, id, hendelseId, dato, beløp, tidsstempel)
-    }
 
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (this.dato != skjæringstidspunkt) return null

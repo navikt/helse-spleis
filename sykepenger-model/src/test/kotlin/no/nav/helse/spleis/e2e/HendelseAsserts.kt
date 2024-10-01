@@ -33,7 +33,7 @@ internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: Lo
     assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato)?.sykepengegrunnlag)
 }
 internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
-    val grunnlagsdataInspektør = inspektør.vilkårsgrunnlagHistorikkInnslag().firstOrNull()?.vilkårsgrunnlagFor(dato)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag for $dato" }
+    val grunnlagsdataInspektør = inspektør.vilkårsgrunnlaghistorikk().grunnlagsdata(dato).inspektør
     val sykepengegrunnlagInspektør = grunnlagsdataInspektør.inntektsgrunnlag.inspektør
     sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[inspektør.orgnummer]?.inspektør.also {
         assertEquals(forventetInntekt, it?.inntektsopplysning?.inspektør?.beløp)

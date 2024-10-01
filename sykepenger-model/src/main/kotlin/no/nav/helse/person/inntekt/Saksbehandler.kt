@@ -20,18 +20,12 @@ class Saksbehandler internal constructor(
     dato: LocalDate,
     hendelseId: UUID,
     beløp: Inntekt,
-    private val forklaring: String?,
-    private val subsumsjon: Subsumsjon?,
-    private val overstyrtInntekt: Inntektsopplysning?,
+    val forklaring: String?,
+    val subsumsjon: Subsumsjon?,
+    val overstyrtInntekt: Inntektsopplysning?,
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, null, tidsstempel)
-
-    override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.preVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
-        overstyrtInntekt?.accept(visitor)
-        visitor.postVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
-    }
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = overstyrtInntekt?.gjenbrukbarInntekt(beløp ?: this.beløp)
 

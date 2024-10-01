@@ -33,6 +33,7 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
+import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -44,11 +45,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     private fun forrigeInnslag() = historikk.elementAtOrNull(1)
 
-    internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
-        visitor.preVisitVilkårsgrunnlagHistorikk()
-        historikk.forEach { it.accept(visitor) }
-        visitor.postVisitVilkårsgrunnlagHistorikk()
-    }
+    internal fun view() = VilkårsgrunnlagHistorikkView(innslag = historikk.map { it.view() })
 
     internal fun lagre(vararg vilkårsgrunnlag: VilkårsgrunnlagElement) {
         if (vilkårsgrunnlag.isEmpty()) return
@@ -110,13 +107,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             elementer.forEach { it.add(this) }
         }
 
-        internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
-            visitor.preVisitInnslag(this, id, opprettet)
-            vilkårsgrunnlag.forEach { (_, element) ->
-                element.accept(visitor)
-            }
-            visitor.postVisitInnslag(this, id, opprettet)
-        }
+        internal fun view() = VilkårsgrunnlagInnslagView(vilkårsgrunnlag = vilkårsgrunnlag.map { it.value.view() })
 
         internal fun add(skjæringstidspunkt: LocalDate, vilkårsgrunnlagElement: VilkårsgrunnlagElement) {
             vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
@@ -208,11 +199,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
     }
 
-    internal abstract class VilkårsgrunnlagElement(
-        protected val vilkårsgrunnlagId: UUID,
-        protected val skjæringstidspunkt: LocalDate,
-        protected val inntektsgrunnlag: Inntektsgrunnlag,
-        private val opptjening: Opptjening?
+    internal sealed class VilkårsgrunnlagElement(
+        val vilkårsgrunnlagId: UUID,
+        val skjæringstidspunkt: LocalDate,
+        val inntektsgrunnlag: Inntektsgrunnlag,
+        val opptjening: Opptjening?
     ) : Aktivitetskontekst {
         internal fun add(innslag: Innslag) {
             innslag.add(skjæringstidspunkt, this)
@@ -220,7 +211,25 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
-        internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
+        internal fun view() = VilkårsgrunnlagView(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            vurdertOk = when (this) {
+                is Grunnlagsdata -> vurdertOk
+                is InfotrygdVilkårsgrunnlag -> true
+            },
+            type = when (this) {
+                is Grunnlagsdata -> VilkårsgrunnlagView.VilkårsgrunnlagTypeView.SPLEIS
+                is InfotrygdVilkårsgrunnlag -> VilkårsgrunnlagView.VilkårsgrunnlagTypeView.INFOTRYGD
+            },
+            meldingsreferanseId = when (this) {
+                is Grunnlagsdata -> this.meldingsreferanseId
+                is InfotrygdVilkårsgrunnlag -> null
+            },
+            inntektsgrunnlag = inntektsgrunnlag.view(),
+            opptjening = opptjening?.view()
+        )
+
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
 
         internal fun inntektskilde() = inntektsgrunnlag.inntektskilde()
@@ -370,10 +379,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Grunnlagsdata(
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
-        internal val opptjening: Opptjening,
-        private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        private val vurdertOk: Boolean,
-        private val meldingsreferanseId: UUID?,
+        opptjening: Opptjening,
+        val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        val vurdertOk: Boolean,
+        val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
@@ -386,35 +395,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
-        override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
-                skjæringstidspunkt,
-                this,
-                inntektsgrunnlag,
-                opptjening,
-                vurdertOk,
-                meldingsreferanseId,
-                vilkårsgrunnlagId,
-                medlemskapstatus
-            )
-            inntektsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            opptjening.accept(vilkårsgrunnlagHistorikkVisitor)
-            vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
-                skjæringstidspunkt,
-                this,
-                inntektsgrunnlag,
-                medlemskapstatus,
-                vurdertOk,
-                meldingsreferanseId,
-                vilkårsgrunnlagId
-            )
-        }
-
         override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
             val foreløpigAvvist = inntektsgrunnlag.avvis(tidslinjer, skjæringstidspunktperiode, periode, subsumsjonslogg)
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-            if (!opptjening.harTilstrekkeligAntallOpptjeningsdager()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+            if (!opptjening!!.harTilstrekkeligAntallOpptjeningsdager()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
             return Utbetalingstidslinje.avvis(foreløpigAvvist, listOf(skjæringstidspunktperiode), begrunnelser)
         }
 
@@ -426,7 +411,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ) = kopierMed(
             hendelse = hendelse,
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
-            opptjening = opptjening.overstyrArbeidsforhold(hendelse).also {
+            opptjening = opptjening!!.overstyrArbeidsforhold(hendelse).also {
                 subsumsjonslogg.logg(it.subsumsjon)
             },
             subsumsjonslogg = subsumsjonslogg,
@@ -445,7 +430,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
-                opptjening = opptjening ?: this.opptjening,
+                opptjening = opptjening ?: this.opptjening!!,
                 medlemskapstatus = medlemskapstatus,
                 vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),
                 meldingsreferanseId = meldingsreferanseId,
@@ -461,7 +446,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = sykepengegrunnlag,
-            opptjening = this.opptjening.dto(),
+            opptjening = this.opptjening!!.dto(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
@@ -522,22 +507,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         }
 
-        override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(
-                this,
-                skjæringstidspunkt,
-                inntektsgrunnlag,
-                vilkårsgrunnlagId
-            )
-            inntektsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(
-                this,
-                skjæringstidspunkt,
-                inntektsgrunnlag,
-                vilkårsgrunnlagId
-            )
-        }
-
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
         override fun equals(other: Any?): Boolean {
@@ -581,4 +550,18 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     fun dto() = VilkårsgrunnlaghistorikkUtDto(
         historikk = this.historikk.map { it.dto() }
     )
+}
+
+internal data class VilkårsgrunnlagHistorikkView(val innslag: List<VilkårsgrunnlagInnslagView>)
+internal data class VilkårsgrunnlagInnslagView(val vilkårsgrunnlag: List<VilkårsgrunnlagView>)
+internal data class VilkårsgrunnlagView(
+    val vilkårsgrunnlagId: UUID,
+    val skjæringstidspunkt: LocalDate,
+    val vurdertOk: Boolean,
+    val type: VilkårsgrunnlagTypeView,
+    val meldingsreferanseId: UUID?,
+    val inntektsgrunnlag: InntektsgrunnlagView,
+    val opptjening: OpptjeningView?
+) {
+    enum class VilkårsgrunnlagTypeView { INFOTRYGD, SPLEIS }
 }
