@@ -93,18 +93,16 @@ data class Arbeidsgiverperioderesultat(
     companion object {
         // utvider liste av perioder med ny dato. antar at listen er sortert i stigende rekkefølge,
         // og at <dato> må være nyere enn forrige periode. strekker altså -ikke- periodene eventuelt tilbake i tid, kun frem
-        private fun List<Periode>.leggTil(dato: LocalDate?): List<Periode> {
-            return when {
-                dato == null -> return this
-                // tom liste
-                isEmpty() -> return listOf(dato.somPeriode())
-                // dagen er dekket av en tidligere periode
-                dato <= last().endInclusive -> return this
-                // dagen utvider ikke siste datoperiode
-                dato > last().endInclusive.nesteDag -> return this + listOf(dato.somPeriode())
-                // dagen utvider siste periode
-                else -> return dropLast(1) + listOf(last().oppdaterTom(dato))
-            }
+        private fun List<Periode>.leggTil(dato: LocalDate?): List<Periode> = when {
+            dato == null -> this
+            // tom liste
+            isEmpty() -> listOf(dato.somPeriode())
+            // dagen er dekket av en tidligere periode
+            dato <= last().endInclusive -> this
+            // dagen utvider ikke siste datoperiode
+            dato > last().endInclusive.nesteDag -> this + listOf(dato.somPeriode())
+            // dagen utvider siste periode
+            else -> dropLast(1) + listOf(last().oppdaterTom(dato))
         }
         internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
