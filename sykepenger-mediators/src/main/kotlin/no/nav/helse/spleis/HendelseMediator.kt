@@ -39,7 +39,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
@@ -493,7 +492,7 @@ internal class HendelseMediator(
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         handler: (Person) -> Unit
     ) {
-        val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
+        val personidentifikator = Personidentifikator(hendelse.fødselsnummer())
         hentPersonOgHåndter(personidentifikator, personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
     }
 
@@ -503,7 +502,7 @@ internal class HendelseMediator(
         context: MessageContext,
         handler: (Person) -> Unit
     ) {
-        val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
+        val personidentifikator = Personidentifikator(hendelse.fødselsnummer())
         hentPersonOgHåndter(personidentifikator, null, message, hendelse, context, handler = handler)
     }
     private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(

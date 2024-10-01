@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.november
 import no.nav.helse.oktober
@@ -7,7 +8,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
     private companion object {
-        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somPersonidentifikator()
+        val FYLLER_18_ÅR_2_NOVEMBER = Personidentifikator("02110075045")
     }
 
     @BeforeEach

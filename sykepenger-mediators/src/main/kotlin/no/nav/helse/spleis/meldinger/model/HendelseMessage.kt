@@ -7,7 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import org.slf4j.Logger
@@ -23,7 +23,7 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) {
     internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
 
     internal fun lagreMelding(repository: HendelseRepository) {
-        repository.lagreMelding(this, fødselsnummer.somPersonidentifikator(), id, toJson())
+        repository.lagreMelding(this, Personidentifikator(fødselsnummer), id, toJson())
     }
 
     internal fun logReplays(logger: Logger, size: Int) {

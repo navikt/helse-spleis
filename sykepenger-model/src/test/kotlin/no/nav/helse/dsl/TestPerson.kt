@@ -53,7 +53,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -74,7 +73,7 @@ internal class TestPerson(
     internal companion object {
         private val fnrformatter = DateTimeFormatter.ofPattern("ddMMyy")
         internal val UNG_PERSON_FDATO_2018 = 12.februar(1992)
-        internal val UNG_PERSON_FNR_2018: Personidentifikator = "${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045".somPersonidentifikator()
+        internal val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045")
         internal const val AKTØRID = "42"
 
         internal val INNTEKT = 31000.00.månedlig

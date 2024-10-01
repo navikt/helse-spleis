@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private val fnr = "01011012345".somPersonidentifikator()
+private val fnr = Personidentifikator("01011012345")
 internal class HendelseRepositoryTest {
     private lateinit var dataSource: TestDataSource
 

@@ -2,6 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
@@ -15,7 +16,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.testhelpers.resetSeed
@@ -44,7 +44,7 @@ internal class InntektshistorikkTest {
         val INNTEKT = 31000.00.månedlig
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
-            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = ORGNUMMER
         )
     }

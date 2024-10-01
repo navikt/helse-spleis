@@ -9,8 +9,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 
@@ -20,7 +20,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map(String::somPersonidentifikator).toSet())
+        mediator.behandle(personopplysninger, this, builder.build(), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) } .toSet())
     }
 
     internal companion object {

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
@@ -15,18 +16,17 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     companion object {
-        private val FYLLER_70_TIENDE_JANUAR = "10014812345".somPersonidentifikator()
+        private val FYLLER_70_TIENDE_JANUAR = Personidentifikator("10014812345")
         private val FYLLER_70_TIENDE_JANUAR_FØDSELSDATO = 10.januar(1948)
-        private val FYLLER_70_FJORTENDE_JANUAR = "14014812345".somPersonidentifikator()
+        private val FYLLER_70_FJORTENDE_JANUAR = Personidentifikator("14014812345")
         private val FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO = 14.januar(1948)
-        private val FYLLER_70_TOOGTYVENDE_JANUAR = "22014812345".somPersonidentifikator()
+        private val FYLLER_70_TOOGTYVENDE_JANUAR = Personidentifikator("22014812345")
         private val FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO = 22.januar(1948)
     }
 

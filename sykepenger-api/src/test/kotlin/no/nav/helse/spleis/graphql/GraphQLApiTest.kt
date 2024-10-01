@@ -34,7 +34,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.LokalePayload
 import no.nav.helse.spleis.SpekematClient
@@ -94,7 +94,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @Test
     fun `Det Spesialist faktisk henter`() {
         val spekemat = Spekemat()
-        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
+        person = Person(AKTØRID, Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.addObserver(spekemat)
 
         val spekematClient = mockk<SpekematClient>()

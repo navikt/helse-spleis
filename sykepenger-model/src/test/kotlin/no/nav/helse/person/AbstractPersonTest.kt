@@ -22,7 +22,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -33,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 internal abstract class AbstractPersonTest {
 
     internal companion object {
-        val UNG_PERSON_FNR_2018: Personidentifikator = "12029240045".somPersonidentifikator()
+        val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("12029240045")
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"

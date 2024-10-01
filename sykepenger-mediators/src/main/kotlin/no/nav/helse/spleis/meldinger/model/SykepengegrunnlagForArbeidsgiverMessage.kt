@@ -4,9 +4,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 
 internal class SykepengegrunnlagForArbeidsgiverMessage(packet: JsonMessage) : BehovMessage(packet) {
@@ -24,7 +24,7 @@ internal class SykepengegrunnlagForArbeidsgiverMessage(packet: JsonMessage) : Be
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkter,
             aktørId = aktørId,
-            personidentifikator = fødselsnummer.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(fødselsnummer),
             orgnummer = organisasjonsnummer,
             inntekter = inntekterForSykepengegrunnlag.single()
         )

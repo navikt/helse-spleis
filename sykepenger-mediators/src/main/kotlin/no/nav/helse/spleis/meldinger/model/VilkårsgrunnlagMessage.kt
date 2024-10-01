@@ -17,7 +17,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
@@ -86,7 +86,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkter.distinct().single(),
             aktørId = aktørId,
-            personidentifikator = fødselsnummer.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(fødselsnummer),
             orgnummer = organisasjonsnummer,
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus

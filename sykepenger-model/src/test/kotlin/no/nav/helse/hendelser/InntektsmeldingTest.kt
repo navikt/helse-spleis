@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
@@ -13,7 +14,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
@@ -41,7 +41,7 @@ internal class InntektsmeldingTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = "100010101010",
-        personidentifikator = "12029240045".somPersonidentifikator(),
+        personidentifikator = Personidentifikator("12029240045"),
         organisasjonsnummer = "88888888"
     )
     private lateinit var aktivitetslogg: Aktivitetslogg

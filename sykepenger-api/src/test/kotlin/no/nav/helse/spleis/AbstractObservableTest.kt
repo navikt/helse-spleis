@@ -36,7 +36,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -178,7 +178,7 @@ internal abstract class AbstractObservableTest {
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             skjæringstidspunkt = FOM,
             aktørId = AKTØRID,
-            personidentifikator = fnr.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(fnr),
             orgnummer = orgnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,

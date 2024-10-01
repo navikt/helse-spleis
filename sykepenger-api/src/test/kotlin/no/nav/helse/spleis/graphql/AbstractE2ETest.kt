@@ -29,7 +29,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IdInnhenter
 import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
@@ -54,10 +54,10 @@ internal abstract class AbstractE2ETest {
         const val a3 = "a3"
         val INNTEKT = 48000.månedlig
 
-        private val personfabrikk = PersonHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator())
-        private val a1fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), a1)
-        private val a2fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), a2)
-        private val a3fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), a3)
+        private val personfabrikk = PersonHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR))
+        private val a1fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR), a1)
+        private val a2fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR), a2)
+        private val a3fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR), a3)
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
             a2 to a2fabrikk,
@@ -85,7 +85,7 @@ internal abstract class AbstractE2ETest {
     @BeforeEach
     fun setup() {
         createTestPerson {
-            Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), Alder(UNG_PERSON_FØDSELSDATO, null), it)
+            Person(AKTØRID, Personidentifikator(UNG_PERSON_FNR), Alder(UNG_PERSON_FØDSELSDATO, null), it)
         }
         hendelselogg = Aktivitetslogg()
     }

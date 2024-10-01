@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -10,7 +11,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -249,7 +249,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private companion object {
-        private val fabrikk = ArbeidsgiverHendelsefabrikk("42", "11".somPersonidentifikator(), "a1")
+        private val fabrikk = ArbeidsgiverHendelsefabrikk("42", Personidentifikator("11"), "a1")
         private fun inntektsmelding(
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode

@@ -10,7 +10,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Fødselsnummer.Companion.tilFødselsnummer
@@ -43,7 +43,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-    private val personopplysninger = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato, dødsdato)
+    private val personopplysninger = Personopplysninger(Personidentifikator(fødselsnummer), aktørId, fødselsdato, dødsdato)
     private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem()
     private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
 

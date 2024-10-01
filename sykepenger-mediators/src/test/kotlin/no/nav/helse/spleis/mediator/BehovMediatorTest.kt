@@ -17,7 +17,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.BehovMediator
 import no.nav.helse.spleis.Personopplysninger
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -228,7 +228,7 @@ class BehovMediatorTest {
     private class TestHendelse(
         val logg: Aktivitetslogg
     ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
-        private val person = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, LocalDate.EPOCH, null).person(EmptyLog)
+        private val person = Personopplysninger(Personidentifikator(fødselsnummer), aktørId, LocalDate.EPOCH, null).person(EmptyLog)
         init {
             kontekst(person)
         }

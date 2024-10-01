@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.januar
-import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -13,7 +13,7 @@ internal class SykmeldingTest {
         const val UNG_PERSON_FNR_2018 = "12029240045"
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
-            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = "987654321"
         )
     }

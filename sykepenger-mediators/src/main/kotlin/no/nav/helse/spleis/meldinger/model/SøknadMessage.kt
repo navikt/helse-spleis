@@ -6,7 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
-import no.nav.helse.somPersonidentifikator
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 
@@ -23,7 +23,7 @@ internal sealed class SøknadMessage(
 
     final override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         val personopplysninger = Personopplysninger(
-            personidentifikator = fødselsnummer.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(fødselsnummer),
             aktørId = packet["aktorId"].asText(),
             fødselsdato = packet["fødselsdato"].asLocalDate(),
             dødsdato = packet["dødsdato"].asOptionalLocalDate()

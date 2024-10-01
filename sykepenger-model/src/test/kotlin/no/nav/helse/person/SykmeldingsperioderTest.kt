@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -10,7 +11,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -21,7 +21,7 @@ internal class SykmeldingsperioderTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = "AKTØRID",
-        personidentifikator = "12029212345".somPersonidentifikator(),
+        personidentifikator = Personidentifikator("12029212345"),
         organisasjonsnummer = "ORGNUMMER"
     )
 

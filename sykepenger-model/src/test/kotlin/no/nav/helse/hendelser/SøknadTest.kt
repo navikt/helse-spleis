@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
@@ -25,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.AktivitetException
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_44
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
@@ -49,14 +49,14 @@ internal class SøknadTest {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
-            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = "987654321"
         )
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
         private val november2 = 2.november(2000)
         private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
-            personidentifikator = FYLLER_18_ÅR_2_NOVEMBER.somPersonidentifikator(),
+            personidentifikator = Personidentifikator(FYLLER_18_ÅR_2_NOVEMBER),
             organisasjonsnummer = "987654321"
         )
     }

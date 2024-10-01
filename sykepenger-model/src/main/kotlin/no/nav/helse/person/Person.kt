@@ -78,7 +78,6 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -109,7 +108,7 @@ class Person private constructor(
             val alder = Alder.gjenopprett(dto.alder)
             val person = Person(
                 aktørId = dto.aktørId,
-                personidentifikator = dto.fødselsnummer.somPersonidentifikator(),
+                personidentifikator = Personidentifikator(dto.fødselsnummer),
                 alder = alder,
                 _arbeidsgivere = arbeidsgivere,
                 aktivitetslogg = Aktivitetslogg(),

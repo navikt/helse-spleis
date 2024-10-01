@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -24,7 +25,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -434,14 +434,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode med minst én navdag og minst én avslagsdag får DelvisInnvilget-tag`() {
-        createTestPerson("18.01.1948".somPersonidentifikator(), 18.januar(1948))
+        createTestPerson(Personidentifikator("18.01.1948"), 18.januar(1948))
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertGodkjenningsbehov(tags = setOf("DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
     }
 
     @Test
     fun `Periode med arbeidsgiverperiodedager, ingen navdager og minst én avslagsdag får Avslag-tag`() {
-        createTestPerson("16.01.1948".somPersonidentifikator(), 16.januar(1948))
+        createTestPerson(Personidentifikator("16.01.1948"), 16.januar(1948))
         nyPeriode(januar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
@@ -451,7 +451,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode med kun avslagsdager får Avslag-tag`() {
-        createTestPerson("16.01.1946".somPersonidentifikator(), 16.januar(1946))
+        createTestPerson(Personidentifikator("16.01.1946"), 16.januar(1946))
         nyPeriode(januar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
