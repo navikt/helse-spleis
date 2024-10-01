@@ -457,7 +457,7 @@ internal class Vedtaksperiode private constructor(
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
         val utbetalingsdagerFørSkjæringstidspunkt = Arbeidsgiverperiode.utbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt, periode, arbeidsgiverperiode)
         if (utbetalingsdagerFørSkjæringstidspunkt.isEmpty()) return false
-        sikkerlogg.warn("Har flere skjæringstidspunkt:\n\nAktørId: $aktørId (${id.toString().take(5).uppercase()}) $periode\nSkjæringstidspunkt: ${skjæringstidspunkt.format(datoformat)}\nUtbetalingsdager før skjæringstidspunkt: ${utbetalingsdagerFørSkjæringstidspunkt.joinToString { it.format(datoformat)} }\nSykdomstidslinje; ${sykdomstidslinje.toShortString()}")
+        sikkerlogg.warn("Har flere skjæringstidspunkt:\n\nAktørId: $aktørId (${id.toString().take(5).uppercase()}) $periode\nSkjæringstidspunkt: ${skjæringstidspunkt.format(datoformat)}\nArbeidsgiver: ${organisasjonsnummer}\nUtbetalingsdager før skjæringstidspunkt: ${utbetalingsdagerFørSkjæringstidspunkt.joinToString { it.format(datoformat)} }\nSykdomstidslinje: ${sykdomstidslinje.toShortString()}")
         return true
     }
 
