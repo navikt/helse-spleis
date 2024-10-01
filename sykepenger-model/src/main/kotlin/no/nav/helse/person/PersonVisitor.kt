@@ -15,7 +15,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenlignin
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -193,7 +192,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
     ) {}
 }
 
-internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor {
+internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, FeriepengeutbetalingVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -354,32 +353,4 @@ internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVi
         hendelseIder: Set<Dokumentsporing>
     ) {
     }
-}
-
-internal interface RefusjonshistorikkVisitor {
-    fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
-    fun preVisitRefusjon(
-        meldingsreferanseId: UUID,
-        førsteFraværsdag: LocalDate?,
-        arbeidsgiverperioder: List<Periode>,
-        beløp: Inntekt?,
-        sisteRefusjonsdag: LocalDate?,
-        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun visitEndringIRefusjon(beløp: Inntekt, endringsdato: LocalDate) {}
-    fun postVisitRefusjon(
-        meldingsreferanseId: UUID,
-        førsteFraværsdag: LocalDate?,
-        arbeidsgiverperioder: List<Periode>,
-        beløp: Inntekt?,
-        sisteRefusjonsdag: LocalDate?,
-        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
 }

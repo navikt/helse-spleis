@@ -9,20 +9,19 @@ import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.inntekt.Refusjonshistorikk
 
 internal val Arbeidsgiver.inspektør get() = ArbeidsgiverInspektør(this)
 
 internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverVisitor {
+    private val view = arbeidsgiver.view()
+
     private val vedtaksperioder: MutableMap<UUID, Vedtaksperiode> = mutableMapOf()
     private var aktiveVedtaksperioder: List<Vedtaksperiode> = emptyList()
     private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
 
-    internal lateinit var organisasjonsnummer: String
-        private set
+    val organisasjonsnummer = view.organisasjonsnummer
 
-    internal lateinit var refusjonshistorikk: Refusjonshistorikk
-        private set
+    val refusjonshistorikk = view.refusjonshistorikk.inspektør
 
     val sykdomshistorikk = arbeidsgiver.view().sykdomshistorikk.inspektør
 
@@ -33,14 +32,6 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder
     internal fun forkastedeVedtaksperioder() = vedtaksperioder.values - aktiveVedtaksperioder
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
-
-    override fun preVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) {
-        this.organisasjonsnummer = organisasjonsnummer
-    }
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -60,9 +51,5 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
         aktiveVedtaksperioder = vedtaksperioder
-    }
-
-    override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
-        this.refusjonshistorikk = refusjonshistorikk
     }
 }

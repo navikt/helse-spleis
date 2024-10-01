@@ -131,7 +131,8 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk = sykdomshistorikk.view(),
         utbetalinger = utbetalinger.map { it.view },
         inntektshistorikk = inntektshistorikk.view(),
-        sykmeldingsperioder = sykmeldingsperioder.view()
+        sykmeldingsperioder = sykmeldingsperioder.view(),
+        refusjonshistorikk = refusjonshistorikk.view()
     )
 
     internal companion object {
@@ -293,7 +294,6 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         feriepengeutbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
-        refusjonshistorikk.accept(visitor)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 

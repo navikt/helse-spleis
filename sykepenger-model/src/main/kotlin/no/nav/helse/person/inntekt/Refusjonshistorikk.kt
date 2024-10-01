@@ -13,11 +13,11 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.RefusjonshistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
@@ -31,20 +31,28 @@ internal class Refusjonshistorikk {
         refusjoner.leggTilRefusjon(refusjon)
     }
 
-    internal fun accept(visitor: RefusjonshistorikkVisitor) {
-        visitor.preVisitRefusjonshistorikk(this)
-        refusjoner.forEach { it.accept(visitor) }
-        visitor.postVisitRefusjonshistorikk(this)
-    }
+    fun view() = RefusjonshistorikkView(refusjoner.map {
+        RefusjonView(
+            meldingsreferanseId = it.meldingsreferanseId,
+            førsteFraværsdag = it.førsteFraværsdag,
+            arbeidsgiverperioder = it.arbeidsgiverperioder,
+            beløp = it.beløp,
+            sisteRefusjonsdag = it.sisteRefusjonsdag,
+            endringerIRefusjon = it.endringerIRefusjon.map {
+                EndringIRefusjonView(it.beløp, it.endringsdato)
+            },
+            tidsstempel = it.tidsstempel
+        )
+    })
 
     internal class Refusjon(
-        private val meldingsreferanseId: UUID,
-        private val førsteFraværsdag: LocalDate?,
-        private val arbeidsgiverperioder: List<Periode>,
-        private val beløp: Inntekt?,
-        private val sisteRefusjonsdag: LocalDate?,
-        private val endringerIRefusjon: List<EndringIRefusjon>,
-        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+        val meldingsreferanseId: UUID,
+        val førsteFraværsdag: LocalDate?,
+        val arbeidsgiverperioder: List<Periode>,
+        val beløp: Inntekt?,
+        val sisteRefusjonsdag: LocalDate?,
+        val endringerIRefusjon: List<EndringIRefusjon>,
+        val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         private fun muligDuplikat(other: Refusjon) =
             this.meldingsreferanseId == other.meldingsreferanseId && this.utledetFørsteFraværsdag() == other.utledetFørsteFraværsdag()
@@ -98,28 +106,6 @@ internal class Refusjonshistorikk {
         internal fun beløp(dag: LocalDate): Inntekt {
             if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return INGEN
             return endringerIRefusjon.beløp(dag) ?: beløp ?: INGEN
-        }
-
-        internal fun accept(visitor: RefusjonshistorikkVisitor) {
-            visitor.preVisitRefusjon(
-                meldingsreferanseId,
-                førsteFraværsdag,
-                arbeidsgiverperioder,
-                beløp,
-                sisteRefusjonsdag,
-                endringerIRefusjon,
-                tidsstempel
-            )
-            endringerIRefusjon.forEach { it.accept(visitor) }
-            visitor.postVisitRefusjon(
-                meldingsreferanseId,
-                førsteFraværsdag,
-                arbeidsgiverperioder,
-                beløp,
-                sisteRefusjonsdag,
-                endringerIRefusjon,
-                tidsstempel
-            )
         }
 
         internal data class EndringIRefusjon(
@@ -183,10 +169,6 @@ internal class Refusjonshistorikk {
                 }
             }
 
-            internal fun accept(visitor: RefusjonshistorikkVisitor) {
-                visitor.visitEndringIRefusjon(beløp, endringsdato)
-            }
-
             internal fun dto() = EndringIRefusjonDto(beløp.dtoMånedligDouble(), endringsdato)
         }
 
@@ -216,3 +198,17 @@ internal class Refusjonshistorikk {
     }
 }
 
+data class RefusjonshistorikkView(val refusjoner: List<RefusjonView>)
+data class RefusjonView(
+    val meldingsreferanseId: UUID,
+    val førsteFraværsdag: LocalDate?,
+    val arbeidsgiverperioder: List<Periode>,
+    val beløp: Inntekt?,
+    val sisteRefusjonsdag: LocalDate?,
+    val endringerIRefusjon: List<EndringIRefusjonView>,
+    val tidsstempel: LocalDateTime
+)
+data class EndringIRefusjonView(
+    val beløp: Inntekt,
+    val endringsdato: LocalDate
+)

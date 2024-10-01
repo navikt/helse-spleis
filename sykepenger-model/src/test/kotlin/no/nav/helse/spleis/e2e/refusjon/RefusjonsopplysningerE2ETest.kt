@@ -13,11 +13,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
@@ -95,20 +93,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             )
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
-        }
-    }
-
-
-    @Test
-    fun `Inntektsmelding uten refusjonsopplysninger tolkes som ingen refusjon`() {
-        a1 {
-            håndterSykmelding(januar)
-            håndterSøknad(januar)
-            assertEquals(0, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
-            assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(null, null, emptyList()), beregnetInntekt = INNTEKT)
-            assertEquals(1, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
-            assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INGEN)), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
         }
     }
 

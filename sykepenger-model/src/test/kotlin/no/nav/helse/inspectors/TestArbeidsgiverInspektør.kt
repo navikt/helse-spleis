@@ -13,7 +13,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -279,7 +278,5 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = person.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt.max()) =
         personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer]?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()
-    internal fun refusjonsopplysningerFraRefusjonshistorikk(skjæringstidspunkt: LocalDate = person.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt.max()) =
-        arbeidsgiver.inspektør.refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
 }
