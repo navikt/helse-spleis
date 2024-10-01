@@ -1,6 +1,7 @@
 package no.nav.helse.person.beløp
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
@@ -15,7 +16,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -116,10 +116,10 @@ internal class BeløpstidslinjeTest {
         private val SaksbehandlerId = UUID.fromString("00000000-0000-0000-0000-000000000001")
         private val SykmeldtId = UUID.fromString("00000000-0000-0000-0000-000000000002")
         private val SystemId = UUID.fromString("00000000-0000-0000-0000-000000000003")
-        private val Arbeidsgiver = Kilde(ArbeidsgiverId, ARBEIDSGIVER)
-        private val Saksbehandler = Kilde(SaksbehandlerId, SAKSBEHANDLER)
-        private val Sykmeldt = Kilde(SykmeldtId, SYKMELDT)
-        private val Systemet = Kilde(SystemId, SYSTEM)
+        private val Arbeidsgiver = Kilde(ArbeidsgiverId, ARBEIDSGIVER, LocalDateTime.now())
+        private val Saksbehandler = Kilde(SaksbehandlerId, SAKSBEHANDLER, LocalDateTime.now())
+        private val Sykmeldt = Kilde(SykmeldtId, SYKMELDT, LocalDateTime.now())
+        private val Systemet = Kilde(SystemId, SYSTEM, LocalDateTime.now())
 
         infix fun Inntekt.fra(fra: LocalDate) = Triple(Systemet, this, fra)
         infix fun Inntekt.kun(kun: LocalDate) = fra(kun) til kun

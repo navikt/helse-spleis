@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
@@ -72,7 +73,7 @@ internal class RefusjonTilBeløpstidslinjeTest {
         assertEquals(Beløpstidslinje.fra(1.januar til 31.januar, 500.daglig, kilde), refusjonstidslinje)
     }
 
-    private val kilde = Kilde(UUID.randomUUID(), Avsender.ARBEIDSGIVER)
+    private val kilde = Kilde(UUID.randomUUID(), Avsender.ARBEIDSGIVER, LocalDateTime.now())
     private fun refusjontidslinje(
         tilOgMed: LocalDate,
         førsteFraværsdag: LocalDate? = null,
@@ -86,6 +87,7 @@ internal class RefusjonTilBeløpstidslinjeTest {
         arbeidsgiverperioder = arbeidsgiverperioder,
         beløp = beløp,
         sisteRefusjonsdag = sisteRefusjonsdag,
-        endringerIRefusjon =  endringer
+        endringerIRefusjon =  endringer,
+        tidsstempel = kilde.tidsstempel
     ).beløpstidslinje(tilOgMed)
 }

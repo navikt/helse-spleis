@@ -17,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
@@ -58,7 +57,7 @@ internal class Refusjonshistorikk {
             this.meldingsreferanseId == other.meldingsreferanseId && this.utledetFørsteFraværsdag() == other.utledetFørsteFraværsdag()
 
         internal fun beløpstidslinje(tilOgMed: LocalDate): Beløpstidslinje {
-            val kilde = Kilde(meldingsreferanseId, Avsender.ARBEIDSGIVER)
+            val kilde = Kilde(meldingsreferanseId, Avsender.ARBEIDSGIVER, tidsstempel)
             val startskuddet = startskuddet()
             if (tilOgMed < startskuddet) return Beløpstidslinje()
 
