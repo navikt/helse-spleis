@@ -1955,8 +1955,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(17.januar til 31.januar)
         // IM 1 replayes først og blir lagret på 2.januar av forlengelsen -> kan ikke beregne sykepengegrunnlag
         // IM 2 replayes deretter og blir lagret på 1.januar av forlengelsen -> kan beregne sykepengegrunnlag og går videre
-        assertInntektshistorikkForDato(INNTEKT, dato = 1.januar, førsteFraværsdag = 1.januar, inspektør = inspektør)
-        assertInntektshistorikkForDato(INNTEKT, dato = 2.januar, førsteFraværsdag = 2.januar, inspektør = inspektør)
+        assertInntektshistorikkForDato(INNTEKT, dato = 1.januar, inspektør = inspektør)
+        assertInntektshistorikkForDato(INNTEKT, dato = 2.januar, inspektør = inspektør)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 

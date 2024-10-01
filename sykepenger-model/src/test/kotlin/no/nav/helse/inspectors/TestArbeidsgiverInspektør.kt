@@ -39,6 +39,7 @@ internal class TestArbeidsgiverInspektør(
         }
     }
     internal var arbeidsgiver: Arbeidsgiver = person.arbeidsgivere.first { it.organisasjonsnummer() == orgnummer }
+    private val view = arbeidsgiver.view()
 
     private val personInspektør = person.inspektør
     internal var vedtaksperiodeTeller: Int = 0
@@ -47,10 +48,10 @@ internal class TestArbeidsgiverInspektør(
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
-    internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver.inspektør.inntektshistorikk)
-    val sykdomshistorikk = arbeidsgiver.view().sykdomshistorikk.inspektør
+    internal val inntektInspektør get() = InntektshistorikkInspektør(view.inntektshistorikk)
+    val sykdomshistorikk = view.sykdomshistorikk.inspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
-    private val utbetalinger = arbeidsgiver.view().utbetalinger.map { it.inspektør }
+    private val utbetalinger = view.utbetalinger.map { it.inspektør }
     internal val antallUtbetalinger get() = utbetalinger.size
     internal val feriepengeoppdrag = mutableListOf<Feriepengeoppdrag>()
     internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()

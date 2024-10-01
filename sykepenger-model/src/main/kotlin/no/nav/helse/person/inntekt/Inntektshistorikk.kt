@@ -4,7 +4,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 
 internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
@@ -19,11 +18,9 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         )
     }
 
-    internal fun accept(visitor: InntekthistorikkVisitor) {
-        visitor.preVisitInntekthistorikk(this)
-        historikk.forEach { it.accept(visitor) }
-        visitor.postVisitInntekthistorikk(this)
-    }
+    fun view() = InntektshistorikkView(
+        inntekter = historikk.map { it.view() }
+    )
 
     internal fun leggTil(inntekt: Inntektsmelding): Boolean {
         if (historikk.any { !it.kanLagres(inntekt) }) return false
@@ -38,3 +35,5 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         historikk = historikk.map { it.dto() }
     )
 }
+
+internal data class InntektshistorikkView(val inntekter: List<InntektsmeldingView>)

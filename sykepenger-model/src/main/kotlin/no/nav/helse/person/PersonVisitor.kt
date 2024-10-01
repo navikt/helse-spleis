@@ -15,8 +15,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenlignin
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.InntektsmeldingVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -195,7 +193,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
     ) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
+internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -385,9 +383,3 @@ internal interface RefusjonshistorikkVisitor {
 
     fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
 }
-
-internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {
-    fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-    fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-}
-

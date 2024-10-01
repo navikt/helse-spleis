@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test
 internal class InntektshistorikkTest {
 
     private lateinit var historikk: Inntektshistorikk
-    private val inspektør get() = InntektshistorikkInspektør(historikk)
+    private val inspektør get() = InntektshistorikkInspektør(historikk.view())
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"

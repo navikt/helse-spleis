@@ -1,45 +1,20 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.InntektshistorikkView
 import no.nav.helse.økonomi.Inntekt
 
 
-internal class InntektshistorikkInspektør(inntektshistorikk: Inntektshistorikk) : InntekthistorikkVisitor {
+internal class InntektshistorikkInspektør(inntektshistorikk: InntektshistorikkView) {
 
-    private val inntektsopplysninger = mutableListOf<Opplysning>()
+    private val inntektsopplysninger = inntektshistorikk.inntekter.map { Opplysning(it.dato, it.beløp) }
     internal val size get() = inntektsopplysninger.size
     internal val inntektsdatoer get() = inntektsopplysninger.map { it.dato }
-    internal lateinit var inntektshistorikk: Inntektshistorikk
 
     class Opplysning(
         val dato: LocalDate,
         val sykepengegrunnlag: Inntekt,
     )
 
-    init {
-        inntektshistorikk.accept(this)
-    }
-
-    internal fun omregnetÅrsinntekt(dato: LocalDate, førsteFraværsdag: LocalDate) =
-        inntektshistorikk.avklarSykepengegrunnlag(dato, førsteFraværsdag, null)
-
-    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-        this.inntektshistorikk = inntektshistorikk
-    }
-
-    override fun visitInntektsmelding(
-        inntektsmelding: Inntektsmelding,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {
-        inntektsopplysninger.add(Opplysning(dato, beløp))
-    }
+    internal fun omregnetÅrsinntekt(dato: LocalDate) = inntektsopplysninger.firstOrNull { it.dato == dato }
 }

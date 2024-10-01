@@ -31,6 +31,13 @@ class Inntektsmelding internal constructor(
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
 
+    internal fun view() = InntektsmeldingView(
+        id = id,
+        dato = dato,
+        hendelseId = hendelseId,
+        beløp = beløp,
+        tidsstempel = tidsstempel
+    )
     internal fun accept(visitor: InntektsmeldingVisitor) {
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
     }
@@ -135,3 +142,11 @@ class Inntektsmelding internal constructor(
         }
     }
 }
+
+internal data class InntektsmeldingView(
+    val id: UUID,
+    val dato: LocalDate,
+    val hendelseId: UUID,
+    val beløp: Inntekt,
+    val tidsstempel: LocalDateTime
+)

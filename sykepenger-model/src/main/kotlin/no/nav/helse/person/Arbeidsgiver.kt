@@ -129,7 +129,8 @@ internal class Arbeidsgiver private constructor(
     fun view(): ArbeidsgiverView = ArbeidsgiverView(
         organisasjonsnummer = organisasjonsnummer,
         sykdomshistorikk = sykdomshistorikk.view(),
-        utbetalinger = utbetalinger.map { it.view }
+        utbetalinger = utbetalinger.map { it.view },
+        inntektshistorikk = inntektshistorikk.view()
     )
 
     internal companion object {
@@ -282,7 +283,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
-        inntektshistorikk.accept(visitor)
         sykmeldingsperioder.accept(visitor)
         visitor.preVisitPerioder(vedtaksperioder)
         vedtaksperioder.forEach { it.accept(visitor) }
