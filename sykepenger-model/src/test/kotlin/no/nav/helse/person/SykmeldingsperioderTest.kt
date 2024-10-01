@@ -231,14 +231,5 @@ internal class SykmeldingsperioderTest {
             harOpphørAvNaturalytelser = false
         )
 
-    class Inspektør : SykmeldingsperioderVisitor {
-
-        val perioder = mutableListOf<Periode>()
-
-        override fun visitSykmeldingsperiode(periode: Periode) {
-            perioder.add(periode)
-        }
-    }
-
-    fun Sykmeldingsperioder.perioder() = Inspektør().also(::accept).perioder
+    fun Sykmeldingsperioder.perioder() = view().perioder
 }

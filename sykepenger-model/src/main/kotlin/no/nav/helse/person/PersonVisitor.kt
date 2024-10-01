@@ -193,7 +193,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
     ) {}
 }
 
-internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
+internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,

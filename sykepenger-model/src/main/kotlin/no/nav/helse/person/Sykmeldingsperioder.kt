@@ -1,20 +1,16 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.dto.SykmeldingsperioderDto
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
 ) {
 
-    internal fun accept(visitor: SykmeldingsperioderVisitor) {
-        visitor.preVisitSykmeldingsperioder(this)
-        perioder.forEach { visitor.visitSykmeldingsperiode(it) }
-        visitor.postVisitSykmeldingsperioder(this)
-    }
+    fun view() = SykmeldingsperioderView(perioder)
 
     internal fun lagre(sykmelding: Sykmelding) {
         perioder = sykmelding.oppdaterSykmeldingsperioder(perioder)
@@ -45,8 +41,4 @@ internal class Sykmeldingsperioder(
     }
 }
 
-internal interface SykmeldingsperioderVisitor {
-    fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}
-    fun visitSykmeldingsperiode(periode: Periode) {}
-    fun postVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}
-}
+internal data class SykmeldingsperioderView(val perioder: List<Periode>)

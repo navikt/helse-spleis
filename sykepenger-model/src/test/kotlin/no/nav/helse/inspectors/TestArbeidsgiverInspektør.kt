@@ -15,7 +15,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -24,7 +23,6 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
@@ -61,7 +59,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperioder = mutableMapOf<UUID, Vedtaksperiode>()
     private var forkastetPeriode = false
     private var inFeriepengeutbetaling = false
-    private val sykmeldingsperioder = mutableListOf<Periode>()
+    private val sykmeldingsperioder = view.sykmeldingsperioder.perioder
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = person.vilkårsgrunnlagHistorikk.inspektør.vilkårsgrunnlagHistorikkInnslag()
 
@@ -205,10 +203,6 @@ internal class TestArbeidsgiverInspektør(
         sendPersonoppdragTilOS: Boolean,
     ) {
         inFeriepengeutbetaling = false
-    }
-
-    override fun visitSykmeldingsperiode(periode: Periode) {
-        this.sykmeldingsperioder.add(periode)
     }
 
     private fun <V> IdInnhenter.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
