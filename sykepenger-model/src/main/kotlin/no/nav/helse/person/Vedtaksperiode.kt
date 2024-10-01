@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Grunnbeløp
@@ -454,7 +455,10 @@ internal class Vedtaksperiode private constructor(
     private fun harFlereSkjæringstidspunkt(): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
-        return Arbeidsgiverperiode.harUtbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt, periode, arbeidsgiverperiode)
+        val utbetalingsdagerFørSkjæringstidspunkt = Arbeidsgiverperiode.utbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt, periode, arbeidsgiverperiode)
+        if (utbetalingsdagerFørSkjæringstidspunkt.isEmpty()) return false
+        sikkerlogg.warn("Har flere skjæringstidspunkt:\n\nAktørId: $aktørId (${id.toString().take(5).uppercase()}) $periode\nSkjæringstidspunkt: ${skjæringstidspunkt.format(datoformat)}\nUtbetalingsdager før skjæringstidspunkt: ${utbetalingsdagerFørSkjæringstidspunkt.joinToString { it.format(datoformat)} }\nSykdomstidslinje; ${sykdomstidslinje.toShortString()}")
+        return true
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
@@ -2527,6 +2531,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val datoformat = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
