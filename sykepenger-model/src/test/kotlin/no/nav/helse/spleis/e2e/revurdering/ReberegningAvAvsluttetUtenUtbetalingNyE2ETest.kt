@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar

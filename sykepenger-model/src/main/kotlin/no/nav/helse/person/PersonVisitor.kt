@@ -3,10 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -16,11 +14,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
@@ -186,101 +179,4 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
         inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID
     ) {}
-}
-
-internal interface ArbeidsgiverVisitor : VedtaksperiodeVisitor {
-    fun preVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) {
-    }
-
-    fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
-    fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
-    fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}
-    fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {}
-    fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {}
-    fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}
-    fun postVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) {
-    }
-}
-
-internal interface BehandlingerVisitor : BehandlingVisitor {
-
-    fun preVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {}
-    fun postVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {}
-}
-
-internal interface BehandlingVisitor {
-    fun preVisitBehandling(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        tilstand: Behandlinger.Behandling.Tilstand,
-        periode: Periode,
-        vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        kilde: Behandlinger.Behandlingkilde
-    ) {}
-    fun visitBehandlingendring(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        sykmeldingsperiode: Periode,
-        periode: Periode,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
-        utbetaling: Utbetaling?,
-        dokumentsporing: Dokumentsporing,
-        sykdomstidslinje: Sykdomstidslinje,
-        skjæringstidspunkt: LocalDate,
-        arbeidsgiverperiode: List<Periode>,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        maksdatoresultat: Maksdatoresultat
-    ) {}
-    fun visitBehandlingkilde(
-        meldingsreferanseId: UUID,
-        innsendt: LocalDateTime,
-        registrert: LocalDateTime,
-        avsender: Avsender
-    ) {}
-    fun postVisitBehandling(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        tilstand: Behandlinger.Behandling.Tilstand,
-        periode: Periode,
-        vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        kilde: Behandlinger.Behandlingkilde
-    ) {}
-}
-
-internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVisitor {
-    fun preVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        tilstand: Vedtaksperiodetilstand,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime,
-        periode: Periode,
-        opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
-        hendelseIder: Set<Dokumentsporing>,
-        egenmeldingsperioder: List<Periode>
-    ) {}
-
-    fun postVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        tilstand: Vedtaksperiodetilstand,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime,
-        periode: Periode,
-        opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
-        hendelseIder: Set<Dokumentsporing>
-    ) {
-    }
 }

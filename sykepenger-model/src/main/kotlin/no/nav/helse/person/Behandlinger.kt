@@ -86,15 +86,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.forEach { it.addObserver(observatør) }
     }
 
-    internal fun view() = BehandlingerView(behandlinger = behandlinger.map { it.view() })
-
-    internal fun accept(visitor: BehandlingerVisitor) {
-        visitor.preVisitBehandlinger(behandlinger)
-        behandlinger.forEach { behandling ->
-            behandling.accept(visitor)
-        }
-        visitor.postVisitBehandlinger(behandlinger)
-    }
+    internal fun view() = BehandlingerView(
+        behandlinger = behandlinger.map { it.view() },
+        hendelser = hendelseIder()
+    )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
     internal fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt, subsumsjonslogg: Subsumsjonslogg) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter, subsumsjonslogg)
@@ -302,9 +297,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     ) {
         constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender())
 
-        internal fun accept(visitor: BehandlingVisitor) {
-            visitor.visitBehandlingkilde(meldingsreferanseId, innsendt, registert, avsender)
-        }
+        fun view() = BehandlingkildeView(meldingsreferanseId, innsendt, registert, avsender)
 
         internal fun dto() = BehandlingkildeDto(
             meldingsreferanseId = this.meldingsreferanseId,
@@ -368,6 +361,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             periode = periode,
             vedtakFattet = vedtakFattet,
             avsluttet = avsluttet,
+            kilde = kilde.view(),
             tilstand = when (tilstand) {
                 Tilstand.AnnullertPeriode -> BehandlingView.TilstandView.ANNULLERT_PERIODE
                 Tilstand.AvsluttetUtenVedtak -> BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
@@ -384,12 +378,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             },
             endringer = endringer.map { it.view() }
         )
-        fun accept(visitor: BehandlingVisitor) {
-            visitor.preVisitBehandling(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
-            endringer.forEach { it.accept(visitor) }
-            kilde.accept(visitor)
-            visitor.postVisitBehandling(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
-        }
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
         fun periode() = periode
@@ -456,7 +444,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat = maksdatoresultat
             )
 
-            fun view() = BehandlingendringView(id, sykmeldingsperiode, periode, sykdomstidslinje)
+            fun view() = BehandlingendringView(
+                id = id,
+                sykmeldingsperiode = sykmeldingsperiode,
+                periode = periode,
+                sykdomstidslinje = sykdomstidslinje,
+                grunnlagsdata = grunnlagsdata,
+                utbetaling = utbetaling,
+                dokumentsporing = dokumentsporing,
+                utbetalingstidslinje = utbetalingstidslinje,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                maksdatoresultat = maksdatoresultat
+            )
 
             private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode) =
                 beregnSkjæringstidspunkt().beregnSkjæringstidspunkt(periode, sykdomstidslinje.sykdomsperiode())
@@ -522,23 +522,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 if (other === this) return true
                 if (other !is Endring) return false
                 return this.dokumentsporing == other.dokumentsporing
-            }
-
-            internal fun accept(visitor: BehandlingVisitor) {
-                visitor.visitBehandlingendring(
-                    id,
-                    tidsstempel,
-                    sykmeldingsperiode,
-                    periode,
-                    grunnlagsdata,
-                    utbetaling,
-                    dokumentsporing,
-                    sykdomstidslinje,
-                    skjæringstidspunkt,
-                    arbeidsgiverperiode,
-                    utbetalingstidslinje,
-                    maksdatoresultat
-                )
             }
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Endring? {
@@ -1538,12 +1521,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun dto() = BehandlingerUtDto(behandlinger = this.behandlinger.map { it.dto() })
 }
 
-internal data class BehandlingerView(val behandlinger: List<BehandlingView>)
+internal data class BehandlingerView(
+    val behandlinger: List<BehandlingView>,
+    val hendelser: Set<Dokumentsporing>
+)
 internal data class BehandlingView(
     val id: UUID,
     val periode: Periode,
     val vedtakFattet: LocalDateTime?,
     val avsluttet: LocalDateTime?,
+    val kilde: BehandlingkildeView,
     val tilstand: TilstandView,
     val endringer: List<BehandlingendringView>
 ) {
@@ -1559,5 +1546,18 @@ internal data class BehandlingendringView(
     val id: UUID,
     val sykmeldingsperiode: Periode,
     val periode: Periode,
-    val sykdomstidslinje: Sykdomstidslinje
+    val sykdomstidslinje: Sykdomstidslinje,
+    val grunnlagsdata: VilkårsgrunnlagElement?,
+    val utbetaling: Utbetaling?,
+    val dokumentsporing: Dokumentsporing,
+    val utbetalingstidslinje: Utbetalingstidslinje,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgiverperiode: List<Periode>,
+    val maksdatoresultat: Maksdatoresultat
+)
+internal data class BehandlingkildeView(
+    val meldingsreferanseId: UUID,
+    val innsendt: LocalDateTime,
+    val registert: LocalDateTime,
+    val avsender: Avsender
 )

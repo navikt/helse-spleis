@@ -114,7 +114,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         })
         assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
-        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
         assertEquals("USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString())
     }
@@ -158,7 +158,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         })
         assertEquals(1431.daglig, utbetalingstidslinje[18.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
-        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
         assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString())
     }

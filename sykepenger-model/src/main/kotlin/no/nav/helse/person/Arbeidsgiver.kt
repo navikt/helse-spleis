@@ -134,7 +134,8 @@ internal class Arbeidsgiver private constructor(
         sykmeldingsperioder = sykmeldingsperioder.view(),
         refusjonshistorikk = refusjonshistorikk.view(),
         feriepengeutbetalinger = feriepengeutbetalinger.map { it.view() },
-        aktiveVedtaksperioder = vedtaksperioder.map { it.view() }
+        aktiveVedtaksperioder = vedtaksperioder.map { it.view() },
+        forkastetVedtaksperioder = forkastede.map { it.view() }
     )
 
     internal companion object {
@@ -283,17 +284,6 @@ internal class Arbeidsgiver private constructor(
     internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
-    }
-
-    internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
-        visitor.preVisitPerioder(vedtaksperioder)
-        vedtaksperioder.forEach { it.accept(visitor) }
-        visitor.postVisitPerioder(vedtaksperioder)
-        visitor.preVisitForkastedePerioder(forkastede)
-        forkastede.forEach { it.accept(visitor) }
-        visitor.postVisitForkastedePerioder(forkastede)
-        visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer

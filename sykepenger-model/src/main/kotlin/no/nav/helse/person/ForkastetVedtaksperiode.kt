@@ -15,11 +15,8 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode
 ) {
-    internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitForkastetPeriode(vedtaksperiode)
-        vedtaksperiode.accept(visitor)
-        visitor.postVisitForkastetPeriode(vedtaksperiode)
-    }
+
+    fun view() = vedtaksperiode.view()
 
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }

@@ -248,7 +248,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode`() {
         nyPeriode(januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
         håndterInntektsmelding(
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
@@ -256,14 +256,14 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         )
         assertEquals("GG UUUUUGG UUUUUGG SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertEquals(16.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(16.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
     }
 
     @Test
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
         nyPeriode(januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
         håndterInntektsmelding(
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(14.desember(2017) til 29.desember(2017)),
@@ -271,7 +271,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(14.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(14.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
     }
 
     @Test

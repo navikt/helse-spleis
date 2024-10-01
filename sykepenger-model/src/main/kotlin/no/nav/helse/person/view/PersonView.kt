@@ -18,5 +18,6 @@ internal data class ArbeidsgiverView(
     val sykmeldingsperioder: SykmeldingsperioderView,
     val refusjonshistorikk: RefusjonshistorikkView,
     val feriepengeutbetalinger: List<FeriepengeutbetalingView>,
-    val aktiveVedtaksperioder: List<VedtaksperiodeView>
+    val aktiveVedtaksperioder: List<VedtaksperiodeView>,
+    val forkastetVedtaksperioder: List<VedtaksperiodeView>
 )

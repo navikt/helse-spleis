@@ -24,7 +24,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -1891,7 +1891,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar))
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
 
-        assertEquals(1.januar til 10.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(1.januar til 10.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter(ORGNUMMER))

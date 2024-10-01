@@ -218,7 +218,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private fun validerSykdomshistorikk() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            val perioderPerHendelse = arbeidsgiver.inspektør.sykdomshistorikk.perioderPerHendelse()
+            val perioderPerHendelse = arbeidsgiver.view().sykdomshistorikk.inspektør.perioderPerHendelse()
             perioderPerHendelse.forEach { (hendelseId, perioder) ->
                 check(!perioder.overlapper()) {
                     "Sykdomshistorikk inneholder overlappende perioder fra hendelse $hendelseId"

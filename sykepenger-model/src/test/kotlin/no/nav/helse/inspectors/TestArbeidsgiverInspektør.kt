@@ -1,17 +1,10 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverVisitor
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -23,22 +16,29 @@ import org.junit.jupiter.api.fail
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
     val orgnummer: String
-) : ArbeidsgiverVisitor {
+) {
     internal companion object {
         internal operator fun TestArbeidsgiverInspektør.invoke(blokk: TestArbeidsgiverInspektør.() -> Unit) {
             this.apply(blokk)
         }
     }
+
     internal var arbeidsgiver: Arbeidsgiver = person.arbeidsgivere.first { it.organisasjonsnummer() == orgnummer }
-    private val view = arbeidsgiver.view()
+    private val view = person.view().arbeidsgivere.single { it.organisasjonsnummer == orgnummer }
 
     private val personInspektør = person.inspektør
-    internal var vedtaksperiodeTeller: Int = 0
-        private set
-    private var vedtaksperiodeindeks = 0
-    private val tilstander = mutableMapOf<Int, TilstandType>()
-    private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
-    private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
+    internal val vedtaksperiodeTeller: Int = view.aktiveVedtaksperioder.size + view.forkastetVedtaksperioder.size
+    private val vedtaksperioder = (view.aktiveVedtaksperioder + view.forkastetVedtaksperioder)
+        .associateBy { it.id }
+    private val tilstander = (view.aktiveVedtaksperioder + view.forkastetVedtaksperioder)
+        .mapIndexed { index, periode -> index to periode.tilstand }
+        .toMap()
+
+    private val vedtaksperiodeindekser = (view.aktiveVedtaksperioder + view.forkastetVedtaksperioder).mapIndexed { index, periode ->
+        periode.id to index
+    }.toMap()
+
+    private val vedtaksperiodeForkastet = view.forkastetVedtaksperioder.map { it.id }.toSet()
     internal val inntektInspektør get() = InntektshistorikkInspektør(view.inntektshistorikk)
     val sykdomshistorikk = view.sykdomshistorikk.inspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
@@ -57,56 +57,9 @@ internal class TestArbeidsgiverInspektør(
     internal val spleisFeriepengebeløpArbeidsgiver = view.feriepengeutbetalinger.map { it.spleisFeriepengebeløpArbeidsgiver }
     internal val spleisFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.spleisFeriepengebeløpPerson }
 
-    private val vedtaksperioder = mutableMapOf<UUID, Vedtaksperiode>()
-    private var forkastetPeriode = false
     private val sykmeldingsperioder = view.sykmeldingsperioder.perioder
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = person.vilkårsgrunnlagHistorikk.inspektør.vilkårsgrunnlagHistorikkInnslag()
-
-    init {
-        this.arbeidsgiver.accept(this)
-    }
-
-    override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
-        forkastetPeriode = true
-    }
-
-    override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
-        forkastetPeriode = false
-    }
-
-    override fun preVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime,
-        periode: Periode,
-        opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
-        hendelseIder: Set<Dokumentsporing>,
-        egenmeldingsperioder: List<Periode>
-    ) {
-        vedtaksperiodeTeller += 1
-        vedtaksperiodeindekser[id] = vedtaksperiodeindeks
-        vedtaksperiodeForkastet[vedtaksperiodeindeks] = forkastetPeriode
-        vedtaksperioder[id] = vedtaksperiode
-        tilstander[vedtaksperiodeindeks] = tilstand.type
-    }
-
-    override fun postVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime,
-        periode: Periode,
-        opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
-        hendelseIder: Set<Dokumentsporing>
-    ) {
-        vedtaksperiodeindeks += 1
-    }
 
     internal data class Feriepengeoppdrag(
         val fagsystemId: String,
@@ -159,8 +112,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun periode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.periode
     internal fun vedtaksperiodeSykdomstidslinje(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.sykdomstidslinje
 
-    internal fun periodeErForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperiodeForkastet)
-    internal fun periodeErForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(vedtaksperiodeForkastet)
+    internal fun periodeErForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = periodeErForkastet(vedtaksperiodeIdInnhenter.id(orgnummer))
+    internal fun periodeErForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in vedtaksperiodeForkastet
 
     internal fun periodeErIkkeForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = !periodeErForkastet(vedtaksperiodeIdInnhenter)
     internal fun periodeErIkkeForkastet(vedtaksperiodeId: UUID) = !periodeErForkastet(vedtaksperiodeId)

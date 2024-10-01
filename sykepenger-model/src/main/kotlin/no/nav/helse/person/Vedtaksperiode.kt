@@ -207,34 +207,9 @@ internal class Vedtaksperiode private constructor(
         tilstand = tilstand.type,
         oppdatert = oppdatert,
         skjæringstidspunkt = skjæringstidspunkt,
+        egenmeldingsperioder = egenmeldingsperioder,
         behandlinger = behandlinger.view()
     )
-    internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(
-            this,
-            id,
-            tilstand,
-            opprettet,
-            oppdatert,
-            periode,
-            sykmeldingsperiode,
-            skjæringstidspunkt,
-            behandlinger.hendelseIder(),
-            egenmeldingsperioder
-        )
-        behandlinger.accept(visitor)
-        visitor.postVisitVedtaksperiode(
-            this,
-            id,
-            tilstand,
-            opprettet,
-            oppdatert,
-            periode,
-            sykmeldingsperiode,
-            skjæringstidspunkt,
-            behandlinger.hendelseIder()
-        )
-    }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
@@ -2846,5 +2821,8 @@ internal data class VedtaksperiodeView(
     val tilstand: TilstandType,
     val oppdatert: LocalDateTime,
     val skjæringstidspunkt: LocalDate,
+    val egenmeldingsperioder: List<Periode>,
     val behandlinger: BehandlingerView
-)
+) {
+    val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
+}
