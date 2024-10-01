@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -128,14 +127,16 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         nullstillTilstandsendringer()
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals("PPPP PPPPPPP PPPPPPP PPPPPPP PPP", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
         håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.februar til 1.mars, 100)))
-        assertEquals(2.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals("PPPP PPPPPPP PPPPPPP PPPPPPP PPP", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -149,24 +150,12 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)), orgnummer = a1)
-
-        assertForventetFeil(
-            forklaring = "Her legger vi til foreldrepenger selv om det ødelegger for annen ag",
-            nå = {
-                assertEquals(1.februar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-                assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
-            },
-            ønsket = {
-                assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-                håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-                håndterUtbetalt()
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-            }
-        )
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test
@@ -179,23 +168,14 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-
-        assertForventetFeil(
-            forklaring = "Nå skjer det noe skikkelig spennende i dette case",
-            nå = {
-                assertEquals(
-                    "krever vilkårsgrunnlag for 2018-01-28, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?",
-                    assertThrows<IllegalStateException> {
-                        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)), orgnummer = a1)
-                    }.message
-                )
-            },
-            ønsket = {
-                assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-            }
-        )
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)), orgnummer = a1)
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test

@@ -1037,7 +1037,7 @@ internal class Vedtaksperiode private constructor(
         ytelser.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlag.valider(ytelser, organisasjonsnummer)
         infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, organisasjonsnummer)
-        ytelser.oppdaterHistorikk(periode, skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.periode) {
+        ytelser.oppdaterHistorikk(periode, skjæringstidspunkt, person.nåværendeVedtaksperioder(OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT(this)).firstOrNull()?.periode) {
             oppdaterHistorikk(
                 ytelser.avgrensTil(periode),
                 validering = {}
@@ -1879,10 +1879,12 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
         ): Tilstand {
+            check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) {
+                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
+            }
             if (!vedtaksperiode.forventerInntekt()) return ForventerIkkeInntekt
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) return TrengerInntektsmeldingLæll
             if (vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
 
             val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = vedtaksperiode.førstePeriodeAnnenArbeidsgiverSomTrengerInntektsmelding()
@@ -1902,13 +1904,6 @@ internal class Vedtaksperiode private constructor(
             override fun venteårsak() = HJELP fordi FLERE_SKJÆRINGSTIDSPUNKT
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Denne perioden har flere skjæringstidspunkt slik den står nå. Saksbehandler må inn å vurdere om det kan overstyres dager på en slik måte at det kun er ett skjæringstidspunkt. Om ikke må den kastes ut av Speil.")
-            }
-        }
-
-        private data object TrengerInntektsmeldingLæll: Tilstand {
-            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-                hendelse.info("Perioden hadde tidligere nødvendig inntekt og refusjon, men endringer har gjort at hen trenger inntektsmelding allikevel.")
-                vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
         }
         private data object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
@@ -2592,6 +2587,12 @@ internal class Vedtaksperiode private constructor(
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
+        }
+
+        internal val OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT = { segSelv: Vedtaksperiode ->
+            { vedtaksperiode: Vedtaksperiode ->
+                vedtaksperiode !== segSelv && vedtaksperiode.skjæringstidspunkt == segSelv.skjæringstidspunkt && vedtaksperiode.periode.start >= segSelv.periode.start
+            }
         }
 
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
