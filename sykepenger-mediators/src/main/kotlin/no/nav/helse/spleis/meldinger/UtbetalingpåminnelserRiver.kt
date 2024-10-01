@@ -19,7 +19,7 @@ internal class UtbetalingpåminnelserRiver(
         message.requireKey("antallGangerPåminnet", "utbetalingId",
             "organisasjonsnummer", "fødselsnummer", "aktørId")
         message.require("endringstidspunkt", JsonNode::asLocalDateTime)
-        message.requireAny("status", Utbetalingstatus.values().map(Enum<*>::name))
+        message.requireAny("status", Utbetalingstatus.entries.map(Enum<*>::name))
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingpåminnelseMessage(packet)

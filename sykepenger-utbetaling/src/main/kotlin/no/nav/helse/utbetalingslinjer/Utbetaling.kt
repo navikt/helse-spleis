@@ -851,7 +851,7 @@ enum class Klassekode(val verdi: String) {
     SykepengerArbeidstakerFeriepenger(verdi = "SPATFER");
 
     companion object {
-        private val map = values().associateBy(Klassekode::verdi)
+        private val map = entries.associateBy(Klassekode::verdi)
         fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
         fun gjenopprett(dto: KlassekodeDto) = when (dto) {
             KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> RefusjonFeriepengerIkkeOpplysningspliktig

@@ -25,7 +25,7 @@ enum class Fagområde(
         grad == linje.grad && (linje.beløp == null || linje.beløp == økonomi.dagligBeløpForFagområde(this))
 
     companion object {
-        private val map = values().associateBy(Fagområde::verdi)
+        private val map = entries.associateBy(Fagområde::verdi)
         fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
     }
 }

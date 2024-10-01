@@ -16,7 +16,7 @@ internal class UtbetalingerRiver(
     override val behov = listOf(Utbetaling)
     override val riverName = "Utbetaling"
 
-    private val gyldigeStatuser = Oppdragstatus.values().map(Enum<*>::name)
+    private val gyldigeStatuser = Oppdragstatus.entries.map(Enum<*>::name)
 
     override fun validate(message: JsonMessage) {
         message.requireKey("@løsning.${Utbetaling.name}")

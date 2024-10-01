@@ -23,7 +23,7 @@ internal class PåminnelserRiver(
         message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
         message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
-        message.requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
+        message.requireAny("tilstand", TilstandType.entries.map(Enum<*>::name))
         message.interestedIn("ønskerReberegning")
     }
 
