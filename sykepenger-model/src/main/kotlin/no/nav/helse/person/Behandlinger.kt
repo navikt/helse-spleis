@@ -46,6 +46,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -323,6 +324,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
+        private val refusjonstidslinje: Beløpstidslinje,
         private var vedtakFattet: LocalDateTime?,
         private var avsluttet: LocalDateTime?,
         private val kilde: Behandlingkilde,
@@ -336,7 +338,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val arbeidsgiverperiode get() = gjeldende.arbeidsgiverperiode
         val skjæringstidspunkt get() = gjeldende.skjæringstidspunkt
 
-        constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
+        constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, refusjonstidslinje: Beløpstidslinje, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), refusjonstidslinje, null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {
                 "må ha minst én observatør for å registrere en behandling"
             }
@@ -376,7 +378,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet -> BehandlingView.TilstandView.VEDTAK_FATTET
                 Tilstand.VedtakIverksatt -> BehandlingView.TilstandView.VEDTAK_IVERKSATT
             },
-            endringer = endringer.map { it.view() }
+            endringer = endringer.map { it.view() },
+            refusjonstidslinje = refusjonstidslinje
         )
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
@@ -880,6 +883,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(håndtereEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
+                refusjonstidslinje = this.refusjonstidslinje,
                 avsluttet = null,
                 kilde = Behandlingkilde(hendelse)
             )
@@ -897,6 +901,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
+                refusjonstidslinje = this.refusjonstidslinje,
                 avsluttet = null,
                 kilde = Behandlingkilde(hendelse)
             )
@@ -908,6 +913,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = Tilstand.AnnullertPeriode,
                 endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata)),
+                refusjonstidslinje = this.refusjonstidslinje,
                 avsluttet = LocalDateTime.now(),
                 kilde = Behandlingkilde(hendelse)
             )
@@ -1027,6 +1033,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert
                         )
                     ),
+                    refusjonstidslinje = Beløpstidslinje(),
                     avsluttet = null,
                     kilde = Behandlingkilde(søknad)
                 )
@@ -1105,6 +1112,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                     },
                     endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger, dto.tilstand == BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK) }.toMutableList(),
+                    refusjonstidslinje = Beløpstidslinje(),
                     vedtakFattet = dto.vedtakFattet,
                     avsluttet = dto.avsluttet,
                     kilde = Behandlingkilde.gjenopprett(dto.kilde),
@@ -1406,6 +1414,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         observatører = behandling.observatører,
                         tilstand = TilInfotrygd,
                         endringer = listOf(behandling.gjeldende.kopierUtenUtbetaling()),
+                        refusjonstidslinje = Beløpstidslinje(),
                         avsluttet = LocalDateTime.now(),
                         kilde = Behandlingkilde(hendelse)
                     )
@@ -1532,7 +1541,8 @@ internal data class BehandlingView(
     val avsluttet: LocalDateTime?,
     val kilde: BehandlingkildeView,
     val tilstand: TilstandView,
-    val endringer: List<BehandlingendringView>
+    val endringer: List<BehandlingendringView>,
+    val refusjonstidslinje: Beløpstidslinje
 ) {
     enum class TilstandView {
         ANNULLERT_PERIODE, AVSLUTTET_UTEN_VEDTAK,
