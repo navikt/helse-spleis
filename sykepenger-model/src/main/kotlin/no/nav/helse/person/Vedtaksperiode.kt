@@ -2115,6 +2115,15 @@ internal class Vedtaksperiode private constructor(
             } ?: trengerSimulering(vedtaksperiode, påminnelse)
         }
 
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            refusjonstidslinje: Beløpstidslinje
+        ) {
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             håndterFørstegangsbehandling(simulering, vedtaksperiode) {
                 vedtaksperiode.behandlinger.valider(simulering)

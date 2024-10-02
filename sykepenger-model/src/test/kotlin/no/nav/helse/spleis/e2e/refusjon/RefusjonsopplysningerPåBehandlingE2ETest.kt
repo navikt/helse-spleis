@@ -69,6 +69,24 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
+    @Test
+    fun `korrigerte refusjonsopplysninger i AvventerSimulering`() {
+        håndterSøknad(januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        val tidsstempelNy = LocalDateTime.now()
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+
+        val kildeNy = Kilde(imNy, Avsender.ARBEIDSGIVER, tidsstempelNy)
+
+        val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
+        assertEquals(forventetTidslinje, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+    }
 
     @Test
     fun `korrigerte refusjonsopplysninger i AvventerGodkjenning`() {
