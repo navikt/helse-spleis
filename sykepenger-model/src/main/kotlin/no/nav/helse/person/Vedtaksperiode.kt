@@ -1989,6 +1989,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse)
         }
 
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            refusjonstidslinje: Beløpstidslinje
+        ) {
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
                 vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk)

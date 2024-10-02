@@ -34,10 +34,23 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert inntektsmelding`() {
+    fun `korrigert inntektsmelding i AvventerVilkårsprøving`() {
         håndterSøknad(januar)
-        val tidsstempelGammel = LocalDateTime.now()
-        val imGammel = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, mottatt = tidsstempelGammel)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
+
+        val tidsstempelNy = LocalDateTime.now()
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+
+        val kildeNy = Kilde(imNy, Avsender.ARBEIDSGIVER, tidsstempelNy)
+
+        val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
+        assertEquals(forventetTidslinje, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
+    }
+
+    @Test
+    fun `korrigert inntektsmelding i AvventerGodkjenning`() {
+        håndterSøknad(januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
