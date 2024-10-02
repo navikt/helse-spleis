@@ -14,6 +14,7 @@ import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringIRefusjonDto
@@ -845,7 +846,8 @@ data class PersonData(
                 val vedtakFattet: LocalDateTime?,
                 val avsluttet: LocalDateTime?,
                 val kilde: KildeData,
-                val endringer: List<EndringData>
+                val endringer: List<EndringData>,
+                val refusjonstidslinje: BeløpstidslinjeData? // TODO kan fjernes om 1 måned, 5. november 2024
             ) {
                 fun tilDto() = BehandlingInnDto(
                     id = this.id,
@@ -866,7 +868,20 @@ data class PersonData(
                     vedtakFattet = this.vedtakFattet,
                     avsluttet = this.avsluttet,
                     kilde = this.kilde.tilDto(),
-                    endringer = this.endringer.map { it.tilDto() }
+                    endringer = this.endringer.map { it.tilDto() },
+                    refusjonstidslinje = this.refusjonstidslinje?.let {
+                        BeløpstidslinjeDto(it.dager.map {
+                            BeløpstidslinjeDto.BeløpstidslinjedagDto(
+                                dato = it.dato,
+                                dagligBeløp = it.dagligBeløp,
+                                kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+                                    meldingsreferanseId = it.meldingsreferanseId,
+                                    avsender = it.avsender.tilDto(),
+                                    tidsstempel = it.tidsstempel
+                                )
+                            )
+                        })
+                    } ?: BeløpstidslinjeDto(emptyList())
                 )
                 enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
@@ -1352,6 +1367,8 @@ data class PersonData(
             }
         }
     }
+    data class BeløpstidslinjeData(val dager: List<BeløpstidslinjedagData>)
+    data class BeløpstidslinjedagData(val dato: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData, val tidsstempel: LocalDateTime)
 }
 
 private fun LocalDate.erHelg() = dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)

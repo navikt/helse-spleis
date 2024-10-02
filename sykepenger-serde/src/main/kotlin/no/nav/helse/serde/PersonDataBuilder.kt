@@ -7,6 +7,7 @@ import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringIRefusjonDto
@@ -362,19 +363,22 @@ private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Vedtak
     vedtakFattet = this.vedtakFattet,
     avsluttet = this.avsluttet,
     kilde = this.kilde.tilPersonData(),
-    endringer = this.endringer.map { it.tilPersonData() }
+    endringer = this.endringer.map { it.tilPersonData() },
+    refusjonstidslinje = this.refusjonstidslinje.tilPersonData()
 )
 private fun BehandlingkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
     meldingsreferanseId = this.meldingsreferanseId,
     innsendt = this.innsendt,
     registrert = this.registert,
-    avsender = when (this.avsender) {
-        AvsenderDto.ARBEIDSGIVER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
-        AvsenderDto.SAKSBEHANDLER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
-        AvsenderDto.SYKMELDT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
-        AvsenderDto.SYSTEM -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
-    }
+    avsender = this.avsender.tilPersonData()
 )
+
+private fun AvsenderDto.tilPersonData() = when (this) {
+    AvsenderDto.ARBEIDSGIVER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
+    AvsenderDto.SAKSBEHANDLER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
+    AvsenderDto.SYKMELDT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
+    AvsenderDto.SYSTEM -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
+}
 private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
     id = id,
     tidsstempel = tidsstempel,
@@ -871,4 +875,16 @@ private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = Skatteopplysnin
     fordel = fordel,
     beskrivelse = beskrivelse,
     tidsstempel = tidsstempel
+)
+
+private fun BeløpstidslinjeDto.tilPersonData() = PersonData.BeløpstidslinjeData(
+    dager = this.dager.map {
+        PersonData.BeløpstidslinjedagData(
+            dato = it.dato,
+            dagligBeløp = it.dagligBeløp,
+            meldingsreferanseId = it.kilde.meldingsreferanseId,
+            avsender = it.kilde.avsender.tilPersonData(),
+            tidsstempel = it.kilde.tidsstempel
+        )
+    }
 )

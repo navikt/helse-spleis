@@ -1112,7 +1112,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                     },
                     endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger, dto.tilstand == BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK) }.toMutableList(),
-                    refusjonstidslinje = Beløpstidslinje(),
+                    refusjonstidslinje = Beløpstidslinje.gjenopprett(dto.refusjonstidslinje),
                     vedtakFattet = dto.vedtakFattet,
                     avsluttet = dto.avsluttet,
                     kilde = Behandlingkilde.gjenopprett(dto.kilde),
@@ -1521,6 +1521,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakIverksatt -> BehandlingtilstandDto.VEDTAK_IVERKSATT
             },
             endringer = this.endringer.map { it.dto() },
+            refusjonstidslinje = this.refusjonstidslinje.dto(),
             vedtakFattet = this.vedtakFattet,
             avsluttet = this.avsluttet,
             kilde = this.kilde.dto()
