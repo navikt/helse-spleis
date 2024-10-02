@@ -1,0 +1,40 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "refusjonstidslinje": {
+                "perioder": []
+              }
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "refusjonstidslinje": {
+                "perioder": []
+              }
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "refusjonstidslinje": {
+                  "perioder": []
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 306
+}

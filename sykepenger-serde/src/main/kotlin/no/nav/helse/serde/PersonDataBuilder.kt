@@ -878,9 +878,10 @@ private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = Skatteopplysnin
 )
 
 private fun BeløpstidslinjeDto.tilPersonData() = PersonData.BeløpstidslinjeData(
-    dager = this.dager.map {
-        PersonData.BeløpstidslinjedagData(
-            dato = it.dato,
+    perioder = this.perioder.map {
+        PersonData.BeløpstidslinjeperiodeData(
+            fom = it.fom,
+            tom = it.tom,
             dagligBeløp = it.dagligBeløp,
             meldingsreferanseId = it.kilde.meldingsreferanseId,
             avsender = it.kilde.avsender.tilPersonData(),

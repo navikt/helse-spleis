@@ -63,34 +63,50 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
 
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
 
-    internal fun dto() = BeløpstidslinjeDto(dager.map { (_, dag) ->
-        BeløpstidslinjeDto.BeløpstidslinjedagDto(
-            dato = dag.dato,
-            dagligBeløp = dag.beløp.daglig,
-            kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                meldingsreferanseId = dag.kilde.meldingsreferanseId,
-                avsender = dag.kilde.avsender.dto(),
-                tidsstempel = dag.kilde.tidsstempel
-            )
-        )
-    })
+    internal fun dto() = BeløpstidslinjeDto(
+        perioder = dager
+            .map { (_, dag) ->
+                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                    fom = dag.dato,
+                    tom = dag.dato,
+                    dagligBeløp = dag.beløp.daglig,
+                    kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+                        meldingsreferanseId = dag.kilde.meldingsreferanseId,
+                        avsender = dag.kilde.avsender.dto(),
+                        tidsstempel = dag.kilde.tidsstempel
+                    )
+                )
+            }
+            .fold(emptyList()) { result, dag ->
+                when {
+                    result.isEmpty() -> listOf(dag)
+                    result.last().kanUtvidesAv(dag) -> result.dropLast(1) + result.last().copy(tom = dag.tom)
+                    else -> result.plusElement(dag)
+                }
+            }
+    )
 
     internal companion object {
         private val nyesteTidsstempel = { a: Beløpsdag, b: Beløpsdag ->
             if (a.kilde.tidsstempel > b.kilde.tidsstempel) a else b
         }
         internal fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
-        internal fun gjenopprett(dto: BeløpstidslinjeDto) = Beløpstidslinje(dto.dager.map {
-            Beløpsdag(
-                dato = it.dato,
-                beløp = it.dagligBeløp.daglig,
-                kilde = Kilde(
-                    meldingsreferanseId = it.kilde.meldingsreferanseId,
-                    avsender = Avsender.gjenopprett(it.kilde.avsender),
-                    tidsstempel = it.kilde.tidsstempel
-                )
-            )
-        })
+        internal fun gjenopprett(dto: BeløpstidslinjeDto) = Beløpstidslinje(
+            dager = dto.perioder
+                .flatMap {
+                    (it.fom til it.tom).map { dato ->
+                        Beløpsdag(
+                            dato = dato,
+                            beløp = it.dagligBeløp.daglig,
+                            kilde = Kilde(
+                                meldingsreferanseId = it.kilde.meldingsreferanseId,
+                                avsender = Avsender.gjenopprett(it.kilde.avsender),
+                                tidsstempel = it.kilde.tidsstempel
+                            )
+                        )
+                    }
+                }
+        )
     }
 }
 
