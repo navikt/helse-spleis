@@ -18,7 +18,7 @@ internal class OverstyrTidlinjeRiver(
         message.requireArray("dager") {
             requireKey("dato")
             requireAny("type", Dagtype.gyldigeTyper)
-            interestedIn("grad")
+            interestedIn("grad", "tom")
         }
         message.require("dager") { require(!it.isEmpty) }
     }
