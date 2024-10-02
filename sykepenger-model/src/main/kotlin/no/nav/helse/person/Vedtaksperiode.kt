@@ -2368,6 +2368,14 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            refusjonstidslinje: Beløpstidslinje
+        ) {
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             when {
                 vedtaksperiode.behandlinger.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)

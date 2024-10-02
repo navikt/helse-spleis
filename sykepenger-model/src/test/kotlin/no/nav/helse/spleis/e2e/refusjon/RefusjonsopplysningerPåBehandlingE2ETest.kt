@@ -6,6 +6,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -105,5 +106,39 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
         assertEquals(forventetTidslinje, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `korrigerte refusjonsopplysninger i TilUtbetaling`() {
+        håndterSøknad(januar)
+        val tidsstempelGammel = LocalDateTime.now()
+        val imGammel = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, mottatt = tidsstempelGammel)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        val tidsstempelNy = LocalDateTime.now()
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+
+        val kildeGammel = Kilde(imGammel, Avsender.ARBEIDSGIVER, tidsstempelGammel)
+        val kildeNy = Kilde(imNy, Avsender.ARBEIDSGIVER, tidsstempelNy)
+
+        val inspektør = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør
+        assertEquals(2, inspektør.behandlinger.size)
+
+        inspektør.behandlinger[0].also {
+            val forventetTidslinje = Beløpstidslinje.fra(1.januar til 31.januar, INNTEKT, kildeGammel)
+            assertEquals(forventetTidslinje, it.refusjonstidslinje)
+        }
+        inspektør.behandlinger[1].also {
+            val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
+            assertEquals(forventetTidslinje, it.refusjonstidslinje)
+        }
+
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
     }
 }

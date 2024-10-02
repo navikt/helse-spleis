@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -31,6 +32,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
                 sykmeldingsperiode = it.sykmeldingsperiode,
             )
         },
+        refusjonstidslinje = view.refusjonstidslinje,
         periode = view.periode,
         tilstand = view.tilstand,
         vedtakFattet = view.vedtakFattet,
@@ -44,6 +46,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
     data class Behandling(
         val id: UUID,
         val endringer: List<Behandlingendring>,
+        val refusjonstidslinje: Beløpstidslinje,
         val periode: Periode,
         val tilstand: BehandlingView.TilstandView,
         val vedtakFattet: LocalDateTime?,
