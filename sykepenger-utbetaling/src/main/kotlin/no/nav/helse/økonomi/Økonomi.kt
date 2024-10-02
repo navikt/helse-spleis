@@ -2,7 +2,6 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -13,17 +12,17 @@ import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 class Økonomi private constructor(
-    private val grad: Prosentdel,
-    private val totalGrad: Prosentdel = grad,
-    private val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
-    private val aktuellDagsinntekt: Inntekt = INGEN,
-    private val beregningsgrunnlag: Inntekt = INGEN,
-    private val dekningsgrunnlag: Inntekt = INGEN,
-    private val grunnbeløpgrense: Inntekt? = null,
-    private val arbeidsgiverbeløp: Inntekt? = null,
-    private val personbeløp: Inntekt? = null,
-    private val er6GBegrenset: Boolean? = null,
-    private val tilstand: Tilstand = Tilstand.KunGrad,
+    val grad: Prosentdel,
+    val totalGrad: Prosentdel = grad,
+    val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
+    val aktuellDagsinntekt: Inntekt = INGEN,
+    val beregningsgrunnlag: Inntekt = INGEN,
+    val dekningsgrunnlag: Inntekt = INGEN,
+    val grunnbeløpgrense: Inntekt? = null,
+    val arbeidsgiverbeløp: Inntekt? = null,
+    val personbeløp: Inntekt? = null,
+    val er6GBegrenset: Boolean? = null,
+    val tilstand: Tilstand = Tilstand.KunGrad,
 ) {
     companion object {
         private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
@@ -219,13 +218,6 @@ class Økonomi private constructor(
     fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.toDouble().toInt())
     // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
-
-    fun accept(visitor: ØkonomiVisitor) {
-        visitor.visitAvrundetØkonomi(
-            arbeidsgiverbeløp?.daglig?.toInt(),
-            personbeløp?.daglig?.toInt()
-        )
-    }
 
     private fun utbetalingsgrad() = tilstand.utbetalingsgrad(this)
     private fun sykdomsgrad() = tilstand.sykdomsgrad(this)
@@ -506,13 +498,3 @@ abstract class ØkonomiBuilder {
 fun List<Økonomi>.betal() = Økonomi.betal(this)
 
 fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
-
-/*
-Fordi vi må vekk fra `medData` og gjøre like ting sånn nogenlunde likt.
- */
-interface ØkonomiVisitor {
-    fun visitAvrundetØkonomi(
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
-    ) {}
-}

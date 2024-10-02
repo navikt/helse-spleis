@@ -34,7 +34,6 @@ sealed class Utbetalingsdag(
 
     class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 30
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodeDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto(dato, økonomi)
@@ -50,7 +49,6 @@ sealed class Utbetalingsdag(
 
     class ArbeidsgiverperiodedagNav(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 45
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodedagNav(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto(dato, økonomi)
@@ -69,7 +67,6 @@ sealed class Utbetalingsdag(
         økonomi: Økonomi
     ) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 50
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = NavDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.NavDagDto(dato, økonomi)
@@ -86,7 +83,6 @@ sealed class Utbetalingsdag(
     class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
         override val prioritet = 40
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = NavHelgDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.NavHelgDagDto(dato, økonomi)
@@ -102,7 +98,6 @@ sealed class Utbetalingsdag(
 
     class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 20
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = Fridag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.FridagDto(dato, økonomi)
@@ -118,7 +113,6 @@ sealed class Utbetalingsdag(
 
     class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 10
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = Arbeidsdag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.ArbeidsdagDto(dato, økonomi)
@@ -141,7 +135,6 @@ sealed class Utbetalingsdag(
         override fun avvisDag(begrunnelser: List<Begrunnelse>) =
             AvvistDag(dato, økonomi, this.begrunnelser + begrunnelser)
 
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
 
         override fun erAvvistMed(begrunnelse: Begrunnelse) = takeIf { begrunnelse in begrunnelser }
         override fun kopierMed(økonomi: Økonomi) = AvvistDag(dato, økonomi, begrunnelser)
@@ -161,7 +154,6 @@ sealed class Utbetalingsdag(
     class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
         override val prioritet = 40 // Mellom ArbeidsgiverperiodeDag og NavDag
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = ForeldetDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.ForeldetDagDto(dato, økonomi)
@@ -177,7 +169,6 @@ sealed class Utbetalingsdag(
 
     class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 0
-        fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = UkjentDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.UkjentDagDto(dato, økonomi)

@@ -13,20 +13,15 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
-import no.nav.helse.økonomi.ØkonomiVisitor
 import kotlin.reflect.KClass
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
-// Collects assertable statistics for a Utbetalingstidslinje
-class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
-    UtbetalingstidslinjeVisitor, ØkonomiVisitor {
-    var førstedato = LocalDate.MIN
-    var sistedato = LocalDate.MAX
-    lateinit var førstedag: Utbetalingsdag
-    lateinit var sistedag: Utbetalingsdag
+// Collects assertable statistics for an Utbetalingstidslinje
+class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje) {
+    val førstedato = utbetalingstidslinje.firstOrNull()?.dato ?: LocalDate.MIN
+    val sistedato = utbetalingstidslinje.lastOrNull()?.dato ?: LocalDate.MAX
 
     var arbeidsdagTeller = 0
     var arbeidsgiverperiodeDagTeller = 0
@@ -72,7 +67,58 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         navHelgDagTeller = 0
         ukjentDagTeller = 0
         totalUtbetaling = 0.0
-        utbetalingstidslinje.accept(this)
+
+        utbetalingstidslinje.forEach { dag ->
+            when (dag) {
+                is Arbeidsdag -> {
+                    arbeidsdagTeller += 1
+                    arbeidsdager.add(dag)
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is ArbeidsgiverperiodeDag -> {
+                    arbeidsgiverperiodeDagTeller += 1
+                    arbeidsgiverdager.add(dag)
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is ArbeidsgiverperiodedagNav -> {
+                    arbeidsgiverperiodedagNavTeller += 1
+                    arbeidsgiverperiodedagerNavAnsvar.add(dag)
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is AvvistDag -> {
+                    avvistDagTeller += 1
+                    avvistedatoer.add(dag.dato)
+                    avvistedager.add(dag)
+                    begrunnelser[dag.dato] = dag.begrunnelser
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is ForeldetDag -> {
+                    foreldetDagTeller += 1
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is Fridag -> {
+                    fridagTeller += 1
+                    fridager.add(dag)
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is NavDag -> {
+                    totalUtbetaling += dag.økonomi.arbeidsgiverbeløp?.dagligInt ?: 0
+                    totalUtbetaling += dag.økonomi.personbeløp?.dagligInt ?: 0
+                    navDagTeller += 1
+                    navdager.add(dag)
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is NavHelgDag -> {
+                    navHelgDagTeller += 1
+                    navHelgdager.add(dag)
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+                is UkjentDag -> {
+                    ukjentDagTeller += 1
+                    collect(dag, dag.dato, dag.økonomi)
+                }
+            }
+        }
     }
 
     fun grad(dag: LocalDate) = økonomi.getValue(dag).brukAvrundetGrad { grad -> grad }
@@ -88,109 +134,5 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     private fun collect(dag: Utbetalingsdag, dato: LocalDate, økonomi: Økonomi) {
         this.økonomi[dato] = økonomi
         unikedager.add(dag::class)
-        første(dag, dato)
-        sistedag = dag
-        sistedato = dato
-    }
-
-    private fun første(dag: Utbetalingsdag, dato: LocalDate) {
-        if (this::førstedag.isInitialized) return
-        førstedag = dag
-        førstedato = dato
-    }
-
-    override fun visit(
-        dag: Arbeidsdag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        arbeidsdagTeller += 1
-        arbeidsdager.add(dag)
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(dag: ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
-        arbeidsgiverperiodedagNavTeller += 1
-        arbeidsgiverperiodedagerNavAnsvar.add(dag)
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(
-        dag: ArbeidsgiverperiodeDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        arbeidsgiverperiodeDagTeller += 1
-        arbeidsgiverdager.add(dag)
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(
-        dag: AvvistDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        avvistDagTeller += 1
-        avvistedatoer.add(dato)
-        avvistedager.add(dag)
-        begrunnelser[dato] = dag.begrunnelser
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Fridag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        fridagTeller += 1
-        fridager.add(dag)
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(
-        dag: NavDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        økonomi.accept(this)
-        navDagTeller += 1
-        navdager.add(dag)
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visitAvrundetØkonomi(
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
-    ) {
-        totalUtbetaling += arbeidsgiverbeløp ?: 0
-        totalUtbetaling += personbeløp ?: 0
-    }
-
-    override fun visit(
-        dag: NavHelgDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        navHelgDagTeller += 1
-        navHelgdager.add(dag)
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(
-        dag: ForeldetDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        foreldetDagTeller += 1
-        collect(dag, dato, økonomi)
-    }
-
-    override fun visit(
-        dag: UkjentDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        ukjentDagTeller += 1
-        collect(dag, dato, økonomi)
     }
 }

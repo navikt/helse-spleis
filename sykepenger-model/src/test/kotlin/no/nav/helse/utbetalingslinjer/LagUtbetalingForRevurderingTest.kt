@@ -115,8 +115,8 @@ internal class LagUtbetalingForRevurderingTest {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
         val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, 31.januar)
         revurdering.inspektør.utbetalingstidslinje.inspektør.apply {
-            assertEquals(1.januar, førstedag.dato)
-            assertEquals(31.januar, sistedag.dato)
+            assertEquals(1.januar, førstedato)
+            assertEquals(31.januar, sistedato)
         }
     }
 

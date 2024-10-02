@@ -27,7 +27,6 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -193,7 +192,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     fun setup() {
         resetSeed()
         jurist = Subsumsjonobservatør()
-        observatør = Dagobservatør()
         teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
     }
 
@@ -219,7 +217,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
 
         val utbetalingstidslinje = builder.result(tidslinje)
 
-        utbetalingstidslinje.accept(observatør)
+        observatør = Dagobservatør(utbetalingstidslinje)
 
         val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje, utbetalingstidslinje)
         subsummering.subsummer(tidslinje.periode()!!, ArbeidsgiverRegler.Companion.NormalArbeidstaker)
@@ -286,7 +284,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         }
     }
 
-    private class Dagobservatør : UtbetalingstidslinjeVisitor {
+    private class Dagobservatør(utbetalingstidslinje: Utbetalingstidslinje) {
         val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager
         var fridager = 0
         var arbeidsdager = 0
@@ -296,68 +294,20 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var foreldetdager = 0
         var avvistdager = 0
 
-        override fun visit(
-            dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            arbeidsgiverperiodedager += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.ArbeidsgiverperiodedagNav,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            arbeidsgiverperiodedagerNavAnsvar += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.NavDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            utbetalingsdager += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.NavHelgDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            utbetalingsdager += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.Fridag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            fridager += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.Arbeidsdag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            arbeidsdager += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.AvvistDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            avvistdager += 1
-        }
-
-        override fun visit(
-            dag: Utbetalingsdag.ForeldetDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            foreldetdager += 1
+        init {
+            utbetalingstidslinje.forEach { dag ->
+                when (dag) {
+                    is Utbetalingsdag.Arbeidsdag -> arbeidsdager += 1
+                    is Utbetalingsdag.ArbeidsgiverperiodeDag -> arbeidsgiverperiodedager += 1
+                    is Utbetalingsdag.ArbeidsgiverperiodedagNav -> arbeidsgiverperiodedagerNavAnsvar += 1
+                    is Utbetalingsdag.AvvistDag -> avvistdager += 1
+                    is Utbetalingsdag.ForeldetDag -> foreldetdager += 1
+                    is Utbetalingsdag.Fridag -> fridager += 1
+                    is Utbetalingsdag.NavDag -> utbetalingsdager += 1
+                    is Utbetalingsdag.NavHelgDag -> utbetalingsdager += 1
+                    is Utbetalingsdag.UkjentDag -> {}
+                }
+            }
         }
     }
 }
