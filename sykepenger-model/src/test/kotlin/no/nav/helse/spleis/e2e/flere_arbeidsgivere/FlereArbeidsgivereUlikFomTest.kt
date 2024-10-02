@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -31,6 +32,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
@@ -79,6 +81,59 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Gjenbruk av tidsnære opplysninger slår ikke til ved skatteinntekt i inntektsgrunnlaget`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        håndterSøknad(februar, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
+            assertTrue(arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inntektsopplysning is Inntektsmelding)
+            assertTrue(arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inntektsopplysning is SkattSykepengegrunnlag)
+        }
+
+        nullstillTilstandsendringer()
+        observatør.vedtaksperiodeVenter.clear()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "Ettersom a2 har skatt i inntektsgrunnlaget slår ikke gjenbruk av opplysninger til.",
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
+                val venterPå = observatør.vedtaksperiodeVenter.single().venterPå
+                assertEquals(1.vedtaksperiode.id(a2), venterPå.vedtaksperiodeId)
+                assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
+                assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venterPå.venteårsak.hvorfor)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_VILKÅRSPRØVING_REVURDERING, orgnummer = a2)
+            }
+        )
+    }
 
     @Test
     fun `Går ikke videre til vilkårsprøving om vi mangler IM fra en arbeidsgiver`() {
