@@ -333,7 +333,7 @@ internal class OppdragTest {
             )
         )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId, UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
@@ -360,7 +360,7 @@ internal class OppdragTest {
                 )
             )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId, UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -386,8 +386,8 @@ internal class OppdragTest {
                 )
             )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId, UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId, UUID.randomUUID().toString(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -413,8 +413,8 @@ internal class OppdragTest {
                 )
             )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId, UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId, UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -557,7 +557,7 @@ internal class OppdragTest {
             aktørId = "1234",
             fødselsnummer = "1234",
             orgnummer = "5678",
-            fagsystemId = oppdrag.fagsystemId(),
+            fagsystemId = oppdrag.fagsystemId,
             utbetalingId = "7894",
             avstemmingsnøkkel = avstemmingsnøkkel,
             overføringstidspunkt = overføringstidspunkt,
@@ -592,7 +592,7 @@ internal class OppdragTest {
             aktørId = "1234",
             fødselsnummer = "1234",
             orgnummer = "5678",
-            fagsystemId = oppdrag.fagsystemId(),
+            fagsystemId = oppdrag.fagsystemId,
             utbetalingId = "7894",
             avstemmingsnøkkel = avstemmingsnøkkel,
             overføringstidspunkt = overføringstidspunkt,
@@ -606,7 +606,7 @@ internal class OppdragTest {
             aktørId = "1234",
             fødselsnummer = "1234",
             orgnummer = "5678",
-            fagsystemId = oppdrag.fagsystemId(),
+            fagsystemId = oppdrag.fagsystemId,
             utbetalingId = "7894",
             avstemmingsnøkkel = avstemmingsnøkkel,
             overføringstidspunkt = aksepteringstidspunkt,

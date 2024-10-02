@@ -1,108 +1,36 @@
 package no.nav.helse.inspectors
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import kotlin.properties.Delegates
 
 val Oppdrag.inspektør get() = OppdragInspektør(this)
 
-class OppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
-    private var linjeteller = 0
-    private val endringskoder = mutableListOf<Endringskode>()
-    private lateinit var fagsystemId: String
-    lateinit var fagområde: Fagområde
-        private set
-    lateinit var endringskode: Endringskode
-        private set
-    lateinit var mottaker: String
-        private set
-    private val totalBeløp = mutableListOf<Int>()
-    var nettoBeløp by Delegates.notNull<Int>()
-        private set
-    private val fom = mutableListOf<LocalDate>()
-    private val tom = mutableListOf<LocalDate>()
-    private val grad = mutableListOf<Int?>()
-    private val beløp = mutableListOf<Int?>()
-    private val datoStatusFom = mutableListOf<LocalDate?>()
-    private val delytelseIder = mutableListOf<Int>()
-    private val refDelytelseIder = mutableListOf<Int?>()
-    private val refFagsystemIder = mutableListOf<String?>()
-    var overføringstidspunkt: LocalDateTime? = null
-    var avstemmingsnøkkel: Long? = null
-    private var status: Oppdragstatus? = null
-    private var simuleringsResultat: SimuleringResultatDto? = null
-    var periode: Periode? = null
-        private set
-
-    init {
-        oppdrag.accept(this)
-    }
-
-    override fun preVisitOppdrag(
-        oppdrag: Oppdrag,
-        fagområde: Fagområde,
-        fagsystemId: String,
-        mottaker: String,
-        nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        endringskode: Endringskode,
-        avstemmingsnøkkel: Long?,
-        status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultatDto?
-    ) {
-        this.fagsystemId = fagsystemId
-        this.fagområde = fagområde
-        this.endringskode = endringskode
-        this.mottaker = mottaker
-        this.nettoBeløp = nettoBeløp
-        this.status = status
-        this.simuleringsResultat = simuleringsResultat
-        this.avstemmingsnøkkel = avstemmingsnøkkel
-        this.overføringstidspunkt = overføringstidspunkt
-    }
-
-    override fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        satstype: Satstype,
-        beløp: Int?,
-        grad: Int?,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?,
-        endringskode: Endringskode,
-        datoStatusFom: LocalDate?,
-        statuskode: String?,
-        klassekode: Klassekode
-    ) {
-        linjeteller += 1
-        endringskoder.add(endringskode)
-        delytelseIder.add(delytelseId)
-        refDelytelseIder.add(refDelytelseId)
-        refFagsystemIder.add(refFagsystemId)
-        this.fom.add(fom)
-        this.tom.add(tom)
-        this.grad.add(grad)
-        this.beløp.add(beløp)
-        this.datoStatusFom.add(datoStatusFom)
-        datoStatusFom?.also { this.periode = this.periode?.oppdaterFom(it) ?: it.somPeriode() }
-        this.periode = this.periode?.oppdaterFom(fom)?.oppdaterTom(tom) ?: (fom til tom)
-    }
+class OppdragInspektør(oppdrag: Oppdrag) {
+    private val linjeteller = oppdrag.size
+    private val endringskoder = oppdrag.map { linje -> linje.endringskode }
+    val fagsystemId: String = oppdrag.fagsystemId
+    val fagområde: Fagområde = oppdrag.fagområde
+    val mottaker: String = oppdrag.mottaker
+    val endringskode: Endringskode = oppdrag.endringskode
+    private val totalBeløp = oppdrag.map { linje -> linje.totalbeløp() }
+    val nettoBeløp = oppdrag.nettoBeløp
+    private val fom = oppdrag.map { linje -> linje.fom }
+    private val tom = oppdrag.map { linje -> linje.tom }
+    private val grad = oppdrag.map { linje -> linje.grad }
+    private val beløp = oppdrag.map { linje -> linje.beløp }
+    private val datoStatusFom = oppdrag.map { linje -> linje.datoStatusFom }
+    private val delytelseIder = oppdrag.map { linje -> linje.delytelseId }
+    private val refDelytelseIder = oppdrag.map { linje -> linje.refDelytelseId }
+    private val refFagsystemIder = oppdrag.map { linje -> linje.refFagsystemId }
+    val overføringstidspunkt = oppdrag.overføringstidspunkt
+    val avstemmingsnøkkel = oppdrag.avstemmingsnøkkel
+    val status: Oppdragstatus? = oppdrag.status
+    val simuleringsResultat: SimuleringResultatDto? = oppdrag.simuleringsResultat
+    val periode: Periode? = oppdrag.linjeperiode
 
     fun antallLinjer() = linjeteller
     fun endringskoder() = endringskoder.toList()

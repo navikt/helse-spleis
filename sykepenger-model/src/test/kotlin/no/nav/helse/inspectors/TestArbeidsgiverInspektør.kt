@@ -48,7 +48,7 @@ internal class TestArbeidsgiverInspektør(
     internal val feriepengeoppdrag = view.feriepengeutbetalinger
         .flatMap { listOf(it.oppdrag, it.personoppdrag) }
         .map {
-            Feriepengeoppdrag(it.fagsystemId(), feriepengeutbetalingslinjer = it.map { linje ->
+            Feriepengeoppdrag(it.fagsystemId, feriepengeutbetalingslinjer = it.map { linje ->
                 Feriepengeutbetalingslinje(linje.fom, linje.tom, linje.satstype, linje.beløp, linje.grad, linje.klassekode, linje.endringskode, linje.statuskode)
             })
         }
@@ -143,7 +143,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = hendelseIder(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder
 
-    internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId()
+    internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId
 
     internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vilkårsgrunnlag(vedtaksperiodeIdInnhenter)?.inntektskilde()
     internal fun inntektskilde(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)?.inntektskilde()

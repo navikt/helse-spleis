@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -52,12 +50,8 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -261,7 +255,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(), -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
     }
 
@@ -299,21 +293,21 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         var opprinneligFagsystemId: String?
         inspektør.utbetaling(0).arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.NY)
-            opprinneligFagsystemId = fagsystemId()
+            opprinneligFagsystemId = fagsystemId
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.NY, 1, null, null)
         }
         inspektør.utbetaling(1).arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.ENDR)
-            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(opprinneligFagsystemId, fagsystemId)
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.ENDR, 1, null, null, ønsketDatoStatusFom = 17.januar)
         }
         inspektør.utbetaling(2).arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.ENDR)
-            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(opprinneligFagsystemId, fagsystemId)
             assertEquals(1, size)
-            first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId())
+            first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId)
         }
     }
 
@@ -513,28 +507,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(
-        UtbetalingSkalHaEndringskode(kode, message)
-    )
-
-    private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") :
-        OppdragVisitor {
-        override fun preVisitOppdrag(
-            oppdrag: Oppdrag,
-            fagområde: Fagområde,
-            fagsystemId: String,
-            mottaker: String,
-            nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            endringskode: Endringskode,
-            avstemmingsnøkkel: Long?,
-            status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?,
-            erSimulert: Boolean,
-            simuleringsResultat: SimuleringResultatDto?
-        ) {
-            assertEquals(ønsketEndringskode, endringskode, message)
-        }
+    private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") {
+        assertEquals(kode, endringskode, message)
     }
 
     private fun Utbetalingslinje.assertUtbetalingslinje(
@@ -544,29 +518,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         ønsketRefFagsystemId: String? = null,
         ønsketDatoStatusFom: LocalDate? = null
     ) {
-        val visitor = object : OppdragVisitor {
-            override fun visitUtbetalingslinje(
-                linje: Utbetalingslinje,
-                fom: LocalDate,
-                tom: LocalDate,
-                satstype: Satstype,
-                beløp: Int?,
-                grad: Int?,
-                delytelseId: Int,
-                refDelytelseId: Int?,
-                refFagsystemId: String?,
-                endringskode: Endringskode,
-                datoStatusFom: LocalDate?,
-                statuskode: String?,
-                klassekode: Klassekode
-            ) {
-                assertEquals(ønsketEndringskode, endringskode)
-                assertEquals(ønsketDelytelseId, delytelseId)
-                assertEquals(ønsketRefDelytelseId, refDelytelseId)
-                assertEquals(ønsketRefFagsystemId, refFagsystemId)
-                assertEquals(ønsketDatoStatusFom, datoStatusFom)
-            }
-        }
-        accept(visitor)
+        assertEquals(ønsketEndringskode, endringskode)
+        assertEquals(ønsketDelytelseId, delytelseId)
+        assertEquals(ønsketRefDelytelseId, refDelytelseId)
+        assertEquals(ønsketRefFagsystemId, refFagsystemId)
+        assertEquals(ønsketDatoStatusFom, datoStatusFom)
     }
 }

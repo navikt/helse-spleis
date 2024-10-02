@@ -192,7 +192,7 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
 
         assertNotEquals(utbetalingslinje1, utbetalingslinje2)
         assertNotEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
-        assertEquals(utbetalingslinje1.fagsystemId(), utbetalingslinje2.fagsystemId())
+        assertEquals(utbetalingslinje1.fagsystemId, utbetalingslinje2.fagsystemId)
     }
 
     private fun nyPeriode(

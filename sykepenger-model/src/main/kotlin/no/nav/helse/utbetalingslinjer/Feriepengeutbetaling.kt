@@ -38,7 +38,7 @@ internal class Feriepengeutbetaling private constructor(
     var avstemmingsnøkkel: Long? = null
 
     companion object {
-        fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) || hendelse.erRelevant(it.personoppdrag.fagsystemId()) }
+        fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId) || hendelse.erRelevant(it.personoppdrag.fagsystemId) }
 
         internal fun gjenopprett(alder: Alder, dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
@@ -66,7 +66,7 @@ internal class Feriepengeutbetaling private constructor(
     )
 
     fun håndter(utbetalingHendelse: UtbetalingHendelse, organisasjonsnummer: String, person: Person) {
-        if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId(), personoppdrag.fagsystemId(), utbetalingId)) return
+        if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId, personoppdrag.fagsystemId, utbetalingId)) return
 
         utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         utbetalingHendelse.valider()
@@ -74,7 +74,7 @@ internal class Feriepengeutbetaling private constructor(
         lagreInformasjon(utbetalingHendelse, utbetaltOk)
 
         if (!utbetaltOk) {
-            utbetalingHendelse.info("Utbetaling av feriepenger med utbetalingId $utbetalingId og fagsystemIder ${oppdrag.fagsystemId()} og ${personoppdrag.fagsystemId()} feilet.")
+            utbetalingHendelse.info("Utbetaling av feriepenger med utbetalingId $utbetalingId og fagsystemIder ${oppdrag.fagsystemId} og ${personoppdrag.fagsystemId} feilet.")
             return
         }
 
@@ -130,7 +130,7 @@ internal class Feriepengeutbetaling private constructor(
                 Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig to orgnummer
                 Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger to personidentifikator.toString()
             }
-            val fagsystemId = forrigeOppdrag?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
+            val fagsystemId = forrigeOppdrag?.fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
             val nyttOppdrag = Oppdrag(
                 mottaker = mottaker,

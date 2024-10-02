@@ -275,7 +275,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTrue(inspektør.utbetaling(0).erUtbetalt)
         assertTrue(inspektør.utbetaling(1).erUbetalt)
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
         assertDiff(-2112)
     }
 
@@ -465,7 +465,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         var opprinneligFagsystemId: String?
         inspektør.utbetaling(0).arbeidsgiverOppdrag.apply {
             assertEquals(Endringskode.NY, inspektør.endringskode)
-            opprinneligFagsystemId = fagsystemId()
+            opprinneligFagsystemId = fagsystemId
             assertEquals(1, size)
             first().inspektør.apply {
                 assertEquals(Endringskode.NY, endringskode)
@@ -476,7 +476,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         }
         inspektør.utbetaling(1).arbeidsgiverOppdrag.apply {
             assertEquals(Endringskode.ENDR, inspektør.endringskode)
-            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(opprinneligFagsystemId, fagsystemId)
             assertEquals(1, size)
             first().inspektør.apply {
                 assertEquals(Endringskode.ENDR, endringskode)
@@ -488,13 +488,13 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         }
         inspektør.utbetaling(2).arbeidsgiverOppdrag.apply {
             assertEquals(Endringskode.ENDR, inspektør.endringskode)
-            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(opprinneligFagsystemId, fagsystemId)
             assertEquals(1, size)
             first().inspektør.apply {
                 assertEquals(Endringskode.NY, endringskode)
                 assertEquals(2, delytelseId)
                 assertEquals(1, refDelytelseId)
-                assertEquals(fagsystemId(), refFagsystemId)
+                assertEquals(fagsystemId, refFagsystemId)
             }
         }
         assertDiff(2541)

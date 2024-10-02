@@ -23,11 +23,11 @@ class Utbetalingslinje(
     val beløp: Int?,
     val grad: Int?,
     val refFagsystemId: String? = null,
-    private val delytelseId: Int = 1,
-    private val refDelytelseId: Int? = null,
+    val delytelseId: Int = 1,
+    val refDelytelseId: Int? = null,
     val endringskode: Endringskode = NY,
     val klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
-    private val datoStatusFom: LocalDate? = null
+    val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
     companion object {
@@ -117,24 +117,6 @@ class Utbetalingslinje(
             statuskode = statuskode
         )
 
-    fun accept(visitor: UtbetalingslinjeVisitor) {
-        visitor.visitUtbetalingslinje(
-            this,
-            fom,
-            tom,
-            satstype,
-            beløp,
-            grad,
-            delytelseId,
-            refDelytelseId,
-            refFagsystemId,
-            endringskode,
-            datoStatusFom,
-            statuskode,
-            klassekode
-        )
-    }
-
     fun kobleTil(other: Utbetalingslinje) = kopier(
         endringskode = NY,
         datoStatusFom = null,
@@ -176,7 +158,6 @@ class Utbetalingslinje(
         )
 
 
-    fun datoStatusFom() = datoStatusFom
     fun totalbeløp() = satstype.totalbeløp(beløp ?: 0, stønadsdager())
     fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
@@ -297,23 +278,4 @@ class Utbetalingslinje(
         datoStatusFom = this.datoStatusFom,
         statuskode = this.statuskode
     )
-}
-
-interface UtbetalingslinjeVisitor {
-    fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        satstype: Satstype,
-        beløp: Int?,
-        grad: Int?,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?,
-        endringskode: Endringskode,
-        datoStatusFom: LocalDate?,
-        statuskode: String?,
-        klassekode: Klassekode
-    ) {
-    }
 }

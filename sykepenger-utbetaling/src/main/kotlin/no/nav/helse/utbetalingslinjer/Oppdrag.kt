@@ -3,17 +3,17 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.OppdragstatusDto
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
+import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -29,19 +29,32 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
 
 class Oppdrag private constructor(
-    internal val mottaker: String,
-    internal val fagområde: Fagområde,
-    private val linjer: MutableList<Utbetalingslinje>,
-    private val fagsystemId: String,
-    private val endringskode: Endringskode,
-    private var nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
-    private var overføringstidspunkt: LocalDateTime? = null,
-    private var avstemmingsnøkkel: Long? = null,
-    private var status: Oppdragstatus? = null,
-    private val tidsstempel: LocalDateTime,
-    private var erSimulert: Boolean = false,
-    private var simuleringsResultat: SimuleringResultatDto? = null
+    val mottaker: String,
+    val fagområde: Fagområde,
+    val linjer: MutableList<Utbetalingslinje>,
+    val fagsystemId: String,
+    val endringskode: Endringskode,
+    nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
+    overføringstidspunkt: LocalDateTime? = null,
+    avstemmingsnøkkel: Long? = null,
+    status: Oppdragstatus? = null,
+    val tidsstempel: LocalDateTime,
+    erSimulert: Boolean = false,
+    simuleringsResultat: SimuleringResultatDto? = null
 ) : List<Utbetalingslinje> by linjer, Aktivitetskontekst {
+    var nettoBeløp: Int = nettoBeløp
+        private set
+    var overføringstidspunkt: LocalDateTime? = overføringstidspunkt
+        private set
+    var avstemmingsnøkkel: Long? = avstemmingsnøkkel
+        private set
+    var status: Oppdragstatus? = status
+        private set
+    var erSimulert: Boolean = erSimulert
+        private set
+    var simuleringsResultat: SimuleringResultatDto? = simuleringsResultat
+        private set
+
     companion object {
         fun periode(vararg oppdrag: Oppdrag): Periode? {
             return oppdrag
@@ -98,7 +111,7 @@ class Oppdrag private constructor(
         }
     }
 
-    private val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom() ?: it.fom) til last().tom }
+    val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom ?: it.fom) til last().tom }
 
     constructor(
         mottaker: String,
@@ -127,41 +140,6 @@ class Oppdrag private constructor(
             linjer = linjene
         )
     }
-
-    fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(
-            this,
-            fagområde,
-            fagsystemId,
-            mottaker,
-            nettoBeløp,
-            tidsstempel,
-            endringskode,
-            avstemmingsnøkkel,
-            status,
-            overføringstidspunkt,
-            erSimulert,
-            simuleringsResultat
-        )
-        linjer.forEach { it.accept(visitor) }
-        visitor.postVisitOppdrag(
-            this,
-            fagområde,
-            fagsystemId,
-            mottaker,
-            nettoBeløp,
-            tidsstempel,
-            endringskode,
-            avstemmingsnøkkel,
-            status,
-            overføringstidspunkt,
-            erSimulert,
-            simuleringsResultat
-        )
-    }
-
-    fun fagsystemId() = fagsystemId
-    fun mottaker() = mottaker
 
     private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
 

@@ -4,7 +4,6 @@ import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -154,7 +153,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).erForkastet)
         assertTrue(inspektør.utbetaling(2).erUtbetalt)
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(), -1 * inspektør.sisteUtbetaling().arbeidsgiverOppdrag.nettoBeløp())
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId(), inspektør.sisteUtbetaling().arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.fagsystemId)
     }
 
     @Test

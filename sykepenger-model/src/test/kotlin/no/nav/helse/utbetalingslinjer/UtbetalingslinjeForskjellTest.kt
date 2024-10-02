@@ -1073,7 +1073,7 @@ internal class UtbetalingslinjeForskjellTest {
             13.januar to 19.januar,
             20.januar to 31.januar
         )
-        val new = tomtOppdrag(original.fagsystemId())
+        val new = tomtOppdrag(original.fagsystemId)
         val actual = new - original
         assertUtbetalinger(
             linjer(20.januar to 31.januar endrer original.last() opphører 1.januar),
@@ -1109,7 +1109,7 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(
             1.januar to 5.januar
         )
-        val new = tomtOppdrag(original.fagsystemId())
+        val new = tomtOppdrag(original.fagsystemId)
 
         val actual = new - original
 

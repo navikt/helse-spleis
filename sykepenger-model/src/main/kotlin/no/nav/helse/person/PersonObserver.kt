@@ -286,8 +286,8 @@ interface PersonObserver {
 
             companion object {
                 fun mapOppdrag(oppdrag: Oppdrag) = OppdragEventDetaljer(
-                    fagsystemId = oppdrag.fagsystemId(),
-                    mottaker = oppdrag.mottaker(),
+                    fagsystemId = oppdrag.fagsystemId,
+                    mottaker = oppdrag.mottaker,
                     nettoBeløp = oppdrag.nettoBeløp(),
                     linjer = oppdrag.map { linje ->
                         OppdragEventLinjeDetaljer(

@@ -351,7 +351,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         val revurdering = inspektør.utbetaling(2)
         assertIngenFunksjonelleFeil()
         assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
-        assertEquals(19.januar, revurdering.arbeidsgiverOppdrag[0].datoStatusFom())
+        assertEquals(19.januar, revurdering.arbeidsgiverOppdrag[0].datoStatusFom)
         assertEquals(23.januar til 26.januar, revurdering.arbeidsgiverOppdrag[1].periode)
     }
 
@@ -1065,7 +1065,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
         inspektør.utbetaling(1).arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(2, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
@@ -1103,7 +1103,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(1))
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(2))
-        assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(2).arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(2).arbeidsgiverOppdrag.fagsystemId)
         inspektør.utbetaling(2).arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(1, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)

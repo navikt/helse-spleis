@@ -149,7 +149,7 @@ internal class LagUtbetalingForRevurderingTest {
                 godkjenn(utbetaling)
                 listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
                     .filter { it.harUtbetalinger() }
-                    .map { it.fagsystemId() }
+                    .map { it.fagsystemId }
                     .onEach { kvittèr(utbetaling, it) }
             }
         }

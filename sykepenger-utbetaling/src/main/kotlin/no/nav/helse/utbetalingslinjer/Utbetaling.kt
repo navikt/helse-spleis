@@ -156,14 +156,14 @@ class Utbetaling private constructor(
     }
 
     fun håndter(utbetaling: UtbetalingHendelse) {
-        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return håndterKvitteringForAnnullering(utbetaling)
+        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId, personOppdrag.fagsystemId, id)) return håndterKvitteringForAnnullering(utbetaling)
         if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }
 
     private fun håndterKvitteringForAnnullering(hendelse: UtbetalingHendelse) {
-        if (annulleringer.none { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId(), it.personOppdrag.fagsystemId(), it.id) }) return
+        if (annulleringer.none { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId, it.personOppdrag.fagsystemId, it.id) }) return
         hendelse.kontekst(this)
         tilstand.kvittérAnnullering(this, hendelse)
     }
@@ -190,7 +190,7 @@ class Utbetaling private constructor(
         hendelseErRelevant(hendelse) || annulleringer.any { it.hendelseErRelevant(hendelse) }
 
     private fun hendelseErRelevant(hendelse: UtbetalingHendelse) =
-        hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
+        hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId, personOppdrag.fagsystemId, id)
 
     fun gjelderFor(hendelse: Utbetalingsavgjørelse) =
         hendelse.relevantUtbetaling(id)
@@ -207,7 +207,7 @@ class Utbetaling private constructor(
     }
 
     fun annuller(hendelse: AnnullerUtbetaling, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
-        val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { hendelse.erRelevant(it.id, it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null
+        val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { hendelse.erRelevant(it.id, it.arbeidsgiverOppdrag.fagsystemId) } ?: return null
         if (korrelerendeUtbetaling.korrelasjonsId != this.korrelasjonsId) return null
 
         val aktiveUtbetalinger = alleUtbetalinger.aktive()
@@ -683,11 +683,11 @@ class Utbetaling private constructor(
                     id = utbetaling.id,
                     korrelasjonsId = utbetaling.korrelasjonsId,
                     periode = utbetaling.periode,
-                    personFagsystemId = utbetaling.personOppdrag.fagsystemId(),
+                    personFagsystemId = utbetaling.personOppdrag.fagsystemId,
                     godkjenttidspunkt = tidspunkt,
                     saksbehandlerEpost = epost,
                     saksbehandlerIdent = ident,
-                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId()
+                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId
                 )
             }
         }

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -112,7 +111,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         assertEquals(4, inspektør.antallUtbetalinger)
         inspektør.utbetaling(2).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId())
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId)
             assertEquals(2, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.ENDR, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.januar, it.arbeidsgiverOppdrag[0].inspektør.fom)
@@ -123,7 +122,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         }
         inspektør.utbetaling(3).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId())
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
             assertEquals(1, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.mai, it.arbeidsgiverOppdrag[0].inspektør.fom)
