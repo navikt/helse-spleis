@@ -34,9 +34,6 @@ class Alder(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
         return Alder(this.fødselsdato, dødsdato)
     }
 
-    internal fun accept(visitor: AlderVisitor) {
-        visitor.visitAlder(this, fødselsdato, dødsdato)
-    }
     internal fun innenfor67årsgrense(dato: LocalDate) = dato <= redusertYtelseAlder
 
     internal fun mistetSykepengerett(dato: LocalDate) = dato >= syttiårsdagen
