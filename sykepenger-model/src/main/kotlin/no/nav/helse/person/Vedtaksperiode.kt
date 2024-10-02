@@ -2035,6 +2035,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            refusjonstidslinje: Beløpstidslinje
+        ) {
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
