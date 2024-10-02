@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -10,6 +14,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
@@ -34,9 +40,42 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen`() {
+        håndterSøknad(25.juni til 5.juli)
+        håndterSøknad(31.juli til 18.august)
+        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 1.august)
+        assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
+        assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+
+        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 7.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        assertEquals("ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(listOf(7.august til 18.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
+        assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterOverstyrTidslinje((9.juli til 13.juli).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        assertEquals("ARR SSSSSRR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+
+        assertForventetFeil(
+            forklaring = "Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen",
+            nå = {
+                assertEquals(
+                    "Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-07-09",
+                    assertThrows<IllegalStateException> { håndterYtelser(2.vedtaksperiode) }.message
+                )
+            },
+            ønsket = {
+                fail("""¯\_(ツ)_/¯""")
+            }
+        )
+    }
 
     @Test
     fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`(){
