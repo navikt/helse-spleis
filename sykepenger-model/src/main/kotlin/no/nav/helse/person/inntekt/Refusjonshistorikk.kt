@@ -53,15 +53,20 @@ internal class Refusjonshistorikk {
         val endringerIRefusjon: List<EndringIRefusjon>,
         val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
+        val startskuddet =
+            if (førsteFraværsdag == null) arbeidsgiverperioder.maxOf { it.start }
+            else arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
+
         private fun muligDuplikat(other: Refusjon) =
             this.meldingsreferanseId == other.meldingsreferanseId && this.utledetFørsteFraværsdag() == other.utledetFørsteFraværsdag()
 
         internal fun beløpstidslinje(tilOgMed: LocalDate): Beløpstidslinje {
             val kilde = Kilde(meldingsreferanseId, Avsender.ARBEIDSGIVER, tidsstempel)
-            val startskuddet = startskuddet()
             if (tilOgMed < startskuddet) return Beløpstidslinje()
 
-            val opphørstidslinje = sisteRefusjonsdag?.let { Beløpstidslinje.fra(it.nesteDag til tilOgMed, INGEN, kilde) } ?: Beløpstidslinje()
+            val opphørstidslinje = sisteRefusjonsdag
+                ?.takeIf { it < tilOgMed }
+                ?.let { Beløpstidslinje.fra(it.nesteDag til tilOgMed, INGEN, kilde) } ?: Beløpstidslinje()
 
             if (sisteRefusjonsdag != null && sisteRefusjonsdag < startskuddet) return opphørstidslinje
 
@@ -74,11 +79,6 @@ internal class Refusjonshistorikk {
                 .map { Beløpstidslinje.fra(it.endringsdato til tilOgMed, it.beløp, kilde) }
 
             return endringstidslinjer.fold(basistidslinje, Beløpstidslinje::plus) + opphørstidslinje
-        }
-
-        private fun startskuddet(): LocalDate {
-            if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
-            return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
         }
 
         internal companion object {
@@ -116,13 +116,13 @@ internal class Refusjonshistorikk {
 
                 internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg? = null): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
-                    val aktuelle = refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }
-                    val første = aktuelle.minByOrNull { it.startskuddet() }
-                    if (første != null && første.startskuddet() != skjæringstidspunkt) {
+                    val aktuelle = refusjoner.filter { it.startskuddet >= skjæringstidspunkt }
+                    val første = aktuelle.minByOrNull { it.startskuddet }
+                    if (første != null && første.startskuddet != skjæringstidspunkt) {
                         refusjonsopplysningBuilder.leggTil(Refusjonsopplysning(
                             meldingsreferanseId = første.meldingsreferanseId,
                             fom = skjæringstidspunkt,
-                            tom = første.startskuddet().forrigeDag,
+                            tom = første.startskuddet.forrigeDag,
                             beløp = første.beløp ?: INGEN,
                         ), første.tidsstempel)
                     }
@@ -141,13 +141,13 @@ internal class Refusjonshistorikk {
 
                 private fun Refusjon.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) {
                     // håndterer at inntektsmeldinger oppgir opphørsdato for refusjon til en dato FØR startskuddet
-                    val sisteRefusjonsdag = sisteRefusjonsdag?.let { maxOf(it, startskuddet().forrigeDag) }
-                    val hovedRefusjonsopplysning = EndringIRefusjon(beløp ?: INGEN, startskuddet())
+                    val sisteRefusjonsdag = sisteRefusjonsdag?.let { maxOf(it, startskuddet.forrigeDag) }
+                    val hovedRefusjonsopplysning = EndringIRefusjon(beløp ?: INGEN, startskuddet)
 
                     (endringerIRefusjon + hovedRefusjonsopplysning)
                         .forEach { endring ->
                             if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) return@forEach
-                            else if (endring.endringsdato < startskuddet()) return@forEach
+                            else if (endring.endringsdato < startskuddet) return@forEach
                             else refusjonsopplysningerBuilder.leggTil(Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp), tidsstempel)
                         }
 
@@ -156,7 +156,7 @@ internal class Refusjonshistorikk {
                 }
 
                 internal fun Refusjonshistorikk.beløpstidslinje(søkevindu: Periode): Beløpstidslinje {
-                    val aktuelle = refusjoner.filter { it.startskuddet() in søkevindu }
+                    val aktuelle = refusjoner.filter { it.startskuddet in søkevindu }
                     return aktuelle.sortedBy { it.tidsstempel }.map { it.beløpstidslinje(søkevindu.endInclusive) }.fold(Beløpstidslinje(), Beløpstidslinje::plus).subset(søkevindu)
                 }
 

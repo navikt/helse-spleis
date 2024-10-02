@@ -243,7 +243,8 @@ internal abstract class AbstractDslTest {
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
+        mottatt: LocalDateTime = LocalDateTime.now()
     ) =
         this { håndterInntektsmelding(
             arbeidsgiverperioder,
@@ -253,7 +254,8 @@ internal abstract class AbstractDslTest {
             harOpphørAvNaturalytelser,
             arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
-            id
+            id,
+            mottatt = mottatt
         ) }
     protected fun String.håndterInntektsmeldingPortal(
         arbeidsgiverperioder: List<Periode>,
@@ -395,9 +397,10 @@ internal abstract class AbstractDslTest {
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        orgnummer: String = a1
+        orgnummer: String = a1,
+        mottatt: LocalDateTime = LocalDateTime.now()
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(orgnummer).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id, mottatt = mottatt)
 protected fun håndterInntektsmeldingPortal(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,

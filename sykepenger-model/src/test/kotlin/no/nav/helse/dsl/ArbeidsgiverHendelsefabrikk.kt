@@ -199,7 +199,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             arkivreferanse = "",
             ferieperioder = emptyList(),
             foersteFravaersdag = førsteFraværsdag,
-            mottattDato = LocalDateTime.now(),
+            mottattDato = mottatt,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             naerRelasjon = null,
             avsenderSystem = AvsenderSystem("SpleisModell"),

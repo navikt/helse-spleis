@@ -444,6 +444,7 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding.")
         val dager = inntektsmelding.dager()
         håndter(inntektsmelding) { håndter(dager) }
+        håndter(inntektsmelding) { håndterRefusjonsopplysninger(inntektsmelding, inntektsmelding.refusjonsElement) }
 
         val dagoverstyring = dager.revurderingseventyr()
         addInntektsmelding(inntektsmelding, dagoverstyring)

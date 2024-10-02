@@ -29,6 +29,12 @@ internal class RefusjonTilBeløpstidslinjeTest {
     fun `Siste refusjonsdag er satt`() {
         val refusjonstidslinje = refusjontidslinje(31.januar, førsteFraværsdag = 1.januar, beløp = 100.daglig, sisteRefusjonsdag = 20.januar)
         assertEquals(Beløpstidslinje.fra(1.januar til 20.januar, 100.daglig, kilde) + Beløpstidslinje.fra(21.januar til 31.januar, INGEN, kilde), refusjonstidslinje)
+
+    }
+    @Test
+    fun `Siste refusjonsdag er satt til siste dag i vedtaksperioden`() {
+        val refusjonstidslinje = refusjontidslinje(31.januar, førsteFraværsdag = 1.januar, beløp = 100.daglig, sisteRefusjonsdag = 31.januar)
+        assertEquals(Beløpstidslinje.fra(1.januar til 31.januar, 100.daglig, kilde), refusjonstidslinje)
     }
 
     @Test

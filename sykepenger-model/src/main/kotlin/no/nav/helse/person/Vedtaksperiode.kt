@@ -121,6 +121,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
@@ -302,6 +303,14 @@ internal class Vedtaksperiode private constructor(
         kontekst(dager)
         tilstand.håndter(this, dager)
         dager.vurdertTilOgMed(periode.endInclusive)
+    }
+
+    internal fun håndterRefusjonsopplysninger(hendelse: IAktivitetslogg, refusjon: Refusjonshistorikk.Refusjon) {
+        kontekst(hendelse)
+        val førsteFraværsdag = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
+        val søkevindu = førsteFraværsdag til periode.endInclusive
+        if (refusjon.startskuddet !in søkevindu) return
+        tilstand.håndter(this, hendelse, refusjon)
     }
 
     private fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding): Boolean {
@@ -1319,6 +1328,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager)
         }
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, refusjon: Refusjonshistorikk.Refusjon) {
+            hendelse.info("Forventet ikke refusjonsopplysninger i $type")
+        }
+
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
@@ -1711,6 +1724,15 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
                 dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
             }
+        }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            refusjon: Refusjonshistorikk.Refusjon
+        ) {
+            val refusjonstidslinje = refusjon.beløpstidslinje(vedtaksperiode.periode.endInclusive)
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {

@@ -145,6 +145,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().godkjenning(hendelse, builder)
     }
 
+    internal fun håndterRefusjonstidslinje(refusjonstidslinje: Beløpstidslinje) {
+        behandlinger.last().håndterRefusjonsopplysninger(refusjonstidslinje)
+    }
+
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
         val annullering = behandlinger.last().annuller(arbeidsgiver, hendelse, this.behandlinger.toList()) ?: return null
         andreBehandlinger.forEach {
@@ -324,7 +328,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
-        private val refusjonstidslinje: Beløpstidslinje,
+        private var refusjonstidslinje: Beløpstidslinje,
         private var vedtakFattet: LocalDateTime?,
         private var avsluttet: LocalDateTime?,
         private val kilde: Behandlingkilde,
@@ -403,6 +407,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             person: Person
         ) {
             person.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver.skatteinntekterLagtTilGrunnEvent(this.id))
+        }
+
+        internal fun håndterRefusjonsopplysninger(nyRefusjonstidslinje: Beløpstidslinje) {
+            this.refusjonstidslinje += nyRefusjonstidslinje
         }
 
         // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett

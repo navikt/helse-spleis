@@ -98,8 +98,18 @@ class Inntektsmelding(
         return beregnetInntektsdato
     }
 
+    internal val refusjonsElement = Refusjonshistorikk.Refusjon(
+        meldingsreferanseId = meldingsreferanseId,
+        førsteFraværsdag = førsteFraværsdag,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        beløp = refusjon.beløp,
+        sisteRefusjonsdag = refusjon.opphørsdato,
+        endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
+        tidsstempel = mottatt
+    )
+
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
-        refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+        refusjonshistorikk.leggTilRefusjon(refusjonsElement)
     }
 
     internal fun leggTil(behandlinger: Behandlinger): Boolean {
@@ -110,7 +120,7 @@ class Inntektsmelding(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {
         val refusjonshistorikk = Refusjonshistorikk()
-        refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+        refusjonshistorikk.leggTilRefusjon(refusjonsElement)
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
         val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
@@ -138,20 +148,10 @@ class Inntektsmelding(
     }
 
     class Refusjon(
-        private val beløp: Inntekt?,
-        private val opphørsdato: LocalDate?,
-        private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
+        val beløp: Inntekt?,
+        val opphørsdato: LocalDate?,
+        val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
-
-        internal fun leggTilRefusjon(
-            refusjonshistorikk: Refusjonshistorikk,
-            meldingsreferanseId: UUID,
-            førsteFraværsdag: LocalDate?,
-            arbeidsgiverperioder: List<Periode>
-        ) {
-            val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon.map { it.tilEndring() })
-            refusjonshistorikk.leggTilRefusjon(refusjon)
-        }
 
         class EndringIRefusjon(
             private val beløp: Inntekt,
