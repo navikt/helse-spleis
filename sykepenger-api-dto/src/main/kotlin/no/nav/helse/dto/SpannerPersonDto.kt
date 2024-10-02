@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
@@ -15,6 +16,7 @@ import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtD
 import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -23,7 +25,6 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -419,7 +420,8 @@ data class SpannerPersonDto(
                 val vedtakFattet: LocalDateTime?,
                 val avsluttet: LocalDateTime?,
                 val kilde: KildeData,
-                val endringer: List<EndringData>
+                val endringer: List<EndringData>,
+                val refusjonstidslinje: BeløpstidslinjeData
             ) {
                 enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
@@ -658,6 +660,9 @@ data class SpannerPersonDto(
             val tom: LocalDate?
         )
     }
+
+    data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>)
+    data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
 }
 
 fun PersonUtDto.tilSpannerPersonDto() = SpannerPersonDto(
@@ -999,20 +1004,22 @@ private fun BehandlingUtDto.tilPersonData() =
         vedtakFattet = this.vedtakFattet,
         avsluttet = this.avsluttet,
         kilde = this.kilde.tilPersonData(),
-        endringer = this.endringer.map { it.tilPersonData() }
+        endringer = this.endringer.map { it.tilPersonData() },
+        refusjonstidslinje = this.refusjonstidslinje.tilPersonData()
     )
 private fun BehandlingkildeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
         meldingsreferanseId = this.meldingsreferanseId,
         innsendt = this.innsendt,
         registrert = this.registert,
-        avsender = when (this.avsender) {
-            AvsenderDto.ARBEIDSGIVER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
-            AvsenderDto.SAKSBEHANDLER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
-            AvsenderDto.SYKMELDT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
-            AvsenderDto.SYSTEM -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
-        }
+        avsender = this.avsender.tilPersonData()
     )
+private fun AvsenderDto.tilPersonData() = when (this) {
+    AvsenderDto.ARBEIDSGIVER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
+    AvsenderDto.SAKSBEHANDLER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
+    AvsenderDto.SYKMELDT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
+    AvsenderDto.SYSTEM -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
+}
 private fun BehandlingendringUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
         id = id,
@@ -1551,3 +1558,15 @@ private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =
         beskrivelse = beskrivelse,
         tidsstempel = tidsstempel
     )
+private fun BeløpstidslinjeDto.tilPersonData() = SpannerPersonDto.BeløpstidslinjeData(
+    perioder = this.perioder.map {
+        SpannerPersonDto.BeløpstidslinjeperiodeData(
+            fom = it.fom,
+            tom = it.tom,
+            dagligBeløp = it.dagligBeløp,
+            meldingsreferanseId = it.kilde.meldingsreferanseId,
+            avsender = it.kilde.avsender.tilPersonData(),
+            tidsstempel = it.kilde.tidsstempel
+        )
+    }
+)
