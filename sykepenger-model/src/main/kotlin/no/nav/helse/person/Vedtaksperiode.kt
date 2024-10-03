@@ -617,6 +617,7 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(søknad) {
             søknad.valider(vilkårsgrunnlag, jurist)
         }
+        tilstand.stjelRefusjonsopplysningerFraPeriodeRettFør(this, søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
         val orgnummereMedTilkomneInntekter = søknad.orgnummereMedTilkomneInntekter()
         if (orgnummereMedTilkomneInntekter.isNotEmpty()) person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
@@ -1409,6 +1410,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        fun stjelRefusjonsopplysningerFraPeriodeRettFør(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {}
 
     }
 
@@ -1446,6 +1448,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
+
+        override fun stjelRefusjonsopplysningerFraPeriodeRettFør(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) ?: return
+            vedtaksperiode.behandlinger.stjelRefusjonstidslinjeFra(periodeRettFør.behandlinger, søknad)
+            // TODO Må hensynta refusjonshistorikken i tilfelle det er kommet inn refusjonsopplysninger som endrer seg ift perioden rett før
+        }
     }
 
     internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {

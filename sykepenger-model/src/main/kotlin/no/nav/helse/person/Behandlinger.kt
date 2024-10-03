@@ -273,6 +273,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
+    fun stjelRefusjonstidslinjeFra(behandlingerFraPeriodeRettFør: Behandlinger, søknad: Søknad) {
+        behandlinger.last().stjelRefusjonstidslinje(søknad, behandlingerFraPeriodeRettFør.behandlinger.last())?.also {
+            leggTilNyBehandling(it)
+        }
+
+    }
+
+
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
         behandlinger.last().håndterEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)?.also {
             leggTilNyBehandling(it)
@@ -425,6 +433,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ): Behandling? {
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyRefusjonstidslinje)
         }
+
+        internal fun stjelRefusjonstidslinje(søknad: Søknad, gjeldendeBehandlingPåPeriodeRettFør: Behandling): Behandling? {
+            return this.tilstand.stjelRefusjonstidslinje(this, søknad, gjeldendeBehandlingPåPeriodeRettFør)
+        }
+
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
             (gjeldende.refusjonstidslinje + nyeRefusjonsopplysninger) != gjeldende.refusjonstidslinje
@@ -910,8 +923,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun oppdaterMedRefusjonstidslinje(hendelse: Hendelse, nyeRefusjonsopplysninger: Beløpstidslinje) {
-            check(hendelse is Inntektsmelding) { "Når vi skal ta inn refusjonsopplysninger fra andre ting enn inntektsmelding, må vi fikse dokumentsporing" }
-            val endring = endringer.last().kopierMedRefusjonstidslinje(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()), nyeRefusjonsopplysninger)
+            val dokumentsporing = when(hendelse) {
+                is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId())
+                else -> hendelse.dokumentsporing()
+            }
+            val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing, nyeRefusjonsopplysninger)
             nyEndring(endring)
         }
 
@@ -1222,6 +1238,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ): Behandling? {
                 error("Har ikke implementert håndtering av refusjonsopplysninger i $this")
             }
+            fun stjelRefusjonstidslinje(
+                behandling: Behandling,
+                søknad: Søknad,
+                behandlingPåPeriodeRettFør: Behandling
+            ): Behandling? {
+                error("Har ikke implementert stjeling av refusjonstidslinje i $this")
+            }
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
@@ -1281,6 +1304,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
                     behandling.oppdaterMedRefusjonstidslinje(hendelse, nyeRefusjonsopplysninger)
+                    return null
+                }
+
+                override fun stjelRefusjonstidslinje(
+                    behandling: Behandling,
+                    søknad: Søknad,
+                    behandlingPåPeriodeRettFør: Behandling
+                ): Behandling? {
+                    val refusjonstidslinjePåPeriodeRettFør = behandlingPåPeriodeRettFør.endringer.last().refusjonstidslinje
+                    val stjåletRefusjonstidslinje = refusjonstidslinjePåPeriodeRettFør.strekk(behandling.periode).subset(behandling.periode)
+                    behandling.oppdaterMedRefusjonstidslinje(søknad, stjåletRefusjonstidslinje)
                     return null
                 }
 

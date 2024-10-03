@@ -32,10 +32,9 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
-import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -431,6 +430,7 @@ internal class Arbeidsgiver private constructor(
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
+        val vedtaksperiodeRettFør = finnVedtaksperiodeRettFør(vedtaksperiode)
         vedtaksperiode.håndter(søknad, arbeidsgivere, infotrygdhistorikk)
     }
 

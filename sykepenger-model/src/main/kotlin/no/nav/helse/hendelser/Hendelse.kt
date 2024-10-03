@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AvsenderDto
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 enum class Avsender {
@@ -32,6 +33,8 @@ interface Hendelse : IAktivitetslogg {
     fun registrert(): LocalDateTime
     fun avsender(): Avsender
     fun navn(): String
+    fun dokumentsporing(): Dokumentsporing = error("Ikke definert dokumentsporing for ${this::class.simpleName}")
 
     fun venter(block: () -> Unit) { block() }
+
 }

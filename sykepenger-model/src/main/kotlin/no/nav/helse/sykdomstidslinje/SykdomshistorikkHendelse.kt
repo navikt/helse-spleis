@@ -4,10 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
+import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.dto.HendelseskildeDto
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Revurderingseventyr
 import kotlin.reflect.KClass
 
@@ -15,7 +14,6 @@ internal typealias Melding = KClass<out SykdomshistorikkHendelse>
 
 interface SykdomshistorikkHendelse : Hendelse {
     fun revurderingseventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? = null
-    fun dokumentsporing(): Dokumentsporing
     fun oppdaterFom(other: Periode): Periode
     fun sykdomstidslinje(): Sykdomstidslinje
 
