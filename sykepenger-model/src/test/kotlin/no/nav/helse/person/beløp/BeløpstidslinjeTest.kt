@@ -65,7 +65,7 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
-    fun `Slår sammen to beløptidslinjer med ulike tidsstempler`() {
+    fun `Slår sammen to beløptidslinjer med ulike beløp og tidsstempler`() {
         val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
         val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
 
@@ -76,6 +76,32 @@ internal class BeløpstidslinjeTest {
         assertEquals(nyTidslinje, nyTidslinje + gammelTidslinje)
     }
 
+    @Test
+    fun `Slår sammen to beløptidslinjer med like beløp og ulike tidsstempler`() {
+        val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
+        val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
+
+        val beløp = 1000.daglig
+        val gammelTidslinje = Beløpstidslinje.fra(januar, beløp, kilde1)
+        val nyTidslinje = Beløpstidslinje.fra(januar, beløp, kilde2)
+
+        assertEquals(gammelTidslinje, gammelTidslinje + nyTidslinje)
+        assertEquals(nyTidslinje, nyTidslinje + gammelTidslinje)
+    }
+
+    @Test
+    fun `Slår sammen to beløptidslinjer med like beløp og like tidsstempler`() {
+        val tidsstempel = LocalDateTime.now()
+        val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidsstempel)
+        val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidsstempel)
+
+        val beløp = 1000.daglig
+        val gammelTidslinje = Beløpstidslinje.fra(januar, beløp, kilde1)
+        val nyTidslinje = Beløpstidslinje.fra(januar, beløp, kilde2)
+
+        assertEquals(gammelTidslinje, gammelTidslinje + nyTidslinje)
+        assertEquals(nyTidslinje, nyTidslinje + gammelTidslinje)
+    }
 
     @Test
     fun `Trekke dager fra på en beløpstidslinje`() {

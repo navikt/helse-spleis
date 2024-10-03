@@ -3,7 +3,6 @@ package no.nav.helse.person.beløp
 import java.time.LocalDate
 import java.util.SortedMap
 import no.nav.helse.dto.BeløpstidslinjeDto
-import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
@@ -34,13 +33,16 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
         }
     }
 
-    internal operator fun plus(other: Beløpstidslinje): Beløpstidslinje {
+    internal operator fun plus(other: Beløpstidslinje) = merge(other, BevareEksisterendeOpplysningHvisLikeBeløp)
+
+    private fun merge(other: Beløpstidslinje, strategi: BesteRefusjonsopplysningstrategi): Beløpstidslinje {
         val results = this.dager.toMutableMap()
         other.dager.forEach { (key, dag) ->
-            results.merge(key, dag, nyesteTidsstempel)
+            results.merge(key, dag, strategi)
         }
         return Beløpstidslinje(results)
     }
+
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
 
@@ -87,8 +89,12 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
     )
 
     internal companion object {
-        private val nyesteTidsstempel = { a: Beløpsdag, b: Beløpsdag ->
-            if (a.kilde.tidsstempel > b.kilde.tidsstempel) a else b
+        private val BevareEksisterendeOpplysningHvisLikeBeløp: BesteRefusjonsopplysningstrategi = { venstre: Beløpsdag, høyre: Beløpsdag ->
+            when {
+                venstre.beløp == høyre.beløp -> venstre
+                venstre.kilde.tidsstempel > høyre.kilde.tidsstempel -> venstre
+                else -> høyre
+            }
         }
         internal fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
         internal fun gjenopprett(dto: BeløpstidslinjeDto) = Beløpstidslinje(
@@ -109,6 +115,8 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
         )
     }
 }
+
+internal typealias BesteRefusjonsopplysningstrategi = (Beløpsdag, Beløpsdag) -> Beløpsdag
 
 sealed interface Dag {
     val dato: LocalDate

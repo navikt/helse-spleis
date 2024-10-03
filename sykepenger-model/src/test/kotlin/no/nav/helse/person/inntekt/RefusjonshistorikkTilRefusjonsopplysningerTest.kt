@@ -148,7 +148,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         }
         assertEquals(listOf(Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 1000.daglig)), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
 
-        val forventet = Beløpstidslinje.fra(1.mars til 31.mars, 1000.daglig, kilde2)
+        val forventet = Beløpstidslinje.fra(1.mars til 20.mars, 1000.daglig, kilde1) + Beløpstidslinje.fra(21.mars til 31.mars, 1000.daglig, kilde2)
         assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.mars til 31.mars))
     }
 
