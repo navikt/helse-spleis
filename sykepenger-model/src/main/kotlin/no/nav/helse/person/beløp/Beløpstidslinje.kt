@@ -53,14 +53,12 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     private fun snute(snute: LocalDate): Beløpstidslinje {
         val førsteBeløpsdag = periode?.start?.let { dager.getValue(it) } ?: return Beløpstidslinje()
-        if (snute >= førsteBeløpsdag.dato) return Beløpstidslinje()
-        return Beløpstidslinje((snute til førsteBeløpsdag.dato.forrigeDag).map { Beløpsdag(it, førsteBeløpsdag.beløp, førsteBeløpsdag.kilde) })
+        return førsteBeløpsdag.strekkTilbake(snute)
     }
 
     private fun hale(hale: LocalDate): Beløpstidslinje {
         val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) } ?: return Beløpstidslinje()
-        if (hale <= sisteBeløpsdag.dato) return Beløpstidslinje()
-        return Beløpstidslinje((sisteBeløpsdag.dato.nesteDag til hale).map { Beløpsdag(it, sisteBeløpsdag.beløp, sisteBeløpsdag.kilde) })
+        return sisteBeløpsdag.strekkFrem(hale)
     }
 
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
@@ -128,7 +126,11 @@ data class Beløpsdag(
     override val dato: LocalDate,
     override val beløp: Inntekt,
     override val kilde: Kilde
-): Dag
+): Dag {
+    fun strekk(periode: Periode) = Beløpstidslinje(periode.map { copy(dato = it) })
+    fun strekkTilbake(datoFør: LocalDate) = if (datoFør > dato) Beløpstidslinje() else strekk(datoFør til dato)
+    fun strekkFrem(datoEtter: LocalDate) = if (datoEtter < dato) Beløpstidslinje() else strekk(dato til datoEtter)
+}
 
 data object UkjentDag : Dag {
     override val dato get() = error("En ukjent dag har ikke en dato")
