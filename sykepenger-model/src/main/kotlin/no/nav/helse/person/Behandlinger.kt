@@ -277,9 +277,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().stjelRefusjonstidslinje(søknad, behandlingerFraPeriodeRettFør.behandlinger.last())?.also {
             leggTilNyBehandling(it)
         }
-
     }
-
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
         behandlinger.last().håndterEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)?.also {
@@ -434,10 +432,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyRefusjonstidslinje)
         }
 
-        internal fun stjelRefusjonstidslinje(søknad: Søknad, gjeldendeBehandlingPåPeriodeRettFør: Behandling): Behandling? {
-            return this.tilstand.stjelRefusjonstidslinje(this, søknad, gjeldendeBehandlingPåPeriodeRettFør)
+        internal fun stjelRefusjonstidslinje(søknad: Søknad, behandlingPåPeriodeRettFør: Behandling): Behandling? {
+            return this.tilstand.stjelRefusjonstidslinje(this, søknad, behandlingPåPeriodeRettFør)
         }
-
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
             (gjeldende.refusjonstidslinje + nyeRefusjonsopplysninger) != gjeldende.refusjonstidslinje
@@ -923,7 +920,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun oppdaterMedRefusjonstidslinje(hendelse: Hendelse, nyeRefusjonsopplysninger: Beløpstidslinje) {
-            val dokumentsporing = when(hendelse) {
+            val dokumentsporing = when (hendelse) {
                 is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId())
                 else -> hendelse.dokumentsporing()
             }

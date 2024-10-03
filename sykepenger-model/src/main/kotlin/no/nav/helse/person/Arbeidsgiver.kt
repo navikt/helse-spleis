@@ -430,7 +430,6 @@ internal class Arbeidsgiver private constructor(
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        val vedtaksperiodeRettFør = finnVedtaksperiodeRettFør(vedtaksperiode)
         vedtaksperiode.håndter(søknad, arbeidsgivere, infotrygdhistorikk)
     }
 
