@@ -1,16 +1,15 @@
-package no.nav.helse.hendelser.utbetaling
+package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_18
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_19
 import no.nav.helse.utbetalingslinjer.Utbetaling.Vurdering
 
-interface Utbetalingsavgjørelse: Hendelse {
-    fun relevantUtbetaling(id: UUID): Boolean
-    fun relevantVedtaksperiode(id: UUID): Boolean
+interface UtbetalingsavgjørelseHendelse : IAktivitetslogg {
     fun saksbehandler(): Saksbehandler
+    val utbetalingId: UUID
     val godkjent: Boolean
     val avgjørelsestidspunkt: LocalDateTime
     val automatisert: Boolean
@@ -25,14 +24,14 @@ class Saksbehandler(private val ident: String, private val epost: String) {
         epost = epost
     )
 }
-val Utbetalingsavgjørelse.avvist get() = !godkjent
-val Utbetalingsavgjørelse.vurdering get() = saksbehandler().vurdering(
+val UtbetalingsavgjørelseHendelse.avvist get() = !godkjent
+val UtbetalingsavgjørelseHendelse.vurdering get() = saksbehandler().vurdering(
     godkjent = godkjent,
     avgjørelsestidspunkt = avgjørelsestidspunkt,
     automatisert = automatisert
 )
-private val Utbetalingsavgjørelse.manueltBehandlet get() = !automatisert
-fun Utbetalingsavgjørelse.valider() {
+private val UtbetalingsavgjørelseHendelse.manueltBehandlet get() = !automatisert
+fun UtbetalingsavgjørelseHendelse.valider() {
     when {
         avvist && manueltBehandlet -> {
             funksjonellFeil(RV_UT_19)

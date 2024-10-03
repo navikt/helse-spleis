@@ -235,7 +235,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = if (!simuleringOK) null else SimuleringResultatDto(
+            simuleringsResultat = if (!simuleringOK) null else SimuleringResultatDto(
                 totalbeløp = 44361,
                 perioder = listOf(
                     SimuleringResultatDto.SimulertPeriode(

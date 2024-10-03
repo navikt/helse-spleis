@@ -47,7 +47,7 @@ internal class MessageMediatorTest {
 
     @Test
     fun `annullerer utbetaling`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAnnullering("123456789"))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAnnullering(UUID.randomUUID().toString()))
         assertTrue(hendelseMediator.lestAnnullerUtbetaling)
     }
 
@@ -159,7 +159,7 @@ internal class MessageMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
             fagsystemId = "qwer1234",
-            utbetalingId = "asdf",
+            utbetalingId = UUID.randomUUID().toString(),
             utbetalingOK = true
         ))
         assertTrue(hendelseMediator.lestUtbetaling)

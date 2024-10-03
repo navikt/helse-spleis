@@ -126,7 +126,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText())
+        sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText())
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertUtbetalingBehov(behov, Utbetaling)
         assertUtbetalingdetaljer(behov, true)

@@ -260,7 +260,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(arbeidsgiverFagsystemId)
+        sendAnnullering(utbetalingId.toString())
         sendUtbetaling()
         @Language("JSON")
         val forventet = """
@@ -301,7 +301,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(arbeidsgiverFagsystemId)
+        sendAnnullering(utbetalingId.toString())
         sendUtbetaling()
         @Language("JSON")
         val forventet = """
@@ -340,7 +340,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(arbeidsgiverFagsystemId)
+        sendAnnullering(utbetalingId.toString())
         sendUtbetaling()
         @Language("JSON")
         val forventet = """
@@ -476,6 +476,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private val personFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag").path("fagsystemId").asText().also { check(it.matches(
         FagsystemIdRegex
     )) }
+    private val utbetalingId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").let { UUID.fromString(it.asText()) }
     private val korrelasjonsId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId").let { UUID.fromString(it.asText()) }
 
 

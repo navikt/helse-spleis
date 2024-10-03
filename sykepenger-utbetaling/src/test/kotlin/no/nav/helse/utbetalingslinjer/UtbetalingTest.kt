@@ -4,13 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
+import no.nav.helse.hendelser.Saksbehandler
+import no.nav.helse.hendelser.SimuleringHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -708,28 +709,6 @@ internal class UtbetalingTest {
     }
 
     @Test
-    fun `simulering som er relevant for personoppdrag`() {
-        val utbetalingId = UUID.randomUUID()
-        val simulering = opprettSimulering("1", Fagområde.Sykepenger, utbetalingId)
-        assertTrue(simulering.erRelevantForUtbetaling(utbetalingId))
-        assertFalse(simulering.erRelevantForUtbetaling(UUID.randomUUID()))
-        assertTrue(simulering.erSimulert(Fagområde.Sykepenger, "1"))
-        assertFalse(simulering.erSimulert(Fagområde.Sykepenger, "2"))
-        assertFalse(simulering.erSimulert(Fagområde.SykepengerRefusjon, "1"))
-    }
-
-    @Test
-    fun `simulering som er relevant for arbeidsgiveroppdrag`() {
-        val utbetalingId = UUID.randomUUID()
-        val simulering = opprettSimulering("1", Fagområde.SykepengerRefusjon, utbetalingId)
-        assertTrue(simulering.erRelevantForUtbetaling(utbetalingId))
-        assertFalse(simulering.erRelevantForUtbetaling(UUID.randomUUID()))
-        assertTrue(simulering.erSimulert(Fagområde.SykepengerRefusjon, "1"))
-        assertFalse(simulering.erSimulert(Fagområde.SykepengerRefusjon, "2"))
-        assertFalse(simulering.erSimulert(Fagområde.Sykepenger, "1"))
-    }
-
-    @Test
     fun `simulerer ingen refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
@@ -785,17 +764,10 @@ internal class UtbetalingTest {
 
     private fun opprettSimulering(fagsystemId: String, fagområde: Fagområde, utbetalingId: UUID, simuleringResultat: SimuleringResultatDto? = null) =
         Simulering(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "1",
-            aktørId = "aktørId",
-            fødselsnummer = "fødselsnummer",
-            orgnummer = "orgnummer",
+            utbetalingId = utbetalingId,
             fagsystemId = fagsystemId,
-            fagområde = fagområde.verdi,
-            simuleringOK = true,
-            melding = "melding",
-            simuleringResultat = simuleringResultat,
-            utbetalingId = utbetalingId
+            fagområde = fagområde,
+            simuleringsResultat = simuleringResultat
         )
 
     private fun Utbetalingstidslinje.betale() = beregnUtbetalinger(this)
@@ -856,17 +828,10 @@ internal class UtbetalingTest {
         status: Oppdragstatus = AKSEPTERT,
         utbetalingmottaker: Utbetaling = utbetaling
     ): UtbetalingHendelse {
-        val hendelsen = UtbetalingHendelse(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = "ignore",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
+        val hendelsen = Kvittering(
             fagsystemId = fagsystemId,
-            utbetalingId = "${utbetaling.inspektør.utbetalingId}",
-            status = status,
-            melding = "hei",
-            avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
+            utbetalingId = utbetaling.inspektør.utbetalingId,
+            status = status
         )
         utbetalingmottaker.håndter(hendelsen)
         return hendelsen
@@ -874,24 +839,15 @@ internal class UtbetalingTest {
 
     private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) =
         Utbetalingsgodkjenning(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = "ignore",
-            fødselsnummer = "ignore",
-            organisasjonsnummer = "ignore",
             utbetalingId = utbetaling.inspektør.utbetalingId,
-            vedtaksperiodeId = "ignore",
-            saksbehandler = "Z999999",
-            saksbehandlerEpost = "mille.mellomleder@nav.no",
-            utbetalingGodkjent = utbetalingGodkjent,
-            godkjenttidspunkt = LocalDateTime.now(),
-            automatiskBehandling = false,
+            godkjent = utbetalingGodkjent
         ).also {
             utbetaling.håndter(it)
         }
 
     private fun annuller(utbetaling: Utbetaling, utbetalingId: UUID = utbetaling.inspektør.utbetalingId) =
         utbetaling.annuller(
-            hendelse = AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", null, utbetalingId, "Z123456", "tbd@nav.no", LocalDateTime.now()),
+            hendelse = AnnullerUtbetaling(utbetalingId),
             alleUtbetalinger = listOf(utbetaling)
         )?.also {
             it.opprett(aktivitetslogg)
@@ -902,6 +858,46 @@ internal class UtbetalingTest {
 
     private fun IAktivitetslogg.harBehov(behov: Behovtype) =
         this.behov().any { it.type == behov }
+
+    private class Utbetalingsgodkjenning(
+        override val utbetalingId: UUID,
+        override val godkjent: Boolean,
+        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    ) : UtbetalingsavgjørelseHendelse, IAktivitetslogg by (aktivitetslogg) {
+        override fun saksbehandler(): Saksbehandler = Saksbehandler("Z999999", "mille.mellomleder@nav.no")
+
+        override val avgjørelsestidspunkt: LocalDateTime = LocalDateTime.now()
+        override val automatisert: Boolean = false
+    }
+
+    private class Kvittering(
+        override val fagsystemId: String,
+        override val utbetalingId: UUID,
+        override val status: Oppdragstatus,
+        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    ) : UtbetalingHendelse, IAktivitetslogg by aktivitetslogg {
+        override val avstemmingsnøkkel: Long = 123456789L
+        override val overføringstidspunkt: LocalDateTime = LocalDateTime.now()
+        override val melding: String = ""
+    }
+
+    private class AnnullerUtbetaling(
+        override val utbetalingId: UUID,
+        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    ) : AnnullerUtbetalingHendelse, IAktivitetslogg by aktivitetslogg {
+        override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, "Z999999", "utbetaling@nav.no", LocalDateTime.now(), false)
+    }
+
+    private class Simulering(
+        override val utbetalingId: UUID,
+        override val fagsystemId: String,
+        override val fagområde: Fagområde,
+        override val simuleringsResultat: SimuleringResultatDto?,
+        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    ) : SimuleringHendelse, IAktivitetslogg by aktivitetslogg {
+        override val simuleringOK: Boolean = true
+        override val melding: String = "OK"
+    }
 }
 
 private val frø = LocalDate.of(2018, 1, 1)

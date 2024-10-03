@@ -10,7 +10,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver

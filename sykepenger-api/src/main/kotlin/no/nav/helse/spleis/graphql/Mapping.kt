@@ -2,7 +2,7 @@ package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt

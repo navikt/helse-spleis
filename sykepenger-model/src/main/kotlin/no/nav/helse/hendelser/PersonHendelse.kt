@@ -73,4 +73,9 @@ abstract class PersonHendelse protected constructor(
     override fun register(observer: AktivitetsloggObserver) {
         aktivitetslogg.register(observer)
     }
+
+    companion object {
+        fun wrap(hendelse: PersonHendelse, block: () -> Unit) =
+            hendelse.wrap(::FunksjonelleFeilTilVarsler, block)
+    }
 }

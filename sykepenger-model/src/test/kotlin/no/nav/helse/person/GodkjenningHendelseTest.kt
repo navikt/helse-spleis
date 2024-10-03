@@ -36,7 +36,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.UtbetalingPeriodetype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -86,15 +85,6 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         person.håndter(utbetalingsgodkjenning(true))
         person.håndter(utbetalingsgodkjenning(true))
         assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `legger på periodetype på utgående godkjenningsbehov`() {
-        håndterYtelser()
-        person.håndter(simulering())
-        assertEquals(1, hendelse.behov().size)
-        assertEquals(UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING.name, hendelse.behov().first().detaljer()["periodetype"])
-        person.håndter(utbetalingsgodkjenning(true))
     }
 
     private fun håndterYtelser() {
@@ -237,7 +227,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fagområde = person.personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
-            simuleringResultat = SimuleringResultatDto(
+            simuleringsResultat = SimuleringResultatDto(
                 totalbeløp = 1000,
                 perioder = emptyList()
             ),

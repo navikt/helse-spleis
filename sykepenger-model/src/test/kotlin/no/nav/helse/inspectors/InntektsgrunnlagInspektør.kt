@@ -1,6 +1,6 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.økonomi.Inntekt

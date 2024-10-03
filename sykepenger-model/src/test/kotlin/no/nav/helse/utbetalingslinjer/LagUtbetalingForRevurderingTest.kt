@@ -194,7 +194,7 @@ internal class LagUtbetalingForRevurderingTest {
                 fødselsnummer = FNR.toString(),
                 orgnummer = ORGNUMMER,
                 fagsystemId = fagsystemId,
-                utbetalingId = "${utbetaling.inspektør.utbetalingId}",
+                utbetalingId = utbetaling.inspektør.utbetalingId,
                 status = status,
                 melding = "hei",
                 avstemmingsnøkkel = 123456L,

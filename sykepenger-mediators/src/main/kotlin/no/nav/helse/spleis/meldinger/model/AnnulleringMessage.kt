@@ -13,8 +13,7 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val fagsystemId = packet["fagsystemId"].takeUnless(JsonNode::isMissingOrNull)?.asText()?.trim()
-    private val utbetalingId = packet["utbetalingId"].takeUnless(JsonNode::isMissingOrNull)?.asText()?.trim()?.toUUID()
+    private val utbetalingId = packet["utbetalingId"].asText().trim().toUUID()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
@@ -22,7 +21,6 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
-            fagsystemId,
             utbetalingId,
             saksbehandler.ident,
             saksbehandler.epostadresse,

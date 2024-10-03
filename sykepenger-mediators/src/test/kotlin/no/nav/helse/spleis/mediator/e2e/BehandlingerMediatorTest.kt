@@ -6,7 +6,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -77,8 +76,8 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak annulleres`() {
         nyttVedtak(1.januar, 31.januar)
-        val fagsystemId = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText()
-        sendAnnullering(fagsystemId)
+        val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
+        sendAnnullering(utbetalingId)
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet")
         val førsteBehandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet.first())

@@ -11,9 +11,9 @@ import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -198,9 +198,6 @@ class Oppdrag private constructor(
     fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    fun valider(simulering: Simulering) =
-        simulering.valider(this)
-
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
     private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
@@ -357,15 +354,15 @@ class Oppdrag private constructor(
     )
 
     fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelse) {
-        if (!hendelse.erRelevant(fagsystemId)) return
+        if (hendelse.fagsystemId != this.fagsystemId) return
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
         this.status = hendelse.status
     }
-    fun håndter(simulering: Simulering) {
-        if (!simulering.erSimulert(fagområde, fagsystemId)) return
+    fun håndter(simulering: SimuleringHendelse) {
+        if (simulering.fagsystemId != this.fagsystemId || simulering.fagområde != this.fagområde || !simulering.simuleringOK) return
         this.erSimulert = true
-        this.simuleringsResultat = simulering.simuleringResultat
+        this.simuleringsResultat = simulering.simuleringsResultat
     }
     fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 

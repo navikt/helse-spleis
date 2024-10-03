@@ -248,7 +248,7 @@ internal abstract class AbstractObservableTest {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = SimuleringResultatDto(
+            simuleringsResultat = SimuleringResultatDto(
                 totalbeløp = 2000,
                 perioder = listOf(
                     SimuleringResultatDto.SimulertPeriode(
@@ -323,7 +323,7 @@ internal abstract class AbstractObservableTest {
             fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
-            utbetalingId = "$utbetalingId",
+            utbetalingId = utbetalingId,
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,

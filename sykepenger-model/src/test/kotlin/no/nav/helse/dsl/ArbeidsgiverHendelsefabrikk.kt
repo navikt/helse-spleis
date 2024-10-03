@@ -438,7 +438,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = simuleringsresultat
+            simuleringsResultat = simuleringsresultat
         )
     }
 
@@ -508,7 +508,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             fødselsnummer = personidentifikator.toString(),
             orgnummer = organisasjonsnummer,
             fagsystemId = fagsystemId,
-            utbetalingId = utbetalingId.toString(),
+            utbetalingId = utbetalingId,
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
@@ -521,7 +521,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
-            fagsystemId = null,
             utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",

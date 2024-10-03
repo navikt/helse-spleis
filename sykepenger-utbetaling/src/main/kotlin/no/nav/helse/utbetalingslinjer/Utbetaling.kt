@@ -11,20 +11,22 @@ import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
-import no.nav.helse.hendelser.utbetaling.valider
-import no.nav.helse.hendelser.utbetaling.vurdering
+import no.nav.helse.hendelser.SimuleringHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.UtbetalingpåminnelseHendelse
+import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
+import no.nav.helse.hendelser.valider
+import no.nav.helse.hendelser.vurdering
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
@@ -108,10 +110,10 @@ class Utbetaling private constructor(
 
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
-    private var forrigeHendelse: IAktivitetslogg? = null
+    private var forrigeHendelse: UtbetalingHendelse? = null
 
-    private fun harHåndtert(hendelse: IAktivitetslogg) =
-        (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }
+    private fun harHåndtert(hendelse: UtbetalingHendelse) =
+        (hendelse === forrigeHendelse).also { forrigeHendelse = hendelse }
 
     fun registrer(observer: UtbetalingObserver) {
         observers.add(observer)
@@ -149,27 +151,30 @@ class Utbetaling private constructor(
         tilstand.opprett(this, hendelse)
     }
 
-    fun håndter(hendelse: Utbetalingsavgjørelse) {
-        if (!hendelse.relevantUtbetaling(id)) return
+    fun håndter(hendelse: UtbetalingsavgjørelseHendelse) {
+        if (hendelse.utbetalingId != this.id) return
         hendelse.valider()
         godkjenn(hendelse, hendelse.vurdering)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse) {
-        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId, personOppdrag.fagsystemId, id)) return håndterKvitteringForAnnullering(utbetaling)
+        if (!relevantFor(utbetaling)) return håndterKvitteringForAnnullering(utbetaling)
         if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }
 
     private fun håndterKvitteringForAnnullering(hendelse: UtbetalingHendelse) {
-        if (annulleringer.none { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId, it.personOppdrag.fagsystemId, it.id) }) return
+        if (annulleringer.none { it.relevantFor(hendelse) }) return
         hendelse.kontekst(this)
         tilstand.kvittérAnnullering(this, hendelse)
     }
 
-    fun håndter(simulering: Simulering) {
-        if (!simulering.erRelevantForUtbetaling(id)) return
+    private fun relevantFor(utbetaling: UtbetalingHendelse) =
+        utbetaling.utbetalingId == this.id && (utbetaling.fagsystemId in setOf(this.arbeidsgiverOppdrag.fagsystemId, this.personOppdrag.fagsystemId))
+
+    fun håndter(simulering: SimuleringHendelse) {
+        if (simulering.utbetalingId != this.id) return
         personOppdrag.håndter(simulering)
         arbeidsgiverOppdrag.håndter(simulering)
     }
@@ -179,35 +184,40 @@ class Utbetaling private constructor(
         tilstand.simuler(this, hendelse)
     }
 
-    fun håndter(påminnelse: Utbetalingpåminnelse) {
-        if (!påminnelse.erRelevant(id)) return
+    fun håndter(påminnelse: UtbetalingpåminnelseHendelse) {
+        if (påminnelse.utbetalingId != this.id) return
         påminnelse.kontekst(this)
-        if (!påminnelse.gjelderStatus(tilstand.status)) return
-        tilstand.håndter(this, påminnelse)
+        if (påminnelse.status != this.tilstand.status) return
+        tilstand.håndterPåminnelse(this, påminnelse)
     }
 
     fun gjelderFor(hendelse: UtbetalingHendelse) =
-        hendelseErRelevant(hendelse) || annulleringer.any { it.hendelseErRelevant(hendelse) }
+        relevantFor(hendelse) || annulleringer.any { it.relevantFor(hendelse) }
 
-    private fun hendelseErRelevant(hendelse: UtbetalingHendelse) =
-        hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId, personOppdrag.fagsystemId, id)
+    fun gjelderFor(hendelse: UtbetalingsavgjørelseHendelse) = hendelse.utbetalingId == this.id
 
-    fun gjelderFor(hendelse: Utbetalingsavgjørelse) =
-        hendelse.relevantUtbetaling(id)
+    fun valider(simulering: SimuleringHendelse) {
+        validerSimuleringsresultat(simulering, arbeidsgiverOppdrag)
+        validerSimuleringsresultat(simulering, personOppdrag)
+    }
 
-    fun valider(simulering: Simulering) {
-        arbeidsgiverOppdrag.valider(simulering)
-        personOppdrag.valider(simulering)
+    private fun validerSimuleringsresultat(simuleringHendelse: SimuleringHendelse, oppdrag: Oppdrag) {
+        if (simuleringHendelse.fagsystemId != oppdrag.fagsystemId) return
+        if (simuleringHendelse.fagområde != oppdrag.fagområde) return
+        if (!simuleringHendelse.simuleringOK) return simuleringHendelse.info("Feil under simulering: ${simuleringHendelse.melding}")
+        val simuleringsResultat = simuleringHendelse.simuleringsResultat ?: return simuleringHendelse.info("Ingenting ble simulert")
+        val harNegativtTotalbeløp = simuleringsResultat.totalbeløp < 0
+        if (harNegativtTotalbeløp) simuleringHendelse.varsel(Varselkode.RV_SI_3)
     }
 
     fun valider(valider: (maksdato: LocalDate) -> Unit) = valider(this.maksdato)
 
-    fun håndter(hendelse: AnnullerUtbetaling) {
-        godkjenn(hendelse, hendelse.vurdering())
+    fun håndter(hendelse: AnnullerUtbetalingHendelse) {
+        godkjenn(hendelse, hendelse.vurdering)
     }
 
-    fun annuller(hendelse: AnnullerUtbetaling, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
-        val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { hendelse.erRelevant(it.id, it.arbeidsgiverOppdrag.fagsystemId) } ?: return null
+    fun annuller(hendelse: AnnullerUtbetalingHendelse, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
+        val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { it.id == hendelse.utbetalingId } ?: return null
         if (korrelerendeUtbetaling.korrelasjonsId != this.korrelasjonsId) return null
 
         val aktiveUtbetalinger = alleUtbetalinger.aktive()
@@ -463,9 +473,17 @@ class Utbetaling private constructor(
     }
 
     private fun håndterKvittering(hendelse: UtbetalingHendelse) {
-        hendelse.valider()
+        when (hendelse.status) {
+            Oppdragstatus.OVERFØRT,
+            Oppdragstatus.AKSEPTERT -> { } // all is good
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> hendelse.varsel(RV_UT_2)
+            Oppdragstatus.AVVIST,
+            Oppdragstatus.FEIL -> hendelse.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
+        }
+
+        val skalForsøkesIgjen = hendelse.status in setOf(Oppdragstatus.AVVIST, Oppdragstatus.FEIL)
         val nesteTilstand = when {
-            hendelse.skalForsøkesIgjen() || Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // utbetaling gjør retry ved neste påminnelse
+            skalForsøkesIgjen || Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // utbetaling gjør retry ved neste påminnelse
             type == ANNULLERING -> Annullert
             else -> Utbetalt
         }
@@ -527,7 +545,7 @@ class Utbetaling private constructor(
             hendelse.funksjonellFeil(RV_UT_11)
         }
 
-        fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
             påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
         }
 
@@ -578,7 +596,7 @@ class Utbetaling private constructor(
             check(utbetaling.annulleringer.isNotEmpty())
         }
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        override fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
             vurderNesteTilstand(utbetaling, påminnelse)
         }
 
@@ -622,7 +640,7 @@ class Utbetaling private constructor(
             utbetaling.overførBegge(hendelse)
         }
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        override fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
             utbetaling.overførBegge(påminnelse)
         }
 

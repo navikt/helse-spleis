@@ -80,7 +80,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
             fagområde = fagområde,
             simuleringOK = simuleringOK,
             melding = melding,
-            simuleringResultat = simuleringResultat,
+            simuleringsResultat = simuleringResultat,
             utbetalingId = utbetalingId
         )
 

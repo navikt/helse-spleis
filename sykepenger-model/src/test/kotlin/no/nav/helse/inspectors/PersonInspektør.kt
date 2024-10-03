@@ -4,7 +4,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VedtaksperiodeFilter
 
 internal val Person.inspektør get() = PersonInspektør(this)

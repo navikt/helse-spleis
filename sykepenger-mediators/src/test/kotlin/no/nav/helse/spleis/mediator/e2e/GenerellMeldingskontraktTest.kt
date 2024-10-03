@@ -55,7 +55,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtaksperiode annullert`() {
         nyttVedtak()
 
-        sendAnnullering(testRapid.inspektør.etterspurteBehov(Aktivitet.Behov.Behovtype.Utbetaling).path(Aktivitet.Behov.Behovtype.Utbetaling.name).path("fagsystemId").asText())
+        sendAnnullering(testRapid.inspektør.etterspurteBehov(Aktivitet.Behov.Behovtype.Utbetaling).path("utbetalingId").asText())
 
         val meldingOmAnnullertVedtaksperiode = testRapid.inspektør.meldinger("vedtaksperiode_annullert").first()
 

@@ -31,6 +31,7 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     "fødselsnummer": "08127411111",
     "organisasjonsnummer": "orgnummer",
     "fagsystemId": "ABCD1234",
+    "utbetalingId": "${UUID.randomUUID()}",
     "saksbehandler": {
         "navn": "Siri Saksbhandler",
         "epostaddresse": "siri.saksbehandler@nav.no",

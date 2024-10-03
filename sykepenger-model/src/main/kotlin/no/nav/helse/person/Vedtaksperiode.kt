@@ -18,7 +18,6 @@ import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -43,7 +42,7 @@ import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
@@ -376,7 +375,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk)
     }
 
-    internal fun håndter(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+    internal fun håndter(utbetalingsavgjørelse: Behandlingsavgjørelse) {
         if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
         if (behandlinger.gjelderIkkeFor(utbetalingsavgjørelse)) return utbetalingsavgjørelse.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
         kontekst(utbetalingsavgjørelse)
@@ -395,7 +394,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(simulering: Simulering) {
-        if (!simulering.erRelevant(id)) return
+        if (simulering.vedtaksperiodeId != this.id.toString()) return
         kontekst(simulering)
         tilstand.håndter(this, simulering)
     }
@@ -1293,7 +1292,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndterRevurdering(hendelse: Hendelse, block: () -> Unit) {
             if (hendelse !is PersonHendelse) return block()
-            FunksjonelleFeilTilVarsler.wrap(hendelse, block)
+            PersonHendelse.wrap(hendelse, block)
         }
         fun håndterFørstegangsbehandling(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return block()
@@ -1373,7 +1372,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingsavgjørelse: Utbetalingsavgjørelse
+            utbetalingsavgjørelse: Behandlingsavgjørelse
         ) {
             utbetalingsavgjørelse.info("Forventet ikke utbetalingsavgjørelse i %s".format(type.name))
         }
@@ -2233,7 +2232,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingsavgjørelse: Utbetalingsavgjørelse
+            utbetalingsavgjørelse: Behandlingsavgjørelse
         ) {
             vedtaksperiode.behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
             if (vedtaksperiode.behandlinger.erAvvist()) {
@@ -2332,7 +2331,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingsavgjørelse: Utbetalingsavgjørelse
+            utbetalingsavgjørelse: Behandlingsavgjørelse
         ) {
             vedtaksperiode.behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
             if (vedtaksperiode.behandlinger.erAvvist()) {

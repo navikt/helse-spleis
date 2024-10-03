@@ -78,7 +78,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = utbetalingId ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
@@ -100,7 +100,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
         status = status,
         melding = "hey",
         avstemmingsnøkkel = 654321L,
@@ -511,7 +511,7 @@ internal fun AbstractEndToEndTest.simulering(
         simuleringOK = simuleringOK,
         melding = "",
         utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId")),
-        simuleringResultat = simuleringsresultat
+        simuleringsResultat = simuleringsresultat
     ).apply {
         hendelselogg = this
     }

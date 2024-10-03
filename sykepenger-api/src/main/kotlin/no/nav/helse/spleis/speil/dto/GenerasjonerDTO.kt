@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.speil.builders.ISpleisGrunnlag
 import no.nav.helse.spleis.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling

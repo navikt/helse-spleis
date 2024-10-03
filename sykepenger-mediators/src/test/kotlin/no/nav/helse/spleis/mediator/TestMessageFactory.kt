@@ -1215,13 +1215,13 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagAnnullering(fagsystemId: String): Pair<String, String> {
+    fun lagAnnullering(utbetalingId: String): Pair<String, String> {
         return nyHendelse(
             "annullering", mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
-                "fagsystemId" to fagsystemId,
+                "utbetalingId" to utbetalingId,
                 "saksbehandler" to mapOf(
                     "navn" to "Siri Saksbhandler",
                     "epostaddresse" to "siri.saksbehandler@nav.no",

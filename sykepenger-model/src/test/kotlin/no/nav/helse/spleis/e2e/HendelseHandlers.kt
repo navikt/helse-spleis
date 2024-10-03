@@ -626,7 +626,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
         simuleringOK = simuleringOK,
         melding = "",
         utbetalingId = utbetalingId,
-        simuleringResultat = simuleringsresultat
+        simuleringsResultat = simuleringsresultat
     ).apply {
         hendelselogg = this
     }.håndter(Person::håndter)
@@ -822,7 +822,6 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = orgnummer,
-        fagsystemId = null,
         utbetalingId = utbetalingId,
         saksbehandlerIdent = "Ola Nordmann",
         saksbehandlerEpost = "tbd@nav.no",

@@ -5,6 +5,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
@@ -12,7 +13,8 @@ internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fagsystemId = packet["${Utbetaling.name}.fagsystemId"].asText().trim()
-    private val utbetalingId = packet["utbetalingId"].asText()
+    private val utbetalingId = packet["utbetalingId"].asText().toUUID()
+
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()

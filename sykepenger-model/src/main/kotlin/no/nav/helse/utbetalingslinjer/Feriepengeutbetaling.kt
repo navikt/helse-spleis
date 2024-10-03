@@ -19,6 +19,7 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_2
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import kotlin.math.roundToInt
 
@@ -38,7 +39,7 @@ internal class Feriepengeutbetaling private constructor(
     var avstemmingsnøkkel: Long? = null
 
     companion object {
-        fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId) || hendelse.erRelevant(it.personoppdrag.fagsystemId) }
+        fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.fagsystemId == it.oppdrag.fagsystemId || hendelse.fagsystemId == it.personoppdrag.fagsystemId }
 
         internal fun gjenopprett(alder: Alder, dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
@@ -66,10 +67,16 @@ internal class Feriepengeutbetaling private constructor(
     )
 
     fun håndter(utbetalingHendelse: UtbetalingHendelse, organisasjonsnummer: String, person: Person) {
-        if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId, personoppdrag.fagsystemId, utbetalingId)) return
+        if (utbetalingHendelse.utbetalingId != this.utbetalingId || utbetalingHendelse.fagsystemId !in setOf(oppdrag.fagsystemId, personoppdrag.fagsystemId)) return
 
         utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
-        utbetalingHendelse.valider()
+        when (utbetalingHendelse.status) {
+            Oppdragstatus.OVERFØRT,
+            Oppdragstatus.AKSEPTERT -> { } // all is good
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> utbetalingHendelse.varsel(RV_UT_2)
+            Oppdragstatus.AVVIST,
+            Oppdragstatus.FEIL -> utbetalingHendelse.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
+        }
         val utbetaltOk = !utbetalingHendelse.harFunksjonelleFeilEllerVerre()
         lagreInformasjon(utbetalingHendelse, utbetaltOk)
 

@@ -609,8 +609,8 @@ internal abstract class AbstractEndToEndMediatorTest() {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendAnnullering(fagsystemId: String) {
-        val (_, message) = meldingsfabrikk.lagAnnullering(fagsystemId)
+    protected fun sendAnnullering(utbetalingId: String) {
+        val (_, message) = meldingsfabrikk.lagAnnullering(utbetalingId)
         testRapid.sendTestMessage(message)
     }
 

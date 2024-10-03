@@ -254,7 +254,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             simuleringOK = true,
             melding = "",
             utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
-            simuleringResultat = SimuleringResultatDto(
+            simuleringsResultat = SimuleringResultatDto(
                 totalbeløp = 2000,
                 perioder = listOf(
                     SimuleringResultatDto.SimulertPeriode(

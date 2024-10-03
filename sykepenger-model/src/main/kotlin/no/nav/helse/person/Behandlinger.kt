@@ -27,8 +27,8 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
-import no.nav.helse.hendelser.utbetaling.avvist
+import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
+import no.nav.helse.hendelser.avvist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
@@ -117,7 +117,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun validerFerdigBehandlet(hendelse: Hendelse) = behandlinger.last().validerFerdigBehandlet(hendelse)
 
-    internal fun gjelderIkkeFor(hendelse: Utbetalingsavgjørelse) = siste?.gjelderFor(hendelse) != true
+    internal fun gjelderIkkeFor(hendelse: UtbetalingsavgjørelseHendelse) = siste?.gjelderFor(hendelse) != true
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
@@ -180,7 +180,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
 
-    fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+    fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
         this.behandlinger.last().vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
     }
     fun bekreftAvsluttetBehandlingMedVedtak(arbeidsgiver: Arbeidsgiver) {
@@ -735,7 +735,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.AnnullertPeriode, Tilstand.TilInfotrygd)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd)
 
-        internal fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+        internal fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
             if (utbetalingsavgjørelse.avvist) return tilstand.vedtakAvvist(this, arbeidsgiver, utbetalingsavgjørelse)
             tilstand.vedtakFattet(this, arbeidsgiver, utbetalingsavgjørelse)
         }
@@ -1225,10 +1225,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
-            fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+            fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
                 error("Kan ikke avvise vedtak for behandling i $this")
             }
-            fun vedtakFattet(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+            fun vedtakFattet(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
                 error("Kan ikke fatte vedtak for behandling i $this")
             }
             fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
@@ -1407,11 +1407,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.tilstand(Uberegnet, hendelse)
                 }
 
-                override fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+                override fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
                     // perioden kommer til å bli kastet til infotrygd
                 }
 
-                override fun vedtakFattet(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+                override fun vedtakFattet(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
                     behandling.vedtakFattet = utbetalingsavgjørelse.avgjørelsestidspunkt
                     behandling.behandlingLukket(arbeidsgiver)
                     behandling.tilstand(if (behandling.gjeldende.utbetaling?.erAvsluttet() == true) VedtakIverksatt else VedtakFattet, utbetalingsavgjørelse)
@@ -1449,7 +1449,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.utenUtbetaling(hendelse)
                     behandling.tilstand(UberegnetRevurdering, hendelse)
                 }
-                override fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+                override fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse) {
                     behandling.behandlingLukket(arbeidsgiver)
                     behandling.tilstand(RevurdertVedtakAvvist, utbetalingsavgjørelse)
                 }
