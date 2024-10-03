@@ -228,6 +228,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(setOf(
             Dokumentsporing.søknad(søknadId),
             Dokumentsporing.inntektsmeldingDager(imId),
+            Dokumentsporing.inntektsmeldingRefusjon(imId),
             Dokumentsporing.inntektsmeldingInntekt(imId)
         ), inspektør(a2).hendelser(1.vedtaksperiode))
 
@@ -288,6 +289,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             setOf(
                 Dokumentsporing.søknad(søknadId),
                 Dokumentsporing.inntektsmeldingDager(imId),
+                Dokumentsporing.inntektsmeldingRefusjon(imId),
                 Dokumentsporing.inntektsmeldingInntekt(imId)
             ), inspektør(a2).hendelser(1.vedtaksperiode)
         )

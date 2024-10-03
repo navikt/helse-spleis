@@ -364,7 +364,6 @@ private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Vedtak
     avsluttet = this.avsluttet,
     kilde = this.kilde.tilPersonData(),
     endringer = this.endringer.map { it.tilPersonData() },
-    refusjonstidslinje = this.refusjonstidslinje.tilPersonData()
 )
 private fun BehandlingkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
     meldingsreferanseId = this.meldingsreferanseId,
@@ -391,6 +390,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     vilkårsgrunnlagId = vilkårsgrunnlagId,
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
     utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
+    refusjonstidslinje = refusjonstidslinje.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
     arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData()
@@ -417,6 +417,7 @@ private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.Ved
     dokumenttype = when (type) {
         DokumenttypeDto.InntektsmeldingDager -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingDager
         DokumenttypeDto.InntektsmeldingInntekt -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingInntekt
+        DokumenttypeDto.InntektsmeldingRefusjon -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingRefusjon
         DokumenttypeDto.OverstyrArbeidsforhold -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsforhold
         DokumenttypeDto.OverstyrArbeidsgiveropplysninger -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsgiveropplysninger
         DokumenttypeDto.OverstyrInntekt -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrInntekt

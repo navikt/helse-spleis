@@ -18,6 +18,7 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
@@ -336,7 +337,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
-        private var refusjonstidslinje: Beløpstidslinje,
         private var vedtakFattet: LocalDateTime?,
         private var avsluttet: LocalDateTime?,
         private val kilde: Behandlingkilde,
@@ -350,7 +350,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val arbeidsgiverperiode get() = gjeldende.arbeidsgiverperiode
         val skjæringstidspunkt get() = gjeldende.skjæringstidspunkt
 
-        constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, refusjonstidslinje: Beløpstidslinje, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), refusjonstidslinje, null, avsluttet, kilde, observatører) {
+        constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {
                 "må ha minst én observatør for å registrere en behandling"
             }
@@ -391,7 +391,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakIverksatt -> BehandlingView.TilstandView.VEDTAK_IVERKSATT
             },
             endringer = endringer.map { it.view() },
-            refusjonstidslinje = refusjonstidslinje
         )
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
@@ -428,11 +427,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
-            (refusjonstidslinje + nyeRefusjonsopplysninger) != refusjonstidslinje
-
-        private fun lagreRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) {
-            refusjonstidslinje += nyeRefusjonsopplysninger
-        }
+            (gjeldende.refusjonstidslinje + nyeRefusjonsopplysninger) != gjeldende.refusjonstidslinje
 
         // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett
         class Endring constructor(
@@ -445,6 +440,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dokumentsporing: Dokumentsporing,
             val sykdomstidslinje: Sykdomstidslinje,
             val utbetalingstidslinje: Utbetalingstidslinje,
+            val refusjonstidslinje: Beløpstidslinje,
             val skjæringstidspunkt: LocalDate,
             val arbeidsgiverperiode: List<Periode>,
             val maksdatoresultat: Maksdatoresultat
@@ -456,6 +452,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing: Dokumentsporing,
                 sykdomstidslinje: Sykdomstidslinje,
                 utbetalingstidslinje: Utbetalingstidslinje,
+                refusjonstidslinje: Beløpstidslinje,
                 sykmeldingsperiode: Periode,
                 periode: Periode,
                 skjæringstidspunkt: LocalDate,
@@ -471,6 +468,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = dokumentsporing,
                 sykdomstidslinje = sykdomstidslinje,
                 utbetalingstidslinje = utbetalingstidslinje,
+                refusjonstidslinje = refusjonstidslinje,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 maksdatoresultat = maksdatoresultat
@@ -485,6 +483,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling = utbetaling,
                 dokumentsporing = dokumentsporing,
                 utbetalingstidslinje = utbetalingstidslinje,
+                refusjonstidslinje = refusjonstidslinje,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 maksdatoresultat = maksdatoresultat
@@ -509,6 +508,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
                         sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
                         utbetalingstidslinje = migrerUtbetalingstidslinje(dto, utbetaling, erAvsluttetUtenVedtak),
+                        refusjonstidslinje = Beløpstidslinje.gjenopprett(dto.refusjonstidslinje),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat?.let { Maksdatoresultat.gjenopprett(it) } ?: Maksdatoresultat.IkkeVurdert
@@ -566,6 +566,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dokumentsporing = this.dokumentsporing,
                     sykdomstidslinje = this.sykdomstidslinje,
                     utbetalingstidslinje = this.utbetalingstidslinje,
+                    refusjonstidslinje = this.refusjonstidslinje,
                     sykmeldingsperiode = this.sykmeldingsperiode,
                     periode = this.periode,
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
@@ -586,6 +587,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = dokument,
                 sykdomstidslinje = sykdomstidslinje,
                 utbetalingstidslinje = Utbetalingstidslinje(),
+                refusjonstidslinje = this.refusjonstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = periode,
                 skjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode),
@@ -601,7 +603,26 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 utbetalingstidslinje = Utbetalingstidslinje(),
+                refusjonstidslinje = this.refusjonstidslinje,
                 maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                sykmeldingsperiode = this.sykmeldingsperiode,
+                periode = this.periode,
+                skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
+                arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
+            )
+            internal fun kopierMedRefusjonstidslinje(
+                dokument: Dokumentsporing,
+                refusjonstidslinje: Beløpstidslinje,
+                beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
+                beregnArbeidsgiverperiode: (Periode) -> List<Periode> = { this.arbeidsgiverperiode }
+            ) = Endring(
+                grunnlagsdata = this.grunnlagsdata,
+                utbetaling = this.utbetaling,
+                dokumentsporing = dokument,
+                sykdomstidslinje = this.sykdomstidslinje,
+                utbetalingstidslinje = this.utbetalingstidslinje,
+                refusjonstidslinje = refusjonstidslinje,
+                maksdatoresultat = this.maksdatoresultat,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
                 skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
@@ -614,6 +635,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat = maksdatoresultat,
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
+                refusjonstidslinje = this.refusjonstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
                 skjæringstidspunkt = this.skjæringstidspunkt,
@@ -625,6 +647,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = dokument,
                 sykdomstidslinje = this.sykdomstidslinje,
                 utbetalingstidslinje = this.utbetalingstidslinje,
+                refusjonstidslinje = this.refusjonstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
                 skjæringstidspunkt = this.skjæringstidspunkt,
@@ -637,6 +660,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
+                refusjonstidslinje = this.refusjonstidslinje,
                 maksdatoresultat = this.maksdatoresultat,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
@@ -684,6 +708,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dokumentsporing = this.dokumentsporing.dto(),
                     sykdomstidslinje = this.sykdomstidslinje.dto(),
                     utbetalingstidslinje = this.utbetalingstidslinje.dto(),
+                    refusjonstidslinje = this.refusjonstidslinje.dto(),
                     arbeidsgiverperioder = this.arbeidsgiverperiode.map { it.dto() },
                     maksdatoresultat = this.maksdatoresultat.dto()
                 )
@@ -884,6 +909,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return endringer.last().kopierMedEndring(oppdatertPeriode, hendelse.dokumentsporing(), sykdomstidslinje, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
         }
 
+        private fun oppdaterMedRefusjonstidslinje(hendelse: Hendelse, nyeRefusjonsopplysninger: Beløpstidslinje) {
+            check(hendelse is Inntektsmelding) { "Når vi skal ta inn refusjonsopplysninger fra andre ting enn inntektsmelding, må vi fikse dokumentsporing" }
+            val endring = endringer.last().kopierMedRefusjonstidslinje(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()), nyeRefusjonsopplysninger)
+            nyEndring(endring)
+        }
+
         private fun oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
             val endring = endringer.last().kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) ?: return
             nyEndring(endring)
@@ -912,7 +943,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(håndtereEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
-                refusjonstidslinje = this.refusjonstidslinje,
                 avsluttet = null,
                 kilde = Behandlingkilde(hendelse)
             )
@@ -929,8 +959,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return Behandling(
                 observatører = this.observatører,
                 tilstand = starttilstand,
-                endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
-                refusjonstidslinje = nyRefusjonstidslinje,
+                endringer = listOf(endringer.last().kopierMedRefusjonstidslinje(
+                    Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()),
+                    nyRefusjonstidslinje,
+                    beregnSkjæringstidspunkt,
+                    beregnArbeidsgiverperiode
+                )),
                 avsluttet = null,
                 kilde = Behandlingkilde(hendelse)
             )
@@ -948,7 +982,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
-                refusjonstidslinje = this.refusjonstidslinje,
                 avsluttet = null,
                 kilde = Behandlingkilde(hendelse)
             )
@@ -960,7 +993,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = Tilstand.AnnullertPeriode,
                 endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata)),
-                refusjonstidslinje = this.refusjonstidslinje,
                 avsluttet = LocalDateTime.now(),
                 kilde = Behandlingkilde(hendelse)
             )
@@ -1074,13 +1106,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             sykdomstidslinje = sykdomstidslinje,
                             sykmeldingsperiode = sykmeldingsperiode,
                             utbetalingstidslinje = Utbetalingstidslinje(),
+                            refusjonstidslinje = Beløpstidslinje(),
                             periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette behandling på tom sykdomstidslinje" },
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
                             arbeidsgiverperiode = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert
                         )
                     ),
-                    refusjonstidslinje = Beløpstidslinje(),
                     avsluttet = null,
                     kilde = Behandlingkilde(søknad)
                 )
@@ -1159,7 +1191,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                     },
                     endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger, dto.tilstand == BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK) }.toMutableList(),
-                    refusjonstidslinje = Beløpstidslinje.gjenopprett(dto.refusjonstidslinje),
                     vedtakFattet = dto.vedtakFattet,
                     avsluttet = dto.avsluttet,
                     kilde = Behandlingkilde.gjenopprett(dto.kilde),
@@ -1249,7 +1280,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
-                    behandling.lagreRefusjonsopplysninger(nyeRefusjonsopplysninger)
+                    behandling.oppdaterMedRefusjonstidslinje(hendelse, nyeRefusjonsopplysninger)
                     return null
                 }
 
@@ -1357,7 +1388,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
-                    behandling.lagreRefusjonsopplysninger(nyeRefusjonsopplysninger)
+                    behandling.oppdaterMedRefusjonstidslinje(hendelse, nyeRefusjonsopplysninger)
                     return null
                 }
 
@@ -1495,7 +1526,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         observatører = behandling.observatører,
                         tilstand = TilInfotrygd,
                         endringer = listOf(behandling.gjeldende.kopierUtenUtbetaling()),
-                        refusjonstidslinje = Beløpstidslinje(),
                         avsluttet = LocalDateTime.now(),
                         kilde = Behandlingkilde(hendelse)
                     )
@@ -1614,10 +1644,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakIverksatt -> BehandlingtilstandDto.VEDTAK_IVERKSATT
             },
             endringer = this.endringer.map { it.dto() },
-            refusjonstidslinje = this.refusjonstidslinje.dto(),
             vedtakFattet = this.vedtakFattet,
             avsluttet = this.avsluttet,
-            kilde = this.kilde.dto()
+            kilde = this.kilde.dto(),
         )
     }
 
@@ -1635,8 +1664,7 @@ internal data class BehandlingView(
     val avsluttet: LocalDateTime?,
     val kilde: BehandlingkildeView,
     val tilstand: TilstandView,
-    val endringer: List<BehandlingendringView>,
-    val refusjonstidslinje: Beløpstidslinje
+    val endringer: List<BehandlingendringView>
 ) {
     enum class TilstandView {
         ANNULLERT_PERIODE, AVSLUTTET_UTEN_VEDTAK,
@@ -1655,6 +1683,7 @@ internal data class BehandlingendringView(
     val utbetaling: Utbetaling?,
     val dokumentsporing: Dokumentsporing,
     val utbetalingstidslinje: Utbetalingstidslinje,
+    val refusjonstidslinje: Beløpstidslinje,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgiverperiode: List<Periode>,
     val maksdatoresultat: Maksdatoresultat

@@ -366,7 +366,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(7, behandling.endringer.size)
+                    assertEquals(8, behandling.endringer.size)
                     assertEquals(TilstandView.BEREGNET, behandling.tilstand)
                 }
             }
@@ -389,12 +389,13 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(5, behandling.endringer.size)
+                    assertEquals(6, behandling.endringer.size)
                     assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[0].dokumentsporing)
                     assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[1].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer[2].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[3].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingRefusjon(im), behandling.endringer[3].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[4].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[5].dokumentsporing)
                     assertEquals(VEDTAK_FATTET, behandling.tilstand)
                     assertEquals(vedtakFattetTidspunkt, behandling.vedtakFattet)
                     assertNull(behandling.avsluttet)
@@ -419,7 +420,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(5, behandling.endringer.size)
+                    assertEquals(6, behandling.endringer.size)
                 }
                 behandlinger[1].also { behandling ->
                     assertEquals(1, behandling.endringer.size)
@@ -429,7 +430,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(5, behandling.endringer.size)
+                    assertEquals(6, behandling.endringer.size)
                     assertEquals(VEDTAK_FATTET, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->

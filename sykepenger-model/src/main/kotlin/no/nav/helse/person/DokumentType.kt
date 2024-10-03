@@ -4,6 +4,7 @@ enum class DokumentType {
     Sykmelding,
     Søknad,
     InntektsmeldingInntekt,
+    InntektsmeldingRefusjon,
     InntektsmeldingDager,
     OverstyrTidslinje,
     OverstyrInntekt,

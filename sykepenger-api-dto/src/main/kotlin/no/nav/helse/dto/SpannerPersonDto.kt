@@ -404,6 +404,7 @@ data class SpannerPersonDto(
                 Sykmelding,
                 Søknad,
                 InntektsmeldingInntekt,
+                InntektsmeldingRefusjon,
                 InntektsmeldingDager,
                 OverstyrTidslinje,
                 OverstyrInntekt,
@@ -421,7 +422,6 @@ data class SpannerPersonDto(
                 val avsluttet: LocalDateTime?,
                 val kilde: KildeData,
                 val endringer: List<EndringData>,
-                val refusjonstidslinje: BeløpstidslinjeData
             ) {
                 enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
@@ -451,6 +451,7 @@ data class SpannerPersonDto(
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val utbetalingstidslinje: UtbetalingstidslinjeData,
+                    val refusjonstidslinje: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData
@@ -1005,7 +1006,6 @@ private fun BehandlingUtDto.tilPersonData() =
         avsluttet = this.avsluttet,
         kilde = this.kilde.tilPersonData(),
         endringer = this.endringer.map { it.tilPersonData() },
-        refusjonstidslinje = this.refusjonstidslinje.tilPersonData()
     )
 private fun BehandlingkildeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
@@ -1034,6 +1034,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         vilkårsgrunnlagId = vilkårsgrunnlagId,
         sykdomstidslinje = sykdomstidslinje.tilPersonData(),
         utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
+        refusjonstidslinje = refusjonstidslinje.tilPersonData(),
         dokumentsporing = dokumentsporing.tilPersonData(),
         arbeidsgiverperiode = arbeidsgiverperioder.map {
             SpannerPersonDto.ArbeidsgiverData.PeriodeData(
@@ -1066,6 +1067,7 @@ private fun DokumentsporingDto.tilPersonData() =
         dokumenttype = when (type) {
             DokumenttypeDto.InntektsmeldingDager -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingDager
             DokumenttypeDto.InntektsmeldingInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingInntekt
+            DokumenttypeDto.InntektsmeldingRefusjon -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingRefusjon
             DokumenttypeDto.OverstyrArbeidsforhold -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsforhold
             DokumenttypeDto.OverstyrArbeidsgiveropplysninger -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsgiveropplysninger
             DokumenttypeDto.OverstyrInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrInntekt

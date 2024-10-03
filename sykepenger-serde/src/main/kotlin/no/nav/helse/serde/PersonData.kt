@@ -815,6 +815,7 @@ data class PersonData(
                         DokumentTypeData.Sykmelding -> DokumenttypeDto.Sykmelding
                         DokumentTypeData.Søknad -> DokumenttypeDto.Søknad
                         DokumentTypeData.InntektsmeldingInntekt -> DokumenttypeDto.InntektsmeldingInntekt
+                        DokumentTypeData.InntektsmeldingRefusjon -> DokumenttypeDto.InntektsmeldingRefusjon
                         DokumentTypeData.InntektsmeldingDager -> DokumenttypeDto.InntektsmeldingDager
                         DokumentTypeData.OverstyrTidslinje -> DokumenttypeDto.OverstyrTidslinje
                         DokumentTypeData.OverstyrInntekt -> DokumenttypeDto.OverstyrInntekt
@@ -830,6 +831,7 @@ data class PersonData(
                 Sykmelding,
                 Søknad,
                 InntektsmeldingInntekt,
+                InntektsmeldingRefusjon,
                 InntektsmeldingDager,
                 OverstyrTidslinje,
                 OverstyrInntekt,
@@ -847,7 +849,6 @@ data class PersonData(
                 val avsluttet: LocalDateTime?,
                 val kilde: KildeData,
                 val endringer: List<EndringData>,
-                val refusjonstidslinje: BeløpstidslinjeData
             ) {
                 fun tilDto() = BehandlingInnDto(
                     id = this.id,
@@ -869,18 +870,6 @@ data class PersonData(
                     avsluttet = this.avsluttet,
                     kilde = this.kilde.tilDto(),
                     endringer = this.endringer.map { it.tilDto() },
-                    refusjonstidslinje = BeløpstidslinjeDto(this.refusjonstidslinje.perioder.map {
-                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                            fom = it.fom,
-                            tom = it.tom,
-                            dagligBeløp = it.dagligBeløp,
-                            kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                                meldingsreferanseId = it.meldingsreferanseId,
-                                avsender = it.avsender.tilDto(),
-                                tidsstempel = it.tidsstempel
-                            )
-                        )
-                    })
                 )
                 enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
@@ -921,6 +910,7 @@ data class PersonData(
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val utbetalingstidslinje: UtbetalingstidslinjeData?,
+                    val refusjonstidslinje: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData
@@ -935,6 +925,19 @@ data class PersonData(
                         dokumentsporing = this.dokumentsporing.tilDto(),
                         sykdomstidslinje = this.sykdomstidslinje.tilDto(),
                         utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
+                        refusjonstidslinje = BeløpstidslinjeDto(this.refusjonstidslinje.perioder.map {
+                            BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                                fom = it.fom,
+                                tom = it.tom,
+                                dagligBeløp = it.dagligBeløp,
+                                kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+                                    meldingsreferanseId = it.meldingsreferanseId,
+                                    avsender = it.avsender.tilDto(),
+                                    tidsstempel = it.tidsstempel
+                                )
+                            )
+                        })
+                        ,
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto()

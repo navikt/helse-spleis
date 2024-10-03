@@ -232,7 +232,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, ghost)
 
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
-        assertEquals(setOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
+        assertEquals(setOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingRefusjon(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
     }
 
     @Test

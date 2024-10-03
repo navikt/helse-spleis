@@ -108,6 +108,7 @@ sealed class DokumenttypeDto {
     data object Sykmelding : DokumenttypeDto()
     data object Søknad : DokumenttypeDto()
     data object InntektsmeldingInntekt : DokumenttypeDto()
+    data object InntektsmeldingRefusjon : DokumenttypeDto()
     data object InntektsmeldingDager : DokumenttypeDto()
     data object OverstyrTidslinje : DokumenttypeDto()
     data object OverstyrInntekt : DokumenttypeDto()

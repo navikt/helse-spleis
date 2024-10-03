@@ -3,6 +3,7 @@ package no.nav.helse.dto.serialisering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDto
@@ -20,6 +21,7 @@ data class BehandlingendringUtDto(
     val dokumentsporing: DokumentsporingDto,
     val sykdomstidslinje: SykdomstidslinjeDto,
     val utbetalingstidslinje: UtbetalingstidslinjeUtDto,
+    val refusjonstidslinje: BeløpstidslinjeDto,
     val arbeidsgiverperioder: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatUtDto,
 )

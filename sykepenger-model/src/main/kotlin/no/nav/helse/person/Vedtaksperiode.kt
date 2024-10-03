@@ -2940,5 +2940,5 @@ internal data class VedtaksperiodeView(
     val behandlinger: BehandlingerView
 ) {
     val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
-    val refusjonstidslinje = behandlinger.behandlinger.last().refusjonstidslinje
+    val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje
 }

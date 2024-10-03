@@ -13,6 +13,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
         internal fun sykmelding(id: UUID) = Dokumentsporing(id, DokumentType.Sykmelding)
         internal fun søknad(id: UUID) = Dokumentsporing(id, DokumentType.Søknad)
         internal fun inntektsmeldingInntekt(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingInntekt)
+        internal fun inntektsmeldingRefusjon(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingRefusjon)
         internal fun inntektsmeldingDager(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingDager)
         internal fun overstyrTidslinje(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
         internal fun overstyrInntekt(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrInntekt)
@@ -35,6 +36,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
                     DokumentType.Søknad -> KontekstType.Søknad
                     DokumentType.InntektsmeldingDager -> KontekstType.Inntektsmelding
                     DokumentType.InntektsmeldingInntekt -> KontekstType.Inntektsmelding
+                    DokumentType.InntektsmeldingRefusjon -> KontekstType.Inntektsmelding
                     DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
                     DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
                     DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
@@ -53,6 +55,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
                 dokumentType = when (dto.type) {
                     DokumenttypeDto.InntektsmeldingDager -> DokumentType.InntektsmeldingDager
                     DokumenttypeDto.InntektsmeldingInntekt -> DokumentType.InntektsmeldingInntekt
+                    DokumenttypeDto.InntektsmeldingRefusjon -> DokumentType.InntektsmeldingRefusjon
                     DokumenttypeDto.OverstyrArbeidsforhold -> DokumentType.OverstyrArbeidsforhold
                     DokumenttypeDto.OverstyrArbeidsgiveropplysninger -> DokumentType.OverstyrArbeidsgiveropplysninger
                     DokumenttypeDto.OverstyrInntekt -> DokumentType.OverstyrInntekt
@@ -83,6 +86,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
             DokumentType.Sykmelding -> DokumenttypeDto.Sykmelding
             DokumentType.Søknad -> DokumenttypeDto.Søknad
             DokumentType.InntektsmeldingInntekt -> DokumenttypeDto.InntektsmeldingInntekt
+            DokumentType.InntektsmeldingRefusjon -> DokumenttypeDto.InntektsmeldingRefusjon
             DokumentType.InntektsmeldingDager -> DokumenttypeDto.InntektsmeldingDager
             DokumentType.OverstyrTidslinje -> DokumenttypeDto.OverstyrTidslinje
             DokumentType.OverstyrInntekt -> DokumenttypeDto.OverstyrInntekt
