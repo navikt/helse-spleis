@@ -2,8 +2,10 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -180,6 +182,60 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
+    fun `uendret refusjonsopplysninger i Avsluttet - arbeidsgiverperiode utført tidligere`() {
+        val tidsstempelEldst = LocalDateTime.now().minusDays(10)
+        val eldstId = nyttVedtak(januar, tidsstempelEldst)
+        val kildeEldst = Kilde(eldstId, Avsender.ARBEIDSGIVER, tidsstempelEldst)
+
+        val tidsstempelGammel = LocalDateTime.now().minusDays(1)
+        val gammelId = nyttVedtak(10.februar til 28.februar, tidsstempelGammel, vedtaksperiode = 2, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        val kildeGammel = Kilde(gammelId, Avsender.ARBEIDSGIVER, tidsstempelGammel)
+
+        nullstillTilstandsendringer()
+
+        val tidsstempelNy = LocalDateTime.now()
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, førsteFraværsdag = 10.februar, mottatt = tidsstempelNy)
+        val kildeNy = Kilde(imNy, Avsender.ARBEIDSGIVER, tidsstempelNy)
+
+        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.also { inspektør ->
+            assertEquals(1, inspektør.behandlinger.size)
+            inspektør.behandlinger[0].also {
+                val forventetTidslinje = Beløpstidslinje.fra(januar, INNTEKT, kildeEldst)
+                assertEquals(forventetTidslinje, it.refusjonstidslinje)
+            }
+        }
+        inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.also { inspektør ->
+            assertForventetFeil(
+                forklaring = "Arbeidsgiver sender ut revurderingseventyr ved mottatt IM, som lager ny behandling",
+                nå = {
+                    assertEquals(2, inspektør.behandlinger.size)
+                    inspektør.behandlinger[1].also {
+                        val forventetTidslinje = Beløpstidslinje.fra(10.februar til 28.februar, INNTEKT, kildeGammel)
+                        assertEquals(forventetTidslinje, it.refusjonstidslinje)
+                    }
+                },
+                ønsket = {
+                    assertEquals(1, inspektør.behandlinger.size)
+                }
+            )
+            inspektør.behandlinger[0].also {
+                val forventetTidslinje = Beløpstidslinje.fra(10.februar til 28.februar, INNTEKT, kildeGammel)
+                assertEquals(forventetTidslinje, it.refusjonstidslinje)
+            }
+        }
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertForventetFeil(
+            forklaring = "Arbeidsgiver sender ut revurderingseventyr ved mottatt IM, som lager ny behandling",
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            },
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET)
+            }
+        )
+    }
+
+    @Test
     fun `korrigerte refusjonsopplysninger i AvventerHistorikkRevurdering`() {
         val tidsstempelGammel = LocalDateTime.now()
         val imGammel = nyttVedtak(januar, tidsstempelGammel)
@@ -296,9 +352,9 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
-    private fun nyttVedtak(periode: Periode, tidsstempel: LocalDateTime, vedtaksperiode: Int = 1): UUID {
+    private fun nyttVedtak(periode: Periode, tidsstempel: LocalDateTime, vedtaksperiode: Int = 1, arbeidsgiverperiode: List<Periode> = listOf(periode.start til periode.start.plusDays(15))): UUID {
         håndterSøknad(periode)
-        val im = håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), INNTEKT, mottatt = tidsstempel)
+        val im = håndterInntektsmelding(arbeidsgiverperiode, INNTEKT, førsteFraværsdag = periode.start, mottatt = tidsstempel)
         håndterVilkårsgrunnlag(vedtaksperiode.vedtaksperiode)
         håndterYtelser(vedtaksperiode.vedtaksperiode)
         håndterSimulering(vedtaksperiode.vedtaksperiode)

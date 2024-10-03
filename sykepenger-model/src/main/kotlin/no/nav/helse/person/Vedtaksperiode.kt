@@ -306,13 +306,17 @@ internal class Vedtaksperiode private constructor(
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
-    internal fun håndterRefusjonsopplysninger(hendelse: IAktivitetslogg, refusjon: Refusjonshistorikk.Refusjon) {
+    internal fun håndterRefusjonsopplysninger(hendelse: Hendelse, refusjon: Refusjonshistorikk.Refusjon) {
         kontekst(hendelse)
         val førsteFraværsdag = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
         val søkevindu = førsteFraværsdag til periode.endInclusive
         if (refusjon.startskuddet !in søkevindu) return
         val refusjonstidslinje = refusjon.beløpstidslinje(periode.endInclusive)
         tilstand.håndter(this, hendelse, refusjonstidslinje)
+    }
+
+    private fun håndterEndretRefusjonstidslinje(hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
+        behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), refusjonstidslinje)
     }
 
     private fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding): Boolean {
@@ -1330,7 +1334,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, refusjonstidslinje: Beløpstidslinje) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
             hendelse.info("Forventet ikke refusjonsopplysninger i $type")
         }
 
@@ -1549,10 +1553,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Tilstand {
@@ -1667,10 +1671,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
     }
 
@@ -1746,10 +1750,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
@@ -2007,10 +2011,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -2053,10 +2057,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2133,10 +2137,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -2200,10 +2204,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
     }
@@ -2262,10 +2266,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(
@@ -2362,10 +2366,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
     }
 
@@ -2401,10 +2405,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2572,10 +2576,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             refusjonstidslinje: Beløpstidslinje
         ) {
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(refusjonstidslinje)
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
     }
 
