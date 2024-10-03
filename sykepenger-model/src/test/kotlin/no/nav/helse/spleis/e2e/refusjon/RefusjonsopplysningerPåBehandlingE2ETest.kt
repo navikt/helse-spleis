@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
@@ -201,34 +200,14 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             }
         }
         inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.also { inspektør ->
-            assertForventetFeil(
-                forklaring = "Arbeidsgiver sender ut revurderingseventyr ved mottatt IM, som lager ny behandling",
-                nå = {
-                    assertEquals(2, inspektør.behandlinger.size)
-                    inspektør.behandlinger[1].also {
-                        val forventetTidslinje = Beløpstidslinje.fra(10.februar til 28.februar, INNTEKT, kildeGammel)
-                        assertEquals(forventetTidslinje, it.endringer.last().refusjonstidslinje)
-                    }
-                },
-                ønsket = {
-                    assertEquals(1, inspektør.behandlinger.size)
-                }
-            )
+            assertEquals(1, inspektør.behandlinger.size)
+
             inspektør.behandlinger[0].also {
                 val forventetTidslinje = Beløpstidslinje.fra(10.februar til 28.februar, INNTEKT, kildeGammel)
                 assertEquals(forventetTidslinje, it.endringer.last().refusjonstidslinje)
             }
         }
-        assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertForventetFeil(
-            forklaring = "Arbeidsgiver sender ut revurderingseventyr ved mottatt IM, som lager ny behandling",
-            nå = {
-                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, AVSLUTTET)
-            }
-        )
+        assertTilstander(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
