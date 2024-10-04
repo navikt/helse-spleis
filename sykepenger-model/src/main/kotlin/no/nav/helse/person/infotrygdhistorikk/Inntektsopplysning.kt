@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
-import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -22,10 +21,6 @@ class Inntektsopplysning private constructor(
         refusjonTilArbeidsgiver: Boolean,
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
-
-    internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkInntektsopplysning(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, lagret)
-    }
 
     internal fun funksjoneltLik(other: Inntektsopplysning): Boolean {
         if (this.orgnummer != other.orgnummer) return false

@@ -3,8 +3,6 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InfotrygdperiodeVisitor
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -12,13 +10,11 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
-    protected val periode = fom til tom
+sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
+    val periode = fom til tom
 
     internal open fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
-
-    internal abstract fun accept(visitor: InfotrygdperiodeVisitor)
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
         validerHarBetaltTidligere(periode, aktivitetslogg)
@@ -57,8 +53,6 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         if (this::class != other::class) return false
         return this.periode == other.periode
     }
-
-    abstract fun somOverlappendeInfotrygdperiode(): PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 
     internal companion object {
         internal fun sorter(perioder: List<Infotrygdperiode>) =

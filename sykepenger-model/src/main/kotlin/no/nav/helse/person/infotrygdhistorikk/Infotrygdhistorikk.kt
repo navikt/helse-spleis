@@ -5,9 +5,6 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Person
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -16,9 +13,10 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
-    private val elementer: MutableList<InfotrygdhistorikkElement>
+    private val _elementer: MutableList<InfotrygdhistorikkElement>
 ) {
-    private val siste get() = elementer.first()
+    val elementer get() = _elementer.toList()
+    val siste get() = _elementer.first()
 
     constructor() : this(mutableListOf())
 
@@ -28,7 +26,7 @@ internal class Infotrygdhistorikk private constructor(
 
         internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk {
             return Infotrygdhistorikk(
-                elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
+                _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
             )
         }
     }
@@ -72,13 +70,13 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): Boolean {
         if (harHistorikk() && element.erstatter(siste)) return false
-        elementer.add(0, element)
+        _elementer.add(0, element)
         return true
     }
 
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         if (!harHistorikk()) return false
-        val sisteElementSomFantesFørUtbetaling = elementer.firstOrNull{
+        val sisteElementSomFantesFørUtbetaling = _elementer.firstOrNull{
             it.erEldreEnn(utbetaling)
         } ?: return siste.erNyopprettet()
         return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)
@@ -87,20 +85,14 @@ internal class Infotrygdhistorikk private constructor(
     internal fun tøm() {
         if (!harHistorikk()) return
         val nyeste = siste
-        elementer.clear()
-        elementer.add(nyeste)
-    }
-
-    internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.preVisitInfotrygdhistorikk()
-        elementer.forEach { it.accept(visitor) }
-        visitor.postVisitInfotrygdhistorikk()
+        _elementer.clear()
+        _elementer.add(nyeste)
     }
 
     internal fun betaltePerioder(orgnummer: String? = null) =
         if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
 
-    internal fun harHistorikk() = elementer.isNotEmpty()
+    internal fun harHistorikk() = _elementer.isNotEmpty()
     internal fun harUtbetaltI(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harUtbetaltI(periode)
@@ -112,11 +104,6 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun dto() = InfotrygdhistorikkUtDto(
-        elementer = this.elementer.map { it.dto() }
+        elementer = this._elementer.map { it.dto() }
     )
-
-    internal fun overlappendeInfotrygdperioder(person: Person, alleVedtaksperioder: List<Vedtaksperiode>) {
-        if (!harHistorikk()) return
-        siste.overlappendeInfotrygdperioder(person, alleVedtaksperioder)
-    }
 }

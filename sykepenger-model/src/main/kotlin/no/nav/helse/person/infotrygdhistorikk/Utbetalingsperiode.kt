@@ -7,8 +7,6 @@ import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtD
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.InfotrygdperiodeVisitor
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -17,12 +15,12 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
-abstract class Utbetalingsperiode(
-    protected val orgnr: String,
+sealed class Utbetalingsperiode(
+    val orgnr: String,
     fom: LocalDate,
     tom: LocalDate,
-    protected val grad: Prosentdel,
-    protected val inntekt: Inntekt
+    val grad: Prosentdel,
+    val inntekt: Inntekt
 ) : Infotrygdperiode(fom, tom) {
     companion object {
         // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
@@ -55,19 +53,6 @@ abstract class Utbetalingsperiode(
 class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
 
-    override fun accept(visitor: InfotrygdperiodeVisitor) {
-        visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
-    }
-
-    override fun somOverlappendeInfotrygdperiode(): PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode {
-        return PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
-            fom = this.periode.start,
-            tom = this.periode.endInclusive,
-            type = "ARBEIDSGIVERUTBETALING",
-            orgnummer = this.orgnr
-        )
-    }
-
     internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
         orgnr = orgnr,
         periode = periode.dto(),
@@ -91,19 +76,6 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
 
 class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
-
-    override fun accept(visitor: InfotrygdperiodeVisitor) {
-        visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
-    }
-
-    override fun somOverlappendeInfotrygdperiode(): PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode {
-        return PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
-            fom = this.periode.start,
-            tom = this.periode.endInclusive,
-            type = "PERSONUTBETALING",
-            orgnummer = this.orgnr
-        )
-    }
 
     internal fun dto() = InfotrygdPersonutbetalingsperiodeUtDto(
         orgnr = orgnr,

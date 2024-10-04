@@ -119,8 +119,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -2904,7 +2907,26 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeTom = this.periode.endInclusive,
                 vedtaksperiodetilstand = tilstand.type.name,
                 infotrygdperioder = overlappende.map {
-                    it.somOverlappendeInfotrygdperiode()
+                    when (it) {
+                        is Friperiode -> PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+                            fom = it.periode.start,
+                            tom = it.periode.endInclusive,
+                            type = "FRIPERIODE",
+                            orgnummer = null
+                        )
+                        is ArbeidsgiverUtbetalingsperiode -> PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+                            fom = it.periode.start,
+                            tom = it.periode.endInclusive,
+                            type = "ARBEIDSGIVERUTBETALING",
+                            orgnummer = it.orgnr
+                        )
+                        is PersonUtbetalingsperiode -> PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+                            fom = it.periode.start,
+                            tom = it.periode.endInclusive,
+                            type = "PERSONUTBETALING",
+                            orgnummer = it.orgnr
+                        )
+                    }
                 }
             )
         ))

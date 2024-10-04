@@ -306,8 +306,18 @@ class Person private constructor(
         sykdomshistorikkEndret()
         arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
-        infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
+        emitOverlappendeInfotrygdperioder(alleVedtaksperioder)
         håndterGjenoppta(hendelse)
+    }
+
+    private fun emitOverlappendeInfotrygdperioder(alleVedtaksperioder: List<Vedtaksperiode>) {
+        if (!infotrygdhistorikk.harHistorikk()) return
+        val hendelseId = infotrygdhistorikk.siste.hendelseId!!
+        val perioder = infotrygdhistorikk.siste.perioder
+        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())) { result, vedtaksperiode ->
+            vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
+        }
+        emitOverlappendeInfotrygdperioder(event)
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {

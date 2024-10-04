@@ -6,10 +6,6 @@ import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
@@ -21,17 +17,19 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class InfotrygdhistorikkElement private constructor(
-    private val id: UUID,
-    private val tidsstempel: LocalDateTime,
-    private val hendelseId: UUID? = null,
+    val id: UUID,
+    val tidsstempel: LocalDateTime,
+    val hendelseId: UUID? = null,
     perioder: List<Infotrygdperiode>,
     inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
-    private var oppdatert: LocalDateTime,
+    oppdatert: LocalDateTime,
     private var nyOpprettet: Boolean = false
 ) {
+    var oppdatert = oppdatert
+        private set
     private val inntekter = Inntektsopplysning.sorter(inntekter)
-    private val perioder = Infotrygdperiode.sorter(perioder)
+    val perioder = Infotrygdperiode.sorter(perioder)
     private val kilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {
@@ -110,18 +108,6 @@ class InfotrygdhistorikkElement private constructor(
 
     private fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
 
-    internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
-        visitor.preVisitInfotrygdhistorikkPerioder()
-        perioder.forEach { it.accept(visitor) }
-        visitor.postVisitInfotrygdhistorikkPerioder()
-        visitor.preVisitInfotrygdhistorikkInntektsopplysninger()
-        inntekter.forEach { it.accept(visitor) }
-        visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
-        visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
-        visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
-    }
-
     internal fun funksjoneltLik(other: InfotrygdhistorikkElement): Boolean {
         if (!harLikePerioder(other)) return false
         if (!harLikeInntekter(other)) return false
@@ -171,12 +157,5 @@ class InfotrygdhistorikkElement private constructor(
         arbeidskategorikoder = this.arbeidskategorikoder,
         oppdatert = this.oppdatert
     )
-
-    internal fun overlappendeInfotrygdperioder(person: Person, alleVedtaksperioder: List<Vedtaksperiode>) {
-        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId!!.toString())) { result, vedtaksperiode ->
-            vedtaksperiode.overlappendeInfotrygdperioder(result, this.perioder)
-        }
-        person.emitOverlappendeInfotrygdperioder(event)
-    }
 }
 
