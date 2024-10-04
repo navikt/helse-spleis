@@ -273,8 +273,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    fun stjelRefusjonstidslinjeFra(behandlingerFraPeriodeRettFør: Behandlinger, søknad: Søknad) {
-        behandlinger.last().stjelRefusjonstidslinje(søknad, behandlingerFraPeriodeRettFør.behandlinger.last())?.also {
+    fun viderereførRefusjonsopplysningerFra(nabo: Behandlinger, søknad: Søknad) {
+        behandlinger.last().videreførRefusjonsopplysningerFra(søknad, nabo.behandlinger.last())?.also {
             leggTilNyBehandling(it)
         }
     }
@@ -432,8 +432,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyRefusjonstidslinje)
         }
 
-        internal fun stjelRefusjonstidslinje(søknad: Søknad, behandlingPåPeriodeRettFør: Behandling): Behandling? {
-            return this.tilstand.stjelRefusjonstidslinje(this, søknad, behandlingPåPeriodeRettFør)
+        internal fun videreførRefusjonsopplysningerFra(søknad: Søknad, nabo: Behandling): Behandling? {
+            return this.tilstand.videreførRefusjonsopplysningerFra(this, søknad, nabo)
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
@@ -1184,12 +1184,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ): Behandling? {
                 error("Har ikke implementert håndtering av refusjonsopplysninger i $this")
             }
-            fun stjelRefusjonstidslinje(
+            fun videreførRefusjonsopplysningerFra(
                 behandling: Behandling,
                 søknad: Søknad,
-                behandlingPåPeriodeRettFør: Behandling
+                nabo: Behandling
             ): Behandling? {
-                error("Har ikke implementert stjeling av refusjonstidslinje i $this")
+                error("Har ikke implementert videreføring av refusjonsopplysninger i $this")
             }
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
@@ -1253,14 +1253,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return null
                 }
 
-                override fun stjelRefusjonstidslinje(
+                override fun videreførRefusjonsopplysningerFra(
                     behandling: Behandling,
                     søknad: Søknad,
-                    behandlingPåPeriodeRettFør: Behandling
+                    nabo: Behandling
                 ): Behandling? {
-                    val refusjonstidslinjePåPeriodeRettFør = behandlingPåPeriodeRettFør.endringer.last().refusjonstidslinje
-                    val stjåletRefusjonstidslinje = refusjonstidslinjePåPeriodeRettFør.strekk(behandling.periode).subset(behandling.periode)
-                    behandling.oppdaterMedRefusjonstidslinje(søknad, stjåletRefusjonstidslinje)
+                    val refusjonstidslinjeFraNabo = nabo.endringer.last().refusjonstidslinje
+                    val videreførtRefusjonstidslinje = refusjonstidslinjeFraNabo.strekk(behandling.periode).subset(behandling.periode)
+                    behandling.oppdaterMedRefusjonstidslinje(søknad, videreførtRefusjonstidslinje)
                     return null
                 }
 

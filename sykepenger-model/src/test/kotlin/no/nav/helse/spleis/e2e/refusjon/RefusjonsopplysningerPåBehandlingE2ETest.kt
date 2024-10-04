@@ -401,16 +401,18 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(februar)
             nyPeriode(januar)
+            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+        }
+    }
 
-            assertForventetFeil(
-                forklaring = "Må kunne tilbakeføre refusjonsopplysninger når perioden etter deg har refusjonsopplysninger",
-                ønsket = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
-                },
-                nå = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
-                }
-            )
+    @Test
+    fun `Refusjonsopplysninger på en periode som kiler seg midt mellom to strekker opplysningene fra perioden før seg`() {
+        a1 {
+            nyttVedtak(januar, beregnetInntekt = INNTEKT)
+            nyttVedtak(mars, beregnetInntekt = INNTEKT*1.1)
+            nyPeriode(februar)
+
+            assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.all { it.beløp == INNTEKT })
         }
     }
 
