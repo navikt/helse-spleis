@@ -3,6 +3,7 @@ package no.nav.helse.person.beløp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -148,6 +149,36 @@ internal class BeløpstidslinjeTest {
         assertEquals(Systemet oppgir 100.daglig fra 5.januar til 7.januar, (Systemet oppgir 100.daglig kun 6.januar).strekk(5.januar til 7.januar))
     }
 
+    @Test
+    fun dto() {
+        val tidslinje = (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
+                (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
+                (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
+
+        val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId, Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
+        assertEquals(BeløpstidslinjeDto(
+            perioder = listOf(
+                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                    fom = 1.februar,
+                    tom = 1.februar,
+                    dagligBeløp = 500.0,
+                    kilde = kilde
+                ),
+                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                    fom = 2.februar,
+                    tom = 10.februar,
+                    dagligBeløp = 250.0,
+                    kilde = kilde
+                ),
+                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                    fom = 11.februar,
+                    tom = 12.februar,
+                    dagligBeløp = 500.0,
+                    kilde = kilde
+                )
+            )
+        ), tidslinje.dto())
+    }
 
     private companion object {
         private val ArbeidsgiverId = UUID.fromString("00000000-0000-0000-0000-000000000000")
