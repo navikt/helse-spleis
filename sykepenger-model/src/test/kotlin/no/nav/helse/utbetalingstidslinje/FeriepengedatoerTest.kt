@@ -34,7 +34,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
+internal class FeriepengedatoerTest : AbstractEndToEndTest() {
     private companion object {
         private val alder = UNG_PERSON_FØDSELSDATO.alder
         private val a1 = "456789123"
