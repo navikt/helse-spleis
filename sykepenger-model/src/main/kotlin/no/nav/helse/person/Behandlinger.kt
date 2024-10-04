@@ -440,8 +440,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             (gjeldende.refusjonstidslinje + nyeRefusjonsopplysninger) != gjeldende.refusjonstidslinje
 
         // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett
-        class Endring constructor(
-            private val id: UUID,
+        data class Endring(
+            val id: UUID,
             val tidsstempel: LocalDateTime,
             val sykmeldingsperiode: Periode,
             val periode: Periode,
@@ -455,34 +455,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val arbeidsgiverperiode: List<Periode>,
             val maksdatoresultat: Maksdatoresultat
         ) {
-
-            internal constructor(
-                grunnlagsdata: VilkårsgrunnlagElement?,
-                utbetaling: Utbetaling?,
-                dokumentsporing: Dokumentsporing,
-                sykdomstidslinje: Sykdomstidslinje,
-                utbetalingstidslinje: Utbetalingstidslinje,
-                refusjonstidslinje: Beløpstidslinje,
-                sykmeldingsperiode: Periode,
-                periode: Periode,
-                skjæringstidspunkt: LocalDate,
-                arbeidsgiverperiode: List<Periode>,
-                maksdatoresultat: Maksdatoresultat
-            ) : this(
-                id = UUID.randomUUID(),
-                tidsstempel = LocalDateTime.now(),
-                sykmeldingsperiode = sykmeldingsperiode,
-                periode = periode,
-                grunnlagsdata = grunnlagsdata,
-                utbetaling = utbetaling,
-                dokumentsporing = dokumentsporing,
-                sykdomstidslinje = sykdomstidslinje,
-                utbetalingstidslinje = utbetalingstidslinje,
-                refusjonstidslinje = refusjonstidslinje,
-                skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiverperiode = arbeidsgiverperiode,
-                maksdatoresultat = maksdatoresultat
-            )
 
             fun view() = BehandlingendringView(
                 id = id,
@@ -560,28 +532,42 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             override fun toString() = "$periode - $dokumentsporing - ${sykdomstidslinje.toShortString()}${utbetaling?.let { " - $it" } ?: ""}"
 
-            override fun equals(other: Any?): Boolean {
-                if (other === this) return true
-                if (other !is Endring) return false
-                return this.dokumentsporing == other.dokumentsporing
-            }
+            /* kopierer dataklassen og lager ny, men sørger for at den nye endringen får ny id og tidsstempel (!!) */
+            private fun kopierMed(
+                sykmeldingsperiode: Periode = this.sykmeldingsperiode,
+                periode: Periode = this.periode,
+                grunnlagsdata: VilkårsgrunnlagElement? = this.grunnlagsdata,
+                utbetaling: Utbetaling? = this.utbetaling,
+                dokumentsporing: Dokumentsporing = this.dokumentsporing,
+                sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje,
+                utbetalingstidslinje: Utbetalingstidslinje = this.utbetalingstidslinje,
+                refusjonstidslinje: Beløpstidslinje = this.refusjonstidslinje,
+                skjæringstidspunkt: LocalDate = this.skjæringstidspunkt,
+                arbeidsgiverperiode: List<Periode> = this.arbeidsgiverperiode,
+                maksdatoresultat: Maksdatoresultat = this.maksdatoresultat
+            ) = copy(
+                id = UUID.randomUUID(),
+                tidsstempel = LocalDateTime.now(),
+                sykmeldingsperiode = sykmeldingsperiode,
+                periode = periode,
+                grunnlagsdata = grunnlagsdata,
+                utbetaling = utbetaling,
+                dokumentsporing = dokumentsporing,
+                sykdomstidslinje = sykdomstidslinje,
+                utbetalingstidslinje = utbetalingstidslinje,
+                refusjonstidslinje = refusjonstidslinje,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                maksdatoresultat = maksdatoresultat,
+            )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Endring? {
                 val nyttSkjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt)
                 val arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
                 if (nyttSkjæringstidspunkt == this.skjæringstidspunkt && arbeidsgiverperiode == this.arbeidsgiverperiode) return null
-                return Endring(
-                    grunnlagsdata = this.grunnlagsdata,
-                    utbetaling = this.utbetaling,
-                    dokumentsporing = this.dokumentsporing,
-                    sykdomstidslinje = this.sykdomstidslinje,
-                    utbetalingstidslinje = this.utbetalingstidslinje,
-                    refusjonstidslinje = this.refusjonstidslinje,
-                    sykmeldingsperiode = this.sykmeldingsperiode,
-                    periode = this.periode,
+                return kopierMed(
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
-                    arbeidsgiverperiode = arbeidsgiverperiode,
-                    maksdatoresultat = this.maksdatoresultat
+                    arbeidsgiverperiode = arbeidsgiverperiode
                 )
             }
 
@@ -591,91 +577,50 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykdomstidslinje: Sykdomstidslinje,
                 beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode>
-            ) = Endring(
+            ) = kopierMed(
                 grunnlagsdata = null,
                 utbetaling = null,
                 dokumentsporing = dokument,
                 sykdomstidslinje = sykdomstidslinje,
                 utbetalingstidslinje = Utbetalingstidslinje(),
-                refusjonstidslinje = this.refusjonstidslinje,
-                sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = periode,
                 skjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode),
                 arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
                 maksdatoresultat = Maksdatoresultat.IkkeVurdert
             )
+
             internal fun kopierUtenUtbetaling(
                 beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode> = { this.arbeidsgiverperiode }
-            ) = Endring(
+            ) = kopierMed(
                 grunnlagsdata = null,
                 utbetaling = null,
-                dokumentsporing = this.dokumentsporing,
-                sykdomstidslinje = this.sykdomstidslinje,
                 utbetalingstidslinje = Utbetalingstidslinje(),
-                refusjonstidslinje = this.refusjonstidslinje,
                 maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode,
                 skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
                 arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
             )
+
             internal fun kopierMedRefusjonstidslinje(
                 dokument: Dokumentsporing,
                 refusjonstidslinje: Beløpstidslinje,
                 beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode> = { this.arbeidsgiverperiode }
-            ) = Endring(
-                grunnlagsdata = this.grunnlagsdata,
-                utbetaling = this.utbetaling,
+            ) = kopierMed(
                 dokumentsporing = dokument,
-                sykdomstidslinje = this.sykdomstidslinje,
-                utbetalingstidslinje = this.utbetalingstidslinje,
                 refusjonstidslinje = refusjonstidslinje,
-                maksdatoresultat = this.maksdatoresultat,
-                sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode,
                 skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
                 arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
             )
-            internal fun kopierMedUtbetaling(maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) = Endring(
+            internal fun kopierMedUtbetaling(maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) = kopierMed(
                 grunnlagsdata = grunnlagsdata,
                 utbetaling = utbetaling,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
-                maksdatoresultat = maksdatoresultat,
-                dokumentsporing = this.dokumentsporing,
-                sykdomstidslinje = this.sykdomstidslinje,
-                refusjonstidslinje = this.refusjonstidslinje,
-                sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode,
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                arbeidsgiverperiode = this.arbeidsgiverperiode
+                maksdatoresultat = maksdatoresultat
             )
-            internal fun kopierDokument(dokument: Dokumentsporing) = Endring(
-                grunnlagsdata = this.grunnlagsdata,
-                utbetaling = this.utbetaling,
-                dokumentsporing = dokument,
-                sykdomstidslinje = this.sykdomstidslinje,
-                utbetalingstidslinje = this.utbetalingstidslinje,
-                refusjonstidslinje = this.refusjonstidslinje,
-                sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode,
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                arbeidsgiverperiode = this.arbeidsgiverperiode,
-                maksdatoresultat = this.maksdatoresultat
-            )
-            internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) = Endring(
-                grunnlagsdata = this.grunnlagsdata,
-                utbetaling = this.utbetaling,
-                dokumentsporing = this.dokumentsporing,
-                sykdomstidslinje = this.sykdomstidslinje,
-                utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
-                refusjonstidslinje = this.refusjonstidslinje,
-                maksdatoresultat = this.maksdatoresultat,
-                sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode,
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                arbeidsgiverperiode = this.arbeidsgiverperiode
+            internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)
+            internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) = kopierMed(
+                utbetalingstidslinje = utbetalingstidslinje.subset(this.periode)
             )
 
             fun forkastUtbetaling(hendelse: IAktivitetslogg) {
@@ -897,6 +842,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun nyEndring(endring: Endring?) {
             if (endring == null) return
+            check(endringer.none { it.id == endring.id }) { "Endringer må ha unik ID" }
+            check(endringer.none { it.tidsstempel == endring.tidsstempel }) { "Endringer må ha unik tidsstempel" }
             endringer.add(endring)
         }
 
@@ -1113,6 +1060,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     tilstand = Tilstand.Uberegnet,
                     endringer = listOf(
                         Endring(
+                            id = UUID.randomUUID(),
+                            tidsstempel = LocalDateTime.now(),
                             grunnlagsdata = null,
                             utbetaling = null,
                             dokumentsporing = dokumentsporing,
