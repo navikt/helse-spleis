@@ -38,7 +38,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
-        assertTrue(person.personLogg.varsel().none { w ->
+        assertTrue(person.personLogg.varsel.none { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
     }

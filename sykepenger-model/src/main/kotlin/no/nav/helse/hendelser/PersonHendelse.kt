@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -22,6 +21,8 @@ abstract class PersonHendelse protected constructor(
     init {
         aktivitetslogg.kontekst(this)
     }
+
+    override fun behov() = aktivitetslogg.behov()
 
     fun wrap(other: (IAktivitetslogg) -> IAktivitetslogg, block: () -> Unit): IAktivitetslogg {
         val kopi = aktivitetslogg
@@ -53,7 +54,6 @@ abstract class PersonHendelse protected constructor(
     fun toLogString() = aktivitetslogg.toString()
 
     override fun info(melding: String, vararg params: Any?) = aktivitetslogg.info(melding, *params)
-    override fun varsel(melding: String) = aktivitetslogg.varsel(melding)
     override fun varsel(kode: Varselkode) = aktivitetslogg.varsel(kode)
     override fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) =
         aktivitetslogg.behov(type, melding, detaljer)
@@ -63,12 +63,10 @@ abstract class PersonHendelse protected constructor(
     override fun harVarslerEllerVerre() = aktivitetslogg.harVarslerEllerVerre()
     override fun harFunksjonelleFeilEllerVerre() = aktivitetslogg.harFunksjonelleFeilEllerVerre()
     override fun aktivitetsteller() = aktivitetslogg.aktivitetsteller()
-    override fun behov() = aktivitetslogg.behov()
     override fun barn() = aktivitetslogg.barn()
     override fun kontekst(kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
     override fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(parent, kontekst)
     override fun kontekster() = aktivitetslogg.kontekster()
-    override fun toMap(mapper: AktivitetsloggMappingPort) = aktivitetslogg.toMap(mapper)
 
     override fun register(observer: AktivitetsloggObserver) {
         aktivitetslogg.register(observer)

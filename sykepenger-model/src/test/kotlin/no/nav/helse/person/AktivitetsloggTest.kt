@@ -1,13 +1,11 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -238,75 +236,30 @@ internal class AktivitetsloggTest {
         val hendelse = TestHendelse(aktivitetslogg.barn())
         hendelse.kontekst(person)
         hendelse.varsel(RV_SØ_1)
-        assertEquals(1, aktivitetslogg.varsel().size)
+        assertEquals(1, aktivitetslogg.varsel.size)
         assertVarsel(RV_SØ_1)
     }
 
-    @Test
-    fun `varsel uten kode blir ikke til varsel med kode`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
-        hendelse.kontekst(person)
-        hendelse.varsel(melding = "En melding")
-        assertEquals(1, aktivitetslogg.varsel().size)
-        assertVarsel(forventetKode = null)
-        assertVarsel(message = "En melding")
-    }
-
     private fun assertInfo(message: String, forventetKonteksttyper: List<String>? = null, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        var visitorCalled = false
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Info, melding: String, tidsstempel: String) {
-                visitorCalled = true
-                assertEquals(message, melding)
-                if (forventetKonteksttyper != null)
-                    assertEquals(forventetKonteksttyper, kontekster.map { it.kontekstType })
-            }
-        })
-        assertTrue(visitorCalled)
+        val aktivitet = aktivitetslogg.aktiviteter.filter { it is Aktivitet.Info && message in it.toString() }
+        assertEquals(1, aktivitet.size)
+        if (forventetKonteksttyper != null) {
+            assertEquals(forventetKonteksttyper, aktivitet.single().kontekster.map { it.kontekstType })
+        }
     }
 
-    private fun assertVarsel(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        var visitorCalled = false
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
-                visitorCalled = true
-                assertEquals(message, melding)
-            }
-        })
-        assertTrue(visitorCalled)
-    }
-
-    private fun assertVarsel(forventetKode: Varselkode?, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        var visitorCalled = false
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
-                visitorCalled = true
-                assertEquals(forventetKode, kode)
-            }
-        })
-        assertTrue(visitorCalled)
+    private fun assertVarsel(forventetKode: Varselkode, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
+        val aktivitet = aktivitetslogg.aktiviteter.filterIsInstance<Aktivitet.Varsel>()
+        assertEquals(1, aktivitet.size)
+        assertEquals(forventetKode, aktivitet.single().kode)
     }
 
     private fun assertFunksjonellFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        var visitorCalled = false
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
-                visitorCalled = true
-                assertTrue(message in aktivitet.toString(), aktivitetslogg.toString())
-            }
-        })
-        assertTrue(visitorCalled)
+        assertEquals(1, aktivitetslogg.aktiviteter.count { it is Aktivitet.FunksjonellFeil && message in it.toString() })
     }
 
     private fun assertLogiskFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        var visitorCalled = false
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
-                visitorCalled = true
-                assertEquals(message, melding)
-            }
-        })
-        assertTrue(visitorCalled)
+        assertEquals(1, aktivitetslogg.aktiviteter.count { it is Aktivitet.LogiskFeil && message in it.toString() })
     }
 
     private class TestKontekst(

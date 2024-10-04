@@ -152,7 +152,7 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
-        assertFalse(hendelse.harBehov(Behovtype.Utbetaling))
+        assertFalse(hendelse.aktivitetslogg.harBehov(Behovtype.Utbetaling))
         assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
         assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
         assertEquals(GODKJENT_UTEN_UTBETALING, utbetalingen.inspektør.tilstand)
@@ -202,8 +202,8 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
-        assertEquals(1, hendelse.behov().size)
-        hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
+        assertEquals(1, hendelse.aktivitetslogg.behov.size)
+        hendelse.aktivitetslogg.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
 
@@ -278,8 +278,8 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
-        assertEquals(1, hendelse.behov().size)
-        hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
+        assertEquals(1, hendelse.aktivitetslogg.behov.size)
+        hendelse.aktivitetslogg.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
 
@@ -302,8 +302,8 @@ internal class UtbetalingTest {
         assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
 
         val kvitteringen = kvittèr(annullering1, utbetalingmottaker = utbetalingen)
-        assertEquals(1, kvitteringen.behov().size)
-        kvitteringen.sisteBehov(Behovtype.Utbetaling).also { behov ->
+        assertEquals(1, kvitteringen.aktivitetslogg.behov.size)
+        kvitteringen.aktivitetslogg.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
 
@@ -827,7 +827,7 @@ internal class UtbetalingTest {
         fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         status: Oppdragstatus = AKSEPTERT,
         utbetalingmottaker: Utbetaling = utbetaling
-    ): UtbetalingHendelse {
+    ): Kvittering {
         val hendelsen = Kvittering(
             fagsystemId = fagsystemId,
             utbetalingId = utbetaling.inspektør.utbetalingId,
@@ -853,11 +853,11 @@ internal class UtbetalingTest {
             it.opprett(aktivitetslogg)
         }
 
-    private fun IAktivitetslogg.sisteBehov(type: Behovtype) =
-        behov().last { it.type == type }
+    private fun Aktivitetslogg.sisteBehov(type: Behovtype) =
+        behov.last { it.type == type }
 
-    private fun IAktivitetslogg.harBehov(behov: Behovtype) =
-        this.behov().any { it.type == behov }
+    private fun Aktivitetslogg.harBehov(behov: Behovtype) =
+        this.behov.any { it.type == behov }
 
     private class Utbetalingsgodkjenning(
         override val utbetalingId: UUID,

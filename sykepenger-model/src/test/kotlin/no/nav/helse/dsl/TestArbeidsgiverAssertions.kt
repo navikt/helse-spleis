@@ -10,7 +10,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -146,63 +145,33 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
     }
 
-    private fun collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
-        val info = mutableListOf<String>()
-        personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Info, melding: String, tidsstempel: String) {
-                if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                    info.add(melding)
-                }
-            }
-        })
-        return info
+    private fun collectInfo(vararg filtre: AktivitetsloggFilter): List<String> {
+        return personInspektør.aktivitetslogg.info
+            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .map { it.melding }
     }
 
-    private fun collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
-        val warnings = mutableListOf<String>()
-        personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
-                if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                    warnings.add(melding)
-                }
-            }
-        })
-        return warnings
+    private fun collectVarsler(vararg filtre: AktivitetsloggFilter): List<String> {
+        return personInspektør.aktivitetslogg.varsel
+            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .map { it.melding }
     }
 
-    private fun collectVarselkoder(vararg filtre: AktivitetsloggFilter): MutableList<Varselkode> {
-        val warnings = mutableListOf<Varselkode>()
-        personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
-                if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } } && kode != null) {
-                    warnings.add(kode)
-                }
-            }
-        })
-        return warnings
+    private fun collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
+        return personInspektør.aktivitetslogg.varsel
+            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .map { it.kode }
     }
 
-    private fun collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
-        val errors = mutableListOf<String>()
-        personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
-                if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                    errors.add(melding)
-                }
-            }
-        })
-        return errors
+    private fun collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): List<String> {
+        return personInspektør.aktivitetslogg.funksjonellFeil
+            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .map { it.melding }
     }
 
-    private fun collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
-        val severes = mutableListOf<String>()
-        personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
-                if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                    severes.add(melding)
-                }
-            }
-        })
-        return severes
+    private fun collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): List<String> {
+        return personInspektør.aktivitetslogg.logiskFeil
+            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .map { it.melding }
     }
 }

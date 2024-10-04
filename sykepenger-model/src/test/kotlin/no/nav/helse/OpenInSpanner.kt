@@ -15,9 +15,6 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -104,92 +101,45 @@ class SpannerEtterTestInterceptor : TestWatcher {
     }
 
     private fun SugUtAlleAktivitetene(aktivitetslogg: Aktivitetslogg): String {
-        val liste = mutableListOf<AktivitetDto>()
-
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(
-                id: UUID,
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitet.Info,
-                melding: String,
-                tidsstempel: String
-            ) {
-                liste.add(AktivitetDto(
-                    id = 0,
-                    nivå = "INFO",
-                    tekst = melding,
-                    tidsstempel = tidsstempel,
-                    kontekster = kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                ))
-            }
-
-            override fun visitVarsel(
-                id: UUID,
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitet.Varsel,
-                kode: Varselkode?,
-                melding: String,
-                tidsstempel: String
-            ) {
-                liste.add(AktivitetDto(
-                    id = 0,
-                    nivå = "VARSEL",
-                    tekst = melding,
-                    tidsstempel = tidsstempel,
-                    kontekster = kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                ))
-            }
-
-            override fun visitBehov(
-                id: UUID,
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitet.Behov,
-                type: Aktivitet.Behov.Behovtype,
-                melding: String,
-                detaljer: Map<String, Any?>,
-                tidsstempel: String
-            ) {
-                liste.add(AktivitetDto(
+        val liste = aktivitetslogg.aktiviteter.map {
+            when (it) {
+                is Aktivitet.Behov -> AktivitetDto(
                     id = 0,
                     nivå = "BEHOV",
-                    tekst = melding,
-                    tidsstempel = tidsstempel,
-                    kontekster = kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                ))
-            }
-
-            override fun visitLogiskFeil(
-                id: UUID,
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitet.LogiskFeil,
-                melding: String,
-                tidsstempel: String
-            ) {
-                liste.add(AktivitetDto(
-                    id = 0,
-                    nivå = "LOGISK_FEIL",
-                    tekst = melding,
-                    tidsstempel = tidsstempel,
-                    kontekster = kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                ))
-            }
-
-            override fun visitFunksjonellFeil(
-                id: UUID,
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitet.FunksjonellFeil,
-                melding: String,
-                tidsstempel: String
-            ) {
-                liste.add(AktivitetDto(
+                    tekst = it.melding,
+                    tidsstempel = it.tidsstempel,
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                )
+                is Aktivitet.FunksjonellFeil -> AktivitetDto(
                     id = 0,
                     nivå = "FUNKSJONELL_FEIL",
-                    tekst = melding,
-                    tidsstempel = tidsstempel,
-                    kontekster = kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                ))
+                    tekst = it.melding,
+                    tidsstempel = it.tidsstempel,
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                )
+                is Aktivitet.Info -> AktivitetDto(
+                    id = 0,
+                    nivå = "INFO",
+                    tekst = it.melding,
+                    tidsstempel = it.tidsstempel,
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                )
+                is Aktivitet.LogiskFeil -> AktivitetDto(
+                    id = 0,
+                    nivå = "LOGISK_FEIL",
+                    tekst = it.melding,
+                    tidsstempel = it.tidsstempel,
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                )
+                is Aktivitet.Varsel -> AktivitetDto(
+                    id = 0,
+                    nivå = "VARSEL",
+                    tekst = it.melding,
+                    tidsstempel = it.tidsstempel,
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                )
             }
-        })
+        }
 
         val aktiviteter = mapOf("aktiviteter" to liste)
         val aktivitetsloggV2 = mapOf("aktivitetsloggV2" to aktiviteter)

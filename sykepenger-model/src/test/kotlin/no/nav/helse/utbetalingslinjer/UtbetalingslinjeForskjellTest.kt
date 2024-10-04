@@ -6,8 +6,6 @@ import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
 import no.nav.helse.februar
@@ -17,13 +15,10 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
@@ -465,7 +460,7 @@ internal class UtbetalingslinjeForskjellTest {
             14.januar to 20.januar endringskode NY pekerPå actual[0]
         ), actual)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-        Visitor(aktivitetslogg).assertVarsel(RV_OS_2)
+        aktivitetslogg.assertVarsel(RV_OS_2)
     }
     @Test
     fun `endre fom på siste linje`() {
@@ -1116,30 +1111,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertNotNull(actual[0].datoStatusFom)
         assertNotEquals(original[0].hashCode(), actual[0].hashCode())
     }
-
-    private class Visitor(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
-        private val varsler = mutableListOf<Varselkode>()
-        init {
-            aktivitetslogg.accept(this)
-        }
-
-        override fun visitVarsel(
-            id: UUID,
-            kontekster: List<SpesifikkKontekst>,
-            aktivitet: Aktivitet.Varsel,
-            kode: Varselkode?,
-            melding: String,
-            tidsstempel: String
-        ) {
-            if (kode == null) return
-            varsler.add(kode)
-        }
-
-        fun assertVarsel(varselkode: Varselkode) {
-            assertTrue(varsler.contains(varselkode))
-        }
-    }
-
 
     private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag: LocalDate? = null) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId)

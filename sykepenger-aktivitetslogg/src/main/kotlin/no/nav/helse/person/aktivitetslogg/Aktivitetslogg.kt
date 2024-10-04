@@ -8,15 +8,18 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 class Aktivitetslogg(
     private var forelder: Aktivitetslogg? = null
 ) : IAktivitetslogg {
-    val aktiviteter = mutableListOf<Aktivitet>()
+    private val _aktiviteter = mutableListOf<Aktivitet>()
+    val aktiviteter: List<Aktivitet> get() = _aktiviteter.toList()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
     private val observers = mutableListOf<AktivitetsloggObserver>()
 
-    fun accept(visitor: AktivitetsloggVisitor) {
-        visitor.preVisitAktivitetslogg(this)
-        aktiviteter.forEach { it.accept(visitor) }
-        visitor.postVisitAktivitetslogg(this)
-    }
+    val behov get() = aktiviteter.filterIsInstance<Aktivitet.Behov>()
+    val info get() = aktiviteter.filterIsInstance<Aktivitet.Info>()
+    val varsel get() = aktiviteter.filterIsInstance<Aktivitet.Varsel>()
+    val funksjonellFeil get() = aktiviteter.filterIsInstance<Aktivitet.FunksjonellFeil>()
+    val logiskFeil get() = aktiviteter.filterIsInstance<Aktivitet.LogiskFeil>()
+
+    override fun behov() = behov
 
     override fun register(observer: AktivitetsloggObserver) {
         observers.add(observer)
@@ -25,10 +28,6 @@ class Aktivitetslogg(
     override fun info(melding: String, vararg params: Any?) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
         add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), formatertMelding))
-    }
-
-    override fun varsel(melding: String) {
-        add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding = melding))
     }
 
     override fun varsel(kode: Varselkode) {
@@ -51,23 +50,23 @@ class Aktivitetslogg(
 
     private fun add(aktivitet: Aktivitet) {
         observers.forEach { aktivitet.notify(it) }
-        this.aktiviteter.add(aktivitet)
+        this._aktiviteter.add(aktivitet)
         forelder?.add(aktivitet)
     }
 
     private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
-    override fun harAktiviteter() = info().isNotEmpty() || harVarslerEllerVerre() || behov().isNotEmpty()
+    override fun harAktiviteter() = info.isNotEmpty() || harVarslerEllerVerre() || behov.isNotEmpty()
 
-    override fun harVarslerEllerVerre() = varsel().isNotEmpty() || harFunksjonelleFeilEllerVerre()
+    override fun harVarslerEllerVerre() = varsel.isNotEmpty() || harFunksjonelleFeilEllerVerre()
 
-    override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil().isNotEmpty() || logiskFeil().isNotEmpty()
+    override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil.isNotEmpty() || logiskFeil.isNotEmpty()
 
     override fun barn() = Aktivitetslogg(this).also { it.kontekster.addAll(this.kontekster) }
 
-    override fun toString() = this.aktiviteter.map { it.inOrder() }.joinToString(separator = "\n") { it }
+    override fun toString() = this._aktiviteter.map { it.inOrder() }.joinToString(separator = "\n") { it }
 
-    override fun aktivitetsteller() = aktiviteter.size
+    override fun aktivitetsteller() = _aktiviteter.size
 
     override fun kontekst(kontekst: Aktivitetskontekst) {
         val spesifikkKontekst = kontekst.toSpesifikkKontekst()
@@ -86,11 +85,9 @@ class Aktivitetslogg(
         kontekst(kontekst)
     }
 
-    override fun toMap(mapper: AktivitetsloggMappingPort): Map<String, List<Map<String, Any>>> = mapper.map(this)
-
     fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {
-            it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet ->
+            it._aktiviteter.addAll(this._aktiviteter.filter { aktivitet ->
                 kontekst.any { it in aktivitet }
             })
         }
@@ -98,23 +95,16 @@ class Aktivitetslogg(
 
     internal fun logg(vararg kontekst: String): Aktivitetslogg {
         return Aktivitetslogg(this).also { aktivitetslogg ->
-            aktivitetslogg.aktiviteter.addAll(this.aktiviteter.filter { aktivitet ->
+            aktivitetslogg._aktiviteter.addAll(this._aktiviteter.filter { aktivitet ->
                 kontekst.any { kontekst -> kontekst in aktivitet.kontekster.map { it.kontekstType } }
             })
         }
     }
 
     override fun kontekster() =
-        aktiviteter
+        _aktiviteter
             .groupBy { it.kontekst(null) }
-            .map { Aktivitetslogg(this).apply { aktiviteter.addAll(it.value) } }
-
-    private fun info() = Aktivitet.Info.filter(aktiviteter)
-    fun varsel() = Aktivitet.Varsel.filter(aktiviteter)
-    override fun behov() = Behov.filter(aktiviteter)
-    private fun funksjonellFeil() = Aktivitet.FunksjonellFeil.filter(aktiviteter)
-    private fun logiskFeil() = Aktivitet.LogiskFeil.filter(aktiviteter)
-
+            .map { Aktivitetslogg(this).apply { _aktiviteter.addAll(it.value) } }
 
     class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
         RuntimeException(aktivitetslogg.toString()) {
@@ -126,8 +116,4 @@ class Aktivitetslogg(
         fun aktivitetslogg() = aktivitetslogg
     }
 
-}
-
-interface AktivitetsloggMappingPort {
-    fun map(log: Aktivitetslogg): Map<String, List<Map<String, Any>>> // sorry
 }
