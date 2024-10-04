@@ -358,15 +358,14 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(januar)
             nyPeriode(februar)
 
+            assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+
             assertForventetFeil(
-                forklaring = "Må kunne videreføre refusjonsopplysninger når det kommer søknad som bridger gap'et som før var der",
                 ønsket = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
                 },
                 nå = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isEmpty())
                 }
             )
         }
@@ -380,17 +379,16 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(februar)
             nyPeriode(mars)
 
+            assertTrue(inspektør.vedtaksperioder(4.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+
             assertForventetFeil(
-                forklaring = "Må kunne videreføre refusjonsopplysninger når flere perioder bridger gap'et som før var der",
                 ønsket = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
-                    assertTrue(inspektør.vedtaksperioder(4.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isNotEmpty())
                 },
                 nå = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
-                    assertTrue(inspektør.vedtaksperioder(4.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isEmpty())
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty())
                 }
             )
         }
@@ -401,7 +399,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(februar)
             nyPeriode(januar)
-            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         }
     }
 

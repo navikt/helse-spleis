@@ -198,6 +198,7 @@ internal class Vedtaksperiode private constructor(
     private val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
+    private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
 
     init {
         behandlinger.addObserver(this)
@@ -1449,9 +1450,17 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
 
+        private fun prioritertNabolag(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
+            val (nabolagFør, nabolagEtter) = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode).partition { it.periode.endInclusive < vedtaksperiode.periode.start }
+            // Vi prioriterer refusjonsopplysninger fra perioder før oss før vi sjekker forlengelsene
+            // Når vi ser på periodene før oss starter vi med den nærmeste
+            return (nabolagFør.asReversed() + nabolagEtter)
+        }
+
         override fun videreførRefusjonsopplysningerFraNabo(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val nabo = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) ?: vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode) ?: return
-            vedtaksperiode.behandlinger.viderereførRefusjonsopplysningerFra(nabo.behandlinger, søknad)
+            val refusjonstidslinjeFraNabolaget = prioritertNabolag(vedtaksperiode).firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
+            val nedarvetRefusjonstidslinje = refusjonstidslinjeFraNabolaget.strekk(vedtaksperiode.periode).subset(vedtaksperiode.periode)
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(søknad, nedarvetRefusjonstidslinje)
             // TODO Må hensynta refusjonshistorikken i tilfelle det er kommet inn refusjonsopplysninger som endrer seg ift perioden rett før
         }
     }

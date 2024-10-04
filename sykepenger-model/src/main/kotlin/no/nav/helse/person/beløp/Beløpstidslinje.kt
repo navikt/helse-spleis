@@ -3,7 +3,6 @@ package no.nav.helse.person.beløp
 import java.time.LocalDate
 import java.util.SortedMap
 import no.nav.helse.dto.BeløpstidslinjeDto
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -11,7 +10,7 @@ import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 
-data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>) : Iterable<Dag> {
+data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>) : Collection<Dag> by dager.values {
     private constructor(dager: Map<LocalDate, Beløpsdag>): this(dager.toSortedMap())
 
     internal constructor(dager: List<Beløpsdag> = emptyList()): this(dager.associateBy { it.dato }.toSortedMap().also {

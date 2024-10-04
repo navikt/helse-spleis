@@ -99,6 +99,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
 
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
+    internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje()
 
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
@@ -273,10 +274,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    fun viderereførRefusjonsopplysningerFra(nabo: Behandlinger, søknad: Søknad) {
-        behandlinger.last().videreførRefusjonsopplysningerFra(søknad, nabo.behandlinger.last())?.also {
-            leggTilNyBehandling(it)
-        }
+    internal fun håndterRefusjonstidslinje(søknad: Søknad, refusjonstidslinje: Beløpstidslinje) {
+        behandlinger.last().håndterRefusjonsopplysninger(søknad, refusjonstidslinje)
     }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
@@ -432,8 +431,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyRefusjonstidslinje)
         }
 
-        internal fun videreførRefusjonsopplysningerFra(søknad: Søknad, nabo: Behandling): Behandling? {
-            return this.tilstand.videreførRefusjonsopplysningerFra(this, søknad, nabo)
+        internal fun håndterRefusjonsopplysninger(søknad: Søknad, refusjonstidslinje: Beløpstidslinje) {
+            this.tilstand.håndterRefusjonsopplysninger(this, søknad, refusjonstidslinje)
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
@@ -671,6 +670,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
+        internal fun refusjonstidslinje() = endringer.last().refusjonstidslinje
 
         override fun equals(other: Any?): Boolean {
             if (other === this) return true
@@ -1184,12 +1184,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ): Behandling? {
                 error("Har ikke implementert håndtering av refusjonsopplysninger i $this")
             }
-            fun videreførRefusjonsopplysningerFra(
+            fun håndterRefusjonsopplysninger(
                 behandling: Behandling,
                 søknad: Søknad,
-                nabo: Behandling
-            ): Behandling? {
-                error("Har ikke implementert videreføring av refusjonsopplysninger i $this")
+                refusjonstidslinje: Beløpstidslinje
+            ) {
+                error("Har ikke implementert håndtering av refusjonsopplysninge i $this")
             }
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
@@ -1253,15 +1253,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return null
                 }
 
-                override fun videreførRefusjonsopplysningerFra(
+                override fun håndterRefusjonsopplysninger(
                     behandling: Behandling,
                     søknad: Søknad,
-                    nabo: Behandling
-                ): Behandling? {
-                    val refusjonstidslinjeFraNabo = nabo.endringer.last().refusjonstidslinje
-                    val videreførtRefusjonstidslinje = refusjonstidslinjeFraNabo.strekk(behandling.periode).subset(behandling.periode)
-                    behandling.oppdaterMedRefusjonstidslinje(søknad, videreførtRefusjonstidslinje)
-                    return null
+                    refusjonstidslinje: Beløpstidslinje
+                ) {
+                    behandling.oppdaterMedRefusjonstidslinje(søknad, refusjonstidslinje)
                 }
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
