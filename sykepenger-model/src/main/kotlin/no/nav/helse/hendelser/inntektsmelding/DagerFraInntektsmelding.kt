@@ -75,7 +75,9 @@ internal class DagerFraInntektsmelding(
     private val opprinneligPeriode = sykdomstidslinje.periode()
 
     private val arbeidsdager = mutableSetOf<LocalDate>()
-    private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+    private val _gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+    val gjenståendeDager get() = _gjenståendeDager.toSet()
+
     private val håndterteDager = mutableSetOf<LocalDate>()
     private val ignorerDager: Boolean get() {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return false
@@ -130,17 +132,13 @@ internal class DagerFraInntektsmelding(
     private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
     private fun sykedagerNav(periode: Periode) = Sykdomstidslinje.sykedagerNav(periode.start, periode.endInclusive, 100.prosent, kilde)
 
-    internal fun accept(visitor: DagerFraInntektsmeldingVisitor) {
-        visitor.visitGjenståendeDager(gjenståendeDager)
-    }
-
     override fun innsendt() = mottatt
     override fun avsender() = ARBEIDSGIVER
 
     internal fun alleredeHåndtert(behandlinger: Behandlinger) = behandlinger.dokumentHåndtert(dokumentsporing)
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
-        gjenståendeDager.removeAll {gjenstående -> gjenstående <= dato}
+        _gjenståendeDager.removeAll { gjenstående -> gjenstående <= dato}
     }
 
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
@@ -149,12 +147,12 @@ internal class DagerFraInntektsmelding(
         val oppdatertPeriode = opprinneligPeriode.oppdaterFom(dato)
         val arbeidsdagerFør = oppdatertPeriode.trim(opprinneligPeriode).flatten()
         if (!arbeidsdager.addAll(arbeidsdagerFør)) return
-        gjenståendeDager.addAll(arbeidsdagerFør)
+        _gjenståendeDager.addAll(arbeidsdagerFør)
     }
 
-    private fun overlappendeDager(periode: Periode) =  periode.intersect(gjenståendeDager)
+    private fun overlappendeDager(periode: Periode) =  periode.intersect(_gjenståendeDager)
 
-    private fun periodeRettFør(periode: Periode) = gjenståendeDager.periodeRettFør(periode.start)
+    private fun periodeRettFør(periode: Periode) = _gjenståendeDager.periodeRettFør(periode.start)
 
     private fun skalHåndtere(periode: Periode): Boolean {
         val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()
@@ -163,7 +161,7 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun skalHåndteresAv(periode: Periode): Boolean {
-        val vedtaksperiodeRettFør = gjenståendeDager.isNotEmpty() && periode.endInclusive.erRettFør(gjenståendeDager.first())
+        val vedtaksperiodeRettFør = _gjenståendeDager.isNotEmpty() && periode.endInclusive.erRettFør(_gjenståendeDager.first())
         return skalHåndtere(periode) || vedtaksperiodeRettFør || tomSykdomstidslinjeMenSkalValidere(periode) || egenmeldingerIForkantAvPerioden(periode)
     }
 
@@ -176,7 +174,7 @@ internal class DagerFraInntektsmelding(
     // med første fraværsdag, betyr det at inntektsmeldingen informerer om egenmeldinger vi ikke har søknad for.
     // Om vi hadde en vedtaksperiode, ville dagene bli 'spist opp' via vurdertTilOgMed()
     private fun egenmeldingerIForkantAvPerioden(periode: Periode) =
-        (overlappsperiode != null && overlappsperiode.overlapperMed(periode) && gjenståendeDager.isNotEmpty())
+        (overlappsperiode != null && overlappsperiode.overlapperMed(periode) && _gjenståendeDager.isNotEmpty())
 
     internal fun skalHåndteresAvRevurdering(periode: Periode, sammenhengende: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
         if (skalHåndtere(periode)) return true
@@ -204,7 +202,7 @@ internal class DagerFraInntektsmelding(
         val sykdomstidslinje = samletSykdomstidslinje(periode)
 
         håndterteDager.addAll(periode.toList())
-        gjenståendeDager.removeAll(periode)
+        _gjenståendeDager.removeAll(periode)
         return sykdomstidslinje
     }
 
@@ -215,7 +213,7 @@ internal class DagerFraInntektsmelding(
 
     private fun håndterDagerFør(vedtaksperiode: Periode): Periode? {
         leggTilArbeidsdagerFør(vedtaksperiode.start)
-        val gjenståendePeriode = gjenståendeDager.omsluttendePeriode ?: return null
+        val gjenståendePeriode = _gjenståendeDager.omsluttendePeriode ?: return null
         val periode = vedtaksperiode.oppdaterFom(gjenståendePeriode)
         return periode
     }
@@ -253,7 +251,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun validerArbeidsgiverperiode(periode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
         if (!skalValideresAv(periode)) return
-        if (gjenståendeDager.isNotEmpty()) return validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
+        if (_gjenståendeDager.isNotEmpty()) return validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
         if (beregnetArbeidsgiverperiode != null) validerArbeidsgiverperiode(beregnetArbeidsgiverperiode)
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
     }
@@ -337,8 +335,4 @@ internal class DagerFraInntektsmelding(
         override fun meldingsreferanseId() = meldingsreferanseId
         override fun avsender() = ARBEIDSGIVER
     }
-}
-
-internal interface DagerFraInntektsmeldingVisitor {
-    fun visitGjenståendeDager(dager: Set<LocalDate>)
 }
