@@ -3,10 +3,13 @@ package no.nav.helse.spleis.e2e.refusjon
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Inntektsmelding
@@ -30,6 +33,7 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
@@ -343,6 +347,70 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
             assertEquals(Beløpstidslinje.fra(februar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode2)
+        }
+    }
+
+
+    @Test
+    fun `Må kunne videreføre refusjonsopplysninger når det kommer søknad som bridger gap'et som før var der`() {
+        a1 {
+            nyttVedtak(mars)
+            nyPeriode(januar)
+            nyPeriode(februar)
+
+            assertForventetFeil(
+                forklaring = "Må kunne videreføre refusjonsopplysninger når det kommer søknad som bridger gap'et som før var der",
+                ønsket = {
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                },
+                nå = {
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `Må kunne videreføre refusjonsopplysninger når flere perioder bridger gap'et som før var der`() {
+        a1 {
+            nyttVedtak(april)
+            nyPeriode(januar)
+            nyPeriode(februar)
+            nyPeriode(mars)
+
+            assertForventetFeil(
+                forklaring = "Må kunne videreføre refusjonsopplysninger når flere perioder bridger gap'et som før var der",
+                ønsket = {
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                    assertTrue(inspektør.vedtaksperioder(4.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                },
+                nå = {
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                    assertTrue(inspektør.vedtaksperioder(4.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `Må kunne tilbakeføre refusjonsopplysninger når perioden etter deg har refusjonsopplysninger`() {
+        a1 {
+            nyttVedtak(februar)
+            nyPeriode(januar)
+
+            assertForventetFeil(
+                forklaring = "Må kunne tilbakeføre refusjonsopplysninger når perioden etter deg har refusjonsopplysninger",
+                ønsket = {
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isNotEmpty())
+                },
+                nå = {
+                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.toList().isEmpty())
+                }
+            )
         }
     }
 
