@@ -521,7 +521,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         refusjonstidslinje = Beløpstidslinje.gjenopprett(dto.refusjonstidslinje),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
-                        maksdatoresultat = dto.maksdatoresultat?.let { Maksdatoresultat.gjenopprett(it) } ?: Maksdatoresultat.IkkeVurdert
+                        maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) }
                     )
                 }
 
