@@ -41,8 +41,8 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
@@ -1246,6 +1246,21 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    private fun prioritertNabolag(): List<Vedtaksperiode> {
+        val (nabolagFør, nabolagEtter) = this.arbeidsgiver.finnSammenhengendeVedtaksperioder(this).partition { it.periode.endInclusive < this.periode.start }
+        // Vi prioriterer refusjonsopplysninger fra perioder før oss før vi sjekker forlengelsene
+        // Når vi ser på periodene før oss starter vi med den nærmeste
+        return (nabolagFør.asReversed() + nabolagEtter)
+    }
+
+    private fun videreførRefusjonsopplysningerFraNabo(hendelse: Hendelse? = null) {
+        if (refusjonstidslinje.isNotEmpty()) return
+        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
+        val nedarvetRefusjonstidslinje = refusjonstidslinjeFraNabolaget.strekk(this.periode).subset(this.periode)
+        this.behandlinger.håndterRefusjonstidslinje(hendelse, nedarvetRefusjonstidslinje)
+        // TODO Må hensynta refusjonshistorikken i tilfelle det er kommet inn refusjonsopplysninger som endrer seg ift perioden rett før
+    }
+
     internal sealed class ArbeidsgiveropplysningerStrategi {
         abstract fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg): Boolean
         abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg): Boolean
@@ -1453,18 +1468,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
 
-        private fun prioritertNabolag(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-            val (nabolagFør, nabolagEtter) = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode).partition { it.periode.endInclusive < vedtaksperiode.periode.start }
-            // Vi prioriterer refusjonsopplysninger fra perioder før oss før vi sjekker forlengelsene
-            // Når vi ser på periodene før oss starter vi med den nærmeste
-            return (nabolagFør.asReversed() + nabolagEtter)
-        }
-
         override fun videreførRefusjonsopplysningerFraNabo(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val refusjonstidslinjeFraNabolaget = prioritertNabolag(vedtaksperiode).firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
-            val nedarvetRefusjonstidslinje = refusjonstidslinjeFraNabolaget.strekk(vedtaksperiode.periode).subset(vedtaksperiode.periode)
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(søknad, nedarvetRefusjonstidslinje)
-            // TODO Må hensynta refusjonshistorikken i tilfelle det er kommet inn refusjonsopplysninger som endrer seg ift perioden rett før
+            vedtaksperiode.videreførRefusjonsopplysningerFraNabo(søknad)
         }
     }
 
@@ -1784,6 +1789,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
+            vedtaksperiode.videreførRefusjonsopplysningerFraNabo()
             vurderOmKanGåVidere(vedtaksperiode, revurdering)
             if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
             if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(revurdering)) {
@@ -1835,6 +1841,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+            vedtaksperiode.videreførRefusjonsopplysningerFraNabo()
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 

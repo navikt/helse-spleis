@@ -16,47 +16,25 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Dødsmelding
-import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.IdentOpphørt
-import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.KanIkkeBehandlesHer
-import no.nav.helse.hendelser.Migrate
-import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PersonPåminnelse
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.avvist
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.VedtakFattet
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.avvist
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
@@ -77,7 +55,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
 import no.nav.helse.person.Dokumentsporing.Companion.skjønnsmessigFastsettelse
-import no.nav.helse.person.Dokumentsporing.Companion.system
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
@@ -312,8 +289,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    internal fun håndterRefusjonstidslinje(søknad: Søknad, refusjonstidslinje: Beløpstidslinje) {
-        behandlinger.last().håndterRefusjonsopplysninger(søknad, refusjonstidslinje)
+    internal fun håndterRefusjonstidslinje(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {
+        behandlinger.last().håndterRefusjonsopplysninger(hendelse, refusjonstidslinje)
     }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
@@ -469,8 +446,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyRefusjonstidslinje)
         }
 
-        internal fun håndterRefusjonsopplysninger(søknad: Søknad, refusjonstidslinje: Beløpstidslinje) {
-            this.tilstand.håndterRefusjonsopplysninger(this, søknad, refusjonstidslinje)
+        internal fun håndterRefusjonsopplysninger(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {
+            this.tilstand.håndterRefusjonsopplysninger(this, hendelse, refusjonstidslinje)
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
@@ -534,7 +511,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     )
                 }
 
-                internal fun Hendelse.dokumentsporing(): Dokumentsporing {
+                internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
                         is Inntektsmelding -> inntektsmeldingInntekt(meldingsreferanseId())
                         is DagerFraInntektsmelding -> inntektsmeldingDager(meldingsreferanseId())
@@ -546,35 +523,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId())
                         is Ytelser -> andreYtelser(meldingsreferanseId())
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId())
-                        is AnmodningOmForkasting,
-                        is AvbruttSøknad,
-                        is ForkastSykmeldingsperioder,
-                        is InntektsmeldingerReplay,
-                        is KanIkkeBehandlesHer,
-                        is Påminnelse,
-                        is Simulering,
-                        is SykepengegrunnlagForArbeidsgiver,
-                        is Sykmelding,
-                        is Utbetalingshistorikk,
-                        is VedtakFattet,
-                        is Vilkårsgrunnlag,
-                        is Dødsmelding,
-                        is GjenopplivVilkårsgrunnlag,
-                        is IdentOpphørt,
-                        is Infotrygdendring,
-                        is Migrate,
-                        is MinimumSykdomsgradsvurderingMelding,
-                        is PersonPåminnelse,
-                        is UtbetalingshistorikkEtterInfotrygdendring,
-                        is Behandlingsavgjørelse,
-                        is AnnullerUtbetaling,
-                        is UtbetalingHendelse,
-                        is Utbetalingpåminnelse,
-                        is Utbetalingsgodkjenning,
-                        is UtbetalingshistorikkForFeriepenger -> system(meldingsreferanseId())
-
-                        else -> throw IllegalArgumentException("Har ikke definert dokumentsporing for ${this::class.simpleName}")
+                        else -> null
                     }
+                }
+
+                internal fun Hendelse.dokumentsporing(): Dokumentsporing = checkNotNull(dokumentsporingOrNull()) {
+                    "Mangler dokumentsporing for ${this::class.simpleName}"
                 }
 
                 private fun migrerUtbetalingstidslinje(dto: BehandlingendringInnDto, utbetaling: Utbetaling?, erAvsluttetUtenVedtak: Boolean): Utbetalingstidslinje {
@@ -947,11 +901,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return endringer.last().kopierMedEndring(oppdatertPeriode, hendelse.dokumentsporing(), sykdomstidslinje, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
         }
 
-        private fun oppdaterMedRefusjonstidslinje(hendelse: Hendelse, nyeRefusjonsopplysninger: Beløpstidslinje) {
+        private fun oppdaterMedRefusjonstidslinje(hendelse: Hendelse?, nyeRefusjonsopplysninger: Beløpstidslinje) {
             val dokumentsporing = when (hendelse) {
                 is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId())
-                else -> hendelse.dokumentsporing()
-            }
+                else -> hendelse?.dokumentsporing()
+            } ?: endringer.last().dokumentsporing
             val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing, nyeRefusjonsopplysninger)
             nyEndring(endring)
         }
@@ -1268,7 +1222,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
             fun håndterRefusjonsopplysninger(
                 behandling: Behandling,
-                søknad: Søknad,
+                hendelse: Hendelse?,
                 refusjonstidslinje: Beløpstidslinje
             ) {
                 error("Har ikke implementert håndtering av refusjonsopplysninge i $this")
@@ -1337,10 +1291,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun håndterRefusjonsopplysninger(
                     behandling: Behandling,
-                    søknad: Søknad,
+                    hendelse: Hendelse?,
                     refusjonstidslinje: Beløpstidslinje
                 ) {
-                    behandling.oppdaterMedRefusjonstidslinje(søknad, refusjonstidslinje)
+                    behandling.oppdaterMedRefusjonstidslinje(hendelse, refusjonstidslinje)
                 }
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {

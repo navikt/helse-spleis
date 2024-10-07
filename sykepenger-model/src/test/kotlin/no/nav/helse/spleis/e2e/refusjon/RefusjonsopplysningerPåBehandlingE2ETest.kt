@@ -359,15 +359,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(februar)
 
             assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isNotEmpty())
-
-            assertForventetFeil(
-                ønsket = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
-                },
-                nå = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isEmpty())
-                }
-            )
+            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         }
     }
 
@@ -379,18 +371,27 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(februar)
             nyPeriode(mars)
 
-            assertTrue(inspektør.vedtaksperioder(4.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+            val vedtaksperiodeJanuar = 2.vedtaksperiode
+            val vedtaksperiodeFebruar = 3.vedtaksperiode
+            val vedtaksperiodeMars = 4.vedtaksperiode
+            val vedtaksperiodeApril = 1.vedtaksperiode
 
-            assertForventetFeil(
-                ønsket = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isNotEmpty())
-                },
-                nå = {
-                    assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isEmpty())
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty())
-                }
-            )
+            // Vi har egentlig refusjonsopplysninger for alle periodene, men for out-of-order-perioder får de ikke
+            // refusjonsopplysninger før det er dens tur til å gå videre
+            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeJanuar).refusjonstidslinje.isNotEmpty())
+            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeFebruar).refusjonstidslinje.isEmpty())
+            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeMars).refusjonstidslinje.isNotEmpty())
+            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeApril).refusjonstidslinje.isNotEmpty())
+
+            håndterVilkårsgrunnlag(vedtaksperiodeJanuar)
+            håndterYtelser(vedtaksperiodeJanuar)
+            håndterSimulering(vedtaksperiodeJanuar)
+            håndterUtbetalingsgodkjenning(vedtaksperiodeJanuar)
+            håndterUtbetalt()
+
+            assertSisteTilstand(vedtaksperiodeFebruar, AVVENTER_HISTORIKK)
+            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeFebruar).refusjonstidslinje.isNotEmpty())
+
         }
     }
 
