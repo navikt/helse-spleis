@@ -56,6 +56,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
+import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
@@ -68,7 +69,6 @@ import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.deserialisering.SammenligningsgrunnlagInnDto
-import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
@@ -824,7 +824,6 @@ data class PersonData(
                         DokumentTypeData.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
                         DokumentTypeData.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
                         DokumentTypeData.AndreYtelser -> DokumenttypeDto.AndreYtelser
-                        DokumentTypeData.System -> DokumenttypeDto.System
                     }
                 )
             }
@@ -840,8 +839,7 @@ data class PersonData(
                 OverstyrArbeidsgiveropplysninger,
                 OverstyrArbeidsforhold,
                 SkjønnsmessigFastsettelse,
-                AndreYtelser,
-                System
+                AndreYtelser
             }
 
             data class BehandlingData(

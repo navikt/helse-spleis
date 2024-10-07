@@ -109,7 +109,6 @@ internal class SubsumsjonMediator(
         KontekstType.OverstyrArbeidsforhold -> "overstyrarbeidsforhold"
         KontekstType.SkjønnsmessigFastsettelse -> "skjønnsmessigfastsettelse"
         KontekstType.AndreYtelser -> "andreytelser"
-        KontekstType.System -> "system"
     }
 
     data class SubsumsjonEvent(

@@ -42,6 +42,7 @@ import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtD
 import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -50,7 +51,6 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -427,7 +427,6 @@ private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.Ved
         DokumenttypeDto.Sykmelding -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Sykmelding
         DokumenttypeDto.Søknad -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Søknad
         DokumenttypeDto.AndreYtelser -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.AndreYtelser
-        DokumenttypeDto.System -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.System
     }
 )
 private fun UtbetalingUtDto.tilPersonData() = PersonData.UtbetalingData(

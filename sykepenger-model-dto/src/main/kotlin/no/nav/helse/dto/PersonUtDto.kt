@@ -117,7 +117,6 @@ sealed class DokumenttypeDto {
     data object OverstyrArbeidsforhold : DokumenttypeDto()
     data object SkjønnsmessigFastsettelse : DokumenttypeDto()
     data object AndreYtelser : DokumenttypeDto()
-    data object System: DokumenttypeDto()
 }
 
 data class BehandlingkildeDto(
