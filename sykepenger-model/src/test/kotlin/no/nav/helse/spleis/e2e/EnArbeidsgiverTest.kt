@@ -77,20 +77,12 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             }
         )
 
-        assertForventetFeil(
-            forklaring = "Ønsker å erstatte feilaktig strukket IM med AIG-dager, men AIG-dagene biter jo ikke på :(",
-            nå = {
-                assertEquals(tidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            },
-            ønsket = {
-                håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
-                assertEquals("ARR SSSSSJJ JJJJJJJ JJJJJJJ JJJJJJJ JNSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-                assertEquals(listOf(25.juni til 5.juli, 9.juli til 13.juli), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
-                assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-                håndterYtelser(2.vedtaksperiode)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        assertEquals("ARR SSSSSJJ JJJJJJJ JJJJJJJ JJJJJJJ JNSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(listOf(25.juni til 5.juli, 9.juli til 13.juli), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
+        assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test

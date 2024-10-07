@@ -17,5 +17,5 @@ UbestemtDag,U,U,U,U,U,U,U,U,U,U,U,U,U,C,U,,,,,
 Arbeidsgiverdag_SB,R,R,R,C,C,C,C,C,C,C,C,C,C,L,U,L,,,,
 Arbeidsdag_SB,R,R,R,R,R,R,R,R,R,R,R,R,R,L,R,L,L,,,
 SykedagNav_IM,R,L,L,R,C,R,L,R,C,L,L,R,R,C,U,C,C,L,,
-ArbeidIkkeGjenopptattDag,R,C,C,C,C,C,C,C,C,C,C,C,C,L,C,L,L,C,L,
+ArbeidIkkeGjenopptattDag,R,C,L,C,C,C,L,C,C,C,C,C,C,L,C,L,L,C,L,
 AndreYtelserDag,R,R,R,R,R,R,R,R,R,R,R,R,R,C,R,C,C,R,C,L

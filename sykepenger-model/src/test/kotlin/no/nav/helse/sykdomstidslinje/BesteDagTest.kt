@@ -65,6 +65,8 @@ internal class BesteDagTest {
 
         arbeidIkkeGjenopptattDag mot arbeidsdagFraInntektsmelding gir arbeidsdagFraInntektsmelding
         arbeidIkkeGjenopptattDag mot friskHelgFraInntektsmelding gir friskHelgFraInntektsmelding
+        arbeidsdagFraInntektsmelding mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
+        friskHelgFraInntektsmelding mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
 
         sykedagFraSøknad slår arbeidIkkeGjenopptattDag
         ferieFraSøknad slår arbeidIkkeGjenopptattDag
