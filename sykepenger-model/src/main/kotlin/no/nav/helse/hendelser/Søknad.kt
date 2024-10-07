@@ -93,9 +93,6 @@ class Søknad(
         return egenmeldinger
     }
 
-    override fun dokumentsporing() =
-        Dokumentsporing.søknad(meldingsreferanseId())
-
     override fun innsendt() = sendtTilNAVEllerArbeidsgiver
     override fun registrert() = registrert
     override fun avsender() = SYKMELDT

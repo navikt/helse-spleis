@@ -209,7 +209,6 @@ internal val Int.FORELDET
 
 
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), private val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
-    override fun dokumentsporing() = error("ikke i bruk")
     override fun oppdaterFom(other: Periode) = other
     override fun meldingsreferanseId() =  meldingsreferanseId
     override fun sykdomstidslinje() = tidslinje

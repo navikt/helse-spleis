@@ -326,7 +326,6 @@ internal class DagerFraInntektsmelding(
     ): SykdomshistorikkHendelse, IAktivitetslogg by (aktivitetslogg) {
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
-        override fun dokumentsporing() = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
         override fun sykdomstidslinje() = sykdomstidslinje
 
         override fun innsendt() = innsendt

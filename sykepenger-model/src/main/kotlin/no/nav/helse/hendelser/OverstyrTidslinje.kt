@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
@@ -150,6 +149,4 @@ class OverstyrTidslinje(
     override fun avsender() = Avsender.SAKSBEHANDLER
 
     override fun innsendt() = opprettet
-
-    override fun dokumentsporing() = Dokumentsporing.overstyrTidslinje(meldingsreferanseId())
 }

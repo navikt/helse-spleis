@@ -3,7 +3,6 @@ package no.nav.helse.testhelpers
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
@@ -26,10 +25,6 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
     class OverstyrTidslinje(opprettet: LocalDateTime) : TestEvent(opprettet)
     class Søknad(opprettet: LocalDateTime) : TestEvent(opprettet)
     class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
-
-    override fun dokumentsporing(): Dokumentsporing {
-        error("ikke i bruk")
-    }
 
     override fun oppdaterFom(other: Periode): Periode {
         error("ikke i bruk")

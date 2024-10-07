@@ -16,19 +16,47 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.IdentOpphørt
+import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.Migrate
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.PersonPåminnelse
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.VedtakFattet
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.avvist
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
@@ -38,9 +66,19 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOppl
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
+import no.nav.helse.person.Dokumentsporing.Companion.andreYtelser
+import no.nav.helse.person.Dokumentsporing.Companion.grunnbeløpendring
 import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
+import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
+import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsforhold
+import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
+import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
+import no.nav.helse.person.Dokumentsporing.Companion.skjønnsmessigFastsettelse
+import no.nav.helse.person.Dokumentsporing.Companion.system
+import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
@@ -496,6 +534,49 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     )
                 }
 
+                internal fun Hendelse.dokumentsporing(): Dokumentsporing {
+                    return when (this) {
+                        is Inntektsmelding -> inntektsmeldingInntekt(meldingsreferanseId())
+                        is DagerFraInntektsmelding -> inntektsmeldingDager(meldingsreferanseId())
+                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(meldingsreferanseId()) // huh?
+                        is Søknad -> søknad(meldingsreferanseId())
+                        is OverstyrArbeidsforhold -> overstyrArbeidsforhold(meldingsreferanseId())
+                        is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(meldingsreferanseId())
+                        is OverstyrTidslinje -> overstyrTidslinje(meldingsreferanseId())
+                        is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId())
+                        is Ytelser -> andreYtelser(meldingsreferanseId())
+                        is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId())
+                        is AnmodningOmForkasting,
+                        is AvbruttSøknad,
+                        is ForkastSykmeldingsperioder,
+                        is InntektsmeldingerReplay,
+                        is KanIkkeBehandlesHer,
+                        is Påminnelse,
+                        is Simulering,
+                        is SykepengegrunnlagForArbeidsgiver,
+                        is Sykmelding,
+                        is Utbetalingshistorikk,
+                        is VedtakFattet,
+                        is Vilkårsgrunnlag,
+                        is Dødsmelding,
+                        is GjenopplivVilkårsgrunnlag,
+                        is IdentOpphørt,
+                        is Infotrygdendring,
+                        is Migrate,
+                        is MinimumSykdomsgradsvurderingMelding,
+                        is PersonPåminnelse,
+                        is UtbetalingshistorikkEtterInfotrygdendring,
+                        is Behandlingsavgjørelse,
+                        is AnnullerUtbetaling,
+                        is UtbetalingHendelse,
+                        is Utbetalingpåminnelse,
+                        is Utbetalingsgodkjenning,
+                        is UtbetalingshistorikkForFeriepenger -> system(meldingsreferanseId())
+
+                        else -> throw IllegalArgumentException("Har ikke definert dokumentsporing for ${this::class.simpleName}")
+                    }
+                }
+
                 private fun migrerUtbetalingstidslinje(dto: BehandlingendringInnDto, utbetaling: Utbetaling?, erAvsluttetUtenVedtak: Boolean): Utbetalingstidslinje {
                     if (dto.utbetalingstidslinje != null) return Utbetalingstidslinje.gjenopprett(dto.utbetalingstidslinje!!)
                     if (utbetaling != null) return utbetaling.utbetalingstidslinje.subset(Periode.gjenopprett(dto.periode))
@@ -907,6 +988,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 kilde = Behandlingkilde(hendelse)
             )
         }
+
         private fun nyBehandlingMedRefusjonstidslinje(
             arbeidsgiver: Arbeidsgiver,
             hendelse: Hendelse,
