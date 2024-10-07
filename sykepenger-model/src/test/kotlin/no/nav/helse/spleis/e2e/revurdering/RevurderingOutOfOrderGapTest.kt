@@ -39,7 +39,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -923,10 +922,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
 
         assertVarsel(RV_OO_1, 4.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_2, 4.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_2, 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_2, 2.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_2, 3.vedtaksperiode.filter())
     }
 
     @Test

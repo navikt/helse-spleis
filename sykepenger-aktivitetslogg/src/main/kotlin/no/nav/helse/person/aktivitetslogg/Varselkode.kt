@@ -66,7 +66,7 @@ enum class Varselkode(
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
-    RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning."),
+    RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", avviklet = true),
 
     // IM: Inntektsmelding
     RV_IM_1("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", avviklet = true),
