@@ -377,10 +377,10 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             // Vi har egentlig refusjonsopplysninger for alle periodene, men for out-of-order-perioder får de ikke
             // refusjonsopplysninger før det er dens tur til å gå videre
-            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeJanuar).refusjonstidslinje.isNotEmpty())
-            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeFebruar).refusjonstidslinje.isEmpty())
-            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeMars).refusjonstidslinje.isNotEmpty())
-            assertTrue(inspektør.vedtaksperioder(vedtaksperiodeApril).refusjonstidslinje.isNotEmpty())
+            assertTrue(inspektør.vedtaksperioder(januar).refusjonstidslinje.isNotEmpty())
+            assertTrue(inspektør.vedtaksperioder(februar).refusjonstidslinje.isEmpty())
+            assertTrue(inspektør.vedtaksperioder(mars).refusjonstidslinje.isNotEmpty())
+            assertTrue(inspektør.vedtaksperioder(april).refusjonstidslinje.isNotEmpty())
 
             håndterVilkårsgrunnlag(vedtaksperiodeJanuar)
             håndterYtelser(vedtaksperiodeJanuar)
