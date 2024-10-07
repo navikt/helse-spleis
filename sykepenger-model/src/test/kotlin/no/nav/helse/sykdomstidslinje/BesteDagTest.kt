@@ -16,6 +16,7 @@ internal class BesteDagTest {
         private val arbeidsdagFraSøknad = Dag.Arbeidsdag(1.januar, TestEvent.søknad)
         private val arbeidsdagFraInntektsmelding = Dag.Arbeidsdag(1.januar, TestEvent.inntektsmelding)
         private val ferieFraInntektsmelding = Dag.Feriedag(1.januar, TestEvent.inntektsmelding)
+        private val friskHelgFraInntektsmelding = Dag.FriskHelgedag(1.januar, TestEvent.inntektsmelding)
         private val arbeidIkkeGjenopptattDag = Dag.ArbeidIkkeGjenopptattDag(1.januar, TestEvent.saksbehandler)
         private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
         private val ferieFraSøknad = Dag.Feriedag(1.januar, TestEvent.søknad)
@@ -59,9 +60,12 @@ internal class BesteDagTest {
     }
 
     @Test
-    fun `ferie uten sykmelding`() {
+    fun `arbeid ikke gjenopptatt`() {
         arbeidsdagFraSøknad slår arbeidIkkeGjenopptattDag
-        arbeidsdagFraInntektsmelding slår arbeidIkkeGjenopptattDag
+
+        arbeidIkkeGjenopptattDag mot arbeidsdagFraInntektsmelding gir arbeidsdagFraInntektsmelding
+        arbeidIkkeGjenopptattDag mot friskHelgFraInntektsmelding gir friskHelgFraInntektsmelding
+
         sykedagFraSøknad slår arbeidIkkeGjenopptattDag
         ferieFraSøknad slår arbeidIkkeGjenopptattDag
         arbeidsgiverdagFraInntektsmelding slår arbeidIkkeGjenopptattDag
