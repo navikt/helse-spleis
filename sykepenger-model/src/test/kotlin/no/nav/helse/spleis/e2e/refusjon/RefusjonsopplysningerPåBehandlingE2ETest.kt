@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.forlengVedtak
@@ -416,7 +415,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Forlengelser bruker refusjonsopplysninger fra perioden før, men må hensynta eventuelle endringer i refusjonshistorikken`() {
+    fun `Forlengelser bruker refusjonsopplysninger fra perioden før, men må hensynta eventuell opphør av refusjon i refusjonshistorikken`() {
         a1 {
             val tidsstempel = LocalDateTime.now()
             val im = nyttVedtak(januar, tidsstempel, opphørAvRefusjon = 31.januar)
@@ -427,22 +426,46 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val refusjonstidslinjeVedtaksperiode2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
+            assertEquals(Beløpstidslinje.fra(februar, INGEN, kilde), refusjonstidslinjeVedtaksperiode2)
 
-            assertForventetFeil(
-                forklaring = "Vi hensyntar ikke endringer i refusjonshistorikken",
-                nå = {
-                    assertEquals(Beløpstidslinje.fra(februar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode2)
-                },
-                ønsket = {
-                    assertEquals(Beløpstidslinje.fra(februar, INGEN, kilde), refusjonstidslinjeVedtaksperiode2)
-                }
-            )
         }
     }
 
-    private fun nyttVedtak(periode: Periode, tidsstempel: LocalDateTime, vedtaksperiode: Int = 1, arbeidsgiverperiode: List<Periode> = listOf(periode.start til periode.start.plusDays(15)), opphørAvRefusjon: LocalDate? = null): UUID {
+    @Test
+    fun `Forlengelser bruker refusjonsopplysninger fra perioden før, men må hensynta eventuelle endringer i refusjonshistorikken`() {
+        a1 {
+            val tidsstempel = LocalDateTime.now()
+            val im = nyttVedtak(januar, tidsstempel, endringerIRefusjon = listOf(
+                Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.8, 1.februar),
+                Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.5, 20.februar)
+            ))
+            val kilde = Kilde(im, Avsender.ARBEIDSGIVER, tidsstempel)
+            forlengVedtak(februar)
+
+            val refusjonstidslinjeVedtaksperiode1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+
+            assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
+            assertEquals(Beløpstidslinje.fra(1.februar til 19.februar, INNTEKT * 0.8, kilde) + Beløpstidslinje.fra(20.februar til 28.februar, INNTEKT * 0.5, kilde), refusjonstidslinjeVedtaksperiode2)
+        }
+    }
+
+    private fun nyttVedtak(
+        periode: Periode,
+        tidsstempel: LocalDateTime,
+        vedtaksperiode: Int = 1,
+        arbeidsgiverperiode: List<Periode> = listOf(periode.start til periode.start.plusDays(15)),
+        opphørAvRefusjon: LocalDate? = null,
+        endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
+    ): UUID {
         håndterSøknad(periode)
-        val im = håndterInntektsmelding(arbeidsgiverperiode, INNTEKT, førsteFraværsdag = periode.start, mottatt = tidsstempel, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon))
+        val im = håndterInntektsmelding(
+            arbeidsgiverperiode,
+            INNTEKT,
+            førsteFraværsdag = periode.start,
+            mottatt = tidsstempel,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
+        )
         håndterVilkårsgrunnlag(vedtaksperiode.vedtaksperiode)
         håndterYtelser(vedtaksperiode.vedtaksperiode)
         håndterSimulering(vedtaksperiode.vedtaksperiode)

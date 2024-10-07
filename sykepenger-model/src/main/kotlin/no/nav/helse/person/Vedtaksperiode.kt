@@ -1257,8 +1257,8 @@ internal class Vedtaksperiode private constructor(
         if (refusjonstidslinje.isNotEmpty()) return
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
         val nedarvetRefusjonstidslinje = refusjonstidslinjeFraNabolaget.strekk(this.periode).subset(this.periode)
-        this.behandlinger.håndterRefusjonstidslinje(hendelse, nedarvetRefusjonstidslinje)
-        // TODO Må hensynta refusjonshistorikken i tilfelle det er kommet inn refusjonsopplysninger som endrer seg ift perioden rett før
+        val refusjonstidslinjeFraRefusjonshistorikk = arbeidsgiver.refusjonstidslinje(this)
+        this.behandlinger.håndterRefusjonstidslinje(hendelse, nedarvetRefusjonstidslinje + refusjonstidslinjeFraRefusjonshistorikk)
     }
 
     internal sealed class ArbeidsgiveropplysningerStrategi {
