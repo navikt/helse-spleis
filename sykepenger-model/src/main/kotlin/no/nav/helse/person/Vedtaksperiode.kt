@@ -1915,6 +1915,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
+            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
