@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -22,8 +21,6 @@ class OverstyrArbeidsforhold(
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrInntektsgrunnlag {
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun dokumentsporing() = Dokumentsporing.overstyrArbeidsforhold(meldingsreferanseId())
 
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: BehandlingSubsumsjonslogg) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, this.skjæringstidspunkt, jurist)

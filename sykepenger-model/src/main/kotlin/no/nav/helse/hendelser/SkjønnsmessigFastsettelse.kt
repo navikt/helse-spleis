@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -33,8 +32,6 @@ class SkjønnsmessigFastsettelse(
     }
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun dokumentsporing() = Dokumentsporing.skjønnsmessigFastsettelse(meldingsreferanseId())
 
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: BehandlingSubsumsjonslogg) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, skjæringstidspunkt, jurist)
