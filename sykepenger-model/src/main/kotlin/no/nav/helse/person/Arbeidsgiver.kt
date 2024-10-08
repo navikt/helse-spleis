@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
@@ -187,6 +188,12 @@ internal class Arbeidsgiver private constructor(
             any { it.håndter(overstyrInntektsgrunnlag) }
 
         internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(hendelse: OverstyrArbeidsgiveropplysninger) {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.håndter(hendelse)
+            }
+        }
+
+        internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(hendelse: SkjønnsmessigFastsettelse) {
             forEach { arbeidsgiver ->
                 arbeidsgiver.håndter(hendelse)
             }
@@ -703,6 +710,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
+        håndter(hendelse, Vedtaksperiode::håndter)
+    }
+
+    internal fun håndter(hendelse: SkjønnsmessigFastsettelse) {
         håndter(hendelse, Vedtaksperiode::håndter)
     }
 

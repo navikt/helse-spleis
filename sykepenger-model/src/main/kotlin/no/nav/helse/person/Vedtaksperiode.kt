@@ -31,6 +31,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
@@ -438,6 +439,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
+        val refusjonstidslinje = hendelse.refusjonstidslinje(organisasjonsnummer, periode)
+        if (refusjonstidslinje.isEmpty()) return
+        behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
+    }
+
+    internal fun håndter(hendelse: SkjønnsmessigFastsettelse) {
         val refusjonstidslinje = hendelse.refusjonstidslinje(organisasjonsnummer, periode)
         if (refusjonstidslinje.isEmpty()) return
         behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
