@@ -434,12 +434,15 @@ internal class Vedtaksperiode private constructor(
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
         kontekst(overstyrInntektsgrunnlag)
         overstyrInntektsgrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist)
-        if (overstyrInntektsgrunnlag is OverstyrArbeidsgiveropplysninger) {
-            val refusjonstidslinje = overstyrInntektsgrunnlag.refusjonstidslinje(organisasjonsnummer, periode)
-            if (refusjonstidslinje.isNotEmpty()) behandlinger.håndterRefusjonstidslinje(overstyrInntektsgrunnlag, refusjonstidslinje)
-        }
         return true
     }
+
+    internal fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
+        val refusjonstidslinje = hendelse.refusjonstidslinje(organisasjonsnummer, periode)
+        if (refusjonstidslinje.isEmpty()) return
+        behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
+    }
+
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
         val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false

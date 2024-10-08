@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
@@ -184,6 +185,12 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag) =
             any { it.håndter(overstyrInntektsgrunnlag) }
+
+        internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(hendelse: OverstyrArbeidsgiveropplysninger) {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.håndter(hendelse)
+            }
+        }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -693,6 +700,10 @@ internal class Arbeidsgiver private constructor(
     private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag): Boolean {
         overstyrInntektsgrunnlag.kontekst(this)
         return énHarHåndtert(overstyrInntektsgrunnlag) { håndter(it) }
+    }
+
+    internal fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
+        håndter(hendelse, Vedtaksperiode::håndter)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {

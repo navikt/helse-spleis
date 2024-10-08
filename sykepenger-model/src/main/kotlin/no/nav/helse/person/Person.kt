@@ -55,6 +55,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.førsteFraværsdager
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
@@ -454,6 +455,7 @@ class Person private constructor(
         check(arbeidsgivere.håndter(hendelse)) {
             "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger"
         }
+        arbeidsgivere.håndterOverstyringAvRefusjon(hendelse)
         håndterGjenoppta(hendelse)
     }
 
@@ -867,4 +869,3 @@ class Person private constructor(
     )
 
 }
-

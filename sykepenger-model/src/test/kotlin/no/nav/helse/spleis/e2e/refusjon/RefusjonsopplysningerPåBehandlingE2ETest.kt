@@ -480,6 +480,30 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `saksbehandler overstyrer litt ulik refusjon`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            val tidsstempel = LocalDateTime.now()
+            val overstyring = håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT / 2)))),
+                tidsstempel = tidsstempel
+            )
+            val kildeSaksbehandler = Kilde(overstyring.meldingsreferanseId(), Avsender.SAKSBEHANDLER, tidsstempel)
+            val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+
+            assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinjeJanuar)
+            assertEquals(Beløpstidslinje.fra(februar, INNTEKT / 2, kildeSaksbehandler), refusjonstidslinjeFebruar)
+        }
+    }
+
     private fun nyttVedtak(
         periode: Periode,
         tidsstempel: LocalDateTime,
