@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.nesteDag
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -211,8 +212,8 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                 refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.EmptyLog,
-            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
+            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
+            refusjonstidslinje = Beløpstidslinje()
         )
 
         val utbetalingstidslinje = builder.result(tidslinje)

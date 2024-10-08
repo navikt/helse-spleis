@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -13,6 +12,7 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -950,8 +950,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                 refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.EmptyLog,
-            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
+            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
+            refusjonstidslinje = Beløpstidslinje()
         )
 
         utbetalingstidslinje = builder.result(tidslinje)

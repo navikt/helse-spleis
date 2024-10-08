@@ -7,18 +7,18 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
-import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
+import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
@@ -28,8 +28,8 @@ import no.nav.helse.juni
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykepengegrunnlag
-import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
@@ -135,7 +135,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        val økonomi: Økonomi = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, EmptyLog)
+        val økonomi: Økonomi = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, Beløpstidslinje())
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -151,7 +151,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        val økonomi: Økonomi = grunnlagsdata.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, EmptyLog)
+        val økonomi: Økonomi = grunnlagsdata.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, Beløpstidslinje())
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -167,7 +167,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        val resultat = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)?.medInntektHvisFinnes(31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, EmptyLog)
+        val resultat = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)?.medInntektHvisFinnes(31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, Beløpstidslinje())
         assertNull(resultat)
     }
 

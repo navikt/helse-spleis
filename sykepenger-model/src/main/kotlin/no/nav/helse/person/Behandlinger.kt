@@ -423,8 +423,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
                 faktaavklarteInntekter = faktaavklarteInntekter,
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                subsumsjonslogg = subsumsjonslogg,
-                arbeidsgiverperiode = arbeidsgiverperiode
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                refusjonstidslinje = refusjonstidslinje()
             )
             return builder.result(sykdomstidslinje())
         }
@@ -545,8 +545,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                     refusjonsopplysninger = Refusjonsopplysninger()
                                 ),
                                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                                subsumsjonslogg = Subsumsjonslogg.EmptyLog,
-                                arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) }
+                                arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
+                                refusjonstidslinje = Beløpstidslinje()
                             )
                             return builder.result(Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje))
                         } catch (err: Exception) {
