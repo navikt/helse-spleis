@@ -157,8 +157,7 @@ data class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonstidslinje(kilde: Kilde, orgnummer: String, periode: Periode): Beløpstidslinje {
-            return refusjonsopplysninger(orgnummer).
-            refusjonstidslinje(kilde, periode)
+            return refusjonsopplysninger(orgnummer).refusjonstidslinje(kilde, periode)
         }
 
         private fun erOmregnetÅrsinntektEndret(skjæringstidspunkt: LocalDate, før: List<ArbeidsgiverInntektsopplysning>, etter: List<ArbeidsgiverInntektsopplysning>): Boolean {

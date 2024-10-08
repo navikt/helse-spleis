@@ -141,8 +141,9 @@ data class Refusjonsopplysning(
 
         internal fun refusjonstidslinje(kilde: Kilde, periode: Periode): Beløpstidslinje {
             return validerteRefusjonsopplysninger.fold(Beløpstidslinje()) { acc, refusjonsopplysning ->
-                if (periode.utenfor(refusjonsopplysning.periode)) acc
-                else acc + Beløpstidslinje.fra(refusjonsopplysning.periode.subset(periode), refusjonsopplysning.beløp, kilde)
+                val overlappendePeriode = refusjonsopplysning.periode.overlappendePeriode(periode)
+                if (overlappendePeriode == null) acc
+                else acc + Beløpstidslinje.fra(overlappendePeriode, refusjonsopplysning.beløp, kilde)
             }
         }
 
