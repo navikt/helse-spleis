@@ -1,16 +1,19 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.util.UUID
+import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.september
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -26,12 +29,12 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
             håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent), egenmeldinger = listOf(5.februar til 5.februar))
             observatør.vedtaksperiodeVenter.last().let {
                 assertEquals("INNTEKTSMELDING", it.venterPå.venteårsak.hva)
-                assertEquals("SSHH SSSSSHH SSS", inspektør.sykdomstidslinje(2.vedtaksperiode).toShortString())
+                assertEquals("SSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
             }
 
             håndterSøknad(5.februar til 5.februar)
 
-            assertEquals("S", inspektør.sykdomstidslinje(3.vedtaksperiode).toShortString())
+            assertEquals("S", inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
             assertTilstand(3.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING)
         }
     }
@@ -43,14 +46,75 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
             håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
 
             observatør.vedtaksperiodeVenter.last().let {
-                assertEquals("SHH SSS", inspektør.sykdomstidslinje(1.vedtaksperiode).toShortString())
+                assertEquals("SHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
                 assertEquals("INNTEKTSMELDING", it.venterPå.venteårsak.hva)
                 assertNull(it.venterPå.venteårsak.hvorfor)
             }
         }
     }
 
-    private companion object {
-        private fun TestArbeidsgiverInspektør.sykdomstidslinje(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.behandlinger.last().endringer.last().sykdomstidslinje
+    @Test
+    fun `Får flere skjæringstidspunkt før perioden er utbetalt`() {
+        a1 {
+            håndterSøknad(5.august til 20.august)
+            håndterSøknad(21.august til 20.september)
+            håndterInntektsmelding(listOf(5.august til 20.august))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+
+            inspektør.vedtaksperioder(2.vedtaksperiode).let {
+                assertEquals("SSSSHH SSSSSHH SSSSSHH SSSSSHH SSSS", it.sykdomstidslinje.toShortString())
+                assertEquals(5.august, it.inspektør.skjæringstidspunkt)
+            }
+            nullstillTilstandsendringer()
+
+            assertFlereSkjæringstidspunkt(2.vedtaksperiode) {
+                håndterInntektsmelding(listOf(27.august til 27.august, 4.september til 18.september))
+            }
+
+            inspektør.vedtaksperioder(2.vedtaksperiode).let {
+                assertEquals("AAAARR SAAAARR ASSSSHH SSSSSHH SSSS", it.sykdomstidslinje.toShortString())
+                assertEquals(4.september, it.inspektør.skjæringstidspunkt)
+            }
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+    }
+
+    @Test
+    fun `Inntektsmeldingen strekker perioden tilbake, så kommer det en out of order søknad i starten av perioden inntektsmeldingen har strukket seg over`() {
+        a1 {
+            håndterSøknad(20.august til 3.september)
+            håndterSøknad(17.september til 19.september)
+
+            assertEquals(17.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
+            assertEquals("SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+
+            håndterInntektsmelding(listOf(20.august til 4.september), førsteFraværsdag = 17.september)
+
+            assertEquals(4.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
+            assertEquals("U????? ??????? SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(17.september, inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
+
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+
+            assertFlereSkjæringstidspunkt(2.vedtaksperiode) {
+                håndterSøknad(4.september til 9.september)
+            }
+            assertEquals("SSSSHH ??????? SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(17.september, inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
+        }
+    }
+
+    private fun assertFlereSkjæringstidspunkt(vedtaksperiodeId: UUID, operasjonenSomForårsakerAtDetBlirFlereSkjæringstidspunkt: () -> Unit) {
+        observatør.vedtaksperiodeVenter.clear()
+        operasjonenSomForårsakerAtDetBlirFlereSkjæringstidspunkt()
+        val venterPå = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == vedtaksperiodeId }.venterPå
+        assertEquals(vedtaksperiodeId, venterPå.vedtaksperiodeId)
+        assertEquals("HJELP", venterPå.venteårsak.hva)
+        assertEquals("FLERE_SKJÆRINGSTIDSPUNKT", venterPå.venteårsak.hvorfor)
     }
 }

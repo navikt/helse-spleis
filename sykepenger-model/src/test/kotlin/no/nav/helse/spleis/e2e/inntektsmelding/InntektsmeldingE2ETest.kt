@@ -57,7 +57,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
@@ -112,35 +111,6 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `Får flere skjæringstidspunkt før perioden er utbetalt`() {
-        håndterSøknad(5.august til 20.august)
-        håndterSøknad(21.august til 20.september)
-        håndterInntektsmelding(listOf(5.august til 20.august))
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        inspektør.vedtaksperioder(2.vedtaksperiode).let {
-            assertEquals("SSSSHH SSSSSHH SSSSSHH SSSSSHH SSSS", it.sykdomstidslinje.toShortString())
-            assertEquals(5.august, it.inspektør.skjæringstidspunkt)
-        }
-        nullstillTilstandsendringer()
-        observatør.vedtaksperiodeVenter.clear()
-
-        håndterInntektsmelding(listOf(27.august til 27.august, 4.september til 18.september))
-        inspektør.vedtaksperioder(2.vedtaksperiode).let {
-            assertEquals("AAAARR SAAAARR ASSSSHH SSSSSHH SSSS", it.sykdomstidslinje.toShortString())
-            assertEquals(4.september, it.inspektør.skjæringstidspunkt)
-        }
-        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
-
-        val venterPå = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(ORGNUMMER) }.venterPå
-        assertEquals(2.vedtaksperiode.id(ORGNUMMER), venterPå.vedtaksperiodeId)
-        assertEquals("HJELP", venterPå.venteårsak.hva)
-        assertEquals("FLERE_SKJÆRINGSTIDSPUNKT", venterPå.venteårsak.hvorfor)
-    }
 
     @Test
     fun `altinn-inntektsmelding oppgir opphør av refusjon tilbake i tid i forhold til første fraværsdag`() {
