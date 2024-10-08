@@ -604,10 +604,10 @@ internal class ArbeidsgiverHendelsefabrikk(
             opprettet = LocalDateTime.now()
         )
 
-    internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String) =
+    internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String, tidsstempel: LocalDateTime = LocalDateTime.now()) =
         PersonHendelsefabrikk(aktørId, personidentifikator).lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
-        ), meldingsreferanseId = hendelseId)
+        ), meldingsreferanseId = hendelseId, tidsstempel)
 
 
 }

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
@@ -447,6 +448,35 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
             assertEquals(Beløpstidslinje.fra(1.februar til 19.februar, INNTEKT * 0.8, kilde) + Beløpstidslinje.fra(20.februar til 28.februar, INNTEKT * 0.5, kilde), refusjonstidslinjeVedtaksperiode2)
+        }
+    }
+
+    @Test
+    fun `Saksbehandler overstyrer refusjon`() {
+        a1 {
+            val tidsstempel = LocalDateTime.now()
+            val im = nyttVedtak(januar, tidsstempel)
+
+            val refusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+            val kilde = Kilde(im, Avsender.ARBEIDSGIVER, tidsstempel)
+
+            assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinje)
+
+            val tidsstempel2 = LocalDateTime.now()
+            val saksbehandlerOverstyring = håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN)))),
+                tidsstempel = tidsstempel2
+            )
+
+            val refusjonstidslinje2 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.meldingsreferanseId(), Avsender.SAKSBEHANDLER, tidsstempel2)
+
+            assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinje2)
         }
     }
 

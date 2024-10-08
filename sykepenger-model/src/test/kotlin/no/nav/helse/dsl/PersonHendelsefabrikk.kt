@@ -61,14 +61,14 @@ internal class PersonHendelsefabrikk(
             opprettet = LocalDateTime.now()
         )
 
-    internal fun lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID) =
+    internal fun lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime) =
         OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsreferanseId,
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt),
-            opprettet = LocalDateTime.now()
+            opprettet = tidsstempel
         )
 
     internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =

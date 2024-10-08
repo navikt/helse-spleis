@@ -15,6 +15,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
@@ -152,6 +154,11 @@ data class ArbeidsgiverInntektsopplysning(
                 return endringen.map { it.rullTilbake() } to tilkommetInntekter.isNotEmpty()
             }
             return endringen to tilkommetInntekter.isNotEmpty()
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.refusjonstidslinje(kilde: Kilde, orgnummer: String, periode: Periode): Beløpstidslinje {
+            return refusjonsopplysninger(orgnummer).
+            refusjonstidslinje(kilde, periode)
         }
 
         private fun erOmregnetÅrsinntektEndret(skjæringstidspunkt: LocalDate, før: List<ArbeidsgiverInntektsopplysning>, etter: List<ArbeidsgiverInntektsopplysning>): Boolean {

@@ -9,7 +9,10 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonstidslinje
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class OverstyrArbeidsgiveropplysninger(
@@ -49,5 +52,10 @@ class OverstyrArbeidsgiveropplysninger(
                 )
             )
         }
+    }
+
+    internal fun refusjonstidslinje(organisasjonsnummer: String, periode: Periode): Beløpstidslinje {
+        val kilde = Kilde(meldingsreferanseId(), Avsender.SAKSBEHANDLER, opprettet)
+        return arbeidsgiveropplysninger.refusjonstidslinje(kilde, organisasjonsnummer, periode)
     }
 }

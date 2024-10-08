@@ -434,6 +434,10 @@ internal class Vedtaksperiode private constructor(
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
         kontekst(overstyrInntektsgrunnlag)
         overstyrInntektsgrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist)
+        if (overstyrInntektsgrunnlag is OverstyrArbeidsgiveropplysninger) {
+            val refusjonstidslinje = overstyrInntektsgrunnlag.refusjonstidslinje(organisasjonsnummer, periode)
+            if (refusjonstidslinje.isNotEmpty()) behandlinger.håndterRefusjonstidslinje(overstyrInntektsgrunnlag, refusjonstidslinje)
+        }
         return true
     }
 
