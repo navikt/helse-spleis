@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
@@ -50,14 +49,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Kun periodene med endring i refusjon revurderes`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        assertThrows<IllegalStateException> {
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT, "Noo", null, listOf(
-                    Triple(1.januar, 31.januar, INNTEKT),
-                    Triple(1.februar, null, INNTEKT / 2)
-                ))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT, "Noo", null, listOf(
+                Triple(1.januar, 31.januar, INNTEKT),
+                Triple(1.februar, null, INNTEKT / 2)
             ))
-        }
+        ))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
