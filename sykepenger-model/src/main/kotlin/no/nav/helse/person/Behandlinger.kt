@@ -447,6 +447,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun håndterRefusjonsopplysninger(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {
+            if (!erEndringIRefusjonsopplysninger(refusjonstidslinje)) return
             this.tilstand.håndterRefusjonsopplysninger(this, hendelse, refusjonstidslinje)
         }
 
@@ -1594,15 +1595,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ): Behandling? {
                     if (!behandling.erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger)) return null
                     return behandling.nyBehandlingMedRefusjonstidslinje(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
-                }
-
-                override fun håndterRefusjonsopplysninger(
-                    behandling: Behandling,
-                    hendelse: Hendelse?,
-                    refusjonstidslinje: Beløpstidslinje
-                ) {
-                    if (!behandling.erEndringIRefusjonsopplysninger(refusjonstidslinje)) return
-                    super.håndterRefusjonsopplysninger(behandling, hendelse, refusjonstidslinje)
                 }
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) =
