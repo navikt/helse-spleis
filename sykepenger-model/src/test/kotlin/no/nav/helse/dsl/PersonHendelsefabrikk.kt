@@ -51,14 +51,19 @@ internal class PersonHendelsefabrikk(
             aktørId = aktørId
         )
 
-    internal fun lagSkjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID) =
+    internal fun lagSkjønnsmessigFastsettelse(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+        meldingsreferanseId: UUID,
+        tidsstempel: LocalDateTime
+    ) =
         SkjønnsmessigFastsettelse(
             meldingsreferanseId = meldingsreferanseId,
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(meldingsreferanseId, skjæringstidspunkt),
-            opprettet = LocalDateTime.now()
+            opprettet = tidsstempel
         )
 
     internal fun lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime) =

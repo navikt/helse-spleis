@@ -516,6 +516,45 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
+    fun `Saksbehandler overstyrer refusjon på tidligere skjæringstidspunkt ved skjønnsmessig-fastsettelse`() {
+        a1 {
+            nyttVedtak(januar)
+            val tidsstempel = LocalDateTime.now()
+            val im = nyttVedtak(mars, tidsstempel, vedtaksperiode = 2)
+            val kildeIm = Kilde(im, Avsender.ARBEIDSGIVER, tidsstempel)
+            val tidsstempel2 = LocalDateTime.now()
+            val hendelseId = UUID.randomUUID()
+            håndterSkjønnsmessigFastsettelse(
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN))
+                    )
+                ),
+                meldingsreferanseId = hendelseId,
+                tidsstempel = tidsstempel2
+            )
+            val kildeSaksbehandler = Kilde(hendelseId, Avsender.SAKSBEHANDLER, tidsstempel2)
+
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger.let {
+                assertEquals(1.januar til LocalDate.MAX, it.inspektør.refusjonsopplysninger.single().periode)
+                assertEquals(INGEN, it.inspektør.refusjonsopplysninger.single().beløp)
+            }
+            inspektør.vilkårsgrunnlag(1.mars)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger.let {
+                assertEquals(1.mars til LocalDate.MAX, it.inspektør.refusjonsopplysninger.single().periode)
+                assertEquals(INNTEKT, it.inspektør.refusjonsopplysninger.single().beløp)
+            }
+
+            val refusjonstidslinje1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinje2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinje1)
+            assertEquals(Beløpstidslinje.fra(mars, INNTEKT, kildeIm), refusjonstidslinje2)
+        }
+    }
+
+    @Test
     fun `saksbehandler overstyrer litt ulik refusjon`() {
         a1 {
             nyttVedtak(januar)
