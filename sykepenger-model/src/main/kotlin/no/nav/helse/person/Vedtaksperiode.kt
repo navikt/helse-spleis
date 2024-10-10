@@ -441,12 +441,14 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
         val refusjonstidslinje = hendelse.refusjonstidslinje(organisasjonsnummer, periode)
         if (refusjonstidslinje.isEmpty()) return
+        if (!hendelse.erRelevant(skjæringstidspunkt)) return
         behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
     }
 
     internal fun håndter(hendelse: SkjønnsmessigFastsettelse) {
         val refusjonstidslinje = hendelse.refusjonstidslinje(organisasjonsnummer, periode)
         if (refusjonstidslinje.isEmpty()) return
+        if (!hendelse.erRelevant(skjæringstidspunkt)) return
         behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
     }
 

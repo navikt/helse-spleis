@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -485,8 +484,10 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `Saksbehandler overstyrer refusjon på tidligere skjæringstidspunkt`() {
         a1 {
             nyttVedtak(januar)
-            nyttVedtak(mars)
             val tidsstempel = LocalDateTime.now()
+            val im = nyttVedtak(mars, tidsstempel, vedtaksperiode = 2)
+            val kildeIm = Kilde(im, Avsender.ARBEIDSGIVER, tidsstempel)
+            val tidsstempel2 = LocalDateTime.now()
             val saksbehandlerOverstyring = håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
                 overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
@@ -494,8 +495,10 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                     inntekt = INNTEKT,
                     forklaring = "forklaring",
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN)))),
-                tidsstempel = tidsstempel
+                tidsstempel = tidsstempel2
             )
+            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.meldingsreferanseId(), Avsender.SAKSBEHANDLER, tidsstempel2)
+
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger.let {
                 assertEquals(1.januar til LocalDate.MAX, it.inspektør.refusjonsopplysninger.single().periode)
                 assertEquals(INGEN, it.inspektør.refusjonsopplysninger.single().beløp)
@@ -507,18 +510,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             val refusjonstidslinje1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
             val refusjonstidslinje2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
-            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.meldingsreferanseId(), Avsender.SAKSBEHANDLER, tidsstempel)
             assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinje1)
-
-            assertForventetFeil(
-                forklaring = "ulik refusjon i behandling og vilkårsgrunnlag",
-                nå = {
-                    assertEquals(Beløpstidslinje.fra(mars, INGEN, kildeSaksbehandler), refusjonstidslinje2)
-                },
-                ønsket = {
-                    assertEquals(Beløpstidslinje.fra(mars, INNTEKT, kildeSaksbehandler), refusjonstidslinje2)
-                }
-            )
+            assertEquals(Beløpstidslinje.fra(mars, INNTEKT, kildeIm), refusjonstidslinje2)
         }
     }
 
