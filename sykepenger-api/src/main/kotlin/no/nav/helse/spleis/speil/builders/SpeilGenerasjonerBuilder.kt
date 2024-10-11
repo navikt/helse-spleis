@@ -2,8 +2,8 @@ package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -109,7 +109,7 @@ internal class SpeilGenerasjonerBuilder(
                 is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
                 is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> Periodetilstand.ForberederGodkjenning
 
-                is VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING,
+                is VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> Periodetilstand.AvventerInntektsopplysninger
                 is VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> Periodetilstand.ManglerInformasjon
                 else -> error("Forventer ikke mappingregel for ${vedtaksperiode.tilstand}")
             }

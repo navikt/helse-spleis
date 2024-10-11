@@ -5,7 +5,12 @@ import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
+import no.nav.helse.august
+import no.nav.helse.den
+import no.nav.helse.desember
 import no.nav.helse.erHelg
+import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -14,35 +19,44 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.spleis.speil.dto.AnnullertPeriode
-import no.nav.helse.spleis.speil.dto.BeregnetPeriode
-import no.nav.helse.spleis.speil.dto.Periodetilstand
-import no.nav.helse.spleis.speil.dto.Periodetilstand.*
-import no.nav.helse.spleis.speil.dto.Periodetilstand.Annullert
-import no.nav.helse.spleis.speil.dto.Periodetilstand.Utbetalt
-import no.nav.helse.spleis.speil.dto.SpeilGenerasjonDTO
-import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode
-import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
-import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype
-import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype.*
-import no.nav.helse.spleis.speil.dto.UberegnetPeriode
-import no.nav.helse.spleis.speil.dto.Utbetalingstatus
-import no.nav.helse.spleis.speil.dto.Utbetalingstatus.*
-import no.nav.helse.spleis.speil.dto.Utbetalingtype
-import no.nav.helse.spleis.speil.dto.Utbetalingtype.*
-import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.august
-import no.nav.helse.den
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.september
+import no.nav.helse.spleis.speil.dto.AnnullertPeriode
+import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.Inntekt
 import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.Periodetilstand
+import no.nav.helse.spleis.speil.dto.Periodetilstand.Annullert
+import no.nav.helse.spleis.speil.dto.Periodetilstand.AvventerInntektsopplysninger
+import no.nav.helse.spleis.speil.dto.Periodetilstand.ForberederGodkjenning
+import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling
+import no.nav.helse.spleis.speil.dto.Periodetilstand.RevurderingFeilet
+import no.nav.helse.spleis.speil.dto.Periodetilstand.TilAnnullering
+import no.nav.helse.spleis.speil.dto.Periodetilstand.TilGodkjenning
+import no.nav.helse.spleis.speil.dto.Periodetilstand.TilUtbetaling
+import no.nav.helse.spleis.speil.dto.Periodetilstand.Utbetalt
+import no.nav.helse.spleis.speil.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
+import no.nav.helse.spleis.speil.dto.Periodetilstand.VenterPåAnnenPeriode
+import no.nav.helse.spleis.speil.dto.SpeilGenerasjonDTO
+import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode
+import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype.FORLENGELSE
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.spleis.speil.dto.UberegnetPeriode
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus.GodkjentUtenUtbetaling
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus.IkkeGodkjent
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus.Overført
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus.Ubetalt
+import no.nav.helse.spleis.speil.dto.Utbetalingtype
+import no.nav.helse.spleis.speil.dto.Utbetalingtype.ANNULLERING
+import no.nav.helse.spleis.speil.dto.Utbetalingtype.REVURDERING
+import no.nav.helse.spleis.speil.dto.Utbetalingtype.UTBETALING
+import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.søndag
 import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -54,6 +68,17 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
+
+    @Test
+    fun `En periode i AvventerInntektsmelding venter på inntektsopplysninger`() {
+        val søknadA1 = håndterSøknad(1.januar til 25.januar, orgnummer = a1)
+
+        generasjoner {
+            0.generasjon {
+                uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
+            }
+        }
+    }
 
     @Test
     fun `periodene viser til overstyring av sykepengegrunnlag i hendelser`() {
@@ -740,7 +765,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, size)
-                uberegnetPeriode(0) medTilstand ManglerInformasjon
+                uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
                 beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
             }
         }
@@ -757,7 +782,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, this.perioder.size)
-                uberegnetPeriode(0) medTilstand ManglerInformasjon
+                uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             1.generasjon {
@@ -979,8 +1004,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, size)
-                uberegnetPeriode(0) medTilstand ManglerInformasjon
-                uberegnetPeriode(1) medTilstand ManglerInformasjon
+                uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
+                uberegnetPeriode(1) medTilstand AvventerInntektsopplysninger
             }
         }
 
