@@ -328,17 +328,18 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, inntektsmeldingInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
 
             // Saksbehandler skjønnsmessig fastsetter
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt, refusjonsopplysninger = emptyList())))
+            val skjønnsfastsettId = UUID.randomUUID()
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt)), skjønnsfastsettId)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
-            assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, inntektsmeldingInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
+            assertEquals(listOf(Refusjonsopplysning(skjønnsfastsettId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
 
             // Saksbehandler endrer kun refusjon, men beholder inntekt
             val overstyrInntektOgRefusjonId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntektsmeldingInntekt, forklaring = "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
-            assertEquals(listOf(Refusjonsopplysning(overstyrInntektOgRefusjonId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
+            assertEquals(listOf(Refusjonsopplysning(skjønnsfastsettId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
         }
     }
 
@@ -362,17 +363,18 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, inntektsmeldingInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
 
             // Saksbehandler skjønnsmessig fastsetter
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt, refusjonsopplysninger = emptyList())))
+            val skjønnsmessigFastsettelseId = UUID.randomUUID()
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt)), skjønnsmessigFastsettelseId)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
-            assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, inntektsmeldingInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
+            assertEquals(listOf(Refusjonsopplysning(skjønnsmessigFastsettelseId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
 
             // Saksbehandler endrer refusjon og inntekt til INNTEKT * 2
             val overstyrInntektOgRefusjonId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt, forklaring = "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
-            assertEquals(listOf(Refusjonsopplysning(overstyrInntektOgRefusjonId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
+            assertEquals(listOf(Refusjonsopplysning(skjønnsmessigFastsettelseId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
         }
     }
 

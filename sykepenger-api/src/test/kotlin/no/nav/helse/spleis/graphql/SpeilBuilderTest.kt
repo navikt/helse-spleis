@@ -355,7 +355,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterYtelserTilGodkjenning()
         håndterSkjønnsmessigFastsettelse(
             skjæringstidspunkt = 1.januar,
-            opplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, inntektSkjønnsfastsatt.månedlig, refusjonsopplysninger = listOf(Triple(1.januar, null, 31000.månedlig))))
+            opplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, inntektSkjønnsfastsatt.månedlig))
         )
         håndterYtelserTilGodkjenning()
 
