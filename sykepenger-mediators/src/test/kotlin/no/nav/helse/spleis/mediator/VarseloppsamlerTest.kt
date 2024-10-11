@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_5
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.unike
 import org.intellij.lang.annotations.Language
@@ -19,7 +19,7 @@ internal class VarseloppsamlerTest {
     fun `Samler opp varsler fra aktivitetslogg_ny_aktivitet`() {
         val varsel1 = UUID.randomUUID()
         val varsel2 = UUID.randomUUID()
-        val varsler = listOf(aktivietsloggNyAktivitet(varsel1, RV_IM_4), aktivietsloggNyAktivitet(varsel2, RV_IM_5)).varsler
+        val varsler = listOf(aktivietsloggNyAktivitet(varsel1, RV_IM_4), aktivietsloggNyAktivitet(varsel2, RV_IM_3)).varsler
 
         val forventetVarsel1 = Varsel(
             id = varsel1,
@@ -35,7 +35,7 @@ internal class VarseloppsamlerTest {
         )
         val forventetVarsel2 = Varsel(
             id = varsel2,
-            varselkode = RV_IM_5,
+            varselkode = RV_IM_3,
             kontekster = mapOf(
                 "meldingsreferanseId" to "30c41872-5157-4611-aee5-fbed49d1234d",
                 "aktørId" to "1000000000000",
@@ -48,7 +48,7 @@ internal class VarseloppsamlerTest {
 
         assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
         assertEquals(forventetVarsel1, varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_4))
-        assertEquals(forventetVarsel2, varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_5))
+        assertEquals(forventetVarsel2, varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_3))
     }
 
     internal companion object {

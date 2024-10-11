@@ -55,7 +55,7 @@ enum class Varselkode(
     RV_SØ_38("Søknad forlenger en forkastet periode hos annen arbeidsgiver"),
 
     RV_SØ_39("Støtter ikke søknadstypen"),
-    RV_SØ_40("Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd"),
+    RV_SØ_40("Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd", avviklet = true),
     RV_SØ_41("Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget", avviklet = true),
 
     // Arbeidsledig søknader
@@ -73,8 +73,8 @@ enum class Varselkode(
     RV_IM_2("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode."),
     RV_IM_3("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."),
     RV_IM_4("Det er mottatt flere inntektsmeldinger på samme skjæringstidspunkt. Undersøk at arbeidsgiverperioden, sykepengegrunnlaget og refusjonsopplysningene er riktige"),
-    RV_IM_5("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden."),
-    RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt"),
+    RV_IM_5("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", avviklet = true),
+    RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt", avviklet = true),
     RV_IM_7("Brukeren har opphold i naturalytelser"),
     RV_IM_8("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden"),
     RV_IM_9("ArbeidsforholdsID fra inntektsmeldingen er utfylt", avviklet = true),
@@ -96,7 +96,7 @@ enum class Varselkode(
     RV_IM_25("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden grunnet ferie eller avspasering"),
 
     // ST: Sykdomstidslinje
-    RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),
+    RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag.", avviklet = true),
 
     // RE: Refusjon
     RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", avviklet = true),
@@ -138,7 +138,7 @@ enum class Varselkode(
     RV_IT_33("Skjæringstidspunktet har endret seg som følge av historikk fra Infotrygd"),
     RV_IT_34("Avslutter perioden fordi tidligere periode gikk til Infotrygd", avviklet = true),
     RV_IT_35("Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato", avviklet = true),
-    RV_IT_36("Periode som før var uten utbetalingsdager har nå utbetalingsdager etter endringer fra Infotrygd"),
+    RV_IT_36("Periode som før var uten utbetalingsdager har nå utbetalingsdager etter endringer fra Infotrygd", avviklet = true),
     RV_IT_37("Det er en utbetaling i Infotrygd nærmere enn 18 dager"),
     RV_IT_38("En utbetaling i Infotrygd har medført at perioden nå vil utbetales"),
 
@@ -152,7 +152,7 @@ enum class Varselkode(
     RV_VV_9("Bruker er fortsatt syk 26 uker etter maksdato"),
     RV_VV_10("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler."),
     RV_VV_11("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.", avviklet = true),
-    RV_VV_12("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag"),
+    RV_VV_12("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag", avviklet = true),
     RV_VV_13("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt", avviklet = true),
     RV_VV_14("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.", avviklet = true),
     RV_VV_15("Maks antall sykepengedager er nådd i perioden", avviklet = true),
@@ -178,7 +178,7 @@ enum class Varselkode(
     RV_IV_5("Har inntekt på flere arbeidsgivere med forskjellig fom dato", avviklet = true),
     RV_IV_6("Inntekter fra mer enn én arbeidsgiver i A-ordningen siste tre måneder. Kontroller om brukeren har flere arbeidsforhold på sykmeldingstidspunktet. Flere arbeidsforhold støttes ikke av systemet.", avviklet = true),
     RV_IV_7("Det er gjenbrukt inntektsopplysninger "),
-    RV_IV_8("Perioden har flere skjæringstidspunkter og det er dager hvor inntekten derfor er satt til 0 kr"),
+    RV_IV_8("Perioden har flere skjæringstidspunkter og det er dager hvor inntekten derfor er satt til 0 kr", avviklet = true),
     RV_IV_10("Det er foreslått inntekt fra A-ordningen for én arbeidsgiver"),
 
     // SV: Sykepengegrunnlagsvurdering
@@ -221,7 +221,7 @@ enum class Varselkode(
     RV_UT_10("Forventet ikke overførtkvittering på utbetaling", avviklet = true),
     RV_UT_11("Forventet ikke kvittering på utbetaling"),
     RV_UT_12("Forventet ikke simulering på utbetaling"),
-    RV_UT_13("Forventet ikke å lage godkjenning på utbetaling"),
+    RV_UT_13("Forventet ikke å lage godkjenning på utbetaling", avviklet = true),
     RV_UT_14("Gir opp å prøve utbetaling på nytt", avviklet = true),
     RV_UT_15("Kan ikke annullere: hendelsen er ikke relevant", avviklet = true),
     RV_UT_16("Feil ved kalkulering av utbetalingstidslinjer", avviklet = true),
