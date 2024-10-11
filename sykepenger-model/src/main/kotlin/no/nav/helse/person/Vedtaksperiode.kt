@@ -571,6 +571,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje) {
+        hendelse.info("Igangsetter overstyring av tidslinje")
         val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
             ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it) } ?: this
         person.igangsettOverstyring(
