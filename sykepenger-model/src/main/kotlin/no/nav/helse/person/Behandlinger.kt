@@ -1225,9 +1225,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 behandling: Behandling,
                 hendelse: Hendelse?,
                 refusjonstidslinje: Beløpstidslinje
-            ) {
-                error("Har ikke implementert håndtering av refusjonsopplysninger i $this")
-            }
+            ) {}
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
