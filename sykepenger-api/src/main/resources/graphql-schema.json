@@ -5409,6 +5409,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "AvventerInntektsopplysninger",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "TilSkjonnsfastsettelse",
           "description" : null,
           "isDeprecated" : false,

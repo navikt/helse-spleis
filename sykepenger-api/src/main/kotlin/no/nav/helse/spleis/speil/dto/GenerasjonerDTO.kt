@@ -28,6 +28,7 @@ enum class Periodetilstand {
     ManglerInformasjon,
     UtbetaltVenterPåAnnenPeriode,
     VenterPåAnnenPeriode,
+    AvventerInntektsopplysninger,
     TilGodkjenning,
     IngenUtbetaling,
     TilInfotrygd;

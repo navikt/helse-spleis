@@ -88,6 +88,7 @@ enum class GraphQLPeriodetilstand {
     ManglerInformasjon,
     VenterPaAnnenPeriode,
     UtbetaltVenterPaAnnenPeriode,
+    AvventerInntektsopplysninger,
     TilSkjonnsfastsettelse,
     TilGodkjenning;
 }
