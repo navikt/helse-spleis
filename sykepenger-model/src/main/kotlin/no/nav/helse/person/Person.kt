@@ -464,7 +464,6 @@ class Person private constructor(
         check(arbeidsgivere.håndter(hendelse)) {
             "Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse"
         }
-        arbeidsgivere.håndterOverstyringAvRefusjon(hendelse)
         håndterGjenoppta(hendelse)
     }
 
