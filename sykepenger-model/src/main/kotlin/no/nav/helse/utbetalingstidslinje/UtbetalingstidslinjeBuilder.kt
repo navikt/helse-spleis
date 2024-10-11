@@ -119,7 +119,7 @@ internal class ArbeidsgiverFaktaavklartInntekt(
     private fun loggUlikeRefusjonsbeløp(refusjonsbeløpFraInntektsgrunnlag: Inntekt?, refusjonsdag: no.nav.helse.person.beløp.Dag) {
         if (refusjonsbeløpFraInntektsgrunnlag == null) return
         if (refusjonsdag is UkjentDag) return
-        if (refusjonsbeløpFraInntektsgrunnlag == refusjonsdag.beløp) return
+        if (refusjonsbeløpFraInntektsgrunnlag.rundTilDaglig() == refusjonsdag.beløp.rundTilDaglig()) return
         sikkerlogger.info("Fant ulike refusjonsbeløp på dato ${refusjonsdag.dato}. RefusjonsbeløpFraInntektsgrunnlag = ${refusjonsbeløpFraInntektsgrunnlag.daglig}, refusjonsbeløpFraTidslinje = ${refusjonsdag.beløp.daglig}")
     }
 
