@@ -443,7 +443,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
             nyRefusjonstidslinje: Beløpstidslinje
         ): Behandling? {
-            return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyRefusjonstidslinje)
+            return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, gjeldende.refusjonstidslinje + nyRefusjonstidslinje)
         }
 
         internal fun håndterRefusjonsopplysninger(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {

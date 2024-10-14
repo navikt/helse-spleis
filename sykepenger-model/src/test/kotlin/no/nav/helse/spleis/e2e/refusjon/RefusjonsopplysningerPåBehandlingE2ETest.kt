@@ -681,6 +681,19 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `Korrigerene IM som overstyrer deler av refusjonshistorikken fjerner ikke refusjonshistorikk den ikke vet noe om`() {
+        nyttVedtak(januar)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 20.januar,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null),
+            beregnetInntekt = INNTEKT
+        )
+        assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[19.januar].beløp)
+        assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
+    }
+
     private fun nyttVedtak(
         periode: Periode,
         tidsstempel: LocalDateTime,
