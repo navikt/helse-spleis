@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -602,6 +603,35 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertEquals(Beløpstidslinje.fra(1.januar til 31.januar, INGEN, kildeSaksbehandler), refusjonstidslinjeJanuar)
             assertEquals(Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT / 2, kildeSaksbehandler), refusjonstidslinjeFebruar)
         }
+    }
+
+    @Test
+    fun `Saksbehandler endrer refusjon for førstegangsbehandlingen, og vi feilaktig bruker disse når forlengelsen kommer`() {
+        nyttVedtak(januar)
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    a1,
+                    INNTEKT,
+                    "forklaring",
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2), Triple(1.februar, null, INNTEKT))
+                )
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterSøknad(februar)
+
+        assertForventetFeil(
+            forklaring = "Vi bruker feilaktig overstyrt refusjon for januar, også når februar-søknaden kommer",
+            nå = {
+                assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
+            },
+            ønsket = {
+                assertEquals(INNTEKT, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
+            }
+        )
     }
 
     private fun nyttVedtak(
