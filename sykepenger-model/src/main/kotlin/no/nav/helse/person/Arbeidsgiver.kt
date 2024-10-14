@@ -48,10 +48,12 @@ import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.førsteFraværsdager
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
@@ -69,6 +71,7 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -188,7 +191,11 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(hendelse: OverstyrArbeidsgiveropplysninger) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.håndter(hendelse)
+                val vedtaksperioderPåSkjæringstidspunkt = arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
+                val refusjonstidslinje = vedtaksperioderPåSkjæringstidspunkt.refusjonstidslinje()
+                val førsteFraværsdager = vedtaksperioderPåSkjæringstidspunkt.førsteFraværsdager()
+                val servitør = hendelse.refusjonsservitør(førsteFraværsdager, arbeidsgiver.organisasjonsnummer, refusjonstidslinje) ?: return@forEach
+                arbeidsgiver.håndter(hendelse, servitør)
             }
         }
 
@@ -702,8 +709,9 @@ internal class Arbeidsgiver private constructor(
         return énHarHåndtert(overstyrInntektsgrunnlag) { håndter(it) }
     }
 
-    internal fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
-        håndter(hendelse, Vedtaksperiode::håndter)
+    internal fun håndter(hendelse: Hendelse, servitør: Refusjonsservitør) {
+        håndter(hendelse) { håndter(hendelse, servitør) }
+        servitør.donérRester(hendelse)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {

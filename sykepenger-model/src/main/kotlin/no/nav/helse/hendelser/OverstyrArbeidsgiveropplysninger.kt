@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
@@ -11,12 +12,13 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.refusjon.Refusjonsservitør
 
 class OverstyrArbeidsgiveropplysninger(
     private val meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String,
-    private val skjæringstidspunkt: LocalDate,
+    internal val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     private val opprettet: LocalDateTime,
@@ -51,10 +53,16 @@ class OverstyrArbeidsgiveropplysninger(
         }
     }
 
-    internal fun refusjonstidslinje(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode): Beløpstidslinje {
-        if (this.skjæringstidspunkt != skjæringstidspunkt) return Beløpstidslinje()
-        val (beløpstidslinje, strekkbar) = refusjonstidslinjer[organisasjonsnummer] ?: return Beløpstidslinje()
-        return if (strekkbar) beløpstidslinje.strekkFrem(periode.endInclusive).subset(periode)
-        else beløpstidslinje.subset(periode)
+    internal fun refusjonsservitør(
+        førsteFraværsdager: Collection<LocalDate>,
+        orgnummer: String,
+        eksisterendeRefusjonstidslinje: Beløpstidslinje
+    ): Refusjonsservitør? {
+        val (refusjonstidslinjeFraOverstyring, strekkbar) = refusjonstidslinjer[orgnummer] ?: return null
+        if (refusjonstidslinjeFraOverstyring.isEmpty()) return null
+        val refusjonstidslinje =
+            if (strekkbar) refusjonstidslinjeFraOverstyring
+            else refusjonstidslinjeFraOverstyring + eksisterendeRefusjonstidslinje.fraOgMed(refusjonstidslinjeFraOverstyring.last().dato.nesteDag)
+        return Refusjonsservitør.fra(førsteFraværsdager = førsteFraværsdager, refusjonstidslinje = refusjonstidslinje)
     }
 }
