@@ -180,6 +180,7 @@ enum class Varselkode(
     RV_IV_7("Det er gjenbrukt inntektsopplysninger "),
     RV_IV_8("Perioden har flere skjæringstidspunkter og det er dager hvor inntekten derfor er satt til 0 kr", avviklet = true),
     RV_IV_10("Det er foreslått inntekt fra A-ordningen for én arbeidsgiver"),
+    RV_IV_11("Perioden inneholder flere skjæringstidspunkt"),
 
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
