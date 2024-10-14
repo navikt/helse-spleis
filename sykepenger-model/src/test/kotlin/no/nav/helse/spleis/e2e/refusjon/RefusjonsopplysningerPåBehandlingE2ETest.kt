@@ -634,6 +634,53 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         )
     }
 
+    @Test
+    fun `Endrer refusjon i en lukket periode`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        "forklaring",
+                        refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2))
+                    )
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertEquals(INNTEKT, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
+        }
+    }
+
+    @Test
+    fun `Endrer refusjon midt i en periode`() {
+        a1 {
+            nyttVedtak(januar)
+            assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[19.januar].beløp)
+            assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
+            assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[21.januar].beløp)
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        "forklaring",
+                        refusjonsopplysninger = listOf(Triple(20.januar, 20.januar, INNTEKT / 2))
+                    )
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[19.januar].beløp)
+            assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
+            assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[21.januar].beløp)
+        }
+    }
+
     private fun nyttVedtak(
         periode: Periode,
         tidsstempel: LocalDateTime,

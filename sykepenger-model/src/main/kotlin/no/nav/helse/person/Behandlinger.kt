@@ -448,7 +448,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun håndterRefusjonsopplysninger(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {
             if (!erEndringIRefusjonsopplysninger(refusjonstidslinje)) return
-            this.tilstand.håndterRefusjonsopplysninger(this, hendelse, refusjonstidslinje)
+            this.tilstand.håndterRefusjonsopplysninger(this, hendelse, gjeldende.refusjonstidslinje + refusjonstidslinje)
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =

@@ -20,7 +20,7 @@ class OverstyrArbeidsgiveropplysninger(
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     private val opprettet: LocalDateTime,
-    private val refusjonstidslinjer: Map<String, Beløpstidslinje>
+    private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), OverstyrInntektsgrunnlag {
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
@@ -53,6 +53,8 @@ class OverstyrArbeidsgiveropplysninger(
 
     internal fun refusjonstidslinje(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode): Beløpstidslinje {
         if (this.skjæringstidspunkt != skjæringstidspunkt) return Beløpstidslinje()
-        return refusjonstidslinjer[organisasjonsnummer]?.strekkFrem(periode.endInclusive)?.subset(periode) ?: Beløpstidslinje()
+        val (beløpstidslinje, strekkbar) = refusjonstidslinjer[organisasjonsnummer] ?: return Beløpstidslinje()
+        return if (strekkbar) beløpstidslinje.strekkFrem(periode.endInclusive).subset(periode)
+        else beløpstidslinje.subset(periode)
     }
 }

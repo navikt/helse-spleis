@@ -127,9 +127,10 @@ internal class OverstyrtArbeidsgiveropplysning(
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
             val defaultRefusjonFom = opplysning.gjelder?.start ?: skjæringstidspunkt
+            val strekkbar = opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_,tom) -> tom == null }
             opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
                 acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet))
-            }
+            } to strekkbar
         }
     }
 }
