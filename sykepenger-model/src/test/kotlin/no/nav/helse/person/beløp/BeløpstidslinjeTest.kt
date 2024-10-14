@@ -25,6 +25,14 @@ import org.junit.jupiter.api.assertThrows
 internal class BeløpstidslinjeTest {
 
     @Test
+    fun `subset av beløpstidslinje`() {
+        val beløpstidslinje = (Saksbehandler oppgir 1000.daglig kun 20.januar)
+        val subset = beløpstidslinje.subset(2.januar til 30.januar)
+        assertEquals("toKey out of range", assertThrows<IllegalArgumentException> { subset.subset(2.januar til 31.januar) }.message)
+        assertEquals("fromKey out of range", assertThrows<IllegalArgumentException> { subset.subset(1.januar til 30.januar) }.message)
+    }
+
+    @Test
     fun `beløpstidlinje lager en tidslinje med beløp og kilde`() {
         val beløpstidslinje = (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 10.januar) og (Saksbehandler oppgir 15500.månedlig fra 11.januar til 31.januar)
 
