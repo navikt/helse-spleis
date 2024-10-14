@@ -28,8 +28,8 @@ internal class BeløpstidslinjeTest {
     fun `subset av beløpstidslinje`() {
         val beløpstidslinje = (Saksbehandler oppgir 1000.daglig kun 20.januar)
         val subset = beløpstidslinje.subset(2.januar til 30.januar)
-        assertEquals("toKey out of range", assertThrows<IllegalArgumentException> { subset.subset(2.januar til 31.januar) }.message)
-        assertEquals("fromKey out of range", assertThrows<IllegalArgumentException> { subset.subset(1.januar til 30.januar) }.message)
+        assertEquals(beløpstidslinje, subset.subset(2.januar til 31.januar))
+        assertEquals(beløpstidslinje, subset.subset(1.januar til 30.januar))
     }
 
     @Test

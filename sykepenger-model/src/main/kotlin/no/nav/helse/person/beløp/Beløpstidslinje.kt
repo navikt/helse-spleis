@@ -51,7 +51,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     internal fun subset(periode: Periode): Beløpstidslinje {
         if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()
-        return Beløpstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag))
+        return Beløpstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag).toSortedMap())
     }
 
     private fun snute(snute: LocalDate): Beløpstidslinje {
