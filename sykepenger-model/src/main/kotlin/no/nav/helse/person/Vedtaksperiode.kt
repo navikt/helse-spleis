@@ -1836,6 +1836,10 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.info("Periode ser ut til å feilaktig vente på inntektsmelding. ")
                 return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
             }
+            if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
+                påminnelse.funksjonellFeil(RV_IV_11)
+                return vedtaksperiode.forkast(påminnelse)
+            }
             if (påminnelse.skalReberegnes()) {
                 vedtaksperiode.behandlinger.forkastUtbetaling(påminnelse)
                 return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
