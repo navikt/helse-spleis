@@ -8,6 +8,7 @@ import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
@@ -21,6 +22,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -153,9 +156,38 @@ class Inntektsmelding(
         val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
 
+        internal fun refusjonstidslinje(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime): Pair<LocalDate, Beløpstidslinje> {
+            val kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER, tidsstempel)
+            val startskuddet = startskuddet(førsteFraværsdag, arbeidsgiverperioder)
+            val opphørIRefusjon = opphørsdato?.let {
+                val sisteRefusjonsdag = maxOf(it, startskuddet.forrigeDag)
+                EndringIRefusjon(Inntekt.INGEN, sisteRefusjonsdag.nesteDag)
+            }
+
+            val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, startskuddet)
+            val alleRefusjonsopplysninger = listOfNotNull(opphørIRefusjon, hovedopplysning, *endringerIRefusjon.toTypedArray())
+                .sortedBy { it.endringsdato }
+                .filter { it.endringsdato >= startskuddet }
+
+            check(alleRefusjonsopplysninger.isNotEmpty()) {"Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?"}
+
+            val refusjonstidslinje = alleRefusjonsopplysninger
+                .zipWithNext { nåværende, neste ->
+                    Beløpstidslinje.fra(nåværende.endringsdato til neste.endringsdato.forrigeDag, nåværende.beløp, kilde)
+                }
+                .reduce(Beløpstidslinje::plus)
+                .plus(Beløpstidslinje.fra(alleRefusjonsopplysninger.last().endringsdato.somPeriode(), alleRefusjonsopplysninger.last().beløp, kilde))
+
+            return startskuddet to refusjonstidslinje
+        }
+
+        private fun startskuddet(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>) =
+            if (førsteFraværsdag == null) arbeidsgiverperioder.maxOf { it.start }
+            else arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
+
         class EndringIRefusjon(
-            private val beløp: Inntekt,
-            private val endringsdato: LocalDate
+            internal val beløp: Inntekt,
+            internal val endringsdato: LocalDate
         ) {
 
             internal fun tilEndring() = Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp, endringsdato)
@@ -163,11 +195,6 @@ class Inntektsmelding(
             internal companion object {
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
-
-                private fun startskuddet(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
-                    if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
-                    return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
-                }
             }
         }
     }
