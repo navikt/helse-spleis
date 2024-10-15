@@ -164,19 +164,20 @@ class Inntektsmelding(
                 EndringIRefusjon(Inntekt.INGEN, sisteRefusjonsdag.nesteDag)
             }
 
-            val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, startskuddet)
+            val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, startskuddet).takeUnless { it.endringsdato == opphørIRefusjon?.endringsdato }
             val alleRefusjonsopplysninger = listOfNotNull(opphørIRefusjon, hovedopplysning, *endringerIRefusjon.toTypedArray())
                 .sortedBy { it.endringsdato }
                 .filter { it.endringsdato >= startskuddet }
+                .filter { it.endringsdato <= (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
 
             check(alleRefusjonsopplysninger.isNotEmpty()) {"Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?"}
 
+            val sisteBit = Beløpstidslinje.fra(alleRefusjonsopplysninger.last().endringsdato.somPeriode(), alleRefusjonsopplysninger.last().beløp, kilde)
             val refusjonstidslinje = alleRefusjonsopplysninger
                 .zipWithNext { nåværende, neste ->
                     Beløpstidslinje.fra(nåværende.endringsdato til neste.endringsdato.forrigeDag, nåværende.beløp, kilde)
                 }
-                .reduce(Beløpstidslinje::plus)
-                .plus(Beløpstidslinje.fra(alleRefusjonsopplysninger.last().endringsdato.somPeriode(), alleRefusjonsopplysninger.last().beløp, kilde))
+                .fold(sisteBit) { acc, beløpstidslinje -> acc + beløpstidslinje }
 
             return startskuddet to refusjonstidslinje
         }
