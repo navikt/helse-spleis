@@ -49,14 +49,29 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
+
+    @Test
+    @Disabled
+    fun `en inntektsmelding som får behandlignene til å gå i frø`() {
+        nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
+        val feilmelding = assertThrows<IllegalStateException> { håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(),
+            førsteFraværsdag = 10.januar,
+            beregnetInntekt = INNTEKT
+        )}.message!!
+        assertTrue(feilmelding.endsWith("burde vært ferdig behandlet, men står i tilstand UberegnetRevurdering"))
+    }
 
     @Test
     fun `auu som får inntektsmelding med arbeidsgiverperiode langt tilbake i tid men allikevel skal validere inntektsmelding fordi den har første fraværsdag`() {
