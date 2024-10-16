@@ -1943,6 +1943,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
+            if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
+                påminnelse.funksjonellFeil(RV_IV_11)
+                return vedtaksperiode.forkast(påminnelse)
+            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
