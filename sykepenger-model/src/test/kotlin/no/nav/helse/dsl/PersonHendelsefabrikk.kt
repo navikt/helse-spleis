@@ -118,11 +118,21 @@ internal class OverstyrtArbeidsgiveropplysning(
             checkNotNull(it.forklaring) { "Forklaring må settes på Saksbehandlerinntekt"}
             Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now())
         }
-        internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt) {
-            check(it.refusjonsopplysninger == null) { "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt" }
-            check(it.forklaring == null) { "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt" }
-            check(it.subsumsjon == null) { "Skal ikke sette subsumsjon på Skjønssmessig fastsatt inntekt" }
-            SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now())
+        internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
+            forEach {
+                check(it.refusjonsopplysninger == null) { "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt" }
+                check(it.forklaring == null) { "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt" }
+                check(it.subsumsjon == null) { "Skal ikke sette subsumsjon på Skjønssmessig fastsatt inntekt" }
+            }
+            return map {
+                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = it.orgnummer,
+                    gjelder = gjelder,
+                    inntektsopplysning = SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()),
+                    refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger()
+                )
+            }
         }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
