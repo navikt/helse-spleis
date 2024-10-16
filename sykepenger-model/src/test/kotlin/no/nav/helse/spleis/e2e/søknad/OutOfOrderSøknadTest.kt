@@ -46,6 +46,13 @@ import org.junit.jupiter.api.Test
 internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Out of order AUUer- skal beholde perioden som kom først som låst i tillegg til den nye`() {
+        håndterSøknad(Sykdom(9.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
+        assertEquals(listOf(1.januar til 8.januar, 9.januar til 16.januar), inspektør.sykdomstidslinje.inspektør.låstePerioder)
+    }
+
+    @Test
     fun `ny tidligere periode - senere i avventer simulering - forkaster utbetalingen`() {
         tilSimulering(3.mars til 26.mars, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
