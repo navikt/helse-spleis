@@ -59,6 +59,6 @@ spec:
   - name: IDENTBYTTE
     value: "true"
   - name: TILKOMMEN_ARBEIDSGIVER
-    value: "true"
+    value: "false"
   - name: INNTEKTSMELDING_SOM_IKKEKOMMER
     value: "true"

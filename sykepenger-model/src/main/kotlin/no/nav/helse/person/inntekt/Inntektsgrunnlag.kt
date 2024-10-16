@@ -324,7 +324,7 @@ internal class Inntektsgrunnlag private constructor(
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
         val (resultat, harTilkommetInntekter) = builder.resultat(Toggle.TilkommenArbeidsgiver.enabled)
         if (harTilkommetInntekter) {
-            inntektsmelding.varsel(Varselkode.RV_SV_5)
+            inntektsmelding.varsel(Varselkode.RV_SV_5) // TODO: Burde ha eget varsel så det ikke forvekles med tilkommen inntekt fra søknaden
         }
         arbeidsgiverInntektsopplysninger
             .finn(inntektsmelding.organisasjonsnummer())
