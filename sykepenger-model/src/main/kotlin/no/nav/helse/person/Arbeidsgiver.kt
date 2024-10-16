@@ -48,7 +48,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.førsteFraværsdager
+import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -193,8 +193,8 @@ internal class Arbeidsgiver private constructor(
             forEach { arbeidsgiver ->
                 val vedtaksperioderPåSkjæringstidspunkt = arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
                 val refusjonstidslinje = vedtaksperioderPåSkjæringstidspunkt.refusjonstidslinje()
-                val førsteFraværsdager = vedtaksperioderPåSkjæringstidspunkt.førsteFraværsdager()
-                val servitør = hendelse.refusjonsservitør(førsteFraværsdager, arbeidsgiver.organisasjonsnummer, refusjonstidslinje) ?: return@forEach
+                val startdatoer = vedtaksperioderPåSkjæringstidspunkt.startdatoerPåSammenhengendeVedtaksperioder()
+                val servitør = hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje) ?: return@forEach
                 arbeidsgiver.håndter(hendelse, servitør)
             }
         }

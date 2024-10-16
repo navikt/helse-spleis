@@ -54,7 +54,7 @@ class OverstyrArbeidsgiveropplysninger(
     }
 
     internal fun refusjonsservitør(
-        førsteFraværsdager: Collection<LocalDate>,
+        startdatoer: Collection<LocalDate>,
         orgnummer: String,
         eksisterendeRefusjonstidslinje: Beløpstidslinje
     ): Refusjonsservitør? {
@@ -63,6 +63,6 @@ class OverstyrArbeidsgiveropplysninger(
         val refusjonstidslinje =
             if (strekkbar) refusjonstidslinjeFraOverstyring
             else refusjonstidslinjeFraOverstyring + eksisterendeRefusjonstidslinje.fraOgMed(refusjonstidslinjeFraOverstyring.last().dato.nesteDag)
-        return Refusjonsservitør.fra(førsteFraværsdager = førsteFraværsdager, refusjonstidslinje = refusjonstidslinje)
+        return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = refusjonstidslinje)
     }
 }

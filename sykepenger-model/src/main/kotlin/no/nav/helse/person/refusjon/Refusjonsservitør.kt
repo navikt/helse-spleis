@@ -9,20 +9,20 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 
 internal class Refusjonsservitør private constructor(
     refusjonstidslinje: Beløpstidslinje,
-    førsteFraværsdager: Iterable<LocalDate>
+    startdatoer: Iterable<LocalDate>
 ) {
-    private val sorterteFørsteFraværsdager = førsteFraværsdager.toSortedSet()
-    private val sisteBit = sorterteFørsteFraværsdager.last() to refusjonstidslinje.fraOgMed(sorterteFørsteFraværsdager.last())
+    private val sorterteStartdatoer = startdatoer.toSortedSet()
+    private val sisteBit = sorterteStartdatoer.last() to refusjonstidslinje.fraOgMed(sorterteStartdatoer.last())
 
-    private val refusjonsopplysningerPerFørsteFraværsdag = sorterteFørsteFraværsdager.zipWithNext { nåværende, neste ->
+    private val refusjonsopplysningerPerStartdato = sorterteStartdatoer.zipWithNext { nåværende, neste ->
         nåværende to refusjonstidslinje.subset(nåværende til neste.forrigeDag)
     }.toMap() + sisteBit
 
-    private val refusjonsrester = refusjonsopplysningerPerFørsteFraværsdag.toMutableMap()
+    private val refusjonsrester = refusjonsopplysningerPerStartdato.toMutableMap()
 
-    internal fun servér(førsteFraværsdag: LocalDate, periode: Periode): Beløpstidslinje {
-        val beløpstidslinje = refusjonsopplysningerPerFørsteFraværsdag[førsteFraværsdag] ?: return Beløpstidslinje()
-        refusjonsrester[førsteFraværsdag] = refusjonsrester.getValue(førsteFraværsdag) - periode
+    internal fun servér(startdato: LocalDate, periode: Periode): Beløpstidslinje {
+        val beløpstidslinje = refusjonsopplysningerPerStartdato[startdato] ?: return Beløpstidslinje()
+        refusjonsrester[startdato] = refusjonsrester.getValue(startdato) - periode
         return beløpstidslinje.strekkFrem(periode.endInclusive).subset(periode)
     }
 
@@ -33,9 +33,9 @@ internal class Refusjonsservitør private constructor(
     }
 
     internal companion object {
-        internal fun fra(refusjonstidslinje: Beløpstidslinje, førsteFraværsdager: Collection<LocalDate>): Refusjonsservitør? {
-            if (refusjonstidslinje.isEmpty() || førsteFraværsdager.isEmpty()) return null
-            return Refusjonsservitør(refusjonstidslinje, førsteFraværsdager)
+        internal fun fra(refusjonstidslinje: Beløpstidslinje, startdatoer: Collection<LocalDate>): Refusjonsservitør? {
+            if (refusjonstidslinje.isEmpty() || startdatoer.isEmpty()) return null
+            return Refusjonsservitør(refusjonstidslinje, startdatoer)
         }
     }
 }

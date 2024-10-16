@@ -311,10 +311,12 @@ internal class Vedtaksperiode private constructor(
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
-    private val førsteFraværsdag get() = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
+    // 💡Må ikke forveksles med `førsteFraværsdag` 💡
+    // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
+    private val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
     internal fun håndterRefusjonsopplysninger(hendelse: Hendelse, refusjon: Refusjonshistorikk.Refusjon) {
         kontekst(hendelse)
-        val søkevindu = førsteFraværsdag til periode.endInclusive
+        val søkevindu = startdatoPåSammenhengendeVedtaksperioder til periode.endInclusive
         if (refusjon.startskuddet !in søkevindu) return
         val refusjonstidslinje = refusjon.beløpstidslinje(periode.endInclusive)
         tilstand.håndter(this, hendelse, refusjonstidslinje)
@@ -440,7 +442,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(hendelse: Hendelse, servitør: Refusjonsservitør) {
-        val refusjonstidslinje = servitør.servér(førsteFraværsdag, periode)
+        val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
         if (refusjonstidslinje.isEmpty()) return
         behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
     }
@@ -2695,7 +2697,18 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.refusjonstidslinje() = fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
             beløpstidslinje + vedtaksperiode.refusjonstidslinje
         }
-        internal fun List<Vedtaksperiode>.førsteFraværsdager() = map { it.førsteFraværsdag }
+        internal fun List<Vedtaksperiode>.startdatoerPåSammenhengendeVedtaksperioder(): Set<LocalDate> {
+            val startdatoer = mutableMapOf<UUID, LocalDate>()
+
+            this.forEach { vedtaksperiode ->
+                if (vedtaksperiode.id in startdatoer) return@forEach
+                val sammenhendeVedtaksperioder = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
+                val startdatoPåSammenhengendeVedtaksperioder = sammenhendeVedtaksperioder.periode().start
+                startdatoer.putAll(sammenhendeVedtaksperioder.associate { it.id to startdatoPåSammenhengendeVedtaksperioder })
+            }
+
+            return startdatoer.values.toSet()
+        }
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
