@@ -444,7 +444,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: Hendelse, servitør: Refusjonsservitør) {
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
         if (refusjonstidslinje.isEmpty()) return
-        behandlinger.håndterRefusjonstidslinje(hendelse, refusjonstidslinje)
+        behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), refusjonstidslinje)
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
@@ -1269,7 +1269,7 @@ internal class Vedtaksperiode private constructor(
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
         val nedarvetRefusjonstidslinje = refusjonstidslinjeFraNabolaget.strekk(this.periode).subset(this.periode)
         val refusjonstidslinjeFraRefusjonshistorikk = arbeidsgiver.refusjonstidslinje(this)
-        this.behandlinger.håndterRefusjonstidslinje(hendelse, nedarvetRefusjonstidslinje + refusjonstidslinjeFraRefusjonshistorikk)
+        this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), nedarvetRefusjonstidslinje + refusjonstidslinjeFraRefusjonshistorikk)
     }
 
     internal sealed class ArbeidsgiveropplysningerStrategi {
@@ -1365,7 +1365,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
-            hendelse.info("Forventet ikke refusjonsopplysninger i $type")
+            hendelse.info("Forventet ikke refusjonsopplysninger i vedtaksperiodetilstand $type")
         }
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}

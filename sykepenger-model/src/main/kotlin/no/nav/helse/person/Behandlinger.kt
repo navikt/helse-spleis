@@ -282,7 +282,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun håndterRefusjonstidslinje(
         arbeidsgiver: Arbeidsgiver,
-        hendelse: Hendelse,
+        hendelse: Hendelse?,
         beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
         beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
         refusjonstidslinje: Beløpstidslinje
@@ -290,10 +290,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().håndterRefusjonsopplysninger(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
             leggTilNyBehandling(it)
         }
-    }
-
-    internal fun håndterRefusjonstidslinje(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {
-        behandlinger.last().håndterRefusjonsopplysninger(hendelse, refusjonstidslinje)
     }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
@@ -441,17 +437,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun håndterRefusjonsopplysninger(
             arbeidsgiver: Arbeidsgiver,
-            hendelse: Hendelse,
+            hendelse: Hendelse?,
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
             nyRefusjonstidslinje: Beløpstidslinje
         ): Behandling? {
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, gjeldende.refusjonstidslinje + nyRefusjonstidslinje)
-        }
-
-        internal fun håndterRefusjonsopplysninger(hendelse: Hendelse?, refusjonstidslinje: Beløpstidslinje) {
-            if (!erEndringIRefusjonsopplysninger(refusjonstidslinje)) return
-            this.tilstand.håndterRefusjonsopplysninger(this, hendelse, gjeldende.refusjonstidslinje + refusjonstidslinje)
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
@@ -906,13 +897,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun oppdaterMedRefusjonstidslinje(hendelse: Hendelse?, nyeRefusjonsopplysninger: Beløpstidslinje) {
-            val dokumentsporing = when (hendelse) {
-                is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId())
-                else -> hendelse?.dokumentsporing()
-            } ?: endringer.last().dokumentsporing
+            val dokumentsporing = dokumentsporingForRefusjonstidslinje(hendelse)
             val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing, nyeRefusjonsopplysninger)
             nyEndring(endring)
         }
+
+        private fun dokumentsporingForRefusjonstidslinje(hendelse: Hendelse?) = when (hendelse) {
+            is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId())
+            else -> hendelse?.dokumentsporing()
+        } ?: endringer.last().dokumentsporing
 
         private fun oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
             val endring = endringer.last().kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) ?: return
@@ -949,24 +942,25 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun nyBehandlingMedRefusjonstidslinje(
             arbeidsgiver: Arbeidsgiver,
-            hendelse: Hendelse,
+            hendelse: Hendelse?,
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
             nyRefusjonstidslinje: Beløpstidslinje,
             starttilstand: Tilstand = Tilstand.Uberegnet
         ): Behandling {
             arbeidsgiver.låsOpp(periode)
+            val dokumentsporing = dokumentsporingForRefusjonstidslinje(hendelse)
             return Behandling(
                 observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierMedRefusjonstidslinje(
-                    Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()),
+                    dokumentsporing,
                     nyRefusjonstidslinje,
                     beregnSkjæringstidspunkt,
                     beregnArbeidsgiverperiode
                 )),
                 avsluttet = null,
-                kilde = Behandlingkilde(hendelse)
+                kilde = hendelse?.let { Behandlingkilde(it) } ?: kilde
             )
         }
 
@@ -1217,18 +1211,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun håndterRefusjonsopplysninger(
                 arbeidsgiver: Arbeidsgiver,
                 behandling: Behandling,
-                hendelse: Hendelse,
+                hendelse: Hendelse?,
                 beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                 nyeRefusjonsopplysninger: Beløpstidslinje
             ): Behandling? {
-                error("Har ikke implementert håndtering av refusjonsopplysninger i $this")
+                hendelse?.info("Har ikke implementert håndtering av refusjonsopplysninger i behandlingstilstand $this") // TODO: dette kan bli en error når vi har fått migrert alle refusjonsopplysninger til den nye metoden
+                return null
             }
-            fun håndterRefusjonsopplysninger(
-                behandling: Behandling,
-                hendelse: Hendelse?,
-                refusjonstidslinje: Beløpstidslinje
-            ) {}
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
@@ -1282,21 +1272,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun håndterRefusjonsopplysninger(
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
-                    hendelse: Hendelse,
+                    hendelse: Hendelse?,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
                     behandling.oppdaterMedRefusjonstidslinje(hendelse, nyeRefusjonsopplysninger)
                     return null
-                }
-
-                override fun håndterRefusjonsopplysninger(
-                    behandling: Behandling,
-                    hendelse: Hendelse?,
-                    refusjonstidslinje: Beløpstidslinje
-                ) {
-                    behandling.oppdaterMedRefusjonstidslinje(hendelse, refusjonstidslinje)
                 }
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
@@ -1398,7 +1380,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun håndterRefusjonsopplysninger(
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
-                    hendelse: Hendelse,
+                    hendelse: Hendelse?,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
@@ -1589,7 +1571,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun håndterRefusjonsopplysninger(
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
-                    hendelse: Hendelse,
+                    hendelse: Hendelse?,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
