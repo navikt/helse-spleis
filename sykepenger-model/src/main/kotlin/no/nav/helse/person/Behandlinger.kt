@@ -442,7 +442,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
             nyRefusjonstidslinje: Beløpstidslinje
         ): Behandling? {
-            return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, gjeldende.refusjonstidslinje + nyRefusjonstidslinje)
+            val refusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
+            if (!erEndringIRefusjonsopplysninger(refusjonsopplysningerForPerioden)) return null
+            return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, gjeldende.refusjonstidslinje + refusjonsopplysningerForPerioden)
         }
 
         private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
@@ -1576,7 +1578,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
-                    if (!behandling.erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger)) return null
+                    if (behandling.gjeldende.refusjonstidslinje.isEmpty()) return null // TODO: Denne kan vi fjerne når vi har migrert inn refusjonsopplysninger på alle perioder.
                     return behandling.nyBehandlingMedRefusjonstidslinje(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
                 }
 
