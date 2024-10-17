@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -15,6 +16,7 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -55,22 +57,36 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
-    @Disabled
-    fun `en inntektsmelding som får behandlignene til å gå i frø`() {
+    fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
         nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
-        val feilmelding = assertThrows<IllegalStateException> { håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(),
-            førsteFraværsdag = 10.januar,
-            beregnetInntekt = INNTEKT
-        )}.message!!
-        assertTrue(feilmelding.endsWith("burde vært ferdig behandlet, men står i tilstand UberegnetRevurdering"))
+        val korrigertIm = håndterInntektsmelding(arbeidsgiverperioder = listOf(), førsteFraværsdag = 10.januar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+
+        // Per i dag blir det en revurdering uten endring og varsel om flere IM'er
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("IngenUtbetaling"))
+        assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
+
+        val dagensRefusjonsopplysninger = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
+        val dagensRefusjonsopplysningerPeriode = dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
+        assertEquals(16.januar til LocalDate.MAX, dagensRefusjonsopplysningerPeriode)
+        assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INNTEKT })
+
+        // Med nye refusjonsopplysnigner vil det tolkes som 0,- i refusjon
+        val nyeRefusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
+        val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.first().dato til nyeRefusjonsopplysninger.last().dato
+        assertTrue(nyeRefusjonsopplysninger.all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
+        assertForventetFeil(
+            forklaring = "Skal ikke refusjonstidslinjen strekke seg over hele perioden da??",
+            nå = { assertEquals(10.januar til 31.januar, nyeRefusjonsopplysningerPeriode) },
+            ønsket = { assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode) }
+        )
     }
 
     @Test

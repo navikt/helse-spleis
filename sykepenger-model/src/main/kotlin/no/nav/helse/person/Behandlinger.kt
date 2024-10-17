@@ -271,6 +271,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
+    internal fun håndterer(dokumentsporing: Dokumentsporing) =
+        behandlinger.lastOrNull()?.takeUnless { it.erAvsluttet() }?.dokumentHåndtert(dokumentsporing) == true
+
     internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
         behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)
 

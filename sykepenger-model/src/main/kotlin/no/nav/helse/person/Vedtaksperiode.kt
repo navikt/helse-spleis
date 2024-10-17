@@ -2713,6 +2713,9 @@ internal class Vedtaksperiode private constructor(
 
             return startdatoer.values.toSet()
         }
+        internal fun List<Vedtaksperiode>.refusjonseventyr(hendelse: Hendelse) = firstOrNull {
+            it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()))
+        }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {

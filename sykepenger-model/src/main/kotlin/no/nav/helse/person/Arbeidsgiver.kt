@@ -53,6 +53,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsme
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.Vedtaksperiode.Companion.refusjonseventyr
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
@@ -465,7 +466,8 @@ internal class Arbeidsgiver private constructor(
         håndter(inntektsmelding) { håndterRefusjonsopplysninger(inntektsmelding, inntektsmelding.refusjonsElement) }
 
         val dagoverstyring = dager.revurderingseventyr()
-        addInntektsmelding(inntektsmelding, dagoverstyring)
+        val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
+        addInntektsmelding(inntektsmelding, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
 
         inntektsmelding.ikkeHåndert(person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }
@@ -790,7 +792,7 @@ internal class Arbeidsgiver private constructor(
         return sammenhengendePerioder
     }
 
-    private fun addInntektsmelding(inntektsmelding: Inntektsmelding, dagoverstyring: Revurderingseventyr?) {
+    private fun addInntektsmelding(inntektsmelding: Inntektsmelding, overstyring: Revurderingseventyr?) {
         val subsumsjonsloggMedInntektsmeldingkontekst = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
             Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
             Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
@@ -802,14 +804,14 @@ internal class Arbeidsgiver private constructor(
 
         if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode, forkastede)) {
             inntektsmelding.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
-            if (dagoverstyring == null) return
-            return person.igangsettOverstyring(dagoverstyring)
+            if (overstyring == null) return
+            return person.igangsettOverstyring(overstyring)
         }
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
         val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonsloggMedInntektsmeldingkontekst)
-        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, dagoverstyring)
+        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring)
         if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding)
         håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }
