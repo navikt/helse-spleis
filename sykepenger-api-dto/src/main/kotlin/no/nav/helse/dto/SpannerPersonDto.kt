@@ -964,11 +964,31 @@ private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverD
     sykmeldingFom = sykmeldingFom,
     sykmeldingTom = sykmeldingTom,
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
-    venteårsak = venteårsak.value?.tilPersonData(),
+    venteårsak = utledVenteårsak(venteårsak),
     egenmeldingsperioder = egenmeldingsperioder,
     opprettet = opprettet,
     oppdatert = oppdatert,
 )
+
+private fun utledVenteårsak(venteårsak: LazyVedtaksperiodeVenterDto): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
+     try {
+        return venteårsak.value?.tilPersonData()
+    } catch (e: Exception) {
+        return SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto(
+            ventetSiden = LocalDateTime.now(),
+            venterTil = LocalDateTime.MAX,
+            venterPå = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenterPåDto(
+                vedtaksperiodeId =  "00000000-0000-0000-0000-000000000000".let { UUID.fromString(it) },
+                organisasjonsnummer = "ORGNUMMER",
+                venteårsak = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenteårsakDto(
+                    hva = "Hjelp - kræsj",
+                    hvorfor = "Det kastes en feil et sted når venteårsak evalueres, se i loggene"
+                )
+            )
+        )
+    }
+}
+
 private fun VedtaksperiodeVenterDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto(
         ventetSiden = ventetSiden,
