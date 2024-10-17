@@ -21,10 +21,15 @@ internal class Refusjonsservitør private constructor(
     private val refusjonsrester = refusjonsopplysningerPerStartdato.toMutableMap()
 
     internal fun servér(startdato: LocalDate, periode: Periode): Beløpstidslinje {
-        val beløpstidslinje = refusjonsopplysningerPerStartdato[startdato] ?: return Beløpstidslinje()
-        refusjonsrester[startdato] = refusjonsrester.getValue(startdato) - periode
-        return beløpstidslinje.strekkFrem(periode.endInclusive).subset(periode)
+        val startdatoInnenforSøkevindu = startdatoInnenforSøkevindu(startdato til periode.endInclusive)
+        val refusjonstidslinje = refusjonsopplysningerPerStartdato[startdatoInnenforSøkevindu] ?: return Beløpstidslinje()
+        refusjonsrester[startdatoInnenforSøkevindu] = refusjonsrester.getValue(startdatoInnenforSøkevindu) - periode
+        return refusjonstidslinje.strekkFrem(periode.endInclusive).subset(periode)
     }
+
+    private fun startdatoInnenforSøkevindu(søkevindu: Periode) = refusjonsopplysningerPerStartdato.keys.filter { it in søkevindu }.also {
+        check(it.size < 2) { "Det er flere refusjonsopplysninger lagret innenfor samme søkevindu, det blir en sklitakling fra siden" }
+    }.firstOrNull()
 
     internal fun donérRester(hendelse: IAktivitetslogg) {
         val rester = refusjonsrester.values.filter { it.isNotEmpty() }
@@ -36,6 +41,11 @@ internal class Refusjonsservitør private constructor(
         internal fun fra(refusjonstidslinje: Beløpstidslinje, startdatoer: Collection<LocalDate>): Refusjonsservitør? {
             if (refusjonstidslinje.isEmpty() || startdatoer.isEmpty()) return null
             return Refusjonsservitør(refusjonstidslinje, startdatoer)
+        }
+
+        internal fun fra(refusjonstidslinje: Beløpstidslinje): Refusjonsservitør? {
+            if (refusjonstidslinje.isEmpty()) return null
+            return Refusjonsservitør(refusjonstidslinje, listOf(refusjonstidslinje.first().dato))
         }
     }
 }

@@ -644,7 +644,16 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                     )
                 }
             )
-        }    }
+        }
+    }
+
+    @Test
+    fun `Inntektsmelding kommer før søknad`() {
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.mars, emptyList()))
+            assertInfo("Refusjonsservitøren har rester etter servering: 01-01-2018 til 01-04-2018")
+        }
+    }
 
     @Test
     fun `Endrer refusjon i en lukket periode`() {

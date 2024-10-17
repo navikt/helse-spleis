@@ -125,7 +125,6 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -311,21 +310,6 @@ internal class Vedtaksperiode private constructor(
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
-    // 💡Må ikke forveksles med `førsteFraværsdag` 💡
-    // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
-    private val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
-    internal fun håndterRefusjonsopplysninger(hendelse: Hendelse, refusjon: Refusjonshistorikk.Refusjon) {
-        kontekst(hendelse)
-        val søkevindu = startdatoPåSammenhengendeVedtaksperioder til periode.endInclusive
-        if (refusjon.startskuddet !in søkevindu) return
-        val refusjonstidslinje = refusjon.beløpstidslinje(periode.endInclusive)
-        tilstand.håndter(this, hendelse, refusjonstidslinje)
-    }
-
-    private fun håndterEndretRefusjonstidslinje(hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
-        behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), refusjonstidslinje)
-    }
-
     private fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding): Boolean {
         return skalHåndtereDager(dager) { sammenhengende ->
             dager.skalHåndteresAvRevurdering(periode, sammenhengende, finnArbeidsgiverperiode())
@@ -440,6 +424,10 @@ internal class Vedtaksperiode private constructor(
         overstyrInntektsgrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist)
         return true
     }
+
+    // 💡Må ikke forveksles med `førsteFraværsdag` 💡
+    // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
+    private val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
 
     internal fun håndter(hendelse: Hendelse, servitør: Refusjonsservitør) {
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
@@ -1364,10 +1352,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
-            hendelse.info("Forventet ikke refusjonsopplysninger i vedtaksperiodetilstand $type")
-        }
-
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
@@ -1586,14 +1570,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
-        }
-
         private fun tilstand(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Tilstand {
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) return TrengerInntektsmelding(vedtaksperiode)
@@ -1703,14 +1679,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
         }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
-        }
     }
 
     internal data object AvventerVilkårsprøvingRevurdering : Vedtaksperiodetilstand {
@@ -1781,14 +1749,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
                 dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
             }
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
@@ -1918,10 +1878,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, refusjonstidslinje: Beløpstidslinje) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -2064,14 +2020,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
                 vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk)
@@ -2108,14 +2056,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2190,14 +2130,6 @@ internal class Vedtaksperiode private constructor(
             } ?: trengerSimulering(vedtaksperiode, påminnelse)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             håndterFørstegangsbehandling(simulering, vedtaksperiode) {
                 vedtaksperiode.behandlinger.valider(simulering)
@@ -2257,14 +2189,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
-        }
-
     }
 
     internal data object AvventerGodkjenning : Vedtaksperiodetilstand {
@@ -2317,14 +2241,6 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
                 vedtaksperiode.person.igangsettOverstyring(it)
             } ?: vedtaksperiode.trengerGodkjenning(påminnelse)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(
@@ -2418,14 +2334,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
-        }
     }
 
     internal data object TilUtbetaling : Vedtaksperiodetilstand {
@@ -2456,14 +2364,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, Avsluttet) {
                 hendelse.info("OK fra Oppdragssystemet")
             }
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2627,14 +2527,6 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
                 vedtaksperiode.person.igangsettOverstyring(it)
             }
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            vedtaksperiode.håndterEndretRefusjonstidslinje(hendelse, refusjonstidslinje)
         }
     }
 

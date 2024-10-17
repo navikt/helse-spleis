@@ -30,6 +30,7 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding(
@@ -101,7 +102,7 @@ class Inntektsmelding(
         return beregnetInntektsdato
     }
 
-    internal val refusjonsElement = Refusjonshistorikk.Refusjon(
+    private val refusjonsElement = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = meldingsreferanseId,
         førsteFraværsdag = førsteFraværsdag,
         arbeidsgiverperioder = arbeidsgiverperioder,
@@ -110,6 +111,10 @@ class Inntektsmelding(
         endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
         tidsstempel = mottatt
     )
+
+    internal val refusjonsservitør = checkNotNull(Refusjonsservitør.fra(refusjon.refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt))) {
+        "Det har kommet en inntektsmelding uten refusjonsopplysninger, det takler vi særdeles dårlig"
+    }
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
@@ -156,7 +161,7 @@ class Inntektsmelding(
         val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
 
-        internal fun refusjonstidslinje(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime): Pair<LocalDate, Beløpstidslinje> {
+        internal fun refusjonstidslinje(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime): Beløpstidslinje {
             val kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER, tidsstempel)
             val startskuddet = startskuddet(førsteFraværsdag, arbeidsgiverperioder)
             val opphørIRefusjon = opphørsdato?.let {
@@ -179,7 +184,7 @@ class Inntektsmelding(
                 }
                 .fold(sisteBit) { acc, beløpstidslinje -> acc + beløpstidslinje }
 
-            return startskuddet to refusjonstidslinje
+            return refusjonstidslinje
         }
 
         private fun startskuddet(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>) =

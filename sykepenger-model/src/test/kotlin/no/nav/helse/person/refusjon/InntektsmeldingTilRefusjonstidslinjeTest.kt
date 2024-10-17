@@ -76,11 +76,10 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
             refusjonsbeløp: Inntekt? = null,
             opphørsdato: LocalDate? = null,
             endringerIRefusjon: Map<LocalDate, Inntekt> = emptyMap()
-        ) =
-                Inntektsmelding.Refusjon(
-                    beløp = refusjonsbeløp,
-                    opphørsdato = opphørsdato,
-                    endringerIRefusjon = endringerIRefusjon.map { Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key) }
-                ).refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt).second
+        ) = Inntektsmelding.Refusjon(
+                beløp = refusjonsbeløp,
+                opphørsdato = opphørsdato,
+                endringerIRefusjon = endringerIRefusjon.map { Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key) }
+            ).refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt)
     }
 }
