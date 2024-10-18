@@ -43,9 +43,10 @@ class Økonomi private constructor(
         }
 
         private fun List<Økonomi>.beregningsgrunnlag() = map { it.beregningsgrunnlag }.summer()
+        private fun List<Økonomi>.tilkommet() = filter { it.beregningsgrunnlag == INGEN }.map { it.aktuellDagsinntekt }.summer()
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.aktuellDagsinntekt }, økonomiList.beregningsgrunnlag())
+            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.beregningsgrunnlag }, økonomiList.beregningsgrunnlag())
             return økonomiList.map { økonomi: Økonomi ->
                 økonomi.kopierMed(totalgrad = totalgrad)
             }
@@ -54,7 +55,7 @@ class Økonomi private constructor(
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalGrad.erUnderGrensen() }
 
         private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
-            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.aktuellDagsinntekt }, økonomiList.beregningsgrunnlag())
+            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.beregningsgrunnlag }, økonomiList.beregningsgrunnlag())
 
         fun betal(økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
@@ -76,12 +77,12 @@ class Økonomi private constructor(
             val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
             val er6GBegrenset = beregningsgrunnlag > grunnbeløp
 
-            val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig()
-            val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
+            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad - økonomiList.tilkommet()).rundTilDaglig())
+            val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
-            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) }, personBeløp)
+            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) }, personBeløp)
             val totalPersonbeløp = totalPerson(fordelingPerson)
-            val restbeløp = sykepengegrunnlag - totalArbeidsgiverrefusjon - totalPersonbeløp
+            val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
             val restfordeling = restfordeling(fordelingPerson, restbeløp)
             return restfordeling.map { økonomi -> økonomi.kopierMed(er6GBegrenset = er6GBegrenset) }
         }

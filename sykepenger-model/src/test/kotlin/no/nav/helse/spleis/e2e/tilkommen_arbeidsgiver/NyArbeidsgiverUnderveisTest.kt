@@ -71,11 +71,11 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertEquals(1082.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(733.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(349.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(236.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
         }
     }
 
@@ -114,8 +114,8 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(462.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
-            assertEquals(969.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
+            assertEquals(0.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, inspektør.sisteUtbetaling().utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
         }
     }
 
@@ -265,7 +265,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                     assertEquals(100, dag.økonomi.inspektør.totalGrad)
                 }
                 utbetalingInspektør.utbetalingstidslinje[10.januar].also { dag ->
-                    assertEquals(91, dag.økonomi.inspektør.totalGrad)
+                    assertEquals(100, dag.økonomi.inspektør.totalGrad)
                 }
             }
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør ->

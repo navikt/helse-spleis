@@ -7,6 +7,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.ratio
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
@@ -529,20 +530,20 @@ internal class ØkonomiTest {
             `6G` = `6G`
         )
         val betalte = listOf(a, b).betal().also {
-            assertEquals(44.prosent, it.totalSykdomsgrad())
+            assertEquals(80.prosent, it.totalSykdomsgrad())
         }
-        assertUtbetaling(betalte[0], 951.0, 0.0)
+        assertUtbetaling(betalte[0], 344.0, 0.0)
         assertUtbetaling(betalte[1], 0.0, 0.0)
     }
 
     @Test
-    fun `Tilkommen inntekt - fordeler personbeløp ved avsluttet arbeidsforhold`() {
+    fun `Tilkommen inntekt - fordeler ikke personbeløp ved avsluttet arbeidsforhold`() {
         val `6G` = `6G`.beløp(1.januar)
         val a = 0.prosent.sykdomsgrad.inntekt(INGEN, beregningsgrunnlag = 31000.månedlig, `6G`= `6G`)
         val b = 100.prosent.sykdomsgrad.inntekt(10000.månedlig, beregningsgrunnlag = INGEN, `6G` = `6G`)
         val betalte = listOf(a, b).betal()
         assertUtbetaling(betalte[0], 0.0, 0.0)
-        assertUtbetaling(betalte[1], 462.0, 969.0)
+        assertUtbetaling(betalte[1], 0.0, 0.0)
     }
 
     @Test
