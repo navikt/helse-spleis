@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
+import java.time.Month
 import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
@@ -22,6 +23,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.K
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -395,6 +397,29 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)
             assertTrue(tags(2.vedtaksperiode).contains("FlereArbeidsgivere"))
+        }
+    }
+
+    @Test
+    fun `fellesskapets tverrfaglige test på mandag 14 oktober tyvetyvefire`() {
+        a1 {
+            nyttVedtak(1.januar(2025) til 31.januar(2025), beregnetInntekt = 90000.månedlig)
+            håndterSøknad(Sykdom(1.februar(2025), 28.februar(2025), 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar(2025), 28.februar(2025), "a2", 1867.daglig)))
+            håndterYtelser(2.vedtaksperiode)
+            inspektør.sisteUtbetaling().utbetalingstidslinje.forEach {
+                if (it is Utbetalingsdag.NavDag && it.dato.month == Month.FEBRUARY) {
+                    assertEquals(995.daglig, it.økonomi.arbeidsgiverbeløp)
+                    assertForventetFeil(
+                        forklaring = "Morten har figuren i excalidraw med mellomutregningene",
+                        nå = {
+                            assertEquals(100.prosent, it.økonomi.totalGrad)
+                        },
+                        ønsket = {
+                            assertEquals(35.prosent, it.økonomi.totalGrad)
+                        }
+                    )
+                }
+            }
         }
     }
 
