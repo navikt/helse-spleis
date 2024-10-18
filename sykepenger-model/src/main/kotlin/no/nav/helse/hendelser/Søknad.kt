@@ -111,7 +111,7 @@ class Søknad(
         subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat()))
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
-        if (tilkomneInntekter.isNotEmpty()) varsel(RV_SV_5)
+        validerTilkomneInntekter(this)
         merknaderFraSykmelding.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
@@ -125,6 +125,12 @@ class Søknad(
         if (sendTilGosys) funksjonellFeil(RV_SØ_30)
         if (yrkesskade) varsel(RV_YS_1)
         return this
+    }
+
+    private fun validerTilkomneInntekter(søknad: Søknad) {
+        if (tilkomneInntekter.isEmpty()) return
+        if (perioder.all { it.tålerTilkommenInntekt(søknad) }) varsel(RV_SV_5)
+        else varsel(RV_IV_9)
     }
 
     private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagElement?) {
@@ -290,6 +296,8 @@ class Søknad(
 
         internal open fun valider(søknad: Søknad) {}
 
+        internal open fun tålerTilkommenInntekt(søknad: Søknad): Boolean = true
+
         internal fun valider(søknad: Søknad, varselkode: Varselkode) {
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(varselkode)
         }
@@ -314,6 +322,8 @@ class Søknad(
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "ferie") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde).subset(sykdomsperiode.oppdaterTom(periode))
+
+            override fun tålerTilkommenInntekt(søknad: Søknad) = false
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "papirsykmelding") {
@@ -327,6 +337,8 @@ class Søknad(
         class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "permisjon") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.permisjonsdager(periode.start, periode.endInclusive, kilde)
+
+            override fun tålerTilkommenInntekt(søknad: Søknad) = false
 
             override fun valider(søknad: Søknad) {
                 valider(søknad, RV_SØ_5)
