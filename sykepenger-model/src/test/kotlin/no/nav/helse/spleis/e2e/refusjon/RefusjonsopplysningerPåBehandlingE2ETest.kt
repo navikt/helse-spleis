@@ -13,17 +13,23 @@ import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.onsdag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
@@ -31,13 +37,161 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.torsdag
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `periode etter ferie mangler refusjonsopplysninger`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            forlengVedtak(mars)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+            assertForventetFeil(
+                forklaring = "Mars syns ikke han har noen venner i nabolaget med refusjonsopplysninger å videreføre pga ferien i februar",
+                nå = { assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty()) },
+                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2) }
+            )
+        }
+    }
+
+    @Test
+    fun `periode etter ferie legger ikke til grunnn de nye refusjonopplysningene`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            forlengVedtak(mars)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.januar,
+                refusjon = Inntektsmelding.Refusjon(
+                    beløp = INNTEKT / 2,
+                    opphørsdato = null
+                )
+            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
+
+            assertForventetFeil(
+                forklaring = "Perioden etter periode med ferie tror ikke den henger sammen med periodene før",
+                nå = { assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty()) },
+                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2) }
+            )
+        }
+    }
+
+    @Test
+    fun `periode etter ferie legger ikke til grunnn de nye refusjonopplysningene - med opphørsdato blir det feilaktig rester også`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            forlengVedtak(mars)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.januar,
+                refusjon = Inntektsmelding.Refusjon(
+                    beløp = INNTEKT / 2,
+                    opphørsdato = 30.april
+                )
+            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
+
+            assertForventetFeil(
+                forklaring = "Perioden etter periode med ferie tror ikke den henger sammen med periodene før",
+                nå = {
+                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty())
+                    assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-03-2018 til 01-05-2018")
+
+                },
+                ønsket = {
+                    assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2)
+                    assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018")
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `periode som er strukket kant i kant med annen med AIG`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(mars)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT*1.1)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, mars, INNTEKT*1.1)
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, mars, INNTEKT*1.1)
+        }
+    }
+
+    @Test
+    fun `periode med arbeidsdag i halen`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag(31.januar), Dagtype.Arbeidsdag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterSøknad(februar)
+            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isEmpty())
+        }
+    }
+
+    @Test
+    fun `periode med arbeidsdag i snute`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(torsdag(1.februar), Dagtype.Arbeidsdag)))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT)
+        }
+    }
 
     @Test
     fun `ny vedtaksperiode`() {
@@ -737,5 +891,12 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(vedtaksperiode.vedtaksperiode)
         håndterUtbetalt()
         return im
+    }
+
+
+    private fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt) {
+        assertTrue(beløpstidslinje.isNotEmpty())
+        assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
+        assertTrue(beløpstidslinje.all { it.beløp == beløp })
     }
 }
