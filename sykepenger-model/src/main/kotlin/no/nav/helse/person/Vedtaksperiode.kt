@@ -622,8 +622,10 @@ internal class Vedtaksperiode private constructor(
         }
         tilstand.videreførRefusjonsopplysningerFraNabo(this, søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
-        val orgnummereMedTilkomneInntekter = søknad.orgnummereMedTilkomneInntekter()
-        if (orgnummereMedTilkomneInntekter.isNotEmpty()) person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
+        val (orgnummereMedTilkomneInntekter, tålerTilkommenInntektFraSøknad) = søknad.orgnummereMedTilkomneInntekter()
+        if (orgnummereMedTilkomneInntekter.isNotEmpty() && tålerTilkommenInntektFraSøknad) {
+            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
+        }
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
@@ -645,8 +647,10 @@ internal class Vedtaksperiode private constructor(
         else {
             søknad.info("Søknad har trigget en revurdering")
             håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
-            val orgnummereMedTilkomneInntekter = søknad.orgnummereMedTilkomneInntekter()
-            if (orgnummereMedTilkomneInntekter.isNotEmpty()) person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
+            val (orgnummereMedTilkomneInntekter, tålerTilkommenInntektFraSøknad) = søknad.orgnummereMedTilkomneInntekter()
+            if (orgnummereMedTilkomneInntekter.isNotEmpty() && tålerTilkommenInntektFraSøknad) {
+                person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
+            }
             oppdaterHistorikk(søknad) {
                 søknad.valider(vilkårsgrunnlag, jurist)
             }

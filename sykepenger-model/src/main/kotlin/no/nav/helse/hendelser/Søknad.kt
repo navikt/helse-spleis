@@ -129,9 +129,11 @@ class Søknad(
 
     private fun validerTilkomneInntekter(søknad: Søknad) {
         if (tilkomneInntekter.isEmpty()) return
-        if (perioder.all { it.tålerTilkommenInntekt(søknad) }) varsel(RV_SV_5)
+        if (tålerTilkommenInntekt(søknad)) varsel(RV_SV_5)
         else varsel(RV_IV_9)
     }
+
+    private fun tålerTilkommenInntekt(søknad: Søknad) = perioder.all { it.tålerTilkommenInntekt(søknad) }
 
     private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) varsel(RV_SØ_44)
@@ -177,7 +179,7 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun orgnummereMedTilkomneInntekter() = tilkomneInntekter.orgnummereMedTilkomneInntekter()
+    internal fun orgnummereMedTilkomneInntekter() = tilkomneInntekter.orgnummereMedTilkomneInntekter() to tålerTilkommenInntekt(this)
 
     internal fun nyeInntekter(
         builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
