@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
     @Test
-    fun `periode etter ferie mangler refusjonsopplysninger`() {
+    fun `periode etter ferie mangler _ikke_ refusjonsopplysninger`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
@@ -60,16 +60,12 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-            assertForventetFeil(
-                forklaring = "Mars syns ikke han har noen venner i nabolaget med refusjonsopplysninger å videreføre pga ferien i februar",
-                nå = { assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty()) },
-                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2) }
-            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT)
         }
     }
 
     @Test
-    fun `periode etter ferie legger ikke til grunnn de nye refusjonopplysningene`() {
+    fun `periode etter ferie _legger_ til grunn de nye refusjonopplysningene`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
@@ -89,17 +85,12 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             )
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
-
-            assertForventetFeil(
-                forklaring = "Perioden etter periode med ferie tror ikke den henger sammen med periodene før",
-                nå = { assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty()) },
-                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2) }
-            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2)
         }
     }
 
     @Test
-    fun `periode etter ferie legger ikke til grunnn de nye refusjonopplysningene - med opphørsdato blir det feilaktig rester også`() {
+    fun `periode etter ferie _legger_ til grunn de nye refusjonopplysningene og har rester frem i tid med opphør`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
@@ -120,18 +111,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
 
-            assertForventetFeil(
-                forklaring = "Perioden etter periode med ferie tror ikke den henger sammen med periodene før",
-                nå = {
-                    assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isEmpty())
-                    assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-03-2018 til 01-05-2018")
-
-                },
-                ønsket = {
-                    assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2)
-                    assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018")
-                }
-            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2)
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018")
         }
     }
 

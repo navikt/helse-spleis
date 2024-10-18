@@ -153,8 +153,8 @@ internal class SykdomstidslinjeTest {
     fun `er rett før for andre ytelser`(){
         assertTrue(1.S.erRettFør(1.YF))
         assertTrue(1.YF.erRettFør(1.YF))
-        assertFalse(1.YF.erRettFør(1.YF + 1.S))
-        assertFalse(1.YF.erRettFør(1.S))
+        assertTrue(1.YF.erRettFør(1.YF + 1.S))
+        assertTrue(1.YF.erRettFør(1.S))
     }
 
     @Test

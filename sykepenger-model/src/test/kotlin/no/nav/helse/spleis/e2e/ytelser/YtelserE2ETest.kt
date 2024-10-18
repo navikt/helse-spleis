@@ -82,6 +82,23 @@ import org.junit.jupiter.api.assertThrows
 internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `masse perioder med med andre ytelser`() {
+        nyttVedtak(januar)
+        håndterSøknad(februar)
+        håndterSøknad(mars)
+        håndterSøknad(april)
+        håndterOverstyrTidslinje((1.februar til 15.april).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertEquals(16.april, inspektør.skjæringstidspunkt(4.vedtaksperiode))
+    }
+
+    @Test
     fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() {
         håndterSøknad(1.januar til 15.januar) // Denne må være kortere enn 16 dager
         nullstillTilstandsendringer()
