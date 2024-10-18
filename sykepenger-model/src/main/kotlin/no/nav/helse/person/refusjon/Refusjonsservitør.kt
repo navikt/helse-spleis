@@ -1,6 +1,7 @@
 package no.nav.helse.person.refusjon
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -31,10 +32,8 @@ internal class Refusjonsservitør private constructor(
         check(it.size < 2) { "Det er flere refusjonsopplysninger lagret innenfor samme søkevindu, det blir en sklitakling fra siden" }
     }.firstOrNull()
 
-    internal fun donérRester(hendelse: IAktivitetslogg) {
-        val rester = refusjonsrester.values.filter { it.isNotEmpty() }
-        if (rester.isEmpty()) return
-        hendelse.info("Refusjonsservitøren har rester etter servering: ${rester.map { it.first().dato til it.last().dato }.joinToString() }")
+    internal fun donérRester(suppekjøkken: Suppekjøkken) {
+        refusjonsrester.forEach(suppekjøkken::motta)
     }
 
     internal companion object {
@@ -46,6 +45,20 @@ internal class Refusjonsservitør private constructor(
         internal fun fra(refusjonstidslinje: Beløpstidslinje): Refusjonsservitør? {
             if (refusjonstidslinje.isEmpty()) return null
             return Refusjonsservitør(refusjonstidslinje, listOf(refusjonstidslinje.first().dato))
+        }
+    }
+}
+
+internal interface Suppekjøkken {
+    fun motta(startdato: LocalDate, refusjonstidslinje: Beløpstidslinje)
+
+    class LoggendeSuppekjøkken(private val aktivitetslogg: IAktivitetslogg): Suppekjøkken {
+        override fun motta(startdato: LocalDate, refusjonstidslinje: Beløpstidslinje) {
+            if (refusjonstidslinje.isEmpty()) return
+            aktivitetslogg.info("Refusjonsservitøren har rester for ${startdato.format(formatter)} etter servering: ${refusjonstidslinje.perioderMedBeløp.joinToString()}")
+        }
+        private companion object {
+            private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         }
     }
 }

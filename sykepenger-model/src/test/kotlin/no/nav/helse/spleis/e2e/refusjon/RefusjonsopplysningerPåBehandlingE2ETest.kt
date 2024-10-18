@@ -627,7 +627,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterSøknad(februar)
 
-            assertInfo("Refusjonsservitøren har rester etter servering: 01-02-2018 til 01-02-2018")
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018")
 
             assertForventetFeil(
                 forklaring = "Vi bruker feilaktig overstyrt refusjon for januar, også når februar-søknaden kommer",
@@ -651,7 +651,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `Inntektsmelding kommer før søknad`() {
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.mars, emptyList()))
-            assertInfo("Refusjonsservitøren har rester etter servering: 01-01-2018 til 01-04-2018")
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-01-2018 til 01-04-2018")
         }
     }
 

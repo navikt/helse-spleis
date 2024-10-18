@@ -5,6 +5,7 @@ import java.util.SortedMap
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
@@ -20,6 +21,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal constructor(vararg dager: Beløpsdag):this(dager.toList())
 
     private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
+    internal val perioderMedBeløp = dager.keys.grupperSammenhengendePerioder()
 
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
 
