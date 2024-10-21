@@ -127,7 +127,9 @@ sealed class Inntektsopplysning(
         internal fun erOmregnetÅrsinntektEndret(før: List<Inntektsopplysning>, etter: List<Inntektsopplysning>) =
             omregnetÅrsinntekt(før) != omregnetÅrsinntekt(etter)
 
-        private fun omregnetÅrsinntekt(liste: List<Inntektsopplysning>): List<Inntekt> = liste.map { it.omregnetÅrsinntekt().beløp }
+        private fun omregnetÅrsinntekt(liste: List<Inntektsopplysning>) = liste
+            .map { it.omregnetÅrsinntekt().beløp }
+            .map { it.årlig.toInt() }
 
         internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
             if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
