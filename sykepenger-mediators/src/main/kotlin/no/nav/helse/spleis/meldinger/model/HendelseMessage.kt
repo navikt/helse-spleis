@@ -58,6 +58,9 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) {
     internal fun toJson() = packet.toJson()
 }
 
-internal fun asPeriode(jsonNode: JsonNode) =
-    Periode(jsonNode.path("fom").asLocalDate(), jsonNode.path("tom").asLocalDate())
+internal fun asPeriode(jsonNode: JsonNode): Periode {
+    val fom = jsonNode.path("tom").asLocalDate()
+    val tom = jsonNode.path("tom").asLocalDate().takeUnless { it < fom } ?: fom
+    return Periode(fom, tom)
+}
 
