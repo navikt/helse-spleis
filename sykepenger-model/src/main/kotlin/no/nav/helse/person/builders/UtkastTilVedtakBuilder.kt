@@ -33,6 +33,7 @@ internal class UtkastTilVedtakBuilder(
 
     internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
+    internal fun ferie() = apply { tags.add(Tag.Ferie) }
 
     private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
     private val relevantePerioder = mutableSetOf<RelevantPeriode>()
@@ -325,7 +326,8 @@ internal class UtkastTilVedtakBuilder(
         Avslag,
         DelvisInnvilget,
         Innvilget,
-        TilkommenInntekt
+        TilkommenInntekt,
+        Ferie
     }
 
     private companion object {

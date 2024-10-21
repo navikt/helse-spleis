@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
@@ -93,6 +94,13 @@ class Sykdomstidslinje private constructor(
     private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
         ?.findLast { erEnSykedag(this[it]) }
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
+
+    internal fun berik(utkastTilVedtakBuilder: UtkastTilVedtakBuilder) {
+        periode?.find { erEnFerieDag(this[it]) }?.let {
+            utkastTilVedtakBuilder.ferie()
+        }
+    }
+
 
     internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
@@ -204,6 +212,8 @@ class Sykdomstidslinje private constructor(
             }
         private fun erEnSykedag(it: Dag) =
             it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNav
+
+        private fun erEnFerieDag(it: Dag) = it is Feriedag
 
         internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) =
             Skjæringstidspunkt(samletTidslinje(tidslinjer))

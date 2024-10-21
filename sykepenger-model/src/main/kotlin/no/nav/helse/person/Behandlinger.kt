@@ -667,6 +667,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
                 hendelse.kontekst(utbetaling)
                 utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
+                sykdomstidslinje.berik(utkastTilVedtakBuilder)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(hendelse, utkastTilVedtakBuilder.buildGodkjenningsbehov())

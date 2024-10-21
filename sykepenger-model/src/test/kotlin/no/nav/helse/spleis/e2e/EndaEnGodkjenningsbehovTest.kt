@@ -98,6 +98,16 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun ferie() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(31.januar, 31.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag()
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertGodkjenningsbehov(tags = setOf("Ferie"))
+    }
+
+    @Test
     fun `6G-begrenset`() {
         tilGodkjenning(januar, a1, beregnetInntekt = 100000.månedlig)
         assertGodkjenningsbehov(
