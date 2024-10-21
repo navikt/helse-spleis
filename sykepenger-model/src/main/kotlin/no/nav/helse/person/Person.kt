@@ -334,7 +334,7 @@ class Person private constructor(
         }
 
         // Hardkodet dato skal være datoen Infotrygd sist kjørte feriepenger
-        val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2024, 8, 24)
+        val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2024, 10, 19)
 
         val feriepengeberegner = Feriepengeberegner(
             alder = alder,
