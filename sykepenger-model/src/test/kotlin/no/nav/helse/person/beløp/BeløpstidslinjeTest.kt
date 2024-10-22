@@ -37,6 +37,22 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
+    fun `frem til og med`() {
+        val beløpstidslinje = (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar)
+        val subset = beløpstidslinje.tilOgMed(10.januar)
+        assertEquals(10, subset.size)
+        assertEquals(1.januar til 10.januar, subset.perioderMedBeløp.single())
+    }
+
+    @Test
+    fun `fra og med`() {
+        val beløpstidslinje = (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar)
+        val subset = beløpstidslinje.fraOgMed(10.januar)
+        assertEquals(11, subset.size)
+        assertEquals(10.januar til 20.januar, subset.perioderMedBeløp.single())
+    }
+
+    @Test
     fun `beløpstidlinje lager en tidslinje med beløp og kilde`() {
         val beløpstidslinje = (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 10.januar) og (Saksbehandler oppgir 15500.månedlig fra 11.januar til 31.januar)
 

@@ -723,6 +723,7 @@ class Person private constructor(
     internal fun oppdaterVilkårsgrunnlagMedInntektene(
         skjæringstidspunkt: LocalDate,
         hendelse: IAktivitetslogg,
+        periode: Periode,
         nyeInntekter: List<NyInntektUnderveis>,
         subsumsjonslogg: Subsumsjonslogg
     ) {
@@ -734,7 +735,7 @@ class Person private constructor(
         nyeInntekter.forEach { inntekt ->
             finnEllerOpprettArbeidsgiver(inntekt.orgnummer.tilYrkesaktivitet(), hendelse)
         }
-        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(hendelse, nyeInntekter, subsumsjonslogg) ?: return
+        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(hendelse, periode, nyeInntekter, subsumsjonslogg) ?: return
         nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
     }
 

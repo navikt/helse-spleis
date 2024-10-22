@@ -621,7 +621,7 @@ internal class Vedtaksperiode private constructor(
         }
         tilstand.videreførRefusjonsopplysningerFraNabo(this, søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
-        person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, søknad.nyeInntekterUnderveis(), jurist)
+        person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, periode, søknad.nyeInntekterUnderveis(), jurist)
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
@@ -643,7 +643,7 @@ internal class Vedtaksperiode private constructor(
         else {
             søknad.info("Søknad har trigget en revurdering")
             håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
-            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, søknad.nyeInntekterUnderveis(), jurist)
+            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, periode, søknad.nyeInntekterUnderveis(), jurist)
             oppdaterHistorikk(søknad) {
                 søknad.valider(vilkårsgrunnlag, jurist)
             }

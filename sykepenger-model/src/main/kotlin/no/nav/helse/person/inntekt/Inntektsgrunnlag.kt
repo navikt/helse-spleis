@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -20,12 +21,14 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
@@ -219,7 +222,8 @@ internal class Inntektsgrunnlag private constructor(
         minsteinntekt = minsteinntekt,
         oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
-        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
+        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer },
+        tilkommendeInntekter = tilkommendeInntekter
     )
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -303,9 +307,19 @@ internal class Inntektsgrunnlag private constructor(
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
-    fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
+    fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
         if (this.tilkommendeInntekter.isEmpty() && nyeInntekter.isEmpty()) return null
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = nyeInntekter)
+
+        val tingViHar = tilkommendeInntekter.map { tilkommetInntekt ->
+            val nyTidslinje = nyeInntekter.firstOrNull { it.orgnummer == tilkommetInntekt.orgnummer }?.beløpstidslinje ?: Beløpstidslinje()
+            tilkommetInntekt.copy(
+                beløpstidslinje = tilkommetInntekt.beløpstidslinje.tilOgMed(periode.start.forrigeDag) + nyTidslinje + tilkommetInntekt.beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag)
+            )
+        }
+        val kjenteOrgnumreFraFør = tilkommendeInntekter.map { it.orgnummer }
+        val nyeTing = nyeInntekter.filter { it.orgnummer !in kjenteOrgnumreFraFør }
+        val resultat = (tingViHar + nyeTing).filterNot { it.beløpstidslinje.isEmpty() }
+        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = resultat)
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
@@ -470,5 +484,6 @@ internal data class InntektsgrunnlagView(
     val minsteinntekt: Inntekt,
     val oppfyllerMinsteinntektskrav: Boolean,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val deaktiverteArbeidsforhold: List<String>
+    val deaktiverteArbeidsforhold: List<String>,
+    val tilkommendeInntekter: List<NyInntektUnderveis>
 )

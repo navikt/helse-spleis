@@ -18,10 +18,13 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.K
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -49,6 +52,30 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = emptyList())
             håndterYtelser(2.vedtaksperiode)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 28.februar)
+        }
+    }
+
+    @Test
+    fun `forlengelse uten tilkommet inntekt - etter periode med tilkommet inntekt`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, beløp = 4.K.månedlig)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterYtelser(3.vedtaksperiode)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 1246, 1431, subset = 1.februar til 28.februar)
+            assertUtbetalingsbeløp(3.vedtaksperiode, 1431, 1431, subset = 1.mars til 31.mars)
+
+            inspektør.vilkårsgrunnlag(3.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                assertEquals(1, tilkommendeInntekter.size)
+                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+            }
         }
     }
 
@@ -309,8 +336,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertIkkeTilkommenInntektTag(1.vedtaksperiode)
-            assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
+            assertTilkommenInntektTag(1.vedtaksperiode)
+            assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
@@ -347,7 +374,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertIkkeTilkommenInntektTag(1.vedtaksperiode)
+            assertTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

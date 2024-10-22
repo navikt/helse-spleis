@@ -289,8 +289,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return kopierMed(hendelse, nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
         }
 
-        internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
-            val sykepengegrunnlag = inntektsgrunnlag.tilkomneInntekterFraSøknaden(søknad, nyeInntekter, subsumsjonslogg) ?: return null
+        internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
+            val sykepengegrunnlag = inntektsgrunnlag.tilkomneInntekterFraSøknaden(søknad, periode, nyeInntekter, subsumsjonslogg) ?: return null
             return kopierMed(søknad, sykepengegrunnlag, opptjening, EmptyLog)
         }
 

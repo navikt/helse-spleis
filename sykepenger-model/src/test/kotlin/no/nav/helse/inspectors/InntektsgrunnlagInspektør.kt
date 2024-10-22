@@ -19,4 +19,5 @@ internal class InntektsgrunnlagInspektør(view: InntektsgrunnlagView) {
     val arbeidsgiverInntektsopplysningerPerArbeidsgiver = view.arbeidsgiverInntektsopplysninger.associateBy { it.orgnummer }
     val inntektskilde = if (view.arbeidsgiverInntektsopplysninger.size > 1) UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE else UtbetalingInntektskilde.EN_ARBEIDSGIVER
     val arbeidsgiverInntektsopplysninger = view.arbeidsgiverInntektsopplysninger
+    val tilkommendeInntekter = view.tilkommendeInntekter
 }
