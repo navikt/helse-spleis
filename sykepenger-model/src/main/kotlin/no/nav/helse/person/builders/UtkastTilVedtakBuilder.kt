@@ -5,11 +5,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -22,8 +23,7 @@ internal class UtkastTilVedtakBuilder(
     private val arbeidsgiver: String,
     private val kanForkastes: Boolean,
     erForlengelse: Boolean,
-    private val harPeriodeRettFør: Boolean,
-    private val arbeidsgiverperiode: Arbeidsgiverperiode?
+    private val harPeriodeRettFør: Boolean
 ) {
     private val tags = mutableSetOf<Tag>()
     init {
@@ -45,9 +45,14 @@ internal class UtkastTilVedtakBuilder(
     internal fun behandlingId(behandlingId: UUID) = apply { this.behandlingId = behandlingId }
 
     private lateinit var periode: Periode
-    internal fun periode(periode: Periode) = apply {
+    internal fun periode(arbeidsgiverperiode: List<Periode>, periode: Periode) = apply {
         this.periode = periode
-        arbeidsgiverperiode?.berik(this, periode, harPeriodeRettFør)
+
+        val gjennomført = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(arbeidsgiverperiode.periode()?.count() ?: 0)
+        val arbeidsgiverperiodePåstartetITidligerePeriode = arbeidsgiverperiode.isNotEmpty() && periode.start >= arbeidsgiverperiode.last().endInclusive
+        if (!harPeriodeRettFør && gjennomført && arbeidsgiverperiodePåstartetITidligerePeriode) {
+            ingenNyArbeidsgiverperiode()
+        }
     }
 
     private val hendelseIder = mutableSetOf<UUID>()

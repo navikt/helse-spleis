@@ -1048,12 +1048,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun godkjenning(hendelse: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
-            builder.behandlingId(id).periode(periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
+            builder.behandlingId(id).periode(arbeidsgiverperiode, periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
             gjeldende.godkjenning(hendelse, this, builder)
         }
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {
-            builder.behandlingId(id).periode(periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
+            builder.behandlingId(id).periode(arbeidsgiverperiode, periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
             gjeldende.berik(builder)
         }
 

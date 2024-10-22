@@ -11,10 +11,8 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.ukedager
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -113,15 +111,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         // …eller dersom det ikke har vært gap siden forrige utbetaling
         val forrigeUtbetaling = utbetalingsdager.lastOrNull { other -> other.endInclusive < periode.endInclusive } ?: return false
         return oppholdsdager.none { it.overlapperMed(forrigeUtbetaling.endInclusive til periode.endInclusive) }
-    }
-
-    private val gjennomført get() = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(perioder.flatten().count())
-
-    internal fun berik(builder: UtkastTilVedtakBuilder, periode: Periode, harPeriodeRettFør: Boolean) {
-        if (fiktiv() || harPeriodeRettFør) return
-        if (periode.start < arbeidsgiverperioden.endInclusive) return
-        if (!gjennomført) return
-        builder.ingenNyArbeidsgiverperiode()
     }
 
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente

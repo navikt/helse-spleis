@@ -968,8 +968,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
             erForlengelse = erForlengelse(),
-            harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null,
-            arbeidsgiverperiode = finnArbeidsgiverperiode() // todo: denne ligger på behandlinger, trenger ikke re-komputere den
+            harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .associate { it.id to it.behandlinger }
