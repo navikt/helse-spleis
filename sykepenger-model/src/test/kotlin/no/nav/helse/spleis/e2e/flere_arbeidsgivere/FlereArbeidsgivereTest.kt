@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -69,10 +70,52 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `en gjenskapning fra virkeligheten med foreldrepenger, ferie og en spenstig IM blant annet`() {
+        (a1 og a2).nyeVedtak(januar)
+        (a1 og a2).forlengVedtak(februar)
+        a1 { håndterOverstyrTidslinje((1..28).map { ManuellOverskrivingDag(it.februar, Dagtype.Foreldrepengerdag) }) }
+        a2 { håndterOverstyrTidslinje((1..28).map { ManuellOverskrivingDag(it.februar, Dagtype.Foreldrepengerdag) }) }
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
+            håndterYtelser(3.vedtaksperiode)
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 14.mars))
+            håndterInntektsmelding(emptyList(), førsteFraværsdag = 15.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "fox")
+            assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        }
+        a1 {
+            assertForventetFeil(
+                forklaring = "Har ikke tilstrekkelig informasjon til utbetaling!",
+                nå = {
+                    assertThrows<IllegalStateException> { håndterSøknad(april) }
+                },
+                ønsket = {
+                    fail("""\_(ツ)_/¯""")
+                }
+            )
+        }
+    }
 
     @Test
     fun `Forsøker å beregne seg forbi det punktet vi venter på inntektsmelding hos annen arbeidsgiver`() {
