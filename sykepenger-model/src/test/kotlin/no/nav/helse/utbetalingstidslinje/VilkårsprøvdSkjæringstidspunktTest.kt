@@ -2,6 +2,9 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.dsl.BeløpstidslinjeDsl.Arbeidsgiver
+import no.nav.helse.dsl.BeløpstidslinjeDsl.hele
+import no.nav.helse.dsl.BeløpstidslinjeDsl.oppgir
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -24,17 +27,18 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             inntekter = listOf(
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a1", 1000.daglig, 1.januar til 31.januar, Refusjonsopplysning.Refusjonsopplysninger()),
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a2", 500.daglig, 25.januar til LocalDate.MAX, Refusjonsopplysning.Refusjonsopplysninger()),
-            )
+            ),
+            tilkommendeInntekter = emptyList()
         )
 
-        vilkårsgrunnlag.ghosttidslinjer(mapOf(
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
             "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
         )).also { result ->
             assertEquals(1, result.size)
             assertEquals(24, result["a1"]?.size)
         }
 
-        vilkårsgrunnlag.ghosttidslinjer(mapOf(
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
             "a1" to listOf(tidslinjeOf(16.AP, 15.NAV))
         )).also { result ->
             assertEquals(2, result.size)
@@ -43,7 +47,7 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             assertEquals(25.januar til 31.januar, result["a2"]?.periode())
         }
 
-        vilkårsgrunnlag.ghosttidslinjer(mapOf(
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
             "a2" to listOf(tidslinjeOf(31.UTELATE, 28.NAV))
         )).also { result ->
             assertEquals(2, result.size)
@@ -51,6 +55,29 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             assertEquals(1.februar til 28.februar, result["a1"]?.periode())
             assertEquals(28, result["a2"]?.size)
             assertEquals(1.februar til 28.februar, result["a2"]?.periode())
+        }
+    }
+
+    @Test
+    fun `nye inntekter underveis`() {
+        val vilkårsgrunnlag = VilkårsprøvdSkjæringstidspunkt(
+            skjæringstidspunkt = 1.januar,
+            `6G` = Grunnbeløp.`6G`.beløp(1.januar),
+            inntekter = listOf(
+                VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a1", 1000.daglig, 1.januar til 31.januar, Refusjonsopplysning.Refusjonsopplysninger())
+            ),
+            tilkommendeInntekter = listOf(
+                VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis("a2", Arbeidsgiver oppgir 500.daglig hele januar)
+            )
+        )
+
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
+            "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
+        )).also { result ->
+            assertEquals(2, result.size)
+            assertEquals(24, result["a1"]?.size)
+            assertEquals(24, result["a2"]?.size)
+            assertEquals(1.januar til 24.januar, result["a2"]?.periode())
         }
     }
 }

@@ -1189,7 +1189,7 @@ internal class Vedtaksperiode private constructor(
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
         // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
         // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
-        return faktaavklarteInntekter.ghosttidslinjer(utbetalingstidslinjer)
+        return faktaavklarteInntekter.medGhostOgNyeInntekterUnderveis(utbetalingstidslinjer)
     }
 
     private fun filtrerUtbetalingstidslinjer(hendelse: IAktivitetslogg, uberegnetTidslinjePerArbeidsgiver: Map<String, Utbetalingstidslinje>, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {

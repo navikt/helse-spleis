@@ -1,19 +1,23 @@
 package no.nav.helse.person.beløp
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dsl.BeløpstidslinjeDsl.Arbeidsgiver
+import no.nav.helse.dsl.BeløpstidslinjeDsl.Saksbehandler
+import no.nav.helse.dsl.BeløpstidslinjeDsl.Sykmeldt
+import no.nav.helse.dsl.BeløpstidslinjeDsl.Systemet
+import no.nav.helse.dsl.BeløpstidslinjeDsl.fra
+import no.nav.helse.dsl.BeløpstidslinjeDsl.hele
+import no.nav.helse.dsl.BeløpstidslinjeDsl.kun
+import no.nav.helse.dsl.BeløpstidslinjeDsl.og
+import no.nav.helse.dsl.BeløpstidslinjeDsl.oppgir
+import no.nav.helse.dsl.BeløpstidslinjeDsl.til
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
-import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.hendelser.Avsender.SYKMELDT
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -202,26 +206,5 @@ internal class BeløpstidslinjeTest {
                 )
             )
         ), tidslinje.dto())
-    }
-
-    private companion object {
-        private val ArbeidsgiverId = UUID.fromString("00000000-0000-0000-0000-000000000000")
-        private val SaksbehandlerId = UUID.fromString("00000000-0000-0000-0000-000000000001")
-        private val SykmeldtId = UUID.fromString("00000000-0000-0000-0000-000000000002")
-        private val SystemId = UUID.fromString("00000000-0000-0000-0000-000000000003")
-        private val Arbeidsgiver = Kilde(ArbeidsgiverId, ARBEIDSGIVER, LocalDateTime.now())
-        private val Saksbehandler = Kilde(SaksbehandlerId, SAKSBEHANDLER, LocalDateTime.now())
-        private val Sykmeldt = Kilde(SykmeldtId, SYKMELDT, LocalDateTime.now())
-        private val Systemet = Kilde(SystemId, SYSTEM, LocalDateTime.now())
-
-        infix fun Inntekt.fra(fra: LocalDate) = Triple(Systemet, this, fra)
-        infix fun Inntekt.kun(kun: LocalDate) = fra(kun) til kun
-
-        infix fun Kilde.oppgir(inntekt: Inntekt) = this to inntekt
-        infix fun Pair<Kilde, Inntekt>.fra(fra: LocalDate) = Triple(first, second, fra)
-        infix fun Pair<Kilde, Inntekt>.kun(kun: LocalDate) = fra(kun) til kun
-        infix fun Pair<Kilde, Inntekt>.hele(periode: Periode) = fra(periode.start) til periode.endInclusive
-        infix fun Triple<Kilde, Inntekt, LocalDate>.til(til: LocalDate) = Beløpstidslinje((third til til).map { Beløpsdag(it, second, first) })
-        infix fun Beløpstidslinje.og(other: Beløpstidslinje) = this + other
     }
 }

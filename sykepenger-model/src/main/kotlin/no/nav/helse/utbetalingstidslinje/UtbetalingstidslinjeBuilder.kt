@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.UkjentDag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -31,7 +32,8 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
 internal class VilkårsprøvdSkjæringstidspunkt(
     private val skjæringstidspunkt: LocalDate,
     private val `6G`: Inntekt,
-    inntekter: List<FaktaavklartInntekt>
+    inntekter: List<FaktaavklartInntekt>,
+    val tilkommendeInntekter: List<NyInntektUnderveis>
 ) {
     private val inntekter = inntekter.associate { inntekt ->
         inntekt.organisasjonsnummer to ArbeidsgiverFaktaavklartInntekt(
@@ -46,11 +48,42 @@ internal class VilkårsprøvdSkjæringstidspunkt(
         return inntekter[organisasjonsnummer]
     }
 
-    internal fun ghosttidslinjer(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
+    internal fun medGhostOgNyeInntekterUnderveis(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
+        return nyeInntekterUnderveis(ghosttidslinjer(utbetalingstidslinjer))
+    }
+
+    private fun ghosttidslinjer(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
         val beregningsperiode = utbetalingstidslinjer.values.flatten().map { it.periode() }.periode()!!
         return inntekter
             .mapValues { (orgnr, v) -> v.ghosttidslinje(beregningsperiode, skjæringstidspunkt, `6G`, utbetalingstidslinjer[orgnr] ?: emptyList()) }
             .filterValues { it.isNotEmpty() }
+    }
+
+    private fun nyeInntekterUnderveis(utbetalingstidslinjer: Map<String, Utbetalingstidslinje>): Map<String, Utbetalingstidslinje> {
+        val beregningsperiode = utbetalingstidslinjer.values.map { it.periode() }.periode()!!
+        val tilkommendeInntekterTidslinje = tilkommendeInntekter.associate { nyInntekt ->
+            val tilkommenInntektTidslinje = Utbetalingstidslinje.Builder().apply {
+                beregningsperiode.forEach { dato ->
+                    when (val beløpsdag = nyInntekt.beløpstidslinje[dato]) {
+                        is Beløpsdag -> {
+                            addArbeidsdag(dato, Økonomi.ikkeBetalt().inntekt(
+                                aktuellDagsinntekt = beløpsdag.beløp,
+                                beregningsgrunnlag = INGEN,
+                                `6G` = `6G`,
+                                refusjonsbeløp = INGEN
+                            ))
+                        }
+                        is UkjentDag -> {
+                            addArbeidsdag(dato, Økonomi.ikkeBetalt())
+                        }
+                    }
+                }
+            }.build()
+            nyInntekt.orgnummer to tilkommenInntektTidslinje
+        }
+        // hvis vi skal kunne ha søknad og tilkommen inntekt for en og samme arbeidsgiver så må vi
+        // gjøre en litt bedre merging enn Map.plus() her :)
+        return utbetalingstidslinjer + tilkommendeInntekterTidslinje
     }
 
     internal class FaktaavklartInntekt(
@@ -58,6 +91,11 @@ internal class VilkårsprøvdSkjæringstidspunkt(
         val fastsattÅrsinntekt: Inntekt,
         val gjelder: Periode,
         val refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger
+    )
+
+    data class NyInntektUnderveis(
+        val orgnummer: String,
+        val beløpstidslinje: Beløpstidslinje
     )
 }
 

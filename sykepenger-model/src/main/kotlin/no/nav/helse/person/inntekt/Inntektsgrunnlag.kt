@@ -464,7 +464,8 @@ internal class Inntektsgrunnlag private constructor(
     internal fun faktaavklarteInntekter() = VilkårsprøvdSkjæringstidspunkt(
         skjæringstidspunkt = skjæringstidspunkt,
         `6G` = `6G`,
-        inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter()
+        inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
+        tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) }
     )
 }
 
