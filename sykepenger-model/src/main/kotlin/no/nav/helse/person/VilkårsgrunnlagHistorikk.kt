@@ -34,6 +34,7 @@ import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
+import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -288,8 +289,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return kopierMed(hendelse, nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
         }
 
-        internal fun tilkomneInntekterFraSøknaden(søknad: Søknad, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement {
-            val sykepengegrunnlag = inntektsgrunnlag.tilkomneInntekterFraSøknaden(søknad, subsumsjonslogg)
+        internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
+            val sykepengegrunnlag = inntektsgrunnlag.tilkomneInntekterFraSøknaden(søknad, nyeInntekter, subsumsjonslogg) ?: return null
             return kopierMed(søknad, sykepengegrunnlag, opptjening, EmptyLog)
         }
 

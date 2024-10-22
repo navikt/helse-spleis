@@ -356,13 +356,6 @@ data class PersonData(
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
                         tidsstempel = this.tidsstempel
                     )
-                    Inntektsopplysningskilde.INNTEKT_FRA_SØKNAD -> InntektsopplysningInnDto.InntektFraSøknadDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel
-                    )
                     Inntektsopplysningskilde.INNTEKTSMELDING -> InntektsopplysningInnDto.InntektsmeldingDto(
                         id = this.id,
                         hendelseId = this.hendelseId,

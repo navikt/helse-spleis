@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -21,7 +20,6 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
     val tidsstempel: LocalDateTime = inntektsopplysning.tidsstempel
     val forrigeInntekt = when (inntektsopplysning) {
         is Infotrygd -> null
-        is InntektFraSøknad -> null
         is Saksbehandler -> inntektsopplysning.overstyrtInntekt
         is SkjønnsmessigFastsatt -> inntektsopplysning.overstyrtInntekt
         is IkkeRapportert -> null

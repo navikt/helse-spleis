@@ -457,7 +457,6 @@ internal class Vedtaksperiode private constructor(
         ?.takeIf { it.forventerInntekt() } != null
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
-        if (Toggle.TilkommenArbeidsgiver.enabled) return false
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer) == false
     }
 
@@ -622,10 +621,7 @@ internal class Vedtaksperiode private constructor(
         }
         tilstand.videreførRefusjonsopplysningerFraNabo(this, søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
-        val (orgnummereMedTilkomneInntekter, tålerTilkommenInntektFraSøknad) = søknad.orgnummereMedTilkomneInntekter()
-        if (orgnummereMedTilkomneInntekter.isNotEmpty() && tålerTilkommenInntektFraSøknad) {
-            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
-        }
+        person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, søknad.nyeInntekterUnderveis(), jurist)
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
@@ -647,10 +643,7 @@ internal class Vedtaksperiode private constructor(
         else {
             søknad.info("Søknad har trigget en revurdering")
             håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
-            val (orgnummereMedTilkomneInntekter, tålerTilkommenInntektFraSøknad) = søknad.orgnummereMedTilkomneInntekter()
-            if (orgnummereMedTilkomneInntekter.isNotEmpty() && tålerTilkommenInntektFraSøknad) {
-                person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
-            }
+            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, søknad.nyeInntekterUnderveis(), jurist)
             oppdaterHistorikk(søknad) {
                 søknad.valider(vilkårsgrunnlag, jurist)
             }
@@ -976,7 +969,7 @@ internal class Vedtaksperiode private constructor(
             kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
             erForlengelse = erForlengelse(),
             harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null,
-            arbeidsgiverperiode = finnArbeidsgiverperiode()
+            arbeidsgiverperiode = finnArbeidsgiverperiode() // todo: denne ligger på behandlinger, trenger ikke re-komputere den
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .associate { it.id to it.behandlinger }

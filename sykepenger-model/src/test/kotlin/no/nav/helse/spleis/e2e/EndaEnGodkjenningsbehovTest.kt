@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.etterspurtBehov
@@ -121,49 +120,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 1200000.0
-                    )
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `Tilkommen arbeidsgiver`() = Toggle.TilkommenArbeidsgiver.enable {
-        nyttVedtak(januar, orgnummer = a1)
-        håndterSøknad(februar, orgnummer = a1)
-        håndterSøknad(februar, orgnummer = a2)
-        håndterInntektsmelding(
-            listOf(1.februar til 16.februar),
-            beregnetInntekt = 10000.månedlig,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
-            orgnummer = a2
-        )
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertGodkjenningsbehov(
-            tags = setOf("TilkommenInntekt"),
-            periodeFom = 1.februar,
-            periodeTom = 28.februar,
-            periodeType = "FORLENGELSE",
-            førstegangsbehandling = false,
-            inntektskilde = "EN_ARBEIDSGIVER",
-            orgnummere = setOf(a1, a2),
-            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
-            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-            perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
-            ),
-            sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 372000.0,
-                "6G" to 561804.0,
-                "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
-                    mapOf(
-                        "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 372000.0
                     )
                 )
             )

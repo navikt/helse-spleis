@@ -10,6 +10,12 @@ import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 
+internal data class INyInntektUnderveis(
+    val arbeidsgiver: String,
+    val fom: LocalDate,
+    val tom: LocalDate
+)
+
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val fom: LocalDate,

@@ -27,9 +27,12 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
+import no.nav.helse.person.beløp.Beløpsdag
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
@@ -111,7 +114,7 @@ class Søknad(
         subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat()))
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
-        validerTilkomneInntekter(this)
+        validerTilkomneInntekter()
         merknaderFraSykmelding.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
@@ -127,13 +130,12 @@ class Søknad(
         return this
     }
 
-    private fun validerTilkomneInntekter(søknad: Søknad) {
+    private fun validerTilkomneInntekter() {
         if (tilkomneInntekter.isEmpty()) return
-        if (tålerTilkommenInntekt(søknad)) varsel(RV_SV_5)
-        else varsel(RV_IV_9)
+        if (tålerTilkommenInntekt()) varsel(RV_SV_5) else varsel(RV_IV_9)
     }
 
-    private fun tålerTilkommenInntekt(søknad: Søknad) = perioder.all { it.tålerTilkommenInntekt(søknad) }
+    private fun tålerTilkommenInntekt() = perioder.none { it is Søknadsperiode.Ferie || it is Søknadsperiode.Permisjon }
 
     private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) varsel(RV_SØ_44)
@@ -179,14 +181,12 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun orgnummereMedTilkomneInntekter() = tilkomneInntekter.orgnummereMedTilkomneInntekter() to tålerTilkommenInntekt(this)
+    internal fun orgnummereMedTilkomneInntekter() = tilkomneInntekter.orgnummereMedTilkomneInntekter() to tålerTilkommenInntekt()
 
-    internal fun nyeInntekter(
-        builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
-        skjæringstidspunkt: LocalDate
-    ) {
-        tilkomneInntekter.forEach { inntekt ->
-            inntekt.nyInntekt(builder, skjæringstidspunkt, meldingsreferanseId(), registrert)
+    internal fun nyeInntekterUnderveis(): List<NyInntektUnderveis> {
+        val tilkommetkilde = Kilde(meldingsreferanseId(), Avsender.SYKMELDT, registrert)
+        return if (!tålerTilkommenInntekt()) emptyList() else tilkomneInntekter.map {
+            it.beløpstidslinje(tilkommetkilde)
         }
     }
 
@@ -209,31 +209,16 @@ class Søknad(
         private val fom: LocalDate,
         private val tom: LocalDate,
         private val orgnummer: String,
-        private val beløp: Inntekt,
+        private val beløp: Inntekt
     ) {
-        private fun gjelder() = fom til tom
+        private val periode = fom til tom
 
-        internal fun nyInntekt(
-            builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
-            skjæringstidspunkt: LocalDate,
-            meldingsreferanseId: UUID,
-            registrert: LocalDateTime
-        ) {
-            builder.leggTilInntekt(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = orgnummer,
-                    gjelder = gjelder(),
-                    inntektsopplysning = InntektFraSøknad(
-                        id = UUID.randomUUID(),
-                        dato = skjæringstidspunkt,
-                        hendelseId = meldingsreferanseId,
-                        beløp = beløp,
-                        tidsstempel = registrert
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger()
-                )
-            )
-        }
+        internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
+            orgnummer = orgnummer,
+            beløpstidslinje = Beløpstidslinje(periode.map {
+                Beløpsdag(it, beløp, kilde)
+            })
+        )
 
         companion object {
             fun List<TilkommenInntekt>.orgnummereMedTilkomneInntekter() = map { it.orgnummer }
@@ -298,7 +283,7 @@ class Søknad(
 
         internal open fun valider(søknad: Søknad) {}
 
-        internal open fun tålerTilkommenInntekt(søknad: Søknad): Boolean = true
+        internal open fun tålerTilkommenInntekt(søknad: IAktivitetslogg): Boolean = true
 
         internal fun valider(søknad: Søknad, varselkode: Varselkode) {
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(varselkode)
@@ -325,7 +310,7 @@ class Søknad(
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde).subset(sykdomsperiode.oppdaterTom(periode))
 
-            override fun tålerTilkommenInntekt(søknad: Søknad) = false
+            override fun tålerTilkommenInntekt(søknad: IAktivitetslogg) = false
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "papirsykmelding") {
@@ -340,7 +325,7 @@ class Søknad(
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.permisjonsdager(periode.start, periode.endInclusive, kilde)
 
-            override fun tålerTilkommenInntekt(søknad: Søknad) = false
+            override fun tålerTilkommenInntekt(søknad: IAktivitetslogg) = false
 
             override fun valider(søknad: Søknad) {
                 valider(søknad, RV_SØ_5)

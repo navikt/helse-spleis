@@ -116,6 +116,11 @@ internal class UtkastTilVedtakBuilder(
         arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder))
     }
 
+    private val tilkomneArbeidsgivere = mutableSetOf<String>()
+    internal fun tilkommetInntekt(orgnr: String) {
+        tilkomneArbeidsgivere.add(orgnr)
+    }
+
     private class UtbetalingstidslinjeInfo(utbetalingstidslinje: Utbetalingstidslinje) {
         private var avvistDag = false
         private var navDag = false
@@ -150,9 +155,7 @@ internal class UtkastTilVedtakBuilder(
     internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
 
     private inner class Build {
-        private val arbeidsgivere = arbeidsgiverinntekter.partition { it.gjelder.start > skjæringstidspunkt }
-        private val tilkomneArbeidsgivere = arbeidsgivere.first
-        private val arbeidsgivereISykepengegrunnlaget = arbeidsgivere.second.also {
+        private val arbeidsgivereISykepengegrunnlaget = arbeidsgiverinntekter.also {
             check(it.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
         }
         private val skjønnsfastsatt = arbeidsgivereISykepengegrunnlaget.any { it.skjønnsfastsatt != null }.also {
@@ -161,8 +164,8 @@ internal class UtkastTilVedtakBuilder(
         private val perioderMedSammeSkjæringstidspunkt = relevantePerioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         init {
-            if (tilkomneArbeidsgivere.any { it.gjelder.overlapperMed(periode) }) tags.add(Tag.TilkommenInntekt)
-            if (arbeidsgivereISykepengegrunnlaget.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
+            if (tilkomneArbeidsgivere.isNotEmpty()) tags.add(Tag.TilkommenInntekt)
+            if (arbeidsgivereISykepengegrunnlaget.size == 1 && tilkomneArbeidsgivere.isEmpty()) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
         }
 
         private val sykepengegrunnlagsfakta: PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta = when {

@@ -51,7 +51,6 @@ sealed class Inntektsopplysning(
     internal open fun overstyrer(gammel: IkkeRapportert) = this
     internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
     internal open fun overstyrer(gammel: Inntektsmelding) = this
-    internal open fun overstyrer(gammel: InntektFraSøknad) = this
     internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
     }
@@ -149,7 +148,6 @@ sealed class Inntektsopplysning(
                     is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
                     is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
                     is InntektsopplysningInnDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(dto, inntekter)
-                    is InntektsopplysningInnDto.InntektFraSøknadDto -> InntektFraSøknad.gjenopprett(dto)
                 }
             }
             return inntektsopplysning

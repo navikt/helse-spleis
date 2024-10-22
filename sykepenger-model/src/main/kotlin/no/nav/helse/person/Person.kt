@@ -76,6 +76,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
@@ -721,20 +722,20 @@ class Person private constructor(
 
     internal fun oppdaterVilkårsgrunnlagMedInntektene(
         skjæringstidspunkt: LocalDate,
-        søknad: Søknad,
-        orgnummereMedTilkomneInntekter: List<String>,
+        hendelse: IAktivitetslogg,
+        nyeInntekter: List<NyInntektUnderveis>,
         subsumsjonslogg: Subsumsjonslogg
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
         if (grunnlag == null) {
-            søknad.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
+            hendelse.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
             return
         }
-        orgnummereMedTilkomneInntekter.forEach { orgnr ->
-            finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), søknad)
+        nyeInntekter.forEach { inntekt ->
+            finnEllerOpprettArbeidsgiver(inntekt.orgnummer.tilYrkesaktivitet(), hendelse)
         }
-        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(søknad, subsumsjonslogg)
-        nyttVilkårsgrunnlag(søknad, nyttGrunnlag)
+        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(hendelse, nyeInntekter, subsumsjonslogg) ?: return
+        nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(

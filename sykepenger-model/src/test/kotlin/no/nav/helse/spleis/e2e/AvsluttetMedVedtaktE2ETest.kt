@@ -133,39 +133,6 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender vedtak fattet ved tilkommen arbeidsgiver`() = Toggle.TilkommenArbeidsgiver.enable {
-        nyttVedtak(januar, orgnummer = a1)
-        håndterSøknad(februar, orgnummer = a1)
-        håndterSøknad(februar, orgnummer = a2)
-        håndterInntektsmelding(
-            listOf(1.februar til 16.februar),
-            beregnetInntekt = 10000.månedlig,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
-            orgnummer = a2
-        )
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
-
-        assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.last { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.lastOrNull { it.organisasjonsnummer == a2 }?.sykepengegrunnlagsfakta
-
-        assertNull(a2Sykepengegrunnlagsfakta)
-
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 372000.0,
-            `6G` = 561804.0,
-            arbeidsgivere = listOf(
-                FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0),
-            )
-        )
-        assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
-    }
-
-    @Test
     fun `sender vedtak fattet etter skjønnsmessig fastsettelse med flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)

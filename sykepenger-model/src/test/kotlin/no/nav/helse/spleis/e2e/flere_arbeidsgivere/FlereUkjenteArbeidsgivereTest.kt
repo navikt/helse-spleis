@@ -136,27 +136,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() = Toggle.TilkommenArbeidsgiver.enable {
-        val inntektA1 = INNTEKT + 500.daglig
-
-        nyttVedtak(januar, orgnummer = a1)
-        forlengVedtak(februar, orgnummer = a1)
-        forlengVedtak(mars, orgnummer = a1)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1, orgnummer = a1,)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        nullstillTilstandsendringer()
-        nyPeriode(1.mars til 20.mars, a2)
-
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-    }
-
-    @Test
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var ansett som ghost`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -31,7 +30,6 @@ import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -40,19 +38,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
-
-    @Test
-    fun `Tilkommen arbeidsgiver`() = Toggle.TilkommenArbeidsgiver.enable {
-        nyttVedtak(januar, orgnummer = a1)
-        håndterSøknad(februar, orgnummer = a1)
-        håndterSøknad(februar, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", orgnummer = a2)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        val omregnedeÅrsinntekterFraGodkjenningsbehov = omregnedeÅrsinntekter(2.vedtaksperiode, a1)
-        assertEquals(listOf(OmregnetÅrsinntektFraGodkjenningsbehov(a1, INNTEKT)), omregnedeÅrsinntekterFraGodkjenningsbehov)
-    }
 
     @Test
     fun `sender med feil vilkårsgrunnlagId i påminnet godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden`() {

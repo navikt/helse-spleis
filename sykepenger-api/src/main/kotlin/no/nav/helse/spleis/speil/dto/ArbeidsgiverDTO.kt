@@ -28,20 +28,15 @@ data class ArbeidsgiverDTO(
 
     internal fun medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
         val sykefraværstilfeller = arbeidsgivere.sykefraværstilfeller()
-        val potensiellePerioder = vilkårsgrunnlagHistorikk.potensielleGhostsperioder(organisasjonsnummer, sykefraværstilfeller)
-        val potensielleGhostperioder = potensiellePerioder.mapNotNull { it.first }
-        val potensielleMyttInntektsforholdperioder = potensiellePerioder.mapNotNull { it.second }
+        val potensielleGhostperioder = vilkårsgrunnlagHistorikk.potensielleGhostsperioder(organisasjonsnummer, sykefraværstilfeller)
 
         val ghostsperioder = fjernHelgepølser(potensielleGhostperioder.flatMap { ghostperiode ->
             fjernDagerMedSykdom(ghostperiode, GhostPeriodeDTO::brytOpp)
         })
-        val nyttInntektsforholdperioder = potensielleMyttInntektsforholdperioder.flatMap { nyttInntektsforholdperiode ->
-            fjernDagerMedSykdom(nyttInntektsforholdperiode, NyttInntektsforholdPeriodeDTO::brytOpp)
-        }
 
         return copy(
             ghostPerioder = ghostsperioder,
-            nyeInntektsforhold = nyttInntektsforholdperioder
+            nyeInntektsforhold = vilkårsgrunnlagHistorikk.nyeInntekterUnderveis(organisasjonsnummer)
         )
     }
 

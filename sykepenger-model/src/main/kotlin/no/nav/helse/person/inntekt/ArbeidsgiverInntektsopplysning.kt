@@ -138,20 +138,15 @@ data class ArbeidsgiverInntektsopplysning(
             skjæringstidspunkt: LocalDate,
             opptjening: Opptjening?,
             other: List<ArbeidsgiverInntektsopplysning>,
-            subsumsjonslogg: Subsumsjonslogg,
-            kandidatForTilkommenInntekt: Boolean
-        ): Pair<List<ArbeidsgiverInntektsopplysning>, Boolean> {
-            val tilkommetInntekter = other
-                .filter { inntekt -> none { it.gjelder(inntekt.orgnummer) } }
-                .takeIf { kandidatForTilkommenInntekt } ?: emptyList()
+            subsumsjonslogg: Subsumsjonslogg
+        ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this
                 .map { inntekt -> inntekt.overstyr(other) }
                 .also { it.subsummer(subsumsjonslogg, opptjening, this) }
-                .plus(tilkommetInntekter)
             if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
-                return endringen.map { it.rullTilbake() } to tilkommetInntekter.isNotEmpty()
+                return endringen.map { it.rullTilbake() }
             }
-            return endringen to tilkommetInntekter.isNotEmpty()
+            return endringen
         }
 
         private fun erOmregnetÅrsinntektEndret(skjæringstidspunkt: LocalDate, før: List<ArbeidsgiverInntektsopplysning>, etter: List<ArbeidsgiverInntektsopplysning>): Boolean {

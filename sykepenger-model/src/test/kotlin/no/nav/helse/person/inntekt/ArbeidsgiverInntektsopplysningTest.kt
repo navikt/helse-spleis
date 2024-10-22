@@ -48,45 +48,34 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a3Overstyrt = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 4000.månedlig, "", null, LocalDateTime.now()), Refusjonsopplysninger())
 
         val original = listOf(a1Opplysning, a2Opplysning)
-        val expected = listOf(a1Opplysning, a2Opplysning) to false
+        val expected = listOf(a1Opplysning, a2Opplysning)
         val new = listOf(a1Overstyrt)
 
         assertEquals(expected, original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             listOf(a1Overstyrt, a1Overstyrt),
-            EmptyLog,
-            kandidatForTilkommenInntekt = true
+            EmptyLog
         )) { "kan ikke velge mellom inntekter for samme orgnr" }
 
-        assertEquals(new to true, emptyList<ArbeidsgiverInntektsopplysning>().overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog,
-            kandidatForTilkommenInntekt = true
-        ))
         assertEquals(expected, original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             emptyList(),
-            EmptyLog,
-            kandidatForTilkommenInntekt = true
+            EmptyLog
         ))
-        assertEquals(listOf(a1Overstyrt, a2Opplysning) to false, original.overstyrInntekter(
+        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             new,
-            EmptyLog,
-            kandidatForTilkommenInntekt = true
+            EmptyLog
         ))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertEquals(listOf(a1Overstyrt, a2Opplysning, a3Overstyrt) to true, original.overstyrInntekter(
+        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             forMange,
-            EmptyLog,
-            kandidatForTilkommenInntekt = true
+            EmptyLog
         ))
     }
 
@@ -107,15 +96,14 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 975.månedlig, inntektsmeldingA3, LocalDateTime.now()), Refusjonsopplysninger())
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
-        val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning) to false
+        val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
         val new = listOf(overstyrtA1Opplysning)
 
         val actual = original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             new,
-            EmptyLog,
-            kandidatForTilkommenInntekt = false
+            EmptyLog
         )
         assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
@@ -148,10 +136,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt,
             opptjening,
             new,
-            EmptyLog,
-            kandidatForTilkommenInntekt = false
+            EmptyLog
         )
-        assertEquals(expected to false, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
+        assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
     @Test
@@ -181,7 +168,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
         val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon, LocalDateTime.now()), Refusjonsopplysninger())
 
-        listOf(a1Opplysning).overstyrInntekter(skjæringstidspunkt, opptjening, listOf(a1Overstyrt), jurist, kandidatForTilkommenInntekt = false)
+        listOf(a1Opplysning).overstyrInntekter(skjæringstidspunkt, opptjening, listOf(a1Overstyrt), jurist)
         SubsumsjonInspektør(subsumsjonslogg).assertBeregnet(
             paragraf = paragraf,
             versjon = LocalDate.of(2019, 1, 1),
