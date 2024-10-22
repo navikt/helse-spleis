@@ -27,6 +27,7 @@ import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
+import no.nav.helse.dto.NyInntektUnderveisDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
@@ -244,11 +245,13 @@ data class PersonData(
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
+            val tilkommendeInntekter: List<NyInntektUnderveisData>?, // todo: migrere inn tom liste for å unngå null
             val vurdertInfotrygd: Boolean
         ) {
             fun tilSpleisDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
+                tilkommendeInntekter = this.tilkommendeInntekter?.map { it.tilDto() } ?: emptyList(),
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 sammenligningsgrunnlag = this.sammenligningsgrunnlag!!.tilDto(),
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
@@ -256,6 +259,7 @@ data class PersonData(
             fun tilInfotrygdDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
+                tilkommendeInntekter = emptyList(),
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 sammenligningsgrunnlag = SammenligningsgrunnlagInnDto(InntektbeløpDto.Årlig(0.0), emptyList()),
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
@@ -269,6 +273,16 @@ data class PersonData(
             fun tilDto() = SammenligningsgrunnlagInnDto(
                 sammenligningsgrunnlag = InntektbeløpDto.Årlig(sammenligningsgrunnlag),
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() }
+            )
+        }
+
+        data class NyInntektUnderveisData(
+            val orgnummer: String,
+            val beløpstidslinje: BeløpstidslinjeData
+        ) {
+            fun tilDto() = NyInntektUnderveisDto(
+                orgnummer = orgnummer,
+                beløpstidslinje = beløpstidslinje.tilDto()
             )
         }
 
@@ -925,19 +939,7 @@ data class PersonData(
                         dokumentsporing = this.dokumentsporing.tilDto(),
                         sykdomstidslinje = this.sykdomstidslinje.tilDto(),
                         utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
-                        refusjonstidslinje = BeløpstidslinjeDto(this.refusjonstidslinje.perioder.map {
-                            BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                                fom = it.fom,
-                                tom = it.tom,
-                                dagligBeløp = it.dagligBeløp,
-                                kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                                    meldingsreferanseId = it.meldingsreferanseId,
-                                    avsender = it.avsender.tilDto(),
-                                    tidsstempel = it.tidsstempel
-                                )
-                            )
-                        })
-                        ,
+                        refusjonstidslinje = this.refusjonstidslinje.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto()
@@ -1369,7 +1371,21 @@ data class PersonData(
             }
         }
     }
-    data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>)
+    data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>) {
+        fun tilDto() = BeløpstidslinjeDto(perioder.map {
+            BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                fom = it.fom,
+                tom = it.tom,
+                dagligBeløp = it.dagligBeløp,
+                kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+                    meldingsreferanseId = it.meldingsreferanseId,
+                    avsender = it.avsender.tilDto(),
+                    tidsstempel = it.tidsstempel
+                )
+            )
+        })
+
+    }
     data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData, val tidsstempel: LocalDateTime)
 }
 

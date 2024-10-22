@@ -19,6 +19,7 @@ import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
+import no.nav.helse.dto.NyInntektUnderveisDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
@@ -763,6 +764,7 @@ private fun InntektsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
     sammenligningsgrunnlag = this.sammenligningsgrunnlag.tilPersonData(),
     deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilPersonData() },
+    tilkommendeInntekter = this.tilkommendeInntekter.map { it.tilPersonData() },
     vurdertInfotrygd = this.vurdertInfotrygd
 )
 
@@ -774,6 +776,11 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.Vil
     refusjonsopplysninger = this.refusjonsopplysninger.opplysninger.map {
         it.tilPersonData()
     }
+)
+
+private fun NyInntektUnderveisDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.NyInntektUnderveisData(
+    orgnummer = this.orgnummer,
+    beløpstidslinje = this.beløpstidslinje.tilPersonData()
 )
 
 private fun InntektsopplysningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(

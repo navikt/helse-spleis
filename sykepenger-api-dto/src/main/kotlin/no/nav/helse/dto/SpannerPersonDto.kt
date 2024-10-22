@@ -110,6 +110,7 @@ data class SpannerPersonDto(
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
+            val tilkommendeInntekter: List<NyInntektUnderveisData>,
             val vurdertInfotrygd: Boolean,
             val totalOmregnetÅrsinntekt: InntektbeløpDto.Årlig,
             val beregningsgrunnlag: InntektbeløpDto.Årlig,
@@ -123,6 +124,10 @@ data class SpannerPersonDto(
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>,
         )
 
+        data class NyInntektUnderveisData(
+            val orgnummer: String,
+            val beløpstidslinje: BeløpstidslinjeData
+        )
         data class ArbeidsgiverInntektsopplysningData(
             val orgnummer: String,
             val fom: LocalDate,
@@ -1454,6 +1459,7 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
         sammenligningsgrunnlag = this.sammenligningsgrunnlag.tilPersonData(),
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilPersonData() },
+        tilkommendeInntekter = this.tilkommendeInntekter.map { it.tilPersonData() },
         vurdertInfotrygd = this.vurdertInfotrygd,
         totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig,
         beregningsgrunnlag = beregningsgrunnlag.årlig,
@@ -1473,6 +1479,11 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
             it.tilPersonData()
         }
     )
+
+private fun NyInntektUnderveisDto.tilPersonData() = SpannerPersonDto.VilkårsgrunnlagElementData.NyInntektUnderveisData(
+    orgnummer = this.orgnummer,
+    beløpstidslinje = this.beløpstidslinje.tilPersonData()
+)
 
 private fun InntektsopplysningUtDto.tilPersonData() =
     SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(

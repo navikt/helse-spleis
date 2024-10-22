@@ -65,6 +65,7 @@ internal class Inntektsgrunnlag private constructor(
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
+    private val tilkommendeInntekter: List<NyInntektUnderveis>,
     private val vurdertInfotrygd: Boolean,
     private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
     `6G`: Inntekt? = null
@@ -94,7 +95,7 @@ internal class Inntektsgrunnlag private constructor(
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         subsumsjonslogg: Subsumsjonslogg,
         vurdertInfotrygd: Boolean = false
-    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd, sammenligningsgrunnlag) {
+    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), emptyList(), vurdertInfotrygd, sammenligningsgrunnlag) {
         subsumsjonslogg.apply {
             arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
             logg(`§ 8-10 ledd 2 punktum 1`(
@@ -160,7 +161,7 @@ internal class Inntektsgrunnlag private constructor(
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             `6G`: Inntekt? = null
         ): Inntektsgrunnlag {
-            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
+            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, emptyList(), vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
         }
 
         fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsgrunnlag {
@@ -169,6 +170,7 @@ internal class Inntektsgrunnlag private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it, inntekter) },
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it, inntekter) },
+                tilkommendeInntekter = dto.tilkommendeInntekter.map { NyInntektUnderveis.gjenopprett(it) },
                 vurdertInfotrygd = dto.vurdertInfotrygd,
                 sammenligningsgrunnlag = Sammenligningsgrunnlag.gjenopprett(dto.sammenligningsgrunnlag),
                 `6G` = Inntekt.gjenopprett(dto.`6G`)
@@ -351,6 +353,7 @@ internal class Inntektsgrunnlag private constructor(
             skjæringstidspunkt = nyttSkjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
+            tilkommendeInntekter = tilkommendeInntekter,
             vurdertInfotrygd = vurdertInfotrygd,
             sammenligningsgrunnlag = sammenligningsgrunnlag
         )
@@ -445,6 +448,7 @@ internal class Inntektsgrunnlag private constructor(
     internal fun dto() = InntektsgrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
+        tilkommendeInntekter = this.tilkommendeInntekter.map { it.dto() },
         vurdertInfotrygd = this.vurdertInfotrygd,
         sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
         `6G` = this.`6G`.dto(),
