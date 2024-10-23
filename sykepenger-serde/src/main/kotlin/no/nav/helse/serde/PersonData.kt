@@ -8,7 +8,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
-import no.nav.helse.dto.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -69,7 +68,6 @@ import no.nav.helse.dto.deserialisering.RefusjonInnDto
 import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
-import no.nav.helse.dto.deserialisering.SammenligningsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
@@ -243,7 +241,6 @@ data class PersonData(
         data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
-            val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             val tilkommendeInntekter: List<NyInntektUnderveisData>?, // todo: migrere inn tom liste for å unngå null
             val vurdertInfotrygd: Boolean
@@ -253,7 +250,6 @@ data class PersonData(
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 tilkommendeInntekter = this.tilkommendeInntekter?.map { it.tilDto() } ?: emptyList(),
                 vurdertInfotrygd = this.vurdertInfotrygd,
-                sammenligningsgrunnlag = this.sammenligningsgrunnlag!!.tilDto(),
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
             )
             fun tilInfotrygdDto() = InntektsgrunnlagInnDto(
@@ -261,18 +257,7 @@ data class PersonData(
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 tilkommendeInntekter = emptyList(),
                 vurdertInfotrygd = this.vurdertInfotrygd,
-                sammenligningsgrunnlag = SammenligningsgrunnlagInnDto(InntektbeløpDto.Årlig(0.0), emptyList()),
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
-            )
-        }
-
-        data class SammenligningsgrunnlagData(
-            val sammenligningsgrunnlag: Double,
-            val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>,
-        ) {
-            fun tilDto() = SammenligningsgrunnlagInnDto(
-                sammenligningsgrunnlag = InntektbeløpDto.Årlig(sammenligningsgrunnlag),
-                arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() }
             )
         }
 
@@ -410,46 +395,6 @@ data class PersonData(
                     val bokstav: String?
                 ) {
                     fun tilDto() = SubsumsjonDto(paragraf, ledd, bokstav)
-                }
-            }
-        }
-
-        data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData(
-            val orgnummer: String,
-            val skatteopplysninger: List<SammenligningsgrunnlagInntektsopplysningData>
-        ) {
-            fun tilDto() = ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
-                orgnummer = this.orgnummer,
-                inntektsopplysninger = this.skatteopplysninger.map { it.tilDto() }
-            )
-            data class SammenligningsgrunnlagInntektsopplysningData(
-                val hendelseId: UUID,
-                val beløp: Double,
-                val måned: YearMonth,
-                val type: InntekttypeData,
-                val fordel: String,
-                val beskrivelse: String,
-                val tidsstempel: LocalDateTime,
-            ) {
-                fun tilDto() = SkatteopplysningDto(
-                    hendelseId = this.hendelseId,
-                    beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                    måned = this.måned,
-                    type = when (type) {
-                        InntekttypeData.LØNNSINNTEKT -> InntekttypeDto.LØNNSINNTEKT
-                        InntekttypeData.NÆRINGSINNTEKT -> InntekttypeDto.NÆRINGSINNTEKT
-                        InntekttypeData.PENSJON_ELLER_TRYGD -> InntekttypeDto.PENSJON_ELLER_TRYGD
-                        InntekttypeData.YTELSE_FRA_OFFENTLIGE -> InntekttypeDto.YTELSE_FRA_OFFENTLIGE
-                    },
-                    fordel = fordel,
-                    beskrivelse = beskrivelse,
-                    tidsstempel = tidsstempel
-                )
-                enum class InntekttypeData {
-                    LØNNSINNTEKT,
-                    NÆRINGSINNTEKT,
-                    PENSJON_ELLER_TRYGD,
-                    YTELSE_FRA_OFFENTLIGE
                 }
             }
         }

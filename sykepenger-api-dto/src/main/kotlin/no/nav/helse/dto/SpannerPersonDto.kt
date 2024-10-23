@@ -24,7 +24,6 @@ import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
-import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -108,7 +107,6 @@ data class SpannerPersonDto(
         data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
-            val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             val tilkommendeInntekter: List<NyInntektUnderveisData>,
             val vurdertInfotrygd: Boolean,
@@ -118,10 +116,6 @@ data class SpannerPersonDto(
             val forhøyetInntektskrav: Boolean,
             val minsteinntekt: InntektbeløpDto.Årlig,
             val oppfyllerMinsteinntektskrav: Boolean
-        )
-        data class SammenligningsgrunnlagData(
-            val sammenligningsgrunnlag: Double,
-            val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>,
         )
 
         data class NyInntektUnderveisData(
@@ -170,23 +164,6 @@ data class SpannerPersonDto(
                     val ledd: Int?,
                     val bokstav: String?
                 )
-            }
-        }
-
-        data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData(
-            val orgnummer: String,
-            val skatteopplysninger: List<SammenligningsgrunnlagInntektsopplysningData>
-        ) {
-            data class SammenligningsgrunnlagInntektsopplysningData(
-                val hendelseId: UUID,
-                val beløp: Double,
-                val måned: YearMonth,
-                val type: InntekttypeData,
-                val fordel: String,
-                val beskrivelse: String,
-                val tidsstempel: LocalDateTime,
-            ) {
-                enum class InntekttypeData { LØNNSINNTEKT, NÆRINGSINNTEKT, PENSJON_ELLER_TRYGD, YTELSE_FRA_OFFENTLIGE }
             }
         }
 
@@ -1457,7 +1434,6 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
     SpannerPersonDto.VilkårsgrunnlagElementData.InntektsgrunnlagData(
         grunnbeløp = this.`6G`.årlig.beløp,
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
-        sammenligningsgrunnlag = this.sammenligningsgrunnlag.tilPersonData(),
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilPersonData() },
         tilkommendeInntekter = this.tilkommendeInntekter.map { it.tilPersonData() },
         vurdertInfotrygd = this.vurdertInfotrygd,
@@ -1548,33 +1524,6 @@ private fun RefusjonsopplysningUtDto.tilPersonData() =
         beløp = this.beløp.tilPersonData()
     )
 
-private fun SammenligningsgrunnlagUtDto.tilPersonData() =
-    SpannerPersonDto.VilkårsgrunnlagElementData.SammenligningsgrunnlagData(
-        sammenligningsgrunnlag = this.sammenligningsgrunnlag.årlig.beløp,
-        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() }
-    )
-
-private fun ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto.tilPersonData() =
-    SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData(
-        orgnummer = this.orgnummer,
-        skatteopplysninger = this.inntektsopplysninger.map { it.tilPersonData() }
-    )
-
-private fun SkatteopplysningDto.tilPersonData() =
-    SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData(
-        hendelseId = this.hendelseId,
-        beløp = this.beløp.beløp,
-        måned = this.måned,
-        type = when (this.type) {
-            InntekttypeDto.LØNNSINNTEKT -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData.InntekttypeData.LØNNSINNTEKT
-            InntekttypeDto.NÆRINGSINNTEKT -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData.InntekttypeData.NÆRINGSINNTEKT
-            InntekttypeDto.PENSJON_ELLER_TRYGD -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
-            InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
-        },
-        fordel = fordel,
-        beskrivelse = beskrivelse,
-        tidsstempel = tidsstempel
-    )
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =
     SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData(
         hendelseId = this.hendelseId,

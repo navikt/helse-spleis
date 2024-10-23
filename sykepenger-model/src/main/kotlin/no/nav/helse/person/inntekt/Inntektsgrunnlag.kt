@@ -57,7 +57,6 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTR
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
-import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag private constructor(
@@ -67,7 +66,6 @@ internal class Inntektsgrunnlag private constructor(
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val tilkommendeInntekter: List<NyInntektUnderveis>,
     private val vurdertInfotrygd: Boolean,
-    private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
     `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
 
@@ -86,16 +84,14 @@ internal class Inntektsgrunnlag private constructor(
     private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
     private val minsteinntekt = (if (forhøyetInntektskrav) `2G` else halvG).minsteinntekt(skjæringstidspunkt)
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
-    private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt)
 
     internal constructor(
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         subsumsjonslogg: Subsumsjonslogg,
         vurdertInfotrygd: Boolean = false
-    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), emptyList(), vurdertInfotrygd, sammenligningsgrunnlag) {
+    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), emptyList(), vurdertInfotrygd) {
         subsumsjonslogg.apply {
             arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
             logg(`§ 8-10 ledd 2 punktum 1`(
@@ -140,14 +136,12 @@ internal class Inntektsgrunnlag private constructor(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             subsumsjonslogg: Subsumsjonslogg
         ): Inntektsgrunnlag {
             return Inntektsgrunnlag(
                 alder,
                 arbeidsgiverInntektsopplysninger,
                 skjæringstidspunkt,
-                sammenligningsgrunnlag,
                 subsumsjonslogg
             )
         }
@@ -158,10 +152,9 @@ internal class Inntektsgrunnlag private constructor(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
             vurdertInfotrygd: Boolean,
-            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             `6G`: Inntekt? = null
         ): Inntektsgrunnlag {
-            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, emptyList(), vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
+            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, emptyList(), vurdertInfotrygd, `6G`)
         }
 
         fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsgrunnlag {
@@ -172,7 +165,6 @@ internal class Inntektsgrunnlag private constructor(
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it, inntekter) },
                 tilkommendeInntekter = dto.tilkommendeInntekter.map { NyInntektUnderveis.gjenopprett(it) },
                 vurdertInfotrygd = dto.vurdertInfotrygd,
-                sammenligningsgrunnlag = Sammenligningsgrunnlag.gjenopprett(dto.sammenligningsgrunnlag),
                 `6G` = Inntekt.gjenopprett(dto.`6G`)
             )
         }
@@ -213,7 +205,6 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun view() = InntektsgrunnlagView(
         sykepengegrunnlag = sykepengegrunnlag,
-        avviksprosent = avviksprosent,
         omregnetÅrsinntekt = omregnetÅrsinntekt,
         beregningsgrunnlag = beregningsgrunnlag,
         `6G` = `6G`,
@@ -357,8 +348,7 @@ internal class Inntektsgrunnlag private constructor(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             tilkommendeInntekter = tilkommendeInntekter,
-            vurdertInfotrygd = vurdertInfotrygd,
-            sammenligningsgrunnlag = sammenligningsgrunnlag
+            vurdertInfotrygd = vurdertInfotrygd
         )
 
     internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
@@ -372,7 +362,7 @@ internal class Inntektsgrunnlag private constructor(
     }
 
     internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) } || sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
+        arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
 
     internal fun berik(builder: UtkastTilVedtakBuilder) {
         builder.sykepengegrunnlag(
@@ -454,7 +444,6 @@ internal class Inntektsgrunnlag private constructor(
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
         tilkommendeInntekter = this.tilkommendeInntekter.map { it.dto() },
         vurdertInfotrygd = this.vurdertInfotrygd,
-        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
         `6G` = this.`6G`.dto(),
         sykepengegrunnlag = this.sykepengegrunnlag.dto(),
         totalOmregnetÅrsinntekt = this.omregnetÅrsinntekt.dto(),
@@ -475,7 +464,6 @@ internal class Inntektsgrunnlag private constructor(
 
 internal data class InntektsgrunnlagView(
     val sykepengegrunnlag: Inntekt,
-    val avviksprosent: Avviksprosent,
     val omregnetÅrsinntekt: Inntekt,
     val beregningsgrunnlag: Inntekt,
     val `6G`: Inntekt,

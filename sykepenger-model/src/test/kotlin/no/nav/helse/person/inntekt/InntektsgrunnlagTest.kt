@@ -363,7 +363,6 @@ internal class InntektsgrunnlagTest {
             alder = UNG_PERSON_FØDSELSDATO.alder,
             arbeidsgiverInntektsopplysninger = inntekter,
             skjæringstidspunkt = skjæringstidspunkt,
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             subsumsjonslogg = EmptyLog
         )
         assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.sykepengegrunnlag)
@@ -554,7 +553,6 @@ internal class InntektsgrunnlagTest {
                     refusjonsopplysninger = Refusjonsopplysninger()
                 )
             ),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false
         )
@@ -632,7 +630,6 @@ internal class InntektsgrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -678,7 +675,6 @@ internal class InntektsgrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -722,7 +718,6 @@ internal class InntektsgrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -800,7 +795,6 @@ internal class InntektsgrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -834,7 +828,6 @@ internal class InntektsgrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -858,7 +851,6 @@ internal class InntektsgrunnlagTest {
                         refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
-                sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
                 deaktiverteArbeidsforhold = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",

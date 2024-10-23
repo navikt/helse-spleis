@@ -82,8 +82,6 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         return "[Årlig: $årlig, Månedlig: ${månedlig}, Daglig: ${daglig}]"
     }
 
-    fun avviksprosent(other: Inntekt) = Avviksprosent.avvik(this.årlig, other.årlig)
-
     fun dto() = InntektDto(
         årlig = dtoÅrlig(),
         månedligDouble = dtoMånedligDouble(),

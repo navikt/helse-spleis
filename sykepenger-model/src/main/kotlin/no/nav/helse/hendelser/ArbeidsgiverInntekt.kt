@@ -12,7 +12,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
@@ -49,7 +48,6 @@ class ArbeidsgiverInntekt(
             person: Person,
             rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
             skjæringstidspunkt: LocalDate,
-            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             meldingsreferanseId: UUID,
             subsumsjonslogg: Subsumsjonslogg
         ): Inntektsgrunnlag {
@@ -59,7 +57,6 @@ class ArbeidsgiverInntekt(
             return person.avklarSykepengegrunnlag(
                 hendelse,
                 skjæringstidspunkt,
-                sammenligningsgrunnlag,
                 inntekterMedOpptjening,
                 subsumsjonslogg
             )

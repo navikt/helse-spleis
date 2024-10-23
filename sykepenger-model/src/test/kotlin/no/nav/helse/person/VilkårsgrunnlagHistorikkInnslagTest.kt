@@ -17,7 +17,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -128,7 +127,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                         ),
                         Refusjonsopplysninger()
                     )
-                ), skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), jurist
+                ), skjæringstidspunkt, jurist
             ),
             opptjening = Opptjening.nyOpptjening(opptjening, 1.januar, true),
             medlemskapstatus = when (erMedlem) {

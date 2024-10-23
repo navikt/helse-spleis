@@ -77,7 +77,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.NyInntektUnderveis
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -658,7 +657,6 @@ class Person private constructor(
     internal fun avklarSykepengegrunnlag(
         hendelse: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skatteopplysninger: Map<String, SkattSykepengegrunnlag>,
         subsumsjonslogg: Subsumsjonslogg
     ): Inntektsgrunnlag {
@@ -667,7 +665,6 @@ class Person private constructor(
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
-            sammenligningsgrunnlag,
             subsumsjonslogg
         )
     }
