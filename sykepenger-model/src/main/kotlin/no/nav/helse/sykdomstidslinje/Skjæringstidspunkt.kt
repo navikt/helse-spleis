@@ -19,18 +19,17 @@ import no.nav.helse.hendelser.Periode
  */
 internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomstidslinje) {
 
-    fun beregnSkjæringstidspunktOrNull(vedtaksperiode: Periode, sykdomsperiode: Periode?): LocalDate? {
-        return finnSkjæringstidspunkt(vedtaksperiode, sykdomsperiode)?.skjæringstidspunkt
+    fun beregnSkjæringstidspunkt(vedtaksperiode: Periode): LocalDate {
+        return beregnSkjæringstidspunktOrNull(vedtaksperiode) ?: vedtaksperiode.start
     }
-    fun beregnSkjæringstidspunkt(vedtaksperiode: Periode, sykdomsperiode: Periode?): LocalDate {
-        return beregnSkjæringstidspunktOrNull(vedtaksperiode, sykdomsperiode) ?: vedtaksperiode.start
+    fun beregnSkjæringstidspunktOrNull(vedtaksperiode: Periode): LocalDate? {
+        return finnSkjæringstidspunkt(vedtaksperiode)?.skjæringstidspunkt
     }
 
-    private fun finnSkjæringstidspunkt(vedtaksperiode: Periode, sykdomsperiode: Periode?): Søkekontekst? {
+    private fun finnSkjæringstidspunkt(vedtaksperiode: Periode): Søkekontekst? {
         if (personsykdomstidslinje.count() == 0) return null
         // sykdomsperioden er den perioden som ikke er friskmeldt
-        val søkeperiode = sykdomsperiode ?: vedtaksperiode
-        return søkEtterSkjæringstidspunkt(søkeperiode)
+        return søkEtterSkjæringstidspunkt(vedtaksperiode)
     }
 
     private fun søkEtterSkjæringstidspunkt(søkeperiode: Periode): Søkekontekst {

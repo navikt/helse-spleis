@@ -11,8 +11,6 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -90,11 +88,6 @@ class Sykdomstidslinje private constructor(
     internal fun fremTilOgMed(dato: LocalDate) =
         if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
 
-
-    private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
-        ?.findLast { erEnSykedag(this[it]) }
-        ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
-
     internal fun berik(utkastTilVedtakBuilder: UtkastTilVedtakBuilder) {
         periode?.find { erEnFerieDag(this[it]) }?.let {
             utkastTilVedtakBuilder.ferie()
@@ -141,7 +134,7 @@ class Sykdomstidslinje private constructor(
 
     internal fun sisteSkjæringstidspunkt(periode: Periode? = null): LocalDate? {
         val søkeperiode = periode ?: this.periode ?: return null
-        return Skjæringstidspunkt(this).beregnSkjæringstidspunktOrNull(søkeperiode, null)
+        return Skjæringstidspunkt(this).beregnSkjæringstidspunktOrNull(søkeperiode)
     }
 
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
@@ -196,7 +189,6 @@ class Sykdomstidslinje private constructor(
         }?.trim() ?: "Tom tidslinje"
     }
 
-    internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
     internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
 
     internal companion object {
@@ -205,8 +197,6 @@ class Sykdomstidslinje private constructor(
                 val utenProblemdager = Sykdomstidslinje(sykdomstidslinje.dager.filter { (_, dag) -> dag !is ProblemDag }.toSortedMap(), sykdomstidslinje.periode)
                 acc.merge(utenProblemdager, replace)
             }
-        private fun erEnSykedag(it: Dag) =
-            it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNav
 
         private fun erEnFerieDag(it: Dag) = it is Feriedag
 

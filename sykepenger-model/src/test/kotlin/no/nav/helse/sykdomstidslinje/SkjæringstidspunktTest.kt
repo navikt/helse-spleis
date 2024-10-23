@@ -112,7 +112,7 @@ internal class SkjæringstidspunktTest {
     }
 
     private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
-        Skjæringstidspunkt(tidslinje).beregnSkjæringstidspunkt(søkeperiode, null)
+        Skjæringstidspunkt(tidslinje).beregnSkjæringstidspunkt(søkeperiode)
 
     @Test
     fun `skjæringstidspunkt er null for ugyldige situasjoner`() {
@@ -458,7 +458,7 @@ internal class SkjæringstidspunktTest {
     }
 
     private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
-        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).beregnSkjæringstidspunkt(periode, null))
+        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).beregnSkjæringstidspunkt(periode))
     }
 
     private fun assertSkjæringstidspunkt(

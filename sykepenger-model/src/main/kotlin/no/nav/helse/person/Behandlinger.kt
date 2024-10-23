@@ -66,6 +66,13 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -482,8 +489,32 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat = maksdatoresultat
             )
 
-            private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode) =
-                beregnSkjæringstidspunkt().beregnSkjæringstidspunkt(periode, sykdomstidslinje.sykdomsperiode())
+            private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): LocalDate {
+                val sisteSykedag = sykdomstidslinje.lastOrNull {
+                    // uttømmende when-blokk (uten else) med hensikt, fordi om nye det lages nye
+                    // dagtyper så vil det bli compile error og vi blir tvunget til å måtte ta stilling til den
+                    when (it) {
+                        is ArbeidsgiverHelgedag,
+                        is Arbeidsgiverdag,
+                        is ForeldetSykedag,
+                        is SykHelgedag,
+                        is Sykedag,
+                        is SykedagNav -> true
+                        is Dag.AndreYtelser,
+                        is Dag.ArbeidIkkeGjenopptattDag,
+                        is Dag.Arbeidsdag,
+                        is Dag.Feriedag,
+                        is Dag.FriskHelgedag,
+                        is Dag.Permisjonsdag,
+                        is Dag.ProblemDag,
+                        is Dag.UkjentDag -> false
+                    }
+                }?.dato
+
+                // trimmer friskmelding/ferie i halen bort
+                val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
+                return beregnSkjæringstidspunkt().beregnSkjæringstidspunkt(søkeperiode)
+            }
 
             companion object {
                 val IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT = LocalDate.MIN
