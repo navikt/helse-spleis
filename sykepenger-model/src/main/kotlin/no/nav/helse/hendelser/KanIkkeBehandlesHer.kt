@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 class KanIkkeBehandlesHer(

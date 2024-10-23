@@ -11,6 +11,8 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
+import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -34,8 +36,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 

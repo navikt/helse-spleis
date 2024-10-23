@@ -3,9 +3,9 @@ package no.nav.helse.testhelpers
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {

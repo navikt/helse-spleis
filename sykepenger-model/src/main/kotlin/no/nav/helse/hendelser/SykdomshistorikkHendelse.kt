@@ -1,13 +1,11 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
 import no.nav.helse.dto.HendelseskildeDto
-import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Revurderingseventyr
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomshistorikkHendelse>

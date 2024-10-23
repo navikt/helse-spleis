@@ -33,10 +33,12 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
+import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.SykdomshistorikkHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -78,9 +80,8 @@ import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
@@ -468,7 +469,7 @@ internal class Arbeidsgiver private constructor(
 
         val dagoverstyring = dager.revurderingseventyr()
         val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
-        addInntektsmelding(inntektsmelding, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
+        addInntektsmelding(inntektsmelding, Revurderingseventyr.Companion.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
 
         inntektsmelding.ikkeHåndert(person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }
@@ -812,7 +813,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
         val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonsloggMedInntektsmeldingkontekst)
-        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring)
+        val overstyringFraInntektsmelding = Revurderingseventyr.Companion.tidligsteEventyr(inntektoverstyring, overstyring)
         if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding)
         håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }

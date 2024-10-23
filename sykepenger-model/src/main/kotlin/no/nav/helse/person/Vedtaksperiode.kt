@@ -39,12 +39,14 @@ import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.Behandlingsavgjørelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.SykdomshistorikkHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
@@ -129,10 +131,9 @@ import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -402,7 +403,7 @@ internal class Vedtaksperiode private constructor(
         val annullering = behandlinger.håndterAnnullering(arbeidsgiver, hendelse, vedtaksperioder.map { it.behandlinger }) ?: return
         hendelse.info("Forkaster denne, og senere perioder, som følge av annullering.")
         forkast(hendelse)
-        person.igangsettOverstyring(Revurderingseventyr.annullering(hendelse, annullering.periode()))
+        person.igangsettOverstyring(Revurderingseventyr.Companion.annullering(hendelse, annullering.periode()))
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
@@ -556,7 +557,7 @@ internal class Vedtaksperiode private constructor(
         val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
             ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it) } ?: this
         person.igangsettOverstyring(
-            Revurderingseventyr.sykdomstidslinje(
+            Revurderingseventyr.Companion.sykdomstidslinje(
                 hendelse,
                 vedtaksperiodeTilRevurdering.skjæringstidspunkt,
                 vedtaksperiodeTilRevurdering.periode
@@ -633,7 +634,7 @@ internal class Vedtaksperiode private constructor(
         søknad.info("Håndterer overlappende søknad")
         håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
         håndterSøknad(søknad) { nesteTilstand }
-        person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
+        person.igangsettOverstyring(Revurderingseventyr.Companion.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
@@ -649,7 +650,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
+        person.igangsettOverstyring(Revurderingseventyr.Companion.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
 
     private fun håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse: Inntektsmelding) {
@@ -1434,7 +1435,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk.valider(søknad, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             vedtaksperiode.håndterSøknad(søknad)
             søknad.info("Fullført behandling av søknad")
-            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.Companion.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             if (søknad.harFunksjonelleFeilEllerVerre()) return
             vedtaksperiode.tilstand(søknad, when {
                 !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
@@ -2455,7 +2456,7 @@ internal class Vedtaksperiode private constructor(
             }
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
-                Revurderingseventyr.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+                Revurderingseventyr.Companion.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
         }
 
@@ -2597,7 +2598,7 @@ internal class Vedtaksperiode private constructor(
         }
         internal fun List<Vedtaksperiode>.refusjonseventyr(hendelse: Hendelse) = firstOrNull {
             it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()))
-        }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
+        }?.let { Revurderingseventyr.Companion.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {

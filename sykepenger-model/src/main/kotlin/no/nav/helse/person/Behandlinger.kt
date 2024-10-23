@@ -31,10 +31,14 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.avvist
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.SykdomshistorikkHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
@@ -74,7 +78,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
@@ -545,7 +548,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId())
                         is Ytelser -> andreYtelser(meldingsreferanseId())
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId())
-                        else -> null
+                        is Behandlingsavgjørelse,
+                        is PersonHendelse,
+                        is Revurderingseventyr,
+                        is SykdomshistorikkHendelse -> null
                     }
                 }
 

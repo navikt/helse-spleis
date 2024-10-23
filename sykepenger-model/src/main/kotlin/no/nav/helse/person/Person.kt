@@ -41,10 +41,11 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
@@ -243,7 +244,7 @@ class Person private constructor(
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding) {
         registrer(melding, "Behandler minimum sykdomsgradvurdering")
         melding.oppdater(this.minimumSykdomsgradsvurdering)
-        this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()))
+        this.igangsettOverstyring(Revurderingseventyr.Companion.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()))
         håndterGjenoppta(melding)
     }
 
@@ -781,7 +782,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg))
-        igangsettOverstyring(Revurderingseventyr.arbeidsforhold(hendelse, skjæringstidspunkt))
+        igangsettOverstyring(Revurderingseventyr.Companion.arbeidsforhold(hendelse, skjæringstidspunkt))
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -792,7 +793,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         grunnlag.grunnbeløpsregulering(hendelse, subsumsjonslogg)?.let { grunnbeløpsregulert ->
             nyttVilkårsgrunnlag(hendelse, grunnbeløpsregulert)
-            igangsettOverstyring(Revurderingseventyr.grunnbeløpsregulering(hendelse, skjæringstidspunkt))
+            igangsettOverstyring(Revurderingseventyr.Companion.grunnbeløpsregulering(hendelse, skjæringstidspunkt))
         }
     }
 

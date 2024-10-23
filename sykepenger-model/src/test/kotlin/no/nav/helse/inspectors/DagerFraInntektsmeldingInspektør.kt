@@ -3,7 +3,7 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 
 internal val DagerFraInntektsmelding.inspektør get() = DagerFraInntektsmeldingInspektør(this)
 internal class DagerFraInntektsmeldingInspektør(dager: DagerFraInntektsmelding) {

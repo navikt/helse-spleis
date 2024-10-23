@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
-interface UtbetalingHendelse : IAktivitetslogg {
+interface UtbetalingmodulHendelse : IAktivitetslogg {
     val utbetalingId: UUID
     val fagsystemId: String
     val avstemmingsnøkkel: Long

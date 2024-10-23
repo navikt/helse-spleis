@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
