@@ -311,3 +311,6 @@ sealed class Begrunnelse {
         }
     }
 }
+
+fun List<Utbetalingstidslinje>.avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) =
+    Utbetalingstidslinje.avvis(this, avvistePerioder, begrunnelser)
