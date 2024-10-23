@@ -24,9 +24,13 @@ data class GraphQLNyttInntektsforholdPeriode(
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
-    val vilkarsgrunnlagId: UUID,
+    val dagligBelop: Double,
+    val manedligBelop: Double,
     val skjaeringstidspunkt: LocalDate
-)
+) {
+    @Deprecated("Trengs ikke lenger ettersom vi sender inntektene direkte")
+    val vilkarsgrunnlagId: UUID = UUID.randomUUID()
+}
 
 data class GraphQLArbeidsgiver(
     val organisasjonsnummer: String,

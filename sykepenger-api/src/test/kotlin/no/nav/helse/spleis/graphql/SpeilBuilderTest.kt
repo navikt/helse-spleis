@@ -78,7 +78,8 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val nyeInntektsforholdPølse = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
         assertEquals(1.februar til 28.februar, nyeInntektsforholdPølse.fom til nyeInntektsforholdPølse.tom)
         assertEquals(1.januar, nyeInntektsforholdPølse.skjæringstidspunkt)
-        assertTrue(nyeInntektsforholdPølse.vilkårsgrunnlagId in speilApi().vilkårsgrunnlag.keys)
+        assertEquals(10000.0.månedlig.daglig, nyeInntektsforholdPølse.dagligBeløp)
+        assertEquals(10000.0, nyeInntektsforholdPølse.månedligBeløp)
 
         assertEquals(emptyList<GhostPeriodeDTO>(),  speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder)
     }
@@ -93,10 +94,8 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
 
         val førstegangs = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a1" }!!.generasjoner.single().perioder.find { it.fom == 1.januar } as BeregnetPeriode
         val vilkårsgrunnlagIdFørstegangssøknad = førstegangs.vilkårsgrunnlagId
-        val vilkårsgrunnlagIdTilkommen = nyeInntektsforholdPølser.vilkårsgrunnlagId
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.keys
         assertEquals(1, vilkårsgrunnlag.size)
-        assertFalse(vilkårsgrunnlagIdTilkommen in vilkårsgrunnlag)
         assertTrue(vilkårsgrunnlagIdFørstegangssøknad in vilkårsgrunnlag)
     }
 

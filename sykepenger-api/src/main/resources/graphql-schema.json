@@ -1553,6 +1553,21 @@
         "name" : "GraphQLNyttInntektsforholdPeriode",
         "description" : "",
         "fields" : [ {
+          "name" : "dagligBelop",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "Float",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "fom",
           "description" : null,
           "args" : [ ],
@@ -1577,6 +1592,21 @@
             "ofType" : {
               "kind" : "SCALAR",
               "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "manedligBelop",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "Float",
               "ofType" : null
             }
           },

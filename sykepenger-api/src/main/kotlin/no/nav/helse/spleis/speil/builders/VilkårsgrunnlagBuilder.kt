@@ -18,6 +18,7 @@ import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal abstract class IVilkårsgrunnlag(
@@ -142,7 +143,8 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
                         id = UUID.randomUUID(),
                         fom = it.fom,
                         tom = it.tom,
-                        vilkårsgrunnlagId = vilkårsgrunnlag.id,
+                        dagligBeløp = it.dagligbeløp,
+                        månedligBeløp = it.månedligBeløp,
                         skjæringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt
                     )
                 }
@@ -216,7 +218,9 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     INyInntektUnderveis(
                         arbeidsgiver = nyInntekt.orgnummer,
                         fom = nyInntektperiode.fom,
-                        tom = nyInntektperiode.tom
+                        tom = nyInntektperiode.tom,
+                        dagligbeløp = nyInntektperiode.dagligBeløp,
+                        månedligBeløp = nyInntektperiode.dagligBeløp.daglig.månedlig,
                     )
                 }
             },

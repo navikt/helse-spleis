@@ -13,7 +13,9 @@ import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 internal data class INyInntektUnderveis(
     val arbeidsgiver: String,
     val fom: LocalDate,
-    val tom: LocalDate
+    val tom: LocalDate,
+    val dagligbeløp: Double,
+    val månedligBeløp: Double
 )
 
 internal data class IArbeidsgiverinntekt(

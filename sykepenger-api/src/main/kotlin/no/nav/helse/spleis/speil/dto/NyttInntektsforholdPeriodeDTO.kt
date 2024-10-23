@@ -9,7 +9,8 @@ data class NyttInntektsforholdPeriodeDTO(
     val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
-    val vilkårsgrunnlagId: UUID,
+    val dagligBeløp: Double,
+    val månedligBeløp: Double,
     val skjæringstidspunkt: LocalDate
 ) {
     internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = brytOpp(this, fom, tom, tidslinjeperiode, NyttInntektsforholdPeriodeDTO::til, NyttInntektsforholdPeriodeDTO::fra)
