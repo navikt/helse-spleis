@@ -199,11 +199,6 @@ class Sykdomstidslinje private constructor(
     internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
     internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
 
-    internal fun egenmeldingerFraSøknad() = dager
-        .filter { it.value.kommerFra(Søknad::class) && ( it.value is Arbeidsgiverdag || it.value is ArbeidsgiverHelgedag) }
-        .map { it.key }
-        .grupperSammenhengendePerioderMedHensynTilHelg()
-
     internal companion object {
         internal fun List<Sykdomstidslinje>.slåSammenForkastedeSykdomstidslinjer() =
             fold(Sykdomstidslinje()) { acc, sykdomstidslinje ->

@@ -1742,9 +1742,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.håndterDager(dager)
             if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
-            if (vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
-                dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
-            }
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
