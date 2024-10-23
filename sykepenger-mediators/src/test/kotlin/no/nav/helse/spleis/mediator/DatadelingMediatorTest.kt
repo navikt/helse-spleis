@@ -2,13 +2,13 @@ package no.nav.helse.spleis.mediator
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -20,13 +20,13 @@ import org.junit.jupiter.api.Test
 internal class DatadelingMediatorTest {
     private val fødselsnummer = "12345678910"
     private val testRapid = TestRapid()
-    private lateinit var testhendelse: TestHendelse
+    private lateinit var testhendelse: IAktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
     @BeforeEach
     fun beforeEach() {
-        testhendelse = TestHendelse(fødselsnummer)
-        datadelingMediator = DatadelingMediator(testhendelse)
+        testhendelse = Aktivitetslogg()
+        datadelingMediator = DatadelingMediator(testhendelse, UUID.randomUUID(), fødselsnummer, "aktørId")
     }
 
     @Test
@@ -51,8 +51,7 @@ internal class DatadelingMediatorTest {
         assertDoesNotThrow {
             LocalDateTime.parse(info["tidsstempel"].asText())
         }
-        assertEquals("TestHendelse", info["kontekster"][0]["konteksttype"].asText())
-        assertEquals("Person", info["kontekster"][1]["konteksttype"].asText())
+        assertEquals("Person", info["kontekster"][0]["konteksttype"].asText())
     }
 
     @Test
@@ -92,8 +91,6 @@ internal class DatadelingMediatorTest {
         assertEquals("FUNKSJONELL_FEIL", info[2]["nivå"].asText())
         assertEquals("LOGISK_FEIL", info[3]["nivå"].asText())
     }
-
-    private class TestHendelse(fødselsnummer: String) : PersonHendelse(UUID.randomUUID(), fødselsnummer, "1234567891011", Aktivitetslogg())
 
     private class TestKontekst(
         private val type: String,

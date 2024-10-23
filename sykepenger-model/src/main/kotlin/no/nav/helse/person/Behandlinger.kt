@@ -16,6 +16,7 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
@@ -34,11 +35,33 @@ import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.IdentOpphørt
+import no.nav.helse.hendelser.Infotrygdendring
+import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.Migrate
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.hendelser.PersonPåminnelse
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
+import no.nav.helse.hendelser.SykdomstidslinjeHendelse
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.VedtakFattet
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
@@ -549,9 +572,33 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Ytelser -> andreYtelser(meldingsreferanseId())
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId())
                         is Behandlingsavgjørelse,
-                        is PersonHendelse,
                         is Revurderingseventyr,
                         is SykdomshistorikkHendelse -> null
+                        is Dødsmelding,
+                        is GjenopplivVilkårsgrunnlag,
+                        is IdentOpphørt,
+                        is Infotrygdendring,
+                        is Migrate,
+                        is MinimumSykdomsgradsvurderingMelding,
+                        is PersonPåminnelse,
+                        is UtbetalingshistorikkEtterInfotrygdendring,
+                        is UtbetalingshistorikkForFeriepenger,
+                        is AnmodningOmForkasting,
+                        is AnnullerUtbetaling,
+                        is AvbruttSøknad,
+                        is ForkastSykmeldingsperioder,
+                        is InntektsmeldingerReplay,
+                        is KanIkkeBehandlesHer,
+                        is Påminnelse,
+                        is Simulering,
+                        is SykepengegrunnlagForArbeidsgiver,
+                        is Sykmelding,
+                        is UtbetalingHendelse,
+                        is Utbetalingpåminnelse,
+                        is Utbetalingsgodkjenning,
+                        is Utbetalingshistorikk,
+                        is VedtakFattet,
+                        is Vilkårsgrunnlag -> null
                     }
                 }
 

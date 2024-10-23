@@ -5,14 +5,19 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.erAvviklet
 import org.slf4j.LoggerFactory
 
-class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggObserver {
+internal class DatadelingMediator(
+    private val hendelse: IAktivitetslogg,
+    private val meldingsreferanseId: UUID,
+    private val fødselsnummer: String,
+    private val aktørId: String
+): AktivitetsloggObserver {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -61,18 +66,18 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
         if (aktiviteter.isEmpty()) return
         sikkerlogg.info(
             "Publiserer aktiviteter som følge av hendelse med {}, {}, {}",
-            keyValue("hendelseId", hendelse.meldingsreferanseId()),
-            keyValue("fødselsnummer", hendelse.fødselsnummer()),
-            keyValue("aktørId", hendelse.aktørId())
+            keyValue("hendelseId", meldingsreferanseId),
+            keyValue("fødselsnummer", fødselsnummer),
+            keyValue("aktørId", aktørId)
         )
-        context.publish(hendelse.fødselsnummer(), aktiviteter.toJson())
+        context.publish(fødselsnummer, aktiviteter.toJson())
     }
 
     private fun MutableList<Map<String, Any>>.toJson(): String {
         return JsonMessage.newMessage(
             "aktivitetslogg_ny_aktivitet",
             mapOf(
-                "fødselsnummer" to hendelse.fødselsnummer(),
+                "fødselsnummer" to fødselsnummer,
                 "aktiviteter" to this
             )
         ).toJson()

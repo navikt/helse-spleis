@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
-abstract class ArbeidstakerHendelse protected constructor(
+sealed class ArbeidstakerHendelse protected constructor(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String,

@@ -20,7 +20,7 @@ internal class ValidationTest {
     @Test
     fun success() {
         var success = false
-        validation(TestHendelse(aktivitetslogg)) {
+        validation(aktivitetslogg) {
             onValidationFailed { fail("Uventet kall") }
             successBlock()
             onSuccess { success = true }
@@ -31,7 +31,7 @@ internal class ValidationTest {
     @Test
     fun failure() {
         var failure = false
-        validation(TestHendelse(aktivitetslogg)) {
+        validation(aktivitetslogg) {
             onValidationFailed { failure = true }
             failureBlock()
             onSuccess { fail("Uventet kall") }
@@ -41,6 +41,4 @@ internal class ValidationTest {
 
     private fun Validation.successBlock() = valider { true }
     private fun Validation.failureBlock() = valider { false }
-
-    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(UUID.randomUUID(), "fnr", "aktørId", "orgnr", aktivitetslogg)
 }

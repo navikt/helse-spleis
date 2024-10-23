@@ -4,22 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
-import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.BehovMediator
-import no.nav.helse.spleis.Personopplysninger
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -59,18 +55,15 @@ class BehovMediatorTest {
         override fun stop() {}
     }
 
-    private lateinit var aktivitetslogg: Aktivitetslogg
-
     @BeforeEach
     fun setup() {
-        aktivitetslogg = Aktivitetslogg()
         behovMediator = BehovMediator(mockk(relaxed = true))
         messages.clear()
     }
 
     @Test
     fun `grupperer behov`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val hendelse = TestHendelse()
 
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
@@ -131,7 +124,7 @@ class BehovMediatorTest {
 
     @Test
     fun `duplikatnøkler er ok når verdi er lik`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val hendelse = TestHendelse()
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -152,7 +145,7 @@ class BehovMediatorTest {
 
     @Test
     fun `kan produsere samme behov flere ganger så lenge detaljer er likt`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val hendelse = TestHendelse()
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -173,7 +166,7 @@ class BehovMediatorTest {
 
     @Test
     fun `kan ikke produsere samme behov flere ganger`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val hendelse = TestHendelse()
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -194,7 +187,7 @@ class BehovMediatorTest {
 
     @Test
     fun `kan produsere samme behov med like detaljer`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val hendelse = TestHendelse()
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -207,7 +200,7 @@ class BehovMediatorTest {
 
     @Test
     fun `kan ikke produsere samme behov med ulike detaljer`() {
-        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val hendelse = TestHendelse()
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -225,16 +218,5 @@ class BehovMediatorTest {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 
-    private class TestHendelse(
-        val logg: Aktivitetslogg
-    ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
-        private val person = Personopplysninger(Personidentifikator(fødselsnummer), aktørId, LocalDate.EPOCH, null).person(EmptyLog)
-        init {
-            kontekst(person)
-        }
-
-        override fun kontekst(kontekst: Aktivitetskontekst) {
-            logg.kontekst(kontekst)
-        }
-    }
+    fun TestHendelse() = IdentOpphørt(UUID.randomUUID(), fødselsnummer, aktørId)
 }

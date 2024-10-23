@@ -7,7 +7,7 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
-abstract class SykdomstidslinjeHendelse internal constructor(
+sealed class SykdomstidslinjeHendelse protected constructor(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String,
