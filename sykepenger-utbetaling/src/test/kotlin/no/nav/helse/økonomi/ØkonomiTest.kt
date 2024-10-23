@@ -1,7 +1,6 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
-import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -10,7 +9,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.ratio
-import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,9 +21,10 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ØkonomiTest {
 
+    private val `6g` = 561804.årlig
+
     @Test
     fun `er 6g-begrensning selv om dekningsgrunnlaget er lavere`() {
-        val `6g` = `6G`.beløp(1.januar)
         val over6g = `6g` + 260.daglig
         val økonomi = listOf(100.prosent.sykdomsgrad.inntekt(over6g, dekningsgrunnlag = `6g`, `6G` = `6g`))
         val betalte = Økonomi.betal(økonomi)
@@ -35,8 +34,8 @@ internal class ØkonomiTest {
     @Test
     fun `akkurat under 20-prosent-grensen`() {
         val økonomi = listOf(
-            8.prosent.sykdomsgrad.inntekt(30000.månedlig, `6G` = `6G`.beløp(1.januar)),
-            54.prosent.sykdomsgrad.inntekt(10312.40.månedlig, `6G` = `6G`.beløp(1.januar))
+            8.prosent.sykdomsgrad.inntekt(30000.månedlig, `6G` = `6g`),
+            54.prosent.sykdomsgrad.inntekt(10312.40.månedlig, `6G` = `6g`)
         )
         val totalSykdomsgrad = økonomi.totalSykdomsgrad()
         assertNotEquals(20.prosent, totalSykdomsgrad)
@@ -46,13 +45,13 @@ internal class ØkonomiTest {
     @Test
     fun `total sykdomsgrad med 0 i inntekter`() {
         val økonomi = listOf(
-            100.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
-            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
-            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
-            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
-            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
-            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
-            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            100.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6g`),
         )
         val totalSykdomsgrad = økonomi.totalSykdomsgrad()
         assertEquals(100.prosent, totalSykdomsgrad)
@@ -62,8 +61,8 @@ internal class ØkonomiTest {
     fun `total sykdomsgrad regnes ut fra aktuell dagsinntekt`() {
         val inntekt = 10000.månedlig
         val økonomi = listOf(
-            100.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = inntekt, `6G` = `6G`.beløp(1.januar)),
-            50.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = INGEN, `6G` = `6G`.beløp(1.januar))
+            100.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = inntekt, `6G` = `6g`),
+            50.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = INGEN, `6G` = `6g`)
         )
         assertEquals(75.prosent, økonomi.totalSykdomsgrad())
     }
@@ -73,8 +72,8 @@ internal class ØkonomiTest {
         val inntektA1 = 18199.7.månedlig
         val inntektA2 = 22966.54.månedlig
         val økonomi = listOf(
-            20.prosent.sykdomsgrad.inntekt(inntektA1, `6G` = `6G`.beløp(1.januar)),
-            20.prosent.sykdomsgrad.inntekt(inntektA2, `6G` = `6G`.beløp(1.januar))
+            20.prosent.sykdomsgrad.inntekt(inntektA1, `6G` = `6g`),
+            20.prosent.sykdomsgrad.inntekt(inntektA2, `6G` = `6g`)
         )
         val abc = ((18199.7 * 0.2) + (22966.54 * 0.2)) / (18199.7 + 22966.54) // 19.999999999999996
         assertEquals(20.prosent, økonomi.totalSykdomsgrad())
@@ -85,10 +84,10 @@ internal class ØkonomiTest {
     @Test
     fun `kan ikke sette dagsats mer enn en gang`() {
         assertThrows<IllegalStateException> {
-            25.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)).inntekt(
+            25.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`).inntekt(
                 800.daglig,
                 800.daglig,
-                `6G` = `6G`.beløp(1.januar)
+                `6G` = `6g`
             )
         }
     }
@@ -98,7 +97,7 @@ internal class ØkonomiTest {
         assertEquals(
             75.prosent,
             listOf(
-                75.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar))
+                75.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`)
             ).totalSykdomsgrad()
         )
     }
@@ -108,7 +107,7 @@ internal class ØkonomiTest {
         assertEquals(
             75.prosent,
             listOf(
-                75.prosent.sykdomsgrad.inntekt(0.daglig, 0.daglig, `6G` = `6G`.beløp(1.januar))
+                75.prosent.sykdomsgrad.inntekt(0.daglig, 0.daglig, `6G` = `6g`)
             ).totalSykdomsgrad()
         )
     }
@@ -118,8 +117,8 @@ internal class ØkonomiTest {
         assertEquals(
             38.prosent,
             listOf(
-                50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)),
-                20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6G`.beløp(1.januar))
+                50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`),
+                20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6g`)
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }
@@ -131,8 +130,8 @@ internal class ØkonomiTest {
         assertEquals(
             35.prosent,
             listOf(
-                50.prosent.sykdomsgrad.inntekt(0.daglig, 0.daglig, `6G` = `6G`.beløp(1.januar)),
-                20.prosent.sykdomsgrad.inntekt(0.daglig, 0.daglig, `6G` = `6G`.beløp(1.januar))
+                50.prosent.sykdomsgrad.inntekt(0.daglig, 0.daglig, `6G` = `6g`),
+                20.prosent.sykdomsgrad.inntekt(0.daglig, 0.daglig, `6G` = `6g`)
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }
@@ -144,9 +143,9 @@ internal class ØkonomiTest {
         assertEquals(
             49.prosent,
             listOf(
-                50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)),
-                20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6G`.beløp(1.januar)),
-                60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig, `6G` = `6G`.beløp(1.januar))
+                50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`),
+                20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6g`),
+                60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig, `6G` = `6g`)
             ).totalSykdomsgrad()
         )
     }
@@ -156,9 +155,9 @@ internal class ØkonomiTest {
         assertEquals(
             49.prosent,
             listOf(
-                50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)),
-                20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6G`.beløp(1.januar)),
-                60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig, `6G` = `6G`.beløp(1.januar)).lås()
+                50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`),
+                20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6g`),
+                60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig, `6G` = `6g`).lås()
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }
@@ -168,7 +167,7 @@ internal class ØkonomiTest {
     @Test
     fun `kan låse igjen hvis allerede låst`() {
         assertDoesNotThrow {
-            50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)).lås().lås()
+            50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`).lås().lås()
         }
     }
 
@@ -177,7 +176,7 @@ internal class ØkonomiTest {
         50.prosent.sykdomsgrad.inntekt(
             1200.daglig,
             1200.daglig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 1200.daglig
         ).also { økonomi ->
             val betalte = listOf(økonomi).betal()
@@ -188,7 +187,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `arbeidsgiverrefusjon med inntekt`() {
-        100.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1000.daglig)
+        100.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6g`, refusjonsbeløp = 1000.daglig)
             .also { økonomi ->
                 assertEquals(1000.daglig, økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
             }
@@ -197,13 +196,13 @@ internal class ØkonomiTest {
     @Test
     fun `dekningsgrunnlag returns clone`() {
         50.prosent.sykdomsgrad.also { original ->
-            assertNotSame(original, original.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)))
+            assertNotSame(original, original.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`))
         }
     }
 
     @Test
     fun `kan ikke låses etter utbetaling`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)).also { økonomi ->
+        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`).also { økonomi ->
             val betalte = listOf(økonomi).betal()
             assertThrows<IllegalStateException> { betalte.single().lås() }
         }
@@ -219,14 +218,14 @@ internal class ØkonomiTest {
 
     @Test
     fun `toMap med dekningsgrunnlag`() {
-        val økonomi = 79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6G`.beløp(1.januar))
+        val økonomi = 79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6g`)
         assertEquals(79.5, økonomi.inspektør.grad.toDouble())
         assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
     }
 
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
-        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6G`.beløp(1.januar))
+        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6g`)
             .also { økonomi ->
                 assertEquals(79.5, økonomi.inspektør.grad.toDouble())
                 assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
@@ -236,7 +235,7 @@ internal class ØkonomiTest {
     @Test
     fun `kan beregne betaling bare en gang`() {
         assertThrows<IllegalStateException> {
-            listOf(80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)))
+            listOf(80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6g`))
                 .betal()
                 .betal()
         }
@@ -247,7 +246,7 @@ internal class ØkonomiTest {
         80.prosent.sykdomsgrad.inntekt(
             1200.daglig,
             1200.daglig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 1200.daglig
         ).also {
             val betalte = listOf(it).betal()
@@ -269,7 +268,7 @@ internal class ØkonomiTest {
     @Test
     fun `arbeidsgiver og person splittes tilsvarer totalt`() {
         100.prosent.sykdomsgrad
-            .inntekt(999.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 499.5.daglig)
+            .inntekt(999.daglig, `6G` = `6g`, refusjonsbeløp = 499.5.daglig)
             .also {
                 val betalte = listOf(it).betal()
                 betalte.single().also { økonomi ->
@@ -284,9 +283,9 @@ internal class ØkonomiTest {
 
     @Test
     fun `tre arbeidsgivere uten grenser`() {
-        val a = 50.prosent.sykdomsgrad.inntekt(600.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 300.daglig)
-        val b = 20.prosent.sykdomsgrad.inntekt(400.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 400.daglig)
-        val c = 60.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 0.daglig)
+        val a = 50.prosent.sykdomsgrad.inntekt(600.daglig, `6G` = `6g`, refusjonsbeløp = 300.daglig)
+        val b = 20.prosent.sykdomsgrad.inntekt(400.daglig, `6G` = `6g`, refusjonsbeløp = 400.daglig)
+        val c = 60.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6g`, refusjonsbeløp = 0.daglig)
         val betalte = listOf(a, b, c).betal().also {
             assertEquals(49.prosent, it.totalSykdomsgrad())
         }
@@ -302,11 +301,11 @@ internal class ØkonomiTest {
     fun `tre arbeidsgivere med persongrense`() {
         val a = 50.prosent.sykdomsgrad.inntekt(
             1200.daglig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 1200.daglig * 50.prosent
         )
-        val b = 20.prosent.sykdomsgrad.inntekt(800.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 800.daglig)
-        val c = 60.prosent.sykdomsgrad.inntekt(2000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 0.daglig)
+        val b = 20.prosent.sykdomsgrad.inntekt(800.daglig, `6G` = `6g`, refusjonsbeløp = 800.daglig)
+        val c = 60.prosent.sykdomsgrad.inntekt(2000.daglig, `6G` = `6g`, refusjonsbeløp = 0.daglig)
         val betalte = listOf(a, b, c).betal().also {
             assertEquals(49.prosent, it.totalSykdomsgrad())
             // grense = 1059
@@ -323,13 +322,13 @@ internal class ØkonomiTest {
     fun `tre arbeidsgivere over 6G, ingen personutbetaling`() {
         val a = 40.prosent.sykdomsgrad.inntekt(
             30000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 30000.månedlig * 75.prosent
         )
         val b =
-            50.prosent.sykdomsgrad.inntekt(10000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 10000.månedlig)
+            50.prosent.sykdomsgrad.inntekt(10000.månedlig, `6G` = `6g`, refusjonsbeløp = 10000.månedlig)
         val c =
-            70.prosent.sykdomsgrad.inntekt(15000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 15000.månedlig)
+            70.prosent.sykdomsgrad.inntekt(15000.månedlig, `6G` = `6g`, refusjonsbeløp = 15000.månedlig)
         val betalte = listOf(a, b, c).betal()
         betalte.forEach {
             assertTrue(it.er6GBegrenset())
@@ -342,9 +341,9 @@ internal class ØkonomiTest {
 
     @Test
     fun `tre arbeidsgivere med arbeidsgivere`() {
-        val a = 50.prosent.sykdomsgrad.inntekt(4800.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 2400.daglig)
-        val b = 20.prosent.sykdomsgrad.inntekt(3200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 3200.daglig)
-        val c = 60.prosent.sykdomsgrad.inntekt(8000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 0.daglig)
+        val a = 50.prosent.sykdomsgrad.inntekt(4800.daglig, `6G` = `6g`, refusjonsbeløp = 2400.daglig)
+        val b = 20.prosent.sykdomsgrad.inntekt(3200.daglig, `6G` = `6g`, refusjonsbeløp = 3200.daglig)
+        val c = 60.prosent.sykdomsgrad.inntekt(8000.daglig, `6G` = `6g`, refusjonsbeløp = 0.daglig)
         val betalte = listOf(a, b, c).betal()
         assertEquals(49.prosent, betalte.totalSykdomsgrad())
         assertTrue(betalte.er6GBegrenset())
@@ -359,15 +358,15 @@ internal class ØkonomiTest {
     @Test
     fun `eksempel fra regneark`() {
         val a =
-            50.prosent.sykdomsgrad.inntekt(21000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 21000.månedlig)
+            50.prosent.sykdomsgrad.inntekt(21000.månedlig, `6G` = `6g`, refusjonsbeløp = 21000.månedlig)
         val b = 80.prosent.sykdomsgrad.inntekt(
             10000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 10000.månedlig * 90.prosent
         )
         val c = 20.prosent.sykdomsgrad.inntekt(
             31000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 31000.månedlig * 25.prosent
         )
         val betalte = listOf(a, b, c).betal()
@@ -384,15 +383,15 @@ internal class ØkonomiTest {
     @Test
     fun `eksempel fra regneark modifisert for utbetaling til arbeidstaker`() {
         val a =
-            50.prosent.sykdomsgrad.inntekt(21000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 21000.månedlig)
+            50.prosent.sykdomsgrad.inntekt(21000.månedlig, `6G` = `6g`, refusjonsbeløp = 21000.månedlig)
         val b = 20.prosent.sykdomsgrad.inntekt(
             10000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 10000.månedlig * 20.prosent
         )
         val c = 20.prosent.sykdomsgrad.inntekt(
             31000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 31000.månedlig * 25.prosent
         )
         val betalte = listOf(a, b, c).betal().also {
@@ -412,13 +411,13 @@ internal class ØkonomiTest {
         val a = 20.prosent.sykdomsgrad.inntekt(
             10000.daglig,
             10000.daglig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 10000.daglig
         )
         val b = 21.prosent.sykdomsgrad.inntekt(
             10000.daglig,
             10000.daglig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 10000.daglig
         )
         val betalte = listOf(a, b).betal().also {
@@ -433,7 +432,7 @@ internal class ØkonomiTest {
         val økonomi = 50.prosent.sykdomsgrad.inntekt(
             1000.daglig,
             1000.daglig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 500.daglig
         )
         val betalte = listOf(økonomi).betal()
@@ -444,12 +443,12 @@ internal class ØkonomiTest {
     fun `fordeling mellom arbeidsgivere med lik inntekt og refusjon 1`() {
         val a = 100.prosent.sykdomsgrad.inntekt(
             15000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 15000.månedlig
         )
         val b = 100.prosent.sykdomsgrad.inntekt(
             15000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 15000.månedlig
         )
         val betalte = listOf(a, b).betal().also {
@@ -482,9 +481,9 @@ internal class ØkonomiTest {
     @Test
     fun `fordeling mellom arbeidsgivere med lik inntekt og refusjon 2`() {
         val a =
-            100.prosent.sykdomsgrad.inntekt(7750.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 7750.månedlig)
+            100.prosent.sykdomsgrad.inntekt(7750.månedlig, `6G` = `6g`, refusjonsbeløp = 7750.månedlig)
         val b =
-            100.prosent.sykdomsgrad.inntekt(7750.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 7750.månedlig)
+            100.prosent.sykdomsgrad.inntekt(7750.månedlig, `6G` = `6g`, refusjonsbeløp = 7750.månedlig)
         val betalte = listOf(a, b).betal().also {
             assertEquals(100.prosent, it.totalSykdomsgrad())
         }
@@ -498,9 +497,9 @@ internal class ØkonomiTest {
     @Test
     fun `fordeling mellom arbeidsgivere med lik refusjon, men ulik inntekt`() {
         val a =
-            100.prosent.sykdomsgrad.inntekt(8000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 7750.månedlig)
+            100.prosent.sykdomsgrad.inntekt(8000.månedlig, `6G` = `6g`, refusjonsbeløp = 7750.månedlig)
         val b =
-            100.prosent.sykdomsgrad.inntekt(7750.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 7750.månedlig)
+            100.prosent.sykdomsgrad.inntekt(7750.månedlig, `6G` = `6g`, refusjonsbeløp = 7750.månedlig)
         val betalte = listOf(a, b).betal().also {
             assertEquals(100.prosent, it.totalSykdomsgrad())
         }
@@ -521,7 +520,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `tilkommen inntekt - total grad bestemmes ut fra sykepengegrunnlaget`() {
-        val `6G` = `6G`.beløp(1.januar)
+        val `6G` = `6g`
         val a = 80.prosent.sykdomsgrad.inntekt(50000.månedlig, beregningsgrunnlag = 50000.månedlig, `6G` = `6G`)
         val b = 40.prosent.sykdomsgrad.inntekt(
             30000.månedlig,
@@ -538,7 +537,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `Tilkommen inntekt - fordeler ikke personbeløp ved avsluttet arbeidsforhold`() {
-        val `6G` = `6G`.beløp(1.januar)
+        val `6G` = `6g`
         val a = 0.prosent.sykdomsgrad.inntekt(INGEN, beregningsgrunnlag = 31000.månedlig, `6G`= `6G`)
         val b = 100.prosent.sykdomsgrad.inntekt(10000.månedlig, beregningsgrunnlag = INGEN, `6G` = `6G`)
         val betalte = listOf(a, b).betal()
@@ -550,12 +549,12 @@ internal class ØkonomiTest {
     fun `fordeling mellom arbeidsgivere mde ulik inntekt og refusjon`() {
         val a = 100.prosent.sykdomsgrad.inntekt(
             30000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 30000.månedlig
         )
         val b = 100.prosent.sykdomsgrad.inntekt(
             35000.månedlig,
-            `6G` = `6G`.beløp(1.januar),
+            `6G` = `6g`,
             refusjonsbeløp = 35000.månedlig
         )
         val betalte = listOf(a, b).betal().also {

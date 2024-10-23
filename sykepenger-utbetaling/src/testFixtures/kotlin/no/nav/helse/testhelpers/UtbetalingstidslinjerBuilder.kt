@@ -2,7 +2,6 @@ package no.nav.helse.testhelpers
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.erHelg
 import no.nav.helse.plus
 import no.nav.helse.ukedager
@@ -11,6 +10,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -21,7 +21,8 @@ import no.nav.helse.økonomi.Økonomi
 fun tidslinjeOf(
     vararg utbetalingsdager: Utbetalingsdager,
     startDato: LocalDate = LocalDate.of(2018, 1, 1),
-    skjæringstidspunkter: List<LocalDate> = listOf(startDato)
+    skjæringstidspunkter: List<LocalDate> = listOf(startDato),
+    `6G`: Inntekt = 561804.årlig
 ) = Utbetalingstidslinje.Builder().apply {
     val finnSkjæringstidspunktFor = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
     utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
@@ -30,7 +31,7 @@ fun tidslinjeOf(
         repeat(antallDager) {
             val skjæringstidspunkt = finnSkjæringstidspunktFor(dato)
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
-                .inntekt(dekningsgrunnlag, `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt), refusjonsbeløp = arbeidsgiverbeløp)
+                .inntekt(dekningsgrunnlag, `6G` = `6G`, refusjonsbeløp = arbeidsgiverbeløp)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
             dato = dato.plusDays(1)

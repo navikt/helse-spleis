@@ -1,11 +1,11 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.mai
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.UberegnetØkonomi.Companion.beregn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -15,23 +15,23 @@ class NyØkonomiTest {
 
     @Test
     fun `en arbeidsgiver med tilkommet inntekt`() {
-        val grunnbeløp = `6G`.beløp(1.mai(2024))
+        val `6G` = 744168.årlig
         val actual = UberegnetØkonomi(90000.månedlig, 90000.månedlig, 100.prosent)
         val tilkommet = 40451.månedlig
-        val result = actual.beregn(grunnbeløp, tilkommet)
+        val result = actual.beregn(`6G`, tilkommet)
         val expected = BeregnetØkonomi(995.daglig, INGEN)
         assertEquals(expected, result)
     }
 
     @Test
     fun `to arbeidsgivere med tilkommet inntekt`() {
-        val grunnbeløp = `6G`.beløp(1.mai(2024))
+        val `6G` = 744168.årlig
         val actual = listOf(
             UberegnetØkonomi(45000.månedlig, 45000.månedlig, 100.prosent),
             UberegnetØkonomi(45000.månedlig, 45000.månedlig, 100.prosent)
         )
         val tilkommet = 40451.månedlig
-        val result = actual.beregn(grunnbeløp, tilkommet)
+        val result = actual.beregn(`6G`, tilkommet)
         val expected = listOf(
             BeregnetØkonomi(498.daglig, INGEN),
             BeregnetØkonomi(498.daglig, INGEN)
