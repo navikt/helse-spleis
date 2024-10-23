@@ -2,7 +2,6 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.InntektbeløpDto
-import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
 
@@ -17,6 +16,13 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
             )
         ) { "inntekt må være gyldig positivt nummer" }
     }
+
+    val månedlig = årlig / 12
+    val daglig = årlig / ARBEIDSDAGER_PER_ÅR
+    val dagligInt = daglig.toInt()
+
+    fun rundTilDaglig() = daglig.roundToInt().daglig
+    fun rundNedTilDaglig() = dagligInt.daglig
 
     companion object {
         //8-10 ledd 3
@@ -42,12 +48,6 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
         val INGEN = 0.daglig
 
-        private val tilDagligDoubleMemoized = { tall: Double -> tall / ARBEIDSDAGER_PER_ÅR }.memoize()
-        private val tilMånedligDoubleMemoized = { tall: Double -> tall / 12 }.memoize()
-        private val tilDagligIntMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).toInt() }
-        private val rundTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).roundToInt().daglig }.memoize()
-        private val rundNedTilDagligMemoized = { tall: Double -> tilDagligIntMemoized(tall).daglig }.memoize()
-
         fun gjenopprett(dto: InntektbeløpDto): Inntekt {
             return when (dto) {
                 is InntektbeløpDto.Årlig -> Inntekt(dto.beløp)
@@ -57,12 +57,6 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
             }
         }
     }
-
-    val månedlig get(): Double = tilMånedligDoubleMemoized(årlig)
-    val daglig get(): Double = tilDagligDoubleMemoized(årlig)
-    val dagligInt get(): Int = tilDagligIntMemoized(årlig)
-    fun rundTilDaglig() = rundTilDagligMemoized(årlig)
-    fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
 
     operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
 
