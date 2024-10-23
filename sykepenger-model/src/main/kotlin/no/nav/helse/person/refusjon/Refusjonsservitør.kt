@@ -9,8 +9,8 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 
 internal class Refusjonsservitør private constructor(
-    refusjonstidslinje: Beløpstidslinje,
-    startdatoer: Iterable<LocalDate>
+    refusjonstidslinje: Beløpstidslinje, // enten fra sbh eller im
+    startdatoer: Iterable<LocalDate> // for im er dette typisk bare første fraværsdag, mens ved sbh-overstyring kan det være flere datoer
 ) {
     private val sorterteStartdatoer = startdatoer.toSortedSet()
     private val sisteBit = sorterteStartdatoer.last() to refusjonstidslinje.fraOgMed(sorterteStartdatoer.last())
