@@ -13,6 +13,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -142,7 +143,6 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.økonomi.Inntekt
@@ -1140,7 +1140,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun beregnUtbetalinger(hendelse: IAktivitetslogg): Boolean {
+    private fun beregnUtbetalinger(hendelse: IAktivitetslogg): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
@@ -1151,18 +1151,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(hendelse, grunnlagsdata)
-
-        try {
-            perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
-                val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
-                val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode, other.jurist)
-                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatoresultat, utbetalingstidslinje, grunnlagsdata)
-            }
-            return true
-        } catch (err: UtbetalingstidslinjeBuilderException) {
-            err.logg(hendelse)
+        perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
+            val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
+            val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode, other.jurist)
+            other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatoresultat, utbetalingstidslinje, grunnlagsdata)
         }
-        return false
+        return maksdatofilter.maksdatoresultatForVedtaksperiode(periode, EmptyLog)
     }
 
     private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(hendelse: IAktivitetslogg, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
@@ -1663,8 +1657,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
-            if (!vedtaksperiode.beregnUtbetalinger(ytelser)) return
-            vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse())
+            val maksdatoresultat = vedtaksperiode.beregnUtbetalinger(ytelser)
+            ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, maksdatoresultat.maksdato, vedtaksperiode.erForlengelse())
             vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
         }
 
@@ -1917,7 +1911,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
             super.beregnUtbetalinger(vedtaksperiode, ytelser)
-            if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse()) // LOL vi skal til AUU så bare slenger på noen varsler her
+            if (!vedtaksperiode.forventerInntekt()) {
+                // LOL vi skal til AUU så bare slenger på noen varsler her
+                ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode.endInclusive, vedtaksperiode.erForlengelse())
+            }
         }
 
         private fun tilstand(
@@ -2085,8 +2082,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
-            if (!vedtaksperiode.beregnUtbetalinger(ytelser)) return vedtaksperiode.forkast(ytelser)
-            vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse())
+            val maksdatoresultat = vedtaksperiode.beregnUtbetalinger(ytelser)
+            ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, maksdatoresultat.maksdato, vedtaksperiode.erForlengelse())
             if (ytelser.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(ytelser)
             vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning)
         }

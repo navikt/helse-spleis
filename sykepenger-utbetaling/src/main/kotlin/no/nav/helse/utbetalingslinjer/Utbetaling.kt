@@ -210,8 +210,6 @@ class Utbetaling private constructor(
         if (harNegativtTotalbeløp) simuleringHendelse.varsel(Varselkode.RV_SI_3)
     }
 
-    fun valider(valider: (maksdato: LocalDate) -> Unit) = valider(this.maksdato)
-
     fun håndter(hendelse: AnnullerUtbetalingHendelse) {
         godkjenn(hendelse, hendelse.vurdering)
     }

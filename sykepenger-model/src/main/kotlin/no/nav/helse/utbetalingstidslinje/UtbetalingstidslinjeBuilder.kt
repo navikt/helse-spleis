@@ -5,8 +5,6 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.UkjentDag
@@ -17,17 +15,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
-
-internal sealed class UtbetalingstidslinjeBuilderException(message: String) : RuntimeException(message) {
-    internal fun logg(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.info("Feilmelding: $message")
-        aktivitetslogg.funksjonellFeil(RV_UT_3)
-    }
-
-    internal class ProblemdagException(melding: String) : UtbetalingstidslinjeBuilderException(
-        "Forventet ikke ProblemDag i utbetalingstidslinjen. Melding: $melding"
-    )
-}
 
 internal class VilkårsprøvdSkjæringstidspunkt(
     private val skjæringstidspunkt: LocalDate,

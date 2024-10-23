@@ -154,12 +154,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         siste!!.valider(simulering)
     }
 
-    internal fun valider(ytelser: Ytelser, erForlengelse: Boolean) {
-        val sisteUtbetaling = siste
-        if (sisteUtbetaling == null) ytelser.valider(periode(), skjæringstidspunkt(), periode().endInclusive, erForlengelse)
-        else sisteUtbetaling.valider { maksdato -> ytelser.valider(periode(), skjæringstidspunkt(), maksdato, erForlengelse) }
-    }
-
     internal fun erKlarForGodkjenning() = siste?.erKlarForGodkjenning() ?: false
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)

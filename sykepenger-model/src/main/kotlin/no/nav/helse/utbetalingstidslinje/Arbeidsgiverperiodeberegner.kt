@@ -4,6 +4,8 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
@@ -43,7 +45,7 @@ internal class Arbeidsgiverperiodeberegner(
                 is Dag.ForeldetSykedag -> foreldetDag(dag.dato)
                 is Dag.FriskHelgedag -> arbeidsdag(dag.dato)
                 is Dag.Permisjonsdag -> tilstand.feriedag(this, dag.dato)
-                is Dag.ProblemDag -> throw UtbetalingstidslinjeBuilderException.ProblemdagException(dag.melding)
+                is Dag.ProblemDag -> throw ProblemdagException(dag.melding)
                 is Dag.SykHelgedag -> {
                     ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager, dag.dato)
                     sykedag(dag.dato)
@@ -295,5 +297,12 @@ internal class Arbeidsgiverperiodeberegner(
             }
             builder.aktivArbeidsgiverperioderesultat = null
         }
+    }
+}
+
+class ProblemdagException(melding: String) : RuntimeException("Forventet ikke ProblemDag i utbetalingstidslinjen. Melding: $melding") {
+    fun logg(aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Feilmelding: $message")
+        aktivitetslogg.funksjonellFeil(RV_UT_3)
     }
 }
