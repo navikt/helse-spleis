@@ -22,7 +22,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class OmfordelRefusjonsopplysningerTest {
@@ -132,7 +131,6 @@ internal class OmfordelRefusjonsopplysningerTest {
         )
     }
 
-    @Disabled("nei, denne virker ikke i det hele tatt, fordi vi sliter med å få rett beløpstidslinje fra refusjonshistorikk")
     @Test
     fun `hva med to behandlinger?`() {
         val endringJan = endring(januar, 1.januar til 16.januar)
@@ -182,7 +180,7 @@ internal class DingsForOmfordeling(
         sisteBehandlingIHverVedtaksperiode.map { sisteBehandlingForÉnVedtaksperiode ->
             sisteBehandlingForÉnVedtaksperiode to (sisteBehandlingForÉnVedtaksperiode.skjæringstidspunkt til sisteBehandlingForÉnVedtaksperiode.periode().endInclusive)
         }.associate { (behandling, søkevindu) ->
-            behandling to historikkSomSkalFordeles.beløpstidslinje(søkevindu)
+            behandling to historikkSomSkalFordeles.beløpstidslinje(søkevindu).subset(behandling.periode())
         }
 
     data class OmfordelteRefusjonstidslinjer(
