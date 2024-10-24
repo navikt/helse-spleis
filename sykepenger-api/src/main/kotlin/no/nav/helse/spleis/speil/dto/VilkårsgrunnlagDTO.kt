@@ -59,7 +59,7 @@ data class Refusjonselement(
 )
 
 enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert, Søknad
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert
 }
 
 data class SkjønnsmessigFastsattDTO(
