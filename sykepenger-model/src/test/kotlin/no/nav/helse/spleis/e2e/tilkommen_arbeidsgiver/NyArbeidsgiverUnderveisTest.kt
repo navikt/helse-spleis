@@ -163,7 +163,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                     assertEquals(100, dag.økonomi.inspektør.totalGrad)
                 }
                 utbetalingInspektør.utbetalingstidslinje[10.januar].also { dag ->
-                    assertEquals(100, dag.økonomi.inspektør.totalGrad)
+                    assertEquals(83, dag.økonomi.inspektør.totalGrad)
                 }
             }
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør ->

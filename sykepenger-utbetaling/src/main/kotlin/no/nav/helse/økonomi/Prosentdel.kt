@@ -27,17 +27,17 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
             subsumsjonslogg.block(GRENSE.toDouble())
         }
 
-        internal fun Collection<Pair<Prosentdel, Double>>.average(total: Double): Prosentdel {
-            return map { it.first to it.second.toBigDecimal(mc) }.average(total.toBigDecimal(mc))
+        internal fun Collection<Pair<Prosentdel, Double>>.average(tilkommet: Double, total: Double): Prosentdel {
+            return map { it.first to it.second.toBigDecimal(mc) }.average(tilkommet.toBigDecimal(mc), total.toBigDecimal(mc))
         }
 
-        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(total: BigDecimal): Prosentdel {
-            if (total <= BigDecimal.ZERO) return map { (sykdomsgrad, _) ->
-                if (sykdomsgrad > 0.prosent) sykdomsgrad to BigDecimal.ONE else sykdomsgrad to BigDecimal.ZERO
-            }.average(size.toBigDecimal())
-            val teller = this.sumOf { it.first.not().brøkdel.multiply(it.second, mc) }
-            val totalInntektsbevaringsgrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
-            return Prosentdel(totalInntektsbevaringsgrad).not()
+        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(tilkommet: BigDecimal, total: BigDecimal): Prosentdel {
+            require(total > BigDecimal.ZERO) {
+                "Kan ikke dele på 0"
+            }
+            val teller = maxOf(BigDecimal.ZERO, this.sumOf { it.first.brøkdel.multiply(it.second, mc) } - tilkommet)
+            val totalInntektstapGrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
+            return Prosentdel(totalInntektstapGrad)
         }
 
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
@@ -62,6 +62,8 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
     }
 
     internal fun gradér(beløp: Double) = beløp.toBigDecimal(mc).divide(this.brøkdel, mc).toDouble().roundToInt().toDouble()
+
+    internal fun resiprok() = BigDecimal.ONE.divide(this.brøkdel, mc).toDouble()
 
     internal fun times(other: Double) = (other.toBigDecimal(mc) * brøkdel).toDouble()
 

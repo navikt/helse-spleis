@@ -45,8 +45,23 @@ class Økonomi private constructor(
         private fun List<Økonomi>.beregningsgrunnlag() = map { it.beregningsgrunnlag }.summer()
         private fun List<Økonomi>.tilkommet() = filter { it.beregningsgrunnlag == INGEN }.map { it.aktuellDagsinntekt }.summer()
 
+        private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
+            val beregningsgrunnlag = økonomiList.beregningsgrunnlag()
+            if (beregningsgrunnlag == INGEN) {
+                return (økonomiList.sumOf { gradStrategi(it).times(100.0) } / økonomiList.size).prosent
+            }
+            val tilkommet = økonomiList.firstNotNullOfOrNull { it.grunnbeløpgrense }?.let { grunnbeløp ->
+                // Er det litt rart at vi må justerte den tilkomne inntekten med grunnbeløpet?
+                val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
+                val ratio = (sykepengegrunnlagBegrenset6G ratio beregningsgrunnlag)
+                if (ratio > 0.prosent) økonomiList.tilkommet() * ratio.resiprok() else INGEN
+            } ?: INGEN
+            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.beregningsgrunnlag }, tilkommet, beregningsgrunnlag)
+            return totalgrad
+        }
+
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.beregningsgrunnlag }, økonomiList.beregningsgrunnlag())
+            val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::sykdomsgrad)
             return økonomiList.map { økonomi: Økonomi ->
                 økonomi.kopierMed(totalgrad = totalgrad)
             }
@@ -54,8 +69,7 @@ class Økonomi private constructor(
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalGrad.erUnderGrensen() }
 
-        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
-            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.beregningsgrunnlag }, økonomiList.beregningsgrunnlag())
+        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
 
         fun betal(økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
@@ -77,7 +91,7 @@ class Økonomi private constructor(
             val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
             val er6GBegrenset = beregningsgrunnlag > grunnbeløp
 
-            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad - økonomiList.tilkommet()).rundTilDaglig())
+            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
             val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
             val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) }, personBeløp)

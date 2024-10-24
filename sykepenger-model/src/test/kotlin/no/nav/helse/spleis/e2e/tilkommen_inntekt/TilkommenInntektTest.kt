@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.math.roundToInt
 
 internal class TilkommenInntektTest : AbstractDslTest() {
 
@@ -393,18 +394,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             inspektør.sisteUtbetaling().utbetalingstidslinje.forEach {
                 if (it is Utbetalingsdag.NavDag && it.dato.month == Month.FEBRUARY) {
-                    assertEquals(995.daglig, it.økonomi.arbeidsgiverbeløp)
-                    assertForventetFeil(
-                        forklaring = "Morten har figuren i excalidraw med mellomutregningene",
-                        nå = {
-                            assertEquals(100.prosent, it.økonomi.totalGrad)
-                        },
-                        ønsket = {
-                            assertEquals(35.prosent, it.økonomi.totalGrad)
-                        }
-                    )
+                    assertEquals(35, it.økonomi.totalGrad.toDouble().roundToInt())
                 }
             }
+            assertUtbetalingsbeløp(2.vedtaksperiode, 995, 4154, subset = 1.februar(2025) til 28.februar(2025))
         }
     }
 
