@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.BehandlingObserver
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
@@ -68,9 +69,9 @@ internal class OmfordelRefusjonsopplysningerTest {
         }
     }
     val etTimestamp = LocalDateTime.now()
-    private fun endring(periode: Periode, arbeidsgiverPeriode: Periode, skjæringstidspunkt: LocalDate = periode.start) = Behandlinger.Behandling.Endring(
+    private fun endring(periode: Periode, arbeidsgiverPeriode: Periode, skjæringstidspunkt: LocalDate = periode.start, tidsstempel: LocalDateTime = etTimestamp) = Behandlinger.Behandling.Endring(
         id = UUID.randomUUID(),
-        tidsstempel = etTimestamp,
+        tidsstempel = tidsstempel,
         sykmeldingsperiode = periode,
         periode = periode,
         grunnlagsdata = null,
@@ -83,27 +84,27 @@ internal class OmfordelRefusjonsopplysningerTest {
         arbeidsgiverperiode = listOf(arbeidsgiverPeriode),
         maksdatoresultat = Maksdatoresultat.IkkeVurdert)
 
-    private fun behandling(endring: Behandlinger.Behandling.Endring) = Behandlinger.Behandling(
+    private fun behandling(endring: Behandlinger.Behandling.Endring, tidsstempel: LocalDateTime = etTimestamp) = Behandlinger.Behandling(
         observatører = listOf(observatør),
         tilstand = Behandlinger.Behandling.Tilstand.Uberegnet,
         endringer = mutableListOf(endring),
-        avsluttet = etTimestamp,
+        avsluttet = tidsstempel,
         kilde = Behandlinger.Behandlingkilde(
             UUID.randomUUID(),
-            etTimestamp,
-            etTimestamp,
+            tidsstempel,
+            tidsstempel,
             Avsender.SYSTEM
         )
     )
 
-    private fun refusjon(meldingsref: UUID, førsteFraværsdag: LocalDate, arbeidsgiverPeriode: Periode, beløp: Inntekt) = Refusjonshistorikk.Refusjon(
+    private fun refusjon(meldingsref: UUID, førsteFraværsdag: LocalDate, arbeidsgiverPeriode: Periode, beløp: Inntekt, tidsstempel: LocalDateTime = etTimestamp) = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = meldingsref,
         førsteFraværsdag = førsteFraværsdag,
         arbeidsgiverperioder = listOf(arbeidsgiverPeriode),
         beløp = beløp,
         sisteRefusjonsdag = null,
         endringerIRefusjon = emptyList(),
-        tidsstempel = etTimestamp
+        tidsstempel = tidsstempel
     )
 
     @Test
@@ -154,6 +155,39 @@ internal class OmfordelRefusjonsopplysningerTest {
                     februar,
                     1000.månedlig,
                     Kilde(imUUID, Avsender.ARBEIDSGIVER, etTimestamp)
+                )
+            ), rest = null
+        )
+        assertEquals(ønsketResultat, resultat)
+    }
+
+    @Test
+    fun `hva med to ikke-sammenhengende behandlinger?`() {
+        val timestampMars = LocalDateTime.now().plusDays(1)
+
+        val endringJan = endring(januar, 1.januar til 16.januar)
+        val behandlingJan = behandling(endringJan)
+        val endringMars = endring(mars, 1.mars til 16.mars, skjæringstidspunkt = 1.mars, timestampMars)
+        val behandlingMars = behandling(endringMars, timestampMars)
+        val historikk = Refusjonshistorikk()
+        val imUUID = UUID.randomUUID()
+        val refusjonJan = refusjon(imUUID, 1.januar, 1.januar til 16.januar, 1000.månedlig)
+        historikk.leggTilRefusjon(refusjonJan)
+        val refusjonMars = refusjon(imUUID, 1.mars, 1.mars til 16.mars, 2000.månedlig, timestampMars)
+        historikk.leggTilRefusjon(refusjonMars)
+
+        val resultat = DingsForOmfordeling(listOf(behandlingJan, behandlingMars), historikk).reomfordel()
+        val ønsketResultat = DingsForOmfordeling.OmfordelteRefusjonstidslinjer(
+            omplasserteRefusjonstidslinjer = mapOf(
+                behandlingJan to Beløpstidslinje.fra(
+                    januar,
+                    1000.månedlig,
+                    Kilde(imUUID, Avsender.ARBEIDSGIVER, etTimestamp)
+                ),
+                behandlingMars to Beløpstidslinje.fra(
+                    mars,
+                    2000.månedlig,
+                    Kilde(imUUID, Avsender.ARBEIDSGIVER, timestampMars)
                 )
             ), rest = null
         )
