@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
+import no.nav.helse.hendelser.OmfordelRefusjonsopplysninger
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
@@ -571,6 +572,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId())
                         is Ytelser -> andreYtelser(meldingsreferanseId())
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId())
+                        is OmfordelRefusjonsopplysninger, //TODO: denne burde nok spores, om vi klarer å implementere den
                         is Behandlingsavgjørelse,
                         is Revurderingseventyr,
                         is SykdomshistorikkHendelse -> null
