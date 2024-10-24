@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 
 internal class SlettPersonRiver(
@@ -28,5 +29,16 @@ internal class SlettPersonRiver(
         val fødselsnummer = packet["fødselsnummer"].asText()
         sikkerlogg.info("Sletter person med fødselsnummer: $fødselsnummer")
         personRepository.slett(fødselsnummer)
+        context.publish(fødselsnummer, lagPersonSlettet(fødselsnummer))
+    }
+
+    @Language("JSON")
+    private fun lagPersonSlettet(fødselsnummer: String): String {
+        return """
+            {
+                "@event_name": "person_slettet",
+                "fødselsnummer": "$fødselsnummer"
+            }
+        """.trimIndent()
     }
 }

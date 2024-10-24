@@ -43,6 +43,16 @@ internal class AppTest: DBTest() {
         assertEquals(1, finnMelding("1234"))
     }
 
+    @Test
+    fun `sender kvittering etter at slettingen er gjort`() {
+        opprettPerson("123")
+        testRapid.sendTestMessage(slettemelding("123"))
+        assertEquals(0, finnPerson("123"))
+        val kvittering = testRapid.inspektør.message(0)
+        assertEquals("person_slettet", kvittering["@event_name"].asText())
+        assertEquals("123", kvittering["fødselsnummer"].asText())
+    }
+
     private fun slettemelding(fødselsnummer: String) = JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
 
     private fun opprettPerson(fødselsnummer: String) {
