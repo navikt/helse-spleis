@@ -63,6 +63,17 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
+    fun `vurderer ikke maksdato for infotrygdtidslinje som strekker seg ut over vedtaksperioden`() {
+        val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
+        val infotrygdlinje = tidslinjeOf(200.ARB, 10.NAVDAGER, startDato = 1.januar(2019))
+        val avvisteDager = listOf(a1).utbetalingsavgrenser(UNG_PERSON_FNR_2018, a1.periode(), infotrygdlinje)
+        assertEquals(emptyList<Any>(), avvisteDager)
+        assertEquals(248, forbrukteDager)
+        assertEquals(0, gjenståendeDager)
+        assertEquals(setOf(28.desember), maksdatoer)
+    }
+
+    @Test
     fun `avviser ikke dager som strekker seg forbi arbeidsgiver som beregner utbetalinger`() {
         val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
         val a2 = tidslinjeOf(16.AP, 250.NAVDAGER, 182.ARB, 10.NAV)

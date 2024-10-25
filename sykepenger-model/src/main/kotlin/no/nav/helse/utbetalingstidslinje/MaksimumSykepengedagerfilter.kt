@@ -48,7 +48,7 @@ internal class MaksimumSykepengedagerfilter(
         subsumsjonslogg: Subsumsjonslogg
     ): List<Utbetalingstidslinje> {
         this.subsumsjonslogg = subsumsjonslogg
-        tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
+        tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje.fremTilOgMed(periode.endInclusive))
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
         beregnetTidslinje.forEach { dag ->
