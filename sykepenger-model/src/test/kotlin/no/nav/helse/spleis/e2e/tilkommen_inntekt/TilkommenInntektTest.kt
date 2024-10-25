@@ -81,6 +81,83 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     }
 
     @Test
+    fun `syk fra ghost etter periode med tilkommet inntekt`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    arbeidsgivere = listOf(
+                        a1 to INNTEKT,
+                        a2 to 10000.månedlig
+                    ),
+                    skjæringstidspunkt = 1.januar,
+                ),
+                arbeidsforhold = listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
+                )
+            )
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a3, beløp = 4000.månedlig)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT)
+
+            assertForventetFeil(
+                forklaring = "søknad for februar uten tilkommet inntekt fjerner inntektene fra vilkårsgrunnlaget",
+                nå = {
+                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                        assertEquals(0, tilkommendeInntekter.size)
+                    }
+                },
+                ønsket = {
+
+                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                        assertEquals(1, tilkommendeInntekter.size)
+                        assertEquals(a3, tilkommendeInntekter.single().orgnummer)
+                        assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+                    }
+                }
+            )
+        }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 16.februar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 1430, 1431, subset = 17.februar til 28.februar)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 462, 1431, subset = 17.februar til 28.februar)
+        }
+    }
+
+    @Test
     fun `tilkommen inntekt midt i en førstegangsbehandling`() {
         a1 {
             håndterSøknad(
@@ -224,18 +301,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     skjæringstidspunkt = 1.januar,
                 ),
                 arbeidsforhold = listOf(
-                    Arbeidsforhold(
-                        a1,
-                        LocalDate.EPOCH,
-                        null,
-                        Arbeidsforholdtype.ORDINÆRT
-                    ),
-                    Arbeidsforhold(
-                        a2,
-                        1.januar,
-                        null,
-                        Arbeidsforholdtype.ORDINÆRT
-                    )
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
