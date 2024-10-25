@@ -301,16 +301,22 @@ internal class Inntektsgrunnlag private constructor(
     fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
         if (this.tilkommendeInntekter.isEmpty() && nyeInntekter.isEmpty()) return null
 
-        val tingViHar = tilkommendeInntekter.map { tilkommetInntekt ->
-            val nyTidslinje = nyeInntekter.firstOrNull { it.orgnummer == tilkommetInntekt.orgnummer }?.beløpstidslinje ?: Beløpstidslinje()
-            tilkommetInntekt.copy(
-                beløpstidslinje = tilkommetInntekt.beløpstidslinje.tilOgMed(periode.start.forrigeDag) + nyTidslinje + tilkommetInntekt.beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag)
-            )
-        }
+        val tingViHar = overskrivTilkommetInntekterForPeriode(periode, nyeInntekter)
         val kjenteOrgnumreFraFør = tilkommendeInntekter.map { it.orgnummer }
         val nyeTing = nyeInntekter.filter { it.orgnummer !in kjenteOrgnumreFraFør }
         val resultat = (tingViHar + nyeTing).filterNot { it.beløpstidslinje.isEmpty() }
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = resultat)
+    }
+
+    private fun overskrivTilkommetInntekterForPeriode(periode: Periode, nyeInntekter: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
+        return tilkommendeInntekter.map { tilkommetInntekt ->
+            // tom liste/null som resultat tolkes som av søknaden har fjernet inntekten i den angitte perioden
+            val nyTidslinje = nyeInntekter.firstOrNull { it.orgnummer == tilkommetInntekt.orgnummer }?.beløpstidslinje ?: Beløpstidslinje()
+
+            val tidslinjeFørPerioden = tilkommetInntekt.beløpstidslinje.tilOgMed(periode.start.forrigeDag)
+            val tidslinjeEtterPerioden = tilkommetInntekt.beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag)
+            tilkommetInntekt.copy(beløpstidslinje = tidslinjeFørPerioden + nyTidslinje + tidslinjeEtterPerioden)
+        }
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
