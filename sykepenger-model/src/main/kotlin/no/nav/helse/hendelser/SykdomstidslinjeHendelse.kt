@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 sealed class SykdomstidslinjeHendelse protected constructor(
     meldingsreferanseId: UUID,
@@ -14,7 +15,7 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     organisasjonsnummer: String,
     private val opprettet: LocalDateTime,
     melding: Melding? = null,
-    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    aktivitetslogg: IAktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg),
     SykdomshistorikkHendelse {
     protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)

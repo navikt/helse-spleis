@@ -15,8 +15,11 @@ sealed class PersonHendelse protected constructor(
     override val meldingsreferanseId: UUID,
     val fødselsnummer: String,
     val aktørId: String,
-    private var aktivitetslogg: IAktivitetslogg
+    aktivitetslogg: IAktivitetslogg
 ) : Hendelse, Aktivitetskontekst {
+
+    var aktivitetslogg = aktivitetslogg
+        private set
 
     init {
         aktivitetslogg.kontekst(this)

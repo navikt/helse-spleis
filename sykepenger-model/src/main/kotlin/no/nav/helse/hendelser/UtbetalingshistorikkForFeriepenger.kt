@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategori
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag
 
@@ -20,7 +21,7 @@ class UtbetalingshistorikkForFeriepenger(
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
-    internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    aktivitetslogg: IAktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
     internal fun utbetalteFeriepengerTilPerson() =
         feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
