@@ -26,7 +26,6 @@ internal class PersonMediator(
     private val meldinger = mutableListOf<Pakke>()
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(PersonMediator::class.java)
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -464,16 +463,7 @@ internal class PersonMediator(
     }
 
     private fun queueMessage(outgoingMessage: JsonMessage) {
-        loggHvisTomHendelseliste(outgoingMessage)
         queueMessage(hendelse.fødselsnummer, leggPåStandardfelter(outgoingMessage).toJson())
-    }
-
-    private fun loggHvisTomHendelseliste(outgoingMessage: JsonMessage) {
-        objectMapper.readTree(outgoingMessage.toJson()).let {
-            if (it.path("hendelser").isArray && it["hendelser"].isEmpty) {
-                logg.warn("Det blir sendt ut et event med tom hendelseliste - ooouups")
-            }
-        }
     }
 
     private data class Pakke (
