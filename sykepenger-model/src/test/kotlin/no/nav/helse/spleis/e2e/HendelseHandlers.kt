@@ -465,7 +465,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
             .sortedBy { it.value.tidspunkt }
             .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
             .map { it.value.generator(aktivitetslogg.barn()) }
-            .filter { im -> im.meldingsreferanseId() !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
+            .filter { im -> im.meldingsreferanseId !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
             .filter { im -> im.organisasjonsnummer() == orgnummer }
         InntektsmeldingerReplay(
             meldingsreferanseId = UUID.randomUUID(),
@@ -543,7 +543,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Innte
         inntektsmelding.håndter(Person::håndter)
         førReplay()
     }
-    return inntektsmelding.meldingsreferanseId()
+    return inntektsmelding.meldingsreferanseId
 }
 
 internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =

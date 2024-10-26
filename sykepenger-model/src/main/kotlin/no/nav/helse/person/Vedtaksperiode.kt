@@ -259,7 +259,7 @@ internal class Vedtaksperiode private constructor(
                 behandlinger.sisteInntektsmeldingDagerId()?.let {
                     person.arbeidsgiveropplysningerKorrigert(
                         PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                            korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId(),
+                            korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId,
                             korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
                             korrigertInntektsmeldingId = it
                         )
@@ -271,12 +271,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding): Boolean {
         if (!inntektsmelding.leggTil(behandlinger)) return true
-        person.emitInntektsmeldingHåndtert(inntektsmelding.meldingsreferanseId(), id, organisasjonsnummer)
+        person.emitInntektsmeldingHåndtert(inntektsmelding.meldingsreferanseId, id, organisasjonsnummer)
         return false
     }
 
     private fun søknadHåndtert(søknad: Søknad) {
-        person.emitSøknadHåndtert(søknad.meldingsreferanseId(), id, organisasjonsnummer)
+        person.emitSøknadHåndtert(søknad.meldingsreferanseId, id, organisasjonsnummer)
     }
 
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting) {
@@ -676,7 +676,7 @@ internal class Vedtaksperiode private constructor(
             korrigertInntektsmeldingId?.let {
                 person.arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigerendeInntektsopplysningId = dager.meldingsreferanseId(),
+                        korrigerendeInntektsopplysningId = dager.meldingsreferanseId,
                         korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
                         korrigertInntektsmeldingId = it
                     )
@@ -2591,7 +2591,7 @@ internal class Vedtaksperiode private constructor(
             return startdatoer.values.toSet()
         }
         internal fun List<Vedtaksperiode>.refusjonseventyr(hendelse: Hendelse) = firstOrNull {
-            it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId()))
+            it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId))
         }?.let { Revurderingseventyr.Companion.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
         // Fredet funksjonsnavn

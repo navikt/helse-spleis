@@ -54,8 +54,8 @@ internal class DagerFraInntektsmelding(
 
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
     // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
-    internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId(), mottatt)
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
+    internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId, mottatt)
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
@@ -182,12 +182,12 @@ internal class DagerFraInntektsmelding(
 
     internal fun bitAvInntektsmelding(vedtaksperiode: Periode): BitAvInntektsmelding? {
         val sykdomstidslinje = håndterDager(vedtaksperiode) ?: return null
-        return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this, innsendt(), registrert(), navn())
+        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, this, innsendt(), registrert(), navn())
     }
 
     internal fun tomBitAvInntektsmelding(vedtaksperiode: Periode): BitAvInntektsmelding {
         håndterDager(vedtaksperiode)
-        return BitAvInntektsmelding(meldingsreferanseId(), Sykdomstidslinje(), this, innsendt(), registrert(), navn())
+        return BitAvInntektsmelding(meldingsreferanseId, Sykdomstidslinje(), this, innsendt(), registrert(), navn())
     }
 
     private fun håndterDager(vedtaksperiode: Periode): Sykdomstidslinje? {
@@ -311,7 +311,7 @@ internal class DagerFraInntektsmelding(
     }
 
     internal class BitAvInntektsmelding(
-        private val meldingsreferanseId: UUID,
+        override val meldingsreferanseId: UUID,
         private val sykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
         private val innsendt: LocalDateTime,
@@ -325,7 +325,6 @@ internal class DagerFraInntektsmelding(
         override fun innsendt() = innsendt
         override fun registrert() = registert
         override fun navn() = navn
-        override fun meldingsreferanseId() = meldingsreferanseId
         override fun avsender() = ARBEIDSGIVER
     }
 }

@@ -208,9 +208,8 @@ internal val Int.FORELDET
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 
-internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), private val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
+internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), override val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
     override fun oppdaterFom(other: Periode) = other
-    override fun meldingsreferanseId() =  meldingsreferanseId
     override fun sykdomstidslinje() = tidslinje
     override fun innsendt() = error("ikke i bruk")
     override fun registrert() = error("ikke i bruk")

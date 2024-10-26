@@ -73,6 +73,7 @@ internal class TurneringsnøkkelTest {
             val aareg = Aareg.kilde
         }
 
+        override val meldingsreferanseId = UUID.randomUUID()
         val kilde: Hendelseskilde = Hendelseskilde(this::class, UUID.randomUUID(), LocalDateTime.now())
 
         // Objects impersonating real-life sources of sickness timeline days
@@ -98,10 +99,6 @@ internal class TurneringsnøkkelTest {
         }
 
         override fun navn(): String {
-            error("ikke i bruk")
-        }
-
-        override fun meldingsreferanseId(): UUID {
             error("ikke i bruk")
         }
 

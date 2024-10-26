@@ -61,7 +61,7 @@ class Ytelser(
     ) {
         val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
             if (!ytelse.skalOppdatereHistorikk(this, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
-            else ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
+            else ytelse.sykdomstidslinje(meldingsreferanseId, registrert())
         }
         if (sykdomstidslinjer.isEmpty()) return
         this.sykdomstidslinje = sykdomstidslinjer.merge(beste = default)

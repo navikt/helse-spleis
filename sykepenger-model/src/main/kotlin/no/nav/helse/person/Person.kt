@@ -696,7 +696,7 @@ class Person private constructor(
 
     internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Inntektsmelding, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
         observers.forEach {
-            it.inntektsmeldingIkkeHåndtert(hendelse.meldingsreferanseId(), organisasjonsnummer, harPeriodeInnenfor16Dager)
+            it.inntektsmeldingIkkeHåndtert(hendelse.meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
     }
 

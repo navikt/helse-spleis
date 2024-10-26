@@ -492,7 +492,7 @@ internal class HendelseMediator(
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         handler: (Person) -> Unit
     ) {
-        val personidentifikator = Personidentifikator(hendelse.fødselsnummer())
+        val personidentifikator = Personidentifikator(hendelse.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
     }
 
@@ -502,7 +502,7 @@ internal class HendelseMediator(
         context: MessageContext,
         handler: (Person) -> Unit
     ) {
-        val personidentifikator = Personidentifikator(hendelse.fødselsnummer())
+        val personidentifikator = Personidentifikator(hendelse.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, null, message, hendelse, context, handler = handler)
     }
     private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
@@ -514,10 +514,10 @@ internal class HendelseMediator(
         historiskeFolkeregisteridenter: Set<Personidentifikator> = emptySet(),
         handler: (Person) -> Unit
     ) {
-        val subsumsjonMediator = SubsumsjonMediator(hendelse.fødselsnummer(), message, versjonAvKode)
+        val subsumsjonMediator = SubsumsjonMediator(hendelse.fødselsnummer, message, versjonAvKode)
         val personMediator = PersonMediator(message, hendelse)
-        val datadelingMediator = DatadelingMediator(hendelse, hendelse.meldingsreferanseId(), hendelse.fødselsnummer(), hendelse.aktørId())
-        person(personidentifikator, message, hendelse.aktørId(), historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
+        val datadelingMediator = DatadelingMediator(hendelse, hendelse.meldingsreferanseId, hendelse.fødselsnummer, hendelse.aktørId)
+        person(personidentifikator, message, hendelse.aktørId, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person)

@@ -51,13 +51,13 @@ class Vilkårsgrunnlag(
     internal fun avklarSykepengegrunnlag(person: Person, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
             SkattSykepengegrunnlag(
-                hendelseId = meldingsreferanseId(),
+                hendelseId = meldingsreferanseId,
                 dato = skjæringstidspunkt,
                 inntektsopplysninger = emptyList(),
                 ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
             )
         }
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId(), subsumsjonslogg)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId, subsumsjonslogg)
     }
 
     internal fun valider(inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
@@ -80,7 +80,7 @@ class Vilkårsgrunnlag(
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             vurdertOk = sykepengegrunnlagOk && opptjeningvurderingOk && medlemskapsvurderingOk,
-            meldingsreferanseId = meldingsreferanseId(),
+            meldingsreferanseId = meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )
         return this

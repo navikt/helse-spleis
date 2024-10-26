@@ -28,7 +28,7 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
                     .let { JsonMessage.newNeed(behovMap.keys, it) }
                     .also {
                         sikkerLogg.info("sender behov for {}:\n{}", behovMap.keys, it.toJson())
-                        context.publish(hendelse.fødselsnummer(), it.toJson())
+                        context.publish(hendelse.fødselsnummer, it.toJson())
                     }
             }
     }

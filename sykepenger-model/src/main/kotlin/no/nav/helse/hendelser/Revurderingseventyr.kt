@@ -78,7 +78,7 @@ class Revurderingseventyr private constructor(
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {
         if (vedtaksperioder.isEmpty()) return
-        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.meldingsreferanseId())
+        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.meldingsreferanseId)
     }
 
     internal fun loggDersomKorrigerendeSøknad(hendelse: IAktivitetslogg, loggMelding: String) {

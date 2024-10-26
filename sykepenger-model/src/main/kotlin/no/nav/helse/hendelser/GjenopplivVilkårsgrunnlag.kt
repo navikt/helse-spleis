@@ -24,8 +24,8 @@ class GjenopplivVilkårsgrunnlag(
     }
 
     internal fun arbeidsgiverinntektsopplysninger(skjæringstidspunkt: LocalDate) = arbeidsgiveropplysninger.map { (organisasjonsnummer, inntekt) ->
-        val inntektsmeldingInntekt = Inntektsmelding(skjæringstidspunkt, meldingsreferanseId(), inntekt)
-        ArbeidsgiverInntektsopplysning(organisasjonsnummer, skjæringstidspunkt til LocalDate.MAX, inntektsmeldingInntekt, Refusjonsopplysning(meldingsreferanseId(), skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
+        val inntektsmeldingInntekt = Inntektsmelding(skjæringstidspunkt, meldingsreferanseId, inntekt)
+        ArbeidsgiverInntektsopplysning(organisasjonsnummer, skjæringstidspunkt til LocalDate.MAX, inntektsmeldingInntekt, Refusjonsopplysning(meldingsreferanseId, skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
     }
 
     internal fun valider(organisasjonsnummere: List<String>) {

@@ -166,7 +166,7 @@ class Søknad(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             sykdomstidslinje = sykdomstidslinje,
-            dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId()),
+            dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             subsumsjonslogg = subsumsjonslogg
         )
@@ -177,7 +177,7 @@ class Søknad(
     }
 
     internal fun nyeInntekterUnderveis(): List<NyInntektUnderveis> {
-        val tilkommetkilde = Kilde(meldingsreferanseId(), Avsender.SYKMELDT, registrert)
+        val tilkommetkilde = Kilde(meldingsreferanseId, Avsender.SYKMELDT, registrert)
         return if (!tålerTilkommenInntekt()) emptyList() else tilkomneInntekter.map {
             it.beløpstidslinje(tilkommetkilde)
         }

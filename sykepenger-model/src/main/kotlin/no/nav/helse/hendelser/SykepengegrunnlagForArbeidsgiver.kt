@@ -9,7 +9,7 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 class SykepengegrunnlagForArbeidsgiver(
-    private val meldingsreferanseId: UUID,
+    meldingsreferanseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val skjæringstidspunkt: LocalDate,
     aktørId: String,
@@ -26,8 +26,8 @@ class SykepengegrunnlagForArbeidsgiver(
     }
 
     internal fun lagreInntekt(inntektshistorikk: Inntektshistorikk, refusjonshistorikk: Refusjonshistorikk) {
-        inntektshistorikk.leggTil(inntekter.somInntektsmelding(skjæringstidspunkt, meldingsreferanseId()))
-        val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId(), skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
+        inntektshistorikk.leggTil(inntekter.somInntektsmelding(skjæringstidspunkt, meldingsreferanseId))
+        val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
         refusjonshistorikk.leggTilRefusjon(refusjon)
     }
 

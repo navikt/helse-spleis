@@ -17,6 +17,7 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
         val testkilde = TestHendelse(LocalDateTime.now()).kilde
     }
 
+    override val meldingsreferanseId = UUID.randomUUID()
     val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class.simpleName ?: "Ukjent", UUID.randomUUID(), opprettet)
 
     // Objects impersonating real-life sources of sickness timeline days
@@ -43,10 +44,6 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
     }
 
     override fun navn(): String {
-        error("ikke i bruk")
-    }
-
-    override fun meldingsreferanseId(): UUID {
         error("ikke i bruk")
     }
 

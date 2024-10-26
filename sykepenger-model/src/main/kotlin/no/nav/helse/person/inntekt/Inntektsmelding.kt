@@ -64,7 +64,7 @@ class Inntektsmelding internal constructor(
             PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                 korrigertInntektsmeldingId = hendelseId,
                 korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
-                korrigerendeInntektsopplysningId = inntektsmelding.meldingsreferanseId()
+                korrigerendeInntektsopplysningId = inntektsmelding.meldingsreferanseId
             )
         )
     }

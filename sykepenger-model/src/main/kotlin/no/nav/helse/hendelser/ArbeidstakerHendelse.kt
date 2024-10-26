@@ -11,7 +11,7 @@ sealed class ArbeidstakerHendelse protected constructor(
     private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
 
-    protected constructor(other: ArbeidstakerHendelse) : this(other.meldingsreferanseId(), other.fødselsnummer(), other.aktørId(), other.organisasjonsnummer, other.aktivitetslogg)
+    protected constructor(other: ArbeidstakerHendelse) : this(other.meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.aktivitetslogg)
 
     fun organisasjonsnummer() = organisasjonsnummer
 

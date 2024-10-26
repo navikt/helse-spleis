@@ -27,7 +27,8 @@ enum class Avsender {
 }
 
 sealed interface Hendelse : IAktivitetslogg {
-    fun meldingsreferanseId(): UUID
+    val meldingsreferanseId: UUID
+
     fun innsendt(): LocalDateTime
     fun registrert(): LocalDateTime
     fun avsender(): Avsender

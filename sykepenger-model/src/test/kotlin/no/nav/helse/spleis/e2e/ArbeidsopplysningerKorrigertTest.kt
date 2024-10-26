@@ -218,7 +218,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                     Dagtype.Egenmeldingsdag
                 )
             )
-        ).meldingsreferanseId()
+        ).meldingsreferanseId
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
@@ -240,7 +240,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                     Dagtype.Feriedag
                 )
             )
-        ).meldingsreferanseId()
+        ).meldingsreferanseId
         håndterYtelser(1.vedtaksperiode)
         val actual = observatør.arbeidsgiveropplysningerKorrigert
         assertEquals(0, actual.size)

@@ -86,17 +86,17 @@ class Inntektsmelding(
     )
     private var håndtertInntekt = false
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId())
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
         if (alternativInntektsdato == this.beregnetInntektsdato) return
-        if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId(), beregnetInntekt))) return
+        if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId, beregnetInntekt))) return
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
         subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
-        inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
+        inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId, beregnetInntekt))
         return beregnetInntektsdato
     }
 
@@ -135,7 +135,7 @@ class Inntektsmelding(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
                 inntektGjelder,
-                Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt),
+                Inntektsmelding(beregnetInntektsdato, meldingsreferanseId, beregnetInntekt),
                 refusjonshistorikk.refusjonsopplysninger(startskudd, this)
             )
         )
@@ -219,7 +219,7 @@ class Inntektsmelding(
         val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
         val overlapperMedForkastet = forkastede.overlapperMed(dager)
         if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-            person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId(), relevanteSykmeldingsperioder, organisasjonsnummer)
+            person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId, relevanteSykmeldingsperioder, organisasjonsnummer)
             return info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
@@ -227,7 +227,7 @@ class Inntektsmelding(
     private fun håndtertNå() = håndtertInntekt
     internal fun subsumsjonskontekst() = Subsumsjonskontekst(
         type = KontekstType.Inntektsmelding,
-        verdi = meldingsreferanseId().toString()
+        verdi = meldingsreferanseId.toString()
     )
 
     internal fun skalOppdatereVilkårsgrunnlag(

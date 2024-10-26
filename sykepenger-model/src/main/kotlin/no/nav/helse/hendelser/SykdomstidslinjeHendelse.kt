@@ -21,7 +21,7 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     private val håndtertAv = mutableSetOf<UUID>()
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
     internal val kilde: SykdomshistorikkHendelse.Hendelseskilde =
-        SykdomshistorikkHendelse.Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
+        SykdomshistorikkHendelse.Hendelseskilde(melding ?: this::class, meldingsreferanseId, opprettet)
 
     override fun oppdaterFom(other: Periode): Periode {
         // strekker vedtaksperioden tilbake til å måte første dag
@@ -45,7 +45,7 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     }
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
-        && this.meldingsreferanseId() == other.meldingsreferanseId()
+        && this.meldingsreferanseId == other.meldingsreferanseId
 
     internal fun leggTil(vedtaksperiodeId: UUID, behandlinger: Behandlinger): Boolean {
         håndtertAv.add(vedtaksperiodeId)
@@ -54,6 +54,6 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     }
 
     override fun hashCode(): Int {
-        return meldingsreferanseId().hashCode()
+        return meldingsreferanseId.hashCode()
     }
 }

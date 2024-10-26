@@ -26,7 +26,7 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun håndter(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
         val s = hendelse.sykdomstidslinje()
-        val m = hendelse.meldingsreferanseId()
+        val m = hendelse.meldingsreferanseId
 
         val nyttElement = Element.opprett(m, s)
         val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
@@ -68,7 +68,7 @@ internal class Sykdomshistorikk private constructor(
 
         override fun toString() = beregnetSykdomstidslinje.toString()
 
-        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) = hendelseId == hendelse.meldingsreferanseId()
+        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) = hendelseId == hendelse.meldingsreferanseId
 
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 

@@ -15,7 +15,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
 
 class OverstyrArbeidsgiveropplysninger(
-    private val meldingsreferanseId: UUID,
+    meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String,
     internal val skjæringstidspunkt: LocalDate,

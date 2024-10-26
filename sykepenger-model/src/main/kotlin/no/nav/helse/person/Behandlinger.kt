@@ -35,7 +35,6 @@ import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Dødsmelding
@@ -48,12 +47,10 @@ import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OmfordelRefusjonsopplysninger
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
@@ -356,7 +353,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val registert: LocalDateTime,
         val avsender: Avsender
     ) {
-        constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender())
+        constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId, hendelse.innsendt(), hendelse.registrert(), hendelse.avsender())
 
         fun view() = BehandlingkildeView(meldingsreferanseId, innsendt, registert, avsender)
 
@@ -562,16 +559,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
-                        is Inntektsmelding -> inntektsmeldingInntekt(meldingsreferanseId())
-                        is DagerFraInntektsmelding -> inntektsmeldingDager(meldingsreferanseId())
-                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(meldingsreferanseId()) // huh?
-                        is Søknad -> søknad(meldingsreferanseId())
-                        is OverstyrArbeidsforhold -> overstyrArbeidsforhold(meldingsreferanseId())
-                        is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(meldingsreferanseId())
-                        is OverstyrTidslinje -> overstyrTidslinje(meldingsreferanseId())
-                        is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId())
-                        is Ytelser -> andreYtelser(meldingsreferanseId())
-                        is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId())
+                        is Inntektsmelding -> inntektsmeldingInntekt(meldingsreferanseId)
+                        is DagerFraInntektsmelding -> inntektsmeldingDager(meldingsreferanseId)
+                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(meldingsreferanseId) // huh?
+                        is Søknad -> søknad(meldingsreferanseId)
+                        is OverstyrArbeidsforhold -> overstyrArbeidsforhold(meldingsreferanseId)
+                        is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(meldingsreferanseId)
+                        is OverstyrTidslinje -> overstyrTidslinje(meldingsreferanseId)
+                        is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId)
+                        is Ytelser -> andreYtelser(meldingsreferanseId)
+                        is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId)
                         is OmfordelRefusjonsopplysninger, //TODO: denne burde nok spores, om vi klarer å implementere den
                         is Behandlingsavgjørelse,
                         is Revurderingseventyr,
@@ -986,7 +983,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun dokumentsporingForRefusjonstidslinje(hendelse: Hendelse?) = when (hendelse) {
-            is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId())
+            is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId)
             else -> hendelse?.dokumentsporing()
         } ?: endringer.last().dokumentsporing
 
@@ -1162,7 +1159,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun valideringFeilet(hendelse: Hendelse, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
-            if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) error(feil)
+            if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId) error(feil)
             // Om det er krøll fra tidligere logger vi bare
             else hendelse.info("Eksisterende ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
         }

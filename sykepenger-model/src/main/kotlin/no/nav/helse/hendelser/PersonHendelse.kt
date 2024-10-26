@@ -12,9 +12,9 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
 sealed class PersonHendelse protected constructor(
-    private val meldingsreferanseId: UUID,
-    protected val fødselsnummer: String,
-    protected val aktørId: String,
+    override val meldingsreferanseId: UUID,
+    val fødselsnummer: String,
+    val aktørId: String,
     private var aktivitetslogg: IAktivitetslogg
 ) : Hendelse, Aktivitetskontekst {
 
@@ -32,10 +32,6 @@ sealed class PersonHendelse protected constructor(
         return this
     }
 
-    fun aktørId() = aktørId
-    fun fødselsnummer() = fødselsnummer
-
-    override fun meldingsreferanseId() = meldingsreferanseId
     override fun innsendt(): LocalDateTime = LocalDateTime.now()
     override fun registrert(): LocalDateTime = innsendt()
     override fun avsender() = SYSTEM
@@ -43,9 +39,9 @@ sealed class PersonHendelse protected constructor(
 
     final override fun toSpesifikkKontekst() = this.javaClass.canonicalName.split('.').last().let {
         SpesifikkKontekst(it, mapOf(
-            "meldingsreferanseId" to meldingsreferanseId().toString(),
-            "aktørId" to aktørId(),
-            "fødselsnummer" to fødselsnummer()
+            "meldingsreferanseId" to meldingsreferanseId.toString(),
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer
         ) + kontekst())
     }
 
