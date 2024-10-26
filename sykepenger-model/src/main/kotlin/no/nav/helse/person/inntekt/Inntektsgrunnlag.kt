@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -21,14 +20,12 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.UtbetalingInntektskilde
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
@@ -50,10 +47,11 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjek
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
@@ -300,23 +298,7 @@ internal class Inntektsgrunnlag private constructor(
 
     fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
         if (this.tilkommendeInntekter.isEmpty() && nyeInntekter.isEmpty()) return null
-
-        val tingViHar = overskrivTilkommetInntekterForPeriode(periode, nyeInntekter)
-        val kjenteOrgnumreFraFør = tilkommendeInntekter.map { it.orgnummer }
-        val nyeTing = nyeInntekter.filter { it.orgnummer !in kjenteOrgnumreFraFør }
-        val resultat = (tingViHar + nyeTing).filterNot { it.beløpstidslinje.isEmpty() }
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = resultat)
-    }
-
-    private fun overskrivTilkommetInntekterForPeriode(periode: Periode, nyeInntekter: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
-        return tilkommendeInntekter.map { tilkommetInntekt ->
-            // tom liste/null som resultat tolkes som av søknaden har fjernet inntekten i den angitte perioden
-            val nyTidslinje = nyeInntekter.firstOrNull { it.orgnummer == tilkommetInntekt.orgnummer }?.beløpstidslinje ?: Beløpstidslinje()
-
-            val tidslinjeFørPerioden = tilkommetInntekt.beløpstidslinje.tilOgMed(periode.start.forrigeDag)
-            val tidslinjeEtterPerioden = tilkommetInntekt.beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag)
-            tilkommetInntekt.copy(beløpstidslinje = tidslinjeFørPerioden + nyTidslinje + tidslinjeEtterPerioden)
-        }
+        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = this.tilkommendeInntekter.merge(periode, nyeInntekter))
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
