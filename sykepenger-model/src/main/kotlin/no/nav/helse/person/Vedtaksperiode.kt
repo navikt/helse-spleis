@@ -620,7 +620,6 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(søknad) {
             søknad.valider(vilkårsgrunnlag, jurist)
         }
-        tilstand.videreførRefusjonsopplysningerFraNabo(this, søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
         person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, periode, søknad.nyeInntekterUnderveis(), jurist)
         nesteTilstand()?.also { tilstand(søknad, it) }
@@ -1414,8 +1413,6 @@ internal class Vedtaksperiode private constructor(
             ytelser.info("Etter å ha oppdatert sykdomshistorikken fra ytelser står vi nå i ${type.name}. Avventer beregning av utbetalinger.")
         }
 
-        fun videreførRefusjonsopplysningerFraNabo(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {}
-
         fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
     }
 
@@ -1434,6 +1431,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             infotrygdhistorikk.valider(søknad, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             vedtaksperiode.håndterSøknad(søknad)
+            vedtaksperiode.videreførRefusjonsopplysningerFraNabo(søknad)
             søknad.info("Fullført behandling av søknad")
             vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.Companion.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             if (søknad.harFunksjonelleFeilEllerVerre()) return
@@ -1453,10 +1451,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
-
-        override fun videreførRefusjonsopplysningerFraNabo(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.videreførRefusjonsopplysningerFraNabo(søknad)
-        }
     }
 
     internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
