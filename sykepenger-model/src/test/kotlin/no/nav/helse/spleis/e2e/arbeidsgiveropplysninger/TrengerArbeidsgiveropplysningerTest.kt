@@ -38,6 +38,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -511,7 +512,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
         assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a1))
-        assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
+        assertIngenVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)

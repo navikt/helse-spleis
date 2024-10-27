@@ -294,17 +294,17 @@ internal fun interface AktivitetsloggFilter {
         internal fun UUID.filter() = vedtaksperiode(this)
 
         internal fun vedtaksperiode(vedtaksperiodeId: UUID): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
-            kontekst.kontekstMap["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+            kontekst.kontekstType == "Vedtaksperiode" && kontekst.kontekstMap["vedtaksperiodeId"] == vedtaksperiodeId.toString()
         }
         internal fun vedtaksperiode(idInnhenter: IdInnhenter, orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
-            kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
+            kontekst.kontekstType == "Vedtaksperiode" && kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
         }
 
         internal fun person(personidentifikator: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstMap["fødselsnummer"] == personidentifikator.toString()
         }
         internal fun arbeidsgiver(orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
-            kontekst.kontekstMap["organisasjonsnummer"] == orgnummer
+            kontekst.kontekstType == "Arbeidsgiver" && kontekst.kontekstMap["organisasjonsnummer"] == orgnummer
         }
     }
 
