@@ -357,7 +357,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val registert: LocalDateTime,
         val avsender: Avsender
     ) {
-        constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId, hendelse.innsendt(), hendelse.registrert(), hendelse.avsender())
+        constructor(hendelse: Hendelse): this(hendelse.metadata.meldingsreferanseId, hendelse.metadata.innsendt, hendelse.metadata.registrert, hendelse.metadata.avsender)
 
         fun view() = BehandlingkildeView(meldingsreferanseId, innsendt, registert, avsender)
 
@@ -564,16 +564,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
-                        is Inntektsmelding -> inntektsmeldingInntekt(meldingsreferanseId)
-                        is DagerFraInntektsmelding -> inntektsmeldingDager(meldingsreferanseId)
-                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(meldingsreferanseId) // huh?
-                        is Søknad -> søknad(meldingsreferanseId)
-                        is OverstyrArbeidsforhold -> overstyrArbeidsforhold(meldingsreferanseId)
-                        is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(meldingsreferanseId)
-                        is OverstyrTidslinje -> overstyrTidslinje(meldingsreferanseId)
-                        is Grunnbeløpsregulering -> grunnbeløpendring(meldingsreferanseId)
-                        is Ytelser -> andreYtelser(meldingsreferanseId)
-                        is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(meldingsreferanseId)
+                        is Inntektsmelding -> inntektsmeldingInntekt(metadata.meldingsreferanseId)
+                        is DagerFraInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId)
+                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId) // huh?
+                        is Søknad -> søknad(metadata.meldingsreferanseId)
+                        is OverstyrArbeidsforhold -> overstyrArbeidsforhold(metadata.meldingsreferanseId)
+                        is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(metadata.meldingsreferanseId)
+                        is OverstyrTidslinje -> overstyrTidslinje(metadata.meldingsreferanseId)
+                        is Grunnbeløpsregulering -> grunnbeløpendring(metadata.meldingsreferanseId)
+                        is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
+                        is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(metadata.meldingsreferanseId)
                         is OmfordelRefusjonsopplysninger, //TODO: denne burde nok spores, om vi klarer å implementere den
                         is Behandlingsavgjørelse,
                         is Revurderingseventyr,
@@ -989,7 +989,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun dokumentsporingForRefusjonstidslinje(hendelse: Hendelse?) = when (hendelse) {
-            is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId)
+            is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId)
             else -> hendelse?.dokumentsporing()
         } ?: endringer.last().dokumentsporing
 
@@ -1167,7 +1167,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun valideringFeilet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
-            if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId) error(feil)
+            if (kilde.meldingsreferanseId == hendelse.metadata.meldingsreferanseId) error(feil)
             // Om det er krøll fra tidligere logger vi bare
             else aktivitetslogg.info("Eksisterende ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
         }

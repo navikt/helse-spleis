@@ -1,6 +1,8 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
@@ -11,7 +13,16 @@ class InntektsmeldingerReplay(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val inntektsmeldinger: List<Inntektsmelding>
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiodeId
 

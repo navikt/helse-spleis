@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 
@@ -13,12 +14,17 @@ class Grunnbeløpsregulering(
     fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
-): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
+): PersonHendelse(fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = SYSTEM,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = true
+    )
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) =
         this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun innsendt() = opprettet
 
     internal fun sykefraværstilfelleIkkeFunnet(observer: PersonObserver) {
         observer.sykefraværstilfelleIkkeFunnet(

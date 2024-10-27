@@ -62,7 +62,7 @@ class Revurderingseventyr private constructor(
         inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING, periode)
 
     internal fun inngåVedSaksbehandlerendring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        if (hendelse.avsender() != Avsender.SAKSBEHANDLER) return
+        if (hendelse.metadata.avsender != Avsender.SAKSBEHANDLER) return
         if (!periode.overlapperMed(periodeForEndring)) return
         inngåSomEndring(vedtaksperiode, aktivitetslogg, periode)
     }
@@ -78,7 +78,7 @@ class Revurderingseventyr private constructor(
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {
         if (vedtaksperioder.isEmpty()) return
-        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.meldingsreferanseId)
+        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.metadata.meldingsreferanseId)
     }
 
     internal fun loggDersomKorrigerendeSøknad(aktivitetslogg: IAktivitetslogg, loggMelding: String) {

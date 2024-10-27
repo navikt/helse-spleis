@@ -14,8 +14,15 @@ class Utbetalingshistorikk(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val element: InfotrygdhistorikkElement,
-    private val besvart: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
+    besvart: LocalDateTime
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = SYSTEM,
+        innsendt = besvart,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = true
+    )
 
     internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, historikk: Infotrygdhistorikk): Boolean {
         aktivitetslogg.info("Oppdaterer Infotrygdhistorikk")
@@ -23,7 +30,4 @@ class Utbetalingshistorikk(
         aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret")
         return true
     }
-
-    override fun innsendt() = besvart
-    override fun avsender() = SYSTEM
 }

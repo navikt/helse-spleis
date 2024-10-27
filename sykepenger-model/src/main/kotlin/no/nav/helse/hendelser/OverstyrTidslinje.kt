@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
@@ -43,8 +44,16 @@ class OverstyrTidslinje(
     aktørId: String,
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
-    private val opprettet: LocalDateTime,
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
+    opprettet: LocalDateTime,
+) : SykdomstidslinjeHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = Avsender.SAKSBEHANDLER,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = false
+    )
+    private val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class, metadata.meldingsreferanseId, metadata.innsendt)
 
     private val periode: Periode
     private var sykdomstidslinje: Sykdomstidslinje
@@ -145,8 +154,4 @@ class OverstyrTidslinje(
     override fun trimSykdomstidslinje(fom: LocalDate) {
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }
-
-    override fun avsender() = Avsender.SAKSBEHANDLER
-
-    override fun innsendt() = opprettet
 }

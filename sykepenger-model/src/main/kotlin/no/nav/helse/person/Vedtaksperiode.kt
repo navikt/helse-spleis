@@ -44,7 +44,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -263,7 +262,7 @@ internal class Vedtaksperiode private constructor(
                 behandlinger.sisteInntektsmeldingDagerId()?.let {
                     person.arbeidsgiveropplysningerKorrigert(
                         PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                            korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId,
+                            korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId,
                             korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
                             korrigertInntektsmeldingId = it
                         )
@@ -275,12 +274,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding): Boolean {
         if (!inntektsmelding.leggTil(behandlinger)) return true
-        person.emitInntektsmeldingHåndtert(inntektsmelding.meldingsreferanseId, id, organisasjonsnummer)
+        person.emitInntektsmeldingHåndtert(inntektsmelding.metadata.meldingsreferanseId, id, organisasjonsnummer)
         return false
     }
 
     private fun søknadHåndtert(søknad: Søknad) {
-        person.emitSøknadHåndtert(søknad.meldingsreferanseId, id, organisasjonsnummer)
+        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, organisasjonsnummer)
     }
 
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
@@ -690,7 +689,7 @@ internal class Vedtaksperiode private constructor(
             korrigertInntektsmeldingId?.let {
                 person.arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigerendeInntektsopplysningId = dager.meldingsreferanseId,
+                        korrigerendeInntektsopplysningId = dager.metadata.meldingsreferanseId,
                         korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
                         korrigertInntektsmeldingId = it
                     )
@@ -897,19 +896,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     override fun behandlingForkastet(behandlingId: UUID, hendelse: Hendelse) {
-        val automatiskBehandling = when(hendelse) {
-            is AnnullerUtbetaling -> hendelse.erAutomatisk()
-            is Utbetalingsgodkjenning -> hendelse.automatisert
-            else -> true
-        }
-
         person.behandlingForkastet(PersonObserver.BehandlingForkastetEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = id,
             behandlingId = behandlingId,
-            automatiskBehandling = automatiskBehandling
+            automatiskBehandling = hendelse.metadata.automatiskBehandling
         ))
     }
 
@@ -3051,7 +3044,7 @@ internal class Vedtaksperiode private constructor(
             return startdatoer.values.toSet()
         }
         internal fun List<Vedtaksperiode>.refusjonseventyr(hendelse: Hendelse) = firstOrNull {
-            it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.meldingsreferanseId))
+            it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId))
         }?.let { Revurderingseventyr.Companion.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
         // Fredet funksjonsnavn

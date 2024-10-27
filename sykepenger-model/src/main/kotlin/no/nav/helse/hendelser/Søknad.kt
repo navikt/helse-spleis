@@ -8,7 +8,6 @@ import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
-import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
@@ -45,7 +44,7 @@ class Søknad(
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
     private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
-    private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
+    sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
     sykmeldingSkrevet: LocalDateTime,
@@ -56,10 +55,18 @@ class Søknad(
     private val yrkesskade: Boolean,
     private val egenmeldinger: List<Periode>,
     private val søknadstype: Søknadstype,
-    private val registrert: LocalDateTime,
+    registrert: LocalDateTime,
     private val tilkomneInntekter: List<TilkommenInntekt>
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
+) : SykdomstidslinjeHendelse(fnr, aktørId, orgnummer) {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = Avsender.SYKMELDT,
+        innsendt = sendtTilNAVEllerArbeidsgiver,
+        registrert = registrert,
+        automatiskBehandling = false
+    )
 
+    private val kilde: Hendelseskilde = Hendelseskilde(this::class, metadata.meldingsreferanseId, sykmeldingSkrevet)
     private val sykdomsperiode: Periode
     private var sykdomstidslinje: Sykdomstidslinje
 
@@ -88,10 +95,6 @@ class Søknad(
     internal fun egenmeldingsperioder(): List<Periode> {
         return egenmeldinger
     }
-
-    override fun innsendt() = sendtTilNAVEllerArbeidsgiver
-    override fun registrert() = registrert
-    override fun avsender() = SYKMELDT
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
@@ -147,11 +150,11 @@ class Søknad(
         return false
     }
 
-    internal fun forUng(aktivitetslogg: IAktivitetslogg, alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
+    internal fun forUng(aktivitetslogg: IAktivitetslogg, alder: Alder) = alder.forUngForÅSøke(metadata.innsendt.toLocalDate()).also {
         if (it) aktivitetslogg.funksjonellFeil(RV_SØ_17)
     }
     private fun avskjæringsdato(): LocalDate =
-        (opprinneligSendt ?: sendtTilNAVEllerArbeidsgiver).toLocalDate().minusMonths(3).withDayOfMonth(1)
+        (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
 
     internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
@@ -165,7 +168,7 @@ class Søknad(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             sykdomstidslinje = sykdomstidslinje,
-            dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId),
+            dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             subsumsjonslogg = subsumsjonslogg
         )
@@ -176,7 +179,7 @@ class Søknad(
     }
 
     internal fun nyeInntekterUnderveis(): List<NyInntektUnderveis> {
-        val tilkommetkilde = Kilde(meldingsreferanseId, Avsender.SYKMELDT, registrert)
+        val tilkommetkilde = Kilde(metadata.meldingsreferanseId, Avsender.SYKMELDT, metadata.registrert)
         return if (!tålerTilkommenInntekt()) emptyList() else tilkomneInntekter.map {
             it.beløpstidslinje(tilkommetkilde)
         }

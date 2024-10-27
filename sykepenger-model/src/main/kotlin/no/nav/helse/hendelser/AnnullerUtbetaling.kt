@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 class AnnullerUtbetaling(
@@ -14,10 +15,16 @@ class AnnullerUtbetaling(
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), AnnullerUtbetalingHendelse {
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), AnnullerUtbetalingHendelse {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = SAKSBEHANDLER,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = erAutomatisk()
+    )
+
     override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
 
     fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
-
-    override fun avsender() = SAKSBEHANDLER
 }

@@ -26,12 +26,23 @@ enum class Avsender {
 }
 
 sealed interface Hendelse {
-    val meldingsreferanseId: UUID
+    val metadata: HendelseMetadata
 
-    fun innsendt(): LocalDateTime
-    fun registrert(): LocalDateTime
-    fun avsender(): Avsender
     fun navn(): String
     fun venter(block: () -> Unit) { block() }
-
 }
+
+data class HendelseMetadata(
+    val meldingsreferanseId: UUID,
+    val avsender: Avsender,
+
+    // tidspunktet meldingen ble registrert (lest inn) av fagsystemet
+    val registrert: LocalDateTime,
+
+    // tidspunktet for når meldingen ble sendt inn av avsender.
+    // kan være når bruker sendte søknaden sin, eller arbeidsgiver sendte inntektsmelding.
+    val innsendt: LocalDateTime,
+
+    // sann hvis et system har sendt meldingen på eget initiativ
+    val automatiskBehandling: Boolean
+)

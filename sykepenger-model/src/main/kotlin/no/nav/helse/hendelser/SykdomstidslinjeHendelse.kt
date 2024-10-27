@@ -1,25 +1,17 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 
 sealed class SykdomstidslinjeHendelse protected constructor(
-    meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String,
     organisasjonsnummer: String,
-    private val opprettet: LocalDateTime,
-    melding: Melding? = null,
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer),
-    SykdomshistorikkHendelse {
-    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null)
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), SykdomshistorikkHendelse {
     private val håndtertAv = mutableSetOf<UUID>()
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
-    internal val kilde: SykdomshistorikkHendelse.Hendelseskilde =
-        SykdomshistorikkHendelse.Hendelseskilde(melding ?: this::class, meldingsreferanseId, opprettet)
 
     override fun oppdaterFom(other: Periode): Periode {
         // strekker vedtaksperioden tilbake til å måte første dag
@@ -43,7 +35,7 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     }
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
-        && this.meldingsreferanseId == other.meldingsreferanseId
+        && this.metadata.meldingsreferanseId == other.metadata.meldingsreferanseId
 
     internal fun leggTil(vedtaksperiodeId: UUID, behandlinger: Behandlinger): Boolean {
         håndtertAv.add(vedtaksperiodeId)
@@ -52,6 +44,6 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     }
 
     override fun hashCode(): Int {
-        return meldingsreferanseId.hashCode()
+        return metadata.meldingsreferanseId.hashCode()
     }
 }

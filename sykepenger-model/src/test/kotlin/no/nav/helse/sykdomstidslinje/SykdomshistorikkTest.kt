@@ -74,9 +74,8 @@ internal class SykdomshistorikkTest {
 
     @Test
     fun `hendelser skal kunne håndteres i biter`() {
-        val meldingsreferanseId = UUID.randomUUID()
-        val bit1 = TestHendelse(8.U, meldingsreferanseId)
-        val bit2 = TestHendelse(8.U, meldingsreferanseId)
+        val bit1 = TestHendelse(8.U)
+        val bit2 = TestHendelse(8.U)
         historikk.håndter(bit1, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUUUUGG U", historikk.sykdomstidslinje().toShortString())
@@ -117,9 +116,8 @@ internal class SykdomshistorikkTest {
     @Test
     fun `En bit av inntektsmeldingen håndteres før annen hendelse, og den andre biten etterpå`(){
         val søknad = TestHendelse(10.S)
-        val meldingsreferanseId = UUID.randomUUID()
-        val bit1 = TestHendelse(8.U, meldingsreferanseId)
-        val bit2 = TestHendelse(8.U, meldingsreferanseId)
+        val bit1 = TestHendelse(8.U)
+        val bit2 = TestHendelse(8.U)
         historikk.håndter(bit1, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUGG UUUU", historikk.sykdomstidslinje().toShortString())

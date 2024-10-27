@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 class UtbetalingHendelse(
@@ -15,4 +16,15 @@ class UtbetalingHendelse(
     override val melding: String,
     override val avstemmingsnøkkel: Long,
     override val overføringstidspunkt: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer), UtbetalingmodulHendelse
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, orgnummer), UtbetalingmodulHendelse {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
+
+}

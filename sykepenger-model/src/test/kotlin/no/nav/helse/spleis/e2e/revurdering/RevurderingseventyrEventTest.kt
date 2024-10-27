@@ -40,7 +40,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     @Test
     fun `happy case revurdering`() {
         nyttVedtak(januar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag))).meldingsreferanseId
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
 
         revurderingIgangsattEvent {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
@@ -124,7 +124,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     fun `to vedtaksperioder berørt av en revurdering`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag))).meldingsreferanseId
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
         val januar = observatør.utbetalteVedtaksperioder.first()
         val februar = observatør.utbetalteVedtaksperioder.last()
 

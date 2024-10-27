@@ -1,8 +1,10 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -17,7 +19,16 @@ class SykepengegrunnlagForArbeidsgiver(
     personidentifikator: Personidentifikator,
     private val orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
-) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
+) : ArbeidstakerHendelse(personidentifikator.toString(), aktørId, orgnummer) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
 
     internal fun erRelevant(aktivitetslogg: IAktivitetslogg, other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
         if (other != vedtaksperiodeId) return false
@@ -27,8 +38,8 @@ class SykepengegrunnlagForArbeidsgiver(
     }
 
     internal fun lagreInntekt(inntektshistorikk: Inntektshistorikk, refusjonshistorikk: Refusjonshistorikk) {
-        inntektshistorikk.leggTil(inntekter.somInntektsmelding(skjæringstidspunkt, meldingsreferanseId))
-        val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
+        inntektshistorikk.leggTil(inntekter.somInntektsmelding(skjæringstidspunkt, metadata.meldingsreferanseId))
+        val refusjon = Refusjonshistorikk.Refusjon(metadata.meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
         refusjonshistorikk.leggTilRefusjon(refusjon)
     }
 
@@ -38,7 +49,7 @@ class SykepengegrunnlagForArbeidsgiver(
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             skatteinntekter = inntekter.somEksterneSkatteinntekter(),
-            omregnetÅrsinntekt = inntekter.omregnetÅrsinntekt(meldingsreferanseId)
+            omregnetÅrsinntekt = inntekter.omregnetÅrsinntekt(metadata.meldingsreferanseId)
         )
     }
 }

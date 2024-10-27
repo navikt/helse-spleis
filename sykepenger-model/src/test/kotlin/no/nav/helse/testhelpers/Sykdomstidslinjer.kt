@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
+import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Melding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
@@ -206,11 +208,18 @@ internal val Int.FORELDET
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 
-internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), override val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse {
+internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
+
     override fun oppdaterFom(other: Periode) = other
     override fun sykdomstidslinje() = tidslinje
-    override fun innsendt() = error("ikke i bruk")
-    override fun registrert() = error("ikke i bruk")
-    override fun avsender() = error("ikke i bruk")
     override fun navn() = error("ikke i bruk")
 }

@@ -289,7 +289,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             inntektsmeldinger = inntektsmeldinger
                 .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
                 .map { (_, im) -> im.generator() }
-                .filterNot { it.meldingsreferanseId in håndterteInntektsmeldinger }
+                .filterNot { it.metadata.meldingsreferanseId in håndterteInntektsmeldinger }
         )
 
     internal fun lagUtbetalingshistorikk(

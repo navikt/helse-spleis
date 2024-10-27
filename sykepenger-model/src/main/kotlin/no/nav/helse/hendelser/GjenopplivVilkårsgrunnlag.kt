@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -17,15 +18,24 @@ class GjenopplivVilkårsgrunnlag(
     private val vilkårsgrunnlagId: UUID,
     private val nyttSkjæringstidspunkt: LocalDate?,
     private val arbeidsgiveropplysninger: Map<String, Inntekt>
-): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId) {
+): PersonHendelse(fødselsnummer, aktørId) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = Avsender.SAKSBEHANDLER,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = false
+        )
+    }
 
     internal fun gjenoppliv(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
         vilkårsgrunnlagHistorikk.gjenoppliv(this, aktivitetslogg, vilkårsgrunnlagId, nyttSkjæringstidspunkt)
     }
 
     internal fun arbeidsgiverinntektsopplysninger(skjæringstidspunkt: LocalDate) = arbeidsgiveropplysninger.map { (organisasjonsnummer, inntekt) ->
-        val inntektsmeldingInntekt = Inntektsmelding(skjæringstidspunkt, meldingsreferanseId, inntekt)
-        ArbeidsgiverInntektsopplysning(organisasjonsnummer, skjæringstidspunkt til LocalDate.MAX, inntektsmeldingInntekt, Refusjonsopplysning(meldingsreferanseId, skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
+        val inntektsmeldingInntekt = Inntektsmelding(skjæringstidspunkt, metadata.meldingsreferanseId, inntekt)
+        ArbeidsgiverInntektsopplysning(organisasjonsnummer, skjæringstidspunkt til LocalDate.MAX, inntektsmeldingInntekt, Refusjonsopplysning(metadata.meldingsreferanseId, skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
     }
 
     internal fun valider(organisasjonsnummere: List<String>) {

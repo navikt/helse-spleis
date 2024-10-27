@@ -14,14 +14,17 @@ class OverstyrArbeidsforhold(
     aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
-    private val opprettet: LocalDateTime
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
+    opprettet: LocalDateTime
+) : PersonHendelse(fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = SAKSBEHANDLER,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = false
+    )
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun innsendt() = opprettet
-
-    override fun avsender() = SAKSBEHANDLER
 
     internal fun overstyr(inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         return overstyrteArbeidsforhold.fold(inntektsgrunnlag) { acc, overstyring ->

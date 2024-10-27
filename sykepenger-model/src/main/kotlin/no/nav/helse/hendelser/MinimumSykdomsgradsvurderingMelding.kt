@@ -1,6 +1,8 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.MinimumSykdomsgradsvurdering
 
 /**
@@ -13,10 +15,20 @@ class MinimumSykdomsgradsvurderingMelding(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId) {
+) : PersonHendelse(fødselsnummer, aktørId) {
 
     init {
         sjekkForOverlapp()
+    }
+
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
     }
 
     internal fun oppdater(vurdering: MinimumSykdomsgradsvurdering) {

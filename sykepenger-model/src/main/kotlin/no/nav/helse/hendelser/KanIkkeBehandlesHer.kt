@@ -17,11 +17,17 @@ class KanIkkeBehandlesHer(
     private val saksbehandlerEpost: String,
     private val opprettet: LocalDateTime,
     override val automatisert: Boolean
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = if (automatisert) SYSTEM else SAKSBEHANDLER,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = automatisert
+    )
+
     override val avgjørelsestidspunkt = opprettet
     override val godkjent = false
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)
     override fun relevantVedtaksperiode(id: UUID) = vedtaksperiodeId == id
-    override fun innsendt() = opprettet
-    override fun avsender() = if (automatisert) SYSTEM else SAKSBEHANDLER
 }

@@ -1,7 +1,9 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
@@ -11,7 +13,16 @@ class Sykmelding(
     aktørId: String,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>
-) : ArbeidstakerHendelse(meldingsreferanseId, fnr, aktørId, orgnummer) {
+) : ArbeidstakerHendelse(fnr, aktørId, orgnummer) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
 
     private val opprinneligPeriode = checkNotNull(Sykmeldingsperiode.periode(sykeperioder)) { "må ha minst én periode" }
     private var sykmeldingsperiode: Periode? = opprinneligPeriode

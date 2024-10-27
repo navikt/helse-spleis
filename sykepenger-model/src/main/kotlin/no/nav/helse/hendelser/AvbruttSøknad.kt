@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Sykmeldingsperioder
 
@@ -10,11 +11,20 @@ class AvbruttSøknad(
     fødselsnummer: String,
     aktørId: String,
 ) : ArbeidstakerHendelse(
-    meldingsreferanseId = meldingsreferanseId,
     fødselsnummer = fødselsnummer,
     aktørId = aktørId,
     organisasjonsnummer = orgnummer
 ) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = Avsender.SYKMELDT,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = false
+        )
+    }
+
     internal fun avbryt(sykmeldingsperioder: Sykmeldingsperioder) {
         sykmeldingsperioder.fjern(periode)
     }

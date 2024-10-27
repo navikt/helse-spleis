@@ -21,12 +21,15 @@ class Påminnelse(
     private val nestePåminnelsestidspunkt: LocalDateTime,
     private val ønskerReberegning: Boolean = false,
     private val nå: LocalDateTime = LocalDateTime.now(),
-    private val opprettet: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
-
-    override fun innsendt() = opprettet
-
-    override fun avsender() = SYSTEM
+    opprettet: LocalDateTime
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = SYSTEM,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = true
+    )
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand

@@ -18,13 +18,18 @@ class OverstyrArbeidsgiveropplysninger(
     aktørId: String,
     internal val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
-    private val opprettet: LocalDateTime,
+    opprettet: LocalDateTime,
     private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
-    override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
+) : PersonHendelse(fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = Avsender.SAKSBEHANDLER,
+        innsendt = opprettet,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = false
+    )
 
-    override fun innsendt() = opprettet
-    override fun avsender() = Avsender.SAKSBEHANDLER
+    override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
     internal fun overstyr(builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
@@ -36,7 +41,7 @@ class OverstyrArbeidsgiveropplysninger(
                 PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                     korrigertInntektsmeldingId = hendelseId,
                     korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                    korrigerendeInntektsopplysningId = meldingsreferanseId
+                    korrigerendeInntektsopplysningId = metadata.meldingsreferanseId
                 )
             )
         }

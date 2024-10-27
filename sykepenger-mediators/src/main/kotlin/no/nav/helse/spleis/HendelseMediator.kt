@@ -520,7 +520,7 @@ internal class HendelseMediator(
 
         val subsumsjonMediator = SubsumsjonMediator(hendelse.fødselsnummer, message, versjonAvKode)
         val personMediator = PersonMediator(message, hendelse)
-        val datadelingMediator = DatadelingMediator(aktivitetslogg, hendelse.meldingsreferanseId, hendelse.fødselsnummer, hendelse.aktørId)
+        val datadelingMediator = DatadelingMediator(aktivitetslogg, hendelse.metadata.meldingsreferanseId, hendelse.fødselsnummer, hendelse.aktørId)
         person(personidentifikator, message, hendelse.aktørId, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)

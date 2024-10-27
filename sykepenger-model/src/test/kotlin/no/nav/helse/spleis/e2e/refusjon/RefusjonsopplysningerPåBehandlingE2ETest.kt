@@ -610,7 +610,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             )
 
             val refusjonstidslinje2 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
-            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel2)
+            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel2)
 
             assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinje2)
         }
@@ -633,7 +633,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN)))),
                 tidsstempel = tidsstempel2
             )
-            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel2)
+            val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel2)
 
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger.let {
                 assertEquals(1.januar til LocalDate.MAX, it.inspektør.refusjonsopplysninger.single().periode)
@@ -666,7 +666,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                     refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT / 2)))),
                 tidsstempel = tidsstempel
             )
-            val kildeSaksbehandler = Kilde(overstyring.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel)
+            val kildeSaksbehandler = Kilde(overstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel)
             val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
             val refusjonstidslinjeFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
 
@@ -689,7 +689,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                     refusjonsopplysninger = listOf(Triple(1.januar, 15.januar, INGEN), Triple(16.januar, null, INNTEKT / 2)))),
                 tidsstempel = tidsstempel
             )
-            val kildeSaksbehandler = Kilde(overstyring.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel)
+            val kildeSaksbehandler = Kilde(overstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel)
             val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
             val expected = Beløpstidslinje.fra(1.januar til 15.januar, INGEN, kildeSaksbehandler) + Beløpstidslinje.fra(16.januar til 31.januar, INNTEKT / 2, kildeSaksbehandler)
             assertEquals(expected, refusjonstidslinjeJanuar)

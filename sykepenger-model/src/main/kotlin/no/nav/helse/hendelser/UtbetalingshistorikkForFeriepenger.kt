@@ -1,9 +1,11 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Year
 import java.util.*
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
@@ -19,7 +21,17 @@ class UtbetalingshistorikkForFeriepenger(
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId) {
+) : PersonHendelse(fødselsnummer, aktørId) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
+
     internal fun utbetalteFeriepengerTilPerson() =
         feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
 

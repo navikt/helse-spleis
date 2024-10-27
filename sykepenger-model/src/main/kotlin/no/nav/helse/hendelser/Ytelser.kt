@@ -2,7 +2,9 @@ package no.nav.helse.hendelser
 
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
@@ -23,7 +25,16 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), SykdomshistorikkHendelse {
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), SykdomshistorikkHendelse {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
 
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
         foreldrepenger
@@ -61,7 +72,7 @@ class Ytelser(
     ) {
         val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
             if (!ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
-            else ytelse.sykdomstidslinje(meldingsreferanseId, registrert())
+            else ytelse.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert)
         }
         if (sykdomstidslinjer.isEmpty()) return
         this.sykdomstidslinje = sykdomstidslinjer.merge(beste = default)

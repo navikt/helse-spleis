@@ -3,10 +3,8 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
@@ -52,10 +50,12 @@ internal class DagerFraInntektsmelding(
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
     }
 
+    override val metadata = hendelse.metadata
+
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
     // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
-    internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId, mottatt)
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
+    internal val kilde = Hendelseskilde("Inntektsmelding", metadata.meldingsreferanseId, mottatt)
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(metadata.meldingsreferanseId)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
@@ -126,9 +126,6 @@ internal class DagerFraInntektsmelding(
     private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
     private fun sykedagerNav(periode: Periode) = Sykdomstidslinje.sykedagerNav(periode.start, periode.endInclusive, 100.prosent, kilde)
 
-    override fun innsendt() = mottatt
-    override fun avsender() = ARBEIDSGIVER
-
     internal fun alleredeHåndtert(behandlinger: Behandlinger) = behandlinger.dokumentHåndtert(dokumentsporing)
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
@@ -182,12 +179,12 @@ internal class DagerFraInntektsmelding(
 
     internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding? {
         val sykdomstidslinje = håndterDager(aktivitetslogg, vedtaksperiode) ?: return null
-        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, innsendt(), registrert(), navn())
+        return BitAvInntektsmelding(metadata, sykdomstidslinje, navn())
     }
 
     internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding {
         håndterDager(aktivitetslogg, vedtaksperiode)
-        return BitAvInntektsmelding(meldingsreferanseId, Sykdomstidslinje(), innsendt(), registrert(), navn())
+        return BitAvInntektsmelding(metadata, Sykdomstidslinje(), navn())
     }
 
     private fun håndterDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): Sykdomstidslinje? {
@@ -311,19 +308,14 @@ internal class DagerFraInntektsmelding(
     }
 
     internal class BitAvInntektsmelding(
-        override val meldingsreferanseId: UUID,
+        override val metadata: HendelseMetadata,
         private val sykdomstidslinje: Sykdomstidslinje,
-        private val innsendt: LocalDateTime,
-        private val registert: LocalDateTime,
         private val navn : String
     ): SykdomshistorikkHendelse {
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
         override fun sykdomstidslinje() = sykdomstidslinje
 
-        override fun innsendt() = innsendt
-        override fun registrert() = registert
         override fun navn() = navn
-        override fun avsender() = ARBEIDSGIVER
     }
 }

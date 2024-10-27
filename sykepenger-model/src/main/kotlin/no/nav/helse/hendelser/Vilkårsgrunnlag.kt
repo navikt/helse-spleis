@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -25,7 +27,17 @@ class Vilkårsgrunnlag(
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>
-) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
+) : ArbeidstakerHendelse(personidentifikator.toString(), aktørId, orgnummer) {
+    override val metadata = LocalDateTime.now().let { nå ->
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = nå,
+            registrert = nå,
+            automatiskBehandling = true
+        )
+    }
+
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
     private val opptjeningsgrunnlag = arbeidsforhold.opptjeningsgrunnlag()
@@ -51,13 +63,13 @@ class Vilkårsgrunnlag(
     internal fun avklarSykepengegrunnlag(person: Person, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
             SkattSykepengegrunnlag(
-                hendelseId = meldingsreferanseId,
+                hendelseId = metadata.meldingsreferanseId,
                 dato = skjæringstidspunkt,
                 inntektsopplysninger = emptyList(),
                 ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
             )
         }
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId, subsumsjonslogg)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, metadata.meldingsreferanseId, subsumsjonslogg)
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
@@ -80,7 +92,7 @@ class Vilkårsgrunnlag(
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             vurdertOk = sykepengegrunnlagOk && opptjeningvurderingOk && medlemskapsvurderingOk,
-            meldingsreferanseId = meldingsreferanseId,
+            meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )
         return aktivitetslogg

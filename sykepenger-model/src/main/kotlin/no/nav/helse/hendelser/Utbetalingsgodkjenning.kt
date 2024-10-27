@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class Utbetalingsgodkjenning(
     meldingsreferanseId: UUID,
@@ -13,15 +14,21 @@ class Utbetalingsgodkjenning(
     private val saksbehandler: String,
     private val saksbehandlerEpost: String,
     utbetalingGodkjent: Boolean,
-    private val godkjenttidspunkt: LocalDateTime,
+    godkjenttidspunkt: LocalDateTime,
     automatiskBehandling: Boolean
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
+) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = if (automatiskBehandling) SYSTEM else Avsender.SAKSBEHANDLER,
+        innsendt = godkjenttidspunkt,
+        registrert = LocalDateTime.now(),
+        automatiskBehandling = automatiskBehandling
+    )
+
     override fun relevantVedtaksperiode(id: UUID) = id.toString() == this.vedtaksperiodeId
     override fun saksbehandler() = Saksbehandler(saksbehandler, saksbehandlerEpost)
     override val godkjent = utbetalingGodkjent
-    override val avgjørelsestidspunkt = godkjenttidspunkt
-    override val automatisert = automatiskBehandling
-    override fun innsendt() = godkjenttidspunkt
-    override fun avsender() = if (automatisert) Avsender.SYSTEM else Avsender.SAKSBEHANDLER
+    override val avgjørelsestidspunkt = metadata.innsendt
+    override val automatisert = metadata.automatiskBehandling
 
 }
