@@ -6,8 +6,8 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -246,9 +246,6 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             arbeidsforhold = arbeidsforhold ?: listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )
-        ).apply {
-            hendelselogg = this
-
-        }
+        )
     }
 }

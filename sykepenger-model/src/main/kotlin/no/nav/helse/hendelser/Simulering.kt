@@ -2,9 +2,7 @@ package no.nav.helse.hendelser
 
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Oppdrag
 
 class Simulering(
     meldingsreferanseId: UUID,

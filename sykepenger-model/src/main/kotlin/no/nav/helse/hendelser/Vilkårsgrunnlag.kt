@@ -11,8 +11,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.AnsattPeriode
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -31,10 +31,10 @@ class Vilkårsgrunnlag(
     private val opptjeningsgrunnlag = arbeidsforhold.opptjeningsgrunnlag()
     private val harInntektMånedenFørSkjæringstidspunkt = inntekterForOpptjeningsvurdering.harInntektI(YearMonth.from(skjæringstidspunkt).minusMonths(1))
 
-    internal fun erRelevant(other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
+    internal fun erRelevant(aktivitetslogg: IAktivitetslogg, other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
         if (other.toString() != vedtaksperiodeId) return false
         if (skjæringstidspunktVedtaksperiode == skjæringstidspunkt) return true
-        info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
+        aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
         return false
     }
 
@@ -48,7 +48,7 @@ class Vilkårsgrunnlag(
         )
     }
 
-    internal fun avklarSykepengegrunnlag(person: Person, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+    internal fun avklarSykepengegrunnlag(person: Person, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
             SkattSykepengegrunnlag(
                 hendelseId = meldingsreferanseId,
@@ -57,23 +57,23 @@ class Vilkårsgrunnlag(
                 ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
             )
         }
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId, subsumsjonslogg)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId, subsumsjonslogg)
     }
 
-    internal fun valider(inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
-        val sykepengegrunnlagOk = inntektsgrunnlag.valider(this)
-        inntektsvurderingForSykepengegrunnlag.valider(this)
-        arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
+    internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+        val sykepengegrunnlagOk = inntektsgrunnlag.valider(aktivitetslogg)
+        inntektsvurderingForSykepengegrunnlag.valider(aktivitetslogg)
+        arbeidsforhold.forEach { it.loggFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening()
         subsumsjonslogg.logg(opptjening.subsumsjon)
-        opptjening.validerInntektMånedenFørSkjæringstidspunkt(this).also {
+        opptjening.validerInntektMånedenFørSkjæringstidspunkt(aktivitetslogg).also {
             if (harInntektMånedenFørSkjæringstidspunkt && !inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
                 // Varsel spart
-                info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+                aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
             }
         }
-        val opptjeningvurderingOk = opptjening.validerOpptjeningsdager(this)
-        val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
+        val opptjeningvurderingOk = opptjening.validerOpptjeningsdager(aktivitetslogg)
+        val medlemskapsvurderingOk = medlemskapsvurdering.valider(aktivitetslogg)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = inntektsgrunnlag,
@@ -83,7 +83,7 @@ class Vilkårsgrunnlag(
             meldingsreferanseId = meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        return this
+        return aktivitetslogg
     }
 
 

@@ -18,6 +18,7 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.perioder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
@@ -467,7 +468,7 @@ internal class SkjæringstidspunktTest {
         vararg hendelse: SykdomshistorikkHendelse
     ) {
         val a = Sykdomshistorikk()
-        hendelse.forEach { a.håndter(it) }
+        hendelse.forEach { a.håndter(it, Aktivitetslogg()) }
 
         val tidslinje = a.sykdomstidslinje()
 
@@ -500,7 +501,7 @@ internal class SkjæringstidspunktTest {
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidsforholdId = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).dager().bitAvInntektsmelding(arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
+    ).dager().bitAvInntektsmelding(Aktivitetslogg(), arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"

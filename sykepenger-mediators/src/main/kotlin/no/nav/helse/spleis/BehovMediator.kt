@@ -4,11 +4,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import org.slf4j.Logger
 
 internal class BehovMediator(private val sikkerLogg: Logger) {
-    internal fun håndter(context: MessageContext, hendelse: PersonHendelse) {
-        hendelse.kontekster().forEach {
+    internal fun håndter(context: MessageContext, hendelse: PersonHendelse, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.kontekster().forEach {
             if (!it.harFunksjonelleFeilEllerVerre()) {
                 håndter(context, hendelse, it.behov())
             }

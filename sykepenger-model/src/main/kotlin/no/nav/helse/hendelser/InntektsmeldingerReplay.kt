@@ -2,24 +2,23 @@ package no.nav.helse.hendelser
 
 import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class InntektsmeldingerReplay(
     meldingsreferanseId: UUID,
     aktørId: String,
     fødselsnummer: String,
     organisasjonsnummer: String,
-    aktivitetslogg: Aktivitetslogg,
     private val vedtaksperiodeId: UUID,
     private val inntektsmeldinger: List<Inntektsmelding>
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiodeId
 
-    internal fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
-        info("Replayer inntektsmeldinger for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
+    internal fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Replayer inntektsmeldinger for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
         inntektsmeldinger.forEach {
-            arbeidsgiver.håndter(it, vedtaksperiodeId)
+            arbeidsgiver.håndter(it, aktivitetslogg, vedtaksperiodeId)
         }
     }
 }

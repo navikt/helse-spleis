@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AvsenderDto
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 enum class Avsender {
     SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
@@ -26,7 +25,7 @@ enum class Avsender {
     }
 }
 
-sealed interface Hendelse : IAktivitetslogg {
+sealed interface Hendelse {
     val meldingsreferanseId: UUID
 
     fun innsendt(): LocalDateTime

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -13,6 +14,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +27,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val INNTEKT = 31000.00.månedlig
     }
 
-    internal lateinit var hendelselogg: PersonHendelse
+    internal lateinit var forrigeHendelse: Hendelse
+        private set
+    internal lateinit var hendelselogg: IAktivitetslogg
+        private set
+
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, InnsendtInntektsmelding>()
@@ -39,10 +45,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ikkeBesvarteBehov.clear()
     }
 
-    internal fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
-        hendelselogg = this
-        person.håndter(this)
-        ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(behov())
+    internal fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
+        hendelselogg = Aktivitetslogg()
+        forrigeHendelse = this
+        person.håndter(this, hendelselogg)
+        ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(hendelselogg.behov())
         return this
     }
 
@@ -72,7 +79,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     data class InnsendtInntektsmelding(
         val tidspunkt: LocalDateTime,
-        val generator: (Aktivitetslogg) -> Inntektsmelding,
+        val generator: () -> Inntektsmelding,
         val inntektsmeldingkontrakt: no.nav.inntektsmeldingkontrakt.Inntektsmelding
     )
 }

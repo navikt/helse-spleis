@@ -78,21 +78,21 @@ class Inntektsmelding internal constructor(
 
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
-        hendelse: IAktivitetslogg,
+        aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean,
         inntektshistorikk: Inntektshistorikk
     ) {
         if (nyDato == this.dato) return
         val dagerMellom = ChronoUnit.DAYS.between(this.dato, nyDato)
         if (dagerMellom >= 60) {
-            hendelse.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
-            hendelse.varsel(RV_IV_7)
+            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
+            aktivitetslogg.varsel(RV_IV_7)
         } else if (nyArbeidsgiverperiode) {
-            hendelse.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
-            hendelse.varsel(RV_IV_7)
+            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
+            aktivitetslogg.varsel(RV_IV_7)
         }
         inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, kilde, tidsstempel))
-        hendelse.info("Kopierte inntekt som lå lagret på ${this.dato} til $nyDato")
+        aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.dato} til $nyDato")
     }
 
     override fun dto() =

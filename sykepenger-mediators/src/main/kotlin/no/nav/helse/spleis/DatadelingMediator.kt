@@ -13,7 +13,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.erAvviklet
 import org.slf4j.LoggerFactory
 
 internal class DatadelingMediator(
-    private val hendelse: IAktivitetslogg,
+    private val aktivitetslogg: IAktivitetslogg,
     private val meldingsreferanseId: UUID,
     private val fødselsnummer: String,
     private val aktørId: String
@@ -24,7 +24,7 @@ internal class DatadelingMediator(
 
     private val aktiviteter = mutableListOf<Map<String, Any>>()
     init {
-        hendelse.register(this)
+        aktivitetslogg.register(this)
     }
 
     private fun aktivitetMap(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) =

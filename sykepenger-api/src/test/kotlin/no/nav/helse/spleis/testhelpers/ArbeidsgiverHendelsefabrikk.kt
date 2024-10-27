@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
@@ -33,16 +34,14 @@ import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -90,7 +89,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         sendTilGosys: Boolean = false,
         opprinneligSendt: LocalDate? = null,
         yrkesskade: Boolean = false,
-        aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         egenmeldinger: List<Periode> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
         registrert: LocalDateTime = LocalDateTime.now(),
@@ -115,7 +113,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
             søknadstype = søknadstype,
-            aktivitetslogg = aktivitetslogg,
             registrert = registrert,
             tilkomneInntekter = tilkomneInntekter
         ).apply {
@@ -132,7 +129,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
@@ -153,8 +149,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = Inntektsmelding.Avsendersystem.LPS,
                 vedtaksperiodeId = null,
-                mottatt = mottatt,
-                aktivitetslogg = aktivitetslogg
+                mottatt = mottatt
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator
@@ -172,7 +167,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
@@ -193,8 +187,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
                 vedtaksperiodeId = vedtaksperiodeId,
-                mottatt = mottatt,
-                aktivitetslogg = aktivitetslogg
+                mottatt = mottatt
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator
@@ -202,7 +195,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     }
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
-        InntektsmeldingerReplay(UUID.randomUUID(), personidentifikator.toString(), aktørId, organisasjonsnummer, Aktivitetslogg(), vedtaksperiodeId, emptyList())
+        InntektsmeldingerReplay(UUID.randomUUID(), personidentifikator.toString(), aktørId, organisasjonsnummer, vedtaksperiodeId, emptyList())
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
@@ -307,8 +300,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 perioder = institusjonsoppholdsperioder
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-            dagpenger = Dagpenger(dagpenger),
-            aktivitetslogg = Aktivitetslogg()
+            dagpenger = Dagpenger(dagpenger)
         )
     }
 

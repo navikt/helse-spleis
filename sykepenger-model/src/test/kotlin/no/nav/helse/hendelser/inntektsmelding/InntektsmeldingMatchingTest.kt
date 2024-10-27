@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -144,7 +145,7 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
 
-        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(arbeidsgiverperiode)
+        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
         assertTrue(håndtertDagerFraRevurdering)
     }
 
@@ -159,7 +160,7 @@ internal class InntektsmeldingMatchingTest {
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
 
-        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(arbeidsgiverperiode)
+        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
         assertFalse(håndtertDagerFraRevurdering)
     }
 
@@ -175,7 +176,7 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode1, arbeidsgiverperiode))
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode2, arbeidsgiverperiode))
 
-        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(arbeidsgiverperiode)
+        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
         assertFalse(håndtertDagerFraRevurdering)
     }
 
@@ -246,7 +247,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
-        return bitAvInntektsmelding(periode)?.sykdomstidslinje()?.periode()
+        return bitAvInntektsmelding(Aktivitetslogg(), periode)?.sykdomstidslinje()?.periode()
     }
 
     private companion object {

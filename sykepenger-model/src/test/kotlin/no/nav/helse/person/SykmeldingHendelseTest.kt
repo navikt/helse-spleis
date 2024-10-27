@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -13,21 +13,23 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)))
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
-        assertTrue(person.personLogg.harAktiviteter())
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
+        val aktivitetslogg = Aktivitetslogg()
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)), aktivitetslogg)
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harAktiviteter())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.sykmeldingsperioder().size)
     }
 
     @Test
     fun `To søknader uten overlapp`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)))
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar)))
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
-        assertTrue(person.personLogg.harAktiviteter())
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
+        val aktivitetslogg = Aktivitetslogg()
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)), aktivitetslogg)
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar)), aktivitetslogg)
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harAktiviteter())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
         assertEquals(2, inspektør.sykmeldingsperioder().size)
     }

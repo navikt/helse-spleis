@@ -66,23 +66,22 @@ internal class Feriepengeutbetaling private constructor(
         personoppdrag = personoppdrag
     )
 
-    fun håndter(utbetalingHendelse: UtbetalingHendelse, organisasjonsnummer: String, person: Person) {
+    fun håndter(utbetalingHendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, person: Person) {
         if (utbetalingHendelse.utbetalingId != this.utbetalingId || utbetalingHendelse.fagsystemId !in setOf(oppdrag.fagsystemId, personoppdrag.fagsystemId)) return
 
-        utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
+        aktivitetslogg.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         when (utbetalingHendelse.status) {
             Oppdragstatus.OVERFØRT,
             Oppdragstatus.AKSEPTERT -> { } // all is good
-            Oppdragstatus.AKSEPTERT_MED_FEIL -> utbetalingHendelse.varsel(RV_UT_2)
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.varsel(RV_UT_2)
             Oppdragstatus.AVVIST,
-            Oppdragstatus.FEIL -> utbetalingHendelse.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
+            Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
         }
-        val utbetaltOk = !utbetalingHendelse.harFunksjonelleFeilEllerVerre()
-        lagreInformasjon(utbetalingHendelse, utbetaltOk)
+        val utbetaltOk = !aktivitetslogg.harFunksjonelleFeilEllerVerre()
+        lagreInformasjon(utbetalingHendelse, aktivitetslogg, utbetaltOk)
 
         if (!utbetaltOk) {
-            utbetalingHendelse.info("Utbetaling av feriepenger med utbetalingId $utbetalingId og fagsystemIder ${oppdrag.fagsystemId} og ${personoppdrag.fagsystemId} feilet.")
-            return
+            return aktivitetslogg.info("Utbetaling av feriepenger med utbetalingId $utbetalingId og fagsystemIder ${oppdrag.fagsystemId} og ${personoppdrag.fagsystemId} feilet.")
         }
 
         person.feriepengerUtbetalt(
@@ -107,19 +106,19 @@ internal class Feriepengeutbetaling private constructor(
         )
     }
 
-    private fun lagreInformasjon(hendelse: UtbetalingHendelse, gikkBra: Boolean) {
+    private fun lagreInformasjon(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, gikkBra: Boolean) {
         overføringstidspunkt = hendelse.overføringstidspunkt
         avstemmingsnøkkel = hendelse.avstemmingsnøkkel
-        hendelse.info("Data for feriepenger fra Oppdrag/UR: tidspunkt: $overføringstidspunkt, avstemmingsnøkkel $avstemmingsnøkkel og utbetalt ok: ${if (gikkBra) "ja" else "nei"}")
+        aktivitetslogg.info("Data for feriepenger fra Oppdrag/UR: tidspunkt: $overføringstidspunkt, avstemmingsnøkkel $avstemmingsnøkkel og utbetalt ok: ${if (gikkBra) "ja" else "nei"}")
     }
 
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Feriepengeutbetaling", mapOf("utbetalingId" to "$utbetalingId"))
 
-    internal fun overfør(hendelse: PersonHendelse) {
-        hendelse.kontekst(this)
-        if (sendTilOppdrag) oppdrag.overfør(hendelse, null, "SPLEIS")
-        if (sendPersonoppdragTilOS) personoppdrag.overfør(hendelse, null, "SPLEIS")
+    internal fun overfør(aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.kontekst(this)
+        if (sendTilOppdrag) oppdrag.overfør(aktivitetslogg, null, "SPLEIS")
+        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetslogg, null, "SPLEIS")
     }
 
     internal fun gjelderForÅr(år: Year) = feriepengeberegner.gjelderForÅr(år)
@@ -132,7 +131,7 @@ internal class Feriepengeutbetaling private constructor(
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
-        private fun oppdrag(fagområde: Fagområde, forrigeOppdrag: Oppdrag?, beløp: Int): Oppdrag {
+        private fun oppdrag(aktivitetslogg: IAktivitetslogg, fagområde: Fagområde, forrigeOppdrag: Oppdrag?, beløp: Int): Oppdrag {
             val (klassekode, mottaker) = when (fagområde) {
                 Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig to orgnummer
                 Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger to personidentifikator.toString()
@@ -156,8 +155,8 @@ internal class Feriepengeutbetaling private constructor(
             )
 
             if (forrigeOppdrag == null) return nyttOppdrag
-            if (beløp == 0) forrigeOppdrag.annuller(utbetalingshistorikkForFeriepenger)
-            return nyttOppdrag.minus(forrigeOppdrag, utbetalingshistorikkForFeriepenger)
+            if (beløp == 0) forrigeOppdrag.annuller(aktivitetslogg)
+            return nyttOppdrag.minus(forrigeOppdrag, aktivitetslogg)
         }
 
         private fun skalSendeOppdrag(forrigeOppdrag: Oppdrag?, beløp: Int): Boolean {
@@ -168,7 +167,7 @@ internal class Feriepengeutbetaling private constructor(
         private val Double.finere get() = "$this".padStart(10, ' ')
         private val List<Periode>.finere get() = joinToString(separator = "\n\t\t\t\t\t", prefix = "\n\t\t\t\t\t") {"$it (${it.count()} dager)" }
 
-        internal fun build(hendelse: IAktivitetslogg): Feriepengeutbetaling {
+        internal fun build(aktivitetslogg: IAktivitetslogg): Feriepengeutbetaling {
             // Arbeidsgiver
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
             val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
@@ -176,7 +175,7 @@ internal class Feriepengeutbetaling private constructor(
             if (hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() != 0 &&
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() !in infotrygdHarUtbetaltTilArbeidsgiver
             ) {
-                hendelse.info(
+                aktivitetslogg.info(
                     """
                     Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp
                     AktørId: $aktørId
@@ -199,9 +198,9 @@ internal class Feriepengeutbetaling private constructor(
                     ?.oppdrag
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
-            val arbeidsgiveroppdrag = oppdrag(Fagområde.SykepengerRefusjon, forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
+            val arbeidsgiveroppdrag = oppdrag(aktivitetslogg, Fagområde.SykepengerRefusjon, forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
-            if (arbeidsgiverbeløp != 0 && orgnummer == "0") hendelse.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\", aktørId=$aktørId.")
+            if (arbeidsgiverbeløp != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\", aktørId=$aktørId.")
 
             val sendArbeidsgiveroppdrag = skalSendeOppdrag(forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
@@ -211,7 +210,7 @@ internal class Feriepengeutbetaling private constructor(
             if (hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson.roundToInt() != 0 &&
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson.roundToInt() !in infotrygdHarUtbetaltTilPerson
             ) {
-                hendelse.info(
+                aktivitetslogg.info(
                     """
                     Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
                     AktørId: $aktørId
@@ -235,11 +234,11 @@ internal class Feriepengeutbetaling private constructor(
                     ?.personoppdrag
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
-            val personoppdrag = oppdrag(Fagområde.Sykepenger, forrigeSendtePersonOppdrag, personbeløp)
+            val personoppdrag = oppdrag(aktivitetslogg, Fagområde.Sykepenger, forrigeSendtePersonOppdrag, personbeløp)
 
             val sendPersonoppdrag = skalSendeOppdrag(forrigeSendtePersonOppdrag, personbeløp)
 
-            if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < -499 || differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson > 100) hendelse.info(
+            if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < -499 || differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson > 100) aktivitetslogg.info(
                 """
                 ${if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < 0) "Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale" else "Utbetalt for lite i Infotrygd"} for person & orgnr-kombo:
                 AktørId: $aktørId
@@ -253,7 +252,7 @@ internal class Feriepengeutbetaling private constructor(
             val arbeidsgiveroppdragdetaljer = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag).toString()
             val personoppdragdetaljer = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag).toString()
             // Logging
-            hendelse.info(
+            aktivitetslogg.info(
                 """
                 Nøkkelverdier om feriepengeberegning
                 AktørId: $aktørId

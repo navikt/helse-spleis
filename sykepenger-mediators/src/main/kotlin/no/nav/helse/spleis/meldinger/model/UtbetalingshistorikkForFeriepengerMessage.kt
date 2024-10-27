@@ -1,15 +1,14 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.Year
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing an Ytelserbehov
@@ -71,7 +70,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
         return fom != null && tom != null && fom <= tom
     }
 
-    private fun utbetalingshistorikkForFeriepenger(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+    private fun utbetalingshistorikkForFeriepenger() =
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = id,
             aktørId = aktørId,
@@ -80,8 +79,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
             feriepengehistorikk = feriepengehistorikk,
             arbeidskategorikoder = arbeidskategorikoder,
             opptjeningsår = opptjeningsår,
-            skalBeregnesManuelt = skalBeregnesManuelt,
-            aktivitetslogg = aktivitetslogg
+            skalBeregnesManuelt = skalBeregnesManuelt
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

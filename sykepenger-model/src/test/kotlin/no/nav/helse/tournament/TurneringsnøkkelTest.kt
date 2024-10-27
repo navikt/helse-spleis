@@ -7,8 +7,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -65,7 +63,7 @@ internal class TurneringsnøkkelTest {
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
     }
 
-    private sealed class TestHendelse() : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
+    private sealed class TestHendelse() : SykdomshistorikkHendelse {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde

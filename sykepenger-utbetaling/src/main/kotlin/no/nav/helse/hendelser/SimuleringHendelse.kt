@@ -2,10 +2,9 @@ package no.nav.helse.hendelser
 
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Fagområde
 
-interface SimuleringHendelse : IAktivitetslogg {
+interface SimuleringHendelse {
     val utbetalingId: UUID
     val fagsystemId: String
     val fagområde: Fagområde

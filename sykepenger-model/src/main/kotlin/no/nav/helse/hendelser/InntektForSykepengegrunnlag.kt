@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 
 class InntektForSykepengegrunnlag(
@@ -22,14 +23,14 @@ class InntektForSykepengegrunnlag(
     }
 
     internal fun avklarSykepengegrunnlag(
-        hendelse: IAktivitetslogg,
+        aktivitetslogg: IAktivitetslogg,
         person: Person,
         rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
         skjæringstidspunkt: LocalDate,
         meldingsreferanseId: UUID,
         subsumsjonslogg: Subsumsjonslogg
-    ) =
-        inntekter.avklarSykepengegrunnlag(hendelse, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId, subsumsjonslogg)
+    ): Inntektsgrunnlag =
+        inntekter.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, meldingsreferanseId, subsumsjonslogg)
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

@@ -553,7 +553,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
 
-        forkastAlle(hendelselogg)
+        forkastAlle()
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -573,7 +573,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        forkastAlle(hendelselogg)
+        forkastAlle()
 
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }

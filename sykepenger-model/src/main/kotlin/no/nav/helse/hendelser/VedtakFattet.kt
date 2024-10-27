@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 class VedtakFattet(
     meldingsreferanseId: UUID,
@@ -17,7 +16,7 @@ class VedtakFattet(
     private val saksbehandlerEpost: String,
     private val vedtakFattetTidspunkt: LocalDateTime,
     override val automatisert: Boolean
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()), Behandlingsavgjørelse {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
     override val avgjørelsestidspunkt = vedtakFattetTidspunkt
     override val godkjent = true
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)

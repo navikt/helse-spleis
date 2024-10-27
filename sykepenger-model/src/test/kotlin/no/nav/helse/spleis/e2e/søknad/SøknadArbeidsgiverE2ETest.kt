@@ -325,7 +325,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning - med mye gap til forkastet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
+        person.søppelbøtte(forrigeHendelse, 1.januar til 20.januar)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar))
         håndterSøknad(Sykdom(10.februar, 15.februar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)

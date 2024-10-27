@@ -458,7 +458,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `sender ut søknad håndtert for forlengelse av forkastet periode`(){
         håndterSykmelding(januar)
         val søknadId1 = håndterSøknad(januar)
-        forkastAlle(hendelselogg)
+        forkastAlle()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val søknadId2 = håndterSøknad(februar)

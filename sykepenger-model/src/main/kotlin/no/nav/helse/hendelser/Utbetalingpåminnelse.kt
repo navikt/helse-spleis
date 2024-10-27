@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 
 class Utbetalingpåminnelse(
@@ -15,4 +14,4 @@ class Utbetalingpåminnelse(
     override val status: Utbetalingstatus,
     private val endringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()), UtbetalingpåminnelseHendelse
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), UtbetalingpåminnelseHendelse

@@ -6,6 +6,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -28,17 +29,17 @@ import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
@@ -113,9 +114,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSykmelding()
-            person.håndter(sykmelding)
+            person.håndter(sykmelding, aktivitetslogg)
         }
     }
 
@@ -126,9 +127,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSykmelding()
-            person.håndter(sykmelding)
+            person.håndter(sykmelding, aktivitetslogg)
         }
     }
 
@@ -139,9 +140,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSykmelding()
-            person.håndter(sykmelding)
+            person.håndter(sykmelding, aktivitetslogg)
         }
     }
 
@@ -152,9 +153,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSykmelding()
-            person.håndter(sykmelding)
+            person.håndter(sykmelding, aktivitetslogg)
         }
     }
 
@@ -165,9 +166,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSøknadArbeidsgiver()
-            person.håndter(søknad)
+            person.håndter(søknad, aktivitetslogg)
         }
     }
 
@@ -178,9 +179,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSøknadNav()
-            person.håndter(søknad)
+            person.håndter(søknad, aktivitetslogg)
         }
     }
 
@@ -191,9 +192,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSøknadFrilans()
-            person.håndter(søknad)
+            person.håndter(søknad, aktivitetslogg)
         }
     }
 
@@ -204,9 +205,9 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSøknadFrilans()
-            person.håndter(søknad)
+            person.håndter(søknad, aktivitetslogg)
         }
     }
 
@@ -217,44 +218,44 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
             HendelseProbe.onSøknadFrilans()
-            person.håndter(søknad)
+            person.håndter(søknad, aktivitetslogg)
         }
     }
 
     override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
-        opprettPersonOgHåndter(personopplysninger, message, inntektsmelding, context, emptySet()) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, inntektsmelding, context, emptySet()) { person, aktivitetslogg ->
             HendelseProbe.onInntektsmelding()
-            person.håndter(inntektsmelding)
+            person.håndter(inntektsmelding, aktivitetslogg)
         }
     }
 
     override fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: MessageContext) {
-        hentPersonOgHåndter(message, replays, context) { person ->
+        hentPersonOgHåndter(message, replays, context) { person, aktivitetslogg ->
             HendelseProbe.onInntektsmeldingReplay()
-            person.håndter(replays)
+            person.håndter(replays, aktivitetslogg)
         }
     }
 
     override fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: MessageContext) {
-        hentPersonOgHåndter(message, utbetalingshistorikk, context) { person ->
+        hentPersonOgHåndter(message, utbetalingshistorikk, context) { person, aktivitetslogg ->
             HendelseProbe.onUtbetalingshistorikk()
-            person.håndter(utbetalingshistorikk)
+            person.håndter(utbetalingshistorikk, aktivitetslogg)
         }
     }
 
     override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: MessageContext) {
-        hentPersonOgHåndter(message, utbetalingshistorikkForFeriepenger, context) { person ->
+        hentPersonOgHåndter(message, utbetalingshistorikkForFeriepenger, context) { person, aktivitetslogg ->
             HendelseProbe.onUtbetalingshistorikkForFeriepenger()
-            person.håndter(utbetalingshistorikkForFeriepenger)
+            person.håndter(utbetalingshistorikkForFeriepenger, aktivitetslogg)
         }
     }
 
     override fun behandle(message: YtelserMessage, ytelser: Ytelser, context: MessageContext) {
-        hentPersonOgHåndter(message, ytelser, context) { person ->
+        hentPersonOgHåndter(message, ytelser, context) { person, aktivitetslogg ->
             HendelseProbe.onYtelser()
-            person.håndter(ytelser)
+            person.håndter(ytelser, aktivitetslogg)
         }
     }
 
@@ -263,55 +264,55 @@ internal class HendelseMediator(
         sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, sykepengegrunnlagForArbeidsgiver, context) { person ->
-            person.håndter(sykepengegrunnlagForArbeidsgiver)
+        hentPersonOgHåndter(message, sykepengegrunnlagForArbeidsgiver, context) { person, aktivitetslogg ->
+            person.håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
         }
     }
 
     override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: MessageContext) {
-        hentPersonOgHåndter(message, vilkårsgrunnlag, context) { person ->
+        hentPersonOgHåndter(message, vilkårsgrunnlag, context) { person, aktivitetslogg ->
             HendelseProbe.onVilkårsgrunnlag()
-            person.håndter(vilkårsgrunnlag)
+            person.håndter(vilkårsgrunnlag, aktivitetslogg)
         }
     }
 
     override fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext) {
-        hentPersonOgHåndter(message, simulering, context) { person ->
+        hentPersonOgHåndter(message, simulering, context) { person, aktivitetslogg ->
             HendelseProbe.onSimulering()
-            person.håndter(simulering)
+            person.håndter(simulering, aktivitetslogg)
         }
     }
 
     override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext) {
-        hentPersonOgHåndter(message, utbetalingsgodkjenning, context) { person ->
+        hentPersonOgHåndter(message, utbetalingsgodkjenning, context) { person, aktivitetslogg ->
             HendelseProbe.onUtbetalingsgodkjenning()
-            person.håndter(utbetalingsgodkjenning)
+            person.håndter(utbetalingsgodkjenning, aktivitetslogg)
         }
     }
 
     override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext) {
-        hentPersonOgHåndter(message, utbetaling, context) { person ->
+        hentPersonOgHåndter(message, utbetaling, context) { person, aktivitetslogg ->
             HendelseProbe.onUtbetaling()
-            person.håndter(utbetaling)
+            person.håndter(utbetaling, aktivitetslogg)
         }
     }
 
     override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
-        hentPersonOgHåndter(message, påminnelse, context) { person ->
-            person.håndter(påminnelse)
+        hentPersonOgHåndter(message, påminnelse, context) { person, aktivitetslogg ->
+            person.håndter(påminnelse, aktivitetslogg)
         }
     }
 
     override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext) {
-        hentPersonOgHåndter(message, påminnelse, context) { person ->
+        hentPersonOgHåndter(message, påminnelse, context) { person, aktivitetslogg ->
             HendelseProbe.onPåminnelse(påminnelse)
-            person.håndter(påminnelse)
+            person.håndter(påminnelse, aktivitetslogg)
         }
     }
 
     override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext) {
-        hentPersonOgHåndter(message, påminnelse, context) { person ->
-            person.håndter(påminnelse)
+        hentPersonOgHåndter(message, påminnelse, context) { person, aktivitetslogg ->
+            person.håndter(påminnelse, aktivitetslogg)
         }
     }
 
@@ -320,15 +321,15 @@ internal class HendelseMediator(
         anmodning: AnmodningOmForkasting,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, anmodning, context) {person ->
-            person.håndter(anmodning)
+        hentPersonOgHåndter(message, anmodning, context) {person, aktivitetslogg ->
+            person.håndter(anmodning, aktivitetslogg)
         }
     }
 
     override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext) {
-        hentPersonOgHåndter(message, annullerUtbetaling, context) { person ->
+        hentPersonOgHåndter(message, annullerUtbetaling, context) { person, aktivitetslogg ->
             HendelseProbe.onAnnullerUtbetaling()
-            person.håndter(annullerUtbetaling)
+            person.håndter(annullerUtbetaling, aktivitetslogg)
         }
     }
 
@@ -343,39 +344,39 @@ internal class HendelseMediator(
     }
 
     override fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext) {
-        hentPersonOgHåndter(message, migrate, context) { /* intentionally left blank */ }
+        hentPersonOgHåndter(message, migrate, context) { _, _ -> /* intentionally left blank */ }
     }
 
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext) {
-        hentPersonOgHåndter(message, overstyrTidslinje, context) { person ->
+        hentPersonOgHåndter(message, overstyrTidslinje, context) { person, aktivitetslogg ->
             HendelseProbe.onOverstyrTidslinje()
-            person.håndter(overstyrTidslinje)
+            person.håndter(overstyrTidslinje, aktivitetslogg)
         }
     }
 
     override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
-        hentPersonOgHåndter(message, overstyrArbeidsgiveropplysninger, context) { person ->
+        hentPersonOgHåndter(message, overstyrArbeidsgiveropplysninger, context) { person, aktivitetslogg ->
             HendelseProbe.onOverstyrArbeidsgiveropplysninger()
-            person.håndter(overstyrArbeidsgiveropplysninger)
+            person.håndter(overstyrArbeidsgiveropplysninger, aktivitetslogg)
         }
     }
 
     override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext) {
-        hentPersonOgHåndter(message, overstyrArbeidsforhold, context) { person ->
+        hentPersonOgHåndter(message, overstyrArbeidsforhold, context) { person, aktivitetslogg ->
             HendelseProbe.onOverstyrArbeidsforhold()
-            person.håndter(overstyrArbeidsforhold)
+            person.håndter(overstyrArbeidsforhold, aktivitetslogg)
         }
     }
 
     override fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext) {
-        hentPersonOgHåndter(message, grunnbeløpsregulering, context) { person ->
-            person.håndter(grunnbeløpsregulering)
+        hentPersonOgHåndter(message, grunnbeløpsregulering, context) { person, aktivitetslogg ->
+            person.håndter(grunnbeløpsregulering, aktivitetslogg)
         }
     }
 
     override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
-        hentPersonOgHåndter(message, dødsmelding, context) { person ->
-            person.håndter(dødsmelding)
+        hentPersonOgHåndter(message, dødsmelding, context) { person, aktivitetslogg ->
+            person.håndter(dødsmelding, aktivitetslogg)
         }
     }
 
@@ -387,11 +388,11 @@ internal class HendelseMediator(
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(nyPersonidentifikator, null, message, identOpphørt, context, gamleIdenter) { person ->
+        hentPersonOgHåndter(nyPersonidentifikator, null, message, identOpphørt, context, gamleIdenter) { person, aktivitetslogg ->
             if (støtterIdentbytte) {
-                person.håndter(identOpphørt, nyPersonidentifikator, nyAktørId)
+                person.håndter(identOpphørt, aktivitetslogg, nyPersonidentifikator, nyAktørId)
             } else {
-                person.håndter(identOpphørt, nyPersonidentifikator)
+                person.håndter(identOpphørt, aktivitetslogg, nyPersonidentifikator)
             }
             context.publish(JsonMessage.newMessage("slackmelding", mapOf(
                 "melding" to "Det er en person som har byttet ident."
@@ -404,9 +405,9 @@ internal class HendelseMediator(
         infotrygdEndring: Infotrygdendring,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, infotrygdEndring, context) { person ->
+        hentPersonOgHåndter(message, infotrygdEndring, context) { person, aktivitetslogg ->
             HendelseProbe.onInfotrygdendring()
-            person.håndter(infotrygdEndring)
+            person.håndter(infotrygdEndring, aktivitetslogg)
         }
     }
 
@@ -415,9 +416,9 @@ internal class HendelseMediator(
         utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, utbetalingshistorikkEtterInfotrygdendring, context) { person ->
+        hentPersonOgHåndter(message, utbetalingshistorikkEtterInfotrygdendring, context) { person, aktivitetslogg ->
             HendelseProbe.onUtbetalingshistorikkEtterInfotrygdendring()
-            person.håndter(utbetalingshistorikkEtterInfotrygdendring)
+            person.håndter(utbetalingshistorikkEtterInfotrygdendring, aktivitetslogg)
         }
     }
 
@@ -426,9 +427,9 @@ internal class HendelseMediator(
         forkastSykmeldingsperioder: ForkastSykmeldingsperioder,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, forkastSykmeldingsperioder, context) { person ->
+        hentPersonOgHåndter(message, forkastSykmeldingsperioder, context) { person, aktivitetslogg ->
             HendelseProbe.onForkastSykmeldingsperioder()
-            person.håndter(forkastSykmeldingsperioder)
+            person.håndter(forkastSykmeldingsperioder, aktivitetslogg)
         }
     }
     override fun behandle(
@@ -436,9 +437,9 @@ internal class HendelseMediator(
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, avbruttSøknad, context) { person ->
+        hentPersonOgHåndter(message, avbruttSøknad, context) { person, aktivitetslogg ->
             HendelseProbe.onAvbruttSøknad()
-            person.håndter(avbruttSøknad)
+            person.håndter(avbruttSøknad, aktivitetslogg)
         }
     }
     override fun behandle(
@@ -446,9 +447,9 @@ internal class HendelseMediator(
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, avbruttSøknad, context) { person ->
+        hentPersonOgHåndter(message, avbruttSøknad, context) { person, aktivitetslogg ->
             HendelseProbe.onAvbruttSøknad()
-            person.håndter(avbruttSøknad)
+            person.håndter(avbruttSøknad, aktivitetslogg)
         }
     }
 
@@ -457,8 +458,8 @@ internal class HendelseMediator(
         gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, gjenopplivVilkårsgrunnlag, context) { person ->
-            person.håndter(gjenopplivVilkårsgrunnlag)
+        hentPersonOgHåndter(message, gjenopplivVilkårsgrunnlag, context) { person, aktivitetslogg ->
+            person.håndter(gjenopplivVilkårsgrunnlag, aktivitetslogg)
         }
     }
 
@@ -467,8 +468,8 @@ internal class HendelseMediator(
         skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, skjønnsmessigFastsettelse, context) { person ->
-            person.håndter(skjønnsmessigFastsettelse)
+        hentPersonOgHåndter(message, skjønnsmessigFastsettelse, context) { person, aktivitetslogg ->
+            person.håndter(skjønnsmessigFastsettelse, aktivitetslogg)
         }
     }
 
@@ -478,8 +479,8 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         if (minimumSykdomsgradsvurdering.valider()) {
-            hentPersonOgHåndter(message, minimumSykdomsgradsvurdering, context) { person ->
-                person.håndter(minimumSykdomsgradsvurdering)
+            hentPersonOgHåndter(message, minimumSykdomsgradsvurdering, context) { person, aktivitetslogg ->
+                person.håndter(minimumSykdomsgradsvurdering, aktivitetslogg)
             }
         }
     }
@@ -490,7 +491,7 @@ internal class HendelseMediator(
         hendelse: Hendelse,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
-        handler: (Person) -> Unit
+        handler: (Person, IAktivitetslogg) -> Unit
     ) {
         val personidentifikator = Personidentifikator(hendelse.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
@@ -500,7 +501,7 @@ internal class HendelseMediator(
         message: HendelseMessage,
         hendelse: Hendelse,
         context: MessageContext,
-        handler: (Person) -> Unit
+        handler: (Person, IAktivitetslogg) -> Unit
     ) {
         val personidentifikator = Personidentifikator(hendelse.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, null, message, hendelse, context, handler = handler)
@@ -512,17 +513,20 @@ internal class HendelseMediator(
         hendelse: Hendelse,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator> = emptySet(),
-        handler: (Person) -> Unit
+        handler: (Person, IAktivitetslogg) -> Unit
     ) {
+        val aktivitetslogg = Aktivitetslogg()
+        aktivitetslogg.kontekst(hendelse)
+
         val subsumsjonMediator = SubsumsjonMediator(hendelse.fødselsnummer, message, versjonAvKode)
         val personMediator = PersonMediator(message, hendelse)
-        val datadelingMediator = DatadelingMediator(hendelse, hendelse.meldingsreferanseId, hendelse.fødselsnummer, hendelse.aktørId)
+        val datadelingMediator = DatadelingMediator(aktivitetslogg, hendelse.meldingsreferanseId, hendelse.fødselsnummer, hendelse.aktørId)
         person(personidentifikator, message, hendelse.aktørId, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
-            handler(person)
+            handler(person, aktivitetslogg)
         }
-        ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
+        ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse, aktivitetslogg)
     }
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, aktørId: String, historiskeFolkeregisteridenter: Set<Personidentifikator>, subsumsjonslogg: Subsumsjonslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
@@ -543,15 +547,16 @@ internal class HendelseMediator(
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
-        hendelse: PersonHendelse
+        hendelse: PersonHendelse,
+        aktivitetslogg: IAktivitetslogg
     ) {
         personMediator.ferdigstill(context)
         subsumsjonMediator.ferdigstill(context)
         datadelingMediator.ferdigstill(context)
-        if (!hendelse.harAktiviteter()) return
-        if (hendelse.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
-        else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
-        behovMediator.håndter(context, hendelse)
+        if (!aktivitetslogg.harAktiviteter()) return
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${aktivitetslogg.toString()}")
+        else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${aktivitetslogg.toString()}")
+        behovMediator.håndter(context, hendelse, aktivitetslogg)
     }
 }
 

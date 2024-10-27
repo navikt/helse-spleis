@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -17,10 +17,10 @@ class GjenopplivVilkårsgrunnlag(
     private val vilkårsgrunnlagId: UUID,
     private val nyttSkjæringstidspunkt: LocalDate?,
     private val arbeidsgiveropplysninger: Map<String, Inntekt>
-): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
+): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId) {
 
-    internal fun gjenoppliv(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
-        vilkårsgrunnlagHistorikk.gjenoppliv(this, vilkårsgrunnlagId, nyttSkjæringstidspunkt)
+    internal fun gjenoppliv(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
+        vilkårsgrunnlagHistorikk.gjenoppliv(this, aktivitetslogg, vilkårsgrunnlagId, nyttSkjæringstidspunkt)
     }
 
     internal fun arbeidsgiverinntektsopplysninger(skjæringstidspunkt: LocalDate) = arbeidsgiveropplysninger.map { (organisasjonsnummer, inntekt) ->

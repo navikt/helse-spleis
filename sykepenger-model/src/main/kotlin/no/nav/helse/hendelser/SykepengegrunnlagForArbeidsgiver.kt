@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -18,10 +19,10 @@ class SykepengegrunnlagForArbeidsgiver(
     private val inntekter: ArbeidsgiverInntekt
 ) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
 
-    internal fun erRelevant(other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
+    internal fun erRelevant(aktivitetslogg: IAktivitetslogg, other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
         if (other != vedtaksperiodeId) return false
         if (skjæringstidspunktVedtaksperiode == skjæringstidspunkt) return true
-        info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
+        aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
         return false
     }
 

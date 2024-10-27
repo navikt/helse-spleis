@@ -50,6 +50,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -82,7 +83,7 @@ internal class TestPerson(
             testPerson.arbeidsgiver(this, testblokk)
     }
 
-    private lateinit var forrigeHendelse: IAktivitetslogg
+    private lateinit var forrigeAktivitetslogg: IAktivitetslogg
 
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
@@ -108,11 +109,11 @@ internal class TestPerson(
     internal operator fun <R> String.invoke(testblokk: TestArbeidsgiver.() -> R) =
         arbeidsgiver(this, testblokk)
 
-    private fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
-        forrigeHendelse = this
-        this.register(ugyldigeSituasjonerObservatør)
-        person.håndter(this)
-        behovsamler.registrerBehov(forrigeHendelse)
+    private fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
+        forrigeAktivitetslogg = Aktivitetslogg()
+        forrigeAktivitetslogg.register(ugyldigeSituasjonerObservatør)
+        person.håndter(this, forrigeAktivitetslogg)
+        behovsamler.registrerBehov(forrigeAktivitetslogg)
         return this
     }
 
@@ -363,8 +364,8 @@ internal class TestPerson(
         }
 
         internal fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) {
-            arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter {
-                håndter(it, nyttFnr, nyAktørId)
+            arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter { it, aktivitetslogg ->
+                håndter(it, aktivitetslogg, nyttFnr, nyAktørId)
             }
         }
 

@@ -253,7 +253,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Forventer ikke arbeidsgiveropplysninger fra periode der arbeidsgiver har sendt inntektsmelding før vi mottar søknad`() {
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         nyPeriode(januar)
-        person.søppelbøtte(hendelselogg) { true }
+        forkastAlle()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertForventetFeil(
             forklaring = "Falsk positiv",
@@ -270,7 +270,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger fra periode med utbetaling som mottar overlappende søknad`() {
         nyPeriode(januar)
-        person.søppelbøtte(hendelselogg) { true }
+        forkastAlle()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         nyPeriode(31.januar til 31.januar)
@@ -281,7 +281,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer arbeidsgiveropplysninger fra kort periode som mottar overlappende søknad som gjør at perioden går utover AGP`() {
         nyPeriode(1.januar til 1.januar)
-        person.søppelbøtte(hendelselogg) { true }
+        forkastAlle()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         nyPeriode(januar)
@@ -314,7 +314,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes` () {
         nyPeriode(januar)
         nyPeriode(februar)
-        person.søppelbøtte(hendelselogg) { true }
+        forkastAlle()
         assertEquals(listOf(januar), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
         assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)

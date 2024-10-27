@@ -20,18 +20,18 @@ import org.junit.jupiter.api.Test
 internal class DatadelingMediatorTest {
     private val fødselsnummer = "12345678910"
     private val testRapid = TestRapid()
-    private lateinit var testhendelse: IAktivitetslogg
+    private lateinit var aktivitetslogg: IAktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
     @BeforeEach
     fun beforeEach() {
-        testhendelse = Aktivitetslogg()
-        datadelingMediator = DatadelingMediator(testhendelse, UUID.randomUUID(), fødselsnummer, "aktørId")
+        aktivitetslogg = Aktivitetslogg()
+        datadelingMediator = DatadelingMediator(aktivitetslogg, UUID.randomUUID(), fødselsnummer, "aktørId")
     }
 
     @Test
     fun `datadelingMediator fanger opp nye aktiviteter på hendelsen`() {
-        testhendelse.varsel(RV_SØ_1)
+        aktivitetslogg.varsel(RV_SØ_1)
         datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
         assertNotNull(testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet"))
@@ -39,8 +39,8 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun innhold() {
-        testhendelse.kontekst(TestKontekst("Person", "Person 1"))
-        testhendelse.info("Dette er en infomelding")
+        aktivitetslogg.kontekst(TestKontekst("Person", "Person 1"))
+        aktivitetslogg.info("Dette er en infomelding")
         datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
 
@@ -56,11 +56,11 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun nivåer() {
-        testhendelse.info("Dette er en infomelding")
-        testhendelse.varsel(RV_SØ_1)
-        testhendelse.funksjonellFeil(RV_VT_1)
+        aktivitetslogg.info("Dette er en infomelding")
+        aktivitetslogg.varsel(RV_SØ_1)
+        aktivitetslogg.funksjonellFeil(RV_VT_1)
         try {
-            testhendelse.logiskFeil("Dette er en severe")
+            aktivitetslogg.logiskFeil("Dette er en severe")
         } catch (_: Exception) {}
         datadelingMediator.ferdigstill(testRapid)
 
@@ -71,18 +71,18 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun `publiserer behov-aktiviteter`() {
-        testhendelse.behov(Aktivitet.Behov.Behovtype.Godkjenning, "melding")
+        aktivitetslogg.behov(Aktivitet.Behov.Behovtype.Godkjenning, "melding")
         datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
     }
 
     @Test
     fun mapping() {
-        testhendelse.kontekst(TestKontekst("Person", "Person 1"))
-        testhendelse.info("Dette er en infomelding")
-        testhendelse.varsel(RV_SØ_1)
-        testhendelse.funksjonellFeil(RV_VT_1)
-        try { testhendelse.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
+        aktivitetslogg.kontekst(TestKontekst("Person", "Person 1"))
+        aktivitetslogg.info("Dette er en infomelding")
+        aktivitetslogg.varsel(RV_SØ_1)
+        aktivitetslogg.funksjonellFeil(RV_VT_1)
+        try { aktivitetslogg.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
         datadelingMediator.ferdigstill(testRapid)
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]

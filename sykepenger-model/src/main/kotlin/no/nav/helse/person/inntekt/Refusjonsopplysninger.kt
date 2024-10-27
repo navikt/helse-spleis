@@ -155,16 +155,16 @@ data class Refusjonsopplysning(
         private fun harNødvendigRefusjonsopplysninger(
             skjæringstidspunkt: LocalDate,
             utbetalingsdager: List<LocalDate>,
-            hendelse: IAktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             organisasjonsnummer: String
         ): Boolean {
             val førsteRefusjonsopplysning = førsteRefusjonsopplysning() ?: return false.also {
-                hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for hele perioden (${utbetalingsdager.omsluttendePeriode})")
+                aktivitetslogg.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for hele perioden (${utbetalingsdager.omsluttendePeriode})")
             }
             val dekkes = utbetalingsdager.filter { utbetalingsdag -> dekker(utbetalingsdag) }
             val aksepteres = utbetalingsdager.filter { utbetalingsdag -> førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, utbetalingsdag) }
             val mangler = (utbetalingsdager - dekkes - aksepteres).takeUnless { it.isEmpty() } ?: return true
-            hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${mangler.grupperSammenhengendePerioder()}")
+            aktivitetslogg.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${mangler.grupperSammenhengendePerioder()}")
             return false
         }
 
@@ -172,9 +172,9 @@ data class Refusjonsopplysning(
             skjæringstidspunkt: LocalDate,
             utbetalingsdager: List<LocalDate>,
             sisteOppholdsdagFørPerioden: LocalDate?,
-            hendelse: IAktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             organisasjonsnummer: String
-        ) = hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, hendelse, organisasjonsnummer)
+        ) = hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, aktivitetslogg, organisasjonsnummer)
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
 
         private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }

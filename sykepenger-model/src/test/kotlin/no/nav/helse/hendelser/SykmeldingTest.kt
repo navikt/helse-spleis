@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,11 +25,12 @@ internal class SykmeldingTest {
     fun `oppdaterer perioder`() {
         sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
 
-        sykmelding.oppdaterSykmeldingsperioder(emptyList()).also { result ->
+        sykmelding.oppdaterSykmeldingsperioder(Aktivitetslogg(), emptyList()).also { result ->
             assertEquals(listOf(10.januar til 15.januar), result)
         }
 
         sykmelding.oppdaterSykmeldingsperioder(
+            Aktivitetslogg(),
             listOf(1.januar til 2.januar)
         ).also { result ->
             assertEquals(listOf(
@@ -38,6 +40,7 @@ internal class SykmeldingTest {
         }
 
         sykmelding.oppdaterSykmeldingsperioder(
+            Aktivitetslogg(),
             listOf(17.januar til 20.januar)
         ).also { result ->
             assertEquals(listOf(
@@ -46,7 +49,7 @@ internal class SykmeldingTest {
             ), result)
         }
 
-        sykmelding.oppdaterSykmeldingsperioder(listOf(
+        sykmelding.oppdaterSykmeldingsperioder(Aktivitetslogg(), listOf(
             1.januar til 2.januar,
             6.januar til 10.januar,
             15.januar til 20.januar,
@@ -63,7 +66,7 @@ internal class SykmeldingTest {
     fun `oppdaterer perioder - trimmet dager - en dag igjen`() {
         sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
         sykmelding.trimLeft(14.januar)
-        sykmelding.oppdaterSykmeldingsperioder(emptyList()).also { result ->
+        sykmelding.oppdaterSykmeldingsperioder(Aktivitetslogg(), emptyList()).also { result ->
             assertEquals(listOf(15.januar til 15.januar), result)
         }
     }
@@ -72,7 +75,7 @@ internal class SykmeldingTest {
         sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
         sykmelding.trimLeft(15.januar)
         val perioder = listOf(1.januar til 2.januar)
-        sykmelding.oppdaterSykmeldingsperioder(perioder).also { result ->
+        sykmelding.oppdaterSykmeldingsperioder(Aktivitetslogg(), perioder).also { result ->
             assertEquals(perioder, result)
         }
     }

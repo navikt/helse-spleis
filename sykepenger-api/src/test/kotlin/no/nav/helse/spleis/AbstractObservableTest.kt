@@ -34,7 +34,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.testhelpers.TestObservatør
@@ -199,7 +198,6 @@ internal abstract class AbstractObservableTest {
         dagpenger: List<Periode> = emptyList(),
         fnr: String = UNG_PERSON_FNR
     ): Ytelser {
-        val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
@@ -222,8 +220,7 @@ internal abstract class AbstractObservableTest {
                 perioder = institusjonsoppholdsperioder
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-            dagpenger = Dagpenger(dagpenger),
-            aktivitetslogg = aktivitetslogg
+            dagpenger = Dagpenger(dagpenger)
         )
     }
 

@@ -6,6 +6,7 @@ import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
 
@@ -24,12 +25,12 @@ internal class Sykdomshistorikk private constructor(
 
     fun view() = SykdomshistorikkView(elementer = elementer.map { it.view() })
 
-    internal fun håndter(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
+    internal fun håndter(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
         val s = hendelse.sykdomstidslinje()
         val m = hendelse.meldingsreferanseId
 
         val nyttElement = Element.opprett(m, s)
-        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
+        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse, aktivitetslogg) ?: return sykdomstidslinje()
         elementer.add(0, nyttElement.merge(this, uhåndtertSykdomstidslinje))
         return sykdomstidslinje()
     }
@@ -73,7 +74,7 @@ internal class Sykdomshistorikk private constructor(
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
         companion object {
-            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse) : Sykdomstidslinje? {
+            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg) : Sykdomstidslinje? {
                 if (hendelse.sykdomstidslinje().periode() == null) return null // tom sykdomstidslinje
                 val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
                 val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
@@ -82,7 +83,7 @@ internal class Sykdomshistorikk private constructor(
                 val uhåndtertSykdomstidslinje = hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
                 if (uhåndtertSykdomstidslinje.periode() == null) return null // Tom sykdomstidslinje, ikke noe nytt
                 return uhåndtertSykdomstidslinje.also {
-                    hendelse.info("Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken")
+                    aktivitetslogg.info("Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken")
                 }
             }
 

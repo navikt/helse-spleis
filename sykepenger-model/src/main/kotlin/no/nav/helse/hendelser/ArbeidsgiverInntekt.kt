@@ -44,7 +44,7 @@ class ArbeidsgiverInntekt(
 
     internal companion object {
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
-            hendelse: IAktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             person: Person,
             rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
             skjæringstidspunkt: LocalDate,
@@ -55,7 +55,7 @@ class ArbeidsgiverInntekt(
             // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
             val inntekterMedOpptjening = rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
             return person.avklarSykepengegrunnlag(
-                hendelse,
+                aktivitetslogg,
                 skjæringstidspunkt,
                 inntekterMedOpptjening,
                 subsumsjonslogg

@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Sykmelding(
     meldingsreferanseId: UUID,
@@ -25,15 +26,15 @@ class Sykmelding(
         // Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den
     }
 
-    internal fun oppdaterSykmeldingsperioder(perioder: List<Periode>): List<Periode> {
+    internal fun oppdaterSykmeldingsperioder(aktivitetslogg: IAktivitetslogg, perioder: List<Periode>): List<Periode> {
         val periode = sykmeldingsperiode
         if (periode == null) {
-            info("Sykmeldingsperiode har allerede blitt tidligere håndtert, mistenker korrigert sykmelding")
+            aktivitetslogg.info("Sykmeldingsperiode har allerede blitt tidligere håndtert, mistenker korrigert sykmelding")
             return perioder
         }
         val (overlappendePerioder, gapPerioder) = perioder.partition { it.overlapperMed(periode) }
         val nyPeriode = periode + overlappendePerioder.periode()
-        info("Legger til ny periode $nyPeriode i sykmeldingsperioder")
+        aktivitetslogg.info("Legger til ny periode $nyPeriode i sykmeldingsperioder")
         return (gapPerioder + listOf(nyPeriode)).sortedBy { it.start }
     }
 }

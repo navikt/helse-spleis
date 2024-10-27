@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -22,9 +22,8 @@ class Ytelser(
     private val opplæringspenger: Opplæringspenger,
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
-    private val dagpenger: Dagpenger,
-    aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg), SykdomshistorikkHendelse {
+    private val dagpenger: Dagpenger
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), SykdomshistorikkHendelse {
 
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
         foreldrepenger
@@ -37,30 +36,31 @@ class Ytelser(
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate, erForlengelse: Boolean ): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate, erForlengelse: Boolean ): Boolean {
         if (periode.start > maksdato) return true
 
         val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)
-        arbeidsavklaringspenger.valider(this, skjæringstidspunkt, periodeForOverlappsjekk)
-        dagpenger.valider(this, skjæringstidspunkt, periodeForOverlappsjekk)
-        if (foreldrepenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med foreldrepenger`)
-        if (svangerskapspenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med svangerskapspenger`)
-        if (pleiepenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med pleiepenger`)
-        if (omsorgspenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med omsorgspenger`)
-        if (opplæringspenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med opplæringspenger`)
-        if (institusjonsopphold.overlapper(this, periodeForOverlappsjekk)) funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
+        arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
+        dagpenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
+        if (foreldrepenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med foreldrepenger`)
+        if (svangerskapspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med svangerskapspenger`)
+        if (pleiepenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med pleiepenger`)
+        if (omsorgspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med omsorgspenger`)
+        if (opplæringspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med opplæringspenger`)
+        if (institusjonsopphold.overlapper(aktivitetslogg, periodeForOverlappsjekk)) aktivitetslogg.funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
 
-        return !harFunksjonelleFeilEllerVerre()
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun oppdaterHistorikk(
+        aktivitetslogg: IAktivitetslogg,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
         periodeRettEtter: Periode?,
         oppdaterHistorikk: () -> Unit
     ) {
         val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
-            if (!ytelse.skalOppdatereHistorikk(this, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
+            if (!ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
             else ytelse.sykdomstidslinje(meldingsreferanseId, registrert())
         }
         if (sykdomstidslinjer.isEmpty()) return

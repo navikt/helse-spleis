@@ -35,6 +35,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.Personidentifikator
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.LokalePayload
 import no.nav.helse.spleis.SpekematClient
@@ -844,21 +845,22 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {
         return fun (testDataSource: TestDataSource) {
             observatør = TestObservatør().also { person.addObserver(it) }
-            person.håndter(sykmelding())
-            person.håndter(utbetalinghistorikk())
-            person.håndter(søknad())
-            person.håndter(inntektsmelding())
-            person.håndter(ytelser())
-            person.håndter(vilkårsgrunnlag())
+            person.håndter(sykmelding(), Aktivitetslogg())
+            person.håndter(utbetalinghistorikk(), Aktivitetslogg())
+            person.håndter(søknad(), Aktivitetslogg())
+            person.håndter(inntektsmelding(), Aktivitetslogg())
+            person.håndter(ytelser(), Aktivitetslogg())
+            person.håndter(vilkårsgrunnlag(), Aktivitetslogg())
             val ytelser = ytelser()
-            person.håndter(ytelser)
-            val simuleringsbehov = ytelser.behov().last { it.type == Simulering }
+            val aktivitetslogg = Aktivitetslogg()
+            person.håndter(ytelser, aktivitetslogg)
+            val simuleringsbehov = aktivitetslogg.behov().last { it.type == Simulering }
             val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
             val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
             val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
-            person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
-            person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
-            person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
+            person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
+            person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
+            person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
 
             lagrePerson(testDataSource.ds, AKTØRID, UNG_PERSON_FNR, person)
             lagreSykmelding(

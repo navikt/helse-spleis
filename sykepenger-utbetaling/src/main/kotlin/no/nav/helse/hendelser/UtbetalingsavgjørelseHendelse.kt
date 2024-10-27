@@ -7,7 +7,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_18
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_19
 import no.nav.helse.utbetalingslinjer.Utbetaling.Vurdering
 
-interface UtbetalingsavgjørelseHendelse : IAktivitetslogg {
+interface UtbetalingsavgjørelseHendelse {
     fun saksbehandler(): Saksbehandler
     val utbetalingId: UUID
     val godkjent: Boolean
@@ -31,19 +31,19 @@ val UtbetalingsavgjørelseHendelse.vurdering get() = saksbehandler().vurdering(
     automatisert = automatisert
 )
 private val UtbetalingsavgjørelseHendelse.manueltBehandlet get() = !automatisert
-fun UtbetalingsavgjørelseHendelse.valider() {
+fun UtbetalingsavgjørelseHendelse.valider(aktivitetslogg: IAktivitetslogg) {
     when {
         avvist && manueltBehandlet -> {
-            funksjonellFeil(RV_UT_19)
-            info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
+            aktivitetslogg.funksjonellFeil(RV_UT_19)
+            aktivitetslogg.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
         }
         avvist && automatisert -> {
-            funksjonellFeil(RV_UT_18)
-            info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
+            aktivitetslogg.funksjonellFeil(RV_UT_18)
+            aktivitetslogg.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
         }
         godkjent && manueltBehandlet ->
-            info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
+            aktivitetslogg.info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
         else ->
-            info("Utbetaling markert som godkjent automatisk $avgjørelsestidspunkt")
+            aktivitetslogg.info("Utbetaling markert som godkjent automatisk $avgjørelsestidspunkt")
     }
 }

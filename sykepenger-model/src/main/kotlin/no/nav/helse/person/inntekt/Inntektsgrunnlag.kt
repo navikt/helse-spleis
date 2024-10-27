@@ -269,18 +269,18 @@ internal class Inntektsgrunnlag private constructor(
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
     }
 
-    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, nyttSkjæringstidspunkt: LocalDate?): Inntektsgrunnlag? {
+    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, nyttSkjæringstidspunkt: LocalDate?): Inntektsgrunnlag? {
         val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
         val nyeArbeidsgiverInntektsopplysninger = hendelse.arbeidsgiverinntektsopplysninger(skjæringstidspunkt)
         if (arbeidsgiverInntektsopplysninger.isNotEmpty() && nyeArbeidsgiverInntektsopplysninger.isNotEmpty()) {
-            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger inntektsopplysninger.")
+            aktivitetslogg.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger inntektsopplysninger.")
             return null
         }
 
         val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger.map { it.gjenoppliv(this.skjæringstidspunkt, skjæringstidspunkt) }
 
         if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) {
-            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")
+            aktivitetslogg.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")
             return null
         }
         return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt)
@@ -397,8 +397,8 @@ internal class Inntektsgrunnlag private constructor(
     fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harGjenbrukbareOpplysninger(organisasjonsnummer)
 
-    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
-        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
+    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
+        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
     }
 
     enum class Begrensning {

@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Person
 import no.nav.helse.person.VedtaksperiodeFilter
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
@@ -13,14 +14,14 @@ internal fun Person.søppelbøtte(hendelse: Hendelse, periode: Periode) =
     søppelbøtte(hendelse) { it.periode().start >= periode.start }
 
 internal fun Person.søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) =
-    søppelbøtte(hendelse, filter)
+    søppelbøtte(hendelse, Aktivitetslogg(), filter)
 
 internal class PersonInspektør(person: Person) {
     internal val arbeidsgiverteller get() = arbeidsgivere.size
     internal val vilkårsgrunnlagHistorikk = person.vilkårsgrunnlagHistorikk.inspektør
     private val infotrygdhistorikk = person.infotrygdhistorikk
 
-    internal val aktivitetslogg = person.aktivitetslogg
+    internal val aktivitetslogg = person.personlogg
     internal val personidentifikator = person.personidentifikator
     internal val aktørId = person.aktørId
     internal val fødselsdato = person.alder.fødselsdato

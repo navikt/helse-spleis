@@ -17,6 +17,7 @@ import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -60,6 +61,7 @@ internal abstract class AbstractPersonTest {
                     ),
                     besvart = LocalDateTime.now()
                 ),
+                Aktivitetslogg()
             )
         }
         private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
@@ -75,6 +77,7 @@ internal abstract class AbstractPersonTest {
                     ),
                     besvart = LocalDateTime.now()
                 ),
+                Aktivitetslogg()
             )
         }
     }

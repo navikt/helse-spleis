@@ -1,6 +1,10 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -16,11 +20,6 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import org.slf4j.LoggerFactory
 
@@ -95,8 +94,7 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
-            dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
-            aktivitetslogg = Aktivitetslogg()
+            dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) })
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for {}", keyValue("aktørId", aktørId))
             if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for {}", keyValue("aktørId", aktørId))

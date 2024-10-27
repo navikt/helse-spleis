@@ -699,7 +699,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
 
-        forkastAlle(hendelselogg)
+        forkastAlle()
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,

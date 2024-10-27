@@ -90,7 +90,7 @@ sealed class Inntektsopplysning(
     internal fun lagreTidsnærInntekt(
         skjæringstidspunkt: LocalDate,
         arbeidsgiver: Arbeidsgiver,
-        hendelse: IAktivitetslogg,
+        aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean,
         refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
         orgnummer: String,
@@ -103,7 +103,7 @@ sealed class Inntektsopplysning(
             orgnummer = orgnummer,
             inntektsmelding = gjenbrukbarInntekt,
             refusjonsopplysninger = refusjonsopplysninger,
-            hendelse = hendelse,
+            aktivitetslogg = aktivitetslogg,
             nyArbeidsgiverperiode = nyArbeidsgiverperiode
         )
     }

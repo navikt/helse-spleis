@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
 internal class OmfordelRefusjonsopplysningerTest {
     val observatør = object : BehandlingObserver {
         override fun avsluttetUtenVedtak(
-            hendelse: IAktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             behandlingId: UUID,
             tidsstempel: LocalDateTime,
             periode: Periode,
@@ -38,13 +38,13 @@ internal class OmfordelRefusjonsopplysningerTest {
         }
 
         override fun vedtakIverksatt(
-            hendelse: IAktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             vedtakFattetTidspunkt: LocalDateTime,
             behandling: Behandlinger.Behandling
         ) {
         }
 
-        override fun vedtakAnnullert(hendelse: IAktivitetslogg, behandlingId: UUID) {
+        override fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg, behandlingId: UUID) {
         }
 
         override fun behandlingLukket(behandlingId: UUID) {

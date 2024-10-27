@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Påminnelse(
     meldingsreferanseId: UUID,
@@ -22,7 +22,7 @@ class Påminnelse(
     private val ønskerReberegning: Boolean = false,
     private val nå: LocalDateTime = LocalDateTime.now(),
     private val opprettet: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
     override fun innsendt() = opprettet
 
@@ -42,9 +42,9 @@ class Påminnelse(
 
     internal fun skalReberegnes() = ønskerReberegning
 
-    internal fun gjelderTilstand(tilstandType: TilstandType) = (tilstandType == tilstand).also {
+    internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
-            info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+            aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
     }
 

@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
@@ -14,14 +13,10 @@ class Grunnbeløpsregulering(
     fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
-): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrInntektsgrunnlag {
+): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) =
         this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: BehandlingSubsumsjonslogg) {
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, skjæringstidspunkt, jurist)
-    }
 
     override fun innsendt() = opprettet
 

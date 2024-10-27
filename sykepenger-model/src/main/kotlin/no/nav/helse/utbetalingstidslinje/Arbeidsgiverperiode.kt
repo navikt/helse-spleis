@@ -185,19 +185,19 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
             }
         }
 
-        private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String, sisteOppholdsdagFørUtbetalingsdager: () -> LocalDate?): Boolean {
+        private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, sisteOppholdsdagFørUtbetalingsdager: () -> LocalDate?): Boolean {
             val utbetalingsdager = arbeidsgiverperiode.utbetalingsdagerI(periode)
             if (utbetalingsdager.isEmpty()) return true
-            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager(), hendelse, organisasjonsnummer)
+            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager(), aktivitetslogg, organisasjonsnummer)
         }
 
-        internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer) {
+        internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
+            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) {
                 arbeidsgiverperiode.oppholdsdager.lastOrNull { it.endInclusive < periode.start }?.endInclusive ?: arbeidsgiverperiode.firstOrNull()?.forrigeDag
             }
 
-        internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
+        internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
+            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
 
         internal fun utbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate, periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode) =
             arbeidsgiverperiode.utbetalingsdagerI(periode).filter { it < skjæringstidspunkt }

@@ -17,7 +17,7 @@ class KanIkkeBehandlesHer(
     private val saksbehandlerEpost: String,
     private val opprettet: LocalDateTime,
     override val automatisert: Boolean
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()), Behandlingsavgjørelse {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
     override val avgjørelsestidspunkt = opprettet
     override val godkjent = false
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)

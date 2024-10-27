@@ -114,7 +114,7 @@ internal class Refusjonshistorikk {
             internal companion object {
                 internal fun List<EndringIRefusjon>.beløp(dag: LocalDate) = sortedBy { it.endringsdato }.lastOrNull { dag >= it.endringsdato }?.beløp
 
-                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg? = null): Refusjonsopplysninger {
+                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
                     val aktuelle = refusjoner.filter { it.startskuddet >= skjæringstidspunkt }
                     val første = aktuelle.minByOrNull { it.startskuddet }

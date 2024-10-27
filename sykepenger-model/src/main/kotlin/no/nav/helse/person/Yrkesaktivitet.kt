@@ -41,14 +41,14 @@ internal sealed interface Yrkesaktivitet {
 
     fun jurist(other: BehandlingSubsumsjonslogg): BehandlingSubsumsjonslogg =
         other.medOrganisasjonsnummer(this.toString())
-    fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean
+    fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean
 
-    fun håndter(sykmelding: Sykmelding, sykmeldingsperioder: Sykmeldingsperioder) {
-        sykmeldingsperioder.lagre(sykmelding)
+    fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
+        sykmeldingsperioder.lagre(sykmelding, aktivitetslogg)
     }
 
     class Arbeidstaker(private val organisasjonsnummer: String) : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg) = false
+        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg) = false
         override fun avklarSykepengegrunnlag(
             skjæringstidspunkt: LocalDate,
             førsteFraværsdag: LocalDate?,
@@ -62,7 +62,7 @@ internal sealed interface Yrkesaktivitet {
                 orgnummer = organisasjonsnummer,
                 gjelder = skjæringstidspunkt til LocalDate.MAX,
                 inntektsopplysning = inntektsopplysning,
-                refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, aktivitetslogg)
+                refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
             )
         }
 
@@ -80,8 +80,8 @@ internal sealed interface Yrkesaktivitet {
         override fun toString() = identifikator()
     }
     class Frilans : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean {
-            hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
+        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
 
@@ -98,8 +98,8 @@ internal sealed interface Yrkesaktivitet {
         override fun toString() = identifikator()
     }
     class Selvstendig : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean {
-            hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
+        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
 
@@ -115,13 +115,13 @@ internal sealed interface Yrkesaktivitet {
         override fun toString() = identifikator()
     }
     class Arbeidsledig : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean {
-            hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
+        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
 
-        override fun håndter(sykmelding: Sykmelding, sykmeldingsperioder: Sykmeldingsperioder) {
-            sykmelding.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
+        override fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
+            aktivitetslogg.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
         }
 
         override fun avklarSykepengegrunnlag(

@@ -5,8 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 sealed class SykdomstidslinjeHendelse protected constructor(
     meldingsreferanseId: UUID,
@@ -15,10 +13,9 @@ sealed class SykdomstidslinjeHendelse protected constructor(
     organisasjonsnummer: String,
     private val opprettet: LocalDateTime,
     melding: Melding? = null,
-    aktivitetslogg: IAktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg),
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer),
     SykdomshistorikkHendelse {
-    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)
+    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null)
     private val håndtertAv = mutableSetOf<UUID>()
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
     internal val kilde: SykdomshistorikkHendelse.Hendelseskilde =

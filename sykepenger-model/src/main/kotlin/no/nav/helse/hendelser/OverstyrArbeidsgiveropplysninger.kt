@@ -3,12 +3,10 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
@@ -20,19 +18,10 @@ class OverstyrArbeidsgiveropplysninger(
     aktørId: String,
     internal val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     private val opprettet: LocalDateTime,
     private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), OverstyrInntektsgrunnlag {
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: BehandlingSubsumsjonslogg) {
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-            this,
-            this.skjæringstidspunkt,
-            jurist
-        )
-    }
 
     override fun innsendt() = opprettet
     override fun avsender() = Avsender.SAKSBEHANDLER

@@ -251,14 +251,14 @@ data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,
-            hendelse: IAktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             nyArbeidsgiverperiode: Boolean
         ) {
             this.forEach {
                 it.inntektsopplysning.lagreTidsnærInntekt(
                     skjæringstidspunkt,
                     arbeidsgiver,
-                    hendelse,
+                    aktivitetslogg,
                     nyArbeidsgiverperiode,
                     it.refusjonsopplysninger,
                     it.orgnummer

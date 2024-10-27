@@ -186,6 +186,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -211,7 +212,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag.valider(10000.månedlig.sykepengegrunnlag, jurist)
+        vilkårsgrunnlag.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
         SubsumsjonInspektør(subsumsjonslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
 
@@ -243,10 +244,12 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
         vilkårsgrunnlag2.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -292,8 +295,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag1.valider(10000.månedlig.sykepengegrunnlag, jurist)
-        vilkårsgrunnlag2.valider(10000.månedlig.sykepengegrunnlag, jurist)
+        vilkårsgrunnlag1.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
+        vilkårsgrunnlag2.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -316,6 +319,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -341,6 +345,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -367,6 +372,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -383,6 +389,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
+            Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -409,6 +416,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
             10.månedlig.sykepengegrunnlag,
             jurist
         )
@@ -445,6 +453,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
             10.månedlig.inntektsgrunnlag(fødselsdato.alder),
             jurist
         )

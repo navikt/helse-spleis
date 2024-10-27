@@ -3,9 +3,9 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Saksbehandler
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
@@ -152,7 +152,7 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
-        assertFalse(hendelse.aktivitetslogg.harBehov(Behovtype.Utbetaling))
+        assertFalse(hendelse.harBehov(Behovtype.Utbetaling))
         assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
         assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
         assertEquals(GODKJENT_UTEN_UTBETALING, utbetalingen.inspektør.tilstand)
@@ -202,8 +202,8 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
-        assertEquals(1, hendelse.aktivitetslogg.behov.size)
-        hendelse.aktivitetslogg.sisteBehov(Behovtype.Utbetaling).also { behov ->
+        assertEquals(1, hendelse.behov.size)
+        hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
 
@@ -278,8 +278,8 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
-        assertEquals(1, hendelse.aktivitetslogg.behov.size)
-        hendelse.aktivitetslogg.sisteBehov(Behovtype.Utbetaling).also { behov ->
+        assertEquals(1, hendelse.behov.size)
+        hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
 
@@ -302,8 +302,8 @@ internal class UtbetalingTest {
         assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
 
         val kvitteringen = kvittèr(annullering1, utbetalingmottaker = utbetalingen)
-        assertEquals(1, kvitteringen.aktivitetslogg.behov.size)
-        kvitteringen.aktivitetslogg.sisteBehov(Behovtype.Utbetaling).also { behov ->
+        assertEquals(1, kvitteringen.behov().size)
+        kvitteringen.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
 
@@ -827,43 +827,45 @@ internal class UtbetalingTest {
         fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         status: Oppdragstatus = AKSEPTERT,
         utbetalingmottaker: Utbetaling = utbetaling
-    ): Kvittering {
+    ): IAktivitetslogg {
         val hendelsen = Kvittering(
             fagsystemId = fagsystemId,
             utbetalingId = utbetaling.inspektør.utbetalingId,
             status = status
         )
-        utbetalingmottaker.håndter(hendelsen)
-        return hendelsen
+        val aktivitetslogg = Aktivitetslogg()
+        utbetalingmottaker.håndter(hendelsen, aktivitetslogg)
+        return aktivitetslogg
     }
 
-    private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) =
+    private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) = Aktivitetslogg().also { aktivitetslogg ->
         Utbetalingsgodkjenning(
             utbetalingId = utbetaling.inspektør.utbetalingId,
             godkjent = utbetalingGodkjent
         ).also {
-            utbetaling.håndter(it)
+            utbetaling.håndter(it, aktivitetslogg)
         }
+    }
 
     private fun annuller(utbetaling: Utbetaling, utbetalingId: UUID = utbetaling.inspektør.utbetalingId) =
         utbetaling.annuller(
             hendelse = AnnullerUtbetaling(utbetalingId),
+            Aktivitetslogg(),
             alleUtbetalinger = listOf(utbetaling)
         )?.also {
             it.opprett(aktivitetslogg)
         }
 
-    private fun Aktivitetslogg.sisteBehov(type: Behovtype) =
-        behov.last { it.type == type }
+    private fun IAktivitetslogg.sisteBehov(type: Behovtype) =
+        behov().last { it.type == type }
 
-    private fun Aktivitetslogg.harBehov(behov: Behovtype) =
-        this.behov.any { it.type == behov }
+    private fun IAktivitetslogg.harBehov(behov: Behovtype) =
+        this.behov().any { it.type == behov }
 
     private class Utbetalingsgodkjenning(
         override val utbetalingId: UUID,
-        override val godkjent: Boolean,
-        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-    ) : UtbetalingsavgjørelseHendelse, IAktivitetslogg by (aktivitetslogg) {
+        override val godkjent: Boolean
+    ) : UtbetalingsavgjørelseHendelse {
         override fun saksbehandler(): Saksbehandler = Saksbehandler("Z999999", "mille.mellomleder@nav.no")
 
         override val avgjørelsestidspunkt: LocalDateTime = LocalDateTime.now()
@@ -873,18 +875,16 @@ internal class UtbetalingTest {
     private class Kvittering(
         override val fagsystemId: String,
         override val utbetalingId: UUID,
-        override val status: Oppdragstatus,
-        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-    ) : UtbetalingmodulHendelse, IAktivitetslogg by aktivitetslogg {
+        override val status: Oppdragstatus
+    ) : UtbetalingmodulHendelse {
         override val avstemmingsnøkkel: Long = 123456789L
         override val overføringstidspunkt: LocalDateTime = LocalDateTime.now()
         override val melding: String = ""
     }
 
     private class AnnullerUtbetaling(
-        override val utbetalingId: UUID,
-        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-    ) : AnnullerUtbetalingHendelse, IAktivitetslogg by aktivitetslogg {
+        override val utbetalingId: UUID
+    ) : AnnullerUtbetalingHendelse {
         override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, "Z999999", "utbetaling@nav.no", LocalDateTime.now(), false)
     }
 
@@ -892,9 +892,8 @@ internal class UtbetalingTest {
         override val utbetalingId: UUID,
         override val fagsystemId: String,
         override val fagområde: Fagområde,
-        override val simuleringsResultat: SimuleringResultatDto?,
-        val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-    ) : SimuleringHendelse, IAktivitetslogg by aktivitetslogg {
+        override val simuleringsResultat: SimuleringResultatDto?
+    ) : SimuleringHendelse {
         override val simuleringOK: Boolean = true
         override val melding: String = "OK"
     }

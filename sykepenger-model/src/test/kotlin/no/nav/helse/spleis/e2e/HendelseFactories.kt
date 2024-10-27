@@ -32,6 +32,9 @@ import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -39,9 +42,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
@@ -50,7 +50,6 @@ import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -83,9 +82,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         melding = "hei",
         avstemmingsnøkkel = 123456L,
         overføringstidspunkt = LocalDateTime.now()
-    ).apply {
-        hendelselogg = this
-    }
+    )
 
 internal fun AbstractEndToEndTest.feriepengeutbetaling(
     fagsystemId: String,
@@ -105,9 +102,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         melding = "hey",
         avstemmingsnøkkel = 654321L,
         overføringstidspunkt = LocalDateTime.now()
-    ).apply {
-        hendelselogg = this
-    }
+    )
 
 internal fun AbstractEndToEndTest.sykmelding(
     id: UUID,
@@ -120,9 +115,7 @@ internal fun AbstractEndToEndTest.sykmelding(
 ) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSykmelding(
     sykeperioder = sykeperioder,
     id = id
-).apply {
-        hendelselogg = this
-    }
+)
 
 internal fun AbstractEndToEndTest.søknad(
     id: UUID,
@@ -155,9 +148,7 @@ internal fun AbstractEndToEndTest.søknad(
     opprinneligSendt = opprinneligSendt,
     egenmeldinger = egenmeldinger,
     tilkomneInntekter = tilkomneInntekter
-).apply {
-    hendelselogg = this
-}
+)
 
 internal fun AbstractEndToEndTest.inntektsmelding(
     id: UUID = UUID.randomUUID(),
@@ -173,7 +164,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
-    val inntektsmeldinggenerator = { aktivitetslogg: Aktivitetslogg ->
+    val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagInntektsmelding(
             id = id,
             refusjon = refusjon,
@@ -183,8 +174,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            aktivitetslogg = aktivitetslogg
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
     }
     val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
@@ -218,7 +208,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
-    return inntektsmeldinggenerator(Aktivitetslogg()).apply { hendelselogg = this }
+    return inntektsmeldinggenerator()
 }
 
 internal fun AbstractEndToEndTest.inntektsmeldingPortal(
@@ -237,7 +227,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
-    val inntektsmeldinggenerator = { aktivitetslogg: Aktivitetslogg ->
+    val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagPortalinntektsmelding(
             id = id,
             refusjon = refusjon,
@@ -249,8 +239,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            aktivitetslogg = aktivitetslogg
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
     }
     val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
@@ -284,7 +273,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
-    return inntektsmeldinggenerator(Aktivitetslogg()).apply { hendelselogg = this }
+    return inntektsmeldinggenerator()
 }
 
 internal fun AbstractEndToEndTest.vilkårsgrunnlag(
@@ -308,9 +297,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
         arbeidsforhold = arbeidsforhold
-    ).apply {
-        hendelselogg = this
-    }
+    )
 }
 
 internal fun utbetalingpåminnelse(
@@ -380,9 +367,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
             inntekter = inntektshistorikk,
             arbeidskategorikoder = emptyMap()
         )
-    ).apply {
-        hendelselogg = this
-    }
+    )
 }
 
 internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
@@ -405,9 +390,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
             arbeidskategorikoder = arbeidskategorikoder
         ),
         besvart = LocalDateTime.now()
-    ).apply {
-        hendelselogg = this
-    }
+    )
 }
 
 internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
@@ -434,9 +417,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
         arbeidskategorikoder = arbeidskategorikoder,
         opptjeningsår = opptjeningsår,
         skalBeregnesManuelt = skalBeregnesManuelt
-    ).apply {
-        hendelselogg = this
-    }
+    )
 }
 
 internal fun AbstractEndToEndTest.ytelser(
@@ -452,7 +433,6 @@ internal fun AbstractEndToEndTest.ytelser(
     dagpenger: List<Periode> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
 ): Ytelser {
-    val aktivitetslogg = Aktivitetslogg()
     val meldingsreferanseId = UUID.randomUUID()
     return Ytelser(
         meldingsreferanseId = meldingsreferanseId,
@@ -479,11 +459,8 @@ internal fun AbstractEndToEndTest.ytelser(
             perioder = institusjonsoppholdsperioder
         ),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-        dagpenger = Dagpenger(dagpenger),
-        aktivitetslogg = aktivitetslogg
-    ).apply {
-        hendelselogg = this
-    }
+        dagpenger = Dagpenger(dagpenger)
+    )
 }
 
 internal fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
@@ -512,9 +489,7 @@ internal fun AbstractEndToEndTest.simulering(
         melding = "",
         utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId")),
         simuleringsResultat = simuleringsresultat
-    ).apply {
-        hendelselogg = this
-    }
+    )
 }
 
 internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2000) = SimuleringResultatDto(
@@ -584,9 +559,7 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     utbetalingGodkjent = utbetalingGodkjent,
     godkjenttidspunkt = LocalDateTime.now(),
     automatiskBehandling = automatiskBehandling,
-).apply {
-    hendelselogg = this
-}
+)
 
 internal fun inntektsvurderingForSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, vararg orgnummere: String) = InntektForSykepengegrunnlag(
     inntekter = orgnummere.map { orgnummer ->

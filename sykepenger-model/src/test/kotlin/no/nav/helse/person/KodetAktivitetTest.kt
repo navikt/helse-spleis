@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import org.junit.jupiter.api.Assertions
@@ -23,7 +22,7 @@ class KodetAktivitetTest {
 
     @Test
     fun `kodede aktiveter`() {
-        val hendelse1 = TestHendelse(aktivitetslogg.barn())
+        val hendelse1 = aktivitetslogg.barn()
         hendelse1.kontekst(person)
         hendelse1.varsel(Varselkode.RV_SØ_1)
         Assertions.assertTrue(
@@ -36,16 +35,5 @@ class KodetAktivitetTest {
         private val melding: String
     ): Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
-    }
-
-    private class TestHendelse(val logg: Aktivitetslogg): Aktivitetskontekst, IAktivitetslogg by logg {
-        init {
-            logg.kontekst(this)
-        }
-        override fun toSpesifikkKontekst() = SpesifikkKontekst("TestHendelse")
-        override fun kontekst(kontekst: Aktivitetskontekst) {
-            logg.kontekst(kontekst)
-        }
-
     }
 }

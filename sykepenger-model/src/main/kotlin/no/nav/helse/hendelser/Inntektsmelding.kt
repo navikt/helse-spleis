@@ -19,7 +19,7 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.overlapperMed
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -47,14 +47,12 @@ class Inntektsmelding(
     harFlereInntektsmeldinger: Boolean,
     private val avsendersystem: Avsendersystem?,
     private val vedtaksperiodeId: UUID?,
-    private val mottatt: LocalDateTime,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    private val mottatt: LocalDateTime
 ) : ArbeidstakerHendelse(
     meldingsreferanseId = meldingsreferanseId,
     fødselsnummer = fødselsnummer,
     aktørId = aktørId,
-    organisasjonsnummer = orgnummer,
-    aktivitetslogg = aktivitetslogg
+    organisasjonsnummer = orgnummer
 ) {
     companion object {
         private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, inntektsdato: LocalDate?): LocalDate {
@@ -70,7 +68,7 @@ class Inntektsmelding(
         check(ingenInntektsdatoUtenomPortal || inntektsdatoKunHvisPortal) {
             "Om avsendersystem er NAV_NO må inntektsdato være satt og motsatt! inntektsdato=$inntektsdato, avsendersystem=$avsendersystem"
         }
-        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
+        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) error("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
@@ -88,10 +86,10 @@ class Inntektsmelding(
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
         if (alternativInntektsdato == this.beregnetInntektsdato) return
         if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId, beregnetInntekt))) return
-        info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
+        aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
@@ -136,7 +134,7 @@ class Inntektsmelding(
                 organisasjonsnummer,
                 inntektGjelder,
                 Inntektsmelding(beregnetInntektsdato, meldingsreferanseId, beregnetInntekt),
-                refusjonshistorikk.refusjonsopplysninger(startskudd, this)
+                refusjonshistorikk.refusjonsopplysninger(startskudd)
             )
         )
 
@@ -208,6 +206,7 @@ class Inntektsmelding(
     }
 
     internal fun ikkeHåndert(
+        aktivitetslogg: IAktivitetslogg,
         person: Person,
         vedtaksperioder: List<Vedtaksperiode>,
         forkastede: List<ForkastetVedtaksperiode>,
@@ -215,12 +214,12 @@ class Inntektsmelding(
         dager: DagerFraInntektsmelding
     ) {
         if (håndtertNå()) return
-        info("Inntektsmelding ikke håndtert")
+        aktivitetslogg.info("Inntektsmelding ikke håndtert")
         val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
         val overlapperMedForkastet = forkastede.overlapperMed(dager)
         if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
             person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId, relevanteSykmeldingsperioder, organisasjonsnummer)
-            return info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
+            return aktivitetslogg.info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
@@ -231,11 +230,12 @@ class Inntektsmelding(
     )
 
     internal fun skalOppdatereVilkårsgrunnlag(
+        aktivitetslogg: IAktivitetslogg,
         sykdomstidslinjeperiode: Periode?,
         forkastede: List<ForkastetVedtaksperiode>
     ): Boolean {
         if (vedtaksperiodeId != null && forkastede.erForkastet(vedtaksperiodeId)) return false.also {
-            info("Vi har bedt om arbeidsgiveropplysninger, men perioden er forkastet")
+            aktivitetslogg.info("Vi har bedt om arbeidsgiveropplysninger, men perioden er forkastet")
         }
         if (erPortalinntektsmelding()) return true // inntektmelding fra portal, vi har bedt om IM og forventer IM
         if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren

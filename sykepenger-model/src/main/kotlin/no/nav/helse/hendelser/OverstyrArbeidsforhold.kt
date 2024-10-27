@@ -3,12 +3,9 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class OverstyrArbeidsforhold(
@@ -18,13 +15,9 @@ class OverstyrArbeidsforhold(
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
     private val opprettet: LocalDateTime
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrInntektsgrunnlag {
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
-
-    override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: BehandlingSubsumsjonslogg) {
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, this.skjæringstidspunkt, jurist)
-    }
 
     override fun innsendt() = opprettet
 

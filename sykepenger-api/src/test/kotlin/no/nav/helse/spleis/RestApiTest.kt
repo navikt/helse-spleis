@@ -19,6 +19,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.Personidentifikator
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.AfterAll
@@ -120,8 +121,8 @@ internal class RestApiTest {
             mottatt = LocalDateTime.now()
         )
         val person = Person(AKTØRID, Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
-        person.håndter(sykmelding)
-        person.håndter(inntektsmelding)
+        person.håndter(sykmelding, Aktivitetslogg())
+        person.håndter(inntektsmelding, Aktivitetslogg())
         testDataSource.ds.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
         testDataSource.ds.lagreHendelse(MELDINGSREFERANSE)
     }

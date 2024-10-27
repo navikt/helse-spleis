@@ -1,17 +1,16 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import java.util.UUID
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilAvsendersystem
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -24,8 +23,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
     override val skalDuplikatsjekkes = false
 
-    private val aktivitetslogg = Aktivitetslogg()
-
     private val inntektsmeldinger = mutableListOf<Inntektsmelding>()
 
     private val inntektsmeldingerReplay = InntektsmeldingerReplay(
@@ -33,7 +30,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
-        aktivitetslogg = aktivitetslogg,
         vedtaksperiodeId = vedtaksperiodeId,
         inntektsmeldinger = inntektsmeldinger
     )
@@ -92,8 +88,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
             vedtaksperiodeId = vedtaksperiodeId,
-            mottatt = mottatt,
-            aktivitetslogg = aktivitetslogg.barn()
+            mottatt = mottatt
         )
     }
 }

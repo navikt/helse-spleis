@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -26,7 +27,7 @@ internal class SykmeldingsperioderTest {
     )
 
     private fun Sykmeldingsperioder.lagre(periode: Periode) =
-        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)))
+        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
 
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {

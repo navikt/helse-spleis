@@ -55,20 +55,20 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode, periode: Periode) =
-        inngå(vedtaksperiode, TypeEndring.REVURDERING, periode)
+    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) =
+        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.REVURDERING, periode)
 
-    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, periode: Periode) =
-        inngå(vedtaksperiode, TypeEndring.ENDRING, periode)
+    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) =
+        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING, periode)
 
-    internal fun inngåVedSaksbehandlerendring(vedtaksperiode: Vedtaksperiode, periode: Periode) {
+    internal fun inngåVedSaksbehandlerendring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (hendelse.avsender() != Avsender.SAKSBEHANDLER) return
         if (!periode.overlapperMed(periodeForEndring)) return
-        inngåSomEndring(vedtaksperiode, periode)
+        inngåSomEndring(vedtaksperiode, aktivitetslogg, periode)
     }
 
-    private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) {
-        hvorfor.dersomInngått(this, vedtaksperioder.isEmpty())
+    private fun inngå(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, typeEndring: TypeEndring, periode: Periode) {
+        hvorfor.dersomInngått(aktivitetslogg, vedtaksperioder.isEmpty())
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }
 
@@ -81,9 +81,9 @@ class Revurderingseventyr private constructor(
         hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.meldingsreferanseId)
     }
 
-    internal fun loggDersomKorrigerendeSøknad(hendelse: IAktivitetslogg, loggMelding: String) {
+    internal fun loggDersomKorrigerendeSøknad(aktivitetslogg: IAktivitetslogg, loggMelding: String) {
         if (hvorfor == KorrigertSøknad){
-            hendelse.info(loggMelding)
+            aktivitetslogg.info(loggMelding)
         }
     }
 
@@ -94,7 +94,7 @@ class Revurderingseventyr private constructor(
 
     private sealed interface RevurderingÅrsak {
 
-        fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
+        fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: UUID) {
             person.emitOverstyringIgangsattEvent(
@@ -140,8 +140,8 @@ class Revurderingseventyr private constructor(
         }
         data object Annullering : RevurderingÅrsak {
             override fun navn() = "ANNULLERING"
-            override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
-                hendelse.varsel(RV_RV_7)
+            override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
+                aktivitetslogg.varsel(RV_RV_7)
             }
         }
 
@@ -167,9 +167,9 @@ class Revurderingseventyr private constructor(
 
         data object KorrigertInntektsmeldingInntektsopplysninger : RevurderingÅrsak {
 
-            override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
-                if (ingenAndrePåmeldt) hendelse.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
-                hendelse.info("korrigert inntektsmelding trigget revurdering på grunn av inntektsopplysninger")
+            override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
+                if (ingenAndrePåmeldt) aktivitetslogg.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
+                aktivitetslogg.info("korrigert inntektsmelding trigget revurdering på grunn av inntektsopplysninger")
             }
 
             override fun navn() = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"

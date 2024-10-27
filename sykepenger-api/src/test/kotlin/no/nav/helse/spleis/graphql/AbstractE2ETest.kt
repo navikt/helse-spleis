@@ -98,13 +98,14 @@ internal abstract class AbstractE2ETest {
     protected fun dto() = person.dto()
     protected fun speilApi() = serializePersonForSpeil(person, spekemat.resultat())
 
-    protected fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit) = apply {
-        hendelselogg = this
-        person.håndter(this)
+    protected fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit) = apply {
+        hendelselogg = Aktivitetslogg()
+        person.håndter(this, hendelselogg)
         ubesvarteBehov.addAll(hendelselogg.behov())
 
         observatør.ventendeReplays().forEach { (orgnr, vedtaksperiodeId) ->
-            person.håndter(fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId))
+            hendelselogg = Aktivitetslogg()
+            person.håndter(fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
         }
     }
 
