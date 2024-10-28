@@ -11,7 +11,6 @@ class Aktivitetslogg(
     private val _aktiviteter = mutableListOf<Aktivitet>()
     val aktiviteter: List<Aktivitet> get() = _aktiviteter.toList()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
-    private val observers = mutableListOf<AktivitetsloggObserver>()
 
     val behov get() = aktiviteter.filterIsInstance<Aktivitet.Behov>()
     val info get() = aktiviteter.filterIsInstance<Aktivitet.Info>()
@@ -20,10 +19,6 @@ class Aktivitetslogg(
     val logiskFeil get() = aktiviteter.filterIsInstance<Aktivitet.LogiskFeil>()
 
     override fun behov() = behov
-
-    override fun register(observer: AktivitetsloggObserver) {
-        observers.add(observer)
-    }
 
     override fun info(melding: String, vararg params: Any?) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
@@ -49,7 +44,6 @@ class Aktivitetslogg(
     }
 
     private fun add(aktivitet: Aktivitet) {
-        observers.forEach { aktivitet.notify(it) }
         this._aktiviteter.add(aktivitet)
         forelder?.add(aktivitet)
     }

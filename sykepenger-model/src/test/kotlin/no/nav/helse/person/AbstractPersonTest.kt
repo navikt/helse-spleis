@@ -98,7 +98,7 @@ internal abstract class AbstractPersonTest {
 
     @AfterEach
     fun verify() {
-        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner()
+        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner(person.personlogg)
     }
 
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object: ArbeidsgiverRegler {

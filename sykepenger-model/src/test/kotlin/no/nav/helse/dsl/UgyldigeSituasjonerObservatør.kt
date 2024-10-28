@@ -12,9 +12,11 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.VedtaksperiodeView
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
@@ -43,11 +45,11 @@ import kotlin.collections.toSet
 import kotlin.error
 import kotlin.let
 
-internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver, AktivitetsloggObserver {
+internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
 
     private val arbeidsgivereMap = mutableMapOf<String, Arbeidsgiver>()
     private val gjeldendeTilstander = mutableMapOf<UUID, TilstandType>()
-    private val gjeldendeBehandlingstatus = mutableMapOf<UUID, Behandlingstatus>()
+    private val gjeldendeBehandlingstatus = mutableMapOf<UUID, MutableList<Pair<LocalDateTime, Behandlingstatus>>>()
     private val arbeidsgivere get() = arbeidsgivereMap.values
     private val IM = Inntektsmeldinger()
     private val søknader = mutableMapOf<UUID, UUID?>() // SøknadId -> VedtaksperiodeId
@@ -60,39 +62,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         person.addObserver(this)
     }
 
-    override fun aktivitet(
-        id: UUID,
-        label: Char,
-        melding: String,
-        kontekster: List<SpesifikkKontekst>,
-        tidsstempel: LocalDateTime
-    ) {}
-
-    override fun funksjonellFeil(
-        id: UUID,
-        label: Char,
-        kode: Varselkode,
-        melding: String,
-        kontekster: List<SpesifikkKontekst>,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    override fun varsel(
-        id: UUID,
-        label: Char,
-        kode: Varselkode?,
-        melding: String,
-        kontekster: List<SpesifikkKontekst>,
-        tidsstempel: LocalDateTime
-    ) {
-        val vedtaksperiodekontekst = checkNotNull(kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
-            "Det er opprettet et varsel utenom Vedtaksperiode"
-        }
-        val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
-        check(gjeldendeBehandlingstatus[vedtaksperiodeId] == Behandlingstatus.ÅPEN) {
-            "Det er opprettet et varsel utenom en åpen behandling"
-        }
+    private fun loggBehandlingstatus(vedtaksperiodeId: UUID, status: Behandlingstatus) {
+        gjeldendeBehandlingstatus.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(0, LocalDateTime.now() to status)
     }
 
     override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
@@ -100,7 +71,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             "behandling ${event.behandlingId} har allerede sendt ut opprettet event"
         }
         behandlingOpprettetEventer.add(event)
-        gjeldendeBehandlingstatus[event.vedtaksperiodeId] = Behandlingstatus.ÅPEN
+        loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.ÅPEN)
     }
 
     override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
@@ -108,19 +79,19 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         check(behandlingLukketEventer.none { it.behandlingId == event.behandlingId }) {
             "behandling ${event.behandlingId} har allerede sendt ut lukket event"
         }
-        gjeldendeBehandlingstatus[event.vedtaksperiodeId] = Behandlingstatus.LUKKET
+        loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.LUKKET)
     }
 
     override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
-        gjeldendeBehandlingstatus[event.vedtaksperiodeId] = Behandlingstatus.AVSLUTTET
+        loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.AVSLUTTET)
     }
 
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
-        gjeldendeBehandlingstatus[event.vedtaksperiodeId] = Behandlingstatus.AVSLUTTET
+        loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.AVSLUTTET)
     }
 
     override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
-        gjeldendeBehandlingstatus[vedtaksperiodeAnnullertEvent.vedtaksperiodeId] = Behandlingstatus.ANNULLERT
+        loggBehandlingstatus(vedtaksperiodeAnnullertEvent.vedtaksperiodeId, Behandlingstatus.ANNULLERT)
     }
 
     override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
@@ -128,7 +99,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         check(behandlingForkastetEventer.none { it.behandlingId == event.behandlingId }) {
             "behandling ${event.behandlingId} har allerede sendt ut forkastet event"
         }
-        gjeldendeBehandlingstatus[event.vedtaksperiodeId] = Behandlingstatus.AVBRUTT
+        loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.AVBRUTT)
     }
 
     private fun bekreftAtBehandlingFinnes(behandlingId: UUID) {
@@ -158,7 +129,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     override fun behandlingUtført() {
-        bekreftIngenUgyldigeSituasjoner()
+        bekreftIngenUgyldigeSituasjoner(person.personlogg)
         IM.behandlingUtført()
     }
 
@@ -208,12 +179,41 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger hjelp! 😱"
     }
 
-    internal fun bekreftIngenUgyldigeSituasjoner() {
+    internal fun bekreftIngenUgyldigeSituasjoner(aktivitetslogg: Aktivitetslogg) {
         bekreftIngenOverlappende()
+        bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg)
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
         validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
         IM.bekreftEntydighåndtering()
+    }
+
+    private fun bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg: Aktivitetslogg) {
+        aktivitetslogg.aktiviteter.forEach {
+            when (it) {
+                is Aktivitet.Behov -> {}
+                is Aktivitet.FunksjonellFeil -> {}
+                is Aktivitet.Info -> {}
+                is Aktivitet.LogiskFeil -> {}
+                is Aktivitet.Varsel -> {
+                    // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
+                    if (it.kode in setOf(RV_SV_1, Varselkode.RV_RV_7, Varselkode.RV_UT_2)) return@forEach
+
+                    val vedtaksperiodekontekst = checkNotNull(it.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
+                        "Det er opprettet et varsel utenom Vedtaksperiode:\n${it}"
+                    }
+                    val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
+                    val behandlingstatusPåTidspunkt = gjeldendeBehandlingstatus
+                        .getValue(vedtaksperiodeId)
+                        .first { (tidspunkt, _) ->
+                            tidspunkt < it.tidsstempel
+                        }.second
+                    check(behandlingstatusPåTidspunkt == Behandlingstatus.ÅPEN) {
+                        "Det er opprettet et varsel (${it.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
+                    }
+                }
+            }
+        }
     }
 
     private fun validerSykdomshistorikk() {

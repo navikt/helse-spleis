@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 internal class DatadelingMediatorTest {
     private val fødselsnummer = "12345678910"
     private val testRapid = TestRapid()
-    private lateinit var aktivitetslogg: IAktivitetslogg
+    private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
     @BeforeEach

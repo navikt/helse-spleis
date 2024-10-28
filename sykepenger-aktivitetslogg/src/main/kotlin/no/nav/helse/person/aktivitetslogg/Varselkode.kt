@@ -7,7 +7,7 @@ private val regex = "^$varselkodeformat$".toRegex()
 enum class Varselkode(
     val varseltekst: String,
     val funksjonellFeilTekst: String = varseltekst,
-    private val avviklet: Boolean = false
+    val avviklet: Boolean = false
 ) {
 
     RV_SY_1("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", avviklet = true),
@@ -302,7 +302,5 @@ enum class Varselkode(
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")
         }
-
-        fun Varselkode.erAvviklet() = this.avviklet
     }
 }

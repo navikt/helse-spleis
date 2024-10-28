@@ -111,7 +111,6 @@ internal class TestPerson(
 
     private fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg()
-        forrigeAktivitetslogg.register(ugyldigeSituasjonerObservatør)
         person.håndter(this, forrigeAktivitetslogg)
         behovsamler.registrerBehov(forrigeAktivitetslogg)
         return this
@@ -122,7 +121,7 @@ internal class TestPerson(
     }
 
     internal fun bekreftIngenUgyldigeSituasjoner() {
-        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner()
+        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner(person.personlogg)
     }
 
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {

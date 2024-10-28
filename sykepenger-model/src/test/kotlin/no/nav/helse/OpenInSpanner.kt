@@ -9,6 +9,7 @@ import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.inspectors.personLogg
@@ -101,41 +102,42 @@ class SpannerEtterTestInterceptor : TestWatcher {
     }
 
     private fun SugUtAlleAktivitetene(aktivitetslogg: Aktivitetslogg): String {
+        val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         val liste = aktivitetslogg.aktiviteter.map {
             when (it) {
                 is Aktivitet.Behov -> AktivitetDto(
                     id = 0,
                     nivå = "BEHOV",
                     tekst = it.melding,
-                    tidsstempel = it.tidsstempel,
+                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
                     kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
                 )
                 is Aktivitet.FunksjonellFeil -> AktivitetDto(
                     id = 0,
                     nivå = "FUNKSJONELL_FEIL",
                     tekst = it.melding,
-                    tidsstempel = it.tidsstempel,
+                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
                     kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
                 )
                 is Aktivitet.Info -> AktivitetDto(
                     id = 0,
                     nivå = "INFO",
                     tekst = it.melding,
-                    tidsstempel = it.tidsstempel,
+                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
                     kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
                 )
                 is Aktivitet.LogiskFeil -> AktivitetDto(
                     id = 0,
                     nivå = "LOGISK_FEIL",
                     tekst = it.melding,
-                    tidsstempel = it.tidsstempel,
+                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
                     kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
                 )
                 is Aktivitet.Varsel -> AktivitetDto(
                     id = 0,
                     nivå = "VARSEL",
                     tekst = it.melding,
-                    tidsstempel = it.tidsstempel,
+                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
                     kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
                 )
             }

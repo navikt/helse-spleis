@@ -11,7 +11,7 @@ sealed class Aktivitet(
     private val alvorlighetsgrad: Int,
     val label: Char,
     val melding: String,
-    val tidsstempel: String,
+    val tidsstempel: LocalDateTime,
     val kontekster: List<SpesifikkKontekst>
 ) : Comparable<Aktivitet> {
     private companion object {
@@ -29,14 +29,10 @@ sealed class Aktivitet(
 
     internal fun inOrder() = label + "\t" + this.toString()
 
-    override fun toString() = label + "  \t" + tidsstempel + "  \t" + melding + meldingerString()
+    override fun toString() = label + "  \t" + tidsstempel.format(tidsstempelformat) + "  \t" + melding + meldingerString()
 
     private fun meldingerString(): String {
         return kontekster.joinToString(separator = "") { " (${it.melding()})" }
-    }
-
-    internal open fun notify(observer: AktivitetsloggObserver) {
-        observer.aktivitet(id, label, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
     }
 
     operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
@@ -44,11 +40,9 @@ sealed class Aktivitet(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         melding: String,
-        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 0, 'I', melding, tidsstempel, kontekster) {
         companion object {
-            internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) =
-                Info(id, kontekster, melding, tidsstempel)
             internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) =
                 Info(UUID.randomUUID(), kontekster, melding)
         }
@@ -59,18 +53,11 @@ sealed class Aktivitet(
         kontekster: List<SpesifikkKontekst>,
         val kode: Varselkode,
         melding: String,
-        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 25, 'W', melding, tidsstempel, kontekster) {
         companion object {
-            fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String, tidsstempel: String) =
-                Varsel(id, kontekster, kode, melding, tidsstempel)
-
             internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String) =
                 Varsel(UUID.randomUUID(), kontekster, kode, melding = melding)
-        }
-
-        override fun notify(observer: AktivitetsloggObserver) {
-            observer.varsel(id, label, kode, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
         }
     }
 
@@ -80,11 +67,9 @@ sealed class Aktivitet(
         kontekster: List<SpesifikkKontekst>,
         melding: String,
         val detaljer: Map<String, Any?> = emptyMap(),
-        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 50, 'N', melding, tidsstempel, kontekster) {
         companion object {
-            internal fun gjennopprett(id: UUID, type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>, tidsstempel: String) =
-                Behov(id, type, kontekster, melding, detaljer, tidsstempel)
             internal fun opprett(type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>) = Behov(
                 UUID.randomUUID(), type, kontekster, melding, detaljer)
 
@@ -273,15 +258,11 @@ sealed class Aktivitet(
         kontekster: List<SpesifikkKontekst>,
         val kode: Varselkode,
         melding: String,
-        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 75, 'E', melding, tidsstempel, kontekster) {
         companion object {
             internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String) =
                 FunksjonellFeil(UUID.randomUUID(), kontekster, kode, melding)
-        }
-
-        override fun notify(observer: AktivitetsloggObserver) {
-            observer.funksjonellFeil(id, label, kode, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
         }
     }
 
@@ -289,11 +270,9 @@ sealed class Aktivitet(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         melding: String,
-        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 100, 'S', melding, tidsstempel, kontekster) {
         companion object {
-            internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) =
-                LogiskFeil(id, kontekster, melding, tidsstempel)
             internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) =
                 LogiskFeil(UUID.randomUUID(), kontekster, melding)
         }

@@ -17,6 +17,4 @@ interface IAktivitetslogg {
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst)
     fun kontekster(): List<IAktivitetslogg>
-
-    fun register(observer: AktivitetsloggObserver)
 }
