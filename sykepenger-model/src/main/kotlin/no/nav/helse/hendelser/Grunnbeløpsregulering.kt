@@ -3,9 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 
 class Grunnbeløpsregulering(
@@ -14,7 +12,12 @@ class Grunnbeløpsregulering(
     fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
-): PersonHendelse(fødselsnummer, aktørId), OverstyrInntektsgrunnlag {
+): PersonHendelse(), OverstyrInntektsgrunnlag {
+    override val behandlingsporing = Behandlingsporing.Person(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId
+    )
+
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYSTEM,
@@ -29,7 +32,7 @@ class Grunnbeløpsregulering(
     internal fun sykefraværstilfelleIkkeFunnet(observer: PersonObserver) {
         observer.sykefraværstilfelleIkkeFunnet(
             PersonObserver.SykefraværstilfelleIkkeFunnet(
-                fødselsnummer = fødselsnummer,
+                fødselsnummer = behandlingsporing.fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )

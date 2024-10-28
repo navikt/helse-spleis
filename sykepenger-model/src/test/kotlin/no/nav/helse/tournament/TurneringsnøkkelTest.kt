@@ -3,8 +3,6 @@ package no.nav.helse.tournament
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
@@ -69,37 +67,19 @@ internal class TurneringsnøkkelTest {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde
-            val sykmelding = Sykmelding.kilde
-            val aareg = Aareg.kilde
-        }
-
-        override val metadata = LocalDateTime.now().let { nå ->
-            HendelseMetadata(
-                meldingsreferanseId = UUID.randomUUID(),
-                avsender = SYSTEM,
-                innsendt = nå,
-                registrert = nå,
-                automatiskBehandling = true
-            )
         }
 
         val kilde: Hendelseskilde = Hendelseskilde(this::class, UUID.randomUUID(), LocalDateTime.now())
 
         // Objects impersonating real-life sources of sickness timeline days
         object Inntektsmelding : TestHendelse()
-        object Sykmelding : TestHendelse()
         object Søknad : TestHendelse()
-        object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
         override fun oppdaterFom(other: Periode): Periode {
             error("ikke i bruk")
         }
 
         override fun sykdomstidslinje(): Sykdomstidslinje {
-            error("ikke i bruk")
-        }
-
-        override fun navn(): String {
             error("ikke i bruk")
         }
     }

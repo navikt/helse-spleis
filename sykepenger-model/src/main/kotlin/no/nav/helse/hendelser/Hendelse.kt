@@ -26,10 +26,19 @@ enum class Avsender {
 }
 
 sealed interface Hendelse {
+    val behandlingsporing: Behandlingsporing
     val metadata: HendelseMetadata
 
     fun navn(): String
     fun venter(block: () -> Unit) { block() }
+}
+
+sealed interface Behandlingsporing {
+    val fødselsnummer: String
+    val aktørId: String
+
+    data class Person(override val fødselsnummer: String, override val aktørId: String) : Behandlingsporing
+    data class Arbeidsgiver(override val fødselsnummer: String, override val aktørId: String, val organisasjonsnummer: String) : Behandlingsporing
 }
 
 data class HendelseMetadata(

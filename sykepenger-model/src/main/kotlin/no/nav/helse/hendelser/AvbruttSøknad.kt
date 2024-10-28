@@ -10,11 +10,12 @@ class AvbruttSøknad(
     orgnummer: String,
     fødselsnummer: String,
     aktørId: String,
-) : ArbeidstakerHendelse(
-    fødselsnummer = fødselsnummer,
-    aktørId = aktørId,
-    organisasjonsnummer = orgnummer
-) {
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = orgnummer
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

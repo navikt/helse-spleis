@@ -16,7 +16,12 @@ class Utbetalingsgodkjenning(
     utbetalingGodkjent: Boolean,
     godkjenttidspunkt: LocalDateTime,
     automatiskBehandling: Boolean
-) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
+) : PersonHendelse(), Behandlingsavgjørelse {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = if (automatiskBehandling) SYSTEM else Avsender.SAKSBEHANDLER,

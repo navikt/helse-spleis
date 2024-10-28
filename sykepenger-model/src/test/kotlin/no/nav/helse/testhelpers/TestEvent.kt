@@ -2,8 +2,6 @@ package no.nav.helse.testhelpers
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -15,16 +13,6 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
         val sykmelding = Sykmelding(LocalDateTime.now()).kilde
         val saksbehandler = OverstyrTidslinje(LocalDateTime.now()).kilde
         val testkilde = TestHendelse(LocalDateTime.now()).kilde
-    }
-
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = UUID.randomUUID(),
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
     }
 
     val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class.simpleName ?: "Ukjent", UUID.randomUUID(), opprettet)
@@ -41,10 +29,6 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
     }
 
     override fun sykdomstidslinje(): Sykdomstidslinje {
-        error("ikke i bruk")
-    }
-
-    override fun navn(): String {
         error("ikke i bruk")
     }
 }

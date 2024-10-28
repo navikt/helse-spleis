@@ -493,7 +493,7 @@ internal class HendelseMediator(
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         handler: (Person, IAktivitetslogg) -> Unit
     ) {
-        val personidentifikator = Personidentifikator(hendelse.fødselsnummer)
+        val personidentifikator = Personidentifikator(hendelse.behandlingsporing.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
     }
 
@@ -503,7 +503,7 @@ internal class HendelseMediator(
         context: MessageContext,
         handler: (Person, IAktivitetslogg) -> Unit
     ) {
-        val personidentifikator = Personidentifikator(hendelse.fødselsnummer)
+        val personidentifikator = Personidentifikator(hendelse.behandlingsporing.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, null, message, hendelse, context, handler = handler)
     }
     private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
@@ -518,10 +518,10 @@ internal class HendelseMediator(
         val aktivitetslogg = Aktivitetslogg()
         aktivitetslogg.kontekst(hendelse)
 
-        val subsumsjonMediator = SubsumsjonMediator(hendelse.fødselsnummer, message, versjonAvKode)
+        val subsumsjonMediator = SubsumsjonMediator(hendelse.behandlingsporing.fødselsnummer, message, versjonAvKode)
         val personMediator = PersonMediator(message, hendelse)
-        val datadelingMediator = DatadelingMediator(aktivitetslogg, hendelse.metadata.meldingsreferanseId, hendelse.fødselsnummer, hendelse.aktørId)
-        person(personidentifikator, message, hendelse.aktørId, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
+        val datadelingMediator = DatadelingMediator(aktivitetslogg, hendelse.metadata.meldingsreferanseId, hendelse.behandlingsporing.fødselsnummer, hendelse.behandlingsporing.aktørId)
+        person(personidentifikator, message, hendelse.behandlingsporing.aktørId, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person, aktivitetslogg)

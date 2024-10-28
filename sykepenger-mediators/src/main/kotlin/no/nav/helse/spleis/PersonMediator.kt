@@ -458,12 +458,12 @@ internal class PersonMediator(
     }
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        this["aktørId"] = hendelse.aktørId
-        this["fødselsnummer"] = hendelse.fødselsnummer
+        this["aktørId"] = hendelse.behandlingsporing.aktørId
+        this["fødselsnummer"] = hendelse.behandlingsporing.fødselsnummer
     }
 
     private fun queueMessage(outgoingMessage: JsonMessage) {
-        queueMessage(hendelse.fødselsnummer, leggPåStandardfelter(outgoingMessage).toJson())
+        queueMessage(hendelse.behandlingsporing.fødselsnummer, leggPåStandardfelter(outgoingMessage).toJson())
     }
 
     private data class Pakke (

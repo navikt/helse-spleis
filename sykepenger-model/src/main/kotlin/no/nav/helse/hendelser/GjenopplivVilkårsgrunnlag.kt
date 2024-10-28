@@ -18,7 +18,12 @@ class GjenopplivVilkårsgrunnlag(
     private val vilkårsgrunnlagId: UUID,
     private val nyttSkjæringstidspunkt: LocalDate?,
     private val arbeidsgiveropplysninger: Map<String, Inntekt>
-): PersonHendelse(fødselsnummer, aktørId) {
+): PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Person(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId
+    )
+
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

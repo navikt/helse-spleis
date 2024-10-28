@@ -16,7 +16,12 @@ class VedtakFattet(
     private val saksbehandlerEpost: String,
     vedtakFattetTidspunkt: LocalDateTime,
     override val automatisert: Boolean
-) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), Behandlingsavgjørelse {
+) : PersonHendelse(), Behandlingsavgjørelse {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = if (automatisert) SYSTEM else SAKSBEHANDLER,

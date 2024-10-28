@@ -87,9 +87,9 @@ internal class SykdomshistorikkTest {
     @Test
     fun `Overlappende biter`(){
         val meldingsreferanseId = UUID.randomUUID()
-        val bit1 = TestHendelse(8.U, meldingsreferanseId)
+        val bit1 = TestHendelse(8.U(meldingsreferanseId = meldingsreferanseId))
         resetSeed()
-        val bit2 = TestHendelse(16.U, meldingsreferanseId)
+        val bit2 = TestHendelse(16.U(meldingsreferanseId = meldingsreferanseId))
         historikk.håndter(bit1, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUUUUGG U", historikk.sykdomstidslinje().toShortString())

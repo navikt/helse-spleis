@@ -11,7 +11,13 @@ class ForkastSykmeldingsperioder(
     fødselsnummer: String,
     organisasjonsnummer: String,
     private val periode: Periode
-): ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+): PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
+
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

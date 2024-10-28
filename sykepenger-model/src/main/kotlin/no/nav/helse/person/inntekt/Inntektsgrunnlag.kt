@@ -312,7 +312,7 @@ internal class Inntektsgrunnlag private constructor(
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
         val resultat = builder.resultat()
         arbeidsgiverInntektsopplysninger
-            .finn(inntektsmelding.organisasjonsnummer())
+            .finn(inntektsmelding.behandlingsporing.organisasjonsnummer)
             ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
     }

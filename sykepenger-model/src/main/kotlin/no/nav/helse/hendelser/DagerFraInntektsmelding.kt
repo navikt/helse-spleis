@@ -34,7 +34,7 @@ internal class DagerFraInntektsmelding(
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean,
-    hendelse: Hendelse
+    hendelse: Inntektsmelding
 ): Hendelse by hendelse {
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
@@ -50,6 +50,7 @@ internal class DagerFraInntektsmelding(
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
     }
 
+    override val behandlingsporing = hendelse.behandlingsporing
     override val metadata = hendelse.metadata
 
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
@@ -179,12 +180,12 @@ internal class DagerFraInntektsmelding(
 
     internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding? {
         val sykdomstidslinje = håndterDager(aktivitetslogg, vedtaksperiode) ?: return null
-        return BitAvInntektsmelding(metadata, sykdomstidslinje, navn())
+        return BitAvInntektsmelding(metadata, sykdomstidslinje)
     }
 
     internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding {
         håndterDager(aktivitetslogg, vedtaksperiode)
-        return BitAvInntektsmelding(metadata, Sykdomstidslinje(), navn())
+        return BitAvInntektsmelding(metadata, Sykdomstidslinje())
     }
 
     private fun håndterDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): Sykdomstidslinje? {
@@ -307,15 +308,9 @@ internal class DagerFraInntektsmelding(
         return Revurderingseventyr.arbeidsgiverperiode(this, dagene.start, dagene)
     }
 
-    internal class BitAvInntektsmelding(
-        override val metadata: HendelseMetadata,
-        private val sykdomstidslinje: Sykdomstidslinje,
-        private val navn : String
-    ): SykdomshistorikkHendelse {
+    internal class BitAvInntektsmelding(val metadata: HendelseMetadata, private val sykdomstidslinje: Sykdomstidslinje): SykdomshistorikkHendelse {
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
         override fun sykdomstidslinje() = sykdomstidslinje
-
-        override fun navn() = navn
     }
 }

@@ -10,7 +10,6 @@ import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -41,6 +40,7 @@ import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
@@ -183,15 +183,15 @@ class Person private constructor(
 
     fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler sykmelding")
-        tidligereBehandlinger(sykmelding, aktivitetslogg, sykmelding.periode())
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding, aktivitetslogg)
+        tidligereBehandlinger(sykmelding.behandlingsporing, aktivitetslogg, sykmelding.periode())
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(sykmelding, aktivitetslogg)
         håndterGjenoppta(sykmelding, aktivitetslogg)
     }
 
     fun håndter(avbruttSøknad: AvbruttSøknad, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler avbrutt søknad")
-        val arbeidsgiver = finnArbeidsgiver(avbruttSøknad, aktivitetslogg)
+        val arbeidsgiver = finnArbeidsgiver(avbruttSøknad.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(avbruttSøknad, aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)
         håndterGjenoppta(avbruttSøknad, aktivitetslogg)
@@ -199,21 +199,21 @@ class Person private constructor(
 
     fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler forkasting av sykmeldingsperioder")
-        finnArbeidsgiver(forkastSykmeldingsperioder, aktivitetslogg).håndter(forkastSykmeldingsperioder, aktivitetslogg)
+        finnArbeidsgiver(forkastSykmeldingsperioder.behandlingsporing, aktivitetslogg).håndter(forkastSykmeldingsperioder, aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)
         håndterGjenoppta(forkastSykmeldingsperioder, aktivitetslogg)
     }
 
     fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler anmodning om forkasting")
-        finnArbeidsgiver(anmodningOmForkasting, aktivitetslogg).håndter(anmodningOmForkasting, aktivitetslogg)
+        finnArbeidsgiver(anmodningOmForkasting.behandlingsporing, aktivitetslogg).håndter(anmodningOmForkasting, aktivitetslogg)
         håndterGjenoppta(anmodningOmForkasting, aktivitetslogg)
     }
 
     fun håndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler søknad")
-        tidligereBehandlinger(søknad, aktivitetslogg, søknad.periode())
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad, aktivitetslogg)
+        tidligereBehandlinger(søknad.behandlingsporing, aktivitetslogg, søknad.periode())
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetslogg)
         søknad.forUng(aktivitetslogg, alder)
         arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
         håndterGjenoppta(søknad, aktivitetslogg)
@@ -221,7 +221,7 @@ class Person private constructor(
 
     fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler inntektsmelding")
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding, aktivitetslogg)
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(inntektsmelding, aktivitetslogg)
         arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding, aktivitetslogg)
         håndterGjenoppta(inntektsmelding, aktivitetslogg)
@@ -229,7 +229,7 @@ class Person private constructor(
 
     fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler replay av inntektsmeldinger")
-        finnArbeidsgiver(replays, aktivitetslogg).håndter(replays, aktivitetslogg)
+        finnArbeidsgiver(replays.behandlingsporing, aktivitetslogg).håndter(replays, aktivitetslogg)
         håndterGjenoppta(replays, aktivitetslogg)
     }
 
@@ -247,7 +247,7 @@ class Person private constructor(
         håndterGjenoppta(melding, aktivitetslogg)
     }
 
-    private fun tidligereBehandlinger(hendelse: ArbeidstakerHendelse, aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg, periode: Periode) {
         val cutoff = periode.start.minusMonths(6)
         val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
         if (andreBehandledeVedtaksperioder.isNotEmpty()) {
@@ -255,7 +255,7 @@ class Person private constructor(
             val msg = andreBehandledeVedtaksperioder.map {
                 "vedtaksperiode(${it.periode()})"
             }
-            aktivitetslogg.info("""hendelse: ${hendelse::class.java.simpleName} ($periode) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
+            aktivitetslogg.info("""hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
                 | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
                 | tidligere behandlede perioder: ${msg.joinToString { it }}
                 | cutoff: $cutoff""".trimMargin())
@@ -376,55 +376,55 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser, aktivitetslogg).håndter(ytelser, aktivitetslogg, infotrygdhistorikk)
+        finnArbeidsgiver(ytelser.behandlingsporing, aktivitetslogg).håndter(ytelser, aktivitetslogg, infotrygdhistorikk)
         håndterGjenoppta(ytelser, aktivitetslogg)
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler utbetalingsgodkjenning")
-        finnArbeidsgiver(utbetalingsgodkjenning, aktivitetslogg).håndter(utbetalingsgodkjenning, aktivitetslogg)
+        finnArbeidsgiver(utbetalingsgodkjenning.behandlingsporing, aktivitetslogg).håndter(utbetalingsgodkjenning, aktivitetslogg)
         håndterGjenoppta(utbetalingsgodkjenning, aktivitetslogg)
     }
 
     fun håndter(vedtakFattet: VedtakFattet, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler vedtak fattet")
-        finnArbeidsgiver(vedtakFattet, aktivitetslogg).håndter(vedtakFattet, aktivitetslogg)
+        finnArbeidsgiver(vedtakFattet.behandlingsporing, aktivitetslogg).håndter(vedtakFattet, aktivitetslogg)
         håndterGjenoppta(vedtakFattet, aktivitetslogg)
     }
 
     fun håndter(kanIkkeBehandlesHer: KanIkkeBehandlesHer, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler kan ikke behandles her")
-        finnArbeidsgiver(kanIkkeBehandlesHer, aktivitetslogg).håndter(kanIkkeBehandlesHer, aktivitetslogg)
+        finnArbeidsgiver(kanIkkeBehandlesHer.behandlingsporing, aktivitetslogg).håndter(kanIkkeBehandlesHer, aktivitetslogg)
         håndterGjenoppta(kanIkkeBehandlesHer, aktivitetslogg)
     }
 
     fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler sykepengegrunnlag for arbeidsgiver")
-        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetslogg).håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
+        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver.behandlingsporing, aktivitetslogg).håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
         håndterGjenoppta(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler vilkårsgrunnlag")
-        finnArbeidsgiver(vilkårsgrunnlag, aktivitetslogg).håndter(vilkårsgrunnlag, aktivitetslogg)
+        finnArbeidsgiver(vilkårsgrunnlag.behandlingsporing, aktivitetslogg).håndter(vilkårsgrunnlag, aktivitetslogg)
         håndterGjenoppta(vilkårsgrunnlag, aktivitetslogg)
     }
 
     fun håndter(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler simulering")
-        finnArbeidsgiver(simulering, aktivitetslogg).håndter(simulering, aktivitetslogg)
+        finnArbeidsgiver(simulering.behandlingsporing, aktivitetslogg).håndter(simulering, aktivitetslogg)
         håndterGjenoppta(simulering, aktivitetslogg)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler utbetaling")
-        finnArbeidsgiver(utbetaling, aktivitetslogg).håndter(utbetaling, aktivitetslogg)
+        finnArbeidsgiver(utbetaling.behandlingsporing, aktivitetslogg).håndter(utbetaling, aktivitetslogg)
         håndterGjenoppta(utbetaling, aktivitetslogg)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler utbetalingpåminnelse")
-        finnArbeidsgiver(påminnelse, aktivitetslogg).håndter(påminnelse, aktivitetslogg)
+        finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
@@ -437,7 +437,7 @@ class Person private constructor(
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         try {
             registrer(aktivitetslogg, "Behandler påminnelse")
-            if (finnArbeidsgiver(påminnelse, aktivitetslogg).håndter(påminnelse, aktivitetslogg)) return håndterGjenoppta(påminnelse, aktivitetslogg)
+            if (finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)) return håndterGjenoppta(påminnelse, aktivitetslogg)
         } catch (err: Aktivitetslogg.AktivitetException) {
             aktivitetslogg.funksjonellFeil(RV_AG_1)
         }
@@ -447,7 +447,7 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler Overstyr tidslinje")
-        finnArbeidsgiver(hendelse, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
@@ -478,8 +478,7 @@ class Person private constructor(
 
     fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler annulleringforespørsel")
-        arbeidsgivere.finn(hendelse.organisasjonsnummer().tilYrkesaktivitet())?.håndter(hendelse, aktivitetslogg)
-            ?: aktivitetslogg.funksjonellFeil(RV_AG_1)
+        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
@@ -618,14 +617,14 @@ class Person private constructor(
         aktivitetslogg.info(melding)
     }
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, aktivitetslogg: IAktivitetslogg) =
-        finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer().tilYrkesaktivitet(), aktivitetslogg)
+    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
+        finnEllerOpprettArbeidsgiver(behandlingsporing.organisasjonsnummer.tilYrkesaktivitet(), aktivitetslogg)
 
     private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
-    private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse, aktivitetslogg: IAktivitetslogg) =
-        hendelse.organisasjonsnummer().tilYrkesaktivitet().let { yrkesaktivitet ->
+    private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
+        behandlingsporing.organisasjonsnummer.tilYrkesaktivitet().let { yrkesaktivitet ->
             arbeidsgivere.finn(yrkesaktivitet) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
         }
 

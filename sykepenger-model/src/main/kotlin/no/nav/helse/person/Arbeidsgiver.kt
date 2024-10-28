@@ -192,8 +192,7 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun <T> List<Arbeidsgiver>.håndter(overstyrInntektsgrunnlag: T, aktivitetslogg: IAktivitetslogg) where T : OverstyrInntektsgrunnlag,
-                                                                                                                        T : Hendelse =
+        internal fun List<Arbeidsgiver>.håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg) =
             any { it.håndter(overstyrInntektsgrunnlag, aktivitetslogg) }
 
         internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
@@ -732,8 +731,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun <T> håndter(overstyrInntektsgrunnlag: T, aktivitetslogg: IAktivitetslogg): Boolean where T: OverstyrInntektsgrunnlag,
-                                                                                                         T: Hendelse {
+    private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Boolean {
         aktivitetslogg.kontekst(this)
         return énHarHåndtert(overstyrInntektsgrunnlag) {
             håndter(it, aktivitetslogg)

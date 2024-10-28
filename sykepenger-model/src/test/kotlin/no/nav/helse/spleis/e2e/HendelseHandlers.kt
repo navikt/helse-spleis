@@ -12,7 +12,6 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dagtype
@@ -465,7 +464,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
             .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
             .map { it.value.generator() }
             .filter { im -> im.metadata.meldingsreferanseId !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
-            .filter { im -> im.organisasjonsnummer() == orgnummer }
+            .filter { im -> im.behandlingsporing.organisasjonsnummer == orgnummer }
         InntektsmeldingerReplay(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "aktør",
@@ -537,7 +536,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
 ), førReplay)
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}) : UUID {
-    håndterOgReplayInntektsmeldinger(inntektsmelding.organisasjonsnummer()) {
+    håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndter)
         førReplay()
     }
@@ -933,7 +932,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
     overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
     orgnummer: String = ORGNUMMER,
     meldingsreferanseId: UUID = UUID.randomUUID()
-): ArbeidstakerHendelse {
+): OverstyrTidslinje {
     val hendelse = OverstyrTidslinje(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),

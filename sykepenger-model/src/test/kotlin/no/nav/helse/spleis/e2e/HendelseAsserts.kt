@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
-import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -42,7 +42,7 @@ internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitet.Behov.Behovtype, 
     return EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer, tilstand) != null
 }
 
-internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(løsning: KClass<T>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+internal fun AbstractEndToEndTest.assertEtterspurt(løsning: KClass<out Hendelse>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
     assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
         "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
@@ -62,7 +62,7 @@ internal fun <T : PersonHendelse> AbstractEndToEndTest.assertEtterspurt(løsning
 }
 */
 
-internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<T>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+internal fun AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<out Hendelse>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
     assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
         "Forventer ikke at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${

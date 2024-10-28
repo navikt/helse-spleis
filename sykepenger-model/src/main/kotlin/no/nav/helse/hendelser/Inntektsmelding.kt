@@ -48,11 +48,7 @@ class Inntektsmelding(
     private val avsendersystem: Avsendersystem?,
     private val vedtaksperiodeId: UUID?,
     mottatt: LocalDateTime
-) : ArbeidstakerHendelse(
-    fødselsnummer = fødselsnummer,
-    aktørId = aktørId,
-    organisasjonsnummer = orgnummer
-) {
+) : PersonHendelse() {
     companion object {
         private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, inntektsdato: LocalDate?): LocalDate {
             if (inntektsdato != null) return inntektsdato
@@ -70,6 +66,11 @@ class Inntektsmelding(
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) error("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
 
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = orgnummer
+    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.ARBEIDSGIVER,
@@ -134,11 +135,11 @@ class Inntektsmelding(
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
-        val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
+        val startskudd = if (builder.ingenRefusjonsopplysninger(behandlingsporing.organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
         val inntektGjelder = skjæringstidspunkt til LocalDate.MAX
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
-                organisasjonsnummer,
+                behandlingsporing.organisasjonsnummer,
                 inntektGjelder,
                 Inntektsmelding(beregnetInntektsdato, metadata.meldingsreferanseId, beregnetInntekt),
                 refusjonshistorikk.refusjonsopplysninger(startskudd)
@@ -221,10 +222,10 @@ class Inntektsmelding(
         val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
         val overlapperMedForkastet = forkastede.overlapperMed(dager)
         if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId, relevanteSykmeldingsperioder, organisasjonsnummer)
+            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)
             return aktivitetslogg.info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }
-        person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
+        person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
     private fun håndtertNå() = håndtertInntekt
     internal fun subsumsjonskontekst() = Subsumsjonskontekst(

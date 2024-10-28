@@ -8,8 +8,11 @@ class IdentOpphørt(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
-) : PersonHendelse(fødselsnummer, aktørId) {
-
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Person(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

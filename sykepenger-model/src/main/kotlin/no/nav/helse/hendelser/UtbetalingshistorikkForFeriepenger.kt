@@ -21,7 +21,11 @@ class UtbetalingshistorikkForFeriepenger(
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
-) : PersonHendelse(fødselsnummer, aktørId) {
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Person(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

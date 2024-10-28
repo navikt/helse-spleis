@@ -57,7 +57,12 @@ class Søknad(
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
     private val tilkomneInntekter: List<TilkommenInntekt>
-) : SykdomstidslinjeHendelse(fnr, aktørId, orgnummer) {
+) : SykdomstidslinjeHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fnr,
+        aktørId = aktørId,
+        organisasjonsnummer = orgnummer
+    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.SYKMELDT,
@@ -164,9 +169,9 @@ class Søknad(
             aktivitetslogg = aktivitetslogg,
             person = person,
             arbeidsgiver = arbeidsgiver,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
+            aktørId = behandlingsporing.aktørId,
+            fødselsnummer = behandlingsporing.fødselsnummer,
+            organisasjonsnummer = behandlingsporing.organisasjonsnummer,
             sykdomstidslinje = sykdomstidslinje,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,

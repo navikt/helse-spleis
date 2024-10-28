@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
@@ -13,7 +12,6 @@ import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspen
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 data class ManuellOverskrivingDag(
@@ -45,7 +43,12 @@ class OverstyrTidslinje(
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime,
-) : SykdomstidslinjeHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+) : SykdomstidslinjeHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.SAKSBEHANDLER,

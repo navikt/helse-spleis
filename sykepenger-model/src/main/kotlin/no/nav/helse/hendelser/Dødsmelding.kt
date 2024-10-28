@@ -11,7 +11,12 @@ class Dødsmelding(
     fødselsnummer: String,
     aktørId: String,
     private val dødsdato: LocalDate
-) : PersonHendelse(fødselsnummer, aktørId) {
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Person(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId
+    )
+
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

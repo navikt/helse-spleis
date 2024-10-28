@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomshistorikkHendelse>
 
-interface SykdomshistorikkHendelse : Hendelse {
+interface SykdomshistorikkHendelse {
     fun revurderingseventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? = null
     fun oppdaterFom(other: Periode): Periode
     fun sykdomstidslinje(): Sykdomstidslinje

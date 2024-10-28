@@ -22,7 +22,12 @@ class Påminnelse(
     private val ønskerReberegning: Boolean = false,
     private val nå: LocalDateTime = LocalDateTime.now(),
     opprettet: LocalDateTime
-) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYSTEM,
@@ -56,16 +61,16 @@ class Påminnelse(
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(
             PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
+                fødselsnummer = behandlingsporing.fødselsnummer,
+                aktørId = behandlingsporing.aktørId,
+                organisasjonsnummer = behandlingsporing.organisasjonsnummer,
                 vedtaksperiodeId = UUID.fromString(vedtaksperiodeId)
             )
         )
     }
 
     fun toOutgoingMessage() = mapOf(
-        "organisasjonsnummer" to organisasjonsnummer,
+        "organisasjonsnummer" to behandlingsporing.organisasjonsnummer,
         "vedtaksperiodeId" to vedtaksperiodeId,
         "tilstand" to tilstand,
         "antallGangerPåminnet" to antallGangerPåminnet,

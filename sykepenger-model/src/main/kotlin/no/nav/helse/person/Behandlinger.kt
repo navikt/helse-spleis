@@ -40,6 +40,7 @@ import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -357,7 +358,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val registert: LocalDateTime,
         val avsender: Avsender
     ) {
-        constructor(hendelse: Hendelse): this(hendelse.metadata.meldingsreferanseId, hendelse.metadata.innsendt, hendelse.metadata.registrert, hendelse.metadata.avsender)
+        constructor(metadata: HendelseMetadata): this(metadata.meldingsreferanseId, metadata.innsendt, metadata.registrert, metadata.avsender)
+        constructor(sykdomshistorikkHendelse: SykdomshistorikkHendelse) : this(when (sykdomshistorikkHendelse) {
+            is DagerFraInntektsmelding.BitAvInntektsmelding -> sykdomshistorikkHendelse.metadata
+            is Søknad -> sykdomshistorikkHendelse.metadata
+            is OverstyrTidslinje -> sykdomshistorikkHendelse.metadata
+            is Ytelser -> sykdomshistorikkHendelse.metadata
+            else -> error("ukjent sykdomshistorikkhendelse: ${sykdomshistorikkHendelse::class.simpleName}")
+        })
 
         fun view() = BehandlingkildeView(meldingsreferanseId, innsendt, registert, avsender)
 
@@ -562,11 +570,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     )
                 }
 
+                internal fun SykdomshistorikkHendelse.dokumentsporingOrNull(): Dokumentsporing? {
+                    return when (this) {
+                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId) // huh?
+                        is Søknad -> søknad(metadata.meldingsreferanseId)
+                        is OverstyrTidslinje -> overstyrTidslinje(metadata.meldingsreferanseId)
+                        is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
+                        else -> null
+                    }
+                }
                 internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
                         is Inntektsmelding -> inntektsmeldingInntekt(metadata.meldingsreferanseId)
                         is DagerFraInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId)
-                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId) // huh?
                         is Søknad -> søknad(metadata.meldingsreferanseId)
                         is OverstyrArbeidsforhold -> overstyrArbeidsforhold(metadata.meldingsreferanseId)
                         is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(metadata.meldingsreferanseId)
@@ -606,6 +622,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }
                 }
 
+                internal fun SykdomshistorikkHendelse.dokumentsporing(): Dokumentsporing = checkNotNull(dokumentsporingOrNull()) {
+                    "Mangler dokumentsporing for ${this::class.simpleName}"
+                }
                 internal fun Hendelse.dokumentsporing(): Dokumentsporing = checkNotNull(dokumentsporingOrNull()) {
                     "Mangler dokumentsporing for ${this::class.simpleName}"
                 }
@@ -1048,7 +1067,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnArbeidsgiverperiode
                 )),
                 avsluttet = null,
-                kilde = hendelse?.let { Behandlingkilde(it) } ?: kilde
+                kilde = hendelse?.let { Behandlingkilde(it.metadata) } ?: kilde
             )
         }
 
@@ -1065,7 +1084,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
                 avsluttet = null,
-                kilde = Behandlingkilde(hendelse)
+                kilde = Behandlingkilde(hendelse.metadata)
             )
         }
 
@@ -1076,7 +1095,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 tilstand = Tilstand.AnnullertPeriode,
                 endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata)),
                 avsluttet = LocalDateTime.now(),
-                kilde = Behandlingkilde(hendelse)
+                kilde = Behandlingkilde(hendelse.metadata)
             )
         }
 
@@ -1198,7 +1217,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         )
                     ),
                     avsluttet = null,
-                    kilde = Behandlingkilde(søknad)
+                    kilde = Behandlingkilde(søknad.metadata)
                 )
             fun List<Behandling>.jurist(jurist: BehandlingSubsumsjonslogg, vedtaksperiodeId: UUID) =
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat())
@@ -1649,7 +1668,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         tilstand = TilInfotrygd,
                         endringer = listOf(behandling.gjeldende.kopierUtenUtbetaling()),
                         avsluttet = LocalDateTime.now(),
-                        kilde = Behandlingkilde(hendelse)
+                        kilde = Behandlingkilde(hendelse.metadata)
                     )
                 }
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =

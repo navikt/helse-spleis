@@ -27,7 +27,12 @@ class Vilkårsgrunnlag(
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>
-) : ArbeidstakerHendelse(personidentifikator.toString(), aktørId, orgnummer) {
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = personidentifikator.toString(),
+        aktørId = aktørId,
+        organisasjonsnummer = orgnummer
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

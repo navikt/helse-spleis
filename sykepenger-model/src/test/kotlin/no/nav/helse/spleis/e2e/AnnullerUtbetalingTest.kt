@@ -19,6 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
@@ -32,13 +33,14 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
-        håndterAnnullerUtbetaling(orgnummer = a2)
+        assertThrows<Aktivitetslogg.AktivitetException> { håndterAnnullerUtbetaling(orgnummer = a2) }
         assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
     }
 

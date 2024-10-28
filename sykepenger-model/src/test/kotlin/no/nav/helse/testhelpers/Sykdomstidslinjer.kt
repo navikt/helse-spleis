@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Melding
 import no.nav.helse.hendelser.Periode
@@ -70,11 +71,11 @@ internal val Int.U
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.U(melding: Melding) = Sykdomstidslinje.arbeidsgiverdager(
+internal fun Int.U(meldingsreferanseId: UUID = UUID.randomUUID()) = Sykdomstidslinje.arbeidsgiverdager(
     dagensDato,
     dagensDato.plusDays(this.toLong() - 1),
     100.prosent,
-    Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now())
+    Hendelseskilde(SykdomshistorikkHendelse::class, meldingsreferanseId, LocalDateTime.now())
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.K
@@ -208,18 +209,7 @@ internal val Int.FORELDET
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 
-internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse {
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
-    }
-
+internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) : SykdomshistorikkHendelse {
     override fun oppdaterFom(other: Periode) = other
     override fun sykdomstidslinje() = tidslinje
-    override fun navn() = error("ikke i bruk")
 }

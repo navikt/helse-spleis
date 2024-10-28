@@ -11,8 +11,12 @@ class AnmodningOmForkasting(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     internal val force: Boolean
-): ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer) {
-
+): PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

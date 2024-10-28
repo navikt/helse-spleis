@@ -5,11 +5,7 @@ import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 
-sealed class SykdomstidslinjeHendelse protected constructor(
-    fødselsnummer: String,
-    aktørId: String,
-    organisasjonsnummer: String,
-) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), SykdomshistorikkHendelse {
+sealed class SykdomstidslinjeHendelse : PersonHendelse(), SykdomshistorikkHendelse {
     private val håndtertAv = mutableSetOf<UUID>()
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
 

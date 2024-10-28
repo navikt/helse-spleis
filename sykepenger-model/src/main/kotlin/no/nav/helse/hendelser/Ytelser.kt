@@ -25,7 +25,12 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger
-) : ArbeidstakerHendelse(fødselsnummer, aktørId, organisasjonsnummer), SykdomshistorikkHendelse {
+) : PersonHendelse(), SykdomshistorikkHendelse {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

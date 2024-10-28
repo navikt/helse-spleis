@@ -19,7 +19,12 @@ class SykepengegrunnlagForArbeidsgiver(
     personidentifikator: Personidentifikator,
     private val orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
-) : ArbeidstakerHendelse(personidentifikator.toString(), aktørId, orgnummer) {
+) : PersonHendelse() {
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+        fødselsnummer = personidentifikator.toString(),
+        aktørId = aktørId,
+        organisasjonsnummer = orgnummer
+    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,
