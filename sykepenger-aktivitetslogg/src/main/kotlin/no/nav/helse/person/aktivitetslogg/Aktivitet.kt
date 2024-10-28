@@ -27,8 +27,6 @@ sealed class Aktivitet(
     override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
         .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
 
-    internal fun inOrder() = label + "\t" + this.toString()
-
     override fun toString() = label + "  \t" + tidsstempel.format(tidsstempelformat) + "  \t" + melding + meldingerString()
 
     private fun meldingerString(): String {

@@ -58,7 +58,7 @@ class Aktivitetslogg(
 
     override fun barn() = Aktivitetslogg(this).also { it.kontekster.addAll(this.kontekster) }
 
-    override fun toString() = this._aktiviteter.map { it.inOrder() }.joinToString(separator = "\n") { it }
+    override fun toString() = this._aktiviteter.joinToString(separator = "\n") { "$it" }
 
     override fun aktivitetsteller() = _aktiviteter.size
 
