@@ -693,7 +693,7 @@ internal class Vedtaksperiode private constructor(
             korrigertInntektsmeldingId?.let {
                 person.arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigerendeInntektsopplysningId = dager.metadata.meldingsreferanseId,
+                        korrigerendeInntektsopplysningId = dager.hendelse.metadata.meldingsreferanseId,
                         korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
                         korrigertInntektsmeldingId = it
                     )
@@ -1904,7 +1904,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.håndterDager(dager, aktivitetslogg)
-            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager, aktivitetslogg)
+            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(
@@ -2085,7 +2085,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (vedtaksperiode.forventerInntekt()) return vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
             vedtaksperiode.håndterDager(dager, aktivitetslogg)
-            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager, aktivitetslogg)
+            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(
@@ -2830,7 +2830,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.håndterDager(dager, aktivitetslogg)
             if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
-                if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) return vedtaksperiode.forkast(dager, aktivitetslogg)
+                if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
                 return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, forsøkÅLageUtbetalingstidslinje(vedtaksperiode, aktivitetslogg))
             }
         }

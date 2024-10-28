@@ -34,8 +34,8 @@ internal class DagerFraInntektsmelding(
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean,
-    hendelse: Inntektsmelding
-): Hendelse by hendelse {
+    val hendelse: Inntektsmelding
+) {
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
@@ -50,13 +50,10 @@ internal class DagerFraInntektsmelding(
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
     }
 
-    override val behandlingsporing = hendelse.behandlingsporing
-    override val metadata = hendelse.metadata
-
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
     // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
-    internal val kilde = Hendelseskilde("Inntektsmelding", metadata.meldingsreferanseId, mottatt)
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(metadata.meldingsreferanseId)
+    internal val kilde = Hendelseskilde("Inntektsmelding", hendelse.metadata.meldingsreferanseId, mottatt)
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(hendelse.metadata.meldingsreferanseId)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
@@ -180,12 +177,12 @@ internal class DagerFraInntektsmelding(
 
     internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding? {
         val sykdomstidslinje = håndterDager(aktivitetslogg, vedtaksperiode) ?: return null
-        return BitAvInntektsmelding(metadata, sykdomstidslinje)
+        return BitAvInntektsmelding(hendelse.metadata, sykdomstidslinje)
     }
 
     internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding {
         håndterDager(aktivitetslogg, vedtaksperiode)
-        return BitAvInntektsmelding(metadata, Sykdomstidslinje())
+        return BitAvInntektsmelding(hendelse.metadata, Sykdomstidslinje())
     }
 
     private fun håndterDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): Sykdomstidslinje? {
@@ -305,7 +302,7 @@ internal class DagerFraInntektsmelding(
 
     fun revurderingseventyr(): Revurderingseventyr? {
         val dagene = håndterteDager.omsluttendePeriode ?: harValidert ?: return null
-        return Revurderingseventyr.arbeidsgiverperiode(this, dagene.start, dagene)
+        return Revurderingseventyr.arbeidsgiverperiode(hendelse, dagene.start, dagene)
     }
 
     internal class BitAvInntektsmelding(val metadata: HendelseMetadata, private val sykdomstidslinje: Sykdomstidslinje): SykdomshistorikkHendelse {

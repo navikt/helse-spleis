@@ -572,7 +572,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 internal fun SykdomshistorikkHendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
-                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId) // huh?
+                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId)
                         is Søknad -> søknad(metadata.meldingsreferanseId)
                         is OverstyrTidslinje -> overstyrTidslinje(metadata.meldingsreferanseId)
                         is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
@@ -582,7 +582,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
                         is Inntektsmelding -> inntektsmeldingInntekt(metadata.meldingsreferanseId)
-                        is DagerFraInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId)
                         is Søknad -> søknad(metadata.meldingsreferanseId)
                         is OverstyrArbeidsforhold -> overstyrArbeidsforhold(metadata.meldingsreferanseId)
                         is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(metadata.meldingsreferanseId)
