@@ -12,7 +12,7 @@ class Grunnbeløpsregulering(
     fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
-): PersonHendelse(), OverstyrInntektsgrunnlag {
+): Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId

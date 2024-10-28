@@ -11,7 +11,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -45,7 +44,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ikkeBesvarteBehov.clear()
     }
 
-    internal fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
+    internal fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
         hendelselogg = Aktivitetslogg()
         forrigeHendelse = this
         person.håndter(this, hendelselogg)

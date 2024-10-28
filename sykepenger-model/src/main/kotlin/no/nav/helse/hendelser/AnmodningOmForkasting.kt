@@ -11,7 +11,7 @@ class AnmodningOmForkasting(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     internal val force: Boolean
-): PersonHendelse() {
+): Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

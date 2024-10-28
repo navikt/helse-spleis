@@ -16,6 +16,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
@@ -23,7 +24,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -109,7 +109,7 @@ internal class TestPerson(
     internal operator fun <R> String.invoke(testblokk: TestArbeidsgiver.() -> R) =
         arbeidsgiver(this, testblokk)
 
-    private fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
+    private fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg()
         person.håndter(this, forrigeAktivitetslogg)
         behovsamler.registrerBehov(forrigeAktivitetslogg)

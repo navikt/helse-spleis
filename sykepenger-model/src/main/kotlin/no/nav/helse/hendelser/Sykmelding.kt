@@ -13,7 +13,7 @@ class Sykmelding(
     aktørId: String,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -36,10 +36,6 @@ class Sykmelding(
 
     internal fun trimLeft(dato: LocalDate) {
         sykmeldingsperiode = sykmeldingsperiode?.beholdDagerEtter(dato)
-    }
-
-    override fun venter(block: () -> Unit) {
-        // Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den
     }
 
     internal fun oppdaterSykmeldingsperioder(aktivitetslogg: IAktivitetslogg, perioder: List<Periode>): List<Periode> {

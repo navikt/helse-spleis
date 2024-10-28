@@ -8,7 +8,7 @@ class Migrate(
     meldingsreferanseId: UUID,
     aktørId: String,
     fødselsnummer: String
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId

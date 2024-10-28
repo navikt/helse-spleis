@@ -16,7 +16,7 @@ class KanIkkeBehandlesHer(
     private val saksbehandlerEpost: String,
     opprettet: LocalDateTime,
     override val automatisert: Boolean
-) : PersonHendelse(), Behandlingsavgjørelse {
+) : Hendelse, Behandlingsavgjørelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

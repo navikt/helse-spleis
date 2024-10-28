@@ -18,7 +18,7 @@ class Simulering(
     override val melding: String,
     override val simuleringsResultat: SimuleringResultatDto?,
     override val utbetalingId: UUID
-) : PersonHendelse(), SimuleringHendelse {
+) : Hendelse, SimuleringHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

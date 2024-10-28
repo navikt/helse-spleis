@@ -27,7 +27,7 @@ class Vilkårsgrunnlag(
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = personidentifikator.toString(),
         aktørId = aktørId,

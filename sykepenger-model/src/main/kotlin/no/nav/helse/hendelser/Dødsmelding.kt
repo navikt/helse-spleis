@@ -11,7 +11,7 @@ class Dødsmelding(
     fødselsnummer: String,
     aktørId: String,
     private val dødsdato: LocalDate
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId

@@ -15,7 +15,7 @@ class Utbetalingpåminnelse(
     override val status: Utbetalingstatus,
     private val endringstidspunkt: LocalDateTime,
     påminnelsestidspunkt: LocalDateTime
-) : PersonHendelse(), UtbetalingpåminnelseHendelse {
+) : Hendelse, UtbetalingpåminnelseHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

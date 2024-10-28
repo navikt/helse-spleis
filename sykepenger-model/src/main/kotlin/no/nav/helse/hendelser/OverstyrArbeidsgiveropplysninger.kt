@@ -20,7 +20,7 @@ class OverstyrArbeidsgiveropplysninger(
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime,
     private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
-) : PersonHendelse(), OverstyrInntektsgrunnlag {
+) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId

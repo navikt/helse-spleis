@@ -11,7 +11,7 @@ class ForkastSykmeldingsperioder(
     fødselsnummer: String,
     organisasjonsnummer: String,
     private val periode: Periode
-): PersonHendelse() {
+): Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

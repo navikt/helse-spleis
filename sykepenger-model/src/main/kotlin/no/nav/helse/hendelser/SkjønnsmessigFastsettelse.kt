@@ -13,7 +13,7 @@ class SkjønnsmessigFastsettelse(
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime
-) : PersonHendelse(), OverstyrInntektsgrunnlag {
+) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId

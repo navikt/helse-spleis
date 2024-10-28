@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
@@ -21,7 +22,6 @@ import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
@@ -485,10 +485,10 @@ internal class HendelseMediator(
         }
     }
 
-    private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
+    private fun <Hendelsetype : Hendelse> opprettPersonOgHåndter(
         personopplysninger: Personopplysninger,
         message: HendelseMessage,
-        hendelse: Hendelse,
+        hendelse: Hendelsetype,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         handler: (Person, IAktivitetslogg) -> Unit
@@ -497,20 +497,20 @@ internal class HendelseMediator(
         hentPersonOgHåndter(personidentifikator, personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
     }
 
-    private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
+    private fun <Hendelsetype : Hendelse> hentPersonOgHåndter(
         message: HendelseMessage,
-        hendelse: Hendelse,
+        hendelse: Hendelsetype,
         context: MessageContext,
         handler: (Person, IAktivitetslogg) -> Unit
     ) {
         val personidentifikator = Personidentifikator(hendelse.behandlingsporing.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, null, message, hendelse, context, handler = handler)
     }
-    private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
+    private fun <Hendelsetype : Hendelse> hentPersonOgHåndter(
         personidentifikator: Personidentifikator,
         personopplysninger: Personopplysninger?,
         message: HendelseMessage,
-        hendelse: Hendelse,
+        hendelse: Hendelsetype,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator> = emptySet(),
         handler: (Person, IAktivitetslogg) -> Unit
@@ -547,7 +547,7 @@ internal class HendelseMediator(
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
-        hendelse: PersonHendelse,
+        hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
         personMediator.ferdigstill(context)

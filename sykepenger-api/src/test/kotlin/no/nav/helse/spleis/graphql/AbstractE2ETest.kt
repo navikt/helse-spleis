@@ -19,7 +19,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -30,6 +29,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.spleis.IdInnhenter
 import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
@@ -98,7 +98,7 @@ internal abstract class AbstractE2ETest {
     protected fun dto() = person.dto()
     protected fun speilApi() = serializePersonForSpeil(person, spekemat.resultat())
 
-    protected fun <T : PersonHendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit) = apply {
+    protected fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit) = apply {
         hendelselogg = Aktivitetslogg()
         person.håndter(this, hendelselogg)
         ubesvarteBehov.addAll(hendelselogg.behov())

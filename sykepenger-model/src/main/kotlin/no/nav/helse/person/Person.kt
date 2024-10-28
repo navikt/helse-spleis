@@ -10,7 +10,9 @@ import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -28,23 +30,21 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Revurderingseventyr
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
@@ -823,9 +823,12 @@ class Person private constructor(
     }
 
     private fun håndterVedtaksperiodeVenter(hendelse: Hendelse) {
-        hendelse.venter {
-            val nestemann = arbeidsgivere.nestemann() ?: return@venter
-            arbeidsgivere.venter(nestemann)
+        when (hendelse) {
+            is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */ }
+            else -> {
+                val nestemann = arbeidsgivere.nestemann() ?: return
+                arbeidsgivere.venter(nestemann)
+            }
         }
     }
 

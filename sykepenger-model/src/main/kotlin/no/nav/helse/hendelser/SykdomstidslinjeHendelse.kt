@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 
-sealed class SykdomstidslinjeHendelse : PersonHendelse(), SykdomshistorikkHendelse {
+sealed class SykdomstidslinjeHendelse : Hendelse, SykdomshistorikkHendelse {
     private val håndtertAv = mutableSetOf<UUID>()
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
 

@@ -15,7 +15,7 @@ class Utbetalingshistorikk(
     private val vedtaksperiodeId: String,
     private val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

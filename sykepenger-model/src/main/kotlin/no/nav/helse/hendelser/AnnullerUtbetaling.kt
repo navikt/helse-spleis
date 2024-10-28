@@ -15,7 +15,7 @@ class AnnullerUtbetaling(
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime
-) : PersonHendelse(), AnnullerUtbetalingHendelse {
+) : Hendelse, AnnullerUtbetalingHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

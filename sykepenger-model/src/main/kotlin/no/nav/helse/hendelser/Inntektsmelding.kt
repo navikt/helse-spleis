@@ -48,7 +48,7 @@ class Inntektsmelding(
     private val avsendersystem: Avsendersystem?,
     private val vedtaksperiodeId: UUID?,
     mottatt: LocalDateTime
-) : PersonHendelse() {
+) : Hendelse {
     companion object {
         private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, inntektsdato: LocalDate?): LocalDate {
             if (inntektsdato != null) return inntektsdato

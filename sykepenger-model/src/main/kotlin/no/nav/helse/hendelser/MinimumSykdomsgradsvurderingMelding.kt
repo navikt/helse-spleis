@@ -15,7 +15,7 @@ class MinimumSykdomsgradsvurderingMelding(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
-) : PersonHendelse() {
+) : Hendelse {
 
     init {
         sjekkForOverlapp()

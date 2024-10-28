@@ -19,7 +19,7 @@ class SykepengegrunnlagForArbeidsgiver(
     personidentifikator: Personidentifikator,
     private val orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = personidentifikator.toString(),
         aktørId = aktørId,

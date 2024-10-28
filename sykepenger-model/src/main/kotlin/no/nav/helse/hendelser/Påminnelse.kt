@@ -22,7 +22,7 @@ class Påminnelse(
     private val ønskerReberegning: Boolean = false,
     private val nå: LocalDateTime = LocalDateTime.now(),
     opprettet: LocalDateTime
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

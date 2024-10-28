@@ -8,7 +8,7 @@ class IdentOpphørt(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId

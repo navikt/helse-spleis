@@ -16,7 +16,7 @@ class UtbetalingHendelse(
     override val melding: String,
     override val avstemmingsnøkkel: Long,
     override val overføringstidspunkt: LocalDateTime
-) : PersonHendelse(), UtbetalingmodulHendelse {
+) : Hendelse, UtbetalingmodulHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

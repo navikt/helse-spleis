@@ -9,8 +9,8 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
     private val message: HendelseMessage,
-    private val hendelse: PersonHendelse
+    private val hendelse: Hendelse
 ) : PersonObserver {
     private val meldinger = mutableListOf<Pakke>()
     private companion object {

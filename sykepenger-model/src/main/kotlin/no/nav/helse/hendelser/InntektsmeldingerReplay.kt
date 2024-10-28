@@ -13,7 +13,7 @@ class InntektsmeldingerReplay(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val inntektsmeldinger: List<Inntektsmelding>
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

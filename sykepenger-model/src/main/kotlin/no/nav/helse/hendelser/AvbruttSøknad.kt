@@ -10,7 +10,7 @@ class AvbruttSøknad(
     orgnummer: String,
     fødselsnummer: String,
     aktørId: String,
-) : PersonHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

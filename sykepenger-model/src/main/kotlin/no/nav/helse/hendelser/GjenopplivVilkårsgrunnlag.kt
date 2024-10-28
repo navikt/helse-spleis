@@ -18,7 +18,7 @@ class GjenopplivVilkårsgrunnlag(
     private val vilkårsgrunnlagId: UUID,
     private val nyttSkjæringstidspunkt: LocalDate?,
     private val arbeidsgiveropplysninger: Map<String, Inntekt>
-): PersonHendelse() {
+): Hendelse {
     override val behandlingsporing = Behandlingsporing.Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId
