@@ -36,7 +36,6 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -590,7 +589,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(metadata.meldingsreferanseId)
                         is OmfordelRefusjonsopplysninger, //TODO: denne burde nok spores, om vi klarer å implementere den
-                        is Behandlingsavgjørelse,
                         is Revurderingseventyr,
                         is SykdomshistorikkHendelse -> null
                         is Dødsmelding,

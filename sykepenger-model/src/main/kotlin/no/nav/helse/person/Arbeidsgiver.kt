@@ -35,6 +35,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -82,6 +83,8 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.hendelser.SykdomstidslinjeHendelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling

@@ -16,7 +16,7 @@ class Utbetalingsgodkjenning(
     utbetalingGodkjent: Boolean,
     godkjenttidspunkt: LocalDateTime,
     automatiskBehandling: Boolean
-) : Hendelse, Behandlingsavgjørelse {
+) : Behandlingsavgjørelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

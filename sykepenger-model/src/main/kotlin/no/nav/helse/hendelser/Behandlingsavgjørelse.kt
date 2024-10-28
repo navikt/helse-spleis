@@ -2,6 +2,6 @@ package no.nav.helse.hendelser
 
 import java.util.UUID
 
-interface Behandlingsavgjørelse : UtbetalingsavgjørelseHendelse, Hendelse {
+sealed interface Behandlingsavgjørelse : Hendelse, UtbetalingsavgjørelseHendelse {
     fun relevantVedtaksperiode(id: UUID): Boolean
 }

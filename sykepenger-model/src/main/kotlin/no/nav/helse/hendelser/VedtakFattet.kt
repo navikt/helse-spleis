@@ -16,7 +16,7 @@ class VedtakFattet(
     private val saksbehandlerEpost: String,
     vedtakFattetTidspunkt: LocalDateTime,
     override val automatisert: Boolean
-) : Hendelse, Behandlingsavgjørelse {
+) : Behandlingsavgjørelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
