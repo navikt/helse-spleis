@@ -79,7 +79,6 @@ private val Hendelse.kontekstnavn get() = when (this) {
     is VedtakFattet -> "VedtakFattet"
     is Vilkårsgrunnlag -> "Vilkårsgrunnlag"
     is Ytelser -> "Ytelser"
-    is Revurderingseventyr -> error("Har ikke kontekstnavn definert for ${this::class.simpleName}")
 }
 
 sealed interface Behandlingsporing {

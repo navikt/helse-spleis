@@ -1227,7 +1227,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverstyringIgangsattRevurdering(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         revurdering.inngåSomRevurdering(this, aktivitetslogg, periode)
-        behandlinger.sikreNyBehandling(arbeidsgiver, revurdering, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist))
+        behandlinger.sikreNyBehandling(arbeidsgiver, revurdering.hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist))
         tilstand(aktivitetslogg, AvventerRevurdering)
     }
 
@@ -1931,7 +1931,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.videreførRefusjonsopplysningerFraNabo(aktivitetslogg = aktivitetslogg)
-            vurderOmKanGåVidere(vedtaksperiode, revurdering, aktivitetslogg)
+            vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)
             if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
             if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
@@ -2799,7 +2799,7 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering, vedtaksperiode.person.beregnSkjæringstidspunkt(), vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist))
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering.hendelse, vedtaksperiode.person.beregnSkjæringstidspunkt(), vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist))
             if (vedtaksperiode.forventerInntekt()) {
                 revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
                 revurdering.loggDersomKorrigerendeSøknad(aktivitetslogg, "Startet omgjøring grunnet korrigerende søknad")
@@ -2918,7 +2918,7 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering, vedtaksperiode.person.beregnSkjæringstidspunkt(), vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist))
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering.hendelse, vedtaksperiode.person.beregnSkjæringstidspunkt(), vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist))
             vedtaksperiode.jurist.logg(`fvl § 35 ledd 1`())
             revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
             vedtaksperiode.tilstand(aktivitetslogg, AvventerRevurdering)

@@ -589,8 +589,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(metadata.meldingsreferanseId)
                         is OmfordelRefusjonsopplysninger, //TODO: denne burde nok spores, om vi klarer å implementere den
-                        is Revurderingseventyr,
-                        is SykdomshistorikkHendelse -> null
                         is Dødsmelding,
                         is GjenopplivVilkårsgrunnlag,
                         is IdentOpphørt,

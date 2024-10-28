@@ -28,8 +28,8 @@ class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
     private val skjæringstidspunkt: LocalDate,
     private val periodeForEndring: Periode,
-    private val hendelse: Hendelse
-) : Hendelse by hendelse {
+    val hendelse: Hendelse
+) {
 
     internal companion object {
         fun nyPeriode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, hendelse)
