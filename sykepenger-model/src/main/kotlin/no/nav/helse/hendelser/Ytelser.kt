@@ -91,6 +91,46 @@ class Ytelser(
         sykdomstidslinje = sykdomstidslinje.fraOgMed(periode.start).fremTilOgMed(periode.endInclusive)
         return this
     }
+
+    internal fun andreYtelserPerioder(): AndreYtelserPerioder {
+        val foreldrepenger = foreldrepenger.perioder()
+        val svangerskapspenger = svangerskapspenger.perioder()
+        val pleiepenger = pleiepenger.perioder()
+        val omsorgspenger = omsorgspenger.perioder()
+        val opplæringspenger = opplæringspenger.perioder()
+        val arbeidsavklaringspenger = arbeidsavklaringspenger.perioder
+        val dagpenger = dagpenger.perioder
+        return AndreYtelserPerioder(
+            foreldrepenger = foreldrepenger,
+            svangerskapspenger = svangerskapspenger,
+            pleiepenger = pleiepenger,
+            dagpenger = dagpenger,
+            arbeidsavklaringspenger = arbeidsavklaringspenger,
+            opplæringspenger = opplæringspenger,
+            omsorgspenger = omsorgspenger
+        )
+    }
 }
 
 class GradertPeriode(internal val periode: Periode, internal val grad: Int)
+
+data class AndreYtelserPerioder(
+    val foreldrepenger: List<Periode>,
+    val svangerskapspenger: List<Periode>,
+    val pleiepenger: List<Periode>,
+    val dagpenger: List<Periode>,
+    val arbeidsavklaringspenger: List<Periode>,
+    val opplæringspenger: List<Periode>,
+    val omsorgspenger: List<Periode>
+) {
+    internal fun erTom(): Boolean {
+        if (foreldrepenger.isNotEmpty()) return false
+        if (svangerskapspenger.isNotEmpty()) return false
+        if (pleiepenger.isNotEmpty()) return false
+        if (dagpenger.isNotEmpty()) return false
+        if (arbeidsavklaringspenger.isNotEmpty()) return false
+        if (opplæringspenger.isNotEmpty()) return false
+        if (omsorgspenger.isNotEmpty()) return false
+        return true
+    }
+}

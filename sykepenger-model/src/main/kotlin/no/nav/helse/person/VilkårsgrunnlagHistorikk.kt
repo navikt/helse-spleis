@@ -319,6 +319,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
             inntektsgrunnlag.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
 
+        internal fun harTilkommendeInntekter() = inntektsgrunnlag.harTilkommendeInntekter()
+
         internal fun refusjonsopplysninger(organisasjonsnummer: String) =
             inntektsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
 

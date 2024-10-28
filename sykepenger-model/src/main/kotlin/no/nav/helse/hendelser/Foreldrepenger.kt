@@ -38,4 +38,8 @@ class Foreldrepenger(
     override fun skalOppdatereHistorikk(vedtaksperiode: Periode, skjæringstidspunkt: LocalDate, vedtaksperiodeRettEtter: Periode?): Pair<Boolean, Companion.HvorforIkkeOppdatereHistorikk?> {
         return foreldrepengeytelse.skalOppdatereHistorikkIHalen(vedtaksperiode, skjæringstidspunkt, vedtaksperiodeRettEtter)
     }
+
+    internal fun perioder(): List<Periode> {
+        return foreldrepengeytelse.map { it.periode }
+    }
 }

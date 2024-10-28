@@ -296,10 +296,12 @@ internal class Inntektsgrunnlag private constructor(
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
-    fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
+    internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
         if (this.tilkommendeInntekter.isEmpty() && nyeInntekter.isEmpty()) return null
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = this.tilkommendeInntekter.merge(periode, nyeInntekter))
     }
+
+    internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         person: Person,

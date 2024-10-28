@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -11,7 +9,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -97,17 +94,9 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                     TilkommenInntekt(1.februar, 28.februar, a2, 10000.månedlig)
                 )
             )
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(februar, 100)))
-            assertForventetFeil(
-                forklaring = "skal ikke hensynta andre ytelser i rakett 1",
-                nå = {
-                    assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
-                },
-                ønsket = {
-                    assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
-                    assertIngenVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
-                }
-            )
+            assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
         }
     }
 

@@ -489,6 +489,10 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    private fun harTilkomneInntekter(): Boolean {
+        return vilkårsgrunnlag?.harTilkommendeInntekter() ?: false
+    }
+
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg): Boolean {
         if (!behandlinger.kanForkastes(aktivitetslogg, arbeidsgiverUtbetalinger)) {
             aktivitetslogg.info("[kanForkastes] Kan ikke forkastes fordi behandlinger nekter det")
@@ -1781,6 +1785,9 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             val maksdatoresultat = vedtaksperiode.beregnUtbetalinger(aktivitetslogg)
+            if (vedtaksperiode.harTilkomneInntekter() && !ytelser.andreYtelserPerioder().erTom()) {
+                aktivitetslogg.varsel(Varselkode.RV_IV_9)
+            }
             ytelser.valider(aktivitetslogg, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, maksdatoresultat.maksdato, vedtaksperiode.erForlengelse())
             vedtaksperiode.høstingsresultater(aktivitetslogg, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
         }
@@ -2372,6 +2379,9 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             val maksdatoresultat = vedtaksperiode.beregnUtbetalinger(aktivitetslogg)
+            if (vedtaksperiode.harTilkomneInntekter() && !ytelser.andreYtelserPerioder().erTom()) {
+                aktivitetslogg.varsel(Varselkode.RV_IV_9)
+            }
             ytelser.valider(aktivitetslogg, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, maksdatoresultat.maksdato, vedtaksperiode.erForlengelse())
             if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(ytelser, aktivitetslogg)
             vedtaksperiode.høstingsresultater(aktivitetslogg, AvventerSimulering, AvventerGodkjenning)
