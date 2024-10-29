@@ -19,6 +19,7 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.overlapperMed
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.inneholder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -30,9 +31,10 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
+import org.slf4j.LoggerFactory
 
 class Inntektsmelding(
-    meldingsreferanseId: UUID,
+    private val meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
     orgnummer: String,
     fødselsnummer: String,
@@ -55,6 +57,8 @@ class Inntektsmelding(
             if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
             return arbeidsgiverperioder.maxOf { it.start }
         }
+
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     init {
@@ -241,10 +245,20 @@ class Inntektsmelding(
         if (vedtaksperiodeId != null && forkastede.erForkastet(vedtaksperiodeId)) return false.also {
             aktivitetslogg.info("Vi har bedt om arbeidsgiveropplysninger, men perioden er forkastet")
         }
-        if (erPortalinntektsmelding()) return true // inntektmelding fra portal, vi har bedt om IM og forventer IM
+        if (erPortalinntektsmelding()) return true
         if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
         return beregnetInntektsdato in sykdomstidslinjeperiode
     }
 
     private fun erPortalinntektsmelding() = avsendersystem == Avsendersystem.NAV_NO || avsendersystem == Avsendersystem.NAV_NO_SELVBESTEMT
+    internal fun loggOmVedtaksperiodeIdFinnes(vedtaksperioder: MutableList<Vedtaksperiode>) {
+        if (!erPortalinntektsmelding()) return
+        if (vedtaksperiodeId == null) {
+            sikkerlogg.error("Fant inntektsmelding fra portalen uten vedtaksperiodeId. InntektsmeldingId: $meldingsreferanseId")
+            return
+        }
+        if (!vedtaksperioder.inneholder(vedtaksperiodeId)) {
+            sikkerlogg.warn("Finner ikke en aktiv vedtaksperiode for vedtaksperiodeId oppgitt i inntektsmeldingen. InntektsmeldingId: $meldingsreferanseId")
+        }
+    }
 }
