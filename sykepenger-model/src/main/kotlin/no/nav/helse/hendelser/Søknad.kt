@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
@@ -33,7 +34,9 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
+import no.nav.helse.ukedager
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
@@ -183,10 +186,10 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun nyeInntekterUnderveis(): List<NyInntektUnderveis> {
+    internal fun nyeInntekterUnderveis(aktivitetslogg: IAktivitetslogg): List<NyInntektUnderveis> {
         val tilkommetkilde = Kilde(metadata.meldingsreferanseId, Avsender.SYKMELDT, metadata.registrert)
-        return if (!tålerTilkommenInntekt()) emptyList() else tilkomneInntekter.map {
-            it.beløpstidslinje(tilkommetkilde)
+        return if (!tålerTilkommenInntekt()) emptyList() else tilkomneInntekter.map { tilkommenInntekt ->
+            tilkommenInntekt.beløpstidslinje(tilkommetkilde).also { tilkommenInntekt.loggMetadata(aktivitetslogg) }
         }
     }
 
@@ -206,19 +209,24 @@ class Søknad(
     }
 
     class TilkommenInntekt(
-        private val fom: LocalDate,
-        private val tom: LocalDate,
+        fom: LocalDate,
+        tom: LocalDate,
         private val orgnummer: String,
-        private val beløp: Inntekt?
+        private val råttBeløp: Int?,
     ) {
         private val periode = fom til tom
-        private val anvendtBeløp = beløp ?: Inntekt.INGEN
+        private val antallVirkedager = (fom til tom.nesteDag).ukedager()
+        private val smurtBeløp = if (råttBeløp == null) Inntekt.INGEN else (råttBeløp / antallVirkedager).daglig
         internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
             orgnummer = orgnummer,
             beløpstidslinje = Beløpstidslinje(periode.map {
-                Beløpsdag(it, anvendtBeløp, kilde)
+                Beløpsdag(it, smurtBeløp, kilde)
             })
         )
+
+        internal fun loggMetadata(aktivitetslogg: IAktivitetslogg) {
+            aktivitetslogg.info("Rått beløp: $råttBeløp og antall virkedager: $antallVirkedager har ført til anvendt daglig beløp: $smurtBeløp")
+        }
     }
 
     class Søknadstype(private val type: String) {

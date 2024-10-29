@@ -12,7 +12,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,7 +27,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                 Sykdom(1.februar, 28.februar,100.prosent),
                 Permisjon(20.februar, 28.februar),
                 tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000.månedlig)
+                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
@@ -49,7 +48,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 Ferie(20.februar, 28.februar),
                 tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000.månedlig)
+                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
@@ -70,7 +69,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                 Sykdom(1.januar, 31.januar, 100.prosent),
                 Ferie(20.januar, 31.januar),
                 tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000.månedlig)
+                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -91,7 +90,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.februar, 28.februar,100.prosent),
                 tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000.månedlig)
+                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())

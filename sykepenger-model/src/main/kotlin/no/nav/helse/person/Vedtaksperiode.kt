@@ -638,7 +638,7 @@ internal class Vedtaksperiode private constructor(
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, jurist)
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
-        person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, aktivitetslogg, periode, søknad.nyeInntekterUnderveis(), jurist)
+        person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, aktivitetslogg, periode, søknad.nyeInntekterUnderveis(aktivitetslogg), jurist)
         nesteTilstand()?.also { tilstand(aktivitetslogg, it) }
     }
 
@@ -660,7 +660,7 @@ internal class Vedtaksperiode private constructor(
         else {
             aktivitetslogg.info("Søknad har trigget en revurdering")
             håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
-            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, aktivitetslogg, periode, søknad.nyeInntekterUnderveis(), jurist)
+            person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, aktivitetslogg, periode, søknad.nyeInntekterUnderveis(aktivitetslogg), jurist)
             oppdaterHistorikk(søknad, aktivitetslogg) {
                 søknad.valider(aktivitetslogg, vilkårsgrunnlag, jurist)
             }

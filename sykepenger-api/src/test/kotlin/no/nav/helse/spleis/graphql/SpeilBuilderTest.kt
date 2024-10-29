@@ -33,7 +33,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -72,14 +71,14 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `lager NyeInntektsforhold-pølse for tilkommen inntekt`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
         håndterYtelser()
 
         val nyeInntektsforholdPølse = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
         assertEquals(1.februar til 28.februar, nyeInntektsforholdPølse.fom til nyeInntektsforholdPølse.tom)
         assertEquals(1.januar, nyeInntektsforholdPølse.skjæringstidspunkt)
-        assertEquals(10000.0.månedlig.daglig, nyeInntektsforholdPølse.dagligBeløp)
-        assertEquals(10000.0, nyeInntektsforholdPølse.månedligBeløp)
+        assertEquals(10000.0 / 20, nyeInntektsforholdPølse.dagligBeløp)
+        assertEquals(10833, nyeInntektsforholdPølse.månedligBeløp.toInt())
 
         assertEquals(emptyList<GhostPeriodeDTO>(),  speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder)
     }
@@ -87,7 +86,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `kan lage NyeInntektsforhold-pølse med peker til riktig vilkårsgrunnlag før noe er utbetalt`() {
         tilGodkjenning(1.januar, 31.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
 
         val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
         assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.fom til nyeInntektsforholdPølser.tom)
