@@ -34,7 +34,7 @@ import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 class Inntektsmelding(
-    private val meldingsreferanseId: UUID,
+    meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
     orgnummer: String,
     fødselsnummer: String,
@@ -254,11 +254,11 @@ class Inntektsmelding(
     internal fun loggOmVedtaksperiodeIdFinnes(vedtaksperioder: MutableList<Vedtaksperiode>) {
         if (!erPortalinntektsmelding()) return
         if (vedtaksperiodeId == null) {
-            sikkerlogg.error("Fant inntektsmelding fra portalen uten vedtaksperiodeId. InntektsmeldingId: $meldingsreferanseId")
+            sikkerlogg.error("Fant inntektsmelding fra portalen uten vedtaksperiodeId. InntektsmeldingId: ${metadata.meldingsreferanseId}")
             return
         }
         if (!vedtaksperioder.inneholder(vedtaksperiodeId)) {
-            sikkerlogg.warn("Finner ikke en aktiv vedtaksperiode for vedtaksperiodeId oppgitt i inntektsmeldingen. InntektsmeldingId: $meldingsreferanseId")
+            sikkerlogg.warn("Finner ikke en aktiv vedtaksperiode for vedtaksperiodeId oppgitt i inntektsmeldingen. InntektsmeldingId: ${metadata.meldingsreferanseId}")
         }
     }
 }
