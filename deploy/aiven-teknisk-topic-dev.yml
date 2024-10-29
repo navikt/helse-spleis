@@ -25,3 +25,6 @@ spec:
         - team: tbd
           application: spregulering
           access: read
+        - team: tbd
+          application: spennende
+          access: read
