@@ -244,3 +244,7 @@ spec:
         - team: tbd
           application: spre-sykmeldt
           access: readwrite
+        - team: tbd
+          application: speed-async
+          access: readwrite
+
