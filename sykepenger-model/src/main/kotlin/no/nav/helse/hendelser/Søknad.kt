@@ -209,14 +209,14 @@ class Søknad(
         private val fom: LocalDate,
         private val tom: LocalDate,
         private val orgnummer: String,
-        private val beløp: Inntekt
+        private val beløp: Inntekt?
     ) {
         private val periode = fom til tom
-
+        private val anvendtBeløp = beløp ?: Inntekt.INGEN
         internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
             orgnummer = orgnummer,
             beløpstidslinje = Beløpstidslinje(periode.map {
-                Beløpsdag(it, beløp, kilde)
+                Beløpsdag(it, anvendtBeløp, kilde)
             })
         )
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -13,6 +14,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverForskuttererDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -21,8 +23,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykmeldingstypeDTO
 import no.nav.helse.januar
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
@@ -134,11 +134,10 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
                 InntektFraNyttArbeidsforholdDTO(
                     fom = 10.januar,
                     tom = 31.januar,
-                    forsteArbeidsdag = 10.januar,
-                    forstegangssporsmal = true,
-                    belopPerDag = 1000,
+                    belop = 10000,
                     arbeidsstedOrgnummer = "4",
-                    opplysningspliktigOrgnummer = "5"
+                    opplysningspliktigOrgnummer = "5",
+                    harJobbet = true
                     )
             ))
 

@@ -12,6 +12,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
+import no.nav.helse.hendelser.til
+import no.nav.helse.ukedager
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -107,13 +109,15 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         this.opprinneligSendt = opprinneligSendt
     }
 
-    fun tilkommenInntekt(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int) {
+    fun tilkommenInntekt(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int?) {
+        val virkedager = (fom til tom).ukedager()
+        val dagligSmurtBeløp = beløp?.let { (it / virkedager).daglig }
         tilkomneInntekter.add(
             TilkommenInntekt(
                 fom = fom,
                 tom = tom,
                 orgnummer = orgnummer,
-                beløp = beløp.daglig
+                beløp = dagligSmurtBeløp
             )
         )
     }
