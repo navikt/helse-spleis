@@ -823,12 +823,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun addInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, overstyring: Revurderingseventyr?) {
-        val subsumsjonsloggMedInntektsmeldingkontekst = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
-        ) + inntektsmelding.subsumsjonskontekst())
-        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
+
+        val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
+        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
         val skjæringstidspunkt = person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato.somPeriode())
 
@@ -837,14 +835,47 @@ internal class Arbeidsgiver private constructor(
             if (overstyring == null) return
             return person.igangsettOverstyring(overstyring, aktivitetslogg)
         }
+
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
             inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
         }
-        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, aktivitetslogg, subsumsjonsloggMedInntektsmeldingkontekst)
-        val overstyringFraInntektsmelding = Revurderingseventyr.Companion.tidligsteEventyr(inntektoverstyring, overstyring)
-        if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
-        håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg) }
+
+        igangsettOverstyringOgHåndterInntektPåSkjæringstidspunkt(
+            skjæringstidspunkt,
+            inntektsmelding,
+            aktivitetslogg,
+            subsumsjonsloggMedInntektsmeldingkontekst,
+            overstyring
+        )
     }
+
+    private fun igangsettOverstyringOgHåndterInntektPåSkjæringstidspunkt(
+        skjæringstidspunkt: LocalDate,
+        inntektsmelding: Inntektsmelding,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
+        overstyring: Revurderingseventyr?
+    ) {
+        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(
+            skjæringstidspunkt,
+            inntektsmelding,
+            aktivitetslogg,
+            subsumsjonsloggMedInntektsmeldingkontekst
+        )
+        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring)
+        if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
+        håndter(inntektsmelding) {
+            håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg)
+        }
+    }
+
+    private fun subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding: Inntektsmelding) =
+        BehandlingSubsumsjonslogg(
+            subsumsjonslogg, listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
+            ) + inntektsmelding.subsumsjonskontekst()
+        )
 
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
