@@ -33,4 +33,4 @@ spec:
           access: read
         - team: tbd
           application: spennende
-          access: read
+          access: readwrite
