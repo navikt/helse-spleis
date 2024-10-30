@@ -5,6 +5,8 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.ikkeStøttedeBegrunnelserForReduksjon
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.kjenteBegrunnelserForReduksjon
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
@@ -37,15 +39,6 @@ internal class DagerFraInntektsmelding(
     val hendelse: Inntektsmelding
 ) {
     private companion object {
-        private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
-            "BetvilerArbeidsufoerhet",
-            "FiskerMedHyre",
-            "StreikEllerLockout",
-            "FravaerUtenGyldigGrunn",
-            "BeskjedGittForSent",
-            "IkkeLoenn"
-        )
-
         private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
     }
@@ -226,6 +219,9 @@ internal class DagerFraInntektsmelding(
     private fun validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg: IAktivitetslogg) {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return
         aktivitetslogg.info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
+        if (!kjenteBegrunnelserForReduksjon.contains(begrunnelseForReduksjonEllerIkkeUtbetalt)){
+            aktivitetslogg.info("Kjenner ikke til betydning av $begrunnelseForReduksjonEllerIkkeUtbetalt")
+        }
         if (hulleteArbeidsgiverperiode()) aktivitetslogg.funksjonellFeil(RV_IM_23)
         when (begrunnelseForReduksjonEllerIkkeUtbetalt) {
             in ikkeStøttedeBegrunnelserForReduksjon -> aktivitetslogg.funksjonellFeil(RV_IM_8)
@@ -309,5 +305,30 @@ internal class DagerFraInntektsmelding(
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
         override fun sykdomstidslinje() = sykdomstidslinje
+    }
+
+    internal class BegrunnelseForReduksjonEllerIkkeUtbetalt {
+        companion object {
+            internal val støttedeBegrunnelserForReduksjon = setOf(
+                "LovligFravaer",
+                "ArbeidOpphoert",
+                "ManglerOpptjening",
+                "IkkeFravaer",
+                "Permittering",
+                "Saerregler",
+                "FerieEllerAvspasering",
+                "IkkeFullStillingsandel",
+                "TidligereVirksomhet"
+            )
+            internal val ikkeStøttedeBegrunnelserForReduksjon = setOf(
+                "BetvilerArbeidsufoerhet",
+                "FiskerMedHyre",
+                "StreikEllerLockout",
+                "FravaerUtenGyldigGrunn",
+                "BeskjedGittForSent",
+                "IkkeLoenn"
+            )
+            internal val kjenteBegrunnelserForReduksjon = støttedeBegrunnelserForReduksjon + ikkeStøttedeBegrunnelserForReduksjon
+        }
     }
 }
