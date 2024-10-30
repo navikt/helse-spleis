@@ -225,7 +225,7 @@ class Søknad(
         )
 
         internal fun loggMetadata(aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Rått beløp: $råttBeløp og antall virkedager: $antallVirkedager har ført til anvendt daglig beløp: $smurtBeløp")
+            aktivitetslogg.info("Rått beløp: $råttBeløp og antall virkedager i $periode: $antallVirkedager har ført til anvendt daglig beløp: ${smurtBeløp.daglig}")
         }
     }
 
