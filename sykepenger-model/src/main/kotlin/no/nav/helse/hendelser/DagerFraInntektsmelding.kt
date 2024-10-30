@@ -5,6 +5,11 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP
+import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.UKJENT
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.ikkeStøttedeBegrunnelserForReduksjon
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.kjenteBegrunnelserForReduksjon
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -329,6 +334,28 @@ internal class DagerFraInntektsmelding(
                 "IkkeLoenn"
             )
             internal val kjenteBegrunnelserForReduksjon = støttedeBegrunnelserForReduksjon + ikkeStøttedeBegrunnelserForReduksjon
+
+            internal enum class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt {
+                ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP,
+                ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP,
+                ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG,
+                ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT,
+                UKJENT
+            }
+
+            internal fun funksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt(
+                antallDagerIOpplystArbeidsgiverperiode: Int,
+                førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP: Boolean,
+                begrunnelseForReduksjonEllerIkkeUtbetalt: String
+            ): FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt {
+                return when {
+                    antallDagerIOpplystArbeidsgiverperiode in (1..15) -> ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP
+                    førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP -> ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP
+                    antallDagerIOpplystArbeidsgiverperiode == 0 -> ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT
+                    begrunnelseForReduksjonEllerIkkeUtbetalt in støttedeBegrunnelserForReduksjon -> ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG
+                    else -> UKJENT
+                }
+            }
         }
     }
 }
