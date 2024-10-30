@@ -521,6 +521,23 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `tilkommen inntekt - mer i tilkommen enn 6G`() {
+        val `6G` = `6g`
+        val a = 100.prosent.sykdomsgrad.inntekt(31000.månedlig, beregningsgrunnlag = 31000.månedlig, `6G` = `6G`)
+        val b = 0.prosent.sykdomsgrad.inntekt(
+            50000.månedlig,
+            beregningsgrunnlag = INGEN,
+            refusjonsbeløp = INGEN,
+            `6G` = `6G`
+        )
+        val betalte = listOf(a, b).betal().also {
+            assertEquals(0, it.totalSykdomsgrad().toDouble().toInt())
+        }
+        assertUtbetaling(betalte[0], 0.0, 0.0)
+        assertUtbetaling(betalte[1], 0.0, 0.0)
+    }
+
+    @Test
     fun `Tilkommen inntekt - fordeler ikke personbeløp ved avsluttet arbeidsforhold`() {
         val `6G` = `6g`
         val a = 0.prosent.sykdomsgrad.inntekt(INGEN, beregningsgrunnlag = 31000.månedlig, `6G`= `6G`)
