@@ -60,6 +60,8 @@ class Inntektsmelding(
         }
 
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val logger = LoggerFactory.getLogger(Inntektsmelding::class.java)
+
     }
 
     init {
@@ -110,6 +112,14 @@ class Inntektsmelding(
         if (erPortalinntektsmelding()) {
             requireNotNull(vedtaksperiodeId) { "En portalinntektsmelding må oppgi vedtaksperiodeId-en den skal gjelde for" }
             val skjæringstidspunkt = vedtaksperioder.finnSkjæringstidspunktFor(vedtaksperiodeId) ?: return beregnetInntektsdato // TODO tenk litt mer på dette
+            if (skjæringstidspunkt != inntektsdato) {
+                logger.info(
+                    """
+                    Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. 
+                    Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt
+                    """
+                )
+            }
             inntektshistorikk.leggTil(Inntektsmelding(skjæringstidspunkt, metadata.meldingsreferanseId, beregnetInntekt))
             return skjæringstidspunkt
         }
