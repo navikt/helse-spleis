@@ -376,7 +376,7 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
         orgnummer: String = ORGNUMMER,
-        vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode
+        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = orgnummer)
         håndterSøknad(

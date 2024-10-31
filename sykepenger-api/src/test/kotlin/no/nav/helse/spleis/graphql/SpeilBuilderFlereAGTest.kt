@@ -3,23 +3,23 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate.EPOCH
 import java.time.Month
 import java.time.YearMonth
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.spleis.speil.dto.BeregnetPeriode
-import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
+import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.Inntekt
 import no.nav.helse.spleis.speil.dto.InntekterFraAOrdningen
 import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -138,9 +138,9 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(1.januar, orgnummer = a1)
-        håndterInntektsmelding(1.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2)
-        håndterInntektsmelding(29.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(1.januar, orgnummer = a1, vedtaksperiode = 1)
+        håndterInntektsmelding(1.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2, vedtaksperiode = 1)
+        håndterInntektsmelding(29.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2, vedtaksperiode = 2)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
@@ -553,7 +553,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `refusjon for flere arbeidsgivere`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(1.januar, 31.januar, a1 to 1, a2 to 1)
 
         val personDto = speilApi()
         val speilVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId

@@ -141,7 +141,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     beregnetInntekt: Inntekt = 20000.månedlig,
     arbeidsgiverperiode: List<Periode> = listOf(Periode(periode.start, periode.start.plusDays(15))),
     inntektsmeldingId: UUID = UUID.randomUUID(),
-    vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach { nyPeriode(periode, it) }
@@ -207,7 +207,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = 20000.månedlig,
             orgnummer = it.first,
-            vedtaksperiodeIdInnhenter = it.second,
+            vedtaksperiodeIdInnhenter = it.second ?: 1.vedtaksperiode,
             avsendersystem = if (it.second == null) ALTINN else NAV_NO
         )
     }
@@ -255,7 +255,7 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     inntektsmeldingId: UUID = UUID.randomUUID(),
-    vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ) {
     tilGodkjent(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
     håndterUtbetalt(status = status, fnr = fnr, orgnummer = orgnummer)
@@ -272,7 +272,7 @@ internal fun AbstractEndToEndTest.tilGodkjent(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
-    vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ): IdInnhenter {
     val id = tilGodkjenning(
         periode = periode,
@@ -302,7 +302,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
-    vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ): IdInnhenter {
     val id = tilSimulering(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
@@ -320,7 +320,7 @@ internal fun AbstractEndToEndTest.tilSimulering(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
-    vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ): IdInnhenter {
     return tilYtelser(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
 }
@@ -342,7 +342,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     ),
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
-    vedtaksperiodeIdInnhenter: IdInnhenter?
+    vedtaksperiodeIdInnhenter: IdInnhenter
 ): IdInnhenter {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), fnr = fnr, orgnummer = orgnummer)
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = orgnummer)
@@ -514,7 +514,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Inntektsmelding.Avsendersystem = NAV_NO,
-    vedtaksperiodeIdInnhenter: IdInnhenter? = 1.vedtaksperiode,
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     førReplay: () -> Unit = {}
 ): UUID {
     if (avsendersystem == NAV_NO || avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT) {

@@ -7,11 +7,13 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
+import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
@@ -28,8 +30,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.spleis.IdInnhenter
 import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
@@ -143,10 +143,11 @@ internal abstract class AbstractE2ETest {
 
     protected fun håndterInntektsmelding(
         fom: LocalDate,
+        orgnummer: String = a1,
+        vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        meldingsreferanseId: UUID = UUID.randomUUID(),
-        orgnummer: String = a1
+        meldingsreferanseId: UUID = UUID.randomUUID()
     ): UUID {
         return håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
@@ -154,7 +155,8 @@ internal abstract class AbstractE2ETest {
             refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             meldingsreferanseId = meldingsreferanseId,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            vedtaksperiode = vedtaksperiode
         )
     }
 
@@ -195,22 +197,22 @@ internal abstract class AbstractE2ETest {
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         inntektdato: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        orgnummer: String = a1,
+        vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
         meldingsreferanseId: UUID = UUID.randomUUID(),
-        orgnummer: String = a1
     ): UUID {
         (fabrikker.getValue(orgnummer).lagPortalinntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = inntektdato,
             inntektsdato = inntektdato,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            id = meldingsreferanseId
+            id = meldingsreferanseId,
         )).håndter(Person::håndter)
         return meldingsreferanseId
     }
@@ -334,9 +336,9 @@ internal abstract class AbstractE2ETest {
             meldingsreferanseId = meldingsreferanseId
         )).håndter(Person::håndter)
     }
-    protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, orgnummer: String = a1) {
+    protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, orgnummer: String = a1, vedtaksperiode: Int = 1) {
         håndterSøknad(fom til tom, orgnummer)
-        håndterInntektsmelding(fom, orgnummer = orgnummer)
+        håndterInntektsmelding(fom, orgnummer = orgnummer, vedtaksperiode = vedtaksperiode)
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
     }
@@ -344,19 +346,19 @@ internal abstract class AbstractE2ETest {
         håndterSøknad(fom til tom, orgnummer)
         håndterYtelserTilGodkjenning()
     }
-    protected fun tilYtelser(fom: LocalDate, tom: LocalDate, vararg orgnumre: String) {
-        orgnumre.forEach { håndterSøknad(fom til tom, it) }
-        orgnumre.forEach { håndterInntektsmelding(fom, orgnummer = it) }
+    protected fun tilYtelser(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
+        orgnummerOgVedtaksperioder.forEach { håndterSøknad(fom til tom, it.first) }
+        orgnummerOgVedtaksperioder.forEach { håndterInntektsmelding(fom, orgnummer = it.first, vedtaksperiode = it.second) }
         håndterVilkårsgrunnlag()
     }
-    protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg orgnumre: String) {
-        tilYtelser(fom, tom, *orgnumre)
+    protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
+        tilYtelser(fom, tom, *orgnummerOgVedtaksperioder)
         håndterYtelserTilGodkjenning()
     }
 
-    protected fun nyeVedtak(fom: LocalDate, tom: LocalDate, vararg orgnumre: String) {
-        tilYtelser(fom, tom, *orgnumre)
-        orgnumre.forEach {
+    protected fun nyeVedtak(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
+        tilYtelser(fom, tom, *orgnummerOgVedtaksperioder)
+        orgnummerOgVedtaksperioder.forEach {
             håndterYtelserTilGodkjenning()
             håndterUtbetalingsgodkjenning()
             håndterUtbetalt()
@@ -370,8 +372,8 @@ internal abstract class AbstractE2ETest {
             håndterUtbetalt()
         }
     }
-    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, orgnummer: String = a1): Utbetalingbehov {
-        tilGodkjenning(fom, tom, orgnummer)
+    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, orgnummer: String = a1, vedtaksperiode: Int = 1): Utbetalingbehov {
+        tilGodkjenning(fom, tom, orgnummer to vedtaksperiode)
         håndterUtbetalingsgodkjenning()
         return håndterUtbetalt()
     }
