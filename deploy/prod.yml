@@ -20,7 +20,13 @@ spec:
     http:
       path: /stop
   replicas:
-    disableAutoScaling: true
+    min: 2
+    max: 24
+    scalingStrategy:
+      kafka:
+        topic: tbd.rapid.v1
+        consumerGroup: tbd-spleis-v1
+        threshold: 200
   resources:
     limits:
       memory: 8Gi
