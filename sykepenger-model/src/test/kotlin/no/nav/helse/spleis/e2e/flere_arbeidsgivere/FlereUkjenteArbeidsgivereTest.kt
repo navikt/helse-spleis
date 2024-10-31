@@ -63,7 +63,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         forlengVedtak(februar, orgnummer = a1)
         forlengVedtak(mars, orgnummer = a1)
 
-        val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1, orgnummer = a1,)
+        val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -136,7 +136,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var ansett som ghost`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -178,7 +178,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var ansett som ghost - a1 revurderes`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(

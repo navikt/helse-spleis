@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -23,7 +22,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
@@ -63,7 +61,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden med bare ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(0, inspektør.antallUtbetalinger)
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -103,8 +101,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1,)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

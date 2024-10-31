@@ -79,7 +79,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     @Test
     fun `periode med syk nav strekkes tilbake med foreldrepenger - opphører tidligere utbetaling`() {
         håndterSøknad(1.februar til 2.februar)
-        håndterInntektsmelding(emptyList(), 1.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",)
+        håndterInntektsmelding(emptyList(), 1.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)
@@ -210,7 +210,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `kan ikke annullere utbetaling etter sammenhengede periode TIL_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -231,7 +231,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling med teknisk feil blir stående i til utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -256,7 +256,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling med teknisk feil blir stående i til utbetaling og prøver igjen`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -282,7 +282,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling med teknisk feil for lenge går til Utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -309,7 +309,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling som blir avvist går til utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -333,7 +333,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `kan forsøke utbetaling på nytt etter Utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -362,7 +362,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling går videre dersom vi går glipp av Overført-kvittering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -388,7 +388,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `Kan ikke annullere over en fastlåst annullering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -414,7 +414,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         val utbetalingUtbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
@@ -425,7 +425,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling_utbetalt tar med begrunnelse på avviste dager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), Sykmeldingsperiode(21.januar, 30.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Sykdom(21.januar, 30.januar, 15.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

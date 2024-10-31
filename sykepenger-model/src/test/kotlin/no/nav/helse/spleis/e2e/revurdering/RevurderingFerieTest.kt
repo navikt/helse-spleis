@@ -36,7 +36,7 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     fun `Periode med bare ferie, så kommer en tidligere periode med sykdom - ferie skal ikke revurderes`() {
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
-        håndterInntektsmelding(listOf(5.februar til 21.februar),)
+        håndterInntektsmelding(listOf(5.februar til 21.februar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyttVedtak(1.januar til 17.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)

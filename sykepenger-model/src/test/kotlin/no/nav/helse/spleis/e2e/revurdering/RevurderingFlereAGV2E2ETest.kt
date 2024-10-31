@@ -536,7 +536,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(januar, a1)
         nyPeriode(1.februar til 18.februar, a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
 
         nullstillTilstandsendringer()

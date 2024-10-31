@@ -35,10 +35,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
@@ -240,7 +240,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     @Test
     fun `blir syk fra ghost`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -256,7 +256,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
 
         assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a1))
         assertIngenVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
@@ -275,7 +275,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
@@ -1060,7 +1060,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(18.januar, 10.februar), orgnummer = a2)
         håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
@@ -1074,7 +1074,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 12.februar), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar), orgnummer = a2)
@@ -1096,7 +1096,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(21.februar, 28.februar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(21.februar, 28.februar), orgnummer = a2)
@@ -1112,7 +1112,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),

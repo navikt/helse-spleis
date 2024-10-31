@@ -14,9 +14,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -49,7 +49,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `fjerner arbeidsforhold fra arbeidsforholdhistorikken ved overstyring`() {
         håndterSykmelding(januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -72,7 +72,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `Overstyring av arbeidsforhold fører til et nytt vilkårsgrunnlag med nye inntektsopplysninger`() {
         håndterSykmelding(januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -119,7 +119,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             arbeidsforhold = listOf(
@@ -170,7 +170,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `kan ikke overstyre arbeidsforhold for arbeidsgiver vi ikke kjenner til`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -198,7 +198,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `deaktivering av arbeidsforhold uten sykdom fører til nytt sykepengegrunnlag uten arbeidsforholdet, selv med inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -255,7 +255,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `tar med inntekt fra inntektsmelding selv om vi ikke finner et aktivt arbeidsforhold i arbeidsforholdhistorikken`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             arbeidsforhold = listOf(
@@ -296,7 +296,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `kan ikke overstyre arbeidsforhold dersom ingen vedtaksperioder kan håndtere hendelsen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -325,7 +325,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `vi vilkårsprøver krav om minimum inntekt ved overstyring av arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 3800.månedlig, orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 3800.månedlig, orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -366,7 +366,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

@@ -36,7 +36,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -69,7 +69,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar))
         håndterSøknad(20.desember(2017) til 9.januar)
-        håndterInntektsmelding(listOf(20.desember(2017) til 4.januar),)
+        håndterInntektsmelding(listOf(20.desember(2017) til 4.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -98,7 +98,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -112,7 +112,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
-        håndterInntektsmelding(listOf(1.mars til 16.mars),)
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -126,7 +126,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
@@ -139,7 +139,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 

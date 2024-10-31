@@ -228,7 +228,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `perioden får warnings dersom bruker har fått Dagpenger innenfor 4 uker før skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar,)
+        håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertIngenVarsler()
@@ -243,7 +243,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `perioden får warnings dersom bruker har fått AAP innenfor 6 måneder før skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), 3.januar,)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), 3.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertIngenVarsler(1.vedtaksperiode.filter())
@@ -257,7 +257,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `AAP starter senere enn sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar),)
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.februar til 5.februar))
         assertIngenVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
@@ -267,7 +267,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `Dagpenger starter senere enn sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar),)
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.februar til 5.februar))
         assertIngenVarsel(RV_AY_4, 1.vedtaksperiode.filter())
@@ -277,7 +277,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `Foreldrepenger starter mindre enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.mars til 18.mars),)
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
@@ -287,7 +287,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Overlappende svangerskapspenger`() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
         assertVarsel(RV_AY_11)
@@ -297,7 +297,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `Foreldrepenger starter mer enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.mars til 18.mars),)
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
         assertIngenFunksjonelleFeil()
@@ -337,7 +337,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `Omsorgspenger starter mer enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.mars til 18.mars),)
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
         assertIngenFunksjonelleFeil()
@@ -347,7 +347,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `Foreldrepenger før og etter sykmelding`() {
         håndterSykmelding(april)
         håndterSøknad(april)
-        håndterInntektsmelding(listOf(1.april til 16.april),)
+        håndterInntektsmelding(listOf(1.april til 16.april))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(
             GradertPeriode(februar, 100),
@@ -360,7 +360,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `Svangerskapspenger før og etter sykmelding`() {
         håndterSykmelding(april)
         håndterSøknad(april)
-        håndterInntektsmelding(listOf(1.april til 16.april),)
+        håndterInntektsmelding(listOf(1.april til 16.april))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
@@ -453,8 +453,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         nyPeriode(17.januar til 25.januar, orgnummer = a1)
         nyPeriode(17.januar til 31.januar, orgnummer = a2)
         nyPeriode(26.januar til 31.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
