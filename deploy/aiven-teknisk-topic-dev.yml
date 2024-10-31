@@ -28,3 +28,6 @@ spec:
         - team: tbd
           application: spennende
           access: readwrite
+        - team: tbd
+          application: sparkel-sykepengeperioder
+          access: read
