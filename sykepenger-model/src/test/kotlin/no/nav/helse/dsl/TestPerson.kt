@@ -83,7 +83,7 @@ internal class TestPerson(
             testPerson.arbeidsgiver(this, testblokk)
     }
 
-    private lateinit var forrigeAktivitetslogg: IAktivitetslogg
+    private lateinit var forrigeAktivitetslogg: Aktivitetslogg
 
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()

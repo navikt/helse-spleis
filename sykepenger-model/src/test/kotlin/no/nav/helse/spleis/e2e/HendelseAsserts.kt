@@ -312,5 +312,5 @@ internal fun interface AktivitetsloggFilter {
 }
 
 internal fun assertActivities(person: Person) {
-    assertTrue(person.personLogg.harAktiviteter(), person.personLogg.toString())
+    assertTrue(person.personLogg.aktiviteter.isNotEmpty(), person.personLogg.toString())
 }

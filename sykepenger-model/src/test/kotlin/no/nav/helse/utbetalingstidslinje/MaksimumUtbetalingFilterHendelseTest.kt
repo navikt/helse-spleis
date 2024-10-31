@@ -35,7 +35,7 @@ internal class MaksimumUtbetalingFilterHendelseTest {
     fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
         val tidslinje = tidslinjeOf(12.NAV(3500.0), 14.NAV(1200.0)).betal()
         assertEquals(21610.0 + 12000.0, tidslinje.inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.harAktiviteter())
+        assertTrue(aktivitetslogg.aktiviteter.isNotEmpty())
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -49,7 +49,7 @@ internal class MaksimumUtbetalingFilterHendelseTest {
     fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
         val tidslinje = tidslinjeOf(12.NAV(1200.0, 50.0)).betal()
         assertEquals(6000.0, tidslinje.inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.harAktiviteter())
+        assertTrue(aktivitetslogg.aktiviteter.isNotEmpty())
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 

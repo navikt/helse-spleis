@@ -16,7 +16,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -302,7 +301,7 @@ internal class UtbetalingTest {
         assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
 
         val kvitteringen = kvittèr(annullering1, utbetalingmottaker = utbetalingen)
-        assertEquals(1, kvitteringen.behov().size)
+        assertEquals(1, kvitteringen.behov.size)
         kvitteringen.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
             val kontekster = behov.kontekst()
@@ -827,7 +826,7 @@ internal class UtbetalingTest {
         fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         status: Oppdragstatus = AKSEPTERT,
         utbetalingmottaker: Utbetaling = utbetaling
-    ): IAktivitetslogg {
+    ): Aktivitetslogg {
         val hendelsen = Kvittering(
             fagsystemId = fagsystemId,
             utbetalingId = utbetaling.inspektør.utbetalingId,
@@ -856,11 +855,11 @@ internal class UtbetalingTest {
             it.opprett(aktivitetslogg)
         }
 
-    private fun IAktivitetslogg.sisteBehov(type: Behovtype) =
-        behov().last { it.type == type }
+    private fun Aktivitetslogg.sisteBehov(type: Behovtype) =
+        behov.last { it.type == type }
 
-    private fun IAktivitetslogg.harBehov(behov: Behovtype) =
-        this.behov().any { it.type == behov }
+    private fun Aktivitetslogg.harBehov(behov: Behovtype) =
+        this.behov.any { it.type == behov }
 
     private class Utbetalingsgodkjenning(
         override val utbetalingId: UUID,

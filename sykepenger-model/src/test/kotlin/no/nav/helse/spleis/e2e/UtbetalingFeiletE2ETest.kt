@@ -120,7 +120,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterUtbetalingpåminnelse(0, OVERFØRT)
-        assertEquals(1, hendelselogg.behov().size)
+        assertEquals(1, hendelselogg.behov.size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
             fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
@@ -155,7 +155,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterUtbetalingpåminnelse(0, OVERFØRT)
-        assertEquals(1, hendelselogg.behov().size)
+        assertEquals(1, hendelselogg.behov.size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
             fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()

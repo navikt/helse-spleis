@@ -485,7 +485,7 @@ protected fun håndterInntektsmeldingPortal(
         bareÈnArbeidsgiver(a1).assertIngenVarsler(*filtre)
     protected fun assertActivities() {
         val inspektør = inspiser(personInspektør)
-        assertTrue(inspektør.aktivitetslogg.harAktiviteter()) { inspektør.aktivitetslogg.toString() }
+        assertTrue(inspektør.aktivitetslogg.aktiviteter.isNotEmpty()) { inspektør.aktivitetslogg.toString() }
     }
 
     protected fun assertGjenoppbygget(dto: PersonUtDto) {

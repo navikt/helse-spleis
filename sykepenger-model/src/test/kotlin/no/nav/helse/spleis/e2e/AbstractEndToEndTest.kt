@@ -28,7 +28,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     internal lateinit var forrigeHendelse: Hendelse
         private set
-    internal lateinit var hendelselogg: IAktivitetslogg
+    internal lateinit var hendelselogg: Aktivitetslogg
         private set
 
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
@@ -48,7 +48,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         hendelselogg = Aktivitetslogg()
         forrigeHendelse = this
         person.håndter(this, hendelselogg)
-        ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(hendelselogg.behov())
+        ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(hendelselogg.behov)
         return this
     }
 

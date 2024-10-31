@@ -50,7 +50,12 @@ internal class DatadelingMediator(
             "nivå" to nivå,
             "melding" to aktivitet.melding,
             "tidsstempel" to aktivitet.tidsstempel,
-            "kontekster" to aktivitet.kontekster.map { it.toMap() }
+            "kontekster" to aktivitet.kontekster.map {
+                mapOf(
+                    "konteksttype" to it.kontekstType,
+                    "kontekstmap" to it.kontekstMap
+                )
+            }
         )
 
     private fun Collection<Map<String, Any>>.toJson(): String {

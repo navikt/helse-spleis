@@ -401,7 +401,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertTrue(inspektør.sisteUtbetaling().erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
         assertEquals(2,
-            person.personLogg.behov()
+            person.personLogg.behov
                 .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
                 .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
                 .size

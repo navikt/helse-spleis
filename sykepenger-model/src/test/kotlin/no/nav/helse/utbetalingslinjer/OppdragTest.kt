@@ -423,7 +423,7 @@ internal class OppdragTest {
         val oppdrag = Oppdrag("mottaker", Fagområde.Sykepenger)
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isEmpty())
+        assertTrue(aktivitetslogg.behov.isEmpty())
     }
 
     @Test
@@ -460,7 +460,7 @@ internal class OppdragTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isEmpty())
+        assertTrue(aktivitetslogg.behov.isEmpty())
     }
 
     @Test
@@ -468,7 +468,7 @@ internal class OppdragTest {
         val oppdrag = Oppdrag("mottaker", Fagområde.Sykepenger)
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isEmpty())
+        assertTrue(aktivitetslogg.behov.isEmpty())
     }
 
     @Test
@@ -476,7 +476,7 @@ internal class OppdragTest {
         val oppdrag = Oppdrag("mottaker", Fagområde.SykepengerRefusjon)
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isEmpty())
+        assertTrue(aktivitetslogg.behov.isEmpty())
     }
 
     @Test
@@ -484,7 +484,7 @@ internal class OppdragTest {
         val oppdrag = Oppdrag("mottaker", Fagområde.SykepengerRefusjon)
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isEmpty())
+        assertTrue(aktivitetslogg.behov.isEmpty())
     }
 
     @Test
@@ -513,7 +513,7 @@ internal class OppdragTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertTrue(aktivitetslogg.behov.isNotEmpty())
     }
 
     @Test
@@ -532,7 +532,7 @@ internal class OppdragTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertTrue(aktivitetslogg.behov.isNotEmpty())
     }
 
     @Test

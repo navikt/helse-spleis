@@ -100,30 +100,6 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun kontekster() {
-        val hendelse1 = aktivitetslogg.barn()
-        hendelse1.kontekst(person)
-        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
-        hendelse1.kontekst(arbeidsgiver1)
-        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
-        hendelse1.kontekst(vedtaksperiode1)
-        hendelse1.behov(Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning")
-        hendelse1.varsel(RV_SØ_1)
-        val hendelse2 = aktivitetslogg.barn()
-        hendelse2.kontekst(person)
-        val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
-        hendelse2.kontekst(arbeidsgiver2)
-        val tilstand = TestKontekst("Tilstand", "Tilstand 1")
-        hendelse2.kontekst(tilstand)
-        hendelse2.behov(Aktivitet.Behov.Behovtype.Utbetaling, "Skal utbetale")
-        hendelse2.info("Infomelding")
-
-        assertEquals(2, aktivitetslogg.kontekster().size)
-        assertTrue(aktivitetslogg.kontekster().first().behov().isNotEmpty())
-        assertTrue(aktivitetslogg.kontekster().last().behov().isNotEmpty())
-    }
-
-    @Test
     fun `error oppdaget`() {
         aktivitetslogg.funksjonellFeil(RV_VT_1)
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
@@ -205,9 +181,7 @@ internal class AktivitetsloggTest {
         hendelse2.kontekst(vedtaksperiode2)
         hendelse2.info("info message")
         hendelse2.funksjonellFeil(RV_VT_1)
-        assertEquals(5, aktivitetslogg.aktivitetsteller())
-        assertEquals(3, aktivitetslogg.logg(vedtaksperiode1).aktivitetsteller())
-        assertEquals(2, aktivitetslogg.logg(arbeidsgiver2).aktivitetsteller())
+        assertEquals(5, aktivitetslogg.aktiviteter.size)
     }
 
     @Test
@@ -222,12 +196,12 @@ internal class AktivitetsloggTest {
             "param2" to param2
         ))
 
-        assertEquals(1, aktivitetslogg.behov().size)
-        assertEquals(1, aktivitetslogg.behov().first().kontekst().size)
-        assertEquals(2, aktivitetslogg.behov().first().detaljer().size)
-        assertEquals("Person 1", aktivitetslogg.behov().first().kontekst()["Person"])
-        assertEquals(param1, aktivitetslogg.behov().first().detaljer()["param1"])
-        assertEquals(param2, aktivitetslogg.behov().first().detaljer()["param2"])
+        assertEquals(1, aktivitetslogg.behov.size)
+        assertEquals(1, aktivitetslogg.behov.first().kontekst().size)
+        assertEquals(2, aktivitetslogg.behov.first().detaljer().size)
+        assertEquals("Person 1", aktivitetslogg.behov.first().kontekst()["Person"])
+        assertEquals(param1, aktivitetslogg.behov.first().detaljer()["param1"])
+        assertEquals(param2, aktivitetslogg.behov.first().detaljer()["param2"])
     }
 
     @Test

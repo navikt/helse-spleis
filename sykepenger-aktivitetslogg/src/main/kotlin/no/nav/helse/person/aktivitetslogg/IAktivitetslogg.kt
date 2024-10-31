@@ -7,14 +7,10 @@ interface IAktivitetslogg {
     fun funksjonellFeil(kode: Varselkode)
     fun logiskFeil(melding: String, vararg params: Any?): Nothing
 
-    fun harAktiviteter(): Boolean
     fun harVarslerEllerVerre(): Boolean
     fun harFunksjonelleFeilEllerVerre(): Boolean
 
-    fun aktivitetsteller(): Int
-    fun behov(): List<Aktivitet.Behov>
     fun barn(): IAktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst)
-    fun kontekster(): List<IAktivitetslogg>
 }

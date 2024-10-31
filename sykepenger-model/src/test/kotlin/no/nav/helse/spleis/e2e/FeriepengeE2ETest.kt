@@ -607,10 +607,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
 
         assertTrue(person.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
-        assertEquals(person.personLogg.behov().last().detaljer()["saksbehandler"], "SPLEIS")
+        assertEquals(person.personLogg.behov.last().detaljer()["saksbehandler"], "SPLEIS")
 
         @Suppress("unchecked_cast")
-        val linje = (person.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+        val linje = (person.personLogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
         assertEquals(linje["satstype"], "ENG")
         assertEquals(linje["klassekode"], "SPREFAGFER-IOP")
         assertEquals(linje["grad"], null)
@@ -731,7 +731,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
 
             @Suppress("unchecked_cast")
-            val linje = (person.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+            val linje = (person.personLogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
 
             assertEquals("1460", "${linje["sats"]}")
             assertEquals("1460", "${linje["totalbeløp"]}")
@@ -1176,7 +1176,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals("SPREF", ugyldigOppdrag.detaljer()["fagområde"])
     }
 
-    private fun engangsutbetalinger() = person.personLogg.behov()
+    private fun engangsutbetalinger() = person.personLogg.behov
         .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
         .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" } }
 

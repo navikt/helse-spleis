@@ -257,7 +257,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 30.desember)))
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 31.desember)))
-        assertTrue(aktivitetslogg.harAktiviteter())
+        assertTrue(aktivitetslogg.aktiviteter.isNotEmpty())
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 

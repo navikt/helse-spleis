@@ -37,10 +37,10 @@ internal class AktivitetsloggBehovTest {
         hendelse2.kontekst(tilstand)
         hendelse2.behov(Utbetaling, "Skal utbetale")
 
-        assertEquals(2, aktivitetslogg.behov().size)
-        assertEquals(3, aktivitetslogg.behov().first().kontekst().size)
-        assertEquals(3, aktivitetslogg.behov().last().kontekst().size)
-        assertEquals("Tilstand 1", aktivitetslogg.behov().last().kontekst()["Tilstand"])
+        assertEquals(2, aktivitetslogg.behov.size)
+        assertEquals(3, aktivitetslogg.behov.first().kontekst().size)
+        assertEquals(3, aktivitetslogg.behov.last().kontekst().size)
+        assertEquals("Tilstand 1", aktivitetslogg.behov.last().kontekst()["Tilstand"])
     }
 
     private class TestKontekst(

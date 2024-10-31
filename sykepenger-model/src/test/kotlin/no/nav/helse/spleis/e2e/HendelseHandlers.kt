@@ -782,7 +782,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsystemId() else null
 
 private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: String): Pair<UUID, List<String>>? {
-    val utbetalingsbehovUtbetalingIder = person.personLogg.behov()
+    val utbetalingsbehovUtbetalingIder = person.personLogg.behov
         .filter { it.type == Behovtype.Utbetaling }
         .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
 

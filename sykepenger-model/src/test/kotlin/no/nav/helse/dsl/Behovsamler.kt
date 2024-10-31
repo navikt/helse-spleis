@@ -10,6 +10,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.Assertions.assertTrue
 
@@ -21,8 +22,8 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
 
     internal fun håndterteInntektsmeldinger() = hånderteInntektsmeldinger.toSet()
 
-    internal fun registrerBehov(aktivitetslogg: IAktivitetslogg) {
-        val nyeBehov = aktivitetslogg.behov().takeUnless { it.isEmpty() } ?: return
+    internal fun registrerBehov(aktivitetslogg: Aktivitetslogg) {
+        val nyeBehov = aktivitetslogg.behov.takeUnless { it.isEmpty() } ?: return
         log.log("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
         behov.addAll(nyeBehov)
         log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")

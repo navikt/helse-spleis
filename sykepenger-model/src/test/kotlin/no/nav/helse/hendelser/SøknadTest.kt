@@ -268,7 +268,6 @@ internal class SøknadTest {
     fun `legger på warning om søknad inneholder foreldete dager`() {
         søknad(Sykdom(1.januar, 1.mai, 100.prosent))
         søknad.valider(aktivitetslogg, null, jurist)
-        assertEquals(1, aktivitetslogg.kontekster().size)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }

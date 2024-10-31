@@ -68,7 +68,7 @@ internal abstract class AbstractE2ETest {
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
     private lateinit var spekemat: Spekemat
-    private lateinit var hendelselogg: IAktivitetslogg
+    private lateinit var hendelselogg: Aktivitetslogg
     private val ubesvarteBehov = ConcurrentLinkedDeque<Aktivitet.Behov>()
 
     private fun createTestPerson(creator: (Subsumsjonslogg) -> Person) {
@@ -101,7 +101,7 @@ internal abstract class AbstractE2ETest {
     protected fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit) = apply {
         hendelselogg = Aktivitetslogg()
         person.håndter(this, hendelselogg)
-        ubesvarteBehov.addAll(hendelselogg.behov())
+        ubesvarteBehov.addAll(hendelselogg.behov)
 
         observatør.ventendeReplays().forEach { (orgnr, vedtaksperiodeId) ->
             hendelselogg = Aktivitetslogg()
