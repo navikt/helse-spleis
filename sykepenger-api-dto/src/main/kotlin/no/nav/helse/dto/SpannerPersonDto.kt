@@ -48,7 +48,7 @@ data class SpannerPersonDto(
     data class InfotrygdhistorikkElementData(
         val id: UUID,
         val tidsstempel: LocalDateTime,
-        val hendelseId: UUID?,
+        val hendelseId: UUID,
         val ferieperioder: List<FerieperiodeData>,
         val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
         val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,

@@ -19,7 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 class InfotrygdhistorikkElement private constructor(
     val id: UUID,
     val tidsstempel: LocalDateTime,
-    val hendelseId: UUID? = null,
+    val hendelseId: UUID,
     perioder: List<Infotrygdperiode>,
     inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,

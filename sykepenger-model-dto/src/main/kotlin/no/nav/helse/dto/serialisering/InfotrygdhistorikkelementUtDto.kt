@@ -8,7 +8,7 @@ import no.nav.helse.dto.InfotrygdFerieperiodeDto
 data class InfotrygdhistorikkelementUtDto(
     val id: UUID,
     val tidsstempel: LocalDateTime,
-    val hendelseId: UUID?,
+    val hendelseId: UUID,
     val ferieperioder: List<InfotrygdFerieperiodeDto>,
     val arbeidsgiverutbetalingsperioder: List<InfotrygdArbeidsgiverutbetalingsperiodeUtDto>,
     val personutbetalingsperioder: List<InfotrygdPersonutbetalingsperiodeUtDto>,
