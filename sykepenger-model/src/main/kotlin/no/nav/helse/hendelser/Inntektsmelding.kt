@@ -113,12 +113,11 @@ class Inntektsmelding(
             requireNotNull(vedtaksperiodeId) { "En portalinntektsmelding må oppgi vedtaksperiodeId-en den skal gjelde for" }
             val skjæringstidspunkt = vedtaksperioder.finnSkjæringstidspunktFor(vedtaksperiodeId) ?: return beregnetInntektsdato // TODO tenk litt mer på dette
             if (skjæringstidspunkt != inntektsdato) {
-                """Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. 
-                Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt
-                """.trimIndent().let {
-                    logger.info(it)
-                    sikkerlogg.info("$it. For aktørId $aktørId.")
-                }
+                "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
+                    .let {
+                        logger.info(it)
+                        sikkerlogg.info("$it. For aktørId $aktørId.")
+                    }
             }
             inntektshistorikk.leggTil(Inntektsmelding(skjæringstidspunkt, metadata.meldingsreferanseId, beregnetInntekt))
             return skjæringstidspunkt
