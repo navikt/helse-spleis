@@ -524,7 +524,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = førsteFraværsdag,
             vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
             refusjon = refusjon,
             orgnummer = orgnummer,
@@ -555,7 +554,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
 internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     arbeidsgiverperioder: List<Periode>,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-    inntektsdato: LocalDate,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = ORGNUMMER,
@@ -572,7 +570,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     arbeidsgiverperioder,
     beregnetInntekt = beregnetInntekt,
     førsteFraværsdag = førsteFraværsdag,
-    inntektsdato = inntektsdato,
     vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
     refusjon = refusjon,
     orgnummer = orgnummer,

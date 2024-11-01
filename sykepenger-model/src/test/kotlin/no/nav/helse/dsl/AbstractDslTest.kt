@@ -8,8 +8,8 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -261,7 +261,6 @@ internal abstract class AbstractDslTest {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        inntektsdato: LocalDate,
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
@@ -273,7 +272,6 @@ internal abstract class AbstractDslTest {
             arbeidsgiverperioder,
             beregnetInntekt,
             førsteFraværsdag,
-            inntektsdato,
             vedtaksperiodeId,
             refusjon,
             harOpphørAvNaturalytelser,
@@ -405,7 +403,6 @@ protected fun håndterInntektsmeldingPortal(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        inntektsdato: LocalDate,
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
@@ -414,7 +411,7 @@ protected fun håndterInntektsmeldingPortal(
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterInntektsmeldingPortal(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, vedtaksperiodeId, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(orgnummer).håndterInntektsmeldingPortal(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, vedtaksperiodeId, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
 
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,

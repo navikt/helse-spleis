@@ -215,7 +215,6 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
-    inntektsdato: LocalDate,
     vedtaksperiodeId: UUID,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
@@ -231,7 +230,6 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagPortalinntektsmelding(
             id = id,
             refusjon = refusjon,
-            inntektsdato = inntektsdato,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             vedtaksperiodeId = vedtaksperiodeId,

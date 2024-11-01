@@ -185,7 +185,7 @@ internal abstract class AbstractE2ETest {
     ): UUID {
         return håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
-            inntektdato = inntektdato,
+            førsteFraværsdag = inntektdato,
             beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(INGEN, null),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
@@ -196,7 +196,7 @@ internal abstract class AbstractE2ETest {
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        inntektdato: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         orgnummer: String = a1,
         vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
@@ -207,8 +207,7 @@ internal abstract class AbstractE2ETest {
         (fabrikker.getValue(orgnummer).lagPortalinntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = inntektdato,
-            inntektsdato = inntektdato,
+            førsteFraværsdag = førsteFraværsdag,
             vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

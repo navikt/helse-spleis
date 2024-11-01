@@ -88,7 +88,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     fun `serialisering av person`() {
         a1 {
             håndterSøknad(Sykdom(5.januar, 17.januar, 100.prosent))
-            håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(
+            håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(
                 beløp = INNTEKT/2,
                 opphørsdato = 31.januar
             ))
@@ -118,7 +118,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 egenmeldinger = listOf(1.februar til 2.februar),
                 sendtTilNAVEllerArbeidsgiver = 1.juni
             )
-            håndterInntektsmeldingPortal(listOf(1.februar til 16.februar), inntektsdato = 1.februar, førsteFraværsdag = 1.februar)
+            håndterInntektsmeldingPortal(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
@@ -126,7 +126,6 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         a3 {
             håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
             håndterInntektsmeldingPortal(listOf(1.juni til 16.juni),
-                inntektsdato = 1.juni,
                 førsteFraværsdag = 1.juni,
                 beregnetInntekt = INNTEKT,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "IngenOpptjening",

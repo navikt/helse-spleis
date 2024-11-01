@@ -215,7 +215,6 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         håndterInntektsmeldingPortal(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = inntekt,
-            inntektsdato = periode.start,
             førsteFraværsdag = periode.start,
             orgnummer = orgnummer
         )

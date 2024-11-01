@@ -475,7 +475,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
-        inntektsmeldingPortal(listOf(2.januar til 17.januar), inntektsdato = 2.januar)
+        inntektsmeldingPortal(listOf(2.januar til 17.januar))
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
@@ -483,7 +483,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
-        inntektsmeldingPortal(emptyList(), inntektsdato = 1.januar)
+        inntektsmeldingPortal(emptyList())
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertIngenVarsel(RV_IM_3)
@@ -515,7 +515,6 @@ internal class InntektsmeldingTest {
         arbeidsgiverperioder: List<Periode>,
         refusjonBeløp: Inntekt = 1000.månedlig,
         beregnetInntekt: Inntekt = 1000.månedlig,
-        inntektsdato: LocalDate,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
@@ -527,7 +526,6 @@ internal class InntektsmeldingTest {
         inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = inntektsdato,
             vedtaksperiodeId = vedtaksperiodeId,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,

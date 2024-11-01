@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -15,10 +14,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -143,40 +139,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        }
-    }
-
-
-    @Test
-    fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten men hva med egenmeldinger da`() {
-        listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017), inntekt = INNTEKT)
-
-        a2 {
-            forlengVedtak(29.desember(2017) til 10.januar)
-        }
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar))
-            håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(29.desember(2017) til 29.desember(2017)))
-            håndterInntektsmeldingPortal(førsteFraværsdag = 2.januar, arbeidsgiverperioder = emptyList(), inntektsdato = 1.desember(2017))
-
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        }
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        }
-        a1 {
-            assertForventetFeil("vet ikke",
-                nå = {
-                    assertIngenVarsler(2.vedtaksperiode.filter())
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-                },
-                ønsket = {
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                })
         }
     }
 

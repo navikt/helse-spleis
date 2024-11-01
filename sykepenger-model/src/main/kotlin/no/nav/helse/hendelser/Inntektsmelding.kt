@@ -53,8 +53,7 @@ class Inntektsmelding(
     mottatt: LocalDateTime
 ) : Hendelse {
     companion object {
-        private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, inntektsdato: LocalDate?): LocalDate {
-            if (inntektsdato != null) return inntektsdato
+        private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
             if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
             return arbeidsgiverperioder.maxOf { it.start }
         }
@@ -65,11 +64,6 @@ class Inntektsmelding(
     }
 
     init {
-        val ingenInntektsdatoUtenomPortal = inntektsdato == null && !erPortalinntektsmelding()
-        val inntektsdatoKunHvisPortal = inntektsdato != null && erPortalinntektsmelding()
-        check(ingenInntektsdatoUtenomPortal || inntektsdatoKunHvisPortal) {
-            "Om avsendersystem er NAV_NO må inntektsdato være satt og motsatt! inntektsdato=$inntektsdato, avsendersystem=$avsendersystem"
-        }
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) error("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
 
@@ -98,7 +92,7 @@ class Inntektsmelding(
         this
     )
     private var håndtertInntekt = false
-    private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
+    private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {

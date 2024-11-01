@@ -86,7 +86,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(27.januar, 28.januar, 100.prosent))
         håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar)
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -109,7 +109,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmeldingPortal(emptyList(), førsteFraværsdag = 12.februar, inntektsdato = 13.februar)
+        håndterInntektsmeldingPortal(emptyList(), førsteFraværsdag = 12.februar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
@@ -894,7 +894,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         assertEquals(20.januar til 31.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.periode)
 
-        håndterInntektsmeldingPortal(emptyList(), inntektsdato = 20.januar, førsteFraværsdag = 20.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmeldingPortal(emptyList(), førsteFraværsdag = 20.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -991,18 +991,15 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(ag1Periode.start til ag1Periode.endInclusive, a1)
         nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
 
-        val inntektsdato = sykefraværHosArbeidsgiver.values.minOf { it.start }
         håndterInntektsmeldingPortal(
             listOf(ag1Periode.start til ag1Periode.start.plusDays(15)),
             beregnetInntekt = inntekt,
-            inntektsdato = inntektsdato,
-            orgnummer = a1,
+            orgnummer = a1
         )
         håndterInntektsmeldingPortal(
             listOf(ag2Periode.start til ag2Periode.start.plusDays(15)),
             beregnetInntekt = inntekt,
-            inntektsdato = inntektsdato,
-            orgnummer = a2,
+            orgnummer = a2
         )
 
         fraVilkårsprøvingTilGodkjent(inntekt)
