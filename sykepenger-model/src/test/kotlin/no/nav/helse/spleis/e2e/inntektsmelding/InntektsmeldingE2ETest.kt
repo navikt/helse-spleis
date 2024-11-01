@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NAV_NO
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -2191,6 +2192,31 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsopplysningVilkårsgrunnlagA2 = inspektør(a2).vilkårsgrunnlag(25.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.firstOrNull { it.inspektør.orgnummer == a2}?.inspektør?.inntektsopplysning
         assertTrue(inntektsopplysningVilkårsgrunnlagA2 is no.nav.helse.person.inntekt.Inntektsmelding)
         assertEquals(INNTEKT, inntektsopplysningVilkårsgrunnlagA2?.inspektør?.beløp)
+    }
+
+    @Test
+    fun `Lagrer refusjon på arbeidsgiverens første fraværsdag, ikke dato fra IM`() {
+        nyttVedtak(januar)
+        håndterSøknad(5.februar til 28.februar)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = emptyList(),
+            førsteFraværsdag = 1.februar,
+            refusjon = Refusjon(INNTEKT / 2, null, emptyList()),
+            avsendersystem = NAV_NO,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
+
+        val refusjonsopplysninger = inspektør.arbeidsgiver.refusjonsopplysninger(5.februar)
+
+        assertForventetFeil(
+            forklaring = "Skal lagre på første fraværsdag utledet av vedtaksperioden",
+            nå = {
+                assertTrue(refusjonsopplysninger.erTom)
+            },
+            ønsket = {
+                assertFalse(refusjonsopplysninger.erTom)
+            }
+        )
     }
 
 }
