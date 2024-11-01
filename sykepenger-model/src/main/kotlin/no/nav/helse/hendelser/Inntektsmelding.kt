@@ -202,7 +202,7 @@ class Inntektsmelding(
             val sisteBit = Beløpstidslinje.fra(alleRefusjonsopplysninger.last().endringsdato.somPeriode(), alleRefusjonsopplysninger.last().beløp, kilde)
             val refusjonstidslinje = alleRefusjonsopplysninger
                 .zipWithNext { nåværende, neste ->
-                    Beløpstidslinje.fra(nåværende.endringsdato til neste.endringsdato.forrigeDag, nåværende.beløp, kilde)
+                    Beløpstidslinje.fra(nåværende.endringsdato.somPeriode().oppdaterTom(neste.endringsdato.forrigeDag), nåværende.beløp, kilde)
                 }
                 .fold(sisteBit) { acc, beløpstidslinje -> acc + beløpstidslinje }
 

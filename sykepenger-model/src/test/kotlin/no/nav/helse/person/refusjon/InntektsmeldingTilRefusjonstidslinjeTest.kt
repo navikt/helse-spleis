@@ -42,6 +42,14 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
         assertEquals(Beløpstidslinje.fra(1.januar til 15.februar, 1000.daglig, kilde) + Beløpstidslinje.fra(16.februar.somPeriode(), INGEN, kilde), refusjonstidslinje)
     }
 
+
+    @Test
+    fun `Endring av refusjon oppgitt før utløpet av en oppstykket agp`() {
+        val refusjonstidslinje = refusjonstidslinjeFra(1.januar, listOf(1.januar til 13.januar, 15.januar til 17.januar), 1000.daglig, opphørsdato = null, endringerIRefusjon = mapOf(15.januar to 500.daglig))
+        assertEquals(15.januar, refusjonstidslinje.last().dato)
+        assertEquals(Beløpstidslinje.fra(15.januar.somPeriode(), 1000.daglig, kilde), refusjonstidslinje)
+    }
+
     @Test
     fun `Arbeidsgiver utnytter inntektsmeldingens potensiale for å opplyse om refusjonsopplysninger`() {
         val refusjonstidslinje = refusjonstidslinjeFra(
