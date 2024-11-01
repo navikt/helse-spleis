@@ -3044,6 +3044,7 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
             return firstOrNull { it.id == vedtaksperiodeId }?.skjæringstidspunkt
         }
+        internal fun List<Vedtaksperiode>.finn(vedtaksperiodeId: UUID): Vedtaksperiode? = firstOrNull { it.id == vedtaksperiodeId }
         internal fun List<Vedtaksperiode>.startdatoerPåSammenhengendeVedtaksperioder(): Set<LocalDate> {
             val startdatoer = mutableMapOf<UUID, LocalDate>()
 
@@ -3066,6 +3067,12 @@ internal class Vedtaksperiode private constructor(
             return fun (other: Vedtaksperiode): Boolean {
                 if (other.periode.start >= segSelv.periode.start) return true // Forkaster nyere perioder på tvers av arbeidsgivere
                 return medSammeAGP(other)
+            }
+        }
+        internal val SAMMENHENGENDE_PERIODER_HOS_ARBEIDSGIVER= fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
+            val sammenhengendeVedtaksperioder = segSelv.arbeidsgiver.finnSammenhengendeVedtaksperioder(segSelv)
+            return fun (other: Vedtaksperiode): Boolean {
+                return other in sammenhengendeVedtaksperioder
             }
         }
         internal val MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {

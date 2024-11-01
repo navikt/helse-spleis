@@ -823,7 +823,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun addInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, overstyring: Revurderingseventyr?) {
-        inntektsmelding.leggTilRefusjon(refusjonshistorikk)
+        inntektsmelding.leggTilRefusjon(refusjonshistorikk, vedtaksperioder, this)
 
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst, vedtaksperioder)
@@ -958,9 +958,9 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
     }
 
-    private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
-        val førstePeriodeMedUtbetaling = vedtaksperioder.firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
-            ?: vedtaksperioder.firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+    internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate, vedtaksperiodeFilter: VedtaksperiodeFilter = { true }): LocalDate? {
+        val førstePeriodeMedUtbetaling = vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
+            ?: vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             ?: return null
         return sykdomstidslinje().sisteSkjæringstidspunkt(førstePeriodeMedUtbetaling.periode())
     }
