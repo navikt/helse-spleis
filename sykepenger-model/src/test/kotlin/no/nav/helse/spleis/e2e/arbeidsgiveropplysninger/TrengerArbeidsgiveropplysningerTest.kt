@@ -78,6 +78,22 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     private val INNTEKT_FLERE_AG = 20000.månedlig
 
     @Test
+    fun `Skal høre på arbeidsgiver når hen sier at egenmeldinger ikke gjelder`() {
+        håndterSøknad(Sykdom(3.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+        håndterInntektsmelding(listOf(3.januar til 17.januar))
+
+        assertForventetFeil(
+            forklaring = "Fortsetter å hensynta egenmeldinger fra sykmelding selv etter at arbeidsgiver har gitt beskjed om at de ikke gjelder",
+            nå = {
+                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            },
+            ønsket = {
+                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            }
+        )
+    }
+
+    @Test
     fun `flere korte perioder - sender ikke ut ny oppdatert forespørsel ved mottak av im`() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(6.januar, 7.januar, 100.prosent))
