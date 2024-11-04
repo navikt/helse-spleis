@@ -14,6 +14,8 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt
 
 data class Refusjonsopplysning(
@@ -135,6 +137,14 @@ data class Refusjonsopplysning(
             val gammelSnute = validerteRefusjonsopplysninger.firstOrNull { it.dekker(nyttSkjæringstidspunkt) } ?: validerteRefusjonsopplysninger.firstOrNull() ?: return this
             val nySnute = Refusjonsopplysning(gammelSnute.meldingsreferanseId, nyttSkjæringstidspunkt, null, gammelSnute.beløp)
             return nySnute.refusjonsopplysninger.merge(this)
+        }
+
+        internal fun beløpstidslinje(kilde: (meldingsreferanseId: UUID) -> Kilde) = validerteRefusjonsopplysninger.fold(Beløpstidslinje()) { samletBeløpstidslinje, refusjonsopplysning ->
+            samletBeløpstidslinje + Beløpstidslinje.fra(
+                periode = refusjonsopplysning.fom til (refusjonsopplysning.tom ?: refusjonsopplysning.fom),
+                beløp = refusjonsopplysning.beløp,
+                kilde = kilde(refusjonsopplysning.meldingsreferanseId)
+            )
         }
 
         override fun equals(other: Any?): Boolean {

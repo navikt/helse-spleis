@@ -7,6 +7,7 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -15,6 +16,8 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
@@ -35,6 +38,29 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class RefusjonsopplysningerTest {
+
+    @Test
+    fun `refusjonsopplysninger som beløpstidslinje`() {
+        val refusjonsopplysninger = listOf(
+            Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 500.daglig),
+            Refusjonsopplysning(meldingsreferanseId2, 10.januar, null, INGEN),
+            Refusjonsopplysning(meldingsreferanseId3, 1.mars, null, 250.daglig),
+        ).refusjonsopplysninger()
+
+        val beløpstidslinje = refusjonsopplysninger.beløpstidslinje {
+            when (it) {
+                meldingsreferanseId1 -> Kilde(it, Avsender.ARBEIDSGIVER, LocalDateTime.MAX)
+                meldingsreferanseId2 -> Kilde(it, Avsender.SAKSBEHANDLER, LocalDateTime.MAX)
+                else -> Kilde(it, Avsender.SYSTEM, LocalDateTime.MAX)
+            }
+        }
+        val forventet =
+            Beløpstidslinje.fra(1.januar til 9.januar, 500.daglig, Kilde(meldingsreferanseId1, Avsender.ARBEIDSGIVER, LocalDateTime.MAX)) +
+            Beløpstidslinje.fra(10.januar til 28.februar, INGEN, Kilde(meldingsreferanseId2, Avsender.SAKSBEHANDLER, LocalDateTime.MAX)) +
+            Beløpstidslinje.fra(1.mars til 1.mars, 250.daglig, Kilde(meldingsreferanseId3, Avsender.SYSTEM, LocalDateTime.MAX))
+
+        assertEquals(forventet, beløpstidslinje)
+    }
 
     @Test
     fun `flere opplysninger med åpen hale`() {
