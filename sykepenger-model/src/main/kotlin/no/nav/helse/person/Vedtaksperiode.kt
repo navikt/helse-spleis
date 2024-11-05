@@ -355,6 +355,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(hendelse: DagerFraInntektsmelding.BitAvInntektsmelding, aktivitetslogg: IAktivitetslogg, validering: () -> Unit) {
+        egenmeldingsperioder = emptyList()
         oppdaterHistorikk(hendelse, aktivitetslogg, validering)
     }
 
