@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
+import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -102,6 +103,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
@@ -113,6 +115,33 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Når vedtaksperioden er forkastet skal vi ikke bruke portal-inntektsmeldingen som peker på den`() {
+        nyttVedtak(januar)
+
+        håndterSøknad(10.februar til 28.februar)
+        val vedtaksperiodeIdFebruar = 2.vedtaksperiode
+        person.søppelbøtte(forrigeHendelse, februar)
+        assertSisteTilstand(vedtaksperiodeIdFebruar, TIL_INFOTRYGD)
+        nullstillTilstandsendringer()
+
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = NAV_NO, vedtaksperiodeIdInnhenter = vedtaksperiodeIdFebruar, refusjon = Refusjon(1.daglig, null))
+
+        assertForventetFeil(
+            forklaring = "Når vedtaksperioden er forkastet skal vi ikke bruke portal-inntektsmeldingen som peker på den.",
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
+                assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
+            },
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+                assertEquals(1.daglig, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
+                assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
+            }
+        )
+    }
 
     @Test
     fun `altinn-inntektsmelding oppgir opphør av refusjon tilbake i tid i forhold til første fraværsdag`() {
