@@ -52,6 +52,39 @@ import org.junit.jupiter.api.Test
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
     @Test
+    fun `Feil refusjon på forlengelse som ikke har kommet`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, listOf(
+                Triple(1.januar, 28.februar, INGEN),
+                Triple(1.mars, null, INNTEKT)
+            ))))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(mars)
+            håndterYtelser(3.vedtaksperiode)
+
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INGEN)
+
+            assertForventetFeil(
+                forklaring = "Feil refusjon på forlengelse som ikke har kommet",
+                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT) },
+                nå = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INGEN) }
+            )
+        }
+    }
+
+    @Test
     fun `arbeidsgiver opplyser om refusjonsopplysninger frem i tid`() {
         a1 {
             håndterSøknad(januar)
@@ -571,8 +604,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             val vedtaksperiodeJanuar = 2.vedtaksperiode
             val vedtaksperiodeFebruar = 3.vedtaksperiode
-            val vedtaksperiodeMars = 4.vedtaksperiode
-            val vedtaksperiodeApril = 1.vedtaksperiode
 
             // Vi har egentlig refusjonsopplysninger for alle periodene, men for out-of-order-perioder får de ikke
             // refusjonsopplysninger før det er dens tur til å gå videre
