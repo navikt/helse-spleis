@@ -30,6 +30,7 @@ import no.nav.helse.dto.NyInntektUnderveisDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
+import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
@@ -439,7 +440,8 @@ data class PersonData(
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
         val feriepengeutbetalinger: List<FeriepengeutbetalingData>,
-        val refusjonshistorikk: List<RefusjonData>
+        val refusjonshistorikk: List<RefusjonData>,
+        val ubrukteRefusjonsopplysninger: Map<LocalDate, BeløpstidslinjeData>
     ) {
         fun tilDto() = ArbeidsgiverInnDto(
             id = this.id,
@@ -451,7 +453,8 @@ data class PersonData(
             forkastede = this.forkastede.map { it.tilDto() },
             utbetalinger = this.utbetalinger.map { it.tilDto() },
             feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilDto() },
-            refusjonshistorikk = RefusjonshistorikkInnDto(this.refusjonshistorikk.map { it.tilDto() })
+            refusjonshistorikk = RefusjonshistorikkInnDto(this.refusjonshistorikk.map { it.tilDto() }),
+            ubrukteRefusjonsopplysninger = RefusjonsservitørDto(this.ubrukteRefusjonsopplysninger.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilDto() })
         )
 
         data class InntektsmeldingData(

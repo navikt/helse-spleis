@@ -20,6 +20,7 @@ import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.NyInntektUnderveisDto
 import no.nav.helse.dto.OppdragstatusDto
+import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
@@ -90,7 +91,8 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     forkastede = this.forkastede.map { it.tilPersonData() },
     utbetalinger = this.utbetalinger.map { it.tilPersonData() },
     feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
-    refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() }
+    refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() },
+    ubrukteRefusjonsopplysninger = this.ubrukteRefusjonsopplysninger.tilPersonData(),
 )
 
 private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() = PersonData.ArbeidsgiverData.InntektsmeldingData(
@@ -866,3 +868,5 @@ private fun BeløpstidslinjeDto.tilPersonData() = PersonData.BeløpstidslinjeDat
         )
     }
 )
+
+private fun RefusjonsservitørDto.tilPersonData() = refusjonstidslinjer.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilPersonData() }

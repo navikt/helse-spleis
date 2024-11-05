@@ -45,6 +45,8 @@ internal class TestArbeidsgiverInspektør(
     private val utbetalinger = view.utbetalinger.map { it.inspektør }
     internal val antallUtbetalinger get() = utbetalinger.size
 
+    val ubrukteRefusjonsopplysninger = view.ubrukteRefusjonsopplysninger
+
     internal val feriepengeoppdrag = view.feriepengeutbetalinger
         .flatMap { listOf(it.oppdrag, it.personoppdrag) }
         .map {

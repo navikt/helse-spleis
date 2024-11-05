@@ -2,17 +2,15 @@ package no.nav.helse.person.refusjon
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.SortedMap
-import java.util.TreeMap
+import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 
-internal class Refusjonsservitør(
-    private val refusjonstidslinjer: SortedMap<LocalDate, Beløpstidslinje> = TreeMap()
-) {
+internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = emptyMap()) {
+    private val refusjonstidslinjer = input.filterValues { it.isNotEmpty() }.toSortedMap()
     private val refusjonsrester = refusjonstidslinjer.toMutableMap()
     internal operator fun get(dato: LocalDate) = refusjonsrester[dato]
 
@@ -27,7 +25,10 @@ internal class Refusjonsservitør(
         val aktuelle = refusjonstidslinjer.filterKeys { it in søkevindu }
         val refusjonstidslinje = aktuelle.values.fold(Beløpstidslinje()) { sammensatt, ny -> sammensatt + ny }.strekkFrem(periode.endInclusive).subset(periode)
         aktuelle.keys.forEach { dato ->
-            if (refusjonsrester.containsKey(dato)) refusjonsrester[dato] = refusjonsrester.getValue(dato) - periode
+            if (!refusjonsrester.containsKey(dato)) return@forEach
+            val nyVerdi = refusjonsrester.getValue(dato) - periode
+            if (nyVerdi.isEmpty()) refusjonsrester.remove(dato)
+            else refusjonsrester[dato] = nyVerdi
         }
         return refusjonstidslinje
     }
@@ -40,15 +41,15 @@ internal class Refusjonsservitør(
         }
     }
 
+    internal fun dto() = RefusjonsservitørDto(refusjonsrester.mapValues { (_, beløpstidslinje) -> beløpstidslinje.dto() })
+    internal fun view() = RefusjonsservitørView(refusjonsrester.toMap())
+
     internal companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
-        internal fun fra(refusjonstidslinjer: Map<LocalDate, Beløpstidslinje>) =
-            Refusjonsservitør(refusjonstidslinjer.filterValues { it.isNotEmpty() }.toSortedMap())
-
         internal fun fra(refusjonstidslinje: Beløpstidslinje): Refusjonsservitør {
             if (refusjonstidslinje.isEmpty()) return Refusjonsservitør()
-            return fra(mapOf(refusjonstidslinje.first().dato to refusjonstidslinje))
+            return Refusjonsservitør(mapOf(refusjonstidslinje.first().dato to refusjonstidslinje))
         }
 
         internal fun fra(refusjonstidslinje: Beløpstidslinje, startdatoer: Collection<LocalDate>): Refusjonsservitør {
@@ -58,7 +59,11 @@ internal class Refusjonsservitør(
             val refusjonsopplysningerPerStartdato = sorterteStartdatoer.zipWithNext { nåværende, neste ->
                 nåværende to refusjonstidslinje.subset(nåværende til neste.forrigeDag)
             }.toMap() + sisteBit
-            return fra(refusjonsopplysningerPerStartdato)
+            return Refusjonsservitør(refusjonsopplysningerPerStartdato)
         }
+
+        internal fun gjenopprett(dto: RefusjonsservitørDto) = Refusjonsservitør(dto.refusjonstidslinjer.mapValues { (_, beløpstidslinje) -> Beløpstidslinje.gjenopprett(beløpstidslinje) }.toSortedMap())
     }
 }
+
+data class RefusjonsservitørView(val refusjonstidslinjer: Map<LocalDate, Beløpstidslinje>)

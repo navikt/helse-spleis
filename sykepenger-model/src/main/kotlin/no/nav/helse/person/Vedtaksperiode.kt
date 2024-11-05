@@ -441,7 +441,7 @@ internal class Vedtaksperiode private constructor(
 
     // 💡Må ikke forveksles med `førsteFraværsdag` 💡
     // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
-    private val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.finnSammenhengendeVedtaksperioder(this).periode().start
+    private val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.startdatoPåSammenhengendeVedtaksperioder(this)
 
     internal fun håndter(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør) {
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
@@ -1259,8 +1259,8 @@ internal class Vedtaksperiode private constructor(
         if (refusjonstidslinje.isNotEmpty()) return
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
         val nedarvetRefusjonstidslinje = refusjonstidslinjeFraNabolaget.strekk(this.periode).subset(this.periode)
-        val refusjonstidslinjeFraRefusjonshistorikk = arbeidsgiver.refusjonstidslinje(this)
-        this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), nedarvetRefusjonstidslinje + refusjonstidslinjeFraRefusjonshistorikk)
+        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
+        this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), nedarvetRefusjonstidslinje + refusjonstidslinjeFraArbeidsgiver)
     }
 
     internal sealed class ArbeidsgiveropplysningerStrategi {
