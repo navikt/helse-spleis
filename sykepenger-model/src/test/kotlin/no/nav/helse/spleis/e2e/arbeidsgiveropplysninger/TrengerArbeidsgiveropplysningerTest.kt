@@ -86,9 +86,39 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             forklaring = "Fortsetter å hensynta egenmeldinger fra sykmelding selv etter at arbeidsgiver har gitt beskjed om at de ikke gjelder",
             nå = {
                 assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(listOf(1.januar til 2.januar), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsperioder)
             },
             ønsket = {
                 assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsperioder)
+            }
+        )
+    }
+
+    @Test
+    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`() {
+        håndterSøknad(Sykdom(6.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 5.januar))
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        håndterSøknad(Sykdom(22.januar, 25.januar, 100.prosent), egenmeldinger = listOf(21.januar til 21.januar))
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+        håndterInntektsmelding(listOf(6.januar til 17.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+
+        assertForventetFeil(
+            "",
+            nå = {
+                assertEquals(listOf(1.januar til 5.januar), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsperioder)
+                assertEquals(listOf(21.januar til 21.januar), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+                assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+            },
+            ønsket = {
+                assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsperioder)
+                assertEquals(listOf(21.januar til 21.januar), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+
+                håndterInntektsmelding(listOf(6.januar til 17.januar, 22.januar til 25.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+                assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
             }
         )
     }
