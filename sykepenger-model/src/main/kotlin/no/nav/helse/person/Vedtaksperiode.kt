@@ -355,7 +355,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(hendelse: DagerFraInntektsmelding.BitAvInntektsmelding, aktivitetslogg: IAktivitetslogg, validering: () -> Unit) {
-        egenmeldingsperioder = emptyList()
+        if (egenmeldingsperioder.isNotEmpty()) {
+            aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: $egenmeldingsperioder")
+            egenmeldingsperioder = emptyList()
+        }
         oppdaterHistorikk(hendelse, aktivitetslogg, validering)
     }
 
