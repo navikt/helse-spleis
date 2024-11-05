@@ -18,9 +18,11 @@ import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.path
+import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.prometheus.metrics.model.registry.PrometheusRegistry
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
@@ -40,6 +42,8 @@ internal val nyObjectmapper get() = jacksonObjectMapper()
         indentObjectsWith(DefaultIndenter("  ", "\n"))
     })
 
+val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
+
 internal val objectMapper = nyObjectmapper
 internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
 
@@ -54,7 +58,7 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource })
+    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource }, meterRegistry)
     app.start(wait = true)
 }
 

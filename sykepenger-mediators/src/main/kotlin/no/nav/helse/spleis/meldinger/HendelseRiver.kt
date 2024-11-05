@@ -8,9 +8,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.Timer
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import java.util.UUID
+import no.nav.helse.meterRegistry
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
@@ -49,7 +48,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                 "melding_id" to packet["@id"].asText()
             )) {
 
-                val timer = Timer.start(metersRegistry)
+                val timer = Timer.start(meterRegistry)
 
                 try {
                     messageMediator.onRecognizedMessage(createMessage(packet), context)
@@ -62,7 +61,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                             .description("hvor lang tid spleis bruker på behandling av en melding")
                             .tag("river_name", riverName)
                             .tag("event_name", eventName)
-                            .register(metersRegistry)
+                            .register(meterRegistry)
                     )
                 }
             }
@@ -74,7 +73,6 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
     }
 
     companion object {
-        private val metersRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

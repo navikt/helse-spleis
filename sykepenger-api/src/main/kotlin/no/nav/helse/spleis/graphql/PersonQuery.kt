@@ -1,9 +1,6 @@
 package no.nav.helse.spleis.graphql
 
-import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
@@ -16,12 +13,11 @@ import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
+import no.nav.helse.spleis.meterRegistry
 import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.serializePersonForSpeil
 
 private object ApiMetrikker {
-    private val metrics: MeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-
     fun målDatabase(block: () -> SerialisertPerson?): SerialisertPerson? = mål("hent_person", block)
 
     fun målDeserialisering(block: () -> Person): Person = mål("deserialiser_person", block)
@@ -29,13 +25,13 @@ private object ApiMetrikker {
     fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = mål("bygg_snapshot", block)
 
     private fun <R> mål(operasjon: String, block: () -> R): R {
-        val timer = Timer.start(metrics)
+        val timer = Timer.start(meterRegistry)
         return block().also {
             timer.stop(
                 Timer.builder("person_snapshot_api")
                     .description("Metrikker for henting av speil-snapshot")
                     .tag("operasjon", operasjon)
-                    .register(metrics)
+                    .register(meterRegistry)
             )
         }
     }

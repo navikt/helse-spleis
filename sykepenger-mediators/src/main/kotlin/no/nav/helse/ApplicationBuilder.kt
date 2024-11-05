@@ -1,6 +1,10 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import io.micrometer.core.instrument.Clock
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.prometheus.metrics.model.registry.PrometheusRegistry
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
@@ -8,6 +12,8 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
+
+val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
 // Understands how to build our application server
 class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
@@ -21,7 +27,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
 
     private val hendelseRepository = HendelseRepository(dataSource)
     private val personDao = PersonDao(dataSource, STØTTER_IDENTBYTTE)
-    private val rapidsConnection = RapidApplication.create(env)
+    private val rapidsConnection = RapidApplication.create(env, meterRegistry = meterRegistry)
 
     private val hendelseMediator = HendelseMediator(
         hendelseRepository = hendelseRepository,
