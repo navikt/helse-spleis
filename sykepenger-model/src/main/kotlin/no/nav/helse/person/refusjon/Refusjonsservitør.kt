@@ -2,63 +2,63 @@ package no.nav.helse.person.refusjon
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.SortedMap
+import java.util.TreeMap
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 
-internal class Refusjonsservitør private constructor(
-    refusjonstidslinje: Beløpstidslinje, // enten fra sbh eller im
-    startdatoer: Iterable<LocalDate> // for im er dette typisk bare første fraværsdag, mens ved sbh-overstyring kan det være flere datoer
+internal class Refusjonsservitør(
+    private val refusjonstidslinjer: SortedMap<LocalDate, Beløpstidslinje> = TreeMap()
 ) {
-    private val sorterteStartdatoer = startdatoer.toSortedSet()
-    private val sisteBit = sorterteStartdatoer.last() to refusjonstidslinje.fraOgMed(sorterteStartdatoer.last())
+    private val refusjonsrester = refusjonstidslinjer.toMutableMap()
+    internal operator fun get(dato: LocalDate) = refusjonsrester[dato]
 
-    private val refusjonsopplysningerPerStartdato = sorterteStartdatoer.zipWithNext { nåværende, neste ->
-        nåværende to refusjonstidslinje.subset(nåværende til neste.forrigeDag)
-    }.toMap() + sisteBit
-
-    private val refusjonsrester = refusjonsopplysningerPerStartdato.toMutableMap()
-
-    internal fun servér(startdato: LocalDate, periode: Periode): Beløpstidslinje {
-        val startdatoInnenforSøkevindu = startdatoInnenforSøkevindu(startdato til periode.endInclusive)
-        val refusjonstidslinje = refusjonsopplysningerPerStartdato[startdatoInnenforSøkevindu] ?: return Beløpstidslinje()
-        refusjonsrester[startdatoInnenforSøkevindu] = refusjonsrester.getValue(startdatoInnenforSøkevindu) - periode
-        return refusjonstidslinje.strekkFrem(periode.endInclusive).subset(periode)
+    private fun leggTil(dato: LocalDate, beløpstidslinje: Beløpstidslinje) {
+        refusjonstidslinjer[dato] = refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
+        refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
     }
 
-    private fun startdatoInnenforSøkevindu(søkevindu: Periode) = refusjonsopplysningerPerStartdato.keys.filter { it in søkevindu }.also {
-        check(it.size < 2) { "Det er flere refusjonsopplysninger lagret innenfor samme søkevindu, det blir en sklitakling fra siden" }
-    }.firstOrNull()
+    // Serverer refusjonstidslinjer til perioder
+    internal fun servér(startdato: LocalDate, periode: Periode): Beløpstidslinje {
+        val søkevindu = startdato til periode.endInclusive
+        val aktuelle = refusjonstidslinjer.filterKeys { it in søkevindu }
+        val refusjonstidslinje = aktuelle.values.fold(Beløpstidslinje()) { sammensatt, ny -> sammensatt + ny }.strekkFrem(periode.endInclusive).subset(periode)
+        aktuelle.keys.forEach { dato ->
+            if (refusjonsrester.containsKey(dato)) refusjonsrester[dato] = refusjonsrester.getValue(dato) - periode
+        }
+        return refusjonstidslinje
+    }
 
-    internal fun donérRester(suppekjøkken: Suppekjøkken) {
-        refusjonsrester.forEach(suppekjøkken::motta)
+    // Serverer våre rester til en annen servitør
+    internal fun servér(other: Refusjonsservitør, aktivitetslogg: IAktivitetslogg) {
+        this.refusjonsrester.filterValues { it.isNotEmpty() }.forEach { (dato, beløpstidslinje) ->
+            aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${beløpstidslinje.perioderMedBeløp.joinToString()}")
+            other.leggTil(dato, beløpstidslinje)
+        }
     }
 
     internal companion object {
-        internal fun fra(refusjonstidslinje: Beløpstidslinje, startdatoer: Collection<LocalDate>): Refusjonsservitør? {
-            if (refusjonstidslinje.isEmpty() || startdatoer.isEmpty()) return null
-            return Refusjonsservitør(refusjonstidslinje, startdatoer)
+        private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+        internal fun fra(refusjonstidslinjer: Map<LocalDate, Beløpstidslinje>) =
+            Refusjonsservitør(refusjonstidslinjer.filterValues { it.isNotEmpty() }.toSortedMap())
+
+        internal fun fra(refusjonstidslinje: Beløpstidslinje): Refusjonsservitør {
+            if (refusjonstidslinje.isEmpty()) return Refusjonsservitør()
+            return fra(mapOf(refusjonstidslinje.first().dato to refusjonstidslinje))
         }
 
-        internal fun fra(refusjonstidslinje: Beløpstidslinje): Refusjonsservitør? {
-            if (refusjonstidslinje.isEmpty()) return null
-            return Refusjonsservitør(refusjonstidslinje, listOf(refusjonstidslinje.first().dato))
-        }
-    }
-}
-
-internal interface Suppekjøkken {
-    fun motta(startdato: LocalDate, refusjonstidslinje: Beløpstidslinje)
-
-    class LoggendeSuppekjøkken(private val aktivitetslogg: IAktivitetslogg): Suppekjøkken {
-        override fun motta(startdato: LocalDate, refusjonstidslinje: Beløpstidslinje) {
-            if (refusjonstidslinje.isEmpty()) return
-            aktivitetslogg.info("Refusjonsservitøren har rester for ${startdato.format(formatter)} etter servering: ${refusjonstidslinje.perioderMedBeløp.joinToString()}")
-        }
-        private companion object {
-            private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        internal fun fra(refusjonstidslinje: Beløpstidslinje, startdatoer: Collection<LocalDate>): Refusjonsservitør {
+            if (refusjonstidslinje.isEmpty() || startdatoer.isEmpty()) return Refusjonsservitør()
+            val sorterteStartdatoer = startdatoer.toSortedSet()
+            val sisteBit = sorterteStartdatoer.last() to refusjonstidslinje.fraOgMed(sorterteStartdatoer.last())
+            val refusjonsopplysningerPerStartdato = sorterteStartdatoer.zipWithNext { nåværende, neste ->
+                nåværende to refusjonstidslinje.subset(nåværende til neste.forrigeDag)
+            }.toMap() + sisteBit
+            return fra(refusjonsopplysningerPerStartdato)
         }
     }
 }

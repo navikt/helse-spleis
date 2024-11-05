@@ -160,9 +160,7 @@ class Inntektsmelding(
         }
     }
 
-    internal val refusjonsservitør = checkNotNull(Refusjonsservitør.fra(refusjon.refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt))) {
-        "Det har kommet en inntektsmelding uten refusjonsopplysninger, det takler vi særdeles dårlig"
-    }
+    internal val refusjonsservitør = Refusjonsservitør.fra(refusjon.refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt))
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiver: Arbeidsgiver) {
         val refusjonsElement = refusjonsElement(vedtaksperioder, arbeidsgiver)

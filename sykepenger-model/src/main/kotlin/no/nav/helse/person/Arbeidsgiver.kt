@@ -76,7 +76,6 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
-import no.nav.helse.person.refusjon.Suppekjøkken
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -743,7 +742,7 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse) {
             håndter(hendelse, aktivitetslogg, servitør)
         }
-        servitør.donérRester(Suppekjøkken.LoggendeSuppekjøkken(aktivitetslogg))
+        servitør.servér(Refusjonsservitør(), aktivitetslogg)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
