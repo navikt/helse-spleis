@@ -55,7 +55,7 @@ spec:
   - name: KAFKA_CONSUMER_GROUP_ID
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
-    value: earliest
+    value: EARLIEST
   - name: IDENTBYTTE
     value: "true"
   - name: TILKOMMEN_ARBEIDSGIVER
