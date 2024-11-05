@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.test_support.TestDataSource
+import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -50,21 +51,21 @@ internal class HendelseDaoTest {
 
     @Test
     fun `hentAlleHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource::ds)
+        val dao = HendelseDao(dataSource::ds, mockk(relaxed = true))
         val events = dao.hentAlleHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, events.size)
     }
 
     @Test
     fun `hentHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource::ds)
+        val dao = HendelseDao(dataSource::ds, mockk(relaxed = true))
         val ingenEvents = dao.hentHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, ingenEvents.size)
     }
 
     @Test
     fun `hentHendelse sql er valid`() {
-        val dao = HendelseDao(dataSource::ds)
+        val dao = HendelseDao(dataSource::ds, mockk(relaxed = true))
         val event = dao.hentHendelse(meldingsReferanse)
         Assertions.assertNotNull(event)
     }

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.graphql
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
@@ -13,18 +14,17 @@ import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.meterRegistry
 import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.serializePersonForSpeil
 
 private object ApiMetrikker {
-    fun målDatabase(block: () -> SerialisertPerson?): SerialisertPerson? = mål("hent_person", block)
+    fun målDatabase(meterRegistry: MeterRegistry, block: () -> SerialisertPerson?): SerialisertPerson? = mål(meterRegistry, "hent_person", block)
 
-    fun målDeserialisering(block: () -> Person): Person = mål("deserialiser_person", block)
+    fun målDeserialisering(meterRegistry: MeterRegistry, block: () -> Person): Person = mål(meterRegistry, "deserialiser_person", block)
 
-    fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = mål("bygg_snapshot", block)
+    fun målByggSnapshot(meterRegistry: MeterRegistry, block: () -> PersonDTO): PersonDTO = mål(meterRegistry, "bygg_snapshot", block)
 
-    private fun <R> mål(operasjon: String, block: () -> R): R {
+    private fun <R> mål(meterRegistry: MeterRegistry, operasjon: String, block: () -> R): R {
         val timer = Timer.start(meterRegistry)
         return block().also {
             timer.stop(
@@ -37,14 +37,14 @@ private object ApiMetrikker {
     }
 }
 
-internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String): GraphQLPerson? {
-    return ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
+internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String, meterRegistry: MeterRegistry): GraphQLPerson? {
+    return ApiMetrikker.målDatabase(meterRegistry) { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
         val spekemat = spekematClient.hentSpekemat(fnr, callId)
-        ApiMetrikker.målDeserialisering {
+        ApiMetrikker.målDeserialisering(meterRegistry) {
             val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(fnr.toLong()) }
             Person.gjenopprett(EmptyLog, dto)
         }
-            .let { ApiMetrikker.målByggSnapshot { serializePersonForSpeil(it, spekemat) } }
+            .let { ApiMetrikker.målByggSnapshot(meterRegistry) { serializePersonForSpeil(it, spekemat) } }
             .let { person -> mapTilDto(person, hendelseDao.hentHendelser(fnr.toLong())) }
     }
 }

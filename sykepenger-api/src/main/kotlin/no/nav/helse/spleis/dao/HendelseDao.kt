@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.dao
 
+import io.micrometer.core.instrument.MeterRegistry
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -12,7 +13,7 @@ import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.objectMapper
 import org.intellij.lang.annotations.Language
 
-internal class HendelseDao(private val dataSource: () -> DataSource) {
+internal class HendelseDao(private val dataSource: () -> DataSource, private val meterRegistry: MeterRegistry) {
 
     fun hentHendelse(meldingsReferanse: UUID): String? {
         return sessionOf(dataSource()).use { session ->
@@ -25,7 +26,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource) {
                 }.asSingle
             )
         }.also {
-            PostgresProbe.hendelseLestFraDb()
+            PostgresProbe.hendelseLestFraDb(meterRegistry)
         }
     }
 
@@ -121,7 +122,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource) {
                 }
             }
         }.onEach {
-            PostgresProbe.hendelseLestFraDb()
+            PostgresProbe.hendelseLestFraDb(meterRegistry)
         }
     }
 

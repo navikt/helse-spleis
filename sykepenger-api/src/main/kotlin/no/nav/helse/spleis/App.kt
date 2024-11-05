@@ -19,7 +19,6 @@ import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.path
 import io.micrometer.core.instrument.Clock
-import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
@@ -42,8 +41,6 @@ internal val nyObjectmapper get() = jacksonObjectMapper()
         indentObjectsWith(DefaultIndenter("  ", "\n"))
     })
 
-val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
-
 internal val objectMapper = nyObjectmapper
 internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
 
@@ -58,7 +55,7 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource }, meterRegistry)
+    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource })
     app.start(wait = true)
 }
 
@@ -68,7 +65,7 @@ internal fun createApp(
     spekematClient: SpekematClient,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
-    collectorRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    meterRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 ) =
     embeddedServer(
         factory = Netty,
@@ -77,7 +74,7 @@ internal fun createApp(
             log = logg
             module {
                 azureAdAppAuthentication(azureConfig)
-                lagApplikasjonsmodul(spekematClient, spurteDuClient, dataSourceProvider, collectorRegistry)
+                lagApplikasjonsmodul(spekematClient, spurteDuClient, dataSourceProvider, meterRegistry)
             }
         },
         configure = {
@@ -89,7 +86,7 @@ internal fun Application.lagApplikasjonsmodul(
     spekematClient: SpekematClient,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
-    collectorRegistry: PrometheusMeterRegistry
+    meterRegistry: PrometheusMeterRegistry
 ) {
     install(CallId) {
         header("callId")
@@ -104,13 +101,13 @@ internal fun Application.lagApplikasjonsmodul(
         filter { call -> call.request.path().startsWith("/api/") }
     }
     install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-    requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), collectorRegistry)
-    nais(collectorRegistry)
+    requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), meterRegistry)
+    nais(meterRegistry)
 
-    val hendelseDao = HendelseDao(dataSourceProvider)
-    val personDao = PersonDao(dataSourceProvider)
+    val hendelseDao = HendelseDao(dataSourceProvider, meterRegistry)
+    val personDao = PersonDao(dataSourceProvider, meterRegistry)
 
     spannerApi(hendelseDao, personDao, spurteDuClient)
     sporingApi(hendelseDao, personDao)
-    installGraphQLApi(spekematClient, hendelseDao, personDao)
+    installGraphQLApi(spekematClient, hendelseDao, personDao, meterRegistry)
 }
