@@ -59,14 +59,20 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal fun tilOgMed(dato: LocalDate) = Beløpstidslinje(dager.headMap(dato.nesteDag).toSortedMap())
     internal fun fraOgMed(dato: LocalDate) = Beløpstidslinje(dager.tailMap(dato).toSortedMap())
 
-    private fun snute(snute: LocalDate): Beløpstidslinje {
-        val førsteBeløpsdag = periode?.start?.let { dager.getValue(it) } ?: return Beløpstidslinje()
-        return førsteBeløpsdag.strekkTilbake(snute)
-    }
+    private val førsteBeløpsdag = periode?.start?.let { dager.getValue(it) }
+    private fun snute(snute: LocalDate) = førsteBeløpsdag?.strekkTilbake(snute) ?: Beløpstidslinje()
 
-    private fun hale(hale: LocalDate): Beløpstidslinje {
-        val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) } ?: return Beløpstidslinje()
-        return sisteBeløpsdag.strekkFrem(hale)
+    private val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) }
+    private fun hale(hale: LocalDate) = sisteBeløpsdag?.strekkFrem(hale) ?: Beløpstidslinje()
+
+    // Fyller alle hull i beløpstidslinjen (les UkjentDag) med beløp & kilde fra forrige Beløpsdag
+    internal fun fyll(): Beløpstidslinje {
+        var forrigeBeløpsdag = førsteBeløpsdag ?: return Beløpstidslinje()
+        val fylteDager = this.map { dag -> when (dag) {
+            is Beløpsdag -> dag.also { forrigeBeløpsdag = it }
+            is UkjentDag -> forrigeBeløpsdag.copy(dato = forrigeBeløpsdag.dato.nesteDag).also { forrigeBeløpsdag = it }
+        }}
+        return Beløpstidslinje(fylteDager)
     }
 
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)

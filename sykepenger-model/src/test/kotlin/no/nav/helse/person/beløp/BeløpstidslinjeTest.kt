@@ -2,6 +2,7 @@ package no.nav.helse.person.beløp
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Arbeidsgiver
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Saksbehandler
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Sykmeldt
@@ -27,6 +28,21 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class BeløpstidslinjeTest {
+
+    @Test
+    fun `fylle en hullete beløpstidslinje`() {
+        val beløpstidslinje1 = (Arbeidsgiver oppgir 1000.daglig hele januar)
+        val beløpstidslinje2 = (Saksbehandler oppgir 2000.daglig hele mars)
+        val beløpstidslinje3 = (Systemet oppgir 3000.daglig fra 2.april til 30.april)
+
+        val sammenslått = beløpstidslinje1 + beløpstidslinje2 + beløpstidslinje3
+        assertEquals(listOf(januar, mars, 2.april til 30.april), sammenslått.perioderMedBeløp)
+        val fylt = sammenslått.fyll()
+        assertEquals(listOf(1.januar til 30.april), fylt.perioderMedBeløp)
+
+        val forventet = (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig fra 1.mars til 1.april) + (Systemet oppgir 3000.daglig fra 2.april til 30.april)
+        assertEquals(forventet, fylt)
+    }
 
     @Test
     fun `subset av beløpstidslinje`() {
