@@ -472,17 +472,20 @@ internal class Arbeidsgiver private constructor(
         håndter(replays) { håndter(replays, aktivitetslogg) }
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeId: UUID? = null) {
+    internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID? = null) {
         aktivitetslogg.kontekst(this)
-        if (vedtaksperiodeId != null) aktivitetslogg.info("Replayer inntektsmelding.")
-        inntektsmelding.loggOmVedtaksperiodeIdFinnes(vedtaksperioder)
+        if (vedtaksperiodeIdForReplay != null) aktivitetslogg.info("Replayer inntektsmelding.")
+        inntektsmelding.validerPortalinntektsmelding(vedtaksperioder, aktivitetslogg)
         val dager = inntektsmelding.dager()
+
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
+
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
         håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
 
         val dagoverstyring = dager.revurderingseventyr()
         val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
-        addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.Companion.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
+        addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
 
         inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }

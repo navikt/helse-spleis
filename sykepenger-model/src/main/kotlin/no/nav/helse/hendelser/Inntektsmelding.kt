@@ -25,6 +25,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.finn
 import no.nav.helse.person.Vedtaksperiode.Companion.finnSkjæringstidspunktFor
 import no.nav.helse.person.Vedtaksperiode.Companion.inneholder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -290,14 +291,11 @@ class Inntektsmelding(
     }
 
     private fun erPortalinntektsmelding() = avsendersystem == Avsendersystem.NAV_NO || avsendersystem == Avsendersystem.NAV_NO_SELVBESTEMT
-    internal fun loggOmVedtaksperiodeIdFinnes(vedtaksperioder: MutableList<Vedtaksperiode>) {
+    internal fun validerPortalinntektsmelding(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg) {
         if (!erPortalinntektsmelding()) return
-        if (vedtaksperiodeId == null) {
-            sikkerlogg.error("Fant inntektsmelding fra portalen uten vedtaksperiodeId. InntektsmeldingId: ${metadata.meldingsreferanseId}")
-            return
-        }
-        if (!vedtaksperioder.inneholder(vedtaksperiodeId)) {
-            sikkerlogg.warn("Finner ikke en aktiv vedtaksperiode for vedtaksperiodeId oppgitt i inntektsmeldingen. InntektsmeldingId: ${metadata.meldingsreferanseId}")
+
+        if (!vedtaksperioder.inneholder(checkNotNull(vedtaksperiodeId) { "Fikk en portalinntektsmelding uten vedtaksperiodeId!" })) {
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
         }
     }
 }

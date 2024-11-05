@@ -94,6 +94,7 @@ enum class Varselkode(
     RV_IM_23("Arbeidsgiver har oppgitt hullete arbeidsgiverperiode og begrunnelse for redusert utbetaling i arbeidsgiverperiode"),
     RV_IM_24("Det har kommet ny inntektsmelding, vurder om arbeidsgiverperiode er riktig"),
     RV_IM_25("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden grunnet ferie eller avspasering"),
+    RV_IM_26("Portalinntektsmelding peker ikke på en aktiv vedtaksperiode"),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag.", avviklet = true),

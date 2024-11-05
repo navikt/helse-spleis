@@ -128,19 +128,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = NAV_NO, vedtaksperiodeIdInnhenter = vedtaksperiodeIdFebruar, refusjon = Refusjon(1.daglig, null))
 
-        assertForventetFeil(
-            forklaring = "Når vedtaksperioden er forkastet skal vi ikke bruke portal-inntektsmeldingen som peker på den.",
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET)
-                assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
-                assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
-            },
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-                assertEquals(1.daglig, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
-                assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
+        assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
     }
 
     @Test
