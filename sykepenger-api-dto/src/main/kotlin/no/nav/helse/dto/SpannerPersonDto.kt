@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -202,7 +203,8 @@ data class SpannerPersonDto(
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
         val feriepengeutbetalinger: List<FeriepengeutbetalingData>,
-        val refusjonshistorikk: List<RefusjonData>
+        val refusjonshistorikk: List<RefusjonData>,
+        val ubrukteRefusjonsopplysninger: RefusjonservitørData
     ) {
         data class InntektsmeldingData(
             val id: UUID,
@@ -502,6 +504,8 @@ data class SpannerPersonDto(
                 val endringsdato: LocalDate
             )
         }
+
+        data class RefusjonservitørData(val refusjonstidslinjer: Map<LocalDate, BeløpstidslinjeData>)
     }
 
     data class SykdomshistorikkData(
@@ -671,7 +675,8 @@ private fun ArbeidsgiverUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverDat
     forkastede = this.forkastede.map { it.tilPersonData() },
     utbetalinger = this.utbetalinger.map { it.tilPersonData() },
     feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
-    refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() }
+    refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() },
+    ubrukteRefusjonsopplysninger = RefusjonservitørData(this.ubrukteRefusjonsopplysninger.refusjonstidslinjer.mapValues { (_, dto) -> dto.tilPersonData() })
 )
 
 private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
