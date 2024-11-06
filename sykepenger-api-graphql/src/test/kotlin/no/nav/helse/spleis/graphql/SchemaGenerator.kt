@@ -2,13 +2,15 @@ package no.nav.helse.spleis.graphql
 
 import com.apurebase.kgraphql.GraphQL
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.server.application.install
 import io.ktor.server.testing.testApplication
 import java.nio.file.Paths
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -40,10 +42,10 @@ internal class SchemaGenerator {
             }
         }
 
-        val schemaPath = Paths.get("${Paths.get("").absolutePathString()}/src/main/resources/graphql-schema.json")
+        val schemaPath = Paths.get("${Paths.get("").absolutePathString()}/../sykepenger-api/src/main/resources/graphql-schema.json")
         val gammeltSchema = schemaPath.readText()
         val response = client.post("/graphql") { setBody(IntrospectionQuery) }.bodyAsText()
-        val nyttSchema = objectMapper.readTree(response) as ObjectNode
+        val nyttSchema = jacksonObjectMapper().registerModule(JavaTimeModule()).readTree(response) as ObjectNode
 
         assertTrue(nyttSchema.path("data").path("__schema").isObject) {
             "Noe er galt med det nytt schema"

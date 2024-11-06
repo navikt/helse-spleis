@@ -4,21 +4,21 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val tbdLibsVersion = "2024.05.31-08.02-2c3441c1"
+val tbdLibsVersion = "2024.11.06-07.11-d5ab9e24"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
-val micrometerRegistryPrometheusVersion = "1.13.3"
-val ktorVersion = "2.3.12"
-val awaitilityVersion = "4.2.0"
-val mockVersion = "1.13.9"
-val kGraphQLVersion = "0.19.0"
-val jsonassertVersion = "1.5.1"
+val ktorVersion = "3.0.1"
+val awaitilityVersion = "4.2.2"
+val mockVersion = "1.13.13"
+val jsonassertVersion = "1.5.3"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
 dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
+    implementation(project(":sykepenger-api-graphql"))
     implementation(project(":sykepenger-api-dto"))
+    implementation("com.github.navikt.tbd-libs:naisful-app:$tbdLibsVersion")
     implementation("com.github.navikt.tbd-libs:azure-token-client-default:$tbdLibsVersion")
     implementation("com.github.navikt.tbd-libs:spurtedu-client:$tbdLibsVersion")
     implementation(libs.bundles.jackson)
@@ -29,13 +29,8 @@ dependencies {
 
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
-    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-id:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
@@ -47,8 +42,8 @@ dependencies {
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+
+    testImplementation("com.github.navikt.tbd-libs:naisful-test-app:$tbdLibsVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("org.wiremock:wiremock:3.3.1") {
         exclude(group = "junit")
@@ -60,9 +55,6 @@ dependencies {
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
 
     testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
-
-    testImplementation("com.apurebase:kgraphql:$kGraphQLVersion")
-    testImplementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
 
     // for å kunne gjenopprette personer fra json
     testImplementation(project(":sykepenger-serde"))

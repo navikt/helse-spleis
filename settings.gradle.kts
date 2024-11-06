@@ -1,11 +1,13 @@
 rootProject.name = "sykepenger-spleis"
-include("jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-dto", "sykepenger-model", "sykepenger-model-dto", "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling", "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api")
+include("jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", "sykepenger-api-dto", "sykepenger-model", "sykepenger-model-dto",
+    "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling",
+    "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api")
 
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("testcontainers", "1.20.1")
-            version("rapids-and-rivers", "2024103107451730357158.c7f281c8bc12")
+            version("rapids-and-rivers", "2024110520091730833744.40f3b6aa7090")
             version("postgres", "42.7.3")
             version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")

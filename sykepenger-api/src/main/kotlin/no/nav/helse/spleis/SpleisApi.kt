@@ -14,6 +14,7 @@ import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
@@ -66,7 +67,7 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
         authenticate {
             get("/api/vedtaksperioder") {
                 withContext(Dispatchers.IO) {
-                    val fnr =  fnr(personDao)
+                    val fnr = fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     val dto = person.tilPersonDto { hendelseDao.hentAlleHendelser(fnr) }
                     call.respond(serializePersonForSporing(Person.gjenopprett(EmptyLog, dto)))
@@ -76,7 +77,7 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
     }
 }
 
-private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null): Long {
+private fun RoutingContext.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null): Long {
     val maskertId = call.parameters["maskertId"]
     val (fnr, aktorid) = call.identFraSpurteDu(spurteDuClient, maskertId) ?: call.identFraRequest()
     return fnr(personDao, fnr, aktorid) ?: throw BadRequestException("Mangler fnr eller aktorId i headers")

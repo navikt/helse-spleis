@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.azure.AzureTokenProvider
+import com.github.navikt.tbd_libs.result_object.getOrThrow
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -82,7 +83,7 @@ class SpekematClient(
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .header(CALL_ID_HEADER, callId)
-            .header("Authorization", "Bearer ${tokenProvider.bearerToken(scope).token}")
+            .header("Authorization", "Bearer ${tokenProvider.bearerToken(scope).getOrThrow().token}")
             .POST(HttpRequest.BodyPublishers.ofString(requestBody))
             .build()
     }

@@ -1,26 +1,18 @@
 package no.nav.helse.spleis.graphql
 
+import com.github.navikt.tbd_libs.naisful.test.TestContext
+import com.github.navikt.tbd_libs.naisful.test.naisfulTestApp
 import com.github.navikt.tbd_libs.test_support.TestDataSource
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.isSuccess
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.engine.connector
-import io.ktor.server.testing.testApplication
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
-import java.net.ServerSocket
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -41,7 +33,6 @@ import no.nav.helse.spleis.LokalePayload
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.databaseContainer
-import no.nav.helse.spleis.graphql.SchemaGenerator.Companion.IntrospectionQuery
 import no.nav.helse.spleis.lagApplikasjonsmodul
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.TestObservatør
@@ -83,7 +74,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             assertHeltLike(forventet, this)
         }
     }
-
 
     @Test
     fun `response på introspection`() = spleisApiTestApplication {
@@ -139,6 +129,10 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 .replace(TidsstempelRegex, TidsstempelMandagsfrø)
                 .replace(FagsystemIdRegex, FagsystemId)
 
+        @Language("JSON")
+        private const val IntrospectionQuery = """
+        {"query":"\n    query IntrospectionQuery {\n      __schema {\n        queryType { name }\n        mutationType { name }\n        subscriptionType { name }\n        types {\n          ...FullType\n        }\n        directives {\n          name\n          description\n          locations\n          args {\n            ...InputValue\n          }\n        }\n      }\n    }\n    fragment FullType on __Type {\n      kind\n      name\n      description\n      fields(includeDeprecated: true) {\n        name\n        description\n        args {\n          ...InputValue\n        }\n        type {\n          ...TypeRef\n        }\n        isDeprecated\n        deprecationReason\n      }\n      inputFields {\n        ...InputValue\n      }\n      interfaces {\n        ...TypeRef\n      }\n      enumValues(includeDeprecated: true) {\n        name\n        description\n        isDeprecated\n        deprecationReason\n      }\n      possibleTypes {\n        ...TypeRef\n      }\n    }\n    fragment InputValue on __InputValue {\n      name\n      description\n      type { ...TypeRef }\n      defaultValue\n    }\n    fragment TypeRef on __Type {\n      kind\n      name\n      ofType {\n        kind\n        name\n        ofType {\n          kind\n          name\n          ofType {\n            kind\n            name\n            ofType {\n              kind\n              name\n              ofType {\n                kind\n                name\n                ofType {\n                  kind\n                  name\n                  ofType {\n                    kind\n                    name\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n    ","operationName":"IntrospectionQuery"}
+        """
 
         @Language("JSON")
         private val detSpesialistFaktiskForventer = """
@@ -770,23 +764,17 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private fun String.readResource() =
             object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
 
-        private fun spleisApiTestApplication(spekematClient: SpekematClient = mockk<SpekematClient>(), testdata: (TestDataSource) -> Unit = { }, testblokk: suspend SpleisApiTestContext.() -> Unit) {
+        private fun spleisApiTestApplication(spekematClient: SpekematClient = mockk<SpekematClient>(), testdata: (TestDataSource) -> Unit = { }, testblokk: suspend TestContext.() -> Unit) {
             val testDataSource = databaseContainer.nyTilkobling()
-            val randomPort = ServerSocket(0).localPort
             testdata(testDataSource)
-            lagTestapplikasjon(spekematClient = spekematClient, port = randomPort, testDataSource = testDataSource, testblokk)
+            lagTestapplikasjon(spekematClient = spekematClient, testDataSource = testDataSource, testblokk)
             databaseContainer.droppTilkobling(testDataSource)
         }
 
-        private fun lagTestapplikasjon(spekematClient: SpekematClient, port: Int, testDataSource: TestDataSource, testblokk: suspend SpleisApiTestContext.() -> Unit) {
-            testApplication {
-                environment {
-                    connector {
-                        this.host = "localhost"
-                        this.port = port
-                    }
-                }
-                application {
+        private fun lagTestapplikasjon(spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {
+            val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+            naisfulTestApp(
+                testApplicationModule = {
                     authentication {
                         // setter opp en falsk autentisering som alltid svarer med en principal
                         // uavhengig om requesten inneholder bearer eller ei
@@ -797,49 +785,27 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         }
                     }
                     val dataSource = testDataSource.ds
-                    lagApplikasjonsmodul(spekematClient, null, { dataSource }, PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
-                }
-                startApplication()
-
-                val client = createClient {
-                    defaultRequest {
-                        this.port = port
-                    }
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
-                }
-
-                ventTilIsReadySvarerOk(client)
-
-                testblokk(SpleisApiTestContext(client))
-            }
-        }
-
-        private suspend fun ventTilIsReadySvarerOk(client: HttpClient) {
-            do {
-                val response = client.get("/isready")
-                println("Venter på at isready svarer OK… : ${response.status}")
-            } while (!response.status.isSuccess())
+                    lagApplikasjonsmodul(spekematClient, null, { dataSource }, meterRegistry)
+                },
+                objectMapper = objectMapper,
+                meterRegistry = meterRegistry,
+                testblokk = testblokk
+            )
         }
     }
 
-    data class SpleisApiTestContext(
-        val client: HttpClient
-    ) {
-        suspend fun request(
-            body: String,
-            forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
-            assertBlock: String.() -> Unit = {}
-        ): String {
-            return client
-                .post("/graphql") { setBody(body) }
-                .also { response ->
-                    assertEquals(forventetHttpStatusCode, response.status)
-                }
-                .bodyAsText()
-                .also(assertBlock)
-        }
+    suspend fun TestContext.request(
+        body: String,
+        forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
+        assertBlock: String.() -> Unit = {}
+    ): String {
+        return client
+            .post("/graphql") { setBody(body) }
+            .also { response ->
+                assertEquals(forventetHttpStatusCode, response.status)
+            }
+            .bodyAsText()
+            .also(assertBlock)
     }
 
     private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {

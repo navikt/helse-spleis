@@ -45,10 +45,10 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.dto.Utbetalingtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
-import no.nav.helse.spleis.speil.dto.Utbetalingtype
 
 internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
     query("person") {

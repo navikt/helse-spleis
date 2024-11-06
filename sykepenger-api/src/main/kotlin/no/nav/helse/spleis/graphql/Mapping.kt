@@ -43,6 +43,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.dto.Utbetalingtype as GraphQLUtbetalingtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
@@ -65,6 +66,7 @@ import no.nav.helse.spleis.speil.dto.UberegnetPeriode
 import no.nav.helse.spleis.speil.dto.Utbetaling
 import no.nav.helse.spleis.speil.dto.Utbetalingstatus
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
+import no.nav.helse.spleis.speil.dto.Utbetalingtype
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
@@ -190,7 +192,13 @@ private fun mapOppdrag(oppdrag: SpeilOppdrag): GraphQLOppdrag =
 private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     id = utbetaling.id,
     type = utbetaling.type.toString(),
-    typeEnum = utbetaling.type,
+    typeEnum = when (utbetaling.type) {
+        Utbetalingtype.UTBETALING -> GraphQLUtbetalingtype.UTBETALING
+        Utbetalingtype.ETTERUTBETALING -> GraphQLUtbetalingtype.ETTERUTBETALING
+        Utbetalingtype.ANNULLERING -> GraphQLUtbetalingtype.ANNULLERING
+        Utbetalingtype.REVURDERING -> GraphQLUtbetalingtype.REVURDERING
+        Utbetalingtype.FERIEPENGER -> GraphQLUtbetalingtype.FERIEPENGER
+    },
     status = utbetaling.status.toString(),
     statusEnum = when (utbetaling.status) {
         Utbetalingstatus.Annullert -> GraphQLUtbetalingstatus.Annullert

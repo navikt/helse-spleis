@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.AzureToken
 import com.github.navikt.tbd_libs.azure.AzureTokenProvider
 import com.github.navikt.tbd_libs.mock.MockHttpResponse
+import com.github.navikt.tbd_libs.result_object.Result
+import com.github.navikt.tbd_libs.result_object.ok
 import io.mockk.every
 import io.mockk.mockk
 import java.net.http.HttpClient
@@ -14,8 +16,8 @@ import org.junit.jupiter.api.Test
 
 class SpekematClientTest {
     private val azureTokenProvider = object : AzureTokenProvider {
-        override fun bearerToken(scope: String) = AzureToken("liksom-token", LocalDateTime.MAX)
-        override fun onBehalfOfToken(scope: String, token: String): AzureToken {
+        override fun bearerToken(scope: String) = AzureToken("liksom-token", LocalDateTime.MAX).ok()
+        override fun onBehalfOfToken(scope: String, token: String): Result<AzureToken> {
             throw NotImplementedError("ikke implementert i mock")
         }
     }

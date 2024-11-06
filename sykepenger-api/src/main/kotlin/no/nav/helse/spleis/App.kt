@@ -5,33 +5,18 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.naisful.naisApp
 import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
-import io.ktor.http.ContentType
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.callid.CallId
-import io.ktor.server.plugins.callid.callIdMdc
-import io.ktor.server.plugins.callloging.CallLogging
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.request.path
-import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import io.prometheus.metrics.model.registry.PrometheusRegistry
-import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
-import org.slf4j.event.Level
 
 internal val nyObjectmapper get() = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -55,32 +40,28 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource })
+    val app = createApp(config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource })
     app.start(wait = true)
 }
 
 internal fun createApp(
-    ktorConfig: KtorConfig,
     azureConfig: AzureAdAppConfig,
     spekematClient: SpekematClient,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
-    meterRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-) =
-    embeddedServer(
-        factory = Netty,
-        environment = applicationEngineEnvironment {
-            ktorConfig.configure(this)
-            log = logg
-            module {
-                azureAdAppAuthentication(azureConfig)
-                lagApplikasjonsmodul(spekematClient, spurteDuClient, dataSourceProvider, meterRegistry)
-            }
-        },
-        configure = {
-            this.responseWriteTimeoutSeconds = 30
-        }
-    )
+    meterRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+    port: Int = 8080
+) = naisApp(
+    meterRegistry = meterRegistry,
+    objectMapper = objectMapper,
+    applicationLogger = logg,
+    callLogger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging"),
+    port = port,
+    applicationModule = {
+        azureAdAppAuthentication(azureConfig)
+        lagApplikasjonsmodul(spekematClient, spurteDuClient, dataSourceProvider, meterRegistry)
+    }
+)
 
 internal fun Application.lagApplikasjonsmodul(
     spekematClient: SpekematClient,
@@ -88,21 +69,7 @@ internal fun Application.lagApplikasjonsmodul(
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry
 ) {
-    install(CallId) {
-        header("callId")
-        verify { it.isNotEmpty() }
-        generate { UUID.randomUUID().toString() }
-    }
-    install(CallLogging) {
-        logger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging")
-        level = Level.INFO
-        callIdMdc("callId")
-        disableDefaultColors()
-        filter { call -> call.request.path().startsWith("/api/") }
-    }
-    install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
     requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), meterRegistry)
-    nais(meterRegistry)
 
     val hendelseDao = HendelseDao(dataSourceProvider, meterRegistry)
     val personDao = PersonDao(dataSourceProvider, meterRegistry)

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.spleis.speil.dto.Utbetalingtype
 
 enum class GraphQLInntektstype {
     EnArbeidsgiver,
@@ -157,6 +156,14 @@ data class GraphQLUtbetaling(
     val personoppdrag: GraphQLOppdrag?,
     val vurdering: GraphQLVurdering?
 )
+
+enum class Utbetalingtype {
+    UTBETALING,
+    ETTERUTBETALING,
+    ANNULLERING,
+    REVURDERING,
+    FERIEPENGER
+}
 
 data class GraphQLDag(
     val dato: LocalDate,

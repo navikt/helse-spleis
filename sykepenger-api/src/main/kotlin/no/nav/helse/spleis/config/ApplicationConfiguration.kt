@@ -8,8 +8,6 @@ import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
 import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
-import io.ktor.server.engine.connector
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
@@ -18,10 +16,6 @@ import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.objectMapper
 
 internal class ApplicationConfiguration(env: Map<String, String> = System.getenv()) {
-    internal val ktorConfig = KtorConfig(
-        httpPort = env["HTTP_PORT"]?.toInt() ?: 8080
-    )
-
     internal val azureConfig = AzureAdAppConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
         issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
@@ -49,14 +43,6 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"],
         databaseName = env["DATABASE_SPLEIS_API_DATABASE"]
     )
-}
-
-internal class KtorConfig(private val httpPort: Int = 8080) {
-    fun configure(builder: ApplicationEngineEnvironmentBuilder) {
-        builder.connector {
-            port = httpPort
-        }
-    }
 }
 
 internal class AzureAdAppConfig(

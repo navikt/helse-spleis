@@ -27,7 +27,6 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.KtorConfig
 import org.junit.jupiter.api.Assertions
 
 internal class Applikasjonsservere(private val poolSize: Int) {
@@ -98,7 +97,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(KtorConfig(httpPort = randomPort), azureConfig, spekematClient, null, { testDataSource.ds }, registry)
+            createApp(azureConfig, spekematClient, null, { testDataSource.ds }, registry, randomPort)
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 
