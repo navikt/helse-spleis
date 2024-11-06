@@ -334,7 +334,7 @@ internal class HendelseMediator(
     }
 
     override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext) {
-        person(personidentifikator, message, aktørId, emptySet(), EmptyLog, null) { person  ->
+        person(personidentifikator, message, emptySet(), EmptyLog, null) { person  ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
             context.publish(avstemmer.tilJsonMessage().toJson().also {
@@ -521,7 +521,7 @@ internal class HendelseMediator(
         val subsumsjonMediator = SubsumsjonMediator(hendelse.behandlingsporing.fødselsnummer, message, versjonAvKode)
         val personMediator = PersonMediator(message, hendelse)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, hendelse.metadata.meldingsreferanseId, hendelse.behandlingsporing.fødselsnummer, hendelse.behandlingsporing.aktørId)
-        person(personidentifikator, message, hendelse.behandlingsporing.aktørId, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
+        person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person, aktivitetslogg)
@@ -529,12 +529,11 @@ internal class HendelseMediator(
         ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse, aktivitetslogg)
     }
 
-    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, aktørId: String, historiskeFolkeregisteridenter: Set<Personidentifikator>, subsumsjonslogg: Subsumsjonslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
+    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, historiskeFolkeregisteridenter: Set<Personidentifikator>, subsumsjonslogg: Subsumsjonslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(
             subsumsjonslogg = subsumsjonslogg,
             personidentifikator = personidentifikator,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
-            aktørId = aktørId,
             message = message,
             hendelseRepository = hendelseRepository,
             lagNyPerson = { personopplysninger?.person(subsumsjonslogg) },

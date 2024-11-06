@@ -23,7 +23,6 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         subsumsjonslogg: Subsumsjonslogg,
         personidentifikator: Personidentifikator,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
-        aktørId: String,
         message: HendelseMessage,
         hendelseRepository: HendelseRepository,
         lagNyPerson: () -> Person?,
@@ -46,7 +45,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
          */
         sessionOf(dataSource, returnGeneratedKey = true).use {
             it.transaction { txSession ->
-                val (personId, person) = hentPersonEllerOpprettNy(txSession, subsumsjonslogg, hendelseRepository, personidentifikator, aktørId, lagNyPerson, historiskeFolkeregisteridenter)
+                val (personId, person) = hentPersonEllerOpprettNy(txSession, subsumsjonslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
                     ?: return fantIkkePerson(personidentifikator)
 
                 knyttPersonTilHistoriskeIdenter(txSession, personId, personidentifikator, historiskeFolkeregisteridenter)
@@ -62,8 +61,8 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         }
     }
 
-    private fun hentPersonEllerOpprettNy(txSession: Session, subsumsjonslogg: Subsumsjonslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
-        return gjenopprettFraTidligereBehandling(txSession, subsumsjonslogg, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
+    private fun hentPersonEllerOpprettNy(txSession: Session, subsumsjonslogg: Subsumsjonslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, lagNyPerson: () -> Person?, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
+        return gjenopprettFraTidligereBehandling(txSession, subsumsjonslogg, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(txSession, lagNyPerson)
     }
 
     private fun gjenopprettFraTidligereBehandling(txSession: Session, subsumsjonslogg: Subsumsjonslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
@@ -75,9 +74,9 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         return personId to Person.gjenopprett(subsumsjonslogg, personInn, tidligereBehandlinger)
     }
 
-    private fun opprettNyPerson(txSession: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?): Pair<Long, Person>? {
+    private fun opprettNyPerson(txSession: Session, lagNyPerson: () -> Person?): Pair<Long, Person>? {
         val person = lagNyPerson() ?: return null
-        val personId = opprettNyPersonversjon(txSession, personidentifikator, aktørId, 0, "{}")
+        val personId = opprettNyPersonversjon(txSession, person.personidentifikator, person.aktørId, 0, "{}")
         return personId to person
     }
 
