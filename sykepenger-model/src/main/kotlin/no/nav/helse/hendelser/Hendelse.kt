@@ -3,8 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AvsenderDto
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 
 enum class Avsender {
     SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
@@ -27,57 +25,9 @@ enum class Avsender {
     }
 }
 
-sealed interface Hendelse : Aktivitetskontekst {
+sealed interface Hendelse {
     val behandlingsporing: Behandlingsporing
     val metadata: HendelseMetadata
-
-    override fun toSpesifikkKontekst() = SpesifikkKontekst(kontekstnavn, buildMap {
-        put("meldingsreferanseId", metadata.meldingsreferanseId.toString())
-        put("aktørId", behandlingsporing.aktørId)
-        put("fødselsnummer", behandlingsporing.fødselsnummer)
-        when (val sporing = behandlingsporing) {
-            is Behandlingsporing.Arbeidsgiver -> {
-                put("organisasjonsnummer", sporing.organisasjonsnummer)
-            }
-            is Behandlingsporing.Person -> {}
-        }
-    })
-}
-
-private val Hendelse.kontekstnavn get() = when (this) {
-    is Grunnbeløpsregulering -> "Grunnbeløpsregulering"
-    is OverstyrArbeidsforhold -> "OverstyrArbeidsforhold"
-    is OverstyrArbeidsgiveropplysninger -> "OverstyrArbeidsgiveropplysninger"
-    is SkjønnsmessigFastsettelse -> "SkjønnsmessigFastsettelse"
-    is AnmodningOmForkasting -> "AnmodningOmForkasting"
-    is AnnullerUtbetaling -> "AnnullerUtbetaling"
-    is AvbruttSøknad -> "AvbruttSøknad"
-    is Dødsmelding -> "Dødsmelding"
-    is ForkastSykmeldingsperioder -> "ForkastSykmeldingsperioder"
-    is GjenopplivVilkårsgrunnlag -> "GjenopplivVilkårsgrunnlag"
-    is IdentOpphørt -> "IdentOpphørt"
-    is Infotrygdendring -> "Infotrygdendring"
-    is Inntektsmelding -> "Inntektsmelding"
-    is InntektsmeldingerReplay -> "InntektsmeldingerReplay"
-    is KanIkkeBehandlesHer -> "KanIkkeBehandlesHer"
-    is Migrate -> "Migrate"
-    is MinimumSykdomsgradsvurderingMelding -> "MinimumSykdomsgradsvurderingMelding"
-    is PersonPåminnelse -> "PersonPåminnelse"
-    is Påminnelse -> "Påminnelse"
-    is Simulering -> "Simulering"
-    is OverstyrTidslinje -> "OverstyrTidslinje"
-    is Søknad -> "Søknad"
-    is SykepengegrunnlagForArbeidsgiver -> "SykepengegrunnlagForArbeidsgiver"
-    is Sykmelding -> "Sykmelding"
-    is UtbetalingHendelse -> "UtbetalingHendelse"
-    is Utbetalingpåminnelse -> "Utbetalingpåminnelse"
-    is Utbetalingsgodkjenning -> "Utbetalingsgodkjenning"
-    is Utbetalingshistorikk -> "Utbetalingshistorikk"
-    is UtbetalingshistorikkEtterInfotrygdendring -> "UtbetalingshistorikkEtterInfotrygdendring"
-    is UtbetalingshistorikkForFeriepenger -> "UtbetalingshistorikkForFeriepenger"
-    is VedtakFattet -> "VedtakFattet"
-    is Vilkårsgrunnlag -> "Vilkårsgrunnlag"
-    is Ytelser -> "Ytelser"
 }
 
 sealed interface Behandlingsporing {

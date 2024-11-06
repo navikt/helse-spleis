@@ -7,18 +7,25 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
 import org.slf4j.Logger
 
-internal sealed class HendelseMessage(private val packet: JsonMessage) {
+internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivitetskontekst {
     abstract val meldingsporing: Meldingsporing
     private val navn = packet["@event_name"].asText()
     protected val opprettet = packet["@opprettet"].asLocalDateTime()
     internal open val skalDuplikatsjekkes = true
 
     internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
+
+    final override fun toSpesifikkKontekst() =
+        SpesifikkKontekst(kontekstnavn, mapOf(
+            "meldingsreferanseId" to meldingsporing.id.toString()
+        ))
 
     internal fun lagreMelding(repository: HendelseRepository) {
         repository.lagreMelding(this, Personidentifikator(meldingsporing.fødselsnummer), meldingsporing.id, toJson())
@@ -60,4 +67,47 @@ internal fun asPeriode(jsonNode: JsonNode): Periode {
     val fom = jsonNode.path("fom").asLocalDate()
     val tom = jsonNode.path("tom").asLocalDate().takeUnless { it < fom } ?: fom
     return Periode(fom, tom)
+}
+
+private val HendelseMessage.kontekstnavn get() = when (this) {
+    is AnmodningOmForkastingMessage -> "AnmodningOmForkasting"
+    is AnnulleringMessage -> "AnnullerUtbetaling"
+    is AvbruttArbeidsledigSøknadMessage,
+    is AvbruttSøknadMessage -> "AvbruttSøknad"
+    is AvstemmingMessage -> "Avstemming"
+    is SimuleringMessage -> "Simulering"
+    is SykepengegrunnlagForArbeidsgiverMessage -> "SykepengegrunnlagForArbeidsgiver"
+    is UtbetalingMessage -> "UtbetalingHendelse"
+    is UtbetalingsgodkjenningMessage -> "Utbetalingsgodkjenning"
+    is UtbetalingshistorikkEtterInfotrygdendringMessage -> "UtbetalingshistorikkEtterInfotrygdendring"
+    is UtbetalingshistorikkForFeriepengerMessage -> "UtbetalingshistorikkForFeriepenger"
+    is UtbetalingshistorikkMessage -> "Utbetalingshistorikk"
+    is VilkårsgrunnlagMessage -> "Vilkårsgrunnlag"
+    is YtelserMessage -> "Ytelser"
+    is DødsmeldingMessage -> "Dødsmelding"
+    is ForkastSykmeldingsperioderMessage -> "ForkastSykmeldingsperioder"
+    is GjenopplivVilkårsgrunnlagMessage -> "GjenopplivVilkårsgrunnlag"
+    is GrunnbeløpsreguleringMessage -> "Grunnbeløpsregulering"
+    is IdentOpphørtMessage -> "IdentOpphørt"
+    is InfotrygdendringMessage -> "Infotrygdendring"
+    is InntektsmeldingMessage -> "Inntektsmelding"
+    is InntektsmeldingerReplayMessage -> "InntektsmeldingerReplay"
+    is MigrateMessage -> "Migrate"
+    is MinimumSykdomsgradVurdertMessage -> "MinimumSykdomsgradsvurderingMelding"
+    is OverstyrArbeidsforholdMessage -> "OverstyrArbeidsforhold"
+    is OverstyrArbeidsgiveropplysningerMessage -> "OverstyrArbeidsgiveropplysninger"
+    is OverstyrTidslinjeMessage -> "OverstyrTidslinje"
+    is PersonPåminnelseMessage -> "PersonPåminnelse"
+    is PåminnelseMessage -> "Påminnelse"
+    is SkjønnsmessigFastsettelseMessage -> "SkjønnsmessigFastsettelse"
+    is NyArbeidsledigSøknadMessage,
+    is NyFrilansSøknadMessage,
+    is NySelvstendigSøknadMessage,
+    is NySøknadMessage -> "Sykmelding"
+    is SendtSøknadArbeidsgiverMessage,
+    is SendtSøknadArbeidsledigMessage,
+    is SendtSøknadFrilansMessage,
+    is SendtSøknadNavMessage,
+    is SendtSøknadSelvstendigMessage -> "Søknad"
+    is UtbetalingpåminnelseMessage -> "Utbetalingpåminnelse"
 }

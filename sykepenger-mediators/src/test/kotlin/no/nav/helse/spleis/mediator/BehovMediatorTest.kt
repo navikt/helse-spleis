@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
@@ -17,6 +17,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.spleis.BehovMediator
+import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,6 +38,9 @@ class BehovMediatorTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
 
+        private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
+            it.requireKey("@event_name")
+        }, Meldingsporing(UUID.randomUUID(), fødselsnummer, aktørId))
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
@@ -66,8 +71,7 @@ class BehovMediatorTest {
     fun `grupperer behov`() {
         val aktivitetslogg = Aktivitetslogg()
 
-        val hendelse = TestHendelse()
-        aktivitetslogg.kontekst(hendelse)
+        aktivitetslogg.kontekst(eksempelmelding)
 
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         aktivitetslogg.kontekst(arbeidsgiver1)
@@ -87,7 +91,7 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(TestKontekst("Tilstand", "Tilstand 2"))
         aktivitetslogg.behov(Utbetaling, "Skal utbetale")
 
-        behovMediator.håndter(testRapid, hendelse, aktivitetslogg)
+        behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg)
 
         assertEquals(2, messages.size)
         assertEquals(fødselsnummer, messages[0].first)
@@ -103,8 +107,6 @@ class BehovMediatorTest {
             assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
             assertEquals(listOf("Sykepengehistorikk", "Foreldrepenger"), it["@behov"].map(JsonNode::asText))
             assertEquals("behov", it["@event_name"].asText())
-            assertEquals(aktørId, it["aktørId"].asText())
-            assertEquals(fødselsnummer, it["fødselsnummer"].asText())
             assertEquals("Arbeidsgiver 1", it["Arbeidsgiver"].asText())
             assertEquals("Vedtaksperiode 1", it["Vedtaksperiode"].asText())
             assertEquals(LocalDate.now().toString(), it[Sykepengehistorikk.name]["historikkFom"].asText())
@@ -119,8 +121,6 @@ class BehovMediatorTest {
             assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
             assertEquals(listOf("Utbetaling"), it["@behov"].map(JsonNode::asText))
             assertEquals("behov", it["@event_name"].asText())
-            assertEquals(aktørId, it["aktørId"].asText())
-            assertEquals(fødselsnummer, it["fødselsnummer"].asText())
             assertEquals("Arbeidsgiver 2", it["Arbeidsgiver"].asText())
             assertEquals("Vedtaksperiode 2", it["Vedtaksperiode"].asText())
         }
@@ -144,7 +144,7 @@ class BehovMediatorTest {
             )
         )
 
-        assertDoesNotThrow { behovMediator.håndter(testRapid, TestHendelse(), aktivitetslogg) }
+        assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
     }
 
     @Test
@@ -165,7 +165,7 @@ class BehovMediatorTest {
             )
         )
 
-        assertDoesNotThrow { behovMediator.håndter(testRapid, TestHendelse(), aktivitetslogg) }
+        assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
     }
 
     @Test
@@ -186,7 +186,7 @@ class BehovMediatorTest {
             )
         )
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, TestHendelse(), aktivitetslogg) }
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
     }
 
     @Test
@@ -199,7 +199,7 @@ class BehovMediatorTest {
         aktivitetslogg.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
         aktivitetslogg.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
 
-        assertDoesNotThrow { behovMediator.håndter(testRapid, TestHendelse(), aktivitetslogg) }
+        assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
     }
 
     @Test
@@ -212,7 +212,7 @@ class BehovMediatorTest {
         aktivitetslogg.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf("a" to 1))
         aktivitetslogg.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf("a" to 2))
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, TestHendelse(), aktivitetslogg) }
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
     }
 
     private class TestKontekst(
@@ -221,6 +221,4 @@ class BehovMediatorTest {
     ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
-
-    fun TestHendelse() = IdentOpphørt(UUID.randomUUID(), fødselsnummer, aktørId)
 }

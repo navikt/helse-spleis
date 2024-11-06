@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
@@ -20,8 +19,7 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
-    private val message: HendelseMessage,
-    private val hendelse: Hendelse
+    private val message: HendelseMessage
 ) : PersonObserver {
     private val meldinger = mutableListOf<Pakke>()
     private companion object {
@@ -454,12 +452,12 @@ internal class PersonMediator(
     }
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        this["aktørId"] = hendelse.behandlingsporing.aktørId
-        this["fødselsnummer"] = hendelse.behandlingsporing.fødselsnummer
+        this["aktørId"] = message.meldingsporing.aktørId
+        this["fødselsnummer"] = message.meldingsporing.fødselsnummer
     }
 
     private fun queueMessage(outgoingMessage: JsonMessage) {
-        queueMessage(hendelse.behandlingsporing.fødselsnummer, leggPåStandardfelter(outgoingMessage).toJson())
+        queueMessage(message.meldingsporing.fødselsnummer, leggPåStandardfelter(outgoingMessage).toJson())
     }
 
     private data class Pakke (
