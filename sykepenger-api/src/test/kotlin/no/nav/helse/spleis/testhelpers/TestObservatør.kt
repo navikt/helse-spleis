@@ -35,7 +35,6 @@ internal class TestObservatør : PersonObserver {
 
     override fun inntektsmeldingReplay(
         personidentifikator: Personidentifikator,
-        aktørId: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,

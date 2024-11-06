@@ -6,7 +6,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
@@ -101,7 +100,6 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
 
     override fun inntektsmeldingReplay(
         personidentifikator: Personidentifikator,
-        aktørId: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
@@ -113,7 +111,6 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     ) {
         replays.add(Forespørsel(
             fnr = personidentifikator.toString(),
-            aktørId = aktørId,
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,

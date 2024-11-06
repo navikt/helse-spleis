@@ -152,7 +152,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun inntektsmeldingReplay(
         personidentifikator: Personidentifikator,
-        aktørId: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
@@ -164,7 +163,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     ) {
         inntektsmeldingReplayEventer.add(Forespørsel(
             fnr = personidentifikator.toString(),
-            aktørId = aktørId,
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,

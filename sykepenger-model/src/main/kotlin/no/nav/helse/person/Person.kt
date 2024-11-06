@@ -529,7 +529,6 @@ class Person private constructor(
         observers.forEach {
             it.inntektsmeldingReplay(
                 personidentifikator = personidentifikator,
-                aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 skjæringstidspunkt = skjæringstidspunkt,
