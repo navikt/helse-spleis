@@ -17,10 +17,8 @@ internal class VedtaksperiodeVenter private constructor(
     private val organisasjonsnummer: String,
     private val hendelseIder: Set<UUID>) {
 
-    internal fun event(aktørId: String, fødselsnummer: String) =
+    internal fun event() =
         PersonObserver.VedtaksperiodeVenterEvent(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,

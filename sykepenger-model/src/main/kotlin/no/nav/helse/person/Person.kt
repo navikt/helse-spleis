@@ -174,6 +174,8 @@ class Person private constructor(
     var personidentifikator: Personidentifikator = personidentifikator
         private set
 
+    val fødselsnummer get() = personidentifikator.toString()
+
     private val observers = mutableListOf<PersonObserver>()
 
     internal fun view() = PersonView(
@@ -847,7 +849,7 @@ class Person private constructor(
     }
 
     internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
-        observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
+        observers.forEach { it.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
     }
 
     internal fun vedtaksperiodeOpprettet(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode, skjæringstidspunkt: LocalDate, opprettet: LocalDateTime) {

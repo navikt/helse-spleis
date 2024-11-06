@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.onsdag
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.BehandlingView.TilstandView.*
@@ -30,8 +29,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -83,8 +80,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -103,8 +98,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -128,8 +121,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -153,8 +144,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -177,8 +166,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -203,8 +190,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -232,8 +217,6 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId

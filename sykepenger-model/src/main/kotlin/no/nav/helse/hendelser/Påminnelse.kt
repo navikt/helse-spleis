@@ -61,8 +61,6 @@ class Påminnelse(
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(
             PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                fødselsnummer = behandlingsporing.fødselsnummer,
-                aktørId = behandlingsporing.aktørId,
                 organisasjonsnummer = behandlingsporing.organisasjonsnummer,
                 vedtaksperiodeId = UUID.fromString(vedtaksperiodeId)
             )

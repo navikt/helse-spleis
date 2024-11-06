@@ -198,8 +198,6 @@ internal class PersonMediator(
     }
 
     override fun nyVedtaksperiodeUtbetaling(
-        personidentifikator: Personidentifikator,
-        aktørId: String,
         organisasjonsnummer: String,
         utbetalingId: UUID,
         vedtaksperiodeId: UUID
@@ -424,7 +422,6 @@ internal class PersonMediator(
 
     override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
         queueMessage(JsonMessage.newMessage("sykefraværstilfelle_ikke_funnet", mapOf(
-            "fødselsnummer" to event.fødselsnummer,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
         )))
     }

@@ -103,7 +103,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
-    private val organisasjonsnummer: String,
+    val organisasjonsnummer: String,
     private val id: UUID,
     private val inntektshistorikk: Inntektshistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
@@ -299,8 +299,8 @@ internal class Arbeidsgiver private constructor(
                 subsumsjonslogg = subsumsjonslogg
             )
             val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
-            vedtaksperioder.addAll(dto.vedtaksperioder.map { Vedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
-            forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
+            vedtaksperioder.addAll(dto.vedtaksperioder.map { Vedtaksperiode.gjenopprett(person, arbeidsgiver, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
+            forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, arbeidsgiver, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
             return arbeidsgiver
         }
     }
@@ -327,29 +327,26 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
-        fødselsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
-    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+    ) = lagNyUtbetaling(aktivitetslogg, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
 
     internal fun lagRevurdering(
         aktivitetslogg: IAktivitetslogg,
-        fødselsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
     ): Utbetaling {
-        return lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.REVURDERING)
+        return lagNyUtbetaling(aktivitetslogg, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.REVURDERING)
     }
 
     private fun lagNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
-        fødselsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -364,7 +361,7 @@ internal class Arbeidsgiver private constructor(
 
         val (utbetalingen, annulleringer) = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,

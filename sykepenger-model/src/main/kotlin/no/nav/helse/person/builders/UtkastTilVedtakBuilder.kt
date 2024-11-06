@@ -17,8 +17,6 @@ import no.nav.helse.økonomi.Inntekt
 import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
-    private val fødselsnummer: String,
-    private val aktørId: String,
     private val vedtaksperiodeId: UUID,
     private val arbeidsgiver: String,
     private val kanForkastes: Boolean,
@@ -265,8 +263,6 @@ internal class UtkastTilVedtakBuilder(
         )
 
         val utkastTilVedtak = PersonObserver.UtkastTilVedtakEvent(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             behandlingId = behandlingId,
@@ -279,8 +275,6 @@ internal class UtkastTilVedtakBuilder(
         )
 
         fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = PersonObserver.AvsluttetMedVedtakEvent(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
             organisasjonsnummer = arbeidsgiver,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,

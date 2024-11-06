@@ -16,20 +16,15 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 interface PersonObserver {
     data class SykefraværstilfelleIkkeFunnet(
-        val fødselsnummer: String,
         val skjæringstidspunkt: LocalDate
     )
 
     data class VedtaksperiodeIkkeFunnetEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID
     )
 
     data class VedtaksperiodeEndretEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val gjeldendeTilstand: TilstandType,
@@ -42,8 +37,6 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeVenterEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -67,8 +60,6 @@ interface PersonObserver {
     }
 
     data class VedtaksperiodeForkastetEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val gjeldendeTilstand: TilstandType,
@@ -490,8 +481,6 @@ interface PersonObserver {
     }
 
     data class AvsluttetUtenVedtakEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -502,16 +491,12 @@ interface PersonObserver {
     )
 
     data class BehandlingLukketEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID
     )
 
     data class BehandlingForkastetEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -519,8 +504,6 @@ interface PersonObserver {
     )
 
     data class BehandlingOpprettetEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -544,8 +527,6 @@ interface PersonObserver {
     }
 
     data class UtkastTilVedtakEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val skjæringstidspunkt: LocalDate,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -571,8 +552,6 @@ interface PersonObserver {
     }
 
     data class AvsluttetMedVedtakEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -657,8 +636,6 @@ interface PersonObserver {
     fun nyBehandling(event: BehandlingOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
     fun nyVedtaksperiodeUtbetaling(
-        personidentifikator: Personidentifikator,
-        aktørId: String,
         organisasjonsnummer: String,
         utbetalingId: UUID,
         vedtaksperiodeId: UUID

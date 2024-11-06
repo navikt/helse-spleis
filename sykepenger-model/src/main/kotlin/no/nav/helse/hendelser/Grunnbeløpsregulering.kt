@@ -32,7 +32,6 @@ class Grunnbeløpsregulering(
     internal fun sykefraværstilfelleIkkeFunnet(observer: PersonObserver) {
         observer.sykefraværstilfelleIkkeFunnet(
             PersonObserver.SykefraværstilfelleIkkeFunnet(
-                fødselsnummer = behandlingsporing.fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )

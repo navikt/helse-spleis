@@ -51,10 +51,7 @@ internal class ForkastetVedtaksperiode(
 
         internal fun gjenopprett(
             person: Person,
-            aktørId: String,
-            fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
-            organisasjonsnummer: String,
             dto: ForkastetVedtaksperiodeInnDto,
             subsumsjonslogg: Subsumsjonslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
@@ -63,10 +60,7 @@ internal class ForkastetVedtaksperiode(
             return ForkastetVedtaksperiode(
                 vedtaksperiode = Vedtaksperiode.gjenopprett(
                     person = person,
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
                     arbeidsgiver = arbeidsgiver,
-                    organisasjonsnummer = organisasjonsnummer,
                     dto = dto.vedtaksperiode,
                     subsumsjonslogg = subsumsjonslogg,
                     grunnlagsdata = grunnlagsdata,

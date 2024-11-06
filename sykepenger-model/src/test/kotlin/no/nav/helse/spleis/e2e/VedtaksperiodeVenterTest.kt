@@ -3,8 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
-import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.tilGodkjenning
@@ -166,8 +164,6 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
             val forventetVedtaksperiode1 = PersonObserver.VedtaksperiodeVenterEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
@@ -186,8 +182,6 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 )
             )
             val forventetVedtaksperiode2 = PersonObserver.VedtaksperiodeVenterEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 2.vedtaksperiode,
                 behandlingId = inspektør(2.vedtaksperiode).behandlinger.last().id,
@@ -236,8 +230,6 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             ))
 
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = a2,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
@@ -266,8 +258,6 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             nyPeriode(januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,

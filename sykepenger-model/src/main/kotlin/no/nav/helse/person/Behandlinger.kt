@@ -200,14 +200,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun nyUtbetaling(
         vedtaksperiodeSomLagerUtbetaling: UUID,
-        fødselsnummer: String,
         arbeidsgiver: Arbeidsgiver,
         grunnlagsdata: VilkårsgrunnlagElement,
         aktivitetslogg: IAktivitetslogg,
         maksdatoresultat: Maksdatoresultat,
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
-        return behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
+        return behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
     }
 
     internal fun forkast(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
@@ -843,14 +842,21 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun utbetaling(
             vedtaksperiodeSomLagerUtbetaling: UUID,
-            fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             grunnlagsdata: VilkårsgrunnlagElement,
             aktivitetslogg: IAktivitetslogg,
             maksdatoresultat: Maksdatoresultat,
             utbetalingstidslinje: Utbetalingstidslinje
         ): Utbetalingstidslinje {
-            return tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
+            return tilstand.utbetaling(
+                this,
+                vedtaksperiodeSomLagerUtbetaling,
+                arbeidsgiver,
+                grunnlagsdata,
+                aktivitetslogg,
+                maksdatoresultat,
+                utbetalingstidslinje
+            )
         }
 
         private fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Utbetaling? {
@@ -860,7 +866,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun lagOmgjøring(
             vedtaksperiodeSomLagerUtbetaling: UUID,
-            fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             grunnlagsdata: VilkårsgrunnlagElement,
             aktivitetslogg: IAktivitetslogg,
@@ -870,7 +875,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val strategi = Arbeidsgiver::lagUtbetaling
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
-                fødselsnummer,
                 arbeidsgiver,
                 grunnlagsdata,
                 aktivitetslogg,
@@ -882,7 +886,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         private fun lagUtbetaling(
             vedtaksperiodeSomLagerUtbetaling: UUID,
-            fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             grunnlagsdata: VilkårsgrunnlagElement,
             aktivitetslogg: IAktivitetslogg,
@@ -893,7 +896,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             // TODO: bør sende med beregnet AGP slik at utbetalingskoden vet hvilket oppdrag som skal bygges videre på
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
-                fødselsnummer,
                 arbeidsgiver,
                 grunnlagsdata,
                 aktivitetslogg,
@@ -905,7 +907,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         private fun lagRevurdering(
             vedtaksperiodeSomLagerUtbetaling: UUID,
-            fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             grunnlagsdata: VilkårsgrunnlagElement,
             aktivitetslogg: IAktivitetslogg,
@@ -915,7 +916,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val strategi = Arbeidsgiver::lagRevurdering
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
-                fødselsnummer,
                 arbeidsgiver,
                 grunnlagsdata,
                 aktivitetslogg,
@@ -927,16 +927,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         private fun lagUtbetaling(
             vedtaksperiodeSomLagerUtbetaling: UUID,
-            fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             grunnlagsdata: VilkårsgrunnlagElement,
             aktivitetslogg: IAktivitetslogg,
             maksdatoresultat: Maksdatoresultat,
             utbetalingstidslinje: Utbetalingstidslinje,
-            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, fødselsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
+            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
             nyTilstand: Tilstand
         ): Utbetalingstidslinje {
-            val denNyeUtbetalingen = strategi(arbeidsgiver, aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdatoresultat.maksdato, maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, periode)
+            val denNyeUtbetalingen = strategi(arbeidsgiver, aktivitetslogg, utbetalingstidslinje, maksdatoresultat.maksdato, maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, periode)
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
             nyEndring(gjeldende.kopierMedUtbetaling(maksdatoresultat, utbetalingstidslinje, denNyeUtbetalingen, grunnlagsdata))
             tilstand(nyTilstand, aktivitetslogg)
@@ -1356,7 +1355,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
-            fun utbetaling(behandling: Behandling, vedtaksperiodeSomLagerUtbetaling: UUID, fødselsnummer: String, arbeidsgiver: Arbeidsgiver, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg, maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
+            fun utbetaling(
+                behandling: Behandling,
+                vedtaksperiodeSomLagerUtbetaling: UUID,
+                arbeidsgiver: Arbeidsgiver,
+                grunnlagsdata: VilkårsgrunnlagElement,
+                aktivitetslogg: IAktivitetslogg,
+                maksdatoresultat: Maksdatoresultat,
+                utbetalingstidslinje: Utbetalingstidslinje
+            ): Utbetalingstidslinje {
                 error("Støtter ikke å opprette utbetaling i $this")
             }
             fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
@@ -1414,14 +1421,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun utbetaling(
                     behandling: Behandling,
                     vedtaksperiodeSomLagerUtbetaling: UUID,
-                    fødselsnummer: String,
                     arbeidsgiver: Arbeidsgiver,
                     grunnlagsdata: VilkårsgrunnlagElement,
                     aktivitetslogg: IAktivitetslogg,
                     maksdatoresultat: Maksdatoresultat,
                     utbetalingstidslinje: Utbetalingstidslinje
                 ): Utbetalingstidslinje {
-                    return behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
+                    return behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
                 }
 
                 override fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
@@ -1435,14 +1441,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun utbetaling(
                     behandling: Behandling,
                     vedtaksperiodeSomLagerUtbetaling: UUID,
-                    fødselsnummer: String,
                     arbeidsgiver: Arbeidsgiver,
                     grunnlagsdata: VilkårsgrunnlagElement,
                     aktivitetslogg: IAktivitetslogg,
                     maksdatoresultat: Maksdatoresultat,
                     utbetalingstidslinje: Utbetalingstidslinje
                 ): Utbetalingstidslinje {
-                    return behandling.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
+                    return behandling.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
                 }
 
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =
@@ -1467,14 +1472,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun utbetaling(
                     behandling: Behandling,
                     vedtaksperiodeSomLagerUtbetaling: UUID,
-                    fødselsnummer: String,
                     arbeidsgiver: Arbeidsgiver,
                     grunnlagsdata: VilkårsgrunnlagElement,
                     aktivitetslogg: IAktivitetslogg,
                     maksdatoresultat: Maksdatoresultat,
                     utbetalingstidslinje: Utbetalingstidslinje
                 ): Utbetalingstidslinje {
-                    return behandling.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
+                    return behandling.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
                 }
             }
             data object Beregnet : Tilstand {

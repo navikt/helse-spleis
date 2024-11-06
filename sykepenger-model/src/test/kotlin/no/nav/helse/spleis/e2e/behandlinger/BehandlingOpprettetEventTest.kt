@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -32,8 +31,6 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 val behandlingId = behandlinger.single().id
                 val forventetBehandlingEvent = PersonObserver.BehandlingOpprettetEvent(
-                    fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                    aktørId = "42",
                     organisasjonsnummer = a1,
                     vedtaksperiodeId = 1.vedtaksperiode,
                     søknadIder = setOf(søknadId),

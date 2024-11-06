@@ -286,8 +286,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = START,
@@ -318,8 +316,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
@@ -342,8 +338,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = START,
@@ -366,8 +360,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = START,
@@ -389,8 +381,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
@@ -413,8 +403,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = START,
@@ -440,8 +428,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         ), observatør.søknadHåndtert)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = START,

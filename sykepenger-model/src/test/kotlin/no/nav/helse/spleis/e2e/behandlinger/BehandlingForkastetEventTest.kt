@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -29,8 +28,6 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId,
@@ -50,8 +47,6 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId,
@@ -72,8 +67,6 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId,
@@ -94,8 +87,6 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId,
@@ -124,8 +115,6 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
             val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId,

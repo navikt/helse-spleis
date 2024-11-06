@@ -46,7 +46,7 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
     @Test
     fun `sier ifra om det blir forsøkt grunnbeløpsregulert på sykefraværstilfelle som ikke finnes`() {
         håndterGrunnbeløpsregulering(1.januar)
-        assertEquals(PersonObserver.SykefraværstilfelleIkkeFunnet(UNG_PERSON_FNR_2018.toString(), 1.januar), observatør.sykefraværstilfelleIkkeFunnet.single())
+        assertEquals(PersonObserver.SykefraværstilfelleIkkeFunnet(1.januar), observatør.sykefraværstilfelleIkkeFunnet.single())
     }
 
     @Test
