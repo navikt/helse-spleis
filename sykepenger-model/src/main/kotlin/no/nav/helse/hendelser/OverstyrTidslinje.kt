@@ -38,15 +38,11 @@ enum class Dagtype {
 
 class OverstyrTidslinje(
     meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String,
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime,
 ) : SykdomstidslinjeHendelse() {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

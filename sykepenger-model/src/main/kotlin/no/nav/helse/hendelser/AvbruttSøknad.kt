@@ -8,12 +8,8 @@ class AvbruttSøknad(
     private val periode: Periode,
     meldingsreferanseId: UUID,
     orgnummer: String,
-    fødselsnummer: String,
-    aktørId: String,
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

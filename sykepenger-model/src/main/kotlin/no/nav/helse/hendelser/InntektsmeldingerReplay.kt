@@ -8,15 +8,11 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class InntektsmeldingerReplay(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val inntektsmeldinger: List<Inntektsmelding>
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

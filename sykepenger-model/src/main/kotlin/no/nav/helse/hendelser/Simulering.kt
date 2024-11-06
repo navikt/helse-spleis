@@ -9,8 +9,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde
 class Simulering(
     meldingsreferanseId: UUID,
     val vedtaksperiodeId: String,
-    aktørId: String,
-    fødselsnummer: String,
     orgnummer: String,
     override val fagsystemId: String,
     fagområde: String,
@@ -20,8 +18,6 @@ class Simulering(
     override val utbetalingId: UUID
 ) : Hendelse, SimuleringHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

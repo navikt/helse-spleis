@@ -41,8 +41,6 @@ import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
     meldingsreferanseId: UUID,
-    fnr: String,
-    aktørId: String,
     private val orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
@@ -62,8 +60,6 @@ class Søknad(
     private val tilkomneInntekter: List<TilkommenInntekt>
 ) : SykdomstidslinjeHendelse() {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = HendelseMetadata(

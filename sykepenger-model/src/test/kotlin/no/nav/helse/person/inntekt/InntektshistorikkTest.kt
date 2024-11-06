@@ -2,7 +2,6 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
@@ -43,8 +42,6 @@ internal class InntektshistorikkTest {
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            aktørId = AKTØRID,
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = ORGNUMMER
         )
     }

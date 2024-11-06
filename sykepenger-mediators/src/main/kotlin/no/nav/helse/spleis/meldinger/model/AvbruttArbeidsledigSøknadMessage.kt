@@ -17,8 +17,6 @@ internal class AvbruttArbeidsledigSøknadMessage(packet: JsonMessage, override v
     private val avbruttSøknad
         get() = AvbruttSøknad(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             orgnummer = organisasjonsnummer,
             periode = periode
         )

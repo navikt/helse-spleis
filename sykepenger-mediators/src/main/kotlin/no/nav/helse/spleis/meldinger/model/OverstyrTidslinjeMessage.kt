@@ -29,8 +29,6 @@ internal class OverstyrTidslinjeMessage(packet: JsonMessage, override val meldin
         mediator.behandle(
             this, OverstyrTidslinje(
                 meldingsreferanseId = meldingsporing.id,
-                fødselsnummer = meldingsporing.fødselsnummer,
-                aktørId = meldingsporing.aktørId,
                 organisasjonsnummer = organisasjonsnummer,
                 dager = dager,
                 opprettet = opprettet

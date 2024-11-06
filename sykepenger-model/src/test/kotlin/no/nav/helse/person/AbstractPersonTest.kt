@@ -40,8 +40,6 @@ internal abstract class AbstractPersonTest {
 
         val a1: String = ORGNUMMER
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            aktørId = AKTØRID,
-            personidentifikator = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER
         )
         val a2: String = "654321987"
@@ -51,7 +49,7 @@ internal abstract class AbstractPersonTest {
         private fun overgangFraInfotrygdPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
-                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
                     InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
                         UUID.randomUUID(),
@@ -67,7 +65,7 @@ internal abstract class AbstractPersonTest {
         private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
-                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
                     InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
                         UUID.randomUUID(),

@@ -23,8 +23,6 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val påminnelse
         get() = Påminnelse(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             antallGangerPåminnet = antallGangerPåminnet,

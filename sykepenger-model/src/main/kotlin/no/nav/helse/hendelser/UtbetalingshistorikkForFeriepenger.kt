@@ -14,18 +14,13 @@ import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag
 
 class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

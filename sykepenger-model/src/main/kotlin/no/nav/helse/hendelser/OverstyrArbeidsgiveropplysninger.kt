@@ -14,17 +14,12 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 
 class OverstyrArbeidsgiveropplysninger(
     meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String,
     internal val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime,
     private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
 ) : Hendelse, OverstyrInntektsgrunnlag {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.SAKSBEHANDLER,

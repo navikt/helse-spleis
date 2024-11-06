@@ -34,8 +34,6 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
         mediator.behandle(
             this, OverstyrArbeidsgiveropplysninger(
                 meldingsreferanseId = meldingsporing.id,
-                fødselsnummer = meldingsporing.fødselsnummer,
-                aktørId = meldingsporing.aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiveropplysninger = arbeidsgiveropplysninger,
                 opprettet = opprettet,

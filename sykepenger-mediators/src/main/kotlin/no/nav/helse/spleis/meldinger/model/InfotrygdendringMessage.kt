@@ -10,9 +10,7 @@ internal class InfotrygdendringMessage(packet: JsonMessage, override val melding
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(this, Infotrygdendring(
-            meldingsreferanseId = meldingsporing.id,
-            fødselsnummer = meldingsporing.fødselsnummer,
-            aktørId = meldingsporing.aktørId
+            meldingsreferanseId = meldingsporing.id
         ), context)
     }
 

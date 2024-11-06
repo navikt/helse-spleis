@@ -8,14 +8,9 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class Dødsmelding(
     meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String,
     private val dødsdato: LocalDate
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
 
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(

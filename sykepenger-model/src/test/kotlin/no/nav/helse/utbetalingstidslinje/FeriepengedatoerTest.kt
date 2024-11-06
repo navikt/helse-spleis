@@ -363,8 +363,6 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
     ) =
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             utbetalinger = utbetalinger,
             feriepengehistorikk = emptyList(),
             arbeidskategorikoder = arbeidskategorikoder,

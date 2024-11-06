@@ -73,8 +73,6 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage, ov
     private fun utbetalingshistorikkForFeriepenger() =
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             utbetalinger = utbetalinger,
             feriepengehistorikk = feriepengehistorikk,
             arbeidskategorikoder = arbeidskategorikoder,

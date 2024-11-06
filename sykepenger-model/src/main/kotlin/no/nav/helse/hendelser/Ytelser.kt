@@ -13,8 +13,6 @@ import no.nav.helse.sykdomstidslinje.merge
 
 class Ytelser(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val foreldrepenger: Foreldrepenger,
@@ -27,8 +25,6 @@ class Ytelser(
     private val dagpenger: Dagpenger
 ) : Hendelse, SykdomshistorikkHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

@@ -9,15 +9,10 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
 class UtbetalingshistorikkEtterInfotrygdendring(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     private val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYSTEM,

@@ -36,8 +36,6 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
     private fun utbetalingshistorikkEtterInfotrygdendring() =
         UtbetalingshistorikkEtterInfotrygdendring(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             element = infotrygdhistorikk(meldingsporing.id),
             besvart = besvart
         )

@@ -42,7 +42,6 @@ class Inntektsmelding(
     meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
     orgnummer: String,
-    fødselsnummer: String,
     private val aktørId: String,
     private val førsteFraværsdag: LocalDate?,
     private val inntektsdato: LocalDate?,
@@ -72,8 +71,6 @@ class Inntektsmelding(
     }
 
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = HendelseMetadata(

@@ -16,8 +16,6 @@ internal class AnnulleringMessage(packet: JsonMessage, override val meldingspori
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
             meldingsporing.id,
-            meldingsporing.aktørId,
-            meldingsporing.fødselsnummer,
             organisasjonsnummer,
             utbetalingId,
             saksbehandler.ident,

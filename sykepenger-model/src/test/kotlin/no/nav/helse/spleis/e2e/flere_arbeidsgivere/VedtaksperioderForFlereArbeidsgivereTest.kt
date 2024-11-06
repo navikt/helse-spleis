@@ -234,8 +234,6 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             meldingsreferanseId = meldingsreferanseId,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             skjæringstidspunkt = skjæringstidspunkt,
-            aktørId = AKTØRID,
-            personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(

@@ -22,8 +22,6 @@ internal class UtbetalingpåminnelseMessage(packet: JsonMessage, override val me
     private val påminnelse
         get() = Utbetalingpåminnelse(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
             antallGangerPåminnet = antallGangerPåminnet,

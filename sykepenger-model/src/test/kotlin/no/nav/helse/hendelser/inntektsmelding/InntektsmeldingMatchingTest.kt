@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
-import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -251,7 +250,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private companion object {
-        private val fabrikk = ArbeidsgiverHendelsefabrikk("42", Personidentifikator("11"), "a1")
+        private val fabrikk = ArbeidsgiverHendelsefabrikk("a1")
         private fun inntektsmelding(
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode

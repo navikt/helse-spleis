@@ -16,9 +16,7 @@ internal class AnmodningOmForkastingMessage(packet: JsonMessage, override val me
 
     private val anmodning = AnmodningOmForkasting(
         meldingsreferanseId = meldingsporing.id,
-        aktørId = meldingsporing.aktørId,
         organisasjonsnummer = organisasjonsnummer,
-        fødselsnummer = meldingsporing.fødselsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         force = force
     )

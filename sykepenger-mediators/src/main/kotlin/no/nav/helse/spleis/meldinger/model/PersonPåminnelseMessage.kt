@@ -10,11 +10,7 @@ import no.nav.helse.spleis.Meldingsporing
 internal class PersonPåminnelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
     private val påminnelse
-        get() = PersonPåminnelse(
-            meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer
-        )
+        get() = PersonPåminnelse(meldingsreferanseId = meldingsporing.id)
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(this, påminnelse, context)

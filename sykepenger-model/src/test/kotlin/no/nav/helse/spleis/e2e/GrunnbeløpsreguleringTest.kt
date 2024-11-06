@@ -87,7 +87,7 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
     }
 
     private fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {
-        ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR_2018, ORGNUMMER).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
+        ArbeidsgiverHendelsefabrikk(ORGNUMMER).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
     }
 
     private fun hackGrunnbeløp(fra: Int, til: Int) {

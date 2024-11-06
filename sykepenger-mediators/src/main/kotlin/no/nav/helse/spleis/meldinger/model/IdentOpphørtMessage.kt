@@ -15,9 +15,7 @@ internal class IdentOpphørtMessage(packet: JsonMessage, override val meldingspo
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(Personidentifikator(nyttFødselsnummer), this, IdentOpphørt(
-            meldingsreferanseId = meldingsporing.id,
-            fødselsnummer = meldingsporing.fødselsnummer,
-            aktørId = meldingsporing.aktørId
+            meldingsreferanseId = meldingsporing.id
         ), nyAktørId, gamleIdenter, context)
     }
 

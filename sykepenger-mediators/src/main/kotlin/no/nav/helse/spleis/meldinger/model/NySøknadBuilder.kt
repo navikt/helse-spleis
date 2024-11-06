@@ -22,8 +22,6 @@ internal class NySøknadBuilder : SøknadBuilder() {
 
     internal fun build(meldingsporing: Meldingsporing) = Sykmelding(
         meldingsreferanseId = meldingsporing.id,
-        fnr = meldingsporing.fødselsnummer,
-        aktørId = meldingsporing.aktørId,
         orgnummer = organisasjonsnummer,
         sykeperioder = sykemeldingsperioder
     )

@@ -6,8 +6,6 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class Utbetalingsgodkjenning(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     organisasjonsnummer: String,
     override val utbetalingId: UUID,
     private val vedtaksperiodeId: String,
@@ -18,8 +16,6 @@ class Utbetalingsgodkjenning(
     automatiskBehandling: Boolean
 ) : Behandlingsavgjørelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

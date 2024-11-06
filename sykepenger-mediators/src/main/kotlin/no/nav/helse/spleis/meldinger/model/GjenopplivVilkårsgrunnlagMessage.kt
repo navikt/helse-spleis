@@ -19,8 +19,6 @@ internal class GjenopplivVilkårsgrunnlagMessage(packet: JsonMessage, override v
     private val gjenopplivVilkårsgrunnlag
         get() = GjenopplivVilkårsgrunnlag(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             nyttSkjæringstidspunkt = nyttSkjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger

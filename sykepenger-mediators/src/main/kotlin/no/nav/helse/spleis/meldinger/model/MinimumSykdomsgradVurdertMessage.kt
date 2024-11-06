@@ -17,9 +17,7 @@ internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage, override va
             MinimumSykdomsgradsvurderingMelding(
                 perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK.toSet(),
                 perioderMedMinimumSykdomsgradVurdertIkkeOK = perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet(),
-                meldingsreferanseId = meldingsporing.id,
-                fødselsnummer = meldingsporing.fødselsnummer,
-                aktørId = meldingsporing.aktørId
+                meldingsreferanseId = meldingsporing.id
             ),
             context
         )

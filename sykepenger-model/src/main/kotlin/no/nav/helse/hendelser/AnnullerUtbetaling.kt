@@ -3,13 +3,10 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 class AnnullerUtbetaling(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     organisasjonsnummer: String,
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,
@@ -17,8 +14,6 @@ class AnnullerUtbetaling(
     internal val opprettet: LocalDateTime
 ) : Hendelse, AnnullerUtbetalingHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

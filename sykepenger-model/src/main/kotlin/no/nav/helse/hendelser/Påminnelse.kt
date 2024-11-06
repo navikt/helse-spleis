@@ -10,8 +10,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Påminnelse(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val antallGangerPåminnet: Int,
@@ -24,8 +22,6 @@ class Påminnelse(
     opprettet: LocalDateTime
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

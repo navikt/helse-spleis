@@ -37,39 +37,29 @@ internal class PersonHendelsefabrikk(
         MinimumSykdomsgradsvurderingMelding(
             perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK,
             perioderMedMinimumSykdomsgradVurdertIkkeOK = perioderMedMinimumSykdomsgradVurdertIkkeOK,
-            meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId
+            meldingsreferanseId = UUID.randomUUID()
         )
 
     internal fun lagDødsmelding(dødsdato: LocalDate) =
         Dødsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
             dødsdato = dødsdato
         )
     internal fun lagOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         OverstyrArbeidsforhold(
             meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList(),
             opprettet = LocalDateTime.now()
         )
     internal fun lagPåminnelse() =
         PersonPåminnelse(
-            meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId
+            meldingsreferanseId = UUID.randomUUID()
         )
 
     internal fun lagSkjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID) =
         SkjønnsmessigFastsettelse(
             meldingsreferanseId = meldingsreferanseId,
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(meldingsreferanseId, skjæringstidspunkt),
             opprettet = LocalDateTime.now()
@@ -79,8 +69,6 @@ internal class PersonHendelsefabrikk(
         val opprettet = LocalDateTime.now()
         return OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsreferanseId,
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt),
             refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(skjæringstidspunkt, meldingsreferanseId, opprettet),
@@ -91,8 +79,6 @@ internal class PersonHendelsefabrikk(
     internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             utbetalinger = emptyList(),
             feriepengehistorikk = emptyList(),
             arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),

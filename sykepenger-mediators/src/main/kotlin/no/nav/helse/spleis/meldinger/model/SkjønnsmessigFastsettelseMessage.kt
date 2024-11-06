@@ -23,8 +23,6 @@ internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage, override v
         mediator.behandle(
             this, SkjønnsmessigFastsettelse(
                 meldingsreferanseId = meldingsporing.id,
-                fødselsnummer = meldingsporing.fødselsnummer,
-                aktørId = meldingsporing.aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiveropplysninger = arbeidsgiveropplysninger,
                 opprettet = opprettet

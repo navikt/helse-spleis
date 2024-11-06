@@ -51,7 +51,6 @@ internal open class InntektsmeldingMessage(packet: JsonMessage, override val mel
             meldingsreferanseId = meldingsporing.id,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            fødselsnummer = meldingsporing.fødselsnummer,
             aktørId = meldingsporing.aktørId,
             førsteFraværsdag = førsteFraværsdag,
             inntektsdato = inntektsdato,

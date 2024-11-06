@@ -114,8 +114,6 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
     private fun utbetalingshistorikk() =
         Utbetalingshistorikk(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             element = infotrygdhistorikk(meldingsporing.id),

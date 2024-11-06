@@ -7,8 +7,6 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class KanIkkeBehandlesHer(
     meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     override val utbetalingId: UUID,
@@ -18,8 +16,6 @@ class KanIkkeBehandlesHer(
     override val automatisert: Boolean
 ) : Behandlingsavgjørelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

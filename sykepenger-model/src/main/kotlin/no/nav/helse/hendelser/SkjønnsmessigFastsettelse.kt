@@ -8,16 +8,11 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysni
 
 class SkjønnsmessigFastsettelse(
     meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime
 ) : Hendelse, OverstyrInntektsgrunnlag {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.SAKSBEHANDLER,

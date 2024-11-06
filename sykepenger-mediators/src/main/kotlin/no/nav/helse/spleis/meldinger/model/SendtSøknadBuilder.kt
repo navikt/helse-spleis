@@ -28,8 +28,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     internal fun build(meldingsporing: Meldingsporing) = Søknad(
         meldingsreferanseId = meldingsporing.id,
-        fnr = meldingsporing.fødselsnummer,
-        aktørId = meldingsporing.aktørId,
         orgnummer = organisasjonsnummer,
         perioder = perioder,
         andreInntektskilder = harAndreInntektskilder,

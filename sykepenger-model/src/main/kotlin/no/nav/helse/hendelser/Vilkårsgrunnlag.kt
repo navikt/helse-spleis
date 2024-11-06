@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
@@ -20,8 +19,6 @@ class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: String,
     private val skjæringstidspunkt: LocalDate,
-    aktørId: String,
-    personidentifikator: Personidentifikator,
     orgnummer: String,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
@@ -29,8 +26,6 @@ class Vilkårsgrunnlag(
     private val arbeidsforhold: List<Arbeidsforhold>
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = personidentifikator.toString(),
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

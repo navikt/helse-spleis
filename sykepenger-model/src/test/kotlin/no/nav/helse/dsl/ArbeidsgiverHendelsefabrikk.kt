@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.Temporal
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -60,11 +59,7 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 
 
-internal class ArbeidsgiverHendelsefabrikk(
-    private val aktørId: String,
-    private val personidentifikator: Personidentifikator,
-    private val organisasjonsnummer: String
-) {
+internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
@@ -76,8 +71,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     ): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = id,
-            fnr = personidentifikator.toString(),
-            aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             sykeperioder = listOf(*sykeperioder)
         ).apply {
@@ -114,8 +107,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         }
         return Søknad(
             meldingsreferanseId = id,
-            fnr = personidentifikator.toString(),
-            aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
@@ -139,7 +130,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     }
 
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
-        AvbruttSøknad(sykmeldingsperiode, UUID.randomUUID(), organisasjonsnummer, personidentifikator.toString(), aktørId)
+        AvbruttSøknad(sykmeldingsperiode, UUID.randomUUID(), organisasjonsnummer)
 
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
@@ -158,8 +149,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 meldingsreferanseId = id,
                 refusjon = refusjon,
                 orgnummer = organisasjonsnummer,
-                fødselsnummer = personidentifikator.toString(),
-                aktørId = aktørId,
+                aktørId = "aktørId",
                 førsteFraværsdag = førsteFraværsdag,
                 inntektsdato = null,
                 beregnetInntekt = beregnetInntekt,
@@ -175,8 +165,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         }
         val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
             inntektsmeldingId = UUID.randomUUID().toString(),
-            arbeidstakerFnr = personidentifikator.toString(),
-            arbeidstakerAktorId = aktørId,
+            arbeidstakerFnr = "fnr",
+            arbeidstakerAktorId = "aktør",
             virksomhetsnummer = organisasjonsnummer,
             arbeidsgiverFnr = null,
             arbeidsgiverAktorId = null,
@@ -227,8 +217,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 meldingsreferanseId = id,
                 refusjon = refusjon,
                 orgnummer = organisasjonsnummer,
-                fødselsnummer = personidentifikator.toString(),
-                aktørId = aktørId,
+                aktørId = "aktør",
                 førsteFraværsdag = førsteFraværsdag,
                 inntektsdato = null,
                 beregnetInntekt = beregnetInntekt,
@@ -244,8 +233,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         }
         val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
             inntektsmeldingId = UUID.randomUUID().toString(),
-            arbeidstakerFnr = personidentifikator.toString(),
-            arbeidstakerAktorId = aktørId,
+            arbeidstakerFnr = "fnr",
+            arbeidstakerAktorId = "aktørId",
             virksomhetsnummer = organisasjonsnummer,
             arbeidsgiverFnr = null,
             arbeidsgiverAktorId = null,
@@ -281,8 +270,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
         InntektsmeldingerReplay(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = forespørsel.vedtaksperiodeId,
             inntektsmeldinger = inntektsmeldinger
@@ -300,8 +287,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             element = InfotrygdhistorikkElement.opprett(
@@ -322,8 +307,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         UtbetalingshistorikkEtterInfotrygdendring(
             meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = UUID.randomUUID(),
@@ -339,8 +322,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
-            aktørId = aktørId,
-            personidentifikator = personidentifikator,
             orgnummer = organisasjonsnummer,
             inntekter = ArbeidsgiverInntekt(organisasjonsnummer, inntekter)
         )
@@ -358,8 +339,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             skjæringstidspunkt = skjæringstidspunkt,
-            aktørId = aktørId,
-            personidentifikator = personidentifikator,
             orgnummer = organisasjonsnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
@@ -382,8 +361,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             foreldrepenger = Foreldrepenger(
@@ -420,8 +397,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         return Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             orgnummer = organisasjonsnummer,
             fagsystemId = fagsystemId,
             fagområde = fagområde,
@@ -440,8 +415,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = personidentifikator.toString(),
         organisasjonsnummer = organisasjonsnummer,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
@@ -459,8 +432,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
     ) = VedtakFattet(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = personidentifikator.toString(),
         organisasjonsnummer = organisasjonsnummer,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
@@ -475,8 +446,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         automatisert: Boolean = true
     ) = KanIkkeBehandlesHer(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = personidentifikator.toString(),
         organisasjonsnummer = organisasjonsnummer,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
@@ -494,8 +463,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = meldingsreferanseId,
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             orgnummer = organisasjonsnummer,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
@@ -508,8 +475,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagAnnullering(utbetalingId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
@@ -519,9 +484,7 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagIdentOpphørt() =
         IdentOpphørt(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString()
+            meldingsreferanseId = UUID.randomUUID()
         )
 
     internal fun lagPåminnelse(
@@ -533,8 +496,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         Påminnelse(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             antallGangerPåminnet = 0,
@@ -550,8 +511,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
         Grunnbeløpsregulering(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId,
-            personidentifikator.toString(),
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = LocalDateTime.now()
         )
@@ -559,8 +518,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagGjenopplivVilkårsgrunnlag(skjæringstidspunkt: LocalDate?, vilkårsgrunnlagId: UUID) =
         GjenopplivVilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             nyttSkjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = emptyMap()
@@ -568,8 +525,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             periode = periode
         )
@@ -577,8 +532,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
         AnmodningOmForkasting(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             force = force
@@ -587,15 +540,13 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
         OverstyrTidslinje(
             meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()
         )
 
     internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String, tidsstempel: LocalDateTime = LocalDateTime.now()) =
-        PersonHendelsefabrikk(aktørId, personidentifikator).lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
+        PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
         ), meldingsreferanseId = hendelseId, tidsstempel)
 

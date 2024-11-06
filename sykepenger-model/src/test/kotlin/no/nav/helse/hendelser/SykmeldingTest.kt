@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -11,10 +10,7 @@ import org.junit.jupiter.api.assertThrows
 internal class SykmeldingTest {
 
     private companion object {
-        const val UNG_PERSON_FNR_2018 = "12029240045"
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            aktørId = "12345",
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = "987654321"
         )
     }

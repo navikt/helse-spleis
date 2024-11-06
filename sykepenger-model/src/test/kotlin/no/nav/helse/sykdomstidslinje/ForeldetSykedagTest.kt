@@ -10,7 +10,6 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -27,8 +26,6 @@ internal class ForeldetSykedagTest {
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private val hendelefabrikk = ArbeidsgiverHendelsefabrikk(
-            aktørId = AKTØRID,
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = ORGNUMMER
         )
     }

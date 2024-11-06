@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -21,8 +20,6 @@ import org.junit.jupiter.api.Test
 internal class SykmeldingsperioderTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        aktørId = "AKTØRID",
-        personidentifikator = Personidentifikator("12029212345"),
         organisasjonsnummer = "ORGNUMMER"
     )
 

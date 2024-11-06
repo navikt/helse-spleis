@@ -17,7 +17,6 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.perioder
-import no.nav.helse.Personidentifikator
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
@@ -504,15 +503,10 @@ internal class SkjæringstidspunktTest {
     ).dager().bitAvInntektsmelding(Aktivitetslogg(), arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
 
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12029240045"
-        private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
-        private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            aktørId = AKTØRID,
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
             organisasjonsnummer = ORGNUMMER
         )
 

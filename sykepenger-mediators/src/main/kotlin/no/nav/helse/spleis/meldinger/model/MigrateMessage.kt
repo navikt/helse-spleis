@@ -9,9 +9,7 @@ import no.nav.helse.spleis.Meldingsporing
 internal class MigrateMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
     private val migrate get() = Migrate(
-        meldingsreferanseId = meldingsporing.id,
-        aktørId = meldingsporing.aktørId,
-        fødselsnummer = meldingsporing.fødselsnummer
+        meldingsreferanseId = meldingsporing.id
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

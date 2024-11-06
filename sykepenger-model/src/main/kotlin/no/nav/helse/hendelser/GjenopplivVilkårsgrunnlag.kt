@@ -13,16 +13,11 @@ import no.nav.helse.økonomi.Inntekt
 
 class GjenopplivVilkårsgrunnlag(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     private val vilkårsgrunnlagId: UUID,
     private val nyttSkjæringstidspunkt: LocalDate?,
     private val arbeidsgiveropplysninger: Map<String, Inntekt>
 ): Hendelse {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
 
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(

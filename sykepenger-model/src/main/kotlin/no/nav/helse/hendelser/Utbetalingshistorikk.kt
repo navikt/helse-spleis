@@ -9,16 +9,12 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
 class Utbetalingshistorikk(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

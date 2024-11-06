@@ -87,7 +87,7 @@ internal class TestPerson(
 
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
-    private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
+    private val personHendelsefabrikk = PersonHendelsefabrikk()
     internal val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
@@ -152,7 +152,7 @@ internal class TestPerson(
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, personidentifikator, orgnummer)
+        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(orgnummer)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 

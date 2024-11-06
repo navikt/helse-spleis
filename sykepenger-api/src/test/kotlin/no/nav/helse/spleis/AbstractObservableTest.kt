@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -67,12 +66,9 @@ internal abstract class AbstractObservableTest {
     protected fun sykmelding(
         id: UUID = SYKMELDING_ID,
         sykeperioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(FOM, TOM)),
-        orgnummer: String = ORGNUMMER,
-        fnr: String = UNG_PERSON_FNR
+        orgnummer: String = ORGNUMMER
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = id,
-        fnr = fnr,
-        aktørId = AKTØRID,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder
     )
@@ -84,12 +80,9 @@ internal abstract class AbstractObservableTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate = TOM.plusDays(1),
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
-        fnr: String = UNG_PERSON_FNR,
         egenmeldinger: List<Periode> = emptyList()
     ): Søknad = Søknad(
         meldingsreferanseId = id,
-        fnr = fnr,
-        aktørId = AKTØRID,
         orgnummer = orgnummer,
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
@@ -111,8 +104,6 @@ internal abstract class AbstractObservableTest {
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(
         UUID.randomUUID(),
-        "",
-        "",
         InfotrygdhistorikkElement.opprett(
             oppdatert = LocalDateTime.now(),
             hendelseId = UUID.randomUUID(),
@@ -133,14 +124,12 @@ internal abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
-        fnr: String = UNG_PERSON_FNR,
         harFlereInntektsmeldinger: Boolean = false,
         avsendersystem: Inntektsmelding.Avsendersystem? = null
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = orgnummer,
-        fødselsnummer = fnr,
         aktørId = AKTØRID,
         førsteFraværsdag = førsteFraværsdag,
         inntektsdato = null,
@@ -166,22 +155,19 @@ internal abstract class AbstractObservableTest {
                             ORGNUMMER inntekt INNTEKT
                         }
                     }, arbeidsforhold = emptyList()),
-        fnr: String = UNG_PERSON_FNR,
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(listOf(
             ArbeidsgiverInntekt(ORGNUMMER, listOf(ArbeidsgiverInntekt.MånedligInntekt(YearMonth.from(FOM.minusMonths(1)),
                 INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "kontantytelse", "fastloenn")))
         ))
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-            skjæringstidspunkt = FOM,
-            aktørId = AKTØRID,
-            personidentifikator = Personidentifikator(fnr),
-            orgnummer = orgnummer,
-            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
-            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-            arbeidsforhold = arbeidsforhold
+        meldingsreferanseId = UUID.randomUUID(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+        skjæringstidspunkt = FOM,
+        orgnummer = orgnummer,
+        medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
+        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+        inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
+        arbeidsforhold = arbeidsforhold
     )
 
     protected fun ytelser(
@@ -194,14 +180,11 @@ internal abstract class AbstractObservableTest {
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
-        fnr: String = UNG_PERSON_FNR
+        dagpenger: List<Periode> = emptyList()
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
-            aktørId = AKTØRID,
-            fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
@@ -236,8 +219,6 @@ internal abstract class AbstractObservableTest {
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
             fagområde = fagområde,
@@ -294,8 +275,6 @@ internal abstract class AbstractObservableTest {
         utbetalingId: UUID
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = AKTØRID,
-        fødselsnummer = UNG_PERSON_FNR,
         organisasjonsnummer = orgnummer,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
@@ -315,8 +294,6 @@ internal abstract class AbstractObservableTest {
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = meldingsreferanseId,
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,

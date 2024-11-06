@@ -12,19 +12,14 @@ import no.nav.helse.person.MinimumSykdomsgradsvurdering
 class MinimumSykdomsgradsvurderingMelding(
     private val perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     private val perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode>,
-    meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String
+    meldingsreferanseId: UUID
 ) : Hendelse {
 
     init {
         sjekkForOverlapp()
     }
 
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

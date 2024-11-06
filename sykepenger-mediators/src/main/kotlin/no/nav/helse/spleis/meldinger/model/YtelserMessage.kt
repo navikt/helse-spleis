@@ -82,8 +82,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             foreldrepenger = foreldrepenger,

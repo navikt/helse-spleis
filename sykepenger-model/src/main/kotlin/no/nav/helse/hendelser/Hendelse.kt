@@ -31,11 +31,8 @@ sealed interface Hendelse {
 }
 
 sealed interface Behandlingsporing {
-    val fødselsnummer: String
-    val aktørId: String
-
-    data class Person(override val fødselsnummer: String, override val aktørId: String) : Behandlingsporing
-    data class Arbeidsgiver(override val fødselsnummer: String, override val aktørId: String, val organisasjonsnummer: String) : Behandlingsporing
+    data object IngenArbeidsgiver : Behandlingsporing
+    data class Arbeidsgiver(val organisasjonsnummer: String) : Behandlingsporing
 }
 
 data class HendelseMetadata(

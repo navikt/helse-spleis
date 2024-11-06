@@ -141,7 +141,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }.also {
         person.håndter(
             Utbetalingshistorikk(
-                UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
                 InfotrygdhistorikkElement.opprett(
                     oppdatert = LocalDateTime.now(),
                     hendelseId = UUID.randomUUID(),

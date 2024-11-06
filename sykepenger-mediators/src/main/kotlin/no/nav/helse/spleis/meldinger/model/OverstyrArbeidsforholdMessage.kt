@@ -24,8 +24,6 @@ internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage, override v
             this,
             OverstyrArbeidsforhold(
                 meldingsreferanseId = meldingsporing.id,
-                fødselsnummer = meldingsporing.fødselsnummer,
-                aktørId = meldingsporing.aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 overstyrteArbeidsforhold = overstyrteArbeidsforhold,
                 opprettet = opprettet

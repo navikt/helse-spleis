@@ -9,14 +9,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Sykmelding(
     meldingsreferanseId: UUID,
-    fnr: String,
-    aktørId: String,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

@@ -73,8 +73,6 @@ internal fun AbstractEndToEndTest.utbetaling(
 ) =
     UtbetalingHendelse(
         meldingsreferanseId = meldingsreferanseId,
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         utbetalingId = utbetalingId ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
@@ -93,8 +91,6 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
 ) =
     UtbetalingHendelse(
         meldingsreferanseId = meldingsreferanseId,
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
@@ -112,7 +108,7 @@ internal fun AbstractEndToEndTest.sykmelding(
     mottatt: LocalDateTime? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
-) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSykmelding(
+) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSykmelding(
     sykeperioder = sykeperioder,
     id = id
 )
@@ -134,7 +130,7 @@ internal fun AbstractEndToEndTest.søknad(
     permittert: Boolean = false,
     egenmeldinger: List<Periode> = emptyList(),
     tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
-) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSøknad(
+) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSøknad(
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
@@ -165,7 +161,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagInntektsmelding(
+        ArbeidsgiverHendelsefabrikk(orgnummer).lagInntektsmelding(
             id = id,
             refusjon = refusjon,
             førsteFraværsdag = førsteFraværsdag,
@@ -227,7 +223,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagPortalinntektsmelding(
+        ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
             id = id,
             refusjon = refusjon,
             førsteFraværsdag = førsteFraværsdag,
@@ -288,8 +284,6 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         skjæringstidspunkt = skjæringstidspunkt,
-        aktørId = AKTØRID,
-        personidentifikator = fnr,
         orgnummer = orgnummer,
         medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
@@ -307,8 +301,6 @@ internal fun utbetalingpåminnelse(
 ): Utbetalingpåminnelse {
     return Utbetalingpåminnelse(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         utbetalingId = utbetalingId,
         antallGangerPåminnet = 0,
@@ -329,8 +321,6 @@ internal fun påminnelse(
 ): Påminnelse {
     return Påminnelse(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         antallGangerPåminnet = antallGangerPåminnet,
@@ -353,8 +343,6 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
 ): Utbetalingshistorikk {
     return Utbetalingshistorikk(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         besvart = LocalDateTime.now(),
@@ -378,8 +366,6 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
 ): UtbetalingshistorikkEtterInfotrygdendring {
     return UtbetalingshistorikkEtterInfotrygdendring(
         meldingsreferanseId = meldingsreferanseId,
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,
@@ -408,8 +394,6 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
 ): UtbetalingshistorikkForFeriepenger {
     return UtbetalingshistorikkForFeriepenger(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = AKTØRID,
-        fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
         utbetalinger = utbetalinger,
         feriepengehistorikk = feriepengehistorikk,
         arbeidskategorikoder = arbeidskategorikoder,
@@ -434,8 +418,6 @@ internal fun AbstractEndToEndTest.ytelser(
     val meldingsreferanseId = UUID.randomUUID()
     return Ytelser(
         meldingsreferanseId = meldingsreferanseId,
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         foreldrepenger = Foreldrepenger(
@@ -478,8 +460,6 @@ internal fun AbstractEndToEndTest.simulering(
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String,
         fagområde = simuleringsBehov.detaljer().getValue("fagområde") as String,
@@ -547,8 +527,6 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     ),
 ) = Utbetalingsgodkjenning(
     meldingsreferanseId = UUID.randomUUID(),
-    aktørId = AKTØRID,
-    fødselsnummer = fnr.toString(),
     organisasjonsnummer = orgnummer,
     utbetalingId = utbetalingId,
     vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),

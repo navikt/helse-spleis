@@ -55,9 +55,9 @@ internal abstract class AbstractE2ETest {
         val INNTEKT = 48000.månedlig
 
         private val personfabrikk = PersonHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR))
-        private val a1fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR), a1)
-        private val a2fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR), a2)
-        private val a3fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, Personidentifikator(UNG_PERSON_FNR), a3)
+        private val a1fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, a1)
+        private val a2fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, a2)
+        private val a3fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, a3)
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
             a2 to a2fabrikk,

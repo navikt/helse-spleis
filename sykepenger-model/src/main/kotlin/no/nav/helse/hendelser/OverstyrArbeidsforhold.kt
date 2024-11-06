@@ -10,16 +10,11 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class OverstyrArbeidsforhold(
     meldingsreferanseId: UUID,
-    fødselsnummer: String,
-    aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
     opprettet: LocalDateTime
 ) : Hendelse, OverstyrInntektsgrunnlag {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SAKSBEHANDLER,

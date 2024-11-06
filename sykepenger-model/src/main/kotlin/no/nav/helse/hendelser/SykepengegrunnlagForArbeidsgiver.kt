@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -15,14 +14,10 @@ class SykepengegrunnlagForArbeidsgiver(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val skjæringstidspunkt: LocalDate,
-    aktørId: String,
-    personidentifikator: Personidentifikator,
     private val orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        fødselsnummer = personidentifikator.toString(),
-        aktørId = aktørId,
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

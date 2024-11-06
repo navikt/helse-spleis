@@ -23,8 +23,6 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
     private val utbetalingsgodkjenning
         get() = Utbetalingsgodkjenning(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = UUID.fromString(utbetalingId),
             vedtaksperiodeId = vedtaksperiodeId,

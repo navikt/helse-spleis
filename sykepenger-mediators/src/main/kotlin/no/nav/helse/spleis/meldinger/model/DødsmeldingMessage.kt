@@ -14,8 +14,6 @@ internal class DødsmeldingMessage(packet: JsonMessage, override val meldingspor
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(this, Dødsmelding(
             meldingsreferanseId = meldingsporing.id,
-            fødselsnummer = meldingsporing.fødselsnummer,
-            aktørId = meldingsporing.aktørId,
             dødsdato = dødsdato
         ), context)
     }

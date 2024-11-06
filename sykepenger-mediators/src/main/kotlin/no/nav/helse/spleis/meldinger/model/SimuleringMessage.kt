@@ -73,8 +73,6 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
         get() = Simulering(
             meldingsreferanseId = meldingsporing.id,
             vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             orgnummer = organisasjonsnummer,
             fagsystemId = fagsystemId,
             fagområde = fagområde,

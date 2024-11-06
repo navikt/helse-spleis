@@ -95,8 +95,6 @@ internal class RestApiTest {
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR,
-            aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder
         )
@@ -107,7 +105,6 @@ internal class RestApiTest {
                 opphørsdato = null
             ),
             orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR,
             aktørId = "aktørId",
             førsteFraværsdag = LocalDate.of(2018, 1, 1),
             inntektsdato = null,

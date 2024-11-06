@@ -8,15 +8,10 @@ import no.nav.helse.person.PersonObserver
 
 class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
-    aktørId: String,
-    fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
 ): Hendelse, OverstyrInntektsgrunnlag {
-    override val behandlingsporing = Behandlingsporing.Person(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId
-    )
+    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
 
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,

@@ -16,8 +16,6 @@ internal class ForkastSykmeldingsperioderMessage(packet: JsonMessage, override v
     private val forkastSykmeldingsperioder
         get() = ForkastSykmeldingsperioder(
             meldingsreferanseId = meldingsporing.id,
-            aktørId = meldingsporing.aktørId,
-            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             periode = periode
         )

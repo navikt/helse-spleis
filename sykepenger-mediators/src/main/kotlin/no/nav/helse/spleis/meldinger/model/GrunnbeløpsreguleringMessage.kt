@@ -16,8 +16,6 @@ internal class GrunnbeløpsreguleringMessage(packet: JsonMessage, override val m
             this,
             Grunnbeløpsregulering(
                 meldingsporing.id,
-                meldingsporing.aktørId,
-                meldingsporing.fødselsnummer,
                 skjæringstidspunkt,
                 opprettet
             ),
