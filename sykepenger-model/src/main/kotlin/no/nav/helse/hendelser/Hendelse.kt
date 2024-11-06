@@ -62,7 +62,6 @@ private val Hendelse.kontekstnavn get() = when (this) {
     is KanIkkeBehandlesHer -> "KanIkkeBehandlesHer"
     is Migrate -> "Migrate"
     is MinimumSykdomsgradsvurderingMelding -> "MinimumSykdomsgradsvurderingMelding"
-    is OmfordelRefusjonsopplysninger -> "OmfordelRefusjonsopplysninger"
     is PersonPåminnelse -> "PersonPåminnelse"
     is Påminnelse -> "Påminnelse"
     is Simulering -> "Simulering"
