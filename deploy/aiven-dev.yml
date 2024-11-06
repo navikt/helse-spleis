@@ -227,9 +227,6 @@ spec:
           application: spane-opprydding
           access: readwrite
         - team: tbd
-          application: speaker
-          access: readwrite
-        - team: tbd
           application: sondre-halvorsen
           access: read
         - team: tbd
