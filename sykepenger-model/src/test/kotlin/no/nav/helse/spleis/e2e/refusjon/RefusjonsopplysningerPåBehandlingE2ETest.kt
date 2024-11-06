@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -49,6 +50,25 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `En overstyring som er kommet etter IM skal vinne på forlengelsen`() {
+        a1 {
+            nyttVedtak(januar)
+            val overstyringId = UUID.randomUUID()
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, listOf(Triple(1.januar, null, INNTEKT / 2)))), hendelseId = overstyringId)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterSøknad(februar)
+            assertForventetFeil(
+                forklaring = "En overstyring som er kommet etter IM skal vinne på forlengelsen",
+                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2, overstyringId) },
+                nå = { assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT) }
+            )
+        }
+    }
 
     @Test
     fun `Feil refusjon på forlengelse som ikke har kommet`() {

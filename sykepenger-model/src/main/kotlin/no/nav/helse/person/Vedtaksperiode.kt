@@ -1263,6 +1263,7 @@ internal class Vedtaksperiode private constructor(
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
         val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
         val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
+        if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
     }
 
