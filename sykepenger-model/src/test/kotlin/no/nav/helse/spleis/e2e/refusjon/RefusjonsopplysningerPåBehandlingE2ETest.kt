@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -76,11 +75,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INGEN)
 
-            assertForventetFeil(
-                forklaring = "Feil refusjon på forlengelse som ikke har kommet",
-                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT) },
-                nå = { assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INGEN) }
-            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT)
         }
     }
 
@@ -857,20 +852,9 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018")
 
-            assertForventetFeil(
-                forklaring = "Vi bruker feilaktig overstyrt refusjon for januar, også når februar-søknaden kommer",
-                nå = {
-                    assertEquals(
-                        INNTEKT / 2,
-                        inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp
-                    )
-                },
-                ønsket = {
-                    assertEquals(
-                        INNTEKT,
-                        inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp
-                    )
-                }
+            assertEquals(
+                INNTEKT,
+                inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp
             )
         }
     }

@@ -23,7 +23,7 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
     internal fun servér(startdato: LocalDate, periode: Periode): Beløpstidslinje {
         val søkevindu = startdato til periode.endInclusive
         val aktuelle = refusjonstidslinjer.filterKeys { it in søkevindu }
-        val refusjonstidslinje = aktuelle.values.fold(Beløpstidslinje(), Beløpstidslinje::plus).strekkFrem(periode.endInclusive).subset(periode)
+        val refusjonstidslinje = aktuelle.values.fold(Beløpstidslinje(), Beløpstidslinje::plus).fyll(periode.endInclusive)
         aktuelle.keys.forEach { dato ->
             if (!refusjonsrester.containsKey(dato)) return@forEach
             val nyVerdi = refusjonsrester.getValue(dato) - periode

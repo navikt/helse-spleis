@@ -74,9 +74,11 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         }}
         return Beløpstidslinje(fylteDager)
     }
+    internal fun fyll(periode: Periode) = fyll().strekk(periode).subset(periode)
+    internal fun fyll(til: LocalDate) = fyll().strekkFrem(til).tilOgMed(til)
 
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
-    internal fun strekkFrem(til: LocalDate) = this + hale(til)
+    private fun strekkFrem(til: LocalDate) = this + hale(til)
 
     internal fun førsteEndring(other: Beløpstidslinje): LocalDate? {
         val fom = setOfNotNull(periode?.start, other.periode?.start).minOrNull() ?: return null
