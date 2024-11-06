@@ -227,13 +227,7 @@ spec:
           application: spane-opprydding
           access: readwrite
         - team: tbd
-          application: speaker-kafka
-          access: readwrite
-        - team: tbd
-          application: speaker-backend
-          access: readwrite
-        - team: tbd
-          application: speaker-endringer-formidler
+          application: speaker
           access: readwrite
         - team: tbd
           application: sondre-halvorsen
