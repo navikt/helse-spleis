@@ -38,10 +38,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.torsdag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -965,13 +965,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(vedtaksperiode.vedtaksperiode)
         håndterUtbetalt()
         return im
-    }
-
-
-    private fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt) {
-        assertTrue(beløpstidslinje.isNotEmpty())
-        assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
-        assertTrue(beløpstidslinje.all { it.beløp == beløp })
     }
 
     private fun gjenopprettBeløpstislinjeFor(dato: LocalDate) = dto().tilPersonData().arbeidsgivere.single().ubrukteRefusjonsopplysninger[dato]?.tilDto()?.let { Beløpstidslinje.gjenopprett(it) } ?: Beløpstidslinje()

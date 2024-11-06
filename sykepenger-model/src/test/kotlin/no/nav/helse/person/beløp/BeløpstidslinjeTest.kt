@@ -16,13 +16,16 @@ import no.nav.helse.dsl.BeløpstidslinjeDsl.til
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -238,5 +241,16 @@ internal class BeløpstidslinjeTest {
                 )
             )
         ), tidslinje.dto())
+    }
+
+    internal companion object {
+        internal fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
+            assertTrue(beløpstidslinje.isNotEmpty())
+            assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
+            assertTrue(beløpstidslinje.all { it.beløp == beløp })
+            meldingsreferanseId?.let { kildeId ->
+                assertTrue(beløpstidslinje.all { it.kilde.meldingsreferanseId == kildeId })
+            }
+        }
     }
 }

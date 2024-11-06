@@ -30,6 +30,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -203,6 +204,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
+        assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT, imId)
+
         assertEquals(setOf(
             Dokumentsporing.søknad(søknadId),
             Dokumentsporing.inntektsmeldingDager(imId),
@@ -264,6 +267,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT, imId)
+
         assertEquals(
             setOf(
                 Dokumentsporing.søknad(søknadId),
