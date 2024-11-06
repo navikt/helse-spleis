@@ -1260,7 +1260,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun videreførRefusjonsopplysningerFraNabo(hendelse: Hendelse? = null, aktivitetslogg: IAktivitetslogg) {
         if (refusjonstidslinje.isNotEmpty()) return
-        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: return
+        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
         val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
         val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
@@ -3063,7 +3063,7 @@ internal class Vedtaksperiode private constructor(
         }
         internal fun List<Vedtaksperiode>.refusjonseventyr(hendelse: Hendelse) = firstOrNull {
             it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId))
-        }?.let { Revurderingseventyr.Companion.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
+        }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {

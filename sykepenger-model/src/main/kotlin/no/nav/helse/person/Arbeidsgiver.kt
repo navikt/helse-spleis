@@ -478,10 +478,13 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.validerPortalinntektsmelding(vedtaksperioder, aktivitetslogg)
         val dager = inntektsmelding.dager()
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
+            aktivitetslogg.info("Inntektsmelding ikke håndtert")
+            return person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
+        }
 
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
-        håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
+        if (vedtaksperiodeIdForReplay == null) håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
 
         val dagoverstyring = dager.revurderingseventyr()
         val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
