@@ -2,15 +2,11 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import kotlin.properties.Delegates
 
 internal abstract class SøknadBuilder {
-    protected lateinit var meldingsreferanseId: UUID
     protected lateinit var sykmeldingSkrevet: LocalDateTime
-    protected lateinit var fnr: String
-    protected lateinit var aktørId: String
     protected lateinit var fødselsdato: LocalDate
     protected lateinit var organisasjonsnummer: String
     protected var registrert: LocalDateTime = LocalDateTime.now()
@@ -22,10 +18,7 @@ internal abstract class SøknadBuilder {
     protected var yrkesskade by Delegates.notNull<Boolean>()
     protected var innsendt: LocalDateTime? = null
 
-    internal fun meldingsreferanseId(meldingsreferanseId: UUID) = apply { this.meldingsreferanseId = meldingsreferanseId }
     internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) = apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
-    internal fun fnr(fnr: String) = apply { this.fnr = fnr }
-    internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }

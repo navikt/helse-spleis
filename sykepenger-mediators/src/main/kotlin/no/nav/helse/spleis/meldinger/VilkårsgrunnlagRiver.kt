@@ -6,7 +6,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 
 internal class VilkårsgrunnlagRiver(
@@ -53,5 +55,9 @@ internal class VilkårsgrunnlagRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(packet)
+    override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        aktørId = packet["aktørId"].asText()
+    ))
 }

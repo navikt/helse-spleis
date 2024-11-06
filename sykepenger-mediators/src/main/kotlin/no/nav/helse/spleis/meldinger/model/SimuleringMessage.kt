@@ -10,13 +10,13 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf
 
-internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class SimuleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
 
     private val fagsystemId = packet["Simulering.fagsystemId"].asText()
@@ -71,10 +71,10 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private val simulering
         get() = Simulering(
-            meldingsreferanseId = id,
+            meldingsreferanseId = meldingsporing.id,
             vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             orgnummer = organisasjonsnummer,
             fagsystemId = fagsystemId,
             fagområde = fagområde,

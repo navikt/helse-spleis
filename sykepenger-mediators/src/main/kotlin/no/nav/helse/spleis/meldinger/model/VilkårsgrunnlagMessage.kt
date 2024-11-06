@@ -19,14 +19,14 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
-internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
 
     private val inntekterForSykepengegrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSykepengegrunnlag.name}"])
     private val arbeidsforholdForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
@@ -82,11 +82,11 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
 
     private val vilkårsgrunnlag
         get() = Vilkårsgrunnlag(
-            meldingsreferanseId = this.id,
+            meldingsreferanseId = meldingsporing.id,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkter.distinct().single(),
-            aktørId = aktørId,
-            personidentifikator = Personidentifikator(fødselsnummer),
+            aktørId = meldingsporing.aktørId,
+            personidentifikator = Personidentifikator(meldingsporing.fødselsnummer),
             orgnummer = organisasjonsnummer,
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus

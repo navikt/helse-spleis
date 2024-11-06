@@ -5,7 +5,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 
 internal class SendtArbeidsledigSøknaderRiver(
@@ -23,5 +25,9 @@ internal class SendtArbeidsledigSøknaderRiver(
         message.interestedIn("tidligereArbeidsgiverOrgnummer", "sporsmal", "arbeidGjenopptatt", "friskmeldt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsledigMessage(packet)
+    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsledigMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fnr"].asText(),
+        aktørId = packet["aktorId"].asText()
+    ))
 }

@@ -21,12 +21,11 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
-internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val arbeidsgiveropplysninger = packet.arbeidsgiveropplysninger(skjæringstidspunkt)
     private val refusjonstidslinjer = packet.refusjonstidslinjer()
@@ -34,9 +33,9 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
             this, OverstyrArbeidsgiveropplysninger(
-                meldingsreferanseId = id,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                meldingsreferanseId = meldingsporing.id,
+                fødselsnummer = meldingsporing.fødselsnummer,
+                aktørId = meldingsporing.aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiveropplysninger = arbeidsgiveropplysninger,
                 opprettet = opprettet,

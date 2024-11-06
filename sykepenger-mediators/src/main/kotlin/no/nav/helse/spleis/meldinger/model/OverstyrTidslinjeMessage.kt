@@ -9,12 +9,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import no.nav.helse.hendelser.til
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
-internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessage(packet) {
+internal class OverstyrTidslinjeMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val dager = packet["dager"].flatMap { dag ->
         val fom = dag.path("dato").asLocalDate()
         val tom = dag.path("tom").asOptionalLocalDate()?.takeUnless { it < fom } ?: fom
@@ -29,9 +28,9 @@ internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessa
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
             this, OverstyrTidslinje(
-                meldingsreferanseId = id,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                meldingsreferanseId = meldingsporing.id,
+                fødselsnummer = meldingsporing.fødselsnummer,
+                aktørId = meldingsporing.aktørId,
                 organisasjonsnummer = organisasjonsnummer,
                 dager = dager,
                 opprettet = opprettet

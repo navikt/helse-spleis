@@ -59,12 +59,12 @@ internal class SubsumsjonMediator(
 
     fun ferdigstill(context: MessageContext) {
         if (subsumsjoner.isEmpty()) return
-        logg.info("som følge av hendelse id=${message.id} sendes ${subsumsjoner.size} subsumsjonsmeldinger på rapid")
+        logg.info("som følge av hendelse id=${message.meldingsporing.id} sendes ${subsumsjoner.size} subsumsjonsmeldinger på rapid")
         subsumsjoner
             .map { subsumsjonMelding(fødselsnummer = fødselsnummer, event = it) }
             .forEach {
                 context.publish(fødselsnummer, it.toJson().also { message ->
-                    sikkerLogg.info("som følge av hendelse id=${this.message.id} sender subsumsjon: $message")
+                    sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $message")
                 })
             }
     }

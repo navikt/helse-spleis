@@ -11,21 +11,20 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
-internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val arbeidsgiveropplysninger = packet["arbeidsgivere"].asArbeidsgiveropplysninger()
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
             this, SkjønnsmessigFastsettelse(
-                meldingsreferanseId = id,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                meldingsreferanseId = meldingsporing.id,
+                fødselsnummer = meldingsporing.fødselsnummer,
+                aktørId = meldingsporing.aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiveropplysninger = arbeidsgiveropplysninger,
                 opprettet = opprettet
@@ -38,7 +37,7 @@ internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage) : Hendelse
         val årlig = arbeidsgiveropplysning["årlig"].asDouble().årlig
 
         val skjønnsmessigFastsattInntekt =
-            SkjønnsmessigFastsatt(skjæringstidspunkt, id, årlig, opprettet)
+            SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsporing.id, årlig, opprettet)
 
         ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsattInntekt, Refusjonsopplysninger())
     }

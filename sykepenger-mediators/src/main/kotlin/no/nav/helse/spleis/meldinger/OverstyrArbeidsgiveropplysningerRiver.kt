@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
 
 internal class OverstyrArbeidsgiveropplysningerRiver(
@@ -16,7 +18,11 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
 
     override val riverName = "Overstyr inntekt og refusjon"
 
-    override fun createMessage(packet: JsonMessage) = OverstyrArbeidsgiveropplysningerMessage(packet)
+    override fun createMessage(packet: JsonMessage) = OverstyrArbeidsgiveropplysningerMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        aktørId = packet["aktørId"].asText()
+    ))
 
     override fun validate(message: JsonMessage) {
         message.requireKey("aktørId", "fødselsnummer")

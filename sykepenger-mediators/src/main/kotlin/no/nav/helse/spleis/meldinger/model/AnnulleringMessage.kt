@@ -6,19 +6,18 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
-internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class AnnulleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val utbetalingId = packet["utbetalingId"].asText().trim().toUUID()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
-            id,
-            aktørId,
-            fødselsnummer,
+            meldingsporing.id,
+            meldingsporing.aktørId,
+            meldingsporing.fødselsnummer,
             organisasjonsnummer,
             utbetalingId,
             saksbehandler.ident,

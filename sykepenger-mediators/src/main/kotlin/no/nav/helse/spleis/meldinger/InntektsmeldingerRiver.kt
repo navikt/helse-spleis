@@ -5,7 +5,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 
 internal open class InntektsmeldingerRiver(
@@ -52,5 +54,9 @@ internal open class InntektsmeldingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(packet)
+    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["arbeidstakerFnr"].asText(),
+        aktørId = packet["arbeidstakerAktorId"].asText()
+    ))
 }

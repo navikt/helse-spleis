@@ -4,13 +4,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
-internal class AvstemmingMessage(packet: JsonMessage) : HendelseMessage(packet) {
-
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
+internal class AvstemmingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        mediator.behandle(this, Personidentifikator(fødselsnummer), context)
+        mediator.behandle(this, Personidentifikator(meldingsporing.fødselsnummer), context)
     }
 }

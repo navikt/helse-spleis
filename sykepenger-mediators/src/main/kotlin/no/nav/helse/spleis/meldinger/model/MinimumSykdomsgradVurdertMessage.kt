@@ -4,10 +4,9 @@ import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
-internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage) : HendelseMessage(packet) {
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
-    private val aktørId: String = packet["aktørId"].asText()
+internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
     private val perioderMedMinimumSykdomsgradVurdertOK = packet["perioderMedMinimumSykdomsgradVurdertOk"].map(::asPeriode)
     private val perioderMedMinimumSykdomsgradVurdertIkkeOK = packet["perioderMedMinimumSykdomsgradVurdertIkkeOk"].map(::asPeriode)
 
@@ -18,9 +17,9 @@ internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage) : HendelseM
             MinimumSykdomsgradsvurderingMelding(
                 perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK.toSet(),
                 perioderMedMinimumSykdomsgradVurdertIkkeOK = perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet(),
-                meldingsreferanseId = this.id,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId
+                meldingsreferanseId = meldingsporing.id,
+                fødselsnummer = meldingsporing.fødselsnummer,
+                aktørId = meldingsporing.aktørId
             ),
             context
         )

@@ -17,12 +17,13 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     companion object {
         internal fun JsonMessage.harStatslønn() = this["@løsning.${Sykepengehistorikk.name}"].any { it["statslønn"].asBoolean() }
@@ -93,7 +94,6 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val besvart = packet["@besvart"].asLocalDateTime()
 
     private val utbetalinger = packet.utbetalinger()
@@ -113,12 +113,12 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
 
     private fun utbetalingshistorikk() =
         Utbetalingshistorikk(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            element = infotrygdhistorikk(id),
+            element = infotrygdhistorikk(meldingsporing.id),
             besvart = besvart
         )
 

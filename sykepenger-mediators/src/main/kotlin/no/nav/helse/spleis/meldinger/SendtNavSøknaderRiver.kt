@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 
 internal class SendtNavSøknaderRiver(
@@ -39,5 +41,9 @@ internal class SendtNavSøknaderRiver(
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet)
+    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fnr"].asText(),
+        aktørId = packet["aktorId"].asText()
+    ))
 }

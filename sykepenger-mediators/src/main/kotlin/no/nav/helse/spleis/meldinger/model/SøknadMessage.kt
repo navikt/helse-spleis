@@ -19,12 +19,11 @@ internal sealed class SøknadMessage(
     HendelseMessage(packet) {
 
     private val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
-    final override val fødselsnummer = packet["fnr"].asText()
 
     final override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         val personopplysninger = Personopplysninger(
-            personidentifikator = Personidentifikator(fødselsnummer),
-            aktørId = packet["aktorId"].asText(),
+            personidentifikator = Personidentifikator(meldingsporing.fødselsnummer),
+            aktørId = meldingsporing.aktørId,
             fødselsdato = packet["fødselsdato"].asLocalDate(),
             dødsdato = packet["dødsdato"].asOptionalLocalDate()
         )
@@ -35,10 +34,7 @@ internal sealed class SøknadMessage(
     protected abstract fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext)
 
     private fun bygg() {
-        builder.meldingsreferanseId(this.id)
-            .fnr(fødselsnummer)
-            .aktørId(packet["aktorId"].asText())
-            .fødselsdato(packet["fødselsdato"].asLocalDate())
+        builder.fødselsdato(packet["fødselsdato"].asLocalDate())
             .sykmeldingSkrevet(sykmeldingSkrevet)
             .organisasjonsnummer(organisasjonsnummer)
             .fom(packet["fom"].asLocalDate())

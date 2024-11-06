@@ -7,11 +7,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
-internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val fagsystemId = packet["${Utbetaling.name}.fagsystemId"].asText().trim()
     private val utbetalingId = packet["utbetalingId"].asText().toUUID()
 
@@ -23,9 +23,9 @@ internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private val utbetaling
         get() = UtbetalingHendelse(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             orgnummer = organisasjonsnummer,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,

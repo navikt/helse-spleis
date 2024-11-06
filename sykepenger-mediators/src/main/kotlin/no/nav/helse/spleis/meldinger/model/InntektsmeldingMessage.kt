@@ -12,13 +12,13 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Fødselsnummer.Companion.tilFødselsnummer
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
-internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(packet) {
-    override val fødselsnummer = packet["arbeidstakerFnr"].asText()
+internal open class InntektsmeldingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
     private val refusjon = Inntektsmelding.Refusjon(
         beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
         opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
@@ -32,8 +32,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
     private val orgnummer = packet["virksomhetsnummer"].asText()
-    private val aktørId = packet["arbeidstakerAktorId"].asText()
-    private val fødselsdato = packet["fødselsdato"].asOptionalLocalDate() ?: tilFødselsnummer(fødselsnummer).fødselsdato
+    private val fødselsdato = packet["fødselsdato"].asOptionalLocalDate() ?: tilFødselsnummer(meldingsporing.fødselsnummer).fødselsdato
     private val dødsdato = packet["dødsdato"].asOptionalLocalDate()
     protected val mottatt = packet["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
@@ -43,17 +42,17 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-    private val personopplysninger = Personopplysninger(Personidentifikator(fødselsnummer), aktørId, fødselsdato, dødsdato)
+    private val personopplysninger = Personopplysninger(Personidentifikator(meldingsporing.fødselsnummer), meldingsporing.aktørId, fødselsdato, dødsdato)
     private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem()
     private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
 
     protected val inntektsmelding
         get() = Inntektsmelding(
-            meldingsreferanseId = this.id,
+            meldingsreferanseId = meldingsporing.id,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
+            aktørId = meldingsporing.aktørId,
             førsteFraværsdag = førsteFraværsdag,
             inntektsdato = inntektsdato,
             beregnetInntekt = beregnetInntekt.månedlig,

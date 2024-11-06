@@ -5,7 +5,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 
 internal class SendtArbeidsgiverSøknaderRiver(
@@ -32,5 +34,9 @@ internal class SendtArbeidsgiverSøknaderRiver(
         message.forbid("sendtNav")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(packet)
+    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fnr"].asText(),
+        aktørId = packet["aktorId"].asText()
+    ))
 }

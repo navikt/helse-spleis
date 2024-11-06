@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 
 internal open class InntektsmeldingerReplayRiver(
@@ -61,5 +62,9 @@ internal open class InntektsmeldingerReplayRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(packet)
+    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        aktørId = packet["aktørId"].asText()
+    ))
 }

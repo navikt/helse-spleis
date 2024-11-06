@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 
 internal class GrunnbeløpsreguleringRiver(
@@ -17,5 +19,9 @@ internal class GrunnbeløpsreguleringRiver(
         message.requireKey("aktørId", "fødselsnummer", "skjæringstidspunkt")
     }
 
-    override fun createMessage(packet: JsonMessage) = GrunnbeløpsreguleringMessage(packet)
+    override fun createMessage(packet: JsonMessage) = GrunnbeløpsreguleringMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        aktørId = packet["aktørId"].asText()
+    ))
 }

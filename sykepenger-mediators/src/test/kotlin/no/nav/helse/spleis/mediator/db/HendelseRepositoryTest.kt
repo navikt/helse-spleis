@@ -7,6 +7,7 @@ import java.util.UUID
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import no.nav.helse.Personidentifikator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -63,10 +64,10 @@ private object TestMessages {
         @Language("JSON")
         val json = """
         {
-            "@id": "$id",
+            "@id": "foo",
             "@event_name": "ny_soknad",
             "@opprettet": "$now",
-            "fnr": "$fnr",
+            "fnr": "bar",
             "aktorId": "aktorId",
             "sykmeldingSkrevet": "$now",
             "fom": "2020-01-01",
@@ -92,6 +93,6 @@ private object TestMessages {
             packet.requireKey("soknadsperioder")
         }
 
-        return NySøknadMessage(packet)
+        return NySøknadMessage(packet, Meldingsporing(id, fnr.toString(), "aktor"))
     }
 }

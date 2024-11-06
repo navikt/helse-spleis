@@ -6,7 +6,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
@@ -21,10 +20,11 @@ import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import org.slf4j.LoggerFactory
 
 // Understands a JSON message representing an Ytelserbehov
-internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -32,7 +32,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
@@ -82,9 +81,9 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private val ytelser
         get() = Ytelser(
-            meldingsreferanseId = this.id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             foreldrepenger = foreldrepenger,
@@ -96,8 +95,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
             dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) })
         ).also {
-            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for {}", keyValue("aktørId", aktørId))
-            if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for {}", keyValue("aktørId", aktørId))
+            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for")
+            if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
         }
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

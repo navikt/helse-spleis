@@ -7,19 +7,18 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
-internal class AvbruttArbeidsledigSøknadMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class AvbruttArbeidsledigSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    private val aktørId = packet["aktorId"].asText()
     private val organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(Arbeidsledig)
     private val periode = packet["fom"].asLocalDate() til packet["tom"].asLocalDate()
-    override val fødselsnummer: String = packet["fnr"].asText()
 
     private val avbruttSøknad
         get() = AvbruttSøknad(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             orgnummer = organisasjonsnummer,
             periode = periode
         )

@@ -4,16 +4,14 @@ import no.nav.helse.hendelser.Migrate
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
-internal class MigrateMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class MigrateMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
-
-    private val migrate     get() = Migrate(
-        meldingsreferanseId = id,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer
+    private val migrate get() = Migrate(
+        meldingsreferanseId = meldingsporing.id,
+        aktørId = meldingsporing.aktørId,
+        fødselsnummer = meldingsporing.fødselsnummer
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

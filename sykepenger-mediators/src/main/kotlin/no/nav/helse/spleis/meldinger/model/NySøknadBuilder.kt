@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import java.time.LocalDate
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.spleis.Meldingsporing
 
 internal class NySøknadBuilder : SøknadBuilder() {
     private val sykemeldingsperioder = mutableListOf<Sykmeldingsperiode>()
@@ -19,10 +20,10 @@ internal class NySøknadBuilder : SøknadBuilder() {
         fremtidigSøknad = erFremtidig
     }
 
-    internal fun build() = Sykmelding(
-        meldingsreferanseId = meldingsreferanseId,
-        fnr = fnr,
-        aktørId = aktørId,
+    internal fun build(meldingsporing: Meldingsporing) = Sykmelding(
+        meldingsreferanseId = meldingsporing.id,
+        fnr = meldingsporing.fødselsnummer,
+        aktørId = meldingsporing.aktørId,
         orgnummer = organisasjonsnummer,
         sykeperioder = sykemeldingsperioder
     )

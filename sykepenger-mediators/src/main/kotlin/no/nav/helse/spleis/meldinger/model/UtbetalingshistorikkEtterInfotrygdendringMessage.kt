@@ -8,14 +8,14 @@ import java.util.UUID
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.arbeidskategorikoder
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.inntektshistorikk
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.utbetalinger
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
-    private val aktørId = packet["aktørId"].asText()
     private val besvart = packet["@besvart"].asLocalDateTime()
 
     private val utbetalinger = packet.utbetalinger()
@@ -35,10 +35,10 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
 
     private fun utbetalingshistorikkEtterInfotrygdendring() =
         UtbetalingshistorikkEtterInfotrygdendring(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            element = infotrygdhistorikk(id),
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
+            element = infotrygdhistorikk(meldingsporing.id),
             besvart = besvart
         )
 

@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
@@ -25,10 +26,10 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private var sendTilGosys: Boolean = false
     private var søknadstype = Søknad.Søknadstype.Arbeidstaker
 
-    internal fun build() = Søknad(
-        meldingsreferanseId = meldingsreferanseId,
-        fnr = fnr,
-        aktørId = aktørId,
+    internal fun build(meldingsporing: Meldingsporing) = Søknad(
+        meldingsreferanseId = meldingsporing.id,
+        fnr = meldingsporing.fødselsnummer,
+        aktørId = meldingsporing.aktørId,
         orgnummer = organisasjonsnummer,
         perioder = perioder,
         andreInntektskilder = harAndreInntektskilder,

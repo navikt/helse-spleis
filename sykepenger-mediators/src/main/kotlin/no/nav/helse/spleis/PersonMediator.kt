@@ -212,7 +212,7 @@ internal class PersonMediator(
     override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
         queueMessage(JsonMessage.newMessage("overstyring_igangsatt", mapOf(
             "revurderingId" to UUID.randomUUID(),
-            "kilde" to message.id,
+            "kilde" to message.meldingsporing.id,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
             "periodeForEndringFom" to event.periodeForEndring.start,
             "periodeForEndringTom" to event.periodeForEndring.endInclusive,

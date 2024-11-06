@@ -10,10 +10,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : BehovMessage(packet) {
-    private val aktørId = packet["aktørId"].asText()
+internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
     private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt"].asBoolean()
 
     private val utbetalinger = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger"]
@@ -72,9 +72,9 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
 
     private fun utbetalingshistorikkForFeriepenger() =
         UtbetalingshistorikkForFeriepenger(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             utbetalinger = utbetalinger,
             feriepengehistorikk = feriepengehistorikk,
             arbeidskategorikoder = arbeidskategorikoder,

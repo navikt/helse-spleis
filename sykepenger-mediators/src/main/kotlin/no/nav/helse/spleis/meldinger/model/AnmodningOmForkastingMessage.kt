@@ -5,21 +5,20 @@ import no.nav.helse.hendelser.AnmodningOmForkasting
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 
 // Understands a JSON message representing a Påminnelse
-internal class AnmodningOmForkastingMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class AnmodningOmForkastingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().let { UUID.fromString(it) }
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val force = packet["force"].takeIf { it.isBoolean }?.asBoolean() ?: false
 
     private val anmodning = AnmodningOmForkasting(
-        meldingsreferanseId = id,
-        aktørId = aktørId,
+        meldingsreferanseId = meldingsporing.id,
+        aktørId = meldingsporing.aktørId,
         organisasjonsnummer = organisasjonsnummer,
-        fødselsnummer = fødselsnummer,
+        fødselsnummer = meldingsporing.fødselsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         force = force
     )

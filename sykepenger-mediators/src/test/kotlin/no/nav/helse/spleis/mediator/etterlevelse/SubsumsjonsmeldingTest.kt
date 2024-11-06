@@ -7,12 +7,14 @@ import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import java.net.URI
+import java.util.UUID
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.januar
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.SubsumsjonMediator
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,14 +31,9 @@ internal class SubsumsjonsmeldingTest {
 
     @BeforeEach
     fun beforeEach() {
-        val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", mapOf(
-            "aktørId" to "1",
-            "fødselsnummer" to fnr,
-        )).also {
+        val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
             it.requireKey("@event_name")
-            it.requireKey("aktørId")
-            it.requireKey("fødselsnummer")
-        })
+        }, Meldingsporing(UUID.randomUUID(), fnr, "aktør"))
         subsumsjonMediator = SubsumsjonMediator(fnr, eksempelmelding, versjonAvKode)
         testRapid = TestRapid()
     }

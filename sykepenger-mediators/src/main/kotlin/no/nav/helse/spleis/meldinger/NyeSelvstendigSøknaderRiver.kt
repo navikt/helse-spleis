@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 
 internal class NyeSelvstendigSøknaderRiver(
@@ -19,5 +21,9 @@ internal class NyeSelvstendigSøknaderRiver(
         message.forbid("arbeidsgiver.orgnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = NySelvstendigSøknadMessage(packet)
+    override fun createMessage(packet: JsonMessage) = NySelvstendigSøknadMessage(packet, Meldingsporing(
+        id = packet["@id"].asText().toUUID(),
+        fødselsnummer = packet["fnr"].asText(),
+        aktørId = packet["aktorId"].asText()
+    ))
 }

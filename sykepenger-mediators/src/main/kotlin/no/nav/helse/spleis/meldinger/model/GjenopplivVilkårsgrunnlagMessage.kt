@@ -7,21 +7,20 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
-internal class GjenopplivVilkårsgrunnlagMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class GjenopplivVilkårsgrunnlagMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    private val aktørId = packet["aktørId"].asText()
     private val vilkårsgrunnlagId = packet["vilkårsgrunnlagId"].asText().let { UUID.fromString(it) }
     private val nyttSkjæringstidspunkt = packet["nyttSkjæringstidspunkt"].asOptionalLocalDate()
     private val arbeidsgiveropplysninger = packet["arbeidsgivere"].takeUnless { it.isMissingOrNull() }?.associate { it["organisasjonsnummer"].asText() to it["månedligInntekt"].asDouble().månedlig } ?: emptyMap()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
 
     private val gjenopplivVilkårsgrunnlag
         get() = GjenopplivVilkårsgrunnlag(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            meldingsreferanseId = meldingsporing.id,
+            aktørId = meldingsporing.aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             nyttSkjæringstidspunkt = nyttSkjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger

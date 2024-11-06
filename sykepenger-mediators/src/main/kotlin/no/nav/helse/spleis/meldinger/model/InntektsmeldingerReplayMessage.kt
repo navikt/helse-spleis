@@ -12,13 +12,12 @@ import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilAvsendersystem
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding replay
-internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMessage(packet) {
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
+internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
     override val skalDuplikatsjekkes = false
@@ -26,9 +25,9 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
     private val inntektsmeldinger = mutableListOf<Inntektsmelding>()
 
     private val inntektsmeldingerReplay = InntektsmeldingerReplay(
-        meldingsreferanseId = id,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
+        meldingsreferanseId = meldingsporing.id,
+        aktørId = meldingsporing.aktørId,
+        fødselsnummer = meldingsporing.fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         inntektsmeldinger = inntektsmeldinger
@@ -61,7 +60,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
         val arbeidsforholdId = packet.path("arbeidsforholdId").takeIf(JsonNode::isTextual)?.asText()
         val vedtaksperiodeId = packet.path("vedtaksperiodeId").takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
         val orgnummer = packet.path("virksomhetsnummer").asText()
-        val aktørId = packet.path("arbeidstakerAktorId").asText()
         val mottatt = packet.path("mottattDato").asLocalDateTime()
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
         val beregnetInntekt = packet.path("beregnetInntekt").asDouble()
@@ -76,8 +74,8 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
             meldingsreferanseId = internDokumentId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
+            fødselsnummer = meldingsporing.fødselsnummer,
+            aktørId = meldingsporing.aktørId,
             førsteFraværsdag = førsteFraværsdag,
             inntektsdato = inntektsdato,
             beregnetInntekt = beregnetInntekt.månedlig,

@@ -121,13 +121,13 @@ internal class MessageMediator(
                 message.logRecognized(log, sikkerLogg)
                 hendelseRepository.lagreMelding(message)
 
-                if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.id)) {
+                if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.meldingsporing.id)) {
                     message.logDuplikat(sikkerLogg)
                     return
                 }
 
                 hendelseMediator.behandle(message, context)
-                hendelseRepository.markerSomBehandlet(message.id)
+                hendelseRepository.markerSomBehandlet(message.meldingsporing.id)
             }.also { result ->
                 val antallSekunder = result.toDouble(DurationUnit.SECONDS)
                 val label = when {
