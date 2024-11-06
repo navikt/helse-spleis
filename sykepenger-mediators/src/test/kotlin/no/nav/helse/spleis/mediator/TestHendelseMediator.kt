@@ -358,7 +358,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAnnullerUtbetalingVerdi.set(true)
     }
 
-    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext) {
+    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext) {
         lestAvstemmingVerdi.set(true)
     }
 

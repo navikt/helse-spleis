@@ -333,7 +333,7 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext) {
+    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext) {
         person(personidentifikator, message, emptySet(), EmptyLog, null) { person  ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
@@ -639,7 +639,7 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext)
     fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext)
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext)
-    fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext)
+    fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext)
     fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext)
     fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext)

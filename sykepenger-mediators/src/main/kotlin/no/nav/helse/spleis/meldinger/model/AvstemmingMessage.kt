@@ -11,6 +11,6 @@ internal class AvstemmingMessage(packet: JsonMessage) : HendelseMessage(packet) 
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        mediator.behandle(this, Personidentifikator(fødselsnummer), aktørId, context)
+        mediator.behandle(this, Personidentifikator(fødselsnummer), context)
     }
 }
