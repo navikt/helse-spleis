@@ -13,14 +13,13 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class SubsumsjonMediator(
-    private val fødselsnummer: String,
     private val message: HendelseMessage,
     private val versjonAvKode: String
 ) : Subsumsjonslogg {
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(PersonMediator::class.java)
+        private val logg = LoggerFactory.getLogger(SubsumsjonMediator::class.java)
     }
 
     private val subsumsjoner = mutableListOf<SubsumsjonEvent>()
@@ -61,15 +60,15 @@ internal class SubsumsjonMediator(
         if (subsumsjoner.isEmpty()) return
         logg.info("som følge av hendelse id=${message.meldingsporing.id} sendes ${subsumsjoner.size} subsumsjonsmeldinger på rapid")
         subsumsjoner
-            .map { subsumsjonMelding(fødselsnummer = fødselsnummer, event = it) }
+            .map { subsumsjonMelding(it) }
             .forEach {
-                context.publish(fødselsnummer, it.toJson().also { message ->
+                context.publish(message.meldingsporing.fødselsnummer, it.toJson().also { message ->
                     sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $message")
                 })
             }
     }
 
-    private fun subsumsjonMelding(fødselsnummer: String, event: SubsumsjonEvent): JsonMessage {
+    private fun subsumsjonMelding(event: SubsumsjonEvent): JsonMessage {
         return JsonMessage.newMessage("subsumsjon", mapOf(
             "@id" to event.id,
             "subsumsjon" to mutableMapOf(
@@ -79,7 +78,7 @@ internal class SubsumsjonMediator(
                 "versjon" to "1.0.0",
                 "kilde" to "spleis",
                 "versjonAvKode" to versjonAvKode,
-                "fodselsnummer" to fødselsnummer,
+                "fodselsnummer" to message.meldingsporing.fødselsnummer,
                 "sporing" to event.sporing.map { it.key.tilEkstern() to it.value }.toMap(),
                 "lovverk" to event.lovverk,
                 "lovverksversjon" to event.ikrafttredelse,

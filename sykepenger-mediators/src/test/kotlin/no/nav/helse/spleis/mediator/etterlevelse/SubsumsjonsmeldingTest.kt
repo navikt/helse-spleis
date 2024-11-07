@@ -34,7 +34,7 @@ internal class SubsumsjonsmeldingTest {
         val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
             it.requireKey("@event_name")
         }, Meldingsporing(UUID.randomUUID(), fnr, "aktør"))
-        subsumsjonMediator = SubsumsjonMediator(fnr, eksempelmelding, versjonAvKode)
+        subsumsjonMediator = SubsumsjonMediator(eksempelmelding, versjonAvKode)
         testRapid = TestRapid()
     }
 

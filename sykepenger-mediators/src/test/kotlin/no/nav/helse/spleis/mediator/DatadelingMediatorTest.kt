@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -9,7 +10,9 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.spleis.DatadelingMediator
+import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
+import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -22,10 +25,14 @@ internal class DatadelingMediatorTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
+    private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
+        it.requireKey("@event_name")
+    }, Meldingsporing(UUID.randomUUID(), fødselsnummer, "aktørId"))
+
     @BeforeEach
     fun beforeEach() {
         aktivitetslogg = Aktivitetslogg()
-        datadelingMediator = DatadelingMediator(aktivitetslogg, UUID.randomUUID(), fødselsnummer, "aktørId")
+        datadelingMediator = DatadelingMediator(aktivitetslogg, eksempelmelding)
     }
 
     @Test

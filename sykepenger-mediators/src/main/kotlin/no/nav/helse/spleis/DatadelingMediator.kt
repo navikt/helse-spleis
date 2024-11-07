@@ -6,13 +6,12 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class DatadelingMediator(
     private val aktivitetslogg: Aktivitetslogg,
-    private val meldingsreferanseId: UUID,
-    private val fødselsnummer: String,
-    private val aktørId: String
+    private val message: HendelseMessage
 ) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -22,9 +21,9 @@ internal class DatadelingMediator(
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         sikkerlogg.info(
             "Publiserer aktiviteter som følge av hendelse med {}, {}, {}",
-            keyValue("hendelseId", meldingsreferanseId),
-            keyValue("fødselsnummer", fødselsnummer),
-            keyValue("aktørId", aktørId)
+            keyValue("hendelseId", message.meldingsporing.id),
+            keyValue("fødselsnummer", message.meldingsporing.fødselsnummer),
+            keyValue("aktørId", message.meldingsporing.aktørId)
         )
         val aktivitetMap = aktivitetslogg.aktiviteter.map { aktivitet ->
             when (aktivitet) {
@@ -41,7 +40,7 @@ internal class DatadelingMediator(
                 }
             }
         }
-        context.publish(fødselsnummer, aktivitetMap.toJson())
+        context.publish(message.meldingsporing.fødselsnummer, aktivitetMap.toJson())
     }
 
     private fun aktivitetMap(nivå: String, aktivitet: Aktivitet) =
@@ -62,7 +61,7 @@ internal class DatadelingMediator(
         return JsonMessage.newMessage(
             "aktivitetslogg_ny_aktivitet",
             mapOf(
-                "fødselsnummer" to fødselsnummer,
+                "fødselsnummer" to message.meldingsporing.fødselsnummer,
                 "aktiviteter" to this
             )
         ).toJson()
