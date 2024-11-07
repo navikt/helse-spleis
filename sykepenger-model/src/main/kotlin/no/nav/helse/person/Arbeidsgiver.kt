@@ -491,8 +491,24 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }
 
-    internal fun somInntektsmelding(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg) =
-        portalinntektsmelding.somInntektsmelding(vedtaksperioder, person, aktivitetslogg)
+    internal fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg): Inntektsmelding? {
+        aktivitetslogg.kontekst(this)
+        if (!portalinntektsmelding.initaliser(vedtaksperioder, person, aktivitetslogg)) return null
+
+        // Håndterer først dager
+        val dager = portalinntektsmelding.somDagerFraInntektsmelding()
+        håndter(portalinntektsmelding) { håndter(dager, aktivitetslogg) }
+        val dagoverstyring = dager.revurderingseventyr()
+
+        // Nå kan vi initalisere inntektsmeldingen ettersom vi her bruker datoer fra vedtaksperidoen som kan endres i forbindelse med håndtering av dager
+        val inntektsmelding = portalinntektsmelding.somInntektsmelding()
+        håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
+        val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
+        addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
+
+        inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
+        return inntektsmelding
+    }
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)

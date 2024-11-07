@@ -29,12 +29,30 @@ class Portalinntektsmelding(
     private val vedtaksperiodeId: UUID,
     private val mottatt: LocalDateTime
 ) : Hendelse {
+    private lateinit var vedtaksperiode: Vedtaksperiode
+    internal fun initaliser(vedtaksperioder: List<Vedtaksperiode>, person: Person, aktivitetslogg: IAktivitetslogg): Boolean {
+        val vedtaksperiode = vedtaksperioder.finn(vedtaksperiodeId)
+
+        if (vedtaksperiode == null && arbeidsgiverperioder.isEmpty()) {
+            aktivitetslogg.info("Portalinntektsmelding som treffer forkastet periode uten arbeidsgiverperiode oppgitt. Har ingen datoer å gå på. Antar at vi har periode innenfor 16 dager")
+            inntektsmeldingIkkeHåndtert(aktivitetslogg, person, harPeriodeInnenfor16Dager = true)
+            return false
+        }
+
+        if (vedtaksperiode == null) {
+            val arbeidsgiverperioden = checkNotNull(arbeidsgiverperioder.periode())
+            inntektsmeldingIkkeHåndtert(aktivitetslogg, person, harPeriodeInnenfor16Dager = vedtaksperioder.påvirkerArbeidsgiverperiode(arbeidsgiverperioden))
+            return false
+        }
+
+        this.vedtaksperiode = vedtaksperiode
+        return true
+    }
 
     internal fun somInntektsmelding(vedtaksperiodeFom: LocalDate, skjæringstidspunkt: LocalDate) = Inntektsmelding(
         meldingsreferanseId = meldingsreferanseId,
         refusjon = refusjon,
         orgnummer = orgnummer,
-
         førsteFraværsdag = vedtaksperiodeFom,
         inntektsdato = skjæringstidspunkt,
         beregnetInntekt = beregnetInntekt,
@@ -48,25 +66,15 @@ class Portalinntektsmelding(
         mottatt = mottatt
     )
 
-    internal fun somInntektsmelding(vedtaksperioder: List<Vedtaksperiode>, person: Person, aktivitetslogg: IAktivitetslogg): Inntektsmelding? {
-        val vedtaksperioden = vedtaksperioder.finn(vedtaksperiodeId)
+    internal fun somInntektsmelding(): Inntektsmelding {
+        val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
+        val inntektsmelding = somInntektsmelding(
+            vedtaksperiodeFom = vedtaksperiode.periode().start,
+            skjæringstidspunkt = skjæringstidspunkt
+        )
 
-        if (vedtaksperioden == null && arbeidsgiverperioder.isEmpty()) {
-            aktivitetslogg.info("Portalinntektsmelding som treffer forkastet periode uten arbeidsgiverperiode oppgitt. Har ingen datoer å gå på. Antar at vi har periode innenfor 16 dager")
-            inntektsmeldingIkkeHåndtert(aktivitetslogg, person, harPeriodeInnenfor16Dager = true)
-            return null
-        }
-
-        if (vedtaksperioden == null) {
-            val arbeidsgiverperioden = checkNotNull(arbeidsgiverperioder.periode())
-            inntektsmeldingIkkeHåndtert(aktivitetslogg, person, harPeriodeInnenfor16Dager = vedtaksperioder.påvirkerArbeidsgiverperiode(arbeidsgiverperioden))
-            return null
-        }
-
-        val inntektsmelding = somInntektsmelding(vedtaksperiodeFom = vedtaksperioden.periode().start, skjæringstidspunkt = vedtaksperioden.skjæringstidspunkt)
-
-        if (inntektsdato != null && vedtaksperioden.skjæringstidspunkt != inntektsdato) {
-            "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt ${vedtaksperioden.skjæringstidspunkt}".let {
+        if (inntektsdato != null && vedtaksperiode.skjæringstidspunkt != inntektsdato) {
+            "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt".let {
                 logger.info(it)
                 sikkerlogg.info(it)
             }
@@ -74,6 +82,17 @@ class Portalinntektsmelding(
 
         return inntektsmelding
     }
+
+    internal fun somDagerFraInntektsmelding() = DagerFraInntektsmelding(
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        førsteFraværsdag = vedtaksperiode.periode().start,
+        mottatt = mottatt,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        avsendersystem = avsendersystem,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        hendelse = this
+    )
 
     private fun inntektsmeldingIkkeHåndtert(aktivitetslogg: IAktivitetslogg, person: Person, harPeriodeInnenfor16Dager: Boolean) {
         aktivitetslogg.funksjonellFeil(RV_IM_26)

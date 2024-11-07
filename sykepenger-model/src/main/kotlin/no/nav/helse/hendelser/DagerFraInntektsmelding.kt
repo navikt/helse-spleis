@@ -41,7 +41,7 @@ internal class DagerFraInntektsmelding(
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean,
-    val hendelse: Inntektsmelding
+    val hendelse: Hendelse
 ) {
     private companion object {
         private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10

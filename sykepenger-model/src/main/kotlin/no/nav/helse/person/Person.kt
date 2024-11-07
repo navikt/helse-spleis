@@ -233,9 +233,7 @@ class Person private constructor(
     fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler portalinntektsmelding")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(portalinntektsmelding.behandlingsporing, aktivitetslogg)
-        val inntektsmelding = arbeidsgiver.somInntektsmelding(portalinntektsmelding, aktivitetslogg)
-        inntektsmelding?.let {
-            arbeidsgiver.håndter(it, aktivitetslogg)
+        arbeidsgiver.håndter(portalinntektsmelding, aktivitetslogg)?.let {
             arbeidsgiver.inntektsmeldingFerdigbehandlet(it, aktivitetslogg)
             håndterGjenoppta(it, aktivitetslogg)
         }
