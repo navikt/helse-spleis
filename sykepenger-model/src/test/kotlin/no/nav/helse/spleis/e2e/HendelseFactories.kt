@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
@@ -212,62 +213,25 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
     vedtaksperiodeId: UUID,
-    førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
     arbeidsforholdId: String? = null,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     harFlereInntektsmeldinger: Boolean = false
-): Inntektsmelding {
-    val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
-            id = id,
-            refusjon = refusjon,
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = beregnetInntekt,
-            vedtaksperiodeId = vedtaksperiodeId,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
-        )
-    }
-    val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
-        inntektsmeldingId = UUID.randomUUID().toString(),
-        arbeidstakerFnr = fnr.toString(),
-        arbeidstakerAktorId = AKTØRID,
-        virksomhetsnummer = orgnummer,
-        arbeidsgiverFnr = null,
-        arbeidsgiverAktorId = null,
-        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-        arbeidsforholdId = null,
-        beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.månedlig),
-        refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.månedlig), null),
-        endringIRefusjoner = emptyList(),
-        opphoerAvNaturalytelser = emptyList(),
-        gjenopptakelseNaturalytelser = emptyList(),
-        arbeidsgiverperioder = arbeidsgiverperioder.map {
-            no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
-        },
-        status = Status.GYLDIG,
-        arkivreferanse = "",
-        ferieperioder = emptyList(),
-        foersteFravaersdag = førsteFraværsdag,
-        mottattDato = LocalDateTime.now(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        naerRelasjon = null,
-        avsenderSystem = AvsenderSystem("NAV_NO"),
-        innsenderTelefon = "tlfnr",
-        innsenderFulltNavn = "SPLEIS Modell"
-    )
-    inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
-    inntekter[id] = beregnetInntekt
+): Portalinntektsmelding {
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
-    return inntektsmeldinggenerator()
+    return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
+        id = id,
+        refusjon = refusjon,
+        beregnetInntekt = beregnetInntekt,
+        vedtaksperiodeId = vedtaksperiodeId,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        arbeidsforholdId = arbeidsforholdId,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger
+    )
 }
 
 internal fun AbstractEndToEndTest.vilkårsgrunnlag(

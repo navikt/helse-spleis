@@ -48,7 +48,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(mars)
         nullstillTilstandsendringer()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         assertNotEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2) // IM lager nytt innslag i vilkårsgrunnlaghistorikken pga nye refusjonsopplysninger
@@ -69,7 +69,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         nullstillTilstandsendringer()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)

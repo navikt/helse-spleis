@@ -55,7 +55,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
         assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
 
-        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 7.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering", vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 7.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering", avsendersystem = ALTINN)
         assertEquals("ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
         assertEquals(listOf(7.august til 18.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
         assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))

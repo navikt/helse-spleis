@@ -368,6 +368,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 32000.månedlig,
             refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
             orgnummer = a2,
+            avsendersystem = ALTINN
         )
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
 

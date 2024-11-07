@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
+import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Simulering
@@ -227,6 +228,17 @@ class Person private constructor(
         arbeidsgiver.håndter(inntektsmelding, aktivitetslogg)
         arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding, aktivitetslogg)
         håndterGjenoppta(inntektsmelding, aktivitetslogg)
+    }
+
+    fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg) {
+        registrer(aktivitetslogg, "Behandler portalinntektsmelding")
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(portalinntektsmelding.behandlingsporing, aktivitetslogg)
+        val inntektsmelding = arbeidsgiver.somInntektsmelding(portalinntektsmelding, aktivitetslogg)
+        inntektsmelding?.let {
+            arbeidsgiver.håndter(it, aktivitetslogg)
+            arbeidsgiver.inntektsmeldingFerdigbehandlet(it, aktivitetslogg)
+            håndterGjenoppta(it, aktivitetslogg)
+        }
     }
 
     fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {

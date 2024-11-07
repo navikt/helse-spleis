@@ -18,7 +18,7 @@ class Portalinntektsmelding(
     private val meldingsreferanseId: UUID,
     private val refusjon: Inntektsmelding.Refusjon,
     private val orgnummer: String,
-    private val inntektsdato: LocalDate?, // TODO: Denne kan fjernes på sikt. brukes bare til logging
+    private val inntektsdato: LocalDate?, // TODO: Denne kan fjernes på sikt. brukes bare til logging. Hvorfor er den optional når den angivelig alltid settes på portalinntektsmeldinger?
     private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
     private val arbeidsforholdId: String?,
@@ -29,6 +29,24 @@ class Portalinntektsmelding(
     private val vedtaksperiodeId: UUID,
     private val mottatt: LocalDateTime
 ) : Hendelse {
+
+    internal fun somInntektsmelding(vedtaksperiodeFom: LocalDate, skjæringstidspunkt: LocalDate) = Inntektsmelding(
+        meldingsreferanseId = meldingsreferanseId,
+        refusjon = refusjon,
+        orgnummer = orgnummer,
+
+        førsteFraværsdag = vedtaksperiodeFom,
+        inntektsdato = skjæringstidspunkt,
+        beregnetInntekt = beregnetInntekt,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        arbeidsforholdId = arbeidsforholdId,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        avsendersystem = avsendersystem,
+        vedtaksperiodeId = vedtaksperiodeId,
+        mottatt = mottatt
+    )
 
     internal fun somInntektsmelding(vedtaksperioder: List<Vedtaksperiode>, person: Person, aktivitetslogg: IAktivitetslogg): Inntektsmelding? {
         val vedtaksperioden = vedtaksperioder.finn(vedtaksperiodeId)
@@ -45,24 +63,9 @@ class Portalinntektsmelding(
             return null
         }
 
-        val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = meldingsreferanseId,
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            førsteFraværsdag = vedtaksperioden.periode().start,
-            inntektsdato = vedtaksperioden.skjæringstidspunkt,
-            beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem,
-            vedtaksperiodeId = vedtaksperiodeId,
-            mottatt = mottatt
-        )
+        val inntektsmelding = somInntektsmelding(vedtaksperiodeFom = vedtaksperioden.periode().start, skjæringstidspunkt = vedtaksperioden.skjæringstidspunkt)
 
-        if (vedtaksperioden.skjæringstidspunkt != inntektsdato) {
+        if (inntektsdato != null && vedtaksperioden.skjæringstidspunkt != inntektsdato) {
             "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt ${vedtaksperioden.skjæringstidspunkt}".let {
                 logger.info(it)
                 sikkerlogg.info(it)

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -727,13 +728,14 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
 
         nyPeriode(5.februar til 28.februar)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar, avsendersystem = ALTINN)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertIngenVarsler()
 
         assertEquals(listOf(
-            Refusjonsopplysning(inntektsmeldingId, 5.februar, null, INNTEKT),
+            Refusjonsopplysning(inntektsmeldingId, 5.februar, 6.februar, INNTEKT),
+            Refusjonsopplysning(inntektsmeldingId, 7.februar, null, INNTEKT),
         ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
 
         val overstyringId = UUID.randomUUID()

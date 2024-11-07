@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Simulering
@@ -489,6 +490,9 @@ internal class Arbeidsgiver private constructor(
 
         inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }
+
+    internal fun somInntektsmelding(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg) =
+        portalinntektsmelding.somInntektsmelding(vedtaksperioder, person, aktivitetslogg)
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)

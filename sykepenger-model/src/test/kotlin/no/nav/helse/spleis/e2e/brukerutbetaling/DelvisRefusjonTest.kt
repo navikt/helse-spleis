@@ -718,7 +718,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar)
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, avsendersystem = ALTINN)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)

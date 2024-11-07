@@ -131,7 +131,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
-        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, avsendersystem = ALTINN)
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
         inntektsmeldingFørSøknadEvent.let {
             assertEquals(id, it.inntektsmeldingId)

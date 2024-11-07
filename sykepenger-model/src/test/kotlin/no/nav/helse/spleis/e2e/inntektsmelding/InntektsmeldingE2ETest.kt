@@ -178,7 +178,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `tom arbeidsgiverperiode og første fraværsdag dagen efter`() {
         nyPeriode(1.januar til 15.januar)
-        håndterInntektsmelding(listOf(), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", avsendersystem = ALTINN)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.size)
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.first().tilstand)
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
@@ -295,14 +295,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nullstillTilstandsendringer()
         // IM1: Denne treffer ikke 18/1 - 2/2 nå
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = im1Inntekt)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = im1Inntekt, avsendersystem = ALTINN)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nullstillTilstandsendringer()
         // IM2: Denne strekker perioden tilbake til 17/1
         håndterInntektsmelding(
             listOf(17.januar til 30.januar, 31.januar til 2.februar),
             førsteFraværsdag = 3.februar,
-            beregnetInntekt = im2Inntekt
+            beregnetInntekt = im2Inntekt,
+            avsendersystem = ALTINN
         )
         assertEquals(17.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
         // Nå replayes IM1:
@@ -328,7 +329,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         // Inntektsmelding treffer ikke (litt kødden siden den bare er 12 dager..)
-        håndterInntektsmelding(listOf(5.mars til 16.mars), id = inntektsmelding1)
+        håndterInntektsmelding(listOf(5.mars til 16.mars), id = inntektsmelding1, avsendersystem = ALTINN)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertHarIkkeHendelseIder(1.vedtaksperiode, inntektsmelding1)
 
@@ -633,7 +634,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 8.januar, 10.januar til 17.januar), 1.februar)
+        håndterInntektsmelding(listOf(1.januar til 8.januar, 10.januar til 17.januar), 1.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         assertEquals(9.januar til 20.februar, inspektør.periode(2.vedtaksperiode))
     }
 
@@ -849,7 +850,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(10.april til 30.april)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 10.april
+            førsteFraværsdag = 10.april,
+            vedtaksperiodeIdInnhenter = 5.vedtaksperiode
         )
         assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
         assertNull(inspektør.vilkårsgrunnlag(1.januar))
@@ -2103,6 +2105,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 14.januar til 19.januar
             ),
             førsteFraværsdag = 1.mars,
+            avsendersystem = ALTINN
         )
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -2117,6 +2120,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 1.januar til 16.januar
             ),
             førsteFraværsdag = 1.mars,
+            avsendersystem = ALTINN
         )
         assertEquals(2.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(Dag.UkjentDag::class, inspektør.sykdomstidslinje[1.januar]::class)
@@ -2136,6 +2140,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 14.januar til 19.januar
             ),
             førsteFraværsdag = 1.mars,
+            avsendersystem = ALTINN
         )
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -2195,7 +2200,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterInntektsmeldingPortal(
             listOf(1.februar til 16.februar),
-            førsteFraværsdag = 1.februar,
             beregnetInntekt = INNTEKT,
             orgnummer = a2
         )

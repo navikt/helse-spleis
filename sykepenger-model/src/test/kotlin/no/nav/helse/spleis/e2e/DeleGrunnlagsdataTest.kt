@@ -107,6 +107,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(18.januar, 1.februar)),
             førsteFraværsdag = 4.mars,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)

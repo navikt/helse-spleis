@@ -9,6 +9,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -179,6 +180,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.mars,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
+            avsendersystem = ALTINN
         )
 
         assertEquals("SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
@@ -222,6 +224,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             emptyList(),
             førsteFraværsdag = lørdag den 6.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
+            avsendersystem = ALTINN
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
