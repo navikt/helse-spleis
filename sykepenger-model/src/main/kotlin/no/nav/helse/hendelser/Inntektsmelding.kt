@@ -279,6 +279,7 @@ class Inntektsmelding(
         forkastede: List<ForkastetVedtaksperiode>
     ): Boolean {
         if (vedtaksperiodeId != null && forkastede.erForkastet(vedtaksperiodeId)) return false.also {
+            // TODO: Dette kan fjernes når vi tar i bruk PortalInntektsmelding
             aktivitetslogg.info("Vi har bedt om arbeidsgiveropplysninger, men perioden er forkastet")
         }
         if (erPortalinntektsmelding()) return true

@@ -493,11 +493,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg): Inntektsmelding? {
         aktivitetslogg.kontekst(this)
-        if (!portalinntektsmelding.initaliser(vedtaksperioder, person, aktivitetslogg)) return null
+        if (!portalinntektsmelding.initaliser(vedtaksperioder, person, aktivitetslogg)) return null // Håndterer om vedtaksperioden er blitt forkastet _før_ vi får inntektsmelding
 
         // Håndterer først dager
         val dager = portalinntektsmelding.somDagerFraInntektsmelding()
         håndter(portalinntektsmelding) { håndter(dager, aktivitetslogg) }
+        if (!portalinntektsmelding.initaliser(vedtaksperioder, person, aktivitetslogg)) return null // Håndterer om inntektsmeldingen forkaster vedtaksperioden selv
         val dagoverstyring = dager.revurderingseventyr()
 
         // Nå kan vi initalisere inntektsmeldingen ettersom vi her bruker datoer fra vedtaksperidoen som kan endres i forbindelse med håndtering av dager
