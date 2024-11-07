@@ -772,6 +772,7 @@ data class PersonData(
                         DokumentTypeData.InntektsmeldingInntekt -> DokumenttypeDto.InntektsmeldingInntekt
                         DokumentTypeData.InntektsmeldingRefusjon -> DokumenttypeDto.InntektsmeldingRefusjon
                         DokumentTypeData.InntektsmeldingDager -> DokumenttypeDto.InntektsmeldingDager
+                        DokumentTypeData.InntektFraAOrdningen -> DokumenttypeDto.InntektFraAOrdningen
                         DokumentTypeData.OverstyrTidslinje -> DokumenttypeDto.OverstyrTidslinje
                         DokumentTypeData.OverstyrInntekt -> DokumenttypeDto.OverstyrInntekt
                         DokumentTypeData.OverstyrRefusjon -> DokumenttypeDto.OverstyrRefusjon
@@ -788,6 +789,7 @@ data class PersonData(
                 InntektsmeldingInntekt,
                 InntektsmeldingRefusjon,
                 InntektsmeldingDager,
+                InntektFraAOrdningen,
                 OverstyrTidslinje,
                 OverstyrInntekt,
                 OverstyrRefusjon,

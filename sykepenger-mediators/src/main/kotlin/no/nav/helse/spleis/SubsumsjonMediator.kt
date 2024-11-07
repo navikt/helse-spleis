@@ -101,6 +101,7 @@ internal class SubsumsjonMediator(
         KontekstType.Sykmelding -> "sykmelding"
         KontekstType.Søknad -> "soknad"
         KontekstType.Inntektsmelding -> "inntektsmelding"
+        KontekstType.InntektFraAOrdningen -> "inntektFraAOrdningen"
         KontekstType.OverstyrTidslinje -> "overstyrtidslinje"
         KontekstType.OverstyrArbeidsgiveropplysninger -> "overstyrarbeidsgiveropplysninger"
         KontekstType.OverstyrInntekt -> "overstyrinntekt"

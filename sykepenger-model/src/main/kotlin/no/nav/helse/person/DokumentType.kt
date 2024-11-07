@@ -6,6 +6,7 @@ enum class DokumentType {
     InntektsmeldingInntekt,
     InntektsmeldingRefusjon,
     InntektsmeldingDager,
+    InntektFraAOrdningen,
     OverstyrTidslinje,
     OverstyrInntekt,
     OverstyrRefusjon,

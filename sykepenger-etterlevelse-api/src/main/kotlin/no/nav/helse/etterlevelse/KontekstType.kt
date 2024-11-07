@@ -7,6 +7,7 @@ enum class KontekstType {
     Sykmelding,
     Søknad,
     Inntektsmelding,
+    InntektFraAOrdningen,
     OverstyrTidslinje,
     OverstyrInntekt,
     OverstyrRefusjon,

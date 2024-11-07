@@ -1944,6 +1944,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.varsel(Varselkode.RV_IV_10)
             vedtaksperiode.arbeidsgiver.lagreInntekt(sykepengegrunnlagForArbeidsgiver)
             vedtaksperiode.behandlinger.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver, vedtaksperiode.person)
+            vedtaksperiode.behandlinger.oppdaterDokumentsporing(Dokumentsporing.inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId))
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
         }
 

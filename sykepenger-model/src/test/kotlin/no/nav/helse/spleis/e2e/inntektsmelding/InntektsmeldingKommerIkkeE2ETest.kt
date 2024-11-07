@@ -7,21 +7,14 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
@@ -53,11 +46,14 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
-            håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, listOf(
+            val meldingsreferanseId = håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, listOf(
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
             ))
+            val hendelser = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.hendelser
+            assertTrue(hendelser.contains(Dokumentsporing.inntektFraAOrdingen(meldingsreferanseId)))
+
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())

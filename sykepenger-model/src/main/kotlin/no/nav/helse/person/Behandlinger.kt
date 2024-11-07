@@ -71,6 +71,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentspo
 import no.nav.helse.person.Dokumentsporing.Companion.andreYtelser
 import no.nav.helse.person.Dokumentsporing.Companion.grunnbeløpendring
 import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsforhold
@@ -579,6 +580,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
                         is Inntektsmelding -> inntektsmeldingInntekt(metadata.meldingsreferanseId)
+                        is SykepengegrunnlagForArbeidsgiver -> inntektFraAOrdingen(metadata.meldingsreferanseId)
                         is Søknad -> søknad(metadata.meldingsreferanseId)
                         is OverstyrArbeidsforhold -> overstyrArbeidsforhold(metadata.meldingsreferanseId)
                         is OverstyrArbeidsgiveropplysninger -> overstyrArbeidsgiveropplysninger(metadata.meldingsreferanseId)
@@ -603,7 +605,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is KanIkkeBehandlesHer,
                         is Påminnelse,
                         is Simulering,
-                        is SykepengegrunnlagForArbeidsgiver,
                         is Sykmelding,
                         is UtbetalingHendelse,
                         is Utbetalingpåminnelse,

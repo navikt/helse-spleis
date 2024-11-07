@@ -370,9 +370,10 @@ internal class TestPerson(
             vedtaksperiodeId: UUID,
             skjæringstidspunkt: LocalDate,
             inntekter: List<MånedligInntekt>
-        ) {
-            arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId, skjæringstidspunkt, inntekter)
-                .håndter(Person::håndter)
+        ): UUID {
+            val inntektFraOrdningen = arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId, skjæringstidspunkt, inntekter)
+            inntektFraOrdningen.håndter(Person::håndter)
+            return inntektFraOrdningen.metadata.meldingsreferanseId
         }
 
         internal fun håndterPåminnelse(
