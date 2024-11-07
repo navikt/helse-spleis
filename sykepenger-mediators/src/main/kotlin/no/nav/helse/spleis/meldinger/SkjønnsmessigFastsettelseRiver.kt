@@ -20,12 +20,11 @@ internal class SkjønnsmessigFastsettelseRiver(
 
     override fun createMessage(packet: JsonMessage) = SkjønnsmessigFastsettelseMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer")
+        message.requireKey("fødselsnummer")
         message.require("skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("arbeidsgivere") { require(it.size() > 0) { "Må settes minst en arbeidsgiver" } }
         message.requireArray("arbeidsgivere") {

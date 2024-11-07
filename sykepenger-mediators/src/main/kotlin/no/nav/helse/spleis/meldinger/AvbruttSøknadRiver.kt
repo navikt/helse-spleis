@@ -18,19 +18,13 @@ internal class AvbruttSøknadRiver(
     override val riverName = "avbrutt_søknad"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey(
-            "@id",
-            "aktorId",
-            "fnr",
-            "arbeidsgiver.orgnummer"
-        )
+        message.requireKey("@id", "fnr", "arbeidsgiver.orgnummer")
         message.require("fom", JsonNode::asLocalDate)
         message.require("tom", JsonNode::asLocalDate)
     }
 
     override fun createMessage(packet: JsonMessage) = AvbruttSøknadMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText(),
-        aktørId = packet["aktorId"].asText()
+        fødselsnummer = packet["fnr"].asText()
     ))
 }

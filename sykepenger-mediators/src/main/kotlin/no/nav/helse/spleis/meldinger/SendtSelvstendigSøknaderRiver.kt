@@ -27,7 +27,6 @@ internal class SendtSelvstendigSøknaderRiver(
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadSelvstendigMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText(),
-        aktørId = packet["aktorId"].asText()
+        fødselsnummer = packet["fnr"].asText()
     ))
 }

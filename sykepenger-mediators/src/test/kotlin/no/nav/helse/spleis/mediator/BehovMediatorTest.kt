@@ -29,7 +29,6 @@ import org.junit.jupiter.api.assertThrows
 class BehovMediatorTest {
 
     private companion object {
-        private const val aktørId = "aktørId"
         private const val fødselsnummer = "01010112345"
 
         private lateinit var behovMediator: BehovMediator
@@ -40,7 +39,7 @@ class BehovMediatorTest {
 
         private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
             it.requireKey("@event_name")
-        }, Meldingsporing(UUID.randomUUID(), fødselsnummer, aktørId))
+        }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()

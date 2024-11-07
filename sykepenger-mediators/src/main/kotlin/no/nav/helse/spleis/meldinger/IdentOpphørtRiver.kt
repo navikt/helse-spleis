@@ -17,7 +17,7 @@ internal class IdentOpphørtRiver (
 
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer", "nye_identer.fødselsnummer", "nye_identer.aktørId")
+        message.requireKey("fødselsnummer", "nye_identer.fødselsnummer", "nye_identer.aktørId")
         message.requireArray("gamle_identer") {
             requireAny("type", listOf("FØDSELSNUMMER", "AKTØRID", "NPID"))
             requireKey("ident")
@@ -26,7 +26,6 @@ internal class IdentOpphørtRiver (
 
     override fun createMessage(packet: JsonMessage) = IdentOpphørtMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

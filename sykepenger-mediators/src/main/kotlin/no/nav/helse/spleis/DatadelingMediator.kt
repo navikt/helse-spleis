@@ -2,7 +2,6 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -20,10 +19,9 @@ internal class DatadelingMediator(
     internal fun ferdigstill(context: MessageContext) {
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         sikkerlogg.info(
-            "Publiserer aktiviteter som følge av hendelse med {}, {}, {}",
+            "Publiserer aktiviteter som følge av hendelse med {}, {}",
             keyValue("hendelseId", message.meldingsporing.id),
-            keyValue("fødselsnummer", message.meldingsporing.fødselsnummer),
-            keyValue("aktørId", message.meldingsporing.aktørId)
+            keyValue("fødselsnummer", message.meldingsporing.fødselsnummer)
         )
         val aktivitetMap = aktivitetslogg.aktiviteter.map { aktivitet ->
             when (aktivitet) {

@@ -36,7 +36,6 @@ internal class SimuleringerRiver(
 
     override fun createMessage(packet: JsonMessage) = SimuleringMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

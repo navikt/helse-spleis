@@ -57,7 +57,6 @@ internal class VilkårsgrunnlagRiver(
 
     override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

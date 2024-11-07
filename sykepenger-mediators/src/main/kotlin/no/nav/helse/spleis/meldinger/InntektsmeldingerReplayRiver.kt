@@ -18,7 +18,7 @@ internal open class InntektsmeldingerReplayRiver(
     override val riverName = "Inntektsmeldinger Replay"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("fødselsnummer", "aktørId", "organisasjonsnummer")
+        message.requireKey("fødselsnummer", "organisasjonsnummer")
         message.requireKey("vedtaksperiodeId")
         message.requireArray("inntektsmeldinger") {
             require("internDokumentId") { it.asText().toUUID() }
@@ -64,7 +64,6 @@ internal open class InntektsmeldingerReplayRiver(
 
     override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

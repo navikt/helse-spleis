@@ -27,7 +27,7 @@ internal class DatadelingMediatorTest {
 
     private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
         it.requireKey("@event_name")
-    }, Meldingsporing(UUID.randomUUID(), fødselsnummer, "aktørId"))
+    }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
 
     @BeforeEach
     fun beforeEach() {

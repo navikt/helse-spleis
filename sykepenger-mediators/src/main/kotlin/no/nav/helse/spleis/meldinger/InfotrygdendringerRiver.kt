@@ -18,15 +18,13 @@ internal class InfotrygdendringerRiver (
 
 
     override fun validate(message: JsonMessage) {
-        message.requireKey(
-            "aktørId", "fødselsnummer")
+        message.requireKey("fødselsnummer")
         message.require("endringsmeldingId", ::requireLong)
     }
 
     override fun createMessage(packet: JsonMessage) = InfotrygdendringMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 
     private fun requireLong(node: JsonNode) {

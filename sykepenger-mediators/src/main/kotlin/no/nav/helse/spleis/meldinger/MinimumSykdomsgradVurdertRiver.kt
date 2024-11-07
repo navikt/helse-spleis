@@ -17,7 +17,7 @@ internal class MinimumSykdomsgradVurdertRiver(
     override val riverName = "minimum_sykdomsgrad_vurdert"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("@id", "fødselsnummer", "aktørId")
+        message.requireKey("@id", "fødselsnummer")
         message.requireArray("perioderMedMinimumSykdomsgradVurdertOk") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
@@ -30,8 +30,7 @@ internal class MinimumSykdomsgradVurdertRiver(
 
     override fun createMessage(packet: JsonMessage) = MinimumSykdomsgradVurdertMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }
 

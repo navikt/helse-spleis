@@ -15,12 +15,11 @@ internal class PersonPåminnelserRiver(
     override val riverName = "Person påminnelse"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("fødselsnummer", "aktørId")
+        message.requireKey("fødselsnummer")
     }
 
     override fun createMessage(packet: JsonMessage) = PersonPåminnelseMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

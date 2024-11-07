@@ -17,7 +17,6 @@ internal class AnnullerUtbetalingerRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey(
             "@id",
-            "aktørId",
             "fødselsnummer",
             "organisasjonsnummer",
             "saksbehandler",
@@ -29,7 +28,6 @@ internal class AnnullerUtbetalingerRiver(
 
     override fun createMessage(packet: JsonMessage) = AnnulleringMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

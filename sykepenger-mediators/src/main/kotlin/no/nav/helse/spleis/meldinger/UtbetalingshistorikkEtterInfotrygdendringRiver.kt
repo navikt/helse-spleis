@@ -24,7 +24,6 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiver(
 
     override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkEtterInfotrygdendringMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

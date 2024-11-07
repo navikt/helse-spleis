@@ -16,18 +16,13 @@ internal open class AnmodningOmForkastingRiver(
     override val riverName = "anmodningOmForkasting"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey(
-            "organisasjonsnummer",
-            "fødselsnummer",
-            "aktørId"
-        )
+        message.requireKey("organisasjonsnummer", "fødselsnummer")
         message.require("vedtaksperiodeId") { UUID.fromString(it.asText()) }
         message.interestedIn("force")
     }
 
     override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

@@ -63,8 +63,7 @@ internal open class InntektsmeldingerRiver(
         val dødsdato = packet["dødsdato"].asOptionalLocalDate()
         val meldingsporing = Meldingsporing(
             id = packet["@id"].asText().toUUID(),
-            fødselsnummer = packet["arbeidstakerFnr"].asText(),
-            aktørId = aktørId
+            fødselsnummer = packet["arbeidstakerFnr"].asText()
         )
         return InntektsmeldingMessage(
             packet = packet,

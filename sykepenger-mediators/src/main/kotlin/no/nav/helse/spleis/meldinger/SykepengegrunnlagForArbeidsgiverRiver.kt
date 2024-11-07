@@ -27,7 +27,7 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
             requireArray("inntektsliste") {
                 requireKey("beløp")
                 requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
-                interestedIn("orgnummer", "fødselsnummer", "aktørId", "fordel", "beskrivelse")
+                interestedIn("orgnummer", "fødselsnummer", "fordel", "beskrivelse")
             }
             requireArray("arbeidsforholdliste") {
                 requireKey("orgnummer", "type")
@@ -37,7 +37,6 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
 
     override fun createMessage(packet: JsonMessage) = SykepengegrunnlagForArbeidsgiverMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

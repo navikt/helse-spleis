@@ -19,11 +19,7 @@ internal class GjenopplivVilkårsgrunnlagRiver(
     override val riverName = "gjenoppliv_vilkårsgrunnlag"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey(
-            "@id",
-            "aktørId",
-            "fødselsnummer"
-        )
+        message.requireKey("@id", "fødselsnummer")
         message.require("vilkårsgrunnlagId") { UUID.fromString(it.asText()) }
         message.interestedIn("nyttSkjæringstidspunkt", JsonNode::asLocalDate)
         message.interestedIn("arbeidsgivere") {
@@ -36,8 +32,7 @@ internal class GjenopplivVilkårsgrunnlagRiver(
 
     override fun createMessage(packet: JsonMessage) = GjenopplivVilkårsgrunnlagMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 
 

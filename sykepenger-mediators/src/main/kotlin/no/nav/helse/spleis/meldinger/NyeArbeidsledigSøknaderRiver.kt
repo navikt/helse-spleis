@@ -23,7 +23,6 @@ internal class NyeArbeidsledigSøknaderRiver(
 
     override fun createMessage(packet: JsonMessage) = NyArbeidsledigSøknadMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText(),
-        aktørId = packet["aktorId"].asText()
+        fødselsnummer = packet["fnr"].asText()
     ))
 }

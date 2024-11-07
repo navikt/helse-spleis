@@ -16,12 +16,11 @@ internal class GrunnbeløpsreguleringRiver(
     override val riverName = "Grunnbeløpsregulering"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer", "skjæringstidspunkt")
+        message.requireKey("fødselsnummer", "skjæringstidspunkt")
     }
 
     override fun createMessage(packet: JsonMessage) = GrunnbeløpsreguleringMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

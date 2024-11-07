@@ -31,7 +31,6 @@ internal class UtbetalingerRiver(
 
     override fun createMessage(packet: JsonMessage) = UtbetalingMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

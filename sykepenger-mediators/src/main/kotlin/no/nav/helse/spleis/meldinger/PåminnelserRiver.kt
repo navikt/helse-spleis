@@ -20,8 +20,7 @@ internal class PåminnelserRiver(
 
     override fun validate(message: JsonMessage) {
         message.demand("påminnelsestidspunkt") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(24)) }
-        message.requireKey("antallGangerPåminnet", "vedtaksperiodeId",
-            "organisasjonsnummer", "fødselsnummer", "aktørId")
+        message.requireKey("antallGangerPåminnet", "vedtaksperiodeId", "organisasjonsnummer", "fødselsnummer")
         message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
         message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
@@ -31,7 +30,6 @@ internal class PåminnelserRiver(
 
     override fun createMessage(packet: JsonMessage) = PåminnelseMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

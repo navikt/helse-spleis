@@ -16,7 +16,7 @@ internal class OverstyrTidlinjeRiver(
     override val riverName = "Overstyr tidslinje"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
+        message.requireKey("fødselsnummer", "organisasjonsnummer")
         message.requireArray("dager") {
             requireKey("dato")
             requireAny("type", Dagtype.gyldigeTyper)
@@ -27,7 +27,6 @@ internal class OverstyrTidlinjeRiver(
 
     override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

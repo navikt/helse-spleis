@@ -13,15 +13,13 @@ internal class MigrateRiver(rapidsConnection: RapidsConnection, messageMediator:
     override val riverName = "JSON Migrate"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("fødselsnummer", "aktørId")
+        message.requireKey("fødselsnummer")
         message.require("fødselsnummer", ::requireLong)
-        message.require("aktørId", ::requireLong)
     }
 
     override fun createMessage(packet: JsonMessage) = MigrateMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 
     private fun requireLong(node: JsonNode) {

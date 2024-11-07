@@ -75,7 +75,6 @@ internal class YtelserRiver(
 
     override fun createMessage(packet: JsonMessage) = YtelserMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

@@ -18,13 +18,12 @@ internal class DødsmeldingerRiver (
     override val riverName = "Dødsmelding"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer")
+        message.requireKey("fødselsnummer")
         message.require("dødsdato", JsonNode::asLocalDate)
     }
 
     override fun createMessage(packet: JsonMessage) = DødsmeldingMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

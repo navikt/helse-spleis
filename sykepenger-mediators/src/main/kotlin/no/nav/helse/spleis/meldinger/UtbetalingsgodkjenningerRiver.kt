@@ -28,7 +28,6 @@ internal class UtbetalingsgodkjenningerRiver(
 
     override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

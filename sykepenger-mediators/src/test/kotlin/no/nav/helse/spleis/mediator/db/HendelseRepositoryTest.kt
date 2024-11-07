@@ -93,6 +93,6 @@ private object TestMessages {
             packet.requireKey("soknadsperioder")
         }
 
-        return NySøknadMessage(packet, Meldingsporing(id, fnr.toString(), "aktor"))
+        return NySøknadMessage(packet, Meldingsporing(id, fnr.toString()))
     }
 }

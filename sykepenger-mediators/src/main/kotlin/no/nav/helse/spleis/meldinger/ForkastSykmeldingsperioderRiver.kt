@@ -18,19 +18,13 @@ internal class ForkastSykmeldingsperioderRiver(
     override val riverName = "forkast_sykmeldingsperioder"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey(
-            "@id",
-            "aktørId",
-            "fødselsnummer",
-            "organisasjonsnummer"
-        )
+        message.requireKey("@id", "fødselsnummer", "organisasjonsnummer")
         message.require("fom", JsonNode::asLocalDate)
         message.require("tom", JsonNode::asLocalDate)
     }
 
     override fun createMessage(packet: JsonMessage) = ForkastSykmeldingsperioderMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 }

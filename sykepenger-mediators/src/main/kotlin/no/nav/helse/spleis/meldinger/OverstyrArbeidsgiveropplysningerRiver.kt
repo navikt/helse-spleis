@@ -20,12 +20,11 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
 
     override fun createMessage(packet: JsonMessage) = OverstyrArbeidsgiveropplysningerMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer")
+        message.requireKey("fødselsnummer")
         message.require("skjæringstidspunkt", JsonNode::asLocalDate)
         message.requireArbeidsgiveropplysninger()
     }

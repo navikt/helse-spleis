@@ -26,8 +26,7 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
 
     override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText()
+        fødselsnummer = packet["fødselsnummer"].asText()
     ))
 
     internal companion object {

@@ -36,7 +36,6 @@ internal class SendtArbeidsgiverSøknaderRiver(
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText(),
-        aktørId = packet["aktorId"].asText()
+        fødselsnummer = packet["fnr"].asText()
     ))
 }

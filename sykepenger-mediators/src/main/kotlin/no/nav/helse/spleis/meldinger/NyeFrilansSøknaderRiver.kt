@@ -24,7 +24,6 @@ internal class NyeFrilansSøknaderRiver(
 
     override fun createMessage(packet: JsonMessage) = NyFrilansSøknadMessage(packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText(),
-        aktørId = packet["aktorId"].asText()
+        fødselsnummer = packet["fnr"].asText()
     ))
 }
