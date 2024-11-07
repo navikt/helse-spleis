@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.IHendelseMediator
@@ -23,7 +24,7 @@ internal class SykepengegrunnlagForArbeidsgiverMessage(packet: JsonMessage, over
         vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkter,
         orgnummer = organisasjonsnummer,
-        inntekter = inntekterForSykepengegrunnlag.single()
+        inntekter = if (inntekterForSykepengegrunnlag.isEmpty()) ArbeidsgiverInntekt(organisasjonsnummer, emptyList()) else inntekterForSykepengegrunnlag.single()
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
