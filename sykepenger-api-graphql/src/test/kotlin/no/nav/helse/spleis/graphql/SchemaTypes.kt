@@ -15,6 +15,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
@@ -45,10 +46,10 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.dto.Utbetalingtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
+import no.nav.helse.spleis.graphql.dto.Utbetalingtype
 
 internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
     query("person") {
@@ -93,6 +94,7 @@ private fun SchemaBuilder.hendelseTypes() {
     enum<GraphQLHendelsetype>()
     type<GraphQLHendelse>()
     type<GraphQLInntektsmelding>()
+    type<GraphQLInntektFraAOrdningen>()
     type<GraphQLSoknadNav>()
     type<GraphQLSoknadArbeidsgiver>()
     type<GraphQLSoknadArbeidsledig>()

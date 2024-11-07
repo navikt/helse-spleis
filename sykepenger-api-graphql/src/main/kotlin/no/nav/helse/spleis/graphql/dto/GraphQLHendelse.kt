@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 
 enum class GraphQLHendelsetype {
     Inntektsmelding,
+    InntektFraAOrdningen,
     SendtSoknadNav,
     SendtSoknadArbeidsgiver,
     SendtSoknadFrilans,
@@ -29,6 +30,14 @@ data class GraphQLInntektsmelding(
     val beregnetInntekt: Double
 ) : GraphQLHendelse {
     override val type = GraphQLHendelsetype.Inntektsmelding
+}
+
+data class GraphQLInntektFraAOrdningen(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val mottattDato: LocalDateTime,
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.InntektFraAOrdningen
 }
 
 data class GraphQLSoknadNav(
