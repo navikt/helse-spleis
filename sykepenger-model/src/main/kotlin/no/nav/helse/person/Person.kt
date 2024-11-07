@@ -694,11 +694,14 @@ class Person private constructor(
         }
     }
 
-    internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Inntektsmelding, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
+    internal fun emitInntektsmeldingIkkeHåndtert(meldingsreferanseId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
         observers.forEach {
-            it.inntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
+            it.inntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
     }
+
+    internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Inntektsmelding, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) =
+        emitInntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
 
     internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         observers.forEach {

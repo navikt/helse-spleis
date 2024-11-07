@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.PersonPåminnelse
+import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.Sykmelding
@@ -610,6 +611,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Utbetalingshistorikk,
                         is VedtakFattet,
                         is Vilkårsgrunnlag -> null
+                        is Portalinntektsmelding -> error("Forvetnet ikke Portalinntektsmelding så lenge den mappes om til en Inntektsmelding før den håndteres.")
                     }
                 }
 

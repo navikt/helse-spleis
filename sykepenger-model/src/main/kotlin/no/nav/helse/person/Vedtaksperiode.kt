@@ -193,7 +193,7 @@ internal class Vedtaksperiode private constructor(
     private val periode get() = behandlinger.periode()
     internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     private val jurist get() = behandlinger.subsumsjonslogg(subsumsjonslogg, id, person.fødselsnummer, arbeidsgiver.organisasjonsnummer)
-    private val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
+    internal val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
     private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
