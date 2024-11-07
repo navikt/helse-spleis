@@ -105,7 +105,6 @@ internal class RestApiTest {
                 opphørsdato = null
             ),
             orgnummer = ORGNUMMER,
-            aktørId = "aktørId",
             førsteFraværsdag = LocalDate.of(2018, 1, 1),
             inntektsdato = null,
             beregnetInntekt = 12000.månedlig,

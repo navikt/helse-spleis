@@ -11,6 +11,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
@@ -28,6 +29,8 @@ internal class PersonMediator(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
+
+    var person: Person? = null
 
     fun ferdigstill(context: MessageContext) {
         sendUtgåendeMeldinger(context)
@@ -452,8 +455,8 @@ internal class PersonMediator(
     }
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        this["aktørId"] = message.meldingsporing.aktørId
         this["fødselsnummer"] = message.meldingsporing.fødselsnummer
+        this["aktørId"] = checkNotNull(person) { "personmediator må ha person" }.aktørId
     }
 
     private fun queueMessage(outgoingMessage: JsonMessage) {

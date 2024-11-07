@@ -17,7 +17,6 @@ internal class DødsmeldingerRiver (
     override val eventName = "dødsmelding"
     override val riverName = "Dødsmelding"
 
-
     override fun validate(message: JsonMessage) {
         message.requireKey("aktørId", "fødselsnummer")
         message.require("dødsdato", JsonNode::asLocalDate)

@@ -5,9 +5,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 
 internal open class InntektsmeldingerRiver(
@@ -37,7 +40,7 @@ internal open class InntektsmeldingerRiver(
             requireKey("beloep")
         }
         message.require("mottattDato", JsonNode::asLocalDateTime)
-        message.interestedIn("fødselsdato", JsonNode::asLocalDate)
+        message.require("fødselsdato", JsonNode::asLocalDate)
         message.interestedIn("dødsdato", JsonNode::asLocalDate)
         message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
         message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
@@ -54,9 +57,19 @@ internal open class InntektsmeldingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["arbeidstakerFnr"].asText(),
-        aktørId = packet["arbeidstakerAktorId"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage): InntektsmeldingMessage {
+        val aktørId = packet["arbeidstakerAktorId"].asText()
+        val fødselsdato = packet["fødselsdato"].asLocalDate()
+        val dødsdato = packet["dødsdato"].asOptionalLocalDate()
+        val meldingsporing = Meldingsporing(
+            id = packet["@id"].asText().toUUID(),
+            fødselsnummer = packet["arbeidstakerFnr"].asText(),
+            aktørId = aktørId
+        )
+        return InntektsmeldingMessage(
+            packet = packet,
+            personopplysninger = Personopplysninger(Personidentifikator(meldingsporing.fødselsnummer), aktørId, fødselsdato, dødsdato),
+            meldingsporing = meldingsporing
+        )
+    }
 }

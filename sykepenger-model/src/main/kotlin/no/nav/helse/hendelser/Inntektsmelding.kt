@@ -42,7 +42,6 @@ class Inntektsmelding(
     meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
     orgnummer: String,
-    private val aktørId: String,
     private val førsteFraværsdag: LocalDate?,
     private val inntektsdato: LocalDate?,
     private val beregnetInntekt: Inntekt,
@@ -111,7 +110,7 @@ class Inntektsmelding(
                 "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
                     .let {
                         logger.info(it)
-                        sikkerlogg.info("$it. For aktørId $aktørId.")
+                        sikkerlogg.info(it)
                     }
             }
             inntektshistorikk.leggTil(Inntektsmelding(skjæringstidspunkt, metadata.meldingsreferanseId, beregnetInntekt))

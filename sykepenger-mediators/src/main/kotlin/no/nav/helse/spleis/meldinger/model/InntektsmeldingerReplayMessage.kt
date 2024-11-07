@@ -72,7 +72,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
             meldingsreferanseId = internDokumentId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            aktørId = meldingsporing.aktørId,
             førsteFraværsdag = førsteFraværsdag,
             inntektsdato = inntektsdato,
             beregnetInntekt = beregnetInntekt.månedlig,

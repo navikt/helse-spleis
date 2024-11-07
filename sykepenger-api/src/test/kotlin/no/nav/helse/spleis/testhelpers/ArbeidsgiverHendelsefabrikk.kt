@@ -50,10 +50,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
 
-internal class ArbeidsgiverHendelsefabrikk(
-    private val aktørId: String,
-    private val organisasjonsnummer: String
-) {
+internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
@@ -133,7 +130,6 @@ internal class ArbeidsgiverHendelsefabrikk(
                 meldingsreferanseId = id,
                 refusjon = refusjon,
                 orgnummer = organisasjonsnummer,
-                aktørId = aktørId,
                 førsteFraværsdag = førsteFraværsdag,
                 inntektsdato = null,
                 beregnetInntekt = beregnetInntekt,
@@ -179,7 +175,6 @@ internal class ArbeidsgiverHendelsefabrikk(
                 meldingsreferanseId = id,
                 refusjon = refusjon,
                 orgnummer = organisasjonsnummer,
-                aktørId = aktørId,
                 førsteFraværsdag = førsteFraværsdag,
                 inntektsdato = null,
                 beregnetInntekt = beregnetInntekt,

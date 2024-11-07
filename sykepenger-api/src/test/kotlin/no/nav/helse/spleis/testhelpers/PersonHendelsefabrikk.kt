@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
@@ -29,10 +28,7 @@ import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning.Companion
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.økonomi.Inntekt
 
-internal class PersonHendelsefabrikk(
-    private val aktørId: String,
-    private val personidentifikator: Personidentifikator
-) {
+internal class PersonHendelsefabrikk() {
     internal fun lagMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode> = emptySet(), perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet()) =
         MinimumSykdomsgradsvurderingMelding(
             perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK,

@@ -130,7 +130,6 @@ internal abstract class AbstractObservableTest {
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = orgnummer,
-        aktørId = AKTØRID,
         førsteFraværsdag = førsteFraværsdag,
         inntektsdato = null,
         beregnetInntekt = beregnetInntekt,

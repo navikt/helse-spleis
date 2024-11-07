@@ -518,6 +518,9 @@ internal class HendelseMediator(
         val personMediator = PersonMediator(message)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
         person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
+            // <todo title="Fjern denne når aktørId ikke lengre trengs">
+                personMediator.person = person
+            // </todo>
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person, aktivitetslogg)

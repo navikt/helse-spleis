@@ -62,7 +62,7 @@ internal class TestMessageFactory(
             objectMapper
                 .convertValue<Map<String, Any>>(this)
                 .plus("fødselsdato" to "$fødselsdato")
-                .plus("aktorId" to aktørId)
+                .plus("arbeidstakerAktorId" to aktørId)
     }
 
     fun lagNySøknad(

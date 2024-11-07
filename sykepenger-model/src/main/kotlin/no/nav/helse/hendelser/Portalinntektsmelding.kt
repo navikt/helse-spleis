@@ -18,7 +18,6 @@ class Portalinntektsmelding(
     private val meldingsreferanseId: UUID,
     private val refusjon: Inntektsmelding.Refusjon,
     private val orgnummer: String,
-    private val aktørId: String,
     private val inntektsdato: LocalDate?, // TODO: Denne kan fjernes på sikt. brukes bare til logging
     private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
@@ -50,7 +49,6 @@ class Portalinntektsmelding(
             meldingsreferanseId = meldingsreferanseId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            aktørId = aktørId,
             førsteFraværsdag = vedtaksperioden.periode().start,
             inntektsdato = vedtaksperioden.skjæringstidspunkt,
             beregnetInntekt = beregnetInntekt,
@@ -67,7 +65,7 @@ class Portalinntektsmelding(
         if (vedtaksperioden.skjæringstidspunkt != inntektsdato) {
             "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt ${vedtaksperioden.skjæringstidspunkt}".let {
                 logger.info(it)
-                sikkerlogg.info("$it. For aktørId $aktørId.")
+                sikkerlogg.info(it)
             }
         }
 
