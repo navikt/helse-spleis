@@ -13,7 +13,8 @@ enum class HendelsetypeDto {
     SENDT_SØKNAD_SELVSTENDIG,
     SENDT_SØKNAD_ARBEIDSGIVER,
     SENDT_SØKNAD_ARBEIDSLEDIG,
-    INNTEKTSMELDING
+    INNTEKTSMELDING,
+    INNTEKT_FRA_AORDNINGEN
 }
 
 data class HendelseDTO(
@@ -117,6 +118,12 @@ data class HendelseDTO(
             eksternDokumentId = eksternDokumentId,
             mottattDato = mottattDato,
             beregnetInntekt = beregnetInntekt
+        )
+        fun inntektFraAOrdningen(id: String, mottattDato: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.INNTEKT_FRA_AORDNINGEN,
+            id = id,
+            eksternDokumentId = id,
+            mottattDato = mottattDato,
         )
     }
 }

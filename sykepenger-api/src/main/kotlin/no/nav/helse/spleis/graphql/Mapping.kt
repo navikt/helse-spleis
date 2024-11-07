@@ -12,6 +12,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
@@ -277,12 +278,16 @@ private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse.type) {
         rapportertDato = hendelse.rapportertdato!!,
         sendtArbeidsgiver = hendelse.sendtArbeidsgiver!!
     )
-
     HendelsetypeDto.INNTEKTSMELDING -> GraphQLInntektsmelding(
         id = hendelse.id,
         eksternDokumentId = hendelse.eksternDokumentId,
         mottattDato = hendelse.mottattDato!!,
         beregnetInntekt = hendelse.beregnetInntekt!!
+    )
+    HendelsetypeDto.INNTEKT_FRA_AORDNINGEN -> GraphQLInntektFraAOrdningen(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        mottattDato = hendelse.mottattDato!!
     )
     else -> null
 }

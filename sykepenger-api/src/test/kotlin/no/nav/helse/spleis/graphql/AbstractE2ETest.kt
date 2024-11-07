@@ -216,6 +216,21 @@ internal abstract class AbstractE2ETest {
         return meldingsreferanseId
     }
 
+    protected fun håndterSykepengegrunnlagForArbeidsgiver(
+        vedtaksperiode: Int = 1,
+        orgnummer: String = a1,
+        skjæringstidspunkt: LocalDate,
+        skatteinntekter: List<ArbeidsgiverInntekt.MånedligInntekt>
+    ): UUID {
+        val skatteinntekter = fabrikker.getValue(orgnummer).lagSykepengegrunnlagForArbeidsgiver(
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
+            skjæringstidspunkt = skjæringstidspunkt,
+            inntekter = skatteinntekter
+        )
+        skatteinntekter.håndter(Person::håndter)
+        return skatteinntekter.metadata.meldingsreferanseId
+    }
+
     protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT)) {
         håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH })
     }

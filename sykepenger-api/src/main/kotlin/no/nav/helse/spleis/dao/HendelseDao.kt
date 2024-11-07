@@ -36,7 +36,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
             SELECT melding_type, data FROM melding 
             WHERE fnr=? AND (melding_type = 'NY_SØKNAD' OR melding_type = 'SENDT_SØKNAD_NAV' OR melding_type = 'SENDT_SØKNAD_FRILANS'
                 OR melding_type = 'SENDT_SØKNAD_SELVSTENDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSGIVER' OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG' 
-                OR melding_type = 'INNTEKTSMELDING')
+                OR melding_type = 'INNTEKTSMELDING' OR melding_type = 'SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER')
         """
         return sessionOf(dataSource()).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
@@ -119,6 +119,10 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
                         mottattDato = LocalDateTime.parse(node.path("@opprettet").asText()),
                         beregnetInntekt = node.path("beregnetInntekt").asDouble()
                     )
+                    Meldingstype.SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER -> HendelseDTO.inntektFraAOrdningen(
+                        id = node.path("@id").asText(),
+                        mottattDato = LocalDateTime.parse(node.path("@opprettet").asText())
+                    )
                 }
             }
         }.onEach {
@@ -152,6 +156,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
         SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_ARBEIDSLEDIG,
-        INNTEKTSMELDING
+        INNTEKTSMELDING,
+        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
     }
 }

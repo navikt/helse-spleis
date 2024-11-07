@@ -2,8 +2,10 @@ package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.den
@@ -11,6 +13,7 @@ import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -62,6 +65,7 @@ import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -76,6 +80,25 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         generasjoner {
             0.generasjon {
                 uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
+            }
+        }
+    }
+
+    @Test
+    fun `im som aldri kom`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        val inntektFraSkatt = 10000.månedlig
+        val søknadId = håndterSøknad(1.januar til 31.januar, orgnummer = a1)
+        val inntektFraSkattId = håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 1.januar, skatteinntekter = listOf(
+            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+            )
+        )
+        generasjoner(a1) {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) medHendelser setOf(søknadId, inntektFraSkattId)
             }
         }
     }
