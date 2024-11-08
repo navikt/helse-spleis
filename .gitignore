@@ -11,5 +11,5 @@ testressurser/
 *.dtmp
 **/*noCommit*
 .kotlin/
-**/spanner_config.json
+
 
