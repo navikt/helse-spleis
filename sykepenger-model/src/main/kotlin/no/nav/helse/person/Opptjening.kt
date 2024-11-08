@@ -22,12 +22,10 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 
 internal class Opptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
-    private val harInntektMånedenFørSkjæringstidspunkt: Boolean?,
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
 ) {
@@ -47,7 +45,6 @@ internal class Opptjening private constructor(
 
     internal fun opptjeningsdager() = opptjeningsdager
     internal fun harTilstrekkeligAntallOpptjeningsdager(): Boolean = opptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
-    internal fun harInntektMånedenFørSkjæringstidspunkt(): Boolean? = harInntektMånedenFørSkjæringstidspunkt
 
     internal fun erOppfylt(): Boolean = harTilstrekkeligAntallOpptjeningsdager()
 
@@ -57,13 +54,6 @@ internal class Opptjening private constructor(
         return harTilstrekkeligAntallOpptjeningsdager()
     }
 
-    internal fun validerInntektMånedenFørSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
-        val harInntektMånedenFørSkjæringstidspunkt = harInntektMånedenFørSkjæringstidspunkt()
-        if (!harInntektMånedenFørSkjæringstidspunkt!!) {
-            aktivitetslogg.varsel(Varselkode.RV_OV_3)
-        }
-    }
-
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
@@ -71,11 +61,11 @@ internal class Opptjening private constructor(
     }
 
     internal fun deaktiver(orgnummer: String): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt)
+        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
     }
 
     internal fun aktiver(orgnummer: String): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt)
+        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
     }
 
     internal data class ArbeidsgiverOpptjeningsgrunnlag(val orgnummer: String, val ansattPerioder: List<Arbeidsforhold>) {
@@ -195,22 +185,18 @@ internal class Opptjening private constructor(
     companion object {
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
-        internal fun gjenopprett(skjæringstidspunkt: LocalDate, harInntektMånedenFørSkjæringstidspunkt: Boolean?, arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) =
-            Opptjening(skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
-
         internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningInnDto): Opptjening {
             return Opptjening(
                 skjæringstidspunkt = skjæringstidspunkt,
-                harInntektMånedenFørSkjæringstidspunkt = null,
                 dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },
                 opptjeningsperiode = Periode.gjenopprett(dto.opptjeningsperiode)
             )
         }
 
-        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, harInntektMånedenFørSkjæringstidspunkt: Boolean?): Opptjening {
+        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate): Opptjening {
             val opptjeningsperiode = grunnlag.opptjeningsperiode(skjæringstidspunkt)
             val arbeidsforhold = grunnlag.inngårIOpptjening(opptjeningsperiode)
-            val opptjening = Opptjening(skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
+            val opptjening = Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
             return opptjening
         }
     }

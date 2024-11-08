@@ -572,8 +572,7 @@ internal class InntektsgrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, true
-        )
+        ), skjæringstidspunkt)
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
@@ -729,8 +728,7 @@ internal class InntektsgrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, true
-        )
+        ), skjæringstidspunkt)
         val opptjeningMedA2 = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
                 Arbeidsforhold(
@@ -746,8 +744,7 @@ internal class InntektsgrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, true
-        )
+        ), skjæringstidspunkt)
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)

@@ -11,6 +11,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.AnsattPeriode
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
@@ -55,8 +56,7 @@ class Vilkårsgrunnlag(
             grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
                 Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
             },
-            skjæringstidspunkt = skjæringstidspunkt,
-            harInntektMånedenFørSkjæringstidspunkt = harInntektMånedenFørSkjæringstidspunkt
+            skjæringstidspunkt = skjæringstidspunkt
         )
     }
 
@@ -78,12 +78,13 @@ class Vilkårsgrunnlag(
         arbeidsforhold.forEach { it.loggFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening()
         subsumsjonslogg.logg(opptjening.subsumsjon)
-        opptjening.validerInntektMånedenFørSkjæringstidspunkt(aktivitetslogg).also {
-            if (harInntektMånedenFørSkjæringstidspunkt && !inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
-                // Varsel spart
-                aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
-            }
+
+        if (!harInntektMånedenFørSkjæringstidspunkt) {
+            aktivitetslogg.varsel(Varselkode.RV_OV_3)
+        } else if (!inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
+            aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
         }
+
         val opptjeningvurderingOk = opptjening.validerOpptjeningsdager(aktivitetslogg)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(aktivitetslogg)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(

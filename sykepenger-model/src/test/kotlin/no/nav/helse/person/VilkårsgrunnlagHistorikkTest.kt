@@ -78,7 +78,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt, true),
+                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),
@@ -106,7 +106,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = gammeltSkjæringstidspunkt,
             inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt, true),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -129,7 +129,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -145,7 +145,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -161,7 +161,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             inntektsgrunnlag = inntekt.inntektsgrunnlag("et annet orgnr"),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
