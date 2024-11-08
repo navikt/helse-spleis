@@ -11,7 +11,6 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
@@ -20,7 +19,6 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.overlapperMed
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.SAMMENHENGENDE_PERIODER_HOS_ARBEIDSGIVER
 import no.nav.helse.person.Vedtaksperiode.Companion.finn
 import no.nav.helse.person.Vedtaksperiode.Companion.finnSkjæringstidspunktFor
 import no.nav.helse.person.Vedtaksperiode.Companion.inneholder
@@ -74,7 +72,7 @@ class Inntektsmelding(
     )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
-        avsender = Avsender.ARBEIDSGIVER,
+        avsender = ARBEIDSGIVER,
         innsendt = mottatt,
         registrert = mottatt,
         automatiskBehandling = false
@@ -131,8 +129,8 @@ class Inntektsmelding(
         tidsstempel = metadata.registrert
     )
 
-    private fun refusjonsElement(vedtaksperioder: List<Vedtaksperiode>, arbeidsgiver: Arbeidsgiver): Refusjonshistorikk.Refusjon {
-        val utledetFørsteFraværsdag = utledFørsteFraværsdag(vedtaksperioder, arbeidsgiver)
+    private fun refusjonsElement(vedtaksperioder: List<Vedtaksperiode>): Refusjonshistorikk.Refusjon {
+        val utledetFørsteFraværsdag = utledFørsteFraværsdag(vedtaksperioder)
         return Refusjonshistorikk.Refusjon(
             meldingsreferanseId = metadata.meldingsreferanseId,
             førsteFraværsdag = utledetFørsteFraværsdag,
@@ -144,14 +142,10 @@ class Inntektsmelding(
         )
     }
 
-    private fun utledFørsteFraværsdag(
-        vedtaksperioder: List<Vedtaksperiode>,
-        arbeidsgiver: Arbeidsgiver
-    ): LocalDate? {
+    private fun utledFørsteFraværsdag(vedtaksperioder: List<Vedtaksperiode>): LocalDate? {
         return if (erPortalinntektsmelding()) {
-            val skjæringstidspunkt = vedtaksperioder.finnSkjæringstidspunktFor(requireNotNull(vedtaksperiodeId)) ?: return førsteFraværsdag
-            val vedtaksperiode = vedtaksperioder.finn(vedtaksperiodeId) ?: return førsteFraværsdag
-            arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt, SAMMENHENGENDE_PERIODER_HOS_ARBEIDSGIVER(vedtaksperiode)) ?: beregnetInntektsdato
+            val vedtaksperiode = vedtaksperioder.finn(requireNotNull(vedtaksperiodeId)) ?: return førsteFraværsdag
+            return vedtaksperiode.førsteFraværsdag ?: beregnetInntektsdato
         } else {
             førsteFraværsdag
         }
@@ -159,8 +153,8 @@ class Inntektsmelding(
 
     internal val refusjonsservitør = Refusjonsservitør.fra(refusjon.refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt))
 
-    internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiver: Arbeidsgiver) {
-        val refusjonsElement = refusjonsElement(vedtaksperioder, arbeidsgiver)
+    internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk, vedtaksperioder: List<Vedtaksperiode>) {
+        val refusjonsElement = refusjonsElement(vedtaksperioder)
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
     }
 

@@ -194,6 +194,7 @@ internal class Vedtaksperiode private constructor(
     internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     private val jurist get() = behandlinger.subsumsjonslogg(subsumsjonslogg, id, person.fødselsnummer, arbeidsgiver.organisasjonsnummer)
     internal val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
+    internal val førsteFraværsdag get() = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt, SAMMENHENGENDE_PERIODER_HOS_ARBEIDSGIVER(this))
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
     private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
