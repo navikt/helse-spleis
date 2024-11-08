@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.naisful.naisApp
-import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.server.application.Application
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -40,14 +39,13 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource })
+    val app = createApp(config.azureConfig, config.spekematClient, { dataSource })
     app.start(wait = true)
 }
 
 internal fun createApp(
     azureConfig: AzureAdAppConfig,
     spekematClient: SpekematClient,
-    spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
     port: Int = 8080
@@ -59,13 +57,12 @@ internal fun createApp(
     port = port,
     applicationModule = {
         azureAdAppAuthentication(azureConfig)
-        lagApplikasjonsmodul(spekematClient, spurteDuClient, dataSourceProvider, meterRegistry)
+        lagApplikasjonsmodul(spekematClient, dataSourceProvider, meterRegistry)
     }
 )
 
 internal fun Application.lagApplikasjonsmodul(
     spekematClient: SpekematClient,
-    spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry
 ) {
@@ -74,7 +71,7 @@ internal fun Application.lagApplikasjonsmodul(
     val hendelseDao = HendelseDao(dataSourceProvider, meterRegistry)
     val personDao = PersonDao(dataSourceProvider, meterRegistry)
 
-    spannerApi(hendelseDao, personDao, spurteDuClient)
+    spannerApi(hendelseDao, personDao)
     sporingApi(hendelseDao, personDao)
     installGraphQLApi(spekematClient, hendelseDao, personDao, meterRegistry)
 }

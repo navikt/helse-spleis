@@ -13,6 +13,8 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.headers
 import io.ktor.serialization.jackson.JacksonConverter
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -97,7 +99,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(azureConfig, spekematClient, null, { testDataSource.ds }, registry, randomPort)
+            createApp(azureConfig, spekematClient, { testDataSource.ds }, registry, randomPort)
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 
@@ -167,6 +169,24 @@ internal class Applikasjonsservere(private val poolSize: Int) {
                     headers.forEach { (k, v) ->
                         header(k, v)
                     }
+                }.also {
+                    Assertions.assertEquals(expectedStatus, it.status)
+                }.bodyAsText()
+            }.also(testBlock)
+        }
+
+        fun String.httpPost(
+            expectedStatus: HttpStatusCode = HttpStatusCode.OK,
+            postBody: Map<String, String> = emptyMap(),
+            testBlock: String.() -> Unit = {}
+        ) {
+            val token = issuer.createToken(Issuer.AUDIENCE)
+
+            runBlocking {
+                client.post(this@httpPost) {
+                    bearerAuth(token)
+                    contentType(ContentType.Application.Json)
+                    setBody(postBody)
                 }.also {
                     Assertions.assertEquals(expectedStatus, it.status)
                 }.bodyAsText()

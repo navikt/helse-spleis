@@ -56,7 +56,6 @@ spec:
         - application: sporing
     outbound:
       rules:
-        - application: spurtedu
         - application: spekemat
   secureLogs:
     enabled: true

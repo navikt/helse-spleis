@@ -49,12 +49,7 @@ internal class RestApiTest {
 
     @Test
     fun `hent personJson med fnr`() = blackboxTestApplication{
-        "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
-    }
-
-    @Test
-    fun `hent personJson med aktørId`() = blackboxTestApplication {
-        "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("aktorId" to AKTØRID))
+        "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
     }
 
     @Test

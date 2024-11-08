@@ -1,23 +1,24 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParseException
 import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.http.ContentType
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.header
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,14 +29,14 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.sporing.serializePersonForSporing
 
-internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao, spurteDuClient: SpurteDuClient?) {
+internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao) {
     routing {
         authenticate {
-            get("/api/person-json/{maskertId?}") {
+            post("/api/person-json") {
+                val request = call.receive<PersonRequest>()
                 withContext(Dispatchers.IO) {
-                    val ident = fnr(personDao, spurteDuClient)
-                    val serialisertPerson = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(ident) }
+                    val serialisertPerson = personDao.hentPersonFraFnr(request.fødselsnummer.toLong()) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                    val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(request.fødselsnummer.toLong()) }
                     val person = Person.gjenopprett(EmptyLog, dto)
                     call.respond(person.dto().tilSpannerPersonDto())
                 }
@@ -111,6 +112,11 @@ private fun ApplicationCall.identFraRequest(): Pair<Long?, Long?> {
         request.header("aktorId")?.toLong()
     )
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class PersonRequest(
+    val fødselsnummer: String
+)
 
 private fun fnr(personDao: PersonDao, fnr: Long?, aktørId: Long?): Long? {
     return fnr ?: aktørId?.let { personDao.hentFødselsnummer(aktørId) }

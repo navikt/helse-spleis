@@ -5,7 +5,6 @@ import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
-import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTPrincipal
 import java.io.InputStream
@@ -23,10 +22,6 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     )
 
     internal val azureClient = createAzureTokenClientFromEnvironment(env)
-    internal val spurteDuClient = SpurteDuClient(
-        objectMapper = objectMapper,
-        tokenProvider = azureClient
-    )
     internal val spekematClient = SpekematClient(
         tokenProvider = azureClient,
         objectMapper = objectMapper,
