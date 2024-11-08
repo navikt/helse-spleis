@@ -102,6 +102,7 @@ interface PersonObserver {
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
+        val skjæringstidspunkt: LocalDate,
         val skatteinntekter: List<Skatteinntekt>,
         val omregnetÅrsinntekt: Double
     ) {
@@ -115,6 +116,7 @@ interface PersonObserver {
                 "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "behandlingId" to behandlingId,
+                "skjæringstidspunkt" to skjæringstidspunkt,
                 "omregnetÅrsinntekt" to omregnetÅrsinntekt,
                 "skatteinntekter" to skatteinntekter.map {
                     mapOf(

@@ -34,6 +34,7 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
+                skjæringstidspunkt = 1.januar,
                 skatteinntekter = listOf(
                     PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(desember(2017), 10000.0),
                     PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(november(2017), 10000.0),
@@ -64,6 +65,7 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
+                skjæringstidspunkt = 1.januar,
                 skatteinntekter = listOf(
                     PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(desember(2017), 10000.0),
                     PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(november(2017), 10000.0),

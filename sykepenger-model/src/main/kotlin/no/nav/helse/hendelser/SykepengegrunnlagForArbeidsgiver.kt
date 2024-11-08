@@ -48,6 +48,7 @@ class SykepengegrunnlagForArbeidsgiver(
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            skjæringstidspunkt = skjæringstidspunkt,
             skatteinntekter = inntekter.somEksterneSkatteinntekter(),
             omregnetÅrsinntekt = inntekter.omregnetÅrsinntekt(metadata.meldingsreferanseId)
         )
