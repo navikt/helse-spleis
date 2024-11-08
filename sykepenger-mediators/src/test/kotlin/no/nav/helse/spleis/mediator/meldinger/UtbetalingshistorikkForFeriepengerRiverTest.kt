@@ -30,7 +30,6 @@ internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
         "historikkFom": "2020-01-01",
         "historikkTom": "2020-12-31"
       },
-      "aktørId": "aktørId",
       "fødselsnummer": "14123456789",
       "system_read_count": 0,
       "@løsning": {

@@ -25,22 +25,21 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
 fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
-            hentPerson(session, fnr)?.let { (aktørId, data) ->
+            hentPerson(session, fnr)?.let { data ->
                 val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
                 try {
-                    MDC.put("aktørId", aktørId)
                     val node = SerialisertPerson(data).tilPersonDto()
                     val grunnbeløp = finnGrunnbeløp(node)
                     if (grunnbeløp.isEmpty()) return@let
                     val fødselsnummer = fødselsnummerSomString(fnr)
-                    val event = GrunnbeløpEvent(fødselsnummer, aktørId, grunnbeløp)
+                    val event = GrunnbeløpEvent(fødselsnummer, grunnbeløp)
                     val melding = objectMapper.writeValueAsString(event)
                     producer.send(ProducerRecord("tbd.teknisk.v1", null, fødselsnummer, melding))
                     sikkerlogg.info("Skrev grunnbeløp til tbd.teknisk.v1 for:\n{}", melding)
 
                 } catch (err: Exception) {
-                    log.info("$aktørId lar seg ikke serialisere: ${err.message}")
-                    sikkerlogg.error("$aktørId lar seg ikke serialisere: ${err.message}", err)
+                    log.info("person lar seg ikke serialisere: ${err.message}")
+                    sikkerlogg.error("person lar seg ikke serialisere: ${err.message}", err)
                 } finally {
                     MDC.setContextMap(mdcContextMap)
                 }
@@ -71,7 +70,6 @@ private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.len
 
 private data class GrunnbeløpEvent(
     val fødselsnummer: String,
-    val aktørId: String,
     val grunnbeløp: List<Grunnbeløp>
 ) {
     @JsonProperty("@event_name")

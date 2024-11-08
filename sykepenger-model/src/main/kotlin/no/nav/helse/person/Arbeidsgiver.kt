@@ -226,14 +226,12 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) = forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
-            aktørId: String,
             personidentifikator: Personidentifikator,
             feriepengeberegner: Feriepengeberegner,
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
             aktivitetslogg: IAktivitetslogg
         ) {
             forEach { it.utbetalFeriepenger(
-                aktørId,
                 personidentifikator,
                 feriepengeberegner,
                 utbetalingshistorikkForFeriepenger,
@@ -272,8 +270,6 @@ internal class Arbeidsgiver private constructor(
         internal fun gjenopprett(
             person: Person,
             alder: Alder,
-            aktørId: String,
-            fødselsnummer: String,
             dto: ArbeidsgiverInnDto,
             subsumsjonslogg: Subsumsjonslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>
@@ -388,7 +384,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun utbetalFeriepenger(
-        aktørId: String,
         personidentifikator: Personidentifikator,
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
@@ -397,7 +392,6 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg.kontekst(this)
 
         val feriepengeutbetaling = Feriepengeutbetaling.Builder(
-            aktørId,
             personidentifikator,
             organisasjonsnummer,
             feriepengeberegner,

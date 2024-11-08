@@ -31,7 +31,6 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
   "type": "ARBEIDSTAKERE",
   "fravar": [],
   "status": "SENDT",
-  "aktorId": "aktørid",
   "mottaker": "ARBEIDSGIVER",
   "sendtNav": null,
   "opprettet": "2020-01-01T00:00:00.000",

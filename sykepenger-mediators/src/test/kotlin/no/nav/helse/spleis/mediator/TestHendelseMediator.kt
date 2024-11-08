@@ -301,7 +301,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         nyPersonidentifikator: Personidentifikator,
         message: IdentOpphørtMessage,
         identOpphørt: IdentOpphørt,
-        nyAktørId: String,
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
     ) {}

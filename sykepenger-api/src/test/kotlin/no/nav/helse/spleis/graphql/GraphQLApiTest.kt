@@ -2,6 +2,9 @@ package no.nav.helse.spleis.graphql
 
 import com.github.navikt.tbd_libs.naisful.test.TestContext
 import com.github.navikt.tbd_libs.naisful.test.naisfulTestApp
+import com.github.navikt.tbd_libs.result_object.ok
+import com.github.navikt.tbd_libs.speed.IdentResponse
+import com.github.navikt.tbd_libs.speed.SpeedClient
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -85,7 +88,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @Test
     fun `Det Spesialist faktisk henter`() {
         val spekemat = Spekemat()
-        person = Person(AKTØRID, Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
+        person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.addObserver(spekemat)
 
         val spekematClient = mockk<SpekematClient>()
@@ -139,7 +142,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 {
   "data": {
     "person": {
-      "aktorId": "42",
+      "aktorId": "ikke_kult",
       "arbeidsgivere": [
         {
           "organisasjonsnummer": "987654321",
@@ -764,14 +767,23 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private fun String.readResource() =
             object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
 
-        private fun spleisApiTestApplication(spekematClient: SpekematClient = mockk<SpekematClient>(), testdata: (TestDataSource) -> Unit = { }, testblokk: suspend TestContext.() -> Unit) {
+        private fun speedClient() = mockk<SpeedClient> {
+            every { hentFødselsnummerOgAktørId(any(), any()) } returns IdentResponse(
+                fødselsnummer = UNG_PERSON_FNR,
+                aktørId = "ikke_kult",
+                npid = null,
+                kilde = IdentResponse.KildeResponse.PDL
+            ).ok()
+        }
+
+        private fun spleisApiTestApplication(speedClient: SpeedClient = speedClient(), spekematClient: SpekematClient = mockk<SpekematClient>(), testdata: (TestDataSource) -> Unit = { }, testblokk: suspend TestContext.() -> Unit) {
             val testDataSource = databaseContainer.nyTilkobling()
             testdata(testDataSource)
-            lagTestapplikasjon(spekematClient = spekematClient, testDataSource = testDataSource, testblokk)
+            lagTestapplikasjon(speedClient = speedClient, spekematClient = spekematClient, testDataSource = testDataSource, testblokk)
             databaseContainer.droppTilkobling(testDataSource)
         }
 
-        private fun lagTestapplikasjon(spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {
+        private fun lagTestapplikasjon(speedClient: SpeedClient, spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {
             val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
             naisfulTestApp(
                 testApplicationModule = {
@@ -785,7 +797,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         }
                     }
                     val dataSource = testDataSource.ds
-                    lagApplikasjonsmodul(spekematClient, { dataSource }, meterRegistry)
+                    lagApplikasjonsmodul(speedClient, spekematClient, { dataSource }, meterRegistry)
                 },
                 objectMapper = objectMapper,
                 meterRegistry = meterRegistry,
@@ -828,7 +840,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
             person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
 
-            lagrePerson(testDataSource.ds, AKTØRID, UNG_PERSON_FNR, person)
+            lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
             lagreSykmelding(
                 dataSource = testDataSource.ds,
                 fødselsnummer = UNG_PERSON_FNR,
@@ -854,11 +866,11 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         }
     }
 
-    private fun lagrePerson(dataSource: DataSource, aktørId: String, fødselsnummer: String, person: Person) {
+    private fun lagrePerson(dataSource: DataSource, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(dataSource, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), aktørId.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
+            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
             it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
                 fødselsnummer.toLong(), personId!!).asExecute)
 

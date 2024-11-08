@@ -179,22 +179,22 @@ fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: S
 
 private fun testSpeilJsonTask(arbeidId: String) {
     /*opprettOgUtførArbeid(arbeidId) { session, fnr ->
-        hentPerson(session, fnr)?.let { (aktørId, data) ->
+        hentPerson(session, fnr)?.let { data ->
             try {
                 val dto = SerialisertPerson(data).tilPersonDto()
                 val person = Person.gjenopprett(MaskinellJurist(), dto)
                 val pølsepakke: SpekematDTO.PølsepakkeDTO = TODO("Må hente pølsepakken fra spekemat")
                 serializePersonForSpeil(person, pølsepakke)
             } catch (err: Exception) {
-                log.info("$aktørId lar seg ikke serialisere: ${err.message}")
+                log.info("person lar seg ikke serialisere: ${err.message}")
             }
         }
     }*/
 }
 
 fun hentPerson(session: Session, fnr: Long) =
-    session.run(queryOf("SELECT aktor_id, data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
-        it.string("aktor_id") to it.string("data")
+    session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
+        it.string("data")
     }.asSingle)
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
@@ -202,13 +202,12 @@ private fun migrateTask(factory: ConsumerProducerFactory) {
         var count = 0L
         factory.createProducer().use { producer ->
             sessionOf(ds).use { session ->
-                session.run(queryOf("SELECT fnr,aktor_id FROM person").map { row ->
-                    val fnr = row.string("fnr").padStart(11, '0')
-                    fnr to row.string("aktor_id")
+                session.run(queryOf("SELECT fnr FROM person").map { row ->
+                    row.string("fnr").padStart(11, '0')
                 }.asList)
-            }.forEach { (fnr, aktørId) ->
+            }.forEach { fnr ->
                 count += 1
-                producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagMigrate(fnr, aktørId)))
+                producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagMigrate(fnr)))
             }
             producer.flush()
         }
@@ -235,15 +234,15 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
     sessionOf(ds).use { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT fnr, aktor_id
+            SELECT fnr
             FROM person
             WHERE (1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
             """
         session.run(queryOf(statement, mapOf("dayOfMonth" to dayOfMonth)).map { row ->
-            row.string("aktor_id") to row.string("fnr")
-        }.asList).forEach { (aktørId, fnr) ->
+            row.string("fnr")
+        }.asList).forEach { fnr ->
             val fnrStr = fnr.padStart(11, '0')
-            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnrStr, aktørId)))
+            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnrStr)))
         }
     }
 
@@ -251,22 +250,20 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
     log.info("Avstemming completed")
 }
 
-private fun lagMigrate(fnr: String, aktørId: String) = """
+private fun lagMigrate(fnr: String) = """
 {
   "@id": "${UUID.randomUUID()}",
   "@event_name": "json_migrate",
   "@opprettet": "${LocalDateTime.now()}",
-  "aktørId": "$aktørId",
   "fødselsnummer": "$fnr"
 }
 """
 
-private fun lagAvstemming(fnr: String, aktørId: String) = """
+private fun lagAvstemming(fnr: String) = """
 {
   "@id": "${UUID.randomUUID()}",
   "@event_name": "person_avstemming",
   "@opprettet": "${LocalDateTime.now()}",
-  "aktørId": "$aktørId",
   "fødselsnummer": "$fnr"
 }
 """

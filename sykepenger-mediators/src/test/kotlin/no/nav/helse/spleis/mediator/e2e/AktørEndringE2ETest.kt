@@ -17,7 +17,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `person får nytt fnr - behandling fortsetter på samme personjson`() {
-        val meldingsfabrikkFNR2 = TestMessageFactory(FNR2, AKTØRID, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
+        val meldingsfabrikkFNR2 = TestMessageFactory(FNR2, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))

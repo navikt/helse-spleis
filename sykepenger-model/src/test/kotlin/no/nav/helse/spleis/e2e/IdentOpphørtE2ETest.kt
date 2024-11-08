@@ -13,6 +13,5 @@ internal class IdentOpphørtE2ETest : AbstractDslTest() {
         val nyAktørId = "3219876543219"
         håndterIdentOpphørt(nyttFnr, nyAktørId)
         assertEquals(nyttFnr, inspiser(personInspektør).personidentifikator)
-        assertEquals(nyAktørId, inspiser(personInspektør).aktørId)
     }
 }

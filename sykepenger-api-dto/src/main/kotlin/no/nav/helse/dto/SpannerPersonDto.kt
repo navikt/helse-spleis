@@ -35,7 +35,6 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.nesteDag
 
 data class SpannerPersonDto(
-    val aktørId: String,
     val fødselsnummer: String,
     val fødselsdato: LocalDate,
     val arbeidsgivere: List<ArbeidsgiverData>,
@@ -655,7 +654,6 @@ data class SpannerPersonDto(
 }
 
 fun PersonUtDto.tilSpannerPersonDto() = SpannerPersonDto(
-    aktørId = this.aktørId,
     fødselsdato = this.alder.fødselsdato,
     fødselsnummer = this.fødselsnummer,
     opprettet = this.opprettet,

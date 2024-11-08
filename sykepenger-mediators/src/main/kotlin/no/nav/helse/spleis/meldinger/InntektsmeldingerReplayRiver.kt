@@ -25,7 +25,6 @@ internal open class InntektsmeldingerReplayRiver(
             requireKey(
                 "inntektsmelding.inntektsmeldingId",
                 "inntektsmelding.arbeidstakerFnr",
-                "inntektsmelding.arbeidstakerAktorId",
                 "inntektsmelding.virksomhetsnummer",
                 "inntektsmelding.arbeidsgivertype",
                 "inntektsmelding.beregnetInntekt",

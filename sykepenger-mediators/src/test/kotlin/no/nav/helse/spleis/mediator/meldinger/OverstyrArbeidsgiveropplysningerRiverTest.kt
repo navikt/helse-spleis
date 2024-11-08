@@ -11,7 +11,6 @@ import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
 import no.nav.helse.spleis.mediator.TestMessageFactory.Refusjonsopplysning
 import no.nav.helse.spleis.mediator.TestMessageFactory.Subsumsjon
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.AKTØRID
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.ORGNUMMER
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
@@ -213,7 +212,6 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         val forventetResultat = """
             {
               "@event_name": "overstyr_inntekt_og_refusjon",
-              "aktørId": "42",
               "fødselsnummer": "12029240045",
               "skjæringstidspunkt": "2018-01-01",
               "arbeidsgivere": [
@@ -256,7 +254,7 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
             }"""
 
         val faktiskResultat =
-            overstyrArbeidsgiveropplysninger.json("@event_name", "aktørId", "fødselsnummer", "skjæringstidspunkt", "arbeidsgivere")
+            overstyrArbeidsgiveropplysninger.json("@event_name", "fødselsnummer", "skjæringstidspunkt", "arbeidsgivere")
 
         JSONAssert.assertEquals(forventetResultat, faktiskResultat, STRICT)
         assertNoErrors(overstyrArbeidsgiveropplysninger)
@@ -266,13 +264,7 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         OverstyrArbeidsgiveropplysningerRiver(rapidsConnection, mediator)
     }
 
-    private val testMessageFactory = TestMessageFactory(
-        UNG_PERSON_FNR_2018,
-        AKTØRID,
-        ORGNUMMER,
-        INNTEKT,
-        LocalDate.of(1992, 2, 12)
-    )
+    private val testMessageFactory = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, LocalDate.of(1992, 2, 12))
 
     private companion object {
         private val objectMapper = jacksonObjectMapper()

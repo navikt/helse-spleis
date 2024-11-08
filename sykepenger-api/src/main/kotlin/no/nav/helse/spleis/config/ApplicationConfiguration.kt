@@ -3,8 +3,11 @@ package no.nav.helse.spleis.config
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
+import com.github.navikt.tbd_libs.speed.SpeedClient
+import io.ktor.client.HttpClient
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTPrincipal
 import java.io.InputStream
@@ -13,6 +16,7 @@ import java.net.URI
 import java.time.Duration
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.objectMapper
+import org.checkerframework.checker.units.qual.Speed
 
 internal class ApplicationConfiguration(env: Map<String, String> = System.getenv()) {
     internal val azureConfig = AzureAdAppConfig(
@@ -22,6 +26,11 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     )
 
     internal val azureClient = createAzureTokenClientFromEnvironment(env)
+    internal val speedClient = SpeedClient(
+        httpClient = java.net.http.HttpClient.newHttpClient(),
+        objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()),
+        tokenProvider = azureClient
+    )
     internal val spekematClient = SpekematClient(
         tokenProvider = azureClient,
         objectMapper = objectMapper,

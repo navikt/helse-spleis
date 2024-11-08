@@ -66,7 +66,6 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
         val id = eventyr.path("revurderingId").asText()
         val kilde = eventyr.path("kilde").asText()
         assertTrue(eventyr.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(eventyr.path("aktørId").asText().isNotEmpty())
         assertDatotid(eventyr.path("@opprettet").asText())
         assertTrue(hendelseId.isNotEmpty())
         assertDoesNotThrow { UUID.fromString(hendelseId) }

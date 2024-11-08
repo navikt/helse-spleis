@@ -17,7 +17,7 @@ internal class IdentOpphørtRiver (
 
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("fødselsnummer", "nye_identer.fødselsnummer", "nye_identer.aktørId")
+        message.requireKey("fødselsnummer", "nye_identer.fødselsnummer")
         message.requireArray("gamle_identer") {
             requireAny("type", listOf("FØDSELSNUMMER", "AKTØRID", "NPID"))
             requireKey("ident")

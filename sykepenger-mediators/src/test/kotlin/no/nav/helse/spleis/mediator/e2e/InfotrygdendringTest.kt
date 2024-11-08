@@ -78,7 +78,6 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
         val id = behov.path("@id").asText()
         assertEquals("behov", behov.path("@event_name").asText())
         assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(behov.path("aktørId").asText().isNotEmpty())
         assertTrue(behov.path("@behov").isArray)
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())

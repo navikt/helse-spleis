@@ -23,7 +23,6 @@ internal class PersonInspektør(person: Person) {
 
     internal val aktivitetslogg = person.personlogg
     internal val personidentifikator = person.personidentifikator
-    internal val aktørId = person.aktørId
     internal val fødselsdato = person.alder.fødselsdato
     internal var dødsdato = person.alder.dødsdato
 

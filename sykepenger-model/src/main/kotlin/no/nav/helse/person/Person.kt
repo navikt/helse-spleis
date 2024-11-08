@@ -86,7 +86,6 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import kotlin.math.roundToInt
 
 class Person private constructor(
-    aktørId: String,
     personidentifikator: Personidentifikator,
     internal var alder: Alder,
     private val _arbeidsgivere: MutableList<Arbeidsgiver>,
@@ -109,7 +108,6 @@ class Person private constructor(
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
             val alder = Alder.gjenopprett(dto.alder)
             val person = Person(
-                aktørId = dto.aktørId,
                 personidentifikator = Personidentifikator(dto.fødselsnummer),
                 alder = alder,
                 _arbeidsgivere = arbeidsgivere,
@@ -126,28 +124,18 @@ class Person private constructor(
                 tidligereBehandlinger = tidligereBehandlinger
             )
             arbeidsgivere.addAll(dto.arbeidsgivere.map {
-                Arbeidsgiver.gjenopprett(
-                    person,
-                    alder,
-                    dto.aktørId,
-                    dto.fødselsnummer,
-                    it,
-                    subsumsjonslogg,
-                    grunnlagsdataMap
-                )
+                Arbeidsgiver.gjenopprett(person, alder, it, subsumsjonslogg, grunnlagsdataMap)
             })
             return person
         }
     }
 
     internal constructor(
-        aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
         subsumsjonslogg: Subsumsjonslogg,
         regler: ArbeidsgiverRegler
     ) : this(
-        aktørId,
         personidentifikator,
         alder,
         mutableListOf(),
@@ -161,16 +149,12 @@ class Person private constructor(
     )
 
     constructor(
-        aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
         jurist: Subsumsjonslogg
-    ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
+    ) : this(personidentifikator, alder, jurist, NormalArbeidstaker)
 
     internal val arbeidsgivere: List<Arbeidsgiver> get() = _arbeidsgivere.toList()
-
-    var aktørId: String = aktørId
-        private set
 
     var personidentifikator: Personidentifikator = personidentifikator
         private set
@@ -267,7 +251,7 @@ class Person private constructor(
             val msg = andreBehandledeVedtaksperioder.map {
                 "vedtaksperiode(${it.periode()})"
             }
-            aktivitetslogg.info("""hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
+            aktivitetslogg.info("""hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen 
                 | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
                 | tidligere behandlede perioder: ${msg.joinToString { it }}
                 | cutoff: $cutoff""".trimMargin())
@@ -283,17 +267,10 @@ class Person private constructor(
         håndterGjenoppta(dødsmelding, aktivitetslogg)
     }
 
-    fun håndter(identOpphørt: IdentOpphørt, aktivitetslogg: IAktivitetslogg, nyPersonidentifikator: Personidentifikator, nyAktørId: String) {
+    fun håndter(identOpphørt: IdentOpphørt, aktivitetslogg: IAktivitetslogg, nyPersonidentifikator: Personidentifikator) {
         registrer(aktivitetslogg, "Behandler ident opphørt")
         aktivitetslogg.info("Person har byttet ident til $nyPersonidentifikator")
         this.personidentifikator = nyPersonidentifikator
-        this.aktørId = nyAktørId
-        håndterGjenoppta(identOpphørt, aktivitetslogg)
-    }
-
-    fun håndter(identOpphørt: IdentOpphørt, aktivitetslogg: IAktivitetslogg, nyPersonidentifikator: Personidentifikator) {
-        registrer(aktivitetslogg, "Behandler ident opphørt")
-        aktivitetslogg.info("Person har byttet ident til $nyPersonidentifikator, men gjør ingenting med det foreløpig")
         håndterGjenoppta(identOpphørt, aktivitetslogg)
     }
 
@@ -341,7 +318,7 @@ class Person private constructor(
         }
 
         if (utbetalingshistorikk.skalBeregnesManuelt) {
-            aktivitetslogg.info("Person er markert for manuell beregning av feriepenger - aktørId: $aktørId")
+            aktivitetslogg.info("Person er markert for manuell beregning av feriepenger")
             return
         }
 
@@ -363,7 +340,6 @@ class Person private constructor(
             aktivitetslogg.info(
                 """
                 Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
-                AktørId: $aktørId
                 Faktisk utbetalt beløp: $feriepengepengebeløpPersonUtbetaltAvInfotrygd
                 Beregnet beløp: $beregnetFeriepengebeløpPersonInfotrygd
                 """.trimIndent()
@@ -374,7 +350,6 @@ class Person private constructor(
             _arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), aktivitetslogg)
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
-            aktørId,
             personidentifikator,
             feriepengeberegner,
             utbetalingshistorikk,
@@ -620,7 +595,7 @@ class Person private constructor(
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to personidentifikator.toString(), "aktørId" to aktørId))
+        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to personidentifikator.toString()))
     }
 
     private fun registrer(aktivitetslogg: IAktivitetslogg, melding: String) {
@@ -879,7 +854,6 @@ class Person private constructor(
     }
 
     fun dto() = PersonUtDto(
-        aktørId = aktørId,
         fødselsnummer = personidentifikator.toString(),
         alder = alder.dto(),
         arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann()) },

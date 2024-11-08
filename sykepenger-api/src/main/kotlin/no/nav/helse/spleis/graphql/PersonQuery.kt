@@ -37,7 +37,7 @@ private object ApiMetrikker {
     }
 }
 
-internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String, meterRegistry: MeterRegistry): GraphQLPerson? {
+internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, aktørId: String, callId: String, meterRegistry: MeterRegistry): GraphQLPerson? {
     return ApiMetrikker.målDatabase(meterRegistry) { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
         val spekemat = spekematClient.hentSpekemat(fnr, callId)
         ApiMetrikker.målDeserialisering(meterRegistry) {
@@ -45,14 +45,14 @@ internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao
             Person.gjenopprett(EmptyLog, dto)
         }
             .let { ApiMetrikker.målByggSnapshot(meterRegistry) { serializePersonForSpeil(it, spekemat) } }
-            .let { person -> mapTilDto(person, hendelseDao.hentHendelser(fnr.toLong())) }
+            .let { person -> mapTilDto(person, fnr, aktørId, hendelseDao.hentHendelser(fnr.toLong())) }
     }
 }
 
-private fun mapTilDto(person: PersonDTO, hendelser: List<HendelseDTO>) =
+private fun mapTilDto(person: PersonDTO, fnr: String, aktørId: String, hendelser: List<HendelseDTO>) =
     GraphQLPerson(
-        aktorId = person.aktørId,
-        fodselsnummer = person.fødselsnummer,
+        aktorId = aktørId,
+        fodselsnummer = fnr,
         arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
             GraphQLArbeidsgiver(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,

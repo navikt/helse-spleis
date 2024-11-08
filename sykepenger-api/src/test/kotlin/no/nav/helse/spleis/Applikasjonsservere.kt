@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.github.navikt.tbd_libs.speed.SpeedClient
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -14,7 +15,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.headers
 import io.ktor.serialization.jackson.JacksonConverter
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -97,9 +97,10 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+        private val speedClient = mockk<SpeedClient>()
         private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(azureConfig, spekematClient, { testDataSource.ds }, registry, randomPort)
+            createApp(azureConfig, speedClient, spekematClient, { testDataSource.ds }, registry, randomPort)
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 

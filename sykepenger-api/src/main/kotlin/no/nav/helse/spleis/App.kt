@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.naisful.naisApp
+import com.github.navikt.tbd_libs.speed.SpeedClient
 import io.ktor.server.application.Application
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -39,12 +40,13 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.azureConfig, config.spekematClient, { dataSource })
+    val app = createApp(config.azureConfig, config.speedClient, config.spekematClient, { dataSource })
     app.start(wait = true)
 }
 
 internal fun createApp(
     azureConfig: AzureAdAppConfig,
+    speedClient: SpeedClient,
     spekematClient: SpekematClient,
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
@@ -57,11 +59,12 @@ internal fun createApp(
     port = port,
     applicationModule = {
         azureAdAppAuthentication(azureConfig)
-        lagApplikasjonsmodul(spekematClient, dataSourceProvider, meterRegistry)
+        lagApplikasjonsmodul(speedClient, spekematClient, dataSourceProvider, meterRegistry)
     }
 )
 
 internal fun Application.lagApplikasjonsmodul(
+    speedClient: SpeedClient,
     spekematClient: SpekematClient,
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry
@@ -73,5 +76,5 @@ internal fun Application.lagApplikasjonsmodul(
 
     spannerApi(hendelseDao, personDao)
     sporingApi(hendelseDao, personDao)
-    installGraphQLApi(spekematClient, hendelseDao, personDao, meterRegistry)
+    installGraphQLApi(speedClient, spekematClient, hendelseDao, personDao, meterRegistry)
 }

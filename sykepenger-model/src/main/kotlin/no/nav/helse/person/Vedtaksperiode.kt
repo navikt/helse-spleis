@@ -480,7 +480,7 @@ internal class Vedtaksperiode private constructor(
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
         val utbetalingsdagerFørSkjæringstidspunkt = Arbeidsgiverperiode.utbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt, periode, arbeidsgiverperiode)
         if (utbetalingsdagerFørSkjæringstidspunkt.isEmpty()) return false
-        sikkerlogg.warn("Har flere skjæringstidspunkt:\n\nAktørId: ${person.aktørId} (${id.toString().take(5).uppercase()}) $periode\nSkjæringstidspunkt: ${skjæringstidspunkt.format(datoformat)}\nArbeidsgiver: ${arbeidsgiver.organisasjonsnummer}\nUtbetalingsdager før skjæringstidspunkt: ${utbetalingsdagerFørSkjæringstidspunkt.joinToString { it.format(datoformat) }}\nSykdomstidslinje: ${sykdomstidslinje.toShortString()}")
+        sikkerlogg.warn("Har flere skjæringstidspunkt:\n\n (${id.toString().take(5).uppercase()}) $periode\nSkjæringstidspunkt: ${skjæringstidspunkt.format(datoformat)}\nArbeidsgiver: ${arbeidsgiver.organisasjonsnummer}\nUtbetalingsdager før skjæringstidspunkt: ${utbetalingsdagerFørSkjæringstidspunkt.joinToString { it.format(datoformat) }}\nSykdomstidslinje: ${sykdomstidslinje.toShortString()}")
         return true
     }
 
@@ -2751,7 +2751,7 @@ internal class Vedtaksperiode private constructor(
             return try {
                 vedtaksperiode.lagUtbetalingstidslinje(faktaavklarteInntekter)
             } catch (err: Exception) {
-                sikkerLogg.warn("klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}", kv("vedtaksperiodeId", vedtaksperiode.id), kv("aktørId", vedtaksperiode.person.aktørId), err)
+                sikkerLogg.warn("klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}", kv("vedtaksperiodeId", vedtaksperiode.id), err)
                 Utbetalingstidslinje()
             }
         }

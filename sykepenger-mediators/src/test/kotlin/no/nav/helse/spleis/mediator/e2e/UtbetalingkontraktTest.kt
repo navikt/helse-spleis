@@ -43,7 +43,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
            {
               "@event_name": "vedtaksperiode_ny_utbetaling", 
-              "aktørId": "42", 
               "fødselsnummer": "12029240045",
               "organisasjonsnummer": "987654321",
               "vedtaksperiodeId": "<uuid>",
@@ -266,7 +265,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "aktørId": "42", 
                 "fødselsnummer": "12029240045",
                 "organisasjonsnummer": "987654321",
                 "epost" : "siri.saksbehandler@nav.no",
@@ -307,7 +305,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "aktørId": "42", 
                 "fødselsnummer": "12029240045",
                 "organisasjonsnummer": "987654321",
                 "epost" : "siri.saksbehandler@nav.no",
@@ -346,7 +343,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "aktørId": "42", 
                 "fødselsnummer": "12029240045",
                 "organisasjonsnummer": "987654321",
                 "epost" : "siri.saksbehandler@nav.no",
@@ -373,7 +369,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertUtbetalingEndret(melding: JsonNode, fra: String, til: String, annullering: Boolean = false) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
@@ -388,7 +383,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertUtbetalt(melding: JsonNode) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
@@ -627,7 +621,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "type": "NavDag",
                 "begrunnelser": null
             }],
-            "aktørId": "42",
             "fødselsnummer": "12029240045"
         }
     """

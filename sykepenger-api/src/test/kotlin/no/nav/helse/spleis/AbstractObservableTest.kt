@@ -48,7 +48,6 @@ internal abstract class AbstractObservableTest {
         const val UNG_PERSON_FNR = "12029240045"
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val ORGNUMMER = "987654321"
-        const val AKTØRID = "42"
         val INNTEKTSMELDING_ID: UUID = UUID.randomUUID()
         val SØKNAD_ID: UUID = UUID.randomUUID()
         val SYKMELDING_ID: UUID = UUID.randomUUID()

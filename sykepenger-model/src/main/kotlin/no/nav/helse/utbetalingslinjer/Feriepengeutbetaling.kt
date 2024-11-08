@@ -123,7 +123,6 @@ internal class Feriepengeutbetaling private constructor(
     internal fun gjelderForÅr(år: Year) = feriepengeberegner.gjelderForÅr(år)
 
     internal class Builder(
-        private val aktørId: String,
         private val personidentifikator: Personidentifikator,
         private val orgnummer: String,
         private val feriepengeberegner: Feriepengeberegner,
@@ -177,7 +176,6 @@ internal class Feriepengeutbetaling private constructor(
                 aktivitetslogg.info(
                     """
                     Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp
-                    AktørId: $aktørId
                     Arbeidsgiver: $orgnummer
                     Infotrygd har utbetalt $infotrygdHarUtbetaltTilArbeidsgiver
                     Vi har beregnet at infotrygd har utbetalt ${hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt()}
@@ -199,7 +197,7 @@ internal class Feriepengeutbetaling private constructor(
 
             val arbeidsgiveroppdrag = oppdrag(aktivitetslogg, Fagområde.SykepengerRefusjon, forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
-            if (arbeidsgiverbeløp != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\", aktørId=$aktørId.")
+            if (arbeidsgiverbeløp != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\".")
 
             val sendArbeidsgiveroppdrag = skalSendeOppdrag(forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
@@ -212,7 +210,6 @@ internal class Feriepengeutbetaling private constructor(
                 aktivitetslogg.info(
                     """
                     Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
-                    AktørId: $aktørId
                     Arbeidsgiver: $orgnummer
                     Infotrygd har utbetalt $infotrygdHarUtbetaltTilPerson
                     Vi har beregnet at infotrygd har utbetalt ${hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson.roundToInt()}
@@ -240,7 +237,6 @@ internal class Feriepengeutbetaling private constructor(
             if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < -499 || differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson > 100) aktivitetslogg.info(
                 """
                 ${if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < 0) "Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale" else "Utbetalt for lite i Infotrygd"} for person & orgnr-kombo:
-                AktørId: $aktørId
                 Arbeidsgiver: $orgnummer
                 Diff: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson
                 Hva vi har beregnet at IT har utbetalt til person for denne AG: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
@@ -254,7 +250,6 @@ internal class Feriepengeutbetaling private constructor(
             aktivitetslogg.info(
                 """
                 Nøkkelverdier om feriepengeberegning
-                AktørId: $aktørId
                 Arbeidsgiver: $orgnummer
                 
                 - ARBEIDSGIVER:

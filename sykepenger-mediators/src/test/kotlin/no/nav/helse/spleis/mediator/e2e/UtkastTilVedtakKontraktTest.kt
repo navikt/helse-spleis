@@ -18,7 +18,6 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "6G": 561804.0
             },
-            "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "tags": [
                 "Førstegangsbehandling",

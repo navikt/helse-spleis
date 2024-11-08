@@ -31,7 +31,6 @@ internal class RestApiTest {
         private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         private const val ORGNUMMER = "987654321"
         private val MELDINGSREFERANSE = UUID.randomUUID()
-        private const val AKTØRID = "42"
 
         private val appservere = Applikasjonsservere()
 
@@ -111,18 +110,18 @@ internal class RestApiTest {
             vedtaksperiodeId = UUID.randomUUID(),
             mottatt = LocalDateTime.now()
         )
-        val person = Person(AKTØRID, Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
+        val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.håndter(sykmelding, Aktivitetslogg())
         person.håndter(inntektsmelding, Aktivitetslogg())
-        testDataSource.ds.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
+        testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
         testDataSource.ds.lagreHendelse(MELDINGSREFERANSE)
     }
 
-    private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
+    private fun DataSource.lagrePerson(fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(this, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), aktørId.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
+            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
             it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
                 fødselsnummer.toLong(), personId!!).asExecute)
 

@@ -175,7 +175,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         val annulleringsmelding = testRapid.inspektør.siste("utbetaling_annullert")
 
         assertEquals(UNG_PERSON_FNR_2018, annulleringsmelding.path("fødselsnummer").asText())
-        assertEquals(AKTØRID, annulleringsmelding.path("aktørId").asText())
         assertEquals(ORGNUMMER, annulleringsmelding.path("organisasjonsnummer").asText())
         assertTilstander(
             0,

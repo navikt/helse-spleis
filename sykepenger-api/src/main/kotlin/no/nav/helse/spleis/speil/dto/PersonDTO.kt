@@ -5,7 +5,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 data class PersonDTO(
-    val aktørId: String,
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverDTO>,
     val dødsdato: LocalDate?,

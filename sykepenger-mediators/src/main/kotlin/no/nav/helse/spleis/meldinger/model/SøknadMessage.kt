@@ -23,7 +23,6 @@ internal sealed class SøknadMessage(
     final override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         val personopplysninger = Personopplysninger(
             personidentifikator = Personidentifikator(meldingsporing.fødselsnummer),
-            aktørId = packet["aktorId"].asText(),
             fødselsdato = packet["fødselsdato"].asLocalDate(),
             dødsdato = packet["dødsdato"].asOptionalLocalDate()
         )

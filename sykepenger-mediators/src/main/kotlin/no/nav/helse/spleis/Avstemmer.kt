@@ -27,7 +27,6 @@ class Avstemmer(private val person: PersonUtDto) {
     private fun mapTilMelding(person: PersonUtDto): AvstemmerDto {
         return AvstemmerDto(
             fødselsnummer = person.fødselsnummer,
-            aktørId = person.aktørId,
             arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
                 AvstemtArbeidsgiver(
                     organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
@@ -76,7 +75,6 @@ class Avstemmer(private val person: PersonUtDto) {
 
 data class AvstemmerDto(
     val fødselsnummer: String,
-    val aktørId: String,
     val arbeidsgivere: List<AvstemtArbeidsgiver>
 )
 

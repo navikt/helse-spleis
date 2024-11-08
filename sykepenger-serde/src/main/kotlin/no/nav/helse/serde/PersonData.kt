@@ -83,7 +83,6 @@ import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import kotlin.streams.asSequence
 
 data class PersonData(
-    val aktørId: String,
     val fødselsnummer: String,
     val fødselsdato: LocalDate,
     val arbeidsgivere: List<ArbeidsgiverData>,
@@ -95,7 +94,6 @@ data class PersonData(
     val skjemaVersjon: Int
 ) {
     fun tilPersonDto() = PersonInnDto(
-        aktørId = this.aktørId,
         fødselsnummer = this.fødselsnummer,
         alder = AlderDto(fødselsdato = this.fødselsdato, dødsdato = this.dødsdato),
         opprettet = this.opprettet,

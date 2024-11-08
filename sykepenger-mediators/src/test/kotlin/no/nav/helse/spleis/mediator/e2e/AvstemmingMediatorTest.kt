@@ -50,7 +50,6 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         val utbetalinger = avstemt.path("arbeidsgivere").path(0).path("utbetalinger")
 
         assertEquals(UNG_PERSON_FNR_2018, avstemt.path("fødselsnummer").asText())
-        assertEquals(AKTØRID, avstemt.path("aktørId").asText())
         assertEquals(1, avstemt.path("arbeidsgivere").size())
         assertEquals(ORGNUMMER, avstemt.path("arbeidsgivere").path(0).path("organisasjonsnummer").asText())
         assertEquals(2, vedtaksperioder.size())

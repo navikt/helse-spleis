@@ -383,14 +383,11 @@ internal class HendelseMediator(
         nyPersonidentifikator: Personidentifikator,
         message: IdentOpphørtMessage,
         identOpphørt: IdentOpphørt,
-        nyAktørId: String,
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
     ) {
         hentPersonOgHåndter(nyPersonidentifikator, null, message, context, gamleIdenter) { person, aktivitetslogg ->
             if (støtterIdentbytte) {
-                person.håndter(identOpphørt, aktivitetslogg, nyPersonidentifikator, nyAktørId)
-            } else {
                 person.håndter(identOpphørt, aktivitetslogg, nyPersonidentifikator)
             }
             context.publish(JsonMessage.newMessage("slackmelding", mapOf(
@@ -518,9 +515,6 @@ internal class HendelseMediator(
         val personMediator = PersonMediator(message)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
         person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
-            // <todo title="Fjern denne når aktørId ikke lengre trengs">
-                personMediator.person = person
-            // </todo>
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person, aktivitetslogg)
@@ -646,7 +640,13 @@ internal interface IHendelseMediator {
     fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
     fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: MessageContext)
     fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext)
-    fun behandle(nyPersonidentifikator: Personidentifikator, message: IdentOpphørtMessage, identOpphørt: IdentOpphørt, nyAktørId: String, gamleIdenter: Set<Personidentifikator>, context: MessageContext)
+    fun behandle(
+        nyPersonidentifikator: Personidentifikator,
+        message: IdentOpphørtMessage,
+        identOpphørt: IdentOpphørt,
+        gamleIdenter: Set<Personidentifikator>,
+        context: MessageContext
+    )
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
     fun behandle(avbruttSøknadMessage: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)

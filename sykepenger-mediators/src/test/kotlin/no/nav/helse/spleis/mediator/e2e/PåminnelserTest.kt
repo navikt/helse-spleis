@@ -78,7 +78,6 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
 
     private fun assertVedtaksperiodePåminnet(melding: JsonNode) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
         assertTrue(melding.path("tilstand").asText().isNotEmpty())
@@ -90,7 +89,6 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
 
     private fun assertVedtaksperiodeIkkePåminnet(melding: JsonNode) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
         assertTrue(melding.path("tilstand").asText().isNotEmpty())
@@ -98,7 +96,6 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
 
     private fun assertVedtaksperiodeIkkeFunnet(melding: JsonNode) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
     }

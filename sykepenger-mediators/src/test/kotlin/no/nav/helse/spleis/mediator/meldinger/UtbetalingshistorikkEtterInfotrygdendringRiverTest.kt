@@ -35,7 +35,6 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiverTest : RiverTest() 
           "@id": "${UUID.randomUUID()}",
           ${if (vedtaksperiodeId != null) """"vedtaksperiodeId": "$vedtaksperiodeId",""" else ""}
           "@opprettet": "2020-01-24T11:25:00",
-          "aktørId": "aktørId",
           "fødselsnummer": "08127411111",
           "@løsning": {
             "Sykepengehistorikk": [

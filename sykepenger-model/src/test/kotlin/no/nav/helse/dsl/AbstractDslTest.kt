@@ -309,7 +309,7 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterAnnullering(utbetalingId: UUID) =
         this { håndterAnnullering(utbetalingId) }
     protected fun String.håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
-        this { håndterIdentOpphørt(nyttFnr, nyAktørId) }
+        this { håndterIdentOpphørt(nyttFnr) }
     protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         this { håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt) }
     protected fun String.håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =

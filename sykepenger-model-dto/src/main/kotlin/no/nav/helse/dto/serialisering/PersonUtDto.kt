@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import no.nav.helse.dto.AlderDto
 
 data class PersonUtDto(
-    val aktørId: String,
     val fødselsnummer: String,
     val alder: AlderDto,
     val opprettet: LocalDateTime,

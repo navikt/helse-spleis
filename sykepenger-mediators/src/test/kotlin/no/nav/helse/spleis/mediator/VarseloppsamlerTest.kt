@@ -26,7 +26,6 @@ internal class VarseloppsamlerTest {
             varselkode = RV_IM_4,
             kontekster = mapOf(
                 "meldingsreferanseId" to "30c41872-5157-4611-aee5-fbed49d1234d",
-                "aktørId" to "1000000000000",
                 "fødselsnummer" to "11111111111",
                 "organisasjonsnummer" to "999999999",
                 "vedtaksperiodeId" to "fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d",
@@ -38,7 +37,6 @@ internal class VarseloppsamlerTest {
             varselkode = RV_IM_3,
             kontekster = mapOf(
                 "meldingsreferanseId" to "30c41872-5157-4611-aee5-fbed49d1234d",
-                "aktørId" to "1000000000000",
                 "fødselsnummer" to "11111111111",
                 "organisasjonsnummer" to "999999999",
                 "vedtaksperiodeId" to "fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d",
@@ -91,14 +89,12 @@ internal class VarseloppsamlerTest {
                 {
                   "kontekstmap": {
                     "meldingsreferanseId": "d3d70111-9ca2-4876-a04a-652aa77c0662",
-                    "aktørId": "1000000000000",
                     "fødselsnummer": "11111111111",
                     "organisasjonsnummer": "999999999"
                   }
                 },
                 {
                   "kontekstmap": {
-                    "aktørId": "1000000000000",
                     "fødselsnummer": "11111111111"
                   }
                 }
@@ -112,15 +108,13 @@ internal class VarseloppsamlerTest {
                 {
                   "kontekstmap": {
                     "meldingsreferanseId": "30c41872-5157-4611-aee5-fbed49d1234d",
-                    "aktørId": "1000000000000",
                     "fødselsnummer": "11111111111",
                     "organisasjonsnummer": "999999999"
                   }
                 },
                 {
                   "kontekstmap": {
-                    "fødselsnummer": "11111111111",
-                    "aktørId": "1000000000000"
+                    "fødselsnummer": "11111111111"
                   }
                 },
                 {

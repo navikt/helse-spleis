@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 internal class NyeSøknaderRiverTest : RiverTest() {
 
     private val fødselsdato = 12.desember(1995)
-    private val aktørId = "42"
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
     private val ValidSøknad = SykepengesoknadDTO(
@@ -85,7 +84,7 @@ internal class NyeSøknaderRiverTest : RiverTest() {
     }
     private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
     private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
-    private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato").put("aktorId", "$aktørId")
+    private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato")
 }
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())

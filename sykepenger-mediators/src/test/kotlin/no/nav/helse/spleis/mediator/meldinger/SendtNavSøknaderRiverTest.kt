@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 internal class SendtNavSøknaderRiverTest : RiverTest() {
 
     private val fødselsdato = 12.desember(1995)
-    private val aktørId = "42"
     private val invalidJson = "foo"
     private val unknownJson = "{\"foo\": \"bar\"}"
     private fun validSøknad(
@@ -127,7 +126,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
 
     @Test
     fun `Gyldig søknad med inntekt fra nytt arbeidsforhold`() {
-        val factory = TestMessageFactory("1", "2", "3", 31000.0, 1.januar(1990))
+        val factory = TestMessageFactory("1", "3", 31000.0, 1.januar(1990))
         val (_, søknad) = factory.lagSøknadNav(
             perioder = listOf(SoknadsperiodeDTO(1.januar, 31.januar, 100)),
             inntektFraNyttArbeidsforhold = listOf(
@@ -203,7 +202,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     }
     private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
     private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
-    private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato").put("aktorId", "$aktørId")
+    private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato")
 }
 
 private val objectMapper = jacksonObjectMapper()
@@ -278,8 +277,7 @@ private val søknadMedRareEgenmeldinger = """
       "@id": "19b951d6-d24e-4b99-8963-b25fbe714b3b",
       "@event_name": "sendt_søknad_nav",
       "@opprettet": "2023-06-05T10:57:56.171373",
-      "fødselsdato": "1995-12-12",
-      "aktorId": "42"
+      "fødselsdato": "1995-12-12"
     }
 """
 

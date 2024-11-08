@@ -34,7 +34,6 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         val forventet1 = """
             {
               "@event_name": "vedtaksperiode_forkastet",
-              "aktørId": "$AKTØRID",
               "fødselsnummer": "$UNG_PERSON_FNR_2018",
               "organisasjonsnummer": "$ORGNUMMER",
               "tilstand" : "AVVENTER_INNTEKTSMELDING",
@@ -54,7 +53,6 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         val forventet2 = """
             {
               "@event_name": "vedtaksperiode_forkastet",
-              "aktørId": "$AKTØRID",
               "fødselsnummer": "$UNG_PERSON_FNR_2018",
               "organisasjonsnummer": "$ORGNUMMER",
               "tilstand" : "START",
@@ -96,7 +94,6 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
               "@event_name": "vedtaksperiode_forkastet",
-              "aktørId": "$AKTØRID",
               "fødselsnummer": "111",
               "organisasjonsnummer": "$ORGNUMMER",
               "tilstand" : "START",
@@ -152,7 +149,6 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
     ) = """
             {
               "@event_name": "vedtaksperiode_forkastet",
-              "aktørId": "$AKTØRID",
               "fødselsnummer": "$UNG_PERSON_FNR_2018",
               "organisasjonsnummer": "$ORGNUMMER",
               "tilstand" : "START",

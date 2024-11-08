@@ -68,7 +68,6 @@ private object TestMessages {
             "@event_name": "ny_soknad",
             "@opprettet": "$now",
             "fnr": "bar",
-            "aktorId": "aktorId",
             "sykmeldingSkrevet": "$now",
             "fom": "2020-01-01",
             "tom": "2020-01-31",
@@ -87,7 +86,6 @@ private object TestMessages {
             packet.requireKey("fom")
             packet.requireKey("tom")
             packet.requireKey("fnr")
-            packet.requireKey("aktorId")
             packet.requireKey("arbeidsgiver")
             packet.requireKey("arbeidsgiver.orgnummer")
             packet.requireKey("soknadsperioder")

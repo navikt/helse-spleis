@@ -23,7 +23,7 @@ internal open class InntektsmeldingerRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
-            "arbeidstakerAktorId", "virksomhetsnummer",
+            "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
             "status", "arkivreferanse"
         )
@@ -58,7 +58,6 @@ internal open class InntektsmeldingerRiver(
     }
 
     override fun createMessage(packet: JsonMessage): InntektsmeldingMessage {
-        val aktørId = packet["arbeidstakerAktorId"].asText()
         val fødselsdato = packet["fødselsdato"].asLocalDate()
         val dødsdato = packet["dødsdato"].asOptionalLocalDate()
         val meldingsporing = Meldingsporing(
@@ -67,7 +66,8 @@ internal open class InntektsmeldingerRiver(
         )
         return InntektsmeldingMessage(
             packet = packet,
-            personopplysninger = Personopplysninger(Personidentifikator(meldingsporing.fødselsnummer), aktørId, fødselsdato, dødsdato),
+            personopplysninger = Personopplysninger(Personidentifikator(meldingsporing.fødselsnummer),
+                fødselsdato, dødsdato),
             meldingsporing = meldingsporing
         )
     }

@@ -28,7 +28,6 @@ internal class PersonBuilder(
 
         return PersonDTO(
             fødselsnummer = personUtDto.fødselsnummer,
-            aktørId = personUtDto.aktørId,
             arbeidsgivere = arbeidsgivere,
             dødsdato = personUtDto.alder.dødsdato,
             versjon = versjon,

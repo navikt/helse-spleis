@@ -46,7 +46,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
@@ -177,7 +176,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = fnr.toString(),
-        arbeidstakerAktorId = AKTØRID,
+        arbeidstakerAktorId = "aktør",
         virksomhetsnummer = orgnummer,
         arbeidsgiverFnr = null,
         arbeidsgiverAktorId = null,

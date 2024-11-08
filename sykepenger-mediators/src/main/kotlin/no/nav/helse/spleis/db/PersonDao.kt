@@ -76,7 +76,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
     private fun opprettNyPerson(txSession: Session, lagNyPerson: () -> Person?): Pair<Long, Person>? {
         val person = lagNyPerson() ?: return null
-        val personId = opprettNyPersonversjon(txSession, person.personidentifikator, person.aktørId, 0, "{}")
+        val personId = opprettNyPersonversjon(txSession, person.personidentifikator, 0, "{}")
         return personId to person
     }
 
@@ -143,12 +143,11 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         if (size < 2) this.firstOrNull()
         else throw IllegalStateException("Listen inneholder mer enn ett element!")
 
-    private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, aktørId: String, skjemaVersjon: Int, personJson: String): Long {
+    private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String): Long {
         @Language("PostgreSQL")
-        val statement = """ INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (:fnr, :aktorId, :skjemaversjon, :data) """
+        val statement = """ INSERT INTO person (fnr, skjema_versjon, data) VALUES (:fnr, :skjemaversjon, :data) """
         return checkNotNull(session.run(queryOf(statement, mapOf(
             "fnr" to personidentifikator.toLong(),
-            "aktorId" to aktørId.toLong(),
             "skjemaversjon" to skjemaVersjon,
             "data" to personJson
         )).asUpdateAndReturnGeneratedKey)) { "klarte ikke inserte person" }

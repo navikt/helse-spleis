@@ -69,7 +69,6 @@ fun PersonData.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson 
     return SerialisertPerson(if (pretty) node.toPrettyString() else node.toString())
 }
 fun PersonUtDto.tilPersonData() = PersonData(
-    aktørId = this.aktørId,
     fødselsdato = this.alder.fødselsdato,
     fødselsnummer = this.fødselsnummer,
     opprettet = this.opprettet,

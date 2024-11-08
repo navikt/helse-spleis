@@ -41,7 +41,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
-            "aktørId",
             "fødselsnummer"
         )
 
@@ -73,7 +72,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
                 "sykmeldingsperioder",
                 "egenmeldingsperioder",
                 "forespurteOpplysninger",
-                "aktørId",
                 "fødselsnummer"
             )
 
@@ -122,7 +120,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
-            "aktørId",
             "fødselsnummer"
         )
 
@@ -159,7 +156,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
-            "aktørId",
             "fødselsnummer"
         )
 
@@ -193,7 +189,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
-            "aktørId",
             "fødselsnummer"
         )
 
@@ -256,7 +251,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
 
@@ -299,7 +293,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
 
@@ -352,7 +345,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
 
@@ -400,7 +392,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
 
@@ -446,7 +437,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               ]
             }
           ],
-          "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
 

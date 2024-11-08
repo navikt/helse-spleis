@@ -47,7 +47,6 @@ import org.junit.jupiter.api.BeforeEach
 internal abstract class AbstractE2ETest {
     protected companion object {
         private const val UNG_PERSON_FNR = "12029240045"
-        private const val AKTØRID = "42"
         private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val a1 = "a1"
         const val a2 = "a2"
@@ -85,7 +84,7 @@ internal abstract class AbstractE2ETest {
     @BeforeEach
     fun setup() {
         createTestPerson {
-            Person(AKTØRID, Personidentifikator(UNG_PERSON_FNR), Alder(UNG_PERSON_FØDSELSDATO, null), it)
+            Person(Personidentifikator(UNG_PERSON_FNR), Alder(UNG_PERSON_FØDSELSDATO, null), it)
         }
         hendelselogg = Aktivitetslogg()
     }

@@ -2,6 +2,8 @@ package no.nav.helse.spleis.graphql
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.jsontype.NamedType
+import com.github.navikt.tbd_libs.result_object.getOrThrow
+import com.github.navikt.tbd_libs.speed.SpeedClient
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -57,19 +59,30 @@ internal object Api {
         ))
     }
 
-    internal fun Application.installGraphQLApi(spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao, meterRegistry: MeterRegistry) {
+    internal fun Application.installGraphQLApi(speedClient: SpeedClient, spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao, meterRegistry: MeterRegistry) {
         routing {
             authenticate(optional = true) {
                 post("/graphql{...}") {
-                    val fødselsnummer = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
+                    val ident = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId, meterRegistry)
+                        val (fødselsnummer, aktørId) = try {
+                            val identer = speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
+                            identer.fødselsnummer to identer.aktørId
+                        } catch (err: Exception) {
+                            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
+                                ident to "aktør_id_ikke_satt_i_dev"
+                            } else {
+                                throw err
+                            }
+                        }
+
+                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, aktørId, callId, meterRegistry)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")
-                        sikkerlogger.error("callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.javaClass.simpleName} - ${err.message}", keyValue("fødselsnummer", fødselsnummer), err)
+                        sikkerlogger.error("callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.javaClass.simpleName} - ${err.message}", keyValue("fødselsnummer", ident), err)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(mapOf(
                             "errors" to listOf(
                                 mapOf(

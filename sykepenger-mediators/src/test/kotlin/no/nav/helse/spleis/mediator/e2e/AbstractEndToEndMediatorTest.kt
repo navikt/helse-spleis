@@ -83,12 +83,11 @@ internal abstract class AbstractEndToEndMediatorTest() {
     internal companion object {
         internal const val UNG_PERSON_FNR_2018 = "12029240045"
         internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
-        internal const val AKTØRID = "42"
         internal const val ORGNUMMER = "987654321"
         internal const val INNTEKT = 31000.00
     }
 
-    protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
+    protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
     protected lateinit var testRapid: TestRapid
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
@@ -754,7 +753,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
 
         private fun håndterInntektsmeldingReplay(node: JsonNode) {
             val fnr = node.path("fødselsnummer").textValue()
-            val aktørId = node.path("aktørId").textValue()
             val orgnr = node.path("organisasjonsnummer").textValue()
             val vedtaksperiodeId = node.path("vedtaksperiodeId").textValue().toUUID()
             val forespørsel = Forespørsel(
@@ -769,7 +767,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
                 erPotensiellForespørsel = node.path("potensiellForespørsel").booleanValue()
             )
 
-            val replayMessage = lagInntektsmeldingerReplayMessage(aktørId, forespørsel)
+            val replayMessage = lagInntektsmeldingerReplayMessage(forespørsel)
 
 
             log.info("lager inntektsmeldinger_replay-melding for {}", kv("vedtaksperiodeId", vedtaksperiodeId))
@@ -783,7 +781,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
                 }.asList)
             }
 
-        private fun lagInntektsmeldingerReplayMessage(aktørId: String, forespørsel: Forespørsel): JsonMessage {
+        private fun lagInntektsmeldingerReplayMessage(forespørsel: Forespørsel): JsonMessage {
             // replayer alle inntektsmeldinger som ikke er hånderte og som kan være relevante
             val replays = finnInntektsmeldinger(forespørsel.fnr)
                 .filter { it.path("virksomhetsnummer").asText() == forespørsel.orgnr }
@@ -798,7 +796,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
 
             return JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
                 "fødselsnummer" to forespørsel.fnr,
-                "aktørId" to aktørId,
                 "organisasjonsnummer" to forespørsel.orgnr,
                 "vedtaksperiodeId" to "${forespørsel.vedtaksperiodeId}",
                 "inntektsmeldinger" to replays.map { (internDokumentId, jsonNode) ->

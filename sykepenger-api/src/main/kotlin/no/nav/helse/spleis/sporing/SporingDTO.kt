@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.*
 
 data class PersonDTO(
-    val aktørId: String,
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverDTO>
 )

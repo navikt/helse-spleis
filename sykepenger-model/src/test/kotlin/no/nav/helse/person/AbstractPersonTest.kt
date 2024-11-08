@@ -35,7 +35,6 @@ internal abstract class AbstractPersonTest {
     internal companion object {
         val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("12029240045")
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
-        const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
 
         val a1: String = ORGNUMMER
@@ -108,10 +107,10 @@ internal abstract class AbstractPersonTest {
         override fun maksSykepengedagerOver67() = maksSykedager
     }
     protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
+        Person(personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
     }
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, dødsdato: LocalDate? = null) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, Alder(fødseldato, dødsdato), jurist)
+        Person(personidentifikator, Alder(fødseldato, dødsdato), jurist)
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }

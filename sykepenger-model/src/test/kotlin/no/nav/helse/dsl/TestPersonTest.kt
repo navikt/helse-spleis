@@ -32,7 +32,6 @@ internal class TestPersonTest : AbstractDslTest() {
         val inspektør = inspiser(personInspektør)
         assertEquals(TestPerson.UNG_PERSON_FNR_2018, inspektør.personidentifikator)
         assertEquals(TestPerson.UNG_PERSON_FDATO_2018, inspektør.fødselsdato)
-        assertEquals(TestPerson.AKTØRID, inspektør.aktørId)
         assertNull(inspektør.dødsdato)
     }
 

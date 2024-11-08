@@ -18,7 +18,6 @@ internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediat
         val forventetAvsluttetUtenVedtak = """
         {
             "@event_name": "avsluttet_uten_vedtak",
-            "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
             "fom" : "2018-01-01",

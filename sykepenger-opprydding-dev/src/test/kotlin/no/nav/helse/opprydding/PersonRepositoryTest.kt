@@ -87,13 +87,12 @@ internal class PersonRepositoryTest: DBTest() {
             )
 
             val opprettPerson =
-                "INSERT INTO person(skjema_versjon, fnr, aktor_id, data) VALUES(?, ?, ?, ?::json)"
+                "INSERT INTO person(skjema_versjon, fnr, data) VALUES(?, ?, ?::json)"
             it.run(
                 queryOf(
                     opprettPerson,
                     0,
                     fødselsnummer.toLong(),
-                    fødselsnummer.reversed().toLong(),
                     "{}"
                 ).asExecute
             )

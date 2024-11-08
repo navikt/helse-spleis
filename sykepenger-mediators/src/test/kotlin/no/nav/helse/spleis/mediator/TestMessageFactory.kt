@@ -41,7 +41,6 @@ import no.nav.inntektsmeldingkontrakt.Status
 
 internal class TestMessageFactory(
     private val fødselsnummer: String,
-    private val aktørId: String,
     private val organisasjonsnummer: String,
     private val inntekt: Double,
     private val fødselsdato: LocalDate
@@ -52,17 +51,15 @@ internal class TestMessageFactory(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, aktørId: String, historiskeFolkeregisteridenter: List<String>): Map<String, Any> =
+        private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, historiskeFolkeregisteridenter: List<String>): Map<String, Any> =
             objectMapper
                 .convertValue<Map<String, Any>>(this)
                 .plus("fødselsdato" to "$fødselsdato")
-                .plus("aktorId" to aktørId)
                 .plus("historiskeFolkeregisteridenter" to historiskeFolkeregisteridenter)
-        private fun Inntektsmelding.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, aktørId: String): Map<String, Any> =
+        private fun Inntektsmelding.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate): Map<String, Any> =
             objectMapper
                 .convertValue<Map<String, Any>>(this)
                 .plus("fødselsdato" to "$fødselsdato")
-                .plus("arbeidstakerAktorId" to aktørId)
     }
 
     fun lagNySøknad(
@@ -90,7 +87,7 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("ny_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, historiskeFolkeregisteridenter))
     }
 
     fun lagNySøknadFrilanser(
@@ -118,7 +115,8 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad_frilans", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("ny_søknad_frilans", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     fun lagNySøknadSelvstendig(
@@ -146,7 +144,8 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad_selvstendig", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("ny_søknad_selvstendig", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
     fun lagNySøknadArbeidsledig(
         vararg perioder: SoknadsperiodeDTO,
@@ -175,7 +174,8 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad_arbeidsledig", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("ny_søknad_arbeidsledig", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     fun lagSøknadArbeidsgiver(
@@ -200,7 +200,8 @@ internal class TestMessageFactory(
             opprettet = LocalDateTime.now(),
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     fun lagSøknadNav(
@@ -247,7 +248,8 @@ internal class TestMessageFactory(
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
             inntektFraNyttArbeidsforhold = inntektFraNyttArbeidsforhold
         )
-        return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     private fun lagSpørsmål(ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean): List<SporsmalDTO>? {
@@ -310,7 +312,8 @@ internal class TestMessageFactory(
             sendTilGosys = sendTilGosys,
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
         )
-        return nyHendelse("sendt_søknad_frilans", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("sendt_søknad_frilans", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     fun lagSøknadSelvstendig(
@@ -353,7 +356,8 @@ internal class TestMessageFactory(
             sendTilGosys = sendTilGosys,
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
         )
-        return nyHendelse("sendt_søknad_selvstendig", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("sendt_søknad_selvstendig", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     fun lagSøknadArbeidsledig(
@@ -398,7 +402,8 @@ internal class TestMessageFactory(
             sendTilGosys = sendTilGosys,
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
         )
-        return nyHendelse("sendt_søknad_arbeidsledig", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("sendt_søknad_arbeidsledig", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato,
+            historiskeFolkeregisteridenter))
     }
 
     private fun lagInntektsmelding(
@@ -413,7 +418,7 @@ internal class TestMessageFactory(
     ) = Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = fødselsnummer,
-        arbeidstakerAktorId = aktørId,
+        arbeidstakerAktorId = "aktørId",
         virksomhetsnummer = orgnummer,
         arbeidsgiverFnr = null,
         arbeidsgiverAktorId = null,
@@ -456,7 +461,7 @@ internal class TestMessageFactory(
             opphørsdatoForRefusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
             avsenderSystem
-        ).toMapMedFelterFraSpedisjon(fødselsdato, aktørId)
+        ).toMapMedFelterFraSpedisjon(fødselsdato)
     )
 
     fun lagInntektsmeldingReplay(
@@ -490,7 +495,6 @@ internal class TestMessageFactory(
         return nyHendelse(
             "behov", mutableMapOf(
                 "@behov" to listOf("Sykepengehistorikk"),
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "@løsning" to sykepengehistorikk.toJson(),
                 "@final" to true,
@@ -1030,7 +1034,6 @@ internal class TestMessageFactory(
             hendelse = mapOf(
                 "fagsystemId" to fagsystemId,
                 "gyldighetsdato" to gyldighetsdato,
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
             ),
@@ -1091,7 +1094,6 @@ internal class TestMessageFactory(
     fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): Pair<String, String> {
         return nyHendelse(
             "utbetalingpåminnelse", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "utbetalingId" to utbetalingId,
@@ -1111,7 +1113,6 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return nyHendelse(
             "påminnelse", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to orgnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId,
@@ -1131,7 +1132,6 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return nyHendelse(
             "forkast_sykmeldingsperioder", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to orgnummer,
                 "fom" to fom.toString(),
@@ -1144,7 +1144,6 @@ internal class TestMessageFactory(
     fun lagDødsmelding(dødsdato: LocalDate): Pair<String, String> {
         return nyHendelse(
             "dødsmelding", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "dødsdato" to "$dødsdato"
             )
@@ -1154,7 +1153,6 @@ internal class TestMessageFactory(
     fun lagPersonPåminnelse(): Pair<String, String> {
         return nyHendelse(
             "person_påminnelse", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer
             )
         )
@@ -1163,7 +1161,6 @@ internal class TestMessageFactory(
     fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID = UUID.randomUUID()): Pair<String, String> {
         return nyHendelse(
             "anmodning_om_forkasting", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId
@@ -1200,7 +1197,6 @@ internal class TestMessageFactory(
     fun lagAnnullering(utbetalingId: String): Pair<String, String> {
         return nyHendelse(
             "annullering", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "utbetalingId" to utbetalingId,
@@ -1217,21 +1213,18 @@ internal class TestMessageFactory(
     fun lagAvstemming() = nyHendelse(
         "person_avstemming", mapOf(
             "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId
         )
     )
 
     fun lagMigrate() = nyHendelse(
         "json_migrate", mapOf(
             "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId
         )
     )
 
     fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<String, String> {
         return nyHendelse(
             "overstyr_tidslinje", mutableMapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "dager" to dager.map {
@@ -1251,7 +1244,6 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return nyHendelse(
             "overstyr_arbeidsforhold", mutableMapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "overstyrteArbeidsforhold" to overstyrteArbeidsforhold.map {
@@ -1272,7 +1264,6 @@ internal class TestMessageFactory(
         arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
     ) = nyHendelse(
         "overstyr_inntekt_og_refusjon", mutableMapOf(
-            "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt,
             "arbeidsgivere" to arbeidsgiveropplysninger.map { arbeidgiver ->
@@ -1295,7 +1286,6 @@ internal class TestMessageFactory(
         perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Pair<LocalDate, LocalDate>>
     ) = nyHendelse(
         "minimum_sykdomsgrad_vurdert", mutableMapOf(
-            "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "perioderMedMinimumSykdomsgradVurdertOk" to perioderMedMinimumSykdomsgradVurdertOK.map {
                 mutableMapOf(
@@ -1317,7 +1307,6 @@ internal class TestMessageFactory(
         skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>
     ) = nyHendelse(
         "skjønnsmessig_fastsettelse", mutableMapOf(
-            "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt,
             "arbeidsgivere" to skjønnsmessigFastsatt.map { arbeidgiver ->
@@ -1332,7 +1321,6 @@ internal class TestMessageFactory(
     internal fun lagInfotrygdendringer(endringsmeldingId: String = "1234567") = nyHendelse(
         "infotrygdendring", mutableMapOf(
             "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
             "endringsmeldingId" to endringsmeldingId
         )
     )
@@ -1352,7 +1340,6 @@ internal class TestMessageFactory(
     ) = nyHendelse(
         "behov", ekstraFelter + mutableMapOf(
             "@behov" to behov,
-            "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to orgnummer,
             "@løsning" to løsninger,
@@ -1366,10 +1353,9 @@ internal class TestMessageFactory(
 
     fun lagIdentOpphørt(fnr: String, nyttFnr: String) = nyHendelse("ident_opphørt", mapOf(
         "fødselsnummer" to fnr,
-        "aktørId" to aktørId,
         "nye_identer" to mapOf(
             "fødselsnummer" to nyttFnr,
-            "aktørId" to aktørId,
+            "aktørId" to "aktørId",
             "npid" to null
         ),
         "gamle_identer" to listOf(

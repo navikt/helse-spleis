@@ -18,7 +18,6 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
             "@event_name": "skatteinntekter_lagt_til_grunn",
             "vedtaksperiodeId": "<uuid>",
             "behandlingId": "<uuid>",
-            "aktørId": "$AKTØRID",
             "organisasjonsnummer": "$ORGNUMMER",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "omregnetÅrsinntekt": 372000.0,

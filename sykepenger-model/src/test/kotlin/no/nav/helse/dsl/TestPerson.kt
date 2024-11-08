@@ -65,7 +65,6 @@ import org.junit.jupiter.api.fail
 
 internal class TestPerson(
     private val observatør: PersonObserver,
-    private val aktørId: String = AKTØRID,
     private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
     private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
     deferredLog: DeferredLog = DeferredLog(),
@@ -75,7 +74,6 @@ internal class TestPerson(
         private val fnrformatter = DateTimeFormatter.ofPattern("ddMMyy")
         internal val UNG_PERSON_FDATO_2018 = 12.februar(1992)
         internal val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045")
-        internal const val AKTØRID = "42"
 
         internal val INNTEKT = 31000.00.månedlig
 
@@ -88,7 +86,7 @@ internal class TestPerson(
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
-    internal val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
+    internal val person = Person(personidentifikator, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
@@ -359,9 +357,9 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagAnnullering(utbetalingId).håndter(Person::håndter)
         }
 
-        internal fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) {
+        internal fun håndterIdentOpphørt(nyttFnr: Personidentifikator) {
             arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter { it, aktivitetslogg ->
-                håndter(it, aktivitetslogg, nyttFnr, nyAktørId)
+                håndter(it, aktivitetslogg, nyttFnr)
             }
         }
 

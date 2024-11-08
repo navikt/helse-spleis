@@ -1,0 +1,1 @@
+alter table person drop column aktor_id;

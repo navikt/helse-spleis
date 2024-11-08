@@ -26,7 +26,6 @@ internal class AnmodningOmForkastingRiverTest : RiverTest() {
           "vedtaksperiodeId": "$vedtaksperiodeId",
           "organisasjonsnummer": "orgnummer",
           "@opprettet": "2023-04-03T11:25:00",
-          "aktørId": "aktørId",
           "fødselsnummer": "08127411111"
         }
     """

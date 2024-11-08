@@ -50,7 +50,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.Arbeidsledig
@@ -113,9 +112,8 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
 internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
     periode: Periode,
     orgnummer: String,
-    meldingsreferanseId: UUID = UUID.randomUUID(),
-    fødselsnummer: Personidentifikator = UNG_PERSON_FNR_2018,
-    aktørId: String = AKTØRID) {
+    meldingsreferanseId: UUID = UUID.randomUUID()
+) {
     AvbruttSøknad(periode,
         meldingsreferanseId,
         orgnummer
@@ -125,9 +123,8 @@ internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
 internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
     periode: Periode,
     orgnummer: String,
-    meldingsreferanseId: UUID = UUID.randomUUID(),
-    fødselsnummer: Personidentifikator = UNG_PERSON_FNR_2018,
-    aktørId: String = AKTØRID) {
+    meldingsreferanseId: UUID = UUID.randomUUID()
+) {
     AvbruttSøknad(periode,
         meldingsreferanseId,
         Arbeidsledig
@@ -760,10 +757,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
     utbetalingpåminnelse(inspektør.utbetalingId(utbetalingIndeks), status, tilstandsendringstidspunkt).håndter(Person::håndter)
 }
 
-internal fun AbstractEndToEndTest.håndterPersonPåminnelse(
-    aktørId: String = AKTØRID,
-    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-) = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndter)
+internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndter)
 
 internal fun AbstractEndToEndTest.håndterPåminnelse(
     vedtaksperiodeIdInnhenter: IdInnhenter,

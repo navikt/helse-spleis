@@ -35,7 +35,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "vedtaksperiodeId": "<uuid>",
             "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
-            "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
             "fom": "2018-01-03",
@@ -85,7 +84,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "vedtaksperiodeId": "<uuid>",
             "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
-            "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
             "fom": "2018-01-03",
@@ -129,7 +127,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
         {
             "@event_name": "avsluttet_uten_vedtak",
-            "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
             "fom": "2018-01-03",
@@ -176,7 +173,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "vedtaksperiodeId": "<uuid>",
             "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
-            "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
             "fom" : "2018-01-27",

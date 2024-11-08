@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.AKTØRID
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.ORGNUMMER
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
@@ -18,13 +17,7 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
         OverstyrArbeidsforholdRiver(rapidsConnection, mediator)
     }
 
-    private val testMessageFactory = TestMessageFactory(
-        UNG_PERSON_FNR_2018,
-        AKTØRID,
-        ORGNUMMER,
-        INNTEKT,
-        UNG_PERSON_FØDSELSDATO
-    )
+    private val testMessageFactory = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
 
     @Test
     fun `kan mappe melding om overstyring av arbeidsforhold til modell uten feil`() {

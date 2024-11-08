@@ -13,13 +13,6 @@ internal class PersonDao(private val dataSource: () -> DataSource, private val m
             "fnr" to fødselsnummer
         )))
 
-    fun hentFødselsnummer(aktørId: Long) =
-        sessionOf(dataSource()).use { session ->
-            session.run(queryOf("SELECT fnr FROM person WHERE aktor_id = ?;", aktørId).map {
-                it.long("fnr")
-            }.asList)
-        }.singleOrNullOrThrow()
-
     private fun hentPerson(query: Query) =
         sessionOf(dataSource())
             .use { session ->

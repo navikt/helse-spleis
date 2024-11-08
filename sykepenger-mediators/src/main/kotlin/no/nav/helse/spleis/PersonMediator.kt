@@ -30,8 +30,6 @@ internal class PersonMediator(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    var person: Person? = null
-
     fun ferdigstill(context: MessageContext) {
         sendUtgåendeMeldinger(context)
     }
@@ -456,7 +454,6 @@ internal class PersonMediator(
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
         this["fødselsnummer"] = message.meldingsporing.fødselsnummer
-        this["aktørId"] = checkNotNull(person) { "personmediator må ha person" }.aktørId
     }
 
     private fun queueMessage(outgoingMessage: JsonMessage) {

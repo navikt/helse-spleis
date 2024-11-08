@@ -10,7 +10,6 @@ internal class PersonBuilder(private val person: Person) {
         val dto = person.dto()
         return PersonDTO(
             fødselsnummer = dto.fødselsnummer,
-            aktørId = dto.aktørId,
             arbeidsgivere = dto.arbeidsgivere.map { mapArbeidsgiver(it) },
         )
     }
