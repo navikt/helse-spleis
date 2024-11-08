@@ -20,7 +20,6 @@ dependencies {
     implementation(project(":sykepenger-api-dto"))
     implementation("com.github.navikt.tbd-libs:naisful-app:$tbdLibsVersion")
     implementation("com.github.navikt.tbd-libs:azure-token-client-default:$tbdLibsVersion")
-    implementation("com.github.navikt.tbd-libs:spurtedu-client:$tbdLibsVersion")
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")

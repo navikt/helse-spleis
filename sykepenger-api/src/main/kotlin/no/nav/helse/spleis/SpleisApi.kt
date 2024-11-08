@@ -1,21 +1,15 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.core.JsonParseException
-import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.http.ContentType
-import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.header
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -48,13 +42,12 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
 
                     val meldingsReferanse = try {
                         UUID.fromString(hendelseId)
-                    } catch (e: IllegalArgumentException) {
+                    } catch (_: IllegalArgumentException) {
                         throw BadRequestException("meldingsreferanse bør/skal være en UUID")
                     }
 
                     val hendelse =
-                        hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
-
+                        hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = $hendelseId")
 
                     call.respondText(hendelse, ContentType.Application.Json)
                 }
@@ -68,7 +61,7 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
         authenticate {
             get("/api/vedtaksperioder") {
                 withContext(Dispatchers.IO) {
-                    val fnr = fnr(personDao)
+                    val fnr = call.request.header("fnr")?.toLong() ?: throw BadRequestException("mangler fnr")
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     val dto = person.tilPersonDto { hendelseDao.hentAlleHendelser(fnr) }
                     call.respond(serializePersonForSporing(Person.gjenopprett(EmptyLog, dto)))
@@ -78,52 +71,7 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
     }
 }
 
-private fun RoutingContext.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null): Long {
-    val maskertId = call.parameters["maskertId"]
-    val (fnr, aktorid) = call.identFraSpurteDu(spurteDuClient, maskertId) ?: call.identFraRequest()
-    return fnr(personDao, fnr, aktorid) ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
-}
-
-private fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuClient?, maskertId: String?): Pair<Long?, Long?>? {
-    if (spurteDuClient == null || maskertId == null) return null
-    val id = try {
-        UUID.fromString(maskertId)
-    } catch (err: Exception) {
-        return null
-    }
-    val token = bearerToken ?: return null
-    val tekstinnhold = spurteDuClient.vis(id, token).text
-    return try {
-        val node = objectMapper.readTree(tekstinnhold)
-        val ident = node.path("ident").asLong()
-        val identype = node.path("identtype").asText()
-        when (identype.lowercase()) {
-            "fnr" -> Pair(ident, null)
-            "aktorid" -> Pair(null, ident)
-            else -> null
-        }
-    } catch (err: JsonParseException) {
-        null
-    }
-}
-private fun ApplicationCall.identFraRequest(): Pair<Long?, Long?> {
-    return Pair(
-        request.header("fnr")?.toLong(),
-        request.header("aktorId")?.toLong()
-    )
-}
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
     val fødselsnummer: String
 )
-
-private fun fnr(personDao: PersonDao, fnr: Long?, aktørId: Long?): Long? {
-    return fnr ?: aktørId?.let { personDao.hentFødselsnummer(aktørId) }
-}
-
-private val ApplicationCall.bearerToken: String? get() {
-    val httpAuthHeader = request.parseAuthorizationHeader() ?: return null
-    if (httpAuthHeader !is HttpAuthHeader.Single) return null
-    return httpAuthHeader.blob
-}
