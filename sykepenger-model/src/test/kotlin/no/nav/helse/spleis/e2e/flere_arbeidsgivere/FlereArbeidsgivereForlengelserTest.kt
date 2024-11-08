@@ -128,8 +128,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1

@@ -314,7 +314,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
                 )
-            , arbeidsforhold = emptyList())
+            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -398,7 +398,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
                 )
-            , arbeidsforhold = emptyList())
+            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -480,7 +480,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                ), arbeidsforhold = emptyList()
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -623,7 +623,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                ), arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )

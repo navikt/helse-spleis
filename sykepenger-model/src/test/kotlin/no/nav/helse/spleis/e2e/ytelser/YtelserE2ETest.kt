@@ -462,7 +462,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
                     a1 inntekt INNTEKT
                     a2 inntekt INNTEKT * 0.95
                 }
-            }, arbeidsforhold = emptyList()),
+            }),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)

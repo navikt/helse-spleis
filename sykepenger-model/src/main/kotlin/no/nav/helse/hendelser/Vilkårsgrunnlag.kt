@@ -5,6 +5,9 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.Opptjening
@@ -12,9 +15,11 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.inntekt.AnsattPeriode
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.yearMonth
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -69,19 +74,18 @@ class Vilkårsgrunnlag(
                 ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
             )
         }
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, metadata.meldingsreferanseId, subsumsjonslogg)
+        return inntektsvurderingForSykepengegrunnlag.inntekter.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, metadata.meldingsreferanseId, subsumsjonslogg)
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         val sykepengegrunnlagOk = inntektsgrunnlag.valider(aktivitetslogg)
-        inntektsvurderingForSykepengegrunnlag.valider(aktivitetslogg)
-        arbeidsforhold.forEach { it.loggFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold) }
+        arbeidsforhold.forEach { it.validerFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold, inntektsvurderingForSykepengegrunnlag) }
         val opptjening = opptjening()
         subsumsjonslogg.logg(opptjening.subsumsjon)
 
         if (!harInntektMånedenFørSkjæringstidspunkt) {
             aktivitetslogg.varsel(Varselkode.RV_OV_3)
-        } else if (!inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
+        } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
             aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
         }
 
@@ -120,8 +124,28 @@ class Vilkårsgrunnlag(
             check(orgnummer.isNotBlank())
         }
 
-        fun loggFrilans(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, andre: List<Arbeidsforhold>) {
+        fun validerFrilans(
+            aktivitetslogg: IAktivitetslogg,
+            skjæringstidspunkt: LocalDate,
+            andre: List<Arbeidsforhold>,
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag
+        ) {
             if (type != Arbeidsforholdtype.FRILANSER) return
+            harFrilansinntekterDeSiste3Månedene(aktivitetslogg, skjæringstidspunkt, inntektsvurderingForSykepengegrunnlag)
+            sjekkFrilansArbeidsforholdMotAndreArbeidsforhold(aktivitetslogg, skjæringstidspunkt, andre)
+        }
+
+        private fun harFrilansinntekterDeSiste3Månedene(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, inntektForSykepengegrunnlag: InntektForSykepengegrunnlag) {
+            val finnerFrilansinntektDeSiste3Månedene = (1..3).any { antallMånederFør ->
+                val måned = skjæringstidspunkt.yearMonth.minusMonths(antallMånederFør.toLong())
+                val månedenSomPeriode = måned.atDay(1) til måned.atEndOfMonth()
+                val ansattIMåneden = ansettelseperiode.overlapperMed(månedenSomPeriode)
+                ansattIMåneden && inntektForSykepengegrunnlag.inntekter.harInntektFor(orgnummer, måned)
+            }
+            if (finnerFrilansinntektDeSiste3Månedene) aktivitetslogg.funksjonellFeil(RV_IV_3)
+        }
+
+        private fun sjekkFrilansArbeidsforholdMotAndreArbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, andre: List<Arbeidsforhold>) {
             if (skjæringstidspunkt !in ansettelseperiode) return
             aktivitetslogg.info("Vedkommende har et aktivt frilansoppdrag på skjæringstidspunktet")
 

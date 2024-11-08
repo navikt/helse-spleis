@@ -179,7 +179,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -203,7 +203,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -221,7 +221,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -231,7 +231,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -268,7 +268,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -278,7 +278,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 2.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -300,7 +300,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -324,7 +324,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -349,7 +349,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -364,7 +364,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -389,7 +389,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
@@ -424,7 +424,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )

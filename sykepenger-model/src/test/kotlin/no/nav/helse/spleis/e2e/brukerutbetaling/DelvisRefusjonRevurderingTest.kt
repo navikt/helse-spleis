@@ -124,7 +124,6 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), a1Inntekt.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), a2Inntekt.repeat(3))
                 )
-            , arbeidsforhold = emptyList()
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

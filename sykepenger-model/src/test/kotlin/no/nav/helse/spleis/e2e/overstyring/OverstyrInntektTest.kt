@@ -87,8 +87,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt INNTEKT
                 }
-            },
-            arbeidsforhold = emptyList()
+            }
         ), arbeidsforhold = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT)
@@ -142,7 +141,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

@@ -192,8 +192,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -493,8 +492,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -626,8 +624,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)

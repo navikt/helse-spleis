@@ -260,8 +260,7 @@ internal abstract class AbstractE2ETest {
                 Vilkårsgrunnlag.Arbeidsforhold(orgnr, oppstart, type = Arbeidsforholdtype.ORDINÆRT)
             },
             inntekter = InntektForSykepengegrunnlag(
-                inntekter = inntekter.map { (orgnr, inntekt) -> grunnlag(orgnr, behov.skjæringstidspunkt, (1..3).map { inntekt }) },
-                arbeidsforhold = emptyList()
+                inntekter = inntekter.map { (orgnr, inntekt) -> grunnlag(orgnr, behov.skjæringstidspunkt, (1..3).map { inntekt }) }
             ),
             orgnummer = behov.orgnummer
         )

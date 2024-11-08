@@ -41,15 +41,17 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
                     måned = YearMonth.of(2017, 12),
-                    inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER)),
-                    arbeidsforhold = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold(ORGNUMMER, "frilanserOppdragstakerHonorarPersonerMm"))
+                    inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER))
                 )),
                 inntekterForOpptjeningsvurdering = listOf(
                     TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
                     måned = YearMonth.of(2017, 12),
                     inntekter = listOf(TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER))
                 )),
-                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
+                arbeidsforhold = listOf(
+                    TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.FRILANSER)
+                ),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             )
         )
@@ -65,8 +67,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
                     måned = YearMonth.of(2017, 12),
-                    inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322")),
-                    arbeidsforhold = emptyList()
+                    inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322"))
                 )),
                 inntekterForOpptjeningsvurdering = listOf(
                     TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(

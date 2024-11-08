@@ -236,7 +236,7 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             orgnummer = orgnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()
+                inntekter = inntekterForSykepengegrunnlag
             ),
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold ?: listOf(

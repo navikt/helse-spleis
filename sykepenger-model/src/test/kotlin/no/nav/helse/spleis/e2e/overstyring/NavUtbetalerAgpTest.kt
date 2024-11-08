@@ -471,8 +471,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 4000.månedlig.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),

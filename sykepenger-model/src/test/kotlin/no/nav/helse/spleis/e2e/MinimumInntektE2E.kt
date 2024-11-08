@@ -36,8 +36,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -65,8 +64,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -95,8 +93,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -124,8 +121,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)

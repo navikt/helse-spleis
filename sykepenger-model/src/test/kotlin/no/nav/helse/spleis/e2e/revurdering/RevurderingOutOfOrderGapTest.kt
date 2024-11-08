@@ -527,7 +527,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                     a1 inntekt INNTEKT
                     a2 inntekt INNTEKT
                 }
-            }, arbeidsforhold = listOf()),
+            }),
             arbeidsforhold = listOf(
                 Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
                 Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
@@ -600,7 +600,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
-            ), emptyList()
+            )
         )
         val arbeidsforhold = listOf(
             Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -634,7 +634,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3))
-            ), emptyList()
+            )
         )
         val arbeidsforhold2 = listOf(
             Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -674,7 +674,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
-            ), emptyList()
+            )
         )
         val arbeidsforhold = listOf(
             Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -707,7 +707,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
                 grunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3))
-            ), emptyList()
+            )
         )
         val arbeidsforhold2 = listOf(
             Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -1019,7 +1019,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, 1.mars, INNTEKT.repeat(3)),
                     grunnlag(a2, 1.mars, INNTEKT.repeat(3))
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),

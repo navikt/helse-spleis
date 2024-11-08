@@ -367,8 +367,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 inntekter = listOf(
                     grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
                     grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             )
         )
     }

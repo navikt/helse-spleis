@@ -153,7 +153,7 @@ internal abstract class AbstractObservableTest {
                         Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
                             ORGNUMMER inntekt INNTEKT
                         }
-                    }, arbeidsforhold = emptyList()),
+                    }),
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(listOf(
             ArbeidsgiverInntekt(ORGNUMMER, listOf(ArbeidsgiverInntekt.MånedligInntekt(YearMonth.from(FOM.minusMonths(1)),
                 INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "kontantytelse", "fastloenn")))

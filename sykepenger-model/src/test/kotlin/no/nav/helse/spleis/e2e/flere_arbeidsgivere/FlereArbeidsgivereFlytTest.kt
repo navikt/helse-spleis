@@ -424,7 +424,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                     a1 inntekt INNTEKT
                     a2 inntekt INNTEKT * 0.95
                 }
-            }, arbeidsforhold = emptyList()),
+            }),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
@@ -527,7 +527,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -572,7 +572,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -828,7 +828,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(3)),
                     grunnlag(a2, skjæringstidspunkt, 31000.månedlig.repeat(3)),
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),

@@ -250,7 +250,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                    ), arbeidsforhold = emptyList()
+                    )
                 ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -371,7 +371,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                    ), arbeidsforhold = emptyList()
+                    )
                 ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
@@ -522,7 +522,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                    ), arbeidsforhold = emptyList()
+                    )
                 ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),

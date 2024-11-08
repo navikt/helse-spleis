@@ -504,8 +504,7 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
 internal fun inntektsvurderingForSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, vararg orgnummere: String) = InntektForSykepengegrunnlag(
     inntekter = orgnummere.map { orgnummer ->
         grunnlag(orgnummer, skjæringstidspunkt, inntekt.repeat(3))
-    },
-    arbeidsforhold = emptyList()
+    }
 )
 
 internal fun grunnlag(

@@ -535,12 +535,11 @@ internal abstract class AbstractEndToEndMediatorTest() {
 
     fun sykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
-        inntekter: List<InntekterForSykepengegrunnlagFraLøsning.Inntekt>,
-        arbeidsforhold: List<InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold> = emptyList()
+        inntekter: List<InntekterForSykepengegrunnlagFraLøsning.Inntekt>
     ): List<InntekterForSykepengegrunnlagFraLøsning> {
         return (3L downTo 1L).map {
             val mnd = YearMonth.from(skjæringstidspunkt).minusMonths(it)
-            InntekterForSykepengegrunnlagFraLøsning(mnd, inntekter, arbeidsforhold)
+            InntekterForSykepengegrunnlagFraLøsning(mnd, inntekter)
         }
     }
 

@@ -1027,8 +1027,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1101,8 +1100,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1159,8 +1157,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1275,8 +1272,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1746,8 +1742,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1818,8 +1813,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1882,8 +1876,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -1947,8 +1940,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -2008,8 +2000,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )

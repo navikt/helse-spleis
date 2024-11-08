@@ -35,9 +35,6 @@ internal class VilkårsgrunnlagRiver(
                 requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
                 interestedIn("orgnummer", "fødselsnummer", "fordel", "beskrivelse")
             }
-            requireArray("arbeidsforholdliste") {
-                requireKey("orgnummer", "type")
-            }
         }
         message.requireArray("@løsning.${InntekterForOpptjeningsvurdering.name}") {
             require("årMåned", JsonNode::asYearMonth)

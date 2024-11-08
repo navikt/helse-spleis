@@ -442,8 +442,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
                         grunnlag(a3, 1.januar, INNTEKT.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -609,8 +608,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                         grunnlag(a1, 1.januar, inntekt.repeat(3)),
                         grunnlag(a2, 1.januar, inntekt.repeat(3)),
                         grunnlag(a3, 1.januar, inntekt.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -689,8 +687,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 inntekter = listOf(
                     grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
                     grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             )
         )
     }

@@ -337,7 +337,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
             periode.start.minusMonths(3) til periode.start.minusMonths(1) inntekter {
                 orgnummer inntekt beregnetInntekt
             }
-        }, arbeidsforhold = emptyList()
+        }
     ),
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
@@ -609,7 +609,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
                     beskrivelse = "beskrivelse"
                 )
             })
-        ), arbeidsforhold = emptyList()
+        )
     ),
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },

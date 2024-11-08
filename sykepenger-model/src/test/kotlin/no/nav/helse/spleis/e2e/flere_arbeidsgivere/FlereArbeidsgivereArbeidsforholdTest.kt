@@ -61,8 +61,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
@@ -93,8 +92,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter1,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter1
             ),
             arbeidsforhold = arbeidsforhold1
         )
@@ -134,8 +132,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
@@ -160,8 +157,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -202,8 +198,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterA1,
-                arbeidsforhold = emptyList()
+                inntekter = inntekterA1
             ),
             arbeidsforhold = arbeidsforholdA1,
             orgnummer = a1
@@ -232,8 +227,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterA2,
-                arbeidsforhold = emptyList()
+                inntekter = inntekterA2
             ),
             arbeidsforhold = arbeidsforholdA2,
             orgnummer = a2
@@ -277,8 +271,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter1,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter1
             ),
             arbeidsforhold = arbeidsforhold1
         )
@@ -309,8 +302,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter1,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter1
             ),
             arbeidsforhold = arbeidsforhold1
         )
@@ -342,8 +334,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a2,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter3,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter3
             ),
             arbeidsforhold = arbeidsforhold2
         )
@@ -369,8 +360,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter2,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter2
             ),
             arbeidsforhold = arbeidsforhold2
         )
@@ -413,8 +403,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -446,8 +435,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             arbeidsforhold = arbeidsforhold
         )
@@ -469,8 +457,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = emptyList(),
-                arbeidsforhold = emptyList()
+                inntekter = emptyList()
             ),
             arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT))
         )

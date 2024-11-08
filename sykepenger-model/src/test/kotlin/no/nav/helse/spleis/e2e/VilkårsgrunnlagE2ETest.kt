@@ -51,7 +51,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                         november(2017).lønnsinntekt(),
                         oktober(2017).lønnsinntekt(),
                     )),
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
@@ -80,7 +80,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                         desember(2017).lønnsinntekt(2500.månedlig),
                         november(2017).lønnsinntekt((-3000).månedlig),
                     )),
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),

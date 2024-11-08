@@ -131,8 +131,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a2
         )
@@ -182,8 +181,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )
@@ -212,8 +210,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a3, 1.januar, 1000.månedlig.repeat(1)) // Liten inntekt som saksbehandler ikke ser på som relevant
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )
@@ -266,8 +263,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a3, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a2
         )
@@ -308,8 +304,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )
@@ -337,8 +332,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, 3800.månedlig.repeat(3)),
                     grunnlag(a2, 1.januar, 300.månedlig.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )
@@ -377,8 +371,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )

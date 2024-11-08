@@ -68,7 +68,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, 1.januar, 31000.månedlig.repeat(3)),
                     grunnlag(a2, 1.januar, 31000.månedlig.repeat(3)),
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),

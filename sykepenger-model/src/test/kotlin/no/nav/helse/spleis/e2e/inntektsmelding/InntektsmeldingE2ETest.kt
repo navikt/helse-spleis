@@ -550,7 +550,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                         november(2017).lønnsinntekt(),
                         oktober(2017).lønnsinntekt(),
                     )),
-                ), arbeidsforhold = emptyList()
+                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
@@ -1358,7 +1358,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                         beskrivelse = "beskrivelse"
                     )
                 })
-            }, arbeidsforhold = emptyList())
+            })
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,

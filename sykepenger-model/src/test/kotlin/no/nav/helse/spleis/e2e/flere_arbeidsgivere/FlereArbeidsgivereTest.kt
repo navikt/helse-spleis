@@ -918,8 +918,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                             a1 inntekt INNTEKT
                             a2 inntekt 1000.månedlig
                         }
-                    },
-                    arbeidsforhold = emptyList()
+                    }
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -986,8 +985,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = emptyList(),
-                    arbeidsforhold = emptyList()
+                    inntekter = emptyList()
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -1210,7 +1208,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                             a1 inntekt INNTEKT
                             a2 inntekt INNTEKT
                         }
-                    }, arbeidsforhold = emptyList()
+                    }
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -1234,7 +1232,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             inntekter = listOf(
                 grunnlag(a1, 20.januar, INNTEKT.repeat(3)),
                 grunnlag(a2, 20.januar, INNTEKT.repeat(3))
-            ), arbeidsforhold = emptyList()
+            )
         )
         a1 {
             håndterVilkårsgrunnlag(
@@ -1446,7 +1444,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             inntekter = listOf(
                 grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                 grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-            ), arbeidsforhold = emptyList()
+            )
         )
         a1 {
             håndterSykmelding(januar)
@@ -1569,8 +1567,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntekter = listOf(
                     grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
                     grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             )
         )
     }

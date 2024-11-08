@@ -28,20 +28,6 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
 
     private val inntekterForSykepengegrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSykepengegrunnlag.name}"])
-    private val arbeidsforholdForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
-        .flatMap { måned ->
-            måned["arbeidsforholdliste"]
-                .groupBy({ arbeidsforhold -> arbeidsforhold["orgnummer"].asText() }) { arbeidsforhold ->
-                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
-                        yearMonth = måned["årMåned"].asYearMonth(),
-                        erFrilanser = arbeidsforhold["type"].asText() == "frilanserOppdragstakerHonorarPersonerMm"
-                    )
-                }.toList()
-        }
-        .groupBy({ (orgnummer, _) -> orgnummer }) { (_, arbeidsforhold) -> arbeidsforhold }
-        .map { (orgnummer, arbeidsforhold) ->
-            InntektForSykepengegrunnlag.Arbeidsforhold(orgnummer, arbeidsforhold.flatten())
-        }
 
     private val inntekterForOpptjeningsvurdering = mapSkatteopplysninger(packet["@løsning.${Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering.name}"])
     private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
@@ -89,8 +75,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
                 medlemskapstatus = medlemskapstatus
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforholdForSykepengegrunnlag
+                inntekter = inntekterForSykepengegrunnlag
             ),
             inntekterForOpptjeningsvurdering = no.nav.helse.hendelser.InntekterForOpptjeningsvurdering(inntekter = inntekterForOpptjeningsvurdering),
             arbeidsforhold = arbeidsforhold

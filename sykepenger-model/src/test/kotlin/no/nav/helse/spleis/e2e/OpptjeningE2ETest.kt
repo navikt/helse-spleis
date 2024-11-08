@@ -93,7 +93,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )

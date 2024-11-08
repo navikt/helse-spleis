@@ -155,7 +155,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         }
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektForSykepengegrunnlag, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektForSykepengegrunnlag),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )

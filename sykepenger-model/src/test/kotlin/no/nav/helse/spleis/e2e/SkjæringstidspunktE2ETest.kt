@@ -78,8 +78,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             orgnummer = a1
         )
@@ -113,8 +112,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
                 inntekter = listOf(
                     grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
                     grunnlag(a2, 24.februar, 16000.månedlig.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
+                )
             ),
             orgnummer = a1
         )
@@ -147,8 +145,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
+                inntekter = inntekter
             ),
             orgnummer = a1
         )

@@ -456,7 +456,7 @@ internal class TestPerson(
 
 internal fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     lagStandardSykepengegrunnlag(listOf(orgnummer to inntekt), skjæringstidspunkt)
-internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate, arbeidsforhold: List<InntektForSykepengegrunnlag.Arbeidsforhold> = emptyList()) =
+internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate) =
     InntektForSykepengegrunnlag(
         inntekter = inntektperioderForSykepengegrunnlag {
             val måned = YearMonth.from(skjæringstidspunkt)
@@ -464,8 +464,7 @@ internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Innte
             periode inntekter {
                 arbeidsgivere.forEach { (orgnummer, inntekt) -> orgnummer inntekt inntekt }
             }
-        },
-        arbeidsforhold = arbeidsforhold
+        }
     )
 
 internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
