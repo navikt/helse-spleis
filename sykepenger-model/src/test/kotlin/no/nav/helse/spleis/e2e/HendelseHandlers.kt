@@ -517,6 +517,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             id,
             arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
             vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
             refusjon = refusjon,
             orgnummer = orgnummer,
@@ -546,6 +547,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
 internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
+    førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = ORGNUMMER,
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
@@ -554,18 +556,22 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     arbeidsforholdId: String? = null,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
-) = håndterPortalinntektsmelding(inntektsmeldingPortal(
-    id,
-    arbeidsgiverperioder,
-    beregnetInntekt = beregnetInntekt,
-    vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
-    refusjon = refusjon,
-    orgnummer = orgnummer,
-    harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-    arbeidsforholdId = arbeidsforholdId,
-    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-    harFlereInntektsmeldinger = harFlereInntektsmeldinger
-))
+): UUID {
+    val portalinntektsmelding = inntektsmeldingPortal(
+        id,
+        arbeidsgiverperioder,
+        beregnetInntekt = beregnetInntekt,
+        vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
+        refusjon = refusjon,
+        orgnummer = orgnummer,
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        arbeidsforholdId = arbeidsforholdId,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        førsteFraværsdag = førsteFraværsdag,
+    )
+    return håndterPortalinntektsmelding(portalinntektsmelding)
+}
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}) : UUID {
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {

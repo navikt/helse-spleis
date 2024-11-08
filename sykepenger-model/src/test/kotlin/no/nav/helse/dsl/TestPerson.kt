@@ -254,6 +254,7 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
+                førsteFraværsdag,
                 vedtaksperiodeId,
                 refusjon,
                 harOpphørAvNaturalytelser,

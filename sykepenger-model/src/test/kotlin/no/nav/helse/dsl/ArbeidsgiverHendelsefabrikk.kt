@@ -202,6 +202,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagPortalinntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate?,
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
@@ -210,23 +211,22 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
-    ): Portalinntektsmelding {
-        return Portalinntektsmelding(
-                meldingsreferanseId = id,
-                refusjon = refusjon,
-                orgnummer = organisasjonsnummer,
-                inntektsdato = null,
-                beregnetInntekt = beregnetInntekt,
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                arbeidsforholdId = arbeidsforholdId,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-                vedtaksperiodeId = vedtaksperiodeId,
-                mottatt = mottatt
-            )
-    }
+    ) = Portalinntektsmelding(
+        meldingsreferanseId = id,
+        refusjon = refusjon,
+        orgnummer = organisasjonsnummer,
+        inntektsdato = null,
+        beregnetInntekt = beregnetInntekt,
+        førsteFraværsdag = førsteFraværsdag,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        arbeidsforholdId = arbeidsforholdId,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
+        vedtaksperiodeId = vedtaksperiodeId,
+        mottatt = mottatt
+    )
 
     internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
         InntektsmeldingerReplay(

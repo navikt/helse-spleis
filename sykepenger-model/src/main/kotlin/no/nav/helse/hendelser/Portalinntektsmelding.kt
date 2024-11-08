@@ -18,6 +18,7 @@ class Portalinntektsmelding(
     private val meldingsreferanseId: UUID,
     private val refusjon: Inntektsmelding.Refusjon,
     private val orgnummer: String,
+    private val førsteFraværsdag: LocalDate?, // TODO: Denne skulle vi jo fjerne, men inntil videre brukes den jo dessverre
     private val inntektsdato: LocalDate?, // TODO: Denne kan fjernes på sikt. brukes bare til logging. Hvorfor er den optional når den angivelig alltid settes på portalinntektsmeldinger?
     private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,

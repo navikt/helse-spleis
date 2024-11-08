@@ -525,6 +525,7 @@ internal class InntektsmeldingTest {
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             vedtaksperiodeId = vedtaksperiodeId,
             beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = vedtaksperiodeFom,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
