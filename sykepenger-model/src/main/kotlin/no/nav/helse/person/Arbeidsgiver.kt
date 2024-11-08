@@ -505,10 +505,13 @@ internal class Arbeidsgiver private constructor(
         return inntektsmelding
     }
 
-    internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
+    internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode, harFraNabolaget: Boolean): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)
-        val søkevindu = startdatoPåSammenhengendeVedtaksperioder til vedtaksperiode.periode().endInclusive
         val fraUbrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode())
+
+        // Når vi har migrert inn ubrukte refusjonsopplysninger så skal vi ikke trenge å slå opp i refusjonshistorikken.
+        // Om vi har refusjonsopplysninger fra nabolaget er det kun eventuelle refusjonsopplysninger som starter fra og med perioden som skal brukes.
+        val søkevindu = if (harFraNabolaget) vedtaksperiode.periode() else startdatoPåSammenhengendeVedtaksperioder til vedtaksperiode.periode().endInclusive
         val fraRefusjonshistorikk = refusjonshistorikk.beløpstidslinje(søkevindu).subset(vedtaksperiode.periode())
         return fraRefusjonshistorikk + fraUbrukteRefusjonsopplysninger
     }
