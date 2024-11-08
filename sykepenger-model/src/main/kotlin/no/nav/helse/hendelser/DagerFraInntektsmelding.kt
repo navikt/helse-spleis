@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEll
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.UKJENT
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.ikkeStøttedeBegrunnelserForReduksjon
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.kjenteBegrunnelserForReduksjon
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NAV_NO
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
@@ -36,9 +37,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 internal class DagerFraInntektsmelding(
     private val arbeidsgiverperioder: List<Periode>,
     private val førsteFraværsdag: LocalDate?,
-    private val mottatt: LocalDateTime,
+    mottatt: LocalDateTime,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-    private val avsendersystem: Inntektsmelding.Avsendersystem?,
+    avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean,
     val hendelse: Hendelse
@@ -63,6 +64,9 @@ internal class DagerFraInntektsmelding(
     }
     private val sykdomstidslinje = lagSykdomstidslinje()
     private val opprinneligPeriode = sykdomstidslinje.periode()
+    private val validator =
+        if (avsendersystem == NAV_NO && arbeidsgiverperioder.isEmpty()) EtterspurtPortalinntektsmeldingUtenArbeidsgiverperiode
+        else KlassiskInntektsmelding
 
     private val arbeidsdager = mutableSetOf<LocalDate>()
     private val _gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
@@ -241,20 +245,14 @@ internal class DagerFraInntektsmelding(
 
     internal fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, periode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
         if (!skalValideresAv(periode)) return
-        if (_gjenståendeDager.isNotEmpty()) return validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg, periode, beregnetArbeidsgiverperiode)
+        if (_gjenståendeDager.isNotEmpty()) return validator.validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg, periode, beregnetArbeidsgiverperiode)
         if (beregnetArbeidsgiverperiode != null) validerArbeidsgiverperiode(aktivitetslogg, beregnetArbeidsgiverperiode)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
     }
 
     private fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, arbeidsgiverperiode: Arbeidsgiverperiode) {
         if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
-        if (avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
-        aktivitetslogg.varsel(Varselkode.RV_IM_3)
-    }
-
-    private fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
-        if (avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
-        beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, aktivitetslogg)
+        validator.uenigOmArbeidsgiverperiode(aktivitetslogg)
     }
 
     internal fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
@@ -314,7 +312,7 @@ internal class DagerFraInntektsmelding(
 
     internal class BegrunnelseForReduksjonEllerIkkeUtbetalt {
         companion object {
-            internal val støttedeBegrunnelserForReduksjon = setOf(
+            private val støttedeBegrunnelserForReduksjon = setOf(
                 "LovligFravaer",
                 "ArbeidOpphoert",
                 "ManglerOpptjening",
@@ -356,6 +354,25 @@ internal class DagerFraInntektsmelding(
                     else -> UKJENT
                 }
             }
+        }
+    }
+
+    private sealed interface Validator {
+        fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?)
+        fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg)
+    }
+
+    private data object EtterspurtPortalinntektsmeldingUtenArbeidsgiverperiode: Validator {
+        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {}
+        override fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg) {}
+    }
+
+    private data object KlassiskInntektsmelding: Validator {
+        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
+            beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, aktivitetslogg)
+        }
+        override fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg) {
+            aktivitetslogg.varsel(Varselkode.RV_IM_3)
         }
     }
 }
