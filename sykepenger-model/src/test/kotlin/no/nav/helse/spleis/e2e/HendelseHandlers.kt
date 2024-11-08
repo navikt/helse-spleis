@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
@@ -513,19 +512,21 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
 ): UUID {
     if (avsendersystem == NAV_NO || avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT) {
         requireNotNull(vedtaksperiodeIdInnhenter) { "Portalinntektsmelding må knyttes til en vedtaksperiode" }
-        return håndterPortalinntektsmelding(inntektsmeldingPortal(
-            id,
-            arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
-            vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
-        ))
+        return håndterInntektsmelding(
+            inntektsmeldingPortal(
+                id,
+                arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                førsteFraværsdag = førsteFraværsdag,
+                vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
+                refusjon = refusjon,
+                orgnummer = orgnummer,
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+                arbeidsforholdId = arbeidsforholdId,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            )
+        )
     }
     return håndterInntektsmelding(
         inntektsmelding(
@@ -570,7 +571,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         førsteFraværsdag = førsteFraværsdag,
     )
-    return håndterPortalinntektsmelding(portalinntektsmelding)
+    return håndterInntektsmelding(portalinntektsmelding)
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}) : UUID {
@@ -579,11 +580,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Innte
         førReplay()
     }
     return inntektsmelding.metadata.meldingsreferanseId
-}
-
-internal fun AbstractEndToEndTest.håndterPortalinntektsmelding(portalinntektsmelding: Portalinntektsmelding) : UUID {
-    portalinntektsmelding.håndter(Person::håndter)
-    return portalinntektsmelding.metadata.meldingsreferanseId
 }
 
 internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =

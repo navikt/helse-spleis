@@ -26,7 +26,6 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
@@ -219,7 +218,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     arbeidsforholdId: String? = null,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false
-): Portalinntektsmelding {
+): Inntektsmelding {
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
         id = id,

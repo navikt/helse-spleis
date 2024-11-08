@@ -472,7 +472,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
-        inntektsmeldingPortal(listOf(2.januar til 17.januar), vedtaksperiodeFom = 1.januar, skjæringstidspunkt = 1.januar)
+        inntektsmeldingPortal(listOf(2.januar til 17.januar), førsteFraværsdag = 1.januar)
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
@@ -480,7 +480,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
-        inntektsmeldingPortal(emptyList(), vedtaksperiodeFom = 1.januar, skjæringstidspunkt = 1.januar)
+        inntektsmeldingPortal(emptyList(), førsteFraværsdag = 1.januar)
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertIngenVarsel(RV_IM_3)
@@ -517,19 +517,18 @@ internal class InntektsmeldingTest {
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        vedtaksperiodeFom: LocalDate,
-        skjæringstidspunkt: LocalDate
+        førsteFraværsdag: LocalDate?
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             vedtaksperiodeId = vedtaksperiodeId,
             beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = vedtaksperiodeFom,
+            førsteFraværsdag = førsteFraværsdag,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
-        ).somInntektsmelding(vedtaksperiodeFom, skjæringstidspunkt)
+        )
         dager = inntektsmelding.dager()
     }
 }

@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
@@ -211,13 +210,13 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
-    ) = Portalinntektsmelding(
+    ) = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = organisasjonsnummer,
-        inntektsdato = null,
-        beregnetInntekt = beregnetInntekt,
         førsteFraværsdag = førsteFraværsdag,
+        inntektsdato = førsteFraværsdag ?: arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.EPOCH,
+        beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

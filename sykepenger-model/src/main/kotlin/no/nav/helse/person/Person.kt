@@ -214,7 +214,8 @@ class Person private constructor(
         håndterGjenoppta(inntektsmelding, aktivitetslogg)
     }
 
-    fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg) {
+    @Suppress("unused")
+    private fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler portalinntektsmelding")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(portalinntektsmelding.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(portalinntektsmelding, aktivitetslogg)?.let {
