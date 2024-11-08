@@ -72,7 +72,7 @@ internal object Api {
                             identer.fødselsnummer to identer.aktørId
                         } catch (err: Exception) {
                             if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
-                                ident to "aktør_id_ikke_satt_i_dev"
+                                ident to "0000000000000"
                             } else {
                                 throw err
                             }
