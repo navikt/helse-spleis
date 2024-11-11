@@ -239,7 +239,7 @@ class Inntektsmelding(
         fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
         fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate
         fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
-        fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate?
+        fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate
     }
 
     private data object KlassiskInntektsmelding: Type {
@@ -253,7 +253,10 @@ class Inntektsmelding(
         }
         override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = inntektsmelding.beregnetInntektsdato
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdatoForInntekthistorikk(inntektsmelding) }
-        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = inntektsmelding.førsteFraværsdag
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate {
+            return if (inntektsmelding.førsteFraværsdag == null) inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
+            else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(inntektsmelding.førsteFraværsdag).max()
+        }
     }
 
     private data object ForkastetPortalinntetksmelding: Type {

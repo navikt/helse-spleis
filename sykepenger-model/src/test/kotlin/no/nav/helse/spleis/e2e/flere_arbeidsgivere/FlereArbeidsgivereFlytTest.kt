@@ -220,7 +220,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         forlengVedtak(februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
