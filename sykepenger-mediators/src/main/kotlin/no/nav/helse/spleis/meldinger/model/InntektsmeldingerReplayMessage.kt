@@ -55,8 +55,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
                 )
             }
         )
-        val arbeidsforholdId = packet.path("arbeidsforholdId").takeIf(JsonNode::isTextual)?.asText()
-        val vedtaksperiodeId = packet.path("vedtaksperiodeId").takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
         val orgnummer = packet.path("virksomhetsnummer").asText()
         val mottatt = packet.path("mottattDato").asLocalDateTime()
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
@@ -65,22 +63,21 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
         val harOpphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").size() > 0
         val harFlereInntektsmeldinger = packet.path("harFlereInntektsmeldinger").asBoolean(false)
-        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem()
-        val inntektsdato = packet.path("inntektsdato").asOptionalLocalDate()
+        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem(null, null) // Vi skal ikke replaye portalIM så om det feiler her er noe gæli
 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,
             refusjon = refusjon,
             orgnummer = orgnummer,
             førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = inntektsdato,
+            inntektsdato = null, // PortalIM skal ikke replayes
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = null, // PortalIM skal ikke replayes
             mottatt = mottatt
         )
     }

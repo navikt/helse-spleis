@@ -13,8 +13,8 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.NAV_NO
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode

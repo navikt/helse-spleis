@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag

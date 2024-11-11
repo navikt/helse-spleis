@@ -87,13 +87,14 @@ internal class RestApiTest {
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
+        val vedtaksperiodeId = UUID.randomUUID()
         val sykmelding = Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = vedtaksperiodeId,
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder
         )
         val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = vedtaksperiodeId,
             refusjon = Inntektsmelding.Refusjon(
                 beløp = 12000.månedlig,
                 opphørsdato = null
@@ -105,8 +106,8 @@ internal class RestApiTest {
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
-            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-            vedtaksperiodeId = UUID.randomUUID(),
+            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO(vedtaksperiodeId, LocalDate.EPOCH),
+            vedtaksperiodeId = vedtaksperiodeId,
             mottatt = LocalDateTime.now()
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)

@@ -5,7 +5,7 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode

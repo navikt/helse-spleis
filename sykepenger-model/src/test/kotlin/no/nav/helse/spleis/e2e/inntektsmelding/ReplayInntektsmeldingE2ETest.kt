@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -78,7 +78,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() {
         nyttVedtak(mars)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT + 500.daglig, avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT + 500.daglig, avsendersystem = ALTINN)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
@@ -93,7 +93,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, TilstandType.AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = ALTINN)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

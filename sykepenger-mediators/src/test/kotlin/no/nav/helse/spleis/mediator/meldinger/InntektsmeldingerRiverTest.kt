@@ -50,7 +50,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now(),
         naerRelasjon = null,
-        avsenderSystem = AvsenderSystem("NAV_NO", "1.0"),
+        avsenderSystem = AvsenderSystem("LPS", "1.0"),
         innsenderFulltNavn = "SPLEIS MEDIATOR",
         innsenderTelefon = "tlfnr"
     ).asObjectNode()

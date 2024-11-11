@@ -9,7 +9,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje

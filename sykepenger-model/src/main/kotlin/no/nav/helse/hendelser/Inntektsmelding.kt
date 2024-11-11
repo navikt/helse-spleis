@@ -181,11 +181,11 @@ class Inntektsmelding(
 
     }
 
-    enum class Avsendersystem {
-        NAV_NO,
-        NAV_NO_SELVBESTEMT,
-        ALTINN,
-        LPS
+    sealed interface Avsendersystem {
+        data object ALTINN: Avsendersystem
+        data object LPS: Avsendersystem
+        data class NAV_NO(private val vedtaksperiodeId: UUID, private val inntektsdato: LocalDate): Avsendersystem
+        data class NAV_NO_SELVBESTEMT(private val vedtaksperiodeId: UUID, private val inntektsdato: LocalDate): Avsendersystem
     }
 
     class Refusjon(
@@ -280,7 +280,7 @@ class Inntektsmelding(
         return beregnetInntektsdato in sykdomstidslinjeperiode
     }
 
-    private fun erPortalinntektsmelding() = avsendersystem == Avsendersystem.NAV_NO || avsendersystem == Avsendersystem.NAV_NO_SELVBESTEMT
+    private fun erPortalinntektsmelding() = avsendersystem is Avsendersystem.NAV_NO || avsendersystem is Avsendersystem.NAV_NO_SELVBESTEMT
     internal fun validerPortalinntektsmelding(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg) {
         if (!erPortalinntektsmelding()) return
 

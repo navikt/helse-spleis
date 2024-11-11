@@ -9,7 +9,7 @@ import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode

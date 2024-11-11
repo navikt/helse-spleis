@@ -65,7 +65,7 @@ internal class DagerFraInntektsmelding(
     private val sykdomstidslinje = lagSykdomstidslinje()
     private val opprinneligPeriode = sykdomstidslinje.periode()
     private val validator =
-        if (avsendersystem == NAV_NO && arbeidsgiverperioder.isEmpty()) EtterspurtPortalinntektsmeldingUtenArbeidsgiverperiode
+        if (avsendersystem is NAV_NO && arbeidsgiverperioder.isEmpty()) EtterspurtPortalinntektsmeldingUtenArbeidsgiverperiode
         else KlassiskInntektsmelding
 
     private val arbeidsdager = mutableSetOf<LocalDate>()

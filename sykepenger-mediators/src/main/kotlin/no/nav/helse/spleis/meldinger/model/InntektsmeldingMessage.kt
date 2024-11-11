@@ -9,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import java.time.LocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
@@ -30,11 +31,10 @@ internal open class InntektsmeldingMessage(
             )
         }
     )
-    private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
     private val orgnummer = packet["virksomhetsnummer"].asText()
 
-    protected val mottatt = packet["mottattDato"].asLocalDateTime()
+    private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
@@ -42,8 +42,8 @@ internal open class InntektsmeldingMessage(
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-    private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem()
     private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
+    private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato)
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -67,11 +67,11 @@ internal open class InntektsmeldingMessage(
     }
 
     internal companion object {
-        internal fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem {
+        internal fun JsonNode.tilAvsendersystem(vedtaksperiodeId: UUID?, inntektsdato: LocalDate?): Inntektsmelding.Avsendersystem {
             val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS
             return when (navn) {
-                "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
-                "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT
+                "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO(checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO skal ha vedtaksperiodeId " }, checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO skal ha inntektsdato " })
+                "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT(checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha vedtaksperiodeId "}, checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha inntektsdato " })
                 "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
                 else -> Inntektsmelding.Avsendersystem.LPS
             }

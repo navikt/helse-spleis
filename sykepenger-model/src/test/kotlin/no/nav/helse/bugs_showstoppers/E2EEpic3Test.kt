@@ -6,7 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
