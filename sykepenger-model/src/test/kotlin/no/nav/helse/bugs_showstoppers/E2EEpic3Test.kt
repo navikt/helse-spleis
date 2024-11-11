@@ -820,7 +820,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(9.juli, 31.juli))
         håndterSøknad(Sykdom(9.juli, 31.juli, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 9.juli)
+        håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 9.juli, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         inspektør.also {
             assertEquals(Periode(1.juni, 30.juni), it.vedtaksperioder(1.vedtaksperiode).periode)
