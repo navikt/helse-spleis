@@ -19,7 +19,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.finn
-import no.nav.helse.person.Vedtaksperiode.Companion.finnSkjæringstidspunktFor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -39,7 +38,6 @@ class Inntektsmelding(
     private val refusjon: Refusjon,
     private val orgnummer: String,
     private val førsteFraværsdag: LocalDate?,
-    private val inntektsdato: LocalDate?,
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
@@ -54,10 +52,6 @@ class Inntektsmelding(
             if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
             return arbeidsgiverperioder.maxOf { it.start }
         }
-
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val logger = LoggerFactory.getLogger(Inntektsmelding::class.java)
-
     }
 
     init {
@@ -96,24 +90,11 @@ class Inntektsmelding(
         aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg, vedtaksperioder: List<Vedtaksperiode>): LocalDate {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
         subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
-        if (erPortalinntektsmelding()) {
-            requireNotNull(vedtaksperiodeId) { "En portalinntektsmelding må oppgi vedtaksperiodeId-en den skal gjelde for" }
-            val skjæringstidspunkt = vedtaksperioder.finnSkjæringstidspunktFor(vedtaksperiodeId) ?: return beregnetInntektsdato // TODO tenk litt mer på dette
-            if (skjæringstidspunkt != inntektsdato) {
-                "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
-                    .let {
-                        logger.info(it)
-                        sikkerlogg.info(it)
-                    }
-            }
-            inntektshistorikk.leggTil(InntektsmeldingInntekt(skjæringstidspunkt, metadata.meldingsreferanseId, beregnetInntekt))
-            return skjæringstidspunkt
-        }
-
-        inntektshistorikk.leggTil(InntektsmeldingInntekt(beregnetInntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
-        return beregnetInntektsdato
+        val inntektsdato = type.inntektsdatoForInntekthistorikk(this)
+        inntektshistorikk.leggTil(InntektsmeldingInntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
+        return inntektsdato
     }
 
     private val refusjonsElement = Refusjonshistorikk.Refusjon(
@@ -273,8 +254,8 @@ class Inntektsmelding(
         this.type = when (avsendersystem) {
             Avsendersystem.ALTINN,
             Avsendersystem.LPS -> KlassiskInntektsmelding
-            is Avsendersystem.NAV_NO -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it) } ?: ForkastetPortalinntetksmelding
-            is Avsendersystem.NAV_NO_SELVBESTEMT -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it) } ?: ForkastetPortalinntetksmelding
+            is Avsendersystem.NAV_NO -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
+            is Avsendersystem.NAV_NO_SELVBESTEMT -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
         }
         return this.type.entering(this, aktivitetslogg, person, vedtaksperioder)
     }
@@ -282,6 +263,7 @@ class Inntektsmelding(
     private sealed interface Type {
         fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, vedtaksperioder: List<Vedtaksperiode>): Boolean
         fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
+        fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate
     }
 
     private data object KlassiskInntektsmelding: Type {
@@ -293,6 +275,7 @@ class Inntektsmelding(
             if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
             return inntektsmelding.beregnetInntektsdato in sykdomstidslinjeperiode
         }
+        override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = inntektsmelding.beregnetInntektsdato
     }
 
     private data object ForkastetPortalinntetksmelding: Type {
@@ -303,13 +286,30 @@ class Inntektsmelding(
             return false
         }
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
+        override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
-    private data class Portalinntetksmelding(private val vedtaksperiode: Vedtaksperiode) : Type {
+    private data class Portalinntetksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Type {
         override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, vedtaksperioder: List<Vedtaksperiode>): Boolean {
             aktivitetslogg.info("Håndterer en portalinntektsmelding")
             return true
         }
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
+        override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate {
+            val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
+            if (skjæringstidspunkt != inntektsdato) {
+                "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${inntektsmelding.metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
+                    .let {
+                        logger.info(it)
+                        sikkerlogg.info(it)
+                    }
+            }
+            return skjæringstidspunkt
+        }
+
+        private companion object {
+            private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+            private val logger = LoggerFactory.getLogger(Portalinntetksmelding::class.java)
+        }
     }
 }

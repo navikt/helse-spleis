@@ -51,7 +51,6 @@ internal open class InntektsmeldingMessage(
             refusjon = refusjon,
             orgnummer = orgnummer,
             førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = inntektsdato,
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

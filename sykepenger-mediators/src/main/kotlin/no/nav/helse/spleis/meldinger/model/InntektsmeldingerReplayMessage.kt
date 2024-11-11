@@ -70,7 +70,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
             refusjon = refusjon,
             orgnummer = orgnummer,
             førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = null, // PortalIM skal ikke replayes
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

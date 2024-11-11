@@ -130,7 +130,6 @@ internal abstract class AbstractObservableTest {
         refusjon = refusjon,
         orgnummer = orgnummer,
         førsteFraværsdag = førsteFraværsdag,
-        inntektsdato = null,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
