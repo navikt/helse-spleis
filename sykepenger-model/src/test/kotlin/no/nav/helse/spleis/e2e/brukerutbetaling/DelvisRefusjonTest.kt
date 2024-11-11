@@ -24,12 +24,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -687,7 +685,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT)
             ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
         )
-        assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 

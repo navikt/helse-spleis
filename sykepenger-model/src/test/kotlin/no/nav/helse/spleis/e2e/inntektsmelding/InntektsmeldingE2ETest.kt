@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -54,7 +55,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -1534,9 +1534,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
@@ -1555,9 +1553,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_2, 3.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1609,14 +1605,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), 4.januar)
-        assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -1877,7 +1865,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertEquals(1.januar til 31.mars, inspektør.sisteUtbetaling().periode)

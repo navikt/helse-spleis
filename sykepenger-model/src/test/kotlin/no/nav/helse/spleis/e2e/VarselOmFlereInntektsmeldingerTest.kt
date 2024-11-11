@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -63,12 +62,10 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
             nå = {
                 assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
                 assertIngenVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-                assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
             },
             ønsket = {
                 assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
                 assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-                assertVarsel(RV_IM_2, 2.vedtaksperiode.filter())
             }
         )
     }
