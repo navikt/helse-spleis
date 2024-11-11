@@ -61,7 +61,6 @@ class Portalinntektsmelding(
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         avsendersystem = avsendersystem,
-        vedtaksperiodeId = vedtaksperiodeId,
         mottatt = mottatt
     )
 

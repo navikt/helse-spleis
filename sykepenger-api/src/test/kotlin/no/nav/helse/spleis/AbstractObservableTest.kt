@@ -136,7 +136,6 @@ internal abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         avsendersystem = avsendersystem,
-        vedtaksperiodeId = vedtaksperiodeId,
         mottatt = LocalDateTime.now()
     )
 

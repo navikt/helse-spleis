@@ -76,7 +76,6 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
-            vedtaksperiodeId = null, // PortalIM skal ikke replayes
             mottatt = mottatt
         )
     }

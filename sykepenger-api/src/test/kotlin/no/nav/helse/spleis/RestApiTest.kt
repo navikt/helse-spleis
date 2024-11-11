@@ -105,8 +105,8 @@ internal class RestApiTest {
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
+            harOpphørAvNaturalytelser = false,
             avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO(vedtaksperiodeId, LocalDate.EPOCH),
-            vedtaksperiodeId = vedtaksperiodeId,
             mottatt = LocalDateTime.now()
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)

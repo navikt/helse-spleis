@@ -57,7 +57,6 @@ internal open class InntektsmeldingMessage(
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
-            vedtaksperiodeId = vedtaksperiodeId,
             mottatt = mottatt
         )
 

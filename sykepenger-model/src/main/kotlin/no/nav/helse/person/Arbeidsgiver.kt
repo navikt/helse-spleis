@@ -848,7 +848,7 @@ internal class Arbeidsgiver private constructor(
     internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) = finnSammenhengendeVedtaksperioder(vedtaksperiode).periode().start
 
     private fun addInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, overstyring: Revurderingseventyr?) {
-        inntektsmelding.leggTilRefusjon(refusjonshistorikk, vedtaksperioder)
+        inntektsmelding.leggTilRefusjon(refusjonshistorikk)
 
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)

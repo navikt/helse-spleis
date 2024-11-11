@@ -156,7 +156,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = Inntektsmelding.Avsendersystem.LPS,
-                vedtaksperiodeId = null,
                 mottatt = mottatt
             )
         }
@@ -219,7 +218,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO(vedtaksperiodeId, førsteFraværsdag ?: arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.EPOCH),
-        vedtaksperiodeId = vedtaksperiodeId,
         mottatt = mottatt
     )
 
