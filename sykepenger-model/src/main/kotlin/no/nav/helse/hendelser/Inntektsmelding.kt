@@ -96,9 +96,9 @@ class Inntektsmelding(
         return inntektsdato
     }
 
-    private val refusjonsElement = Refusjonshistorikk.Refusjon(
+    private val refusjonsElement get() = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = metadata.meldingsreferanseId,
-        førsteFraværsdag = førsteFraværsdag,
+        førsteFraværsdag = type.refusjonsdato(this),
         arbeidsgiverperioder = arbeidsgiverperioder,
         beløp = refusjon.beløp,
         sisteRefusjonsdag = refusjon.opphørsdato,
@@ -106,18 +106,10 @@ class Inntektsmelding(
         tidsstempel = metadata.registrert
     )
 
-    internal val refusjonsservitør = Refusjonsservitør.fra(refusjon.refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt))
+    internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(type.refusjonsdato(this), arbeidsgiverperioder, metadata.meldingsreferanseId, metadata.innsendt))
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
-        refusjonshistorikk.leggTilRefusjon(Refusjonshistorikk.Refusjon(
-            meldingsreferanseId = metadata.meldingsreferanseId,
-            førsteFraværsdag = type.refusjonsdatoForRefusjonshistorikk(this),
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beløp = refusjon.beløp,
-            sisteRefusjonsdag = refusjon.opphørsdato,
-            endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
-            tidsstempel = metadata.registrert
-        ))
+        refusjonshistorikk.leggTilRefusjon(refusjonsElement)
     }
 
     internal fun leggTil(behandlinger: Behandlinger): Boolean {
@@ -247,7 +239,7 @@ class Inntektsmelding(
         fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
         fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate
         fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
-        fun refusjonsdatoForRefusjonshistorikk(inntektsmelding: Inntektsmelding): LocalDate?
+        fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate?
     }
 
     private data object KlassiskInntektsmelding: Type {
@@ -261,7 +253,7 @@ class Inntektsmelding(
         }
         override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = inntektsmelding.beregnetInntektsdato
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdatoForInntekthistorikk(inntektsmelding) }
-        override fun refusjonsdatoForRefusjonshistorikk(inntektsmelding: Inntektsmelding) = inntektsmelding.førsteFraværsdag
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = inntektsmelding.førsteFraværsdag
     }
 
     private data object ForkastetPortalinntetksmelding: Type {
@@ -274,7 +266,7 @@ class Inntektsmelding(
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun refusjonsdatoForRefusjonshistorikk(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
     private data class Portalinntetksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Type {
@@ -295,7 +287,7 @@ class Inntektsmelding(
             return skjæringstidspunkt
         }
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
-        override fun refusjonsdatoForRefusjonshistorikk(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.skjæringstidspunkt // Ikke spør meg hvorfor den elvis'en er der, jeg bare flyttet kode jeg 👀
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.skjæringstidspunkt // Ikke spør meg hvorfor den elvis'en er der, jeg bare flyttet kode jeg 👀
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
             private val logger = LoggerFactory.getLogger(Portalinntetksmelding::class.java)

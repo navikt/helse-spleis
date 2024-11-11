@@ -10,7 +10,3 @@ object Avsendersystemer {
     val LPS: (vedtaksperiodeId: UUID, inntektsdato: LocalDate) -> Inntektsmelding.Avsendersystem = { _,_ -> Inntektsmelding.Avsendersystem.LPS }
     val ALTINN: (vedtaksperiodeId: UUID, inntektsdato: LocalDate) -> Inntektsmelding.Avsendersystem = { _,_ ->  Inntektsmelding.Avsendersystem.ALTINN }
 }
-
-fun main() {
-    Avsendersystemer.NAV_NO
-}

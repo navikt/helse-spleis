@@ -311,7 +311,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterYtelserTilGodkjenning()
         håndterInntektsmeldingUtenRefusjon(
             listOf(1.januar til 16.januar),
-            inntektdato = 1.februar
+            førsteFraværsdag = 1.februar
         )
         håndterYtelserTilGodkjent()
         håndterYtelserTilGodkjenning()

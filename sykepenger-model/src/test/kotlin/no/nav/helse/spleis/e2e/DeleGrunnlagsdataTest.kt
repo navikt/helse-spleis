@@ -2,8 +2,11 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -20,6 +23,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -107,7 +111,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(18.januar, 1.februar)),
             førsteFraværsdag = 4.mars,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            avsendersystem = ALTINN
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
