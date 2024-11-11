@@ -68,8 +68,8 @@ internal open class InntektsmeldingMessage(
     }
 
     internal companion object {
-        internal fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem? {
-            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return null
+        internal fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem {
+            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS
             return when (navn) {
                 "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
                 "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT

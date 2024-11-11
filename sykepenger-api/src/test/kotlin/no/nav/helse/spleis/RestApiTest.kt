@@ -106,7 +106,7 @@ internal class RestApiTest {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
-            avsendersystem = null,
+            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
             vedtaksperiodeId = UUID.randomUUID(),
             mottatt = LocalDateTime.now()
         )

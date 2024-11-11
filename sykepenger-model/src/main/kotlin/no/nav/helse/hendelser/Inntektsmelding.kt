@@ -48,7 +48,7 @@ class Inntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
-    private val avsendersystem: Avsendersystem?,
+    private val avsendersystem: Avsendersystem,
     private val vedtaksperiodeId: UUID?,
     mottatt: LocalDateTime
 ) : Hendelse {

@@ -124,7 +124,7 @@ internal abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         harFlereInntektsmeldinger: Boolean = false,
-        avsendersystem: Inntektsmelding.Avsendersystem? = null
+        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.LPS
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,

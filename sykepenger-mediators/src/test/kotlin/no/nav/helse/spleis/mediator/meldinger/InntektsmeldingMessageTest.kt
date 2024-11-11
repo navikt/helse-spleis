@@ -14,10 +14,10 @@ internal class InntektsmeldingMessageTest {
 
     @Test
     fun `mapper avsendersystem fra json`() {
-        assertNull(objectMapper.nullNode().tilAvsendersystem())
-        assertNull(objectMapper.missingNode().tilAvsendersystem())
-        assertNull(objectMapper.readTree(mangler).tilAvsendersystem())
-        assertNull(objectMapper.readTree(sattTilNull).tilAvsendersystem())
+        assertEquals(LPS,  objectMapper.nullNode().tilAvsendersystem())
+        assertEquals(LPS, objectMapper.missingNode().tilAvsendersystem())
+        assertEquals(LPS, objectMapper.readTree(mangler).tilAvsendersystem())
+        assertEquals(LPS, objectMapper.readTree(sattTilNull).tilAvsendersystem())
         assertEquals(NAV_NO, objectMapper.readTree(navNo).tilAvsendersystem())
         assertEquals(NAV_NO_SELVBESTEMT, objectMapper.readTree(navNoSelvbestemt).tilAvsendersystem())
         assertEquals(ALTINN, objectMapper.readTree(altinn).tilAvsendersystem())
