@@ -467,15 +467,12 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID? = null) {
         aktivitetslogg.kontekst(this)
         if (vedtaksperiodeIdForReplay != null) aktivitetslogg.info("Replayer inntektsmelding.")
-        inntektsmelding.validerPortalinntektsmelding(vedtaksperioder, aktivitetslogg)
+
+        if (!inntektsmelding.valider(vedtaksperioder, aktivitetslogg, person)) return
         val dager = inntektsmelding.dager()
-
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
-            aktivitetslogg.info("Inntektsmelding ikke håndtert")
-            return person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
-        }
-
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
+        if (!inntektsmelding.valider(vedtaksperioder, aktivitetslogg, person)) return
+
         if (vedtaksperiodeIdForReplay == null) håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
 
         val dagoverstyring = dager.revurderingseventyr()
@@ -858,7 +855,7 @@ internal class Arbeidsgiver private constructor(
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
         val skjæringstidspunkt = person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato.somPeriode())
 
-        if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(aktivitetslogg, sykdomstidslinjeperiode, forkastede)) {
+        if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
             aktivitetslogg.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
             if (overstyring == null) return
             return person.igangsettOverstyring(overstyring, aktivitetslogg)
