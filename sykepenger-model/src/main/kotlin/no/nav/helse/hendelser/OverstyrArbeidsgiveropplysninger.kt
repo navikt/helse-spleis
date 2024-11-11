@@ -8,8 +8,11 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrTilkommendeInntekter
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.refusjon.Refusjonsservitør
 
 class OverstyrArbeidsgiveropplysninger(
@@ -32,6 +35,11 @@ class OverstyrArbeidsgiveropplysninger(
 
     internal fun overstyr(builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
+    }
+
+    internal fun overstyr(nyInntektUnderveis: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
+        val kilde = Kilde(metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, metadata.registrert)
+        return arbeidsgiveropplysninger.overstyrTilkommendeInntekter(nyInntektUnderveis, skjæringstidspunkt, kilde)
     }
 
     internal fun arbeidsgiveropplysningerKorrigert(person: Person, orgnummer: String, hendelseId: UUID) {

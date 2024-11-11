@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
@@ -77,6 +78,138 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     }
 
     @Test
+    fun `overstyrer tilkommen inntekt`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+            håndterUtbetalt()
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 1231, 1431, subset = 1.februar til 28.februar)
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                assertEquals(1, tilkommendeInntekter.size)
+                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+            }
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a2,
+                        250.daglig,
+                        forklaring = "forklaring",
+                        gjelder = 1.februar til 28.februar
+                    )
+                )
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+            håndterYtelser(2.vedtaksperiode)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 1181, 1431, subset = 1.februar til 28.februar)
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                assertEquals(1, tilkommendeInntekter.size)
+                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+                assertEquals(250.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+            }
+        }
+    }
+
+    @Test
+    fun `overstyrer seneste tilkommen inntekt`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+            håndterUtbetalt()
+            håndterSøknad(
+                Sykdom(1.mars, 31.mars, 100.prosent),
+                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
+                )
+            )
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
+            håndterUtbetalt()
+            inspektør.vilkårsgrunnlag(3.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                assertEquals(1, tilkommendeInntekter.size)
+                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.mars])
+                assertEquals(363.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
+            }
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a2,
+                        400.daglig,
+                        forklaring = "forklaring",
+                        gjelder = 1.mars til 31.mars
+                    )
+                )
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+            inspektør.vilkårsgrunnlag(3.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                assertEquals(1, tilkommendeInntekter.size)
+                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.mars])
+                assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
+            }
+        }
+    }
+
+    @Test
+    fun `overstyre inn tilkommen inntekt fra blanke ark`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a2,
+                        400.daglig,
+                        forklaring = "forklaring",
+                        gjelder = 1.januar til 31.januar
+                    )
+                )
+            )
+            assertForventetFeil(
+                forklaring = "Tilkommen inntekt kan dukke opp om informasjonen er tilgjengelig for saxbehandler senere enn når søknaden blir sendt",
+                nå = {
+                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                        assertEquals(0, tilkommendeInntekter.size)
+                    }
+                },
+                ønsket = {
+                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
+                        assertEquals(1, tilkommendeInntekter.size)
+                        assertEquals(a2, tilkommendeInntekter.single().orgnummer)
+                        assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[1.januar].beløp)
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
     fun `syk fra ghost etter periode med tilkommet inntekt`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -120,7 +253,6 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     }
                 },
                 ønsket = {
-
                     inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
                         assertEquals(1, tilkommendeInntekter.size)
                         assertEquals(a3, tilkommendeInntekter.single().orgnummer)

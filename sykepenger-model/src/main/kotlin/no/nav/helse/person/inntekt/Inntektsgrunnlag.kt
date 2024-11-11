@@ -50,7 +50,9 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.overstyr
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -265,8 +267,9 @@ internal class Inntektsgrunnlag private constructor(
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
         hendelse.overstyr(builder)
         val resultat = builder.resultat()
+        val overstyrtTilkommenInntekt = tilkommendeInntekter.overstyr(hendelse)
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
-        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, overstyrtTilkommenInntekt, subsumsjonslogg)
     }
 
     internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, nyttSkjæringstidspunkt: LocalDate?): Inntektsgrunnlag? {
@@ -290,7 +293,12 @@ internal class Inntektsgrunnlag private constructor(
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
         hendelse.overstyr(builder)
         val resultat = builder.resultat()
-        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(
+            resultat,
+            deaktiverteArbeidsforhold,
+            tilkommendeInntekter,
+            subsumsjonslogg
+        )
     }
 
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
@@ -314,15 +322,21 @@ internal class Inntektsgrunnlag private constructor(
         arbeidsgiverInntektsopplysninger
             .finn(inntektsmelding.behandlingsporing.organisasjonsnummer)
             ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
-        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(
+            resultat,
+            deaktiverteArbeidsforhold,
+            tilkommendeInntekter,
+            subsumsjonslogg
+        )
     }
 
     private fun kopierSykepengegrunnlagOgValiderMinsteinntekt(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
+        tilkommendeInntekter: List<NyInntektUnderveis>,
         subsumsjonslogg: Subsumsjonslogg
     ): Inntektsgrunnlag {
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
+        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = tilkommendeInntekter).apply {
            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
         }
     }
@@ -393,7 +407,9 @@ internal class Inntektsgrunnlag private constructor(
         check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
             "Skal bare sammenlikne med samme skjæringstidspunkt"
         }
-        return arbeidsgiverInntektsopplysninger.finnEndringsdato(this.skjæringstidspunkt, other.arbeidsgiverInntektsopplysninger)
+        return arbeidsgiverInntektsopplysninger.finnEndringsdato(other.arbeidsgiverInntektsopplysninger)
+            ?: tilkommendeInntekter.finnEndringsdato(other.tilkommendeInntekter)
+            ?: skjæringstidspunkt
     }
 
     fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =

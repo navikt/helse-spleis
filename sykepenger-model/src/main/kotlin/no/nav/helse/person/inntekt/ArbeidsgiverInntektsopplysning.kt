@@ -15,9 +15,14 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpsdag
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.erRelevantForOverstyring
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
@@ -59,6 +64,12 @@ data class ArbeidsgiverInntektsopplysning(
     private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
         val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
         return overstyring.overstyrer(this)
+    }
+
+    private fun medBeløpstidslinje(kilde: Kilde): NyInntektUnderveis {
+        return NyInntektUnderveis(orgnummer = this.orgnummer, beløpstidslinje = Beløpstidslinje(gjelder.map {
+            Beløpsdag(it, inntektsopplysning.beløp, kilde)
+        }))
     }
 
     private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
@@ -149,6 +160,18 @@ data class ArbeidsgiverInntektsopplysning(
             return endringen
         }
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrTilkommendeInntekter(
+            nyInntektUnderveis: List<NyInntektUnderveis>,
+            skjæringstidspunkt: LocalDate,
+            kilde: Kilde
+        ): List<NyInntektUnderveis> {
+            val somBeløpstidslinjer = this.mapNotNull { inntekt ->
+                if (!nyInntektUnderveis.erRelevantForOverstyring(skjæringstidspunkt, inntekt.gjelder)) null
+                else inntekt.medBeløpstidslinje(kilde)
+            }
+            return nyInntektUnderveis.merge(somBeløpstidslinjer)
+        }
+
         private fun erOmregnetÅrsinntektEndret(skjæringstidspunkt: LocalDate, før: List<ArbeidsgiverInntektsopplysning>, etter: List<ArbeidsgiverInntektsopplysning>): Boolean {
             return Inntektsopplysning.erOmregnetÅrsinntektEndret(omregnetÅrsinntekter(skjæringstidspunkt, før), omregnetÅrsinntekter(skjæringstidspunkt, etter))
         }
@@ -231,9 +254,8 @@ data class ArbeidsgiverInntektsopplysning(
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc, skjæringstidspunkt) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.finnEndringsdato(
-            skjæringstidspunkt: LocalDate,
             other: List<ArbeidsgiverInntektsopplysning>
-        ): LocalDate {
+        ): LocalDate? {
             val endringsDatoer = this.mapNotNull { ny ->
                 val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
                 when {
@@ -242,7 +264,7 @@ data class ArbeidsgiverInntektsopplysning(
                     else -> ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
                 }
             }
-            return endringsDatoer.minOrNull() ?: skjæringstidspunkt
+            return endringsDatoer.minOrNull()
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
