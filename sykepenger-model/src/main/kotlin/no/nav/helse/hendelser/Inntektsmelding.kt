@@ -46,12 +46,6 @@ class Inntektsmelding(
     private val avsendersystem: Avsendersystem,
     mottatt: LocalDateTime
 ) : Hendelse {
-    companion object {
-        private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
-            if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
-            return arbeidsgiverperioder.maxOf { it.start }
-        }
-    }
 
     init {
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) error("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
@@ -80,7 +74,6 @@ class Inntektsmelding(
         hendelse = this
     )
     private var håndtertInntekt = false
-    private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
@@ -91,7 +84,7 @@ class Inntektsmelding(
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
         subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
-        val inntektsdato = type.inntektsdatoForInntekthistorikk(this)
+        val inntektsdato = type.inntektsdato(this)
         inntektshistorikk.leggTil(InntektsmeldingInntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
         return inntektsdato
     }
@@ -123,13 +116,13 @@ class Inntektsmelding(
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
-        val startskudd = if (builder.ingenRefusjonsopplysninger(behandlingsporing.organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
+        val startskudd = if (builder.ingenRefusjonsopplysninger(behandlingsporing.organisasjonsnummer)) skjæringstidspunkt else type.refusjonsdato(this)
         val inntektGjelder = skjæringstidspunkt til LocalDate.MAX
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 behandlingsporing.organisasjonsnummer,
                 inntektGjelder,
-                InntektsmeldingInntekt(beregnetInntektsdato, metadata.meldingsreferanseId, beregnetInntekt),
+                InntektsmeldingInntekt(type.inntektsdato(this), metadata.meldingsreferanseId, beregnetInntekt),
                 refusjonshistorikk.refusjonsopplysninger(startskudd)
             )
         )
@@ -237,7 +230,7 @@ class Inntektsmelding(
     private sealed interface Type {
         fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, vedtaksperioder: List<Vedtaksperiode>): Boolean
         fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
-        fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate
+        fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate
         fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
         fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate
     }
@@ -249,10 +242,13 @@ class Inntektsmelding(
         }
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean {
             if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
-            return inntektsmelding.beregnetInntektsdato in sykdomstidslinjeperiode
+            return inntektsdato(inntektsmelding) in sykdomstidslinjeperiode
         }
-        override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = inntektsmelding.beregnetInntektsdato
-        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdatoForInntekthistorikk(inntektsmelding) }
+        override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
+            if (inntektsmelding.førsteFraværsdag != null && (inntektsmelding.arbeidsgiverperioder.isEmpty() || inntektsmelding.førsteFraværsdag > inntektsmelding.arbeidsgiverperioder.last().endInclusive.nesteDag)) return inntektsmelding.førsteFraværsdag
+            return inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
+        }
+        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdato(inntektsmelding) }
         override fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate {
             return if (inntektsmelding.førsteFraværsdag == null) inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
             else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(inntektsmelding.førsteFraværsdag).max()
@@ -267,7 +263,7 @@ class Inntektsmelding(
             return false
         }
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
+        override fun inntektsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
@@ -278,7 +274,7 @@ class Inntektsmelding(
             return true
         }
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
-        override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate {
+        override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
             if (skjæringstidspunkt != inntektsdato) {
                 "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${inntektsmelding.metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"

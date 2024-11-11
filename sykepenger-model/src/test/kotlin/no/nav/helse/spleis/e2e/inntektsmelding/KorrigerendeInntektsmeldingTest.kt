@@ -3,6 +3,8 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.LPS
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -168,7 +170,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
-        håndterInntektsmelding(listOf(1.mars til 16.mars))
+        håndterInntektsmelding(listOf(1.mars til 16.mars), avsendersystem = LPS)
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -184,7 +186,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         nyttVedtak(10.januar til 31.januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterInntektsmelding(listOf(1.februar til 16.februar), avsendersystem = ALTINN)
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -231,7 +233,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         nyttVedtak(10.januar til 30.januar)
         forlengVedtak(31.januar til 31.januar)
         forlengVedtak(februar)
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterInntektsmelding(listOf(1.februar til 16.februar), avsendersystem = LPS)
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -384,7 +386,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         nyPeriode(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterInntektsmelding(listOf(1.februar til 16.februar), avsendersystem = ALTINN)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

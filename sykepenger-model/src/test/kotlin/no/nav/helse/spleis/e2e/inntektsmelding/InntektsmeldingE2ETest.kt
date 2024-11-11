@@ -1849,12 +1849,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSFFFF FFFFFFF FFFFFFF FFFFFFF FFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
-        håndterInntektsmelding(listOf(27.februar til 14.mars))
+        håndterInntektsmelding(listOf(27.februar til 14.mars), avsendersystem = NAV_NO_SELVBESTEMT, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSFFFF FFFFFFF FFFFFFF FFFFFFF FFFSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1864,9 +1868,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
-        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals(1.januar til 31.mars, inspektør.sisteUtbetaling().periode)
     }
     @Test

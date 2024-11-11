@@ -216,11 +216,12 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
-        nyeVedtak(januar, a1, a2)
+        nyeVedtak(januar, a1, a2, inntekt = 20000.månedlig)
         forlengVedtak(februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 20000.månedlig, orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)

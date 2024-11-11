@@ -51,6 +51,10 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(1.mars, 31.mars))
         håndterInntektsmelding(listOf(5.mars til 21.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)

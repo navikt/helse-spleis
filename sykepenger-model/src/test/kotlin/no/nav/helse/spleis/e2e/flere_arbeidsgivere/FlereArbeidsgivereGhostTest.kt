@@ -16,6 +16,8 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -278,7 +280,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
@@ -306,7 +308,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b`() {
+    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost sender klassisk inntektsmelding`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
@@ -329,7 +331,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT, avsendersystem = ALTINN)
+
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -342,13 +346,55 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        val veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile = Subsumsjon("8-28", 3, "b")
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile)))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT, avsendersystem = NAV_NO)
+
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+    }
+
+    @Test
     fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() {
         utbetalPeriodeMedGhost()
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        // Arbeidsgiver har fylt inn inntekt for skjæringstidspunktet 1.januar så da vinner det over skatteopplysningene
         val inntektsmelding = håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
+            avsendersystem = NAV_NO
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
@@ -356,7 +402,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         assertEquals(
             listOf(Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig), Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig)),
@@ -368,15 +414,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 32000.månedlig,
             refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
             orgnummer = a2,
-            avsendersystem = ALTINN
+            avsendersystem = NAV_NO_SELVBESTEMT
         )
-        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         assertEquals(
             listOf(
                 Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig),
-                Refusjonsopplysning(inntektsmelding, 1.februar, 19.februar, beløp = 32000.månedlig),
-                Refusjonsopplysning(korrigerendeInntektsmelding, 20.februar, null, beløp = 30000.månedlig)
+                Refusjonsopplysning(korrigerendeInntektsmelding, 1.februar, null, beløp = 30000.månedlig)
             ),
             inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         )
@@ -1142,7 +1187,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiver går fra å være ghost mens først arbeidsgiver står til godkjenning`() {
+    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost sender klassisk inntektsmelding`() {
         utbetalPeriodeMedGhost(tilGodkjenning = true)
 
         nyPeriode(16.mars til 31.mars, a1) // Forlengelse på a1
@@ -1163,6 +1208,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             førsteFraværsdag = 16.mars,
             refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
             orgnummer = a2,
+            avsendersystem = ALTINN
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
@@ -1186,6 +1232,38 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         // Vi har fortsatt ikke beregnet hva utbetalingen for a2 kommer til å bli, men saksbehandleren lurer på det allerede *NÅ*
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, a2)
+    }
+
+    @Test
+    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
+        utbetalPeriodeMedGhost(tilGodkjenning = true)
+
+        nyPeriode(16.mars til 31.mars, a1) // Forlengelse på a1
+        nyPeriode(16.mars til 15.april, a2) // Går fra Ghost -> ikke ghost
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
+
+        // IM for tidligere ghost a2 sparker igang revurdering på a1
+        håndterInntektsmelding(
+            listOf(16.mars til 31.mars),
+            førsteFraværsdag = 16.mars,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            avsendersystem = NAV_NO
+        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
     }
 
     @Test
