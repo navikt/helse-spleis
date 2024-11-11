@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
@@ -150,7 +151,7 @@ internal class MessageMediator(
         }
     }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext) {
+    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
         riverErrors.add(riverName to problems)
     }
 
@@ -181,9 +182,9 @@ internal class MessageMediator(
             rapidsConnection.register(this)
         }
 
-        override fun onMessage(message: String, context: MessageContext, metrics: MeterRegistry) {
+        override fun onMessage(message: String, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
             beforeRiverHandling()
-            notifyMessage(message, context, metrics)
+            notifyMessage(message, context, metadata, meterRegistry)
             afterRiverHandling(message)
         }
 
@@ -204,5 +205,5 @@ internal class MessageMediator(
 
 internal interface IMessageMediator {
     fun onRecognizedMessage(message: HendelseMessage, context: MessageContext)
-    fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext)
+    fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata)
 }

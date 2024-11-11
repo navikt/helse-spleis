@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.util.UUID
 import no.nav.helse.person.TilstandType
@@ -40,7 +41,7 @@ internal class TestRapid : RapidsConnection() {
 
     fun sendTestMessage(message: String) {
         log.info("sending message:\n\t$message")
-        notifyMessage(message, this, SimpleMeterRegistry())
+        notifyMessage(message, this, MessageMetadata("", -1, -1, null, emptyMap()), SimpleMeterRegistry())
     }
 
     override fun publish(message: String) {

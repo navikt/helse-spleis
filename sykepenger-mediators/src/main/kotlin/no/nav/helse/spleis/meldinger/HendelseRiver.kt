@@ -5,11 +5,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import java.util.UUID
-import no.nav.helse.meterRegistry
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
@@ -41,7 +42,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
         override fun name() = this@HendelseRiver::class.simpleName ?: "ukjent"
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
             withMDC(mapOf(
                 "river_name" to riverName,
                 "melding_type" to eventName,
@@ -67,8 +68,8 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             }
         }
 
-        override fun onError(problems: MessageProblems, context: MessageContext) {
-            messageMediator.onRiverError(riverName, problems, context)
+        override fun onError(problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+            messageMediator.onRiverError(riverName, problems, context, metadata)
         }
     }
 

@@ -4,7 +4,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val tbdLibsVersion = "2024.11.06-07.11-d5ab9e24"
+val tbdLibsVersion = "2024.11.10-21.15-45a429b5"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
 val ktorVersion = "3.0.1"
 val awaitilityVersion = "4.2.2"
