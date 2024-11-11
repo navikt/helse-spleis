@@ -103,7 +103,6 @@ internal class RestApiTest {
             inntektsdato = null,
             beregnetInntekt = 12000.månedlig,
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
-            arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,

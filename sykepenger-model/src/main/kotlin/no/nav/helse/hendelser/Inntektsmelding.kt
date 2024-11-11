@@ -44,7 +44,6 @@ class Inntektsmelding(
     private val inntektsdato: LocalDate?,
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
-    private val arbeidsforholdId: String?,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
