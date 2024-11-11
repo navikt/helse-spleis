@@ -85,9 +85,9 @@ class Inntektsmelding(
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
-        if (alternativInntektsdato == this.beregnetInntektsdato) return
-        if (!inntektshistorikk.leggTil(InntektsmeldingInntekt(alternativInntektsdato, metadata.meldingsreferanseId, beregnetInntekt))) return
-        aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
+        val inntektsdato = type.alternativInntektsdatoForInntekthistorikk(this, alternativInntektsdato) ?: return
+        if (!inntektshistorikk.leggTil(InntektsmeldingInntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))) return
+        aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
@@ -264,6 +264,7 @@ class Inntektsmelding(
         fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, vedtaksperioder: List<Vedtaksperiode>): Boolean
         fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
         fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding): LocalDate
+        fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
     }
 
     private data object KlassiskInntektsmelding: Type {
@@ -276,6 +277,7 @@ class Inntektsmelding(
             return inntektsmelding.beregnetInntektsdato in sykdomstidslinjeperiode
         }
         override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = inntektsmelding.beregnetInntektsdato
+        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdatoForInntekthistorikk(inntektsmelding) }
     }
 
     private data object ForkastetPortalinntetksmelding: Type {
@@ -287,6 +289,7 @@ class Inntektsmelding(
         }
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun inntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
+        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
     private data class Portalinntetksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Type {
@@ -306,6 +309,7 @@ class Inntektsmelding(
             }
             return skjæringstidspunkt
         }
+        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
