@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.PrintWriter
 
 plugins {
@@ -5,7 +6,6 @@ plugins {
 }
 
 val junitJupiterVersion = "5.10.2"
-val jvmTargetVersion = 21
 
 allprojects {
     group = "no.nav.helse"
@@ -42,13 +42,13 @@ allprojects {
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
-    tasks {
-        java {
-            toolchain {
-                languageVersion = JavaLanguageVersion.of(jvmTargetVersion)
-            }
+    configure<KotlinJvmProjectExtension> {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of("21"))
         }
+    }
 
+    tasks {
         withType<Jar> {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
