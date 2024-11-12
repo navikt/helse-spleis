@@ -161,14 +161,13 @@ internal fun AbstractEndToEndTest.inntektsmelding(
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(orgnummer).lagInntektsmelding(
-            id = id,
-            refusjon = refusjon,
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
+            refusjon = refusjon,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id = id,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
     }
@@ -210,26 +209,22 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
-    førsteFraværsdag: LocalDate?,
     vedtaksperiodeId: UUID,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
-    arbeidsforholdId: String? = null,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
-        id = id,
-        refusjon = refusjon,
-        beregnetInntekt = beregnetInntekt,
-        førsteFraværsdag = førsteFraværsdag,
-        vedtaksperiodeId = vedtaksperiodeId,
         arbeidsgiverperioder = arbeidsgiverperioder,
-        arbeidsforholdId = arbeidsforholdId,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        beregnetInntekt = beregnetInntekt,
+        vedtaksperiodeId = vedtaksperiodeId,
+        refusjon = refusjon,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        id = id,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger
     )
 }

@@ -472,7 +472,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
-        inntektsmeldingPortal(listOf(2.januar til 17.januar), førsteFraværsdag = 1.januar)
+        inntektsmeldingPortal(listOf(2.januar til 17.januar))
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
@@ -480,7 +480,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
-        inntektsmeldingPortal(emptyList(), førsteFraværsdag = 1.januar)
+        inntektsmeldingPortal(emptyList())
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertIngenVarsel(RV_IM_3)
@@ -493,18 +493,20 @@ internal class InntektsmeldingTest {
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = arbeidsforholdId,
+            beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
+            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
+        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+        }, aktivitetslogg)
         dager = inntektsmelding.dager()
     }
 
@@ -515,20 +517,21 @@ internal class InntektsmeldingTest {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
-        arbeidsforholdId: String? = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        førsteFraværsdag: LocalDate?
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            vedtaksperiodeId = vedtaksperiodeId,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = arbeidsforholdId,
+            beregnetInntekt = beregnetInntekt,
+            vedtaksperiodeId = vedtaksperiodeId,
+            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
+        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.MinimalVedtaksperiode({ null }, { LocalDate.EPOCH })
+            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+        }, aktivitetslogg)
+
         dager = inntektsmelding.dager()
     }
 }

@@ -118,24 +118,20 @@ internal abstract class AbstractObservableTest {
         arbeidsgiverperioder: List<Periode> = listOf(Periode(FOM, TOM)),
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         harFlereInntektsmeldinger: Boolean = false,
-        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.LPS
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = orgnummer,
-        førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = avsendersystem,
+        avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
         mottatt = LocalDateTime.now()
     )
 

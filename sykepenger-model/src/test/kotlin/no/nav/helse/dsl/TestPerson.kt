@@ -230,7 +230,6 @@ internal class TestPerson(
                 førsteFraværsdag,
                 refusjon,
                 harOpphørAvNaturalytelser,
-                arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
                 mottatt = mottatt
@@ -254,11 +253,9 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
-                førsteFraværsdag,
                 vedtaksperiodeId,
                 refusjon,
                 harOpphørAvNaturalytelser,
-                arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
                 mottatt = mottatt

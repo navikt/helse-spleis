@@ -54,7 +54,6 @@ class Portalinntektsmelding(
         meldingsreferanseId = meldingsreferanseId,
         refusjon = refusjon,
         orgnummer = orgnummer,
-        førsteFraværsdag = vedtaksperiodeFom,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

@@ -63,13 +63,12 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
         val harOpphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").size() > 0
         val harFlereInntektsmeldinger = packet.path("harFlereInntektsmeldinger").asBoolean(false)
-        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem(null, null) // Vi skal ikke replaye portalIM så om det feiler her er noe gæli
+        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem(null, null, førsteFraværsdag) // Vi skal ikke replaye portalIM så om det feiler her er noe gæli
 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

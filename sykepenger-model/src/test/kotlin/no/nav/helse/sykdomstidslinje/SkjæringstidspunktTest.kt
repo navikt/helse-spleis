@@ -1,16 +1,18 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.erRettFør
 import no.nav.helse.februar
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -493,14 +495,24 @@ internal class SkjæringstidspunktTest {
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 31.desember,
         endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
-    ) = hendelsefabrikk.lagInntektsmelding(
-        refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-        førsteFraværsdag = førsteFraværsdag,
-        beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        arbeidsforholdId = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).dager().bitAvInntektsmelding(Aktivitetslogg(), arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
+    ): DagerFraInntektsmelding.BitAvInntektsmelding {
+        val inntektsmelding = hendelsefabrikk.lagInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
+            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+        }, aktivitetslogg)
+
+        return inntektsmelding.dager().bitAvInntektsmelding(
+            aktivitetslogg,
+            arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
+    }
 
     private companion object {
         private const val ORGNUMMER = "987654321"

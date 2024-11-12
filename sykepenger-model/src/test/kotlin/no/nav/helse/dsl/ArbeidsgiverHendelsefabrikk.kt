@@ -138,7 +138,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
@@ -149,13 +148,12 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 meldingsreferanseId = id,
                 refusjon = refusjon,
                 orgnummer = organisasjonsnummer,
-                førsteFraværsdag = førsteFraværsdag,
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.LPS,
+                avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
                 mottatt = mottatt
             )
         }
@@ -198,11 +196,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagPortalinntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate?,
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
@@ -211,13 +207,12 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = organisasjonsnummer,
-        førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = Inntektsmelding.Avsendersystem.Nav(vedtaksperiodeId, førsteFraværsdag ?: arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.EPOCH),
+        avsendersystem = Inntektsmelding.Avsendersystem.Nav(vedtaksperiodeId, LocalDate.EPOCH),
         mottatt = mottatt
     )
 

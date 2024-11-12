@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -220,14 +221,19 @@ internal class SykmeldingsperioderTest {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate
     ): Inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(null, null),
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = Inntekt.INGEN,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harOpphørAvNaturalytelser = false
-        )
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        beregnetInntekt = Inntekt.INGEN,
+        førsteFraværsdag = førsteFraværsdag,
+        refusjon = Inntektsmelding.Refusjon(null, null),
+        harOpphørAvNaturalytelser = false,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null
+    ).also {
+        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+        }, Aktivitetslogg())
+
+    }
 
     fun Sykmeldingsperioder.perioder() = view().perioder
 }

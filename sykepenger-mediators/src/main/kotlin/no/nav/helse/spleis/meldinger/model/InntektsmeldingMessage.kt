@@ -43,14 +43,13 @@ internal open class InntektsmeldingMessage(
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
     private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
-    private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato)
+    private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato, førsteFraværsdag)
 
     protected val inntektsmelding
         get() = Inntektsmelding(
             meldingsreferanseId = meldingsporing.id,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
@@ -65,13 +64,13 @@ internal open class InntektsmeldingMessage(
     }
 
     internal companion object {
-        internal fun JsonNode.tilAvsendersystem(vedtaksperiodeId: UUID?, inntektsdato: LocalDate?): Inntektsmelding.Avsendersystem {
-            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS
+        internal fun JsonNode.tilAvsendersystem(vedtaksperiodeId: UUID?, inntektsdato: LocalDate?, førsteFraværsdag: LocalDate?): Inntektsmelding.Avsendersystem {
+            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             return when (navn) {
                 "NAV_NO" -> Inntektsmelding.Avsendersystem.Nav(checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO skal ha vedtaksperiodeId " }, checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO skal ha inntektsdato " })
                 "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NavSelvbestemt(checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha vedtaksperiodeId "}, checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha inntektsdato " })
-                "AltinnPortal" -> Inntektsmelding.Avsendersystem.Altinn
-                else -> Inntektsmelding.Avsendersystem.LPS
+                "AltinnPortal" -> Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag)
+                else -> Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             }
         }
     }

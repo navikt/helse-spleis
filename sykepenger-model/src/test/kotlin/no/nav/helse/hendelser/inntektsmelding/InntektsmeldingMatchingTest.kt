@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.DagerFraInntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -254,6 +256,18 @@ internal class InntektsmeldingMatchingTest {
         private fun inntektsmelding(
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode
-        ) = fabrikk.lagInntektsmelding(arbeidsgiverperiode.toList(), førsteFraværsdag = førsteFraværsdag, beregnetInntekt = 400.månedlig).dager()
+        ): DagerFraInntektsmelding {
+            val inntektsmelding = fabrikk.lagInntektsmelding(
+                arbeidsgiverperiode.toList(),
+                beregnetInntekt = 400.månedlig,
+                førsteFraværsdag = førsteFraværsdag
+            )
+            inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+                override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+                override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+            }, Aktivitetslogg())
+
+            return inntektsmelding.dager()
+        }
     }
 }

@@ -17,14 +17,15 @@ internal class InntektsmeldingMessageTest {
     fun `mapper avsendersystem fra json`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val inntektsdato = LocalDate.EPOCH
-        assertEquals(LPS,  objectMapper.nullNode().tilAvsendersystem(null, null))
-        assertEquals(LPS, objectMapper.missingNode().tilAvsendersystem(null, null))
-        assertEquals(LPS, objectMapper.readTree(mangler).tilAvsendersystem(null, null))
-        assertEquals(LPS, objectMapper.readTree(sattTilNull).tilAvsendersystem(null, null))
-        assertEquals(Nav(vedtaksperiodeId, inntektsdato), objectMapper.readTree(navNo).tilAvsendersystem(vedtaksperiodeId, inntektsdato))
-        assertEquals(NavSelvbestemt(vedtaksperiodeId, inntektsdato), objectMapper.readTree(navNoSelvbestemt).tilAvsendersystem(vedtaksperiodeId, inntektsdato))
-        assertEquals(Altinn, objectMapper.readTree(altinn).tilAvsendersystem(null, null))
-        assertEquals(LPS, objectMapper.readTree(hvaSomHelst).tilAvsendersystem(null, null))
+        val førsteFraværsdag = LocalDate.EPOCH.plusDays(1)
+        assertEquals(LPS(førsteFraværsdag),  objectMapper.nullNode().tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(LPS(førsteFraværsdag), objectMapper.missingNode().tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(mangler).tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(sattTilNull).tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(Nav(vedtaksperiodeId, inntektsdato), objectMapper.readTree(navNo).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
+        assertEquals(NavSelvbestemt(vedtaksperiodeId, inntektsdato), objectMapper.readTree(navNoSelvbestemt).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
+        assertEquals(Altinn(førsteFraværsdag), objectMapper.readTree(altinn).tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(hvaSomHelst).tilAvsendersystem(null, null, førsteFraværsdag))
     }
 
     private companion object {

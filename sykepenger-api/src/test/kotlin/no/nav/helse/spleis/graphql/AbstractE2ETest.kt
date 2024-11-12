@@ -209,7 +209,6 @@ internal abstract class AbstractE2ETest {
             true -> fabrikker.getValue(orgnummer).lagPortalinntektsmelding(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 beregnetInntekt = beregnetInntekt,
-                førsteFraværsdag = førsteFraværsdag,
                 vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
                 refusjon = refusjon,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

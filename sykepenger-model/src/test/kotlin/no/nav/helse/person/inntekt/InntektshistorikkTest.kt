@@ -15,6 +15,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.testhelpers.resetSeed
@@ -220,11 +221,16 @@ internal class InntektshistorikkTest {
         førsteFraværsdag: LocalDate = 1.januar,
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
     ) = hendelsefabrikk.lagInntektsmelding(
-        refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-        førsteFraværsdag = førsteFraværsdag,
-        beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
-        arbeidsforholdId = null,
+        beregnetInntekt = beregnetInntekt,
+        førsteFraværsdag = førsteFraværsdag,
+        refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    )
+    ).also {
+        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+        }, Aktivitetslogg())
+
+    }
 }

@@ -507,23 +507,20 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate) -> Inntektsmelding.Avsendersystem = Avsendersystemer.NAV_NO,
+    avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate, førsteFraværsdag: LocalDate?) -> Inntektsmelding.Avsendersystem = Avsendersystemer.NAV_NO,
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     førReplay: () -> Unit = {}
 ): UUID {
     if (erPortal(avsendersystem)) {
-        requireNotNull(vedtaksperiodeIdInnhenter) { "Portalinntektsmelding må knyttes til en vedtaksperiode" }
         return håndterInntektsmelding(
             inntektsmeldingPortal(
                 id,
                 arbeidsgiverperioder,
                 beregnetInntekt = beregnetInntekt,
-                førsteFraværsdag = førsteFraværsdag,
                 vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
                 refusjon = refusjon,
                 orgnummer = orgnummer,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-                arbeidsforholdId = arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger
             )
@@ -546,7 +543,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     )
 }
 
-private fun erPortal(avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate) -> Inntektsmelding.Avsendersystem) = avsendersystem(UUID.randomUUID(), LocalDate.EPOCH).let {
+private fun erPortal(avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate, førsteFraværsdag: LocalDate?) -> Inntektsmelding.Avsendersystem) = avsendersystem(UUID.randomUUID(), LocalDate.EPOCH, LocalDate.EPOCH).let {
     it is Nav || it is NavSelvbestemt
 }
 
@@ -571,10 +568,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
         refusjon = refusjon,
         orgnummer = orgnummer,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        førsteFraværsdag = førsteFraværsdag,
     )
     return håndterInntektsmelding(portalinntektsmelding)
 }
