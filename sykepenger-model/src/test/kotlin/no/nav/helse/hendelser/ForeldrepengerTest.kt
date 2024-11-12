@@ -22,7 +22,7 @@ class ForeldrepengerTest {
     }
 
     @Test
-    fun `100 prosent foreldrepenger minst 14 dager i forkant`() {
+    fun `100 prosent foreldrepenger mer enn 14 dager i forkant`() {
         val foreldrepenger = Foreldrepenger(listOf(
             GradertPeriode(16.september til 30.september, 100)
         ))
@@ -32,7 +32,7 @@ class ForeldrepengerTest {
     }
 
     @Test
-    fun `80 prosent foreldrepenger minst 14 dager i forkant`() {
+    fun `80 prosent foreldrepenger mer enn 14 dager i forkant`() {
         val foreldrepenger = Foreldrepenger(listOf(
             GradertPeriode(16.september til 30.september, 80)
         ))
