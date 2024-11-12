@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
@@ -14,15 +15,27 @@ class Foreldrepenger(
 ): AnnenYtelseSomKanOppdatereHistorikk() {
     private val perioder get() = foreldrepengeytelse.map { it.periode }
 
-    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
-        if (foreldrepengeytelse.isEmpty()) {
-            aktivitetslogg.info("Bruker har ingen foreldrepenger")
-            return false
-        }
+    internal fun valider(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean) {
+        if (foreldrepengeytelse.isEmpty()) return aktivitetslogg.info("Bruker har ingen foreldrepenger")
+        varselHvisOverlapperMedForeldrepenger(aktivitetslogg, erForlengelse, sykdomsperiode)
+        varselHvisForlengerForeldrepengerMerEnn14Dager(aktivitetslogg, sykdomsperiode)
+    }
+
+    private fun varselHvisOverlapperMedForeldrepenger(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean, sykdomsperiode: Periode) {
         val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
-        return perioder.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
-            if (!overlapper) aktivitetslogg.info("Bruker har foreldrepenger, men det slår ikke ut på overlappsjekken")
+        val overlapperMedForeldrepenger = perioder.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }
+        if (overlapperMedForeldrepenger) {
+            aktivitetslogg.varsel(Varselkode.`Overlapper med foreldrepenger`)
+        } else {
+            aktivitetslogg.info("Bruker har foreldrepenger, men det slår ikke ut på overlappsjekken")
         }
+    }
+
+    private fun varselHvisForlengerForeldrepengerMerEnn14Dager(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode) {
+        val `15DagerFør` = sykdomsperiode.start.minusDays(15) til sykdomsperiode.start.minusDays(1)
+        val harForeldrepengerAlleDager = `15DagerFør`.all { dagen -> foreldrepengeytelse.any { it.grad == 100 && dagen in it.periode } }
+        if (!harForeldrepengerAlleDager) return
+        aktivitetslogg.varsel(Varselkode.`Forlenger foreldrepenger med mer enn 14 dager`)
     }
 
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {

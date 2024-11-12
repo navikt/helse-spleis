@@ -37,12 +37,14 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_11
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertActivities
@@ -281,6 +283,16 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
+        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `Foreldrepenger minst 14 dager før perioden`() {
+        håndterSøknad(Sykdom(1.oktober, 31.oktober, 100.prosent))
+        håndterInntektsmelding(listOf(1.oktober til 16.oktober))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(16.september til 30.september, 100)))
+        assertVarsel(RV_AY_12, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 

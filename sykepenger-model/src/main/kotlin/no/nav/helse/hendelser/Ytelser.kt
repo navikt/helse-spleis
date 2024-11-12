@@ -54,7 +54,7 @@ class Ytelser(
         val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)
         arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
         dagpenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
-        if (foreldrepenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med foreldrepenger`)
+        foreldrepenger.valider(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)
         if (svangerskapspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med svangerskapspenger`)
         if (pleiepenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med pleiepenger`)
         if (omsorgspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med omsorgspenger`)
