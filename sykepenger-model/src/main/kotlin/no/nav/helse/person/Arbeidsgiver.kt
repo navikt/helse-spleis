@@ -25,7 +25,6 @@ import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Portalinntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Simulering
@@ -480,26 +479,6 @@ internal class Arbeidsgiver private constructor(
         addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
 
         inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
-    }
-
-    internal fun håndter(portalinntektsmelding: Portalinntektsmelding, aktivitetslogg: IAktivitetslogg): Inntektsmelding? {
-        aktivitetslogg.kontekst(this)
-        if (!portalinntektsmelding.initaliser(vedtaksperioder, person, aktivitetslogg)) return null // Håndterer om vedtaksperioden er blitt forkastet _før_ vi får inntektsmelding
-
-        // Håndterer først dager
-        val dager = portalinntektsmelding.somDagerFraInntektsmelding()
-        håndter(portalinntektsmelding) { håndter(dager, aktivitetslogg) }
-        if (!portalinntektsmelding.initaliser(vedtaksperioder, person, aktivitetslogg)) return null // Håndterer om inntektsmeldingen forkaster vedtaksperioden selv
-        val dagoverstyring = dager.revurderingseventyr()
-
-        // Nå kan vi initalisere inntektsmeldingen ettersom vi her bruker datoer fra vedtaksperidoen som kan endres i forbindelse med håndtering av dager
-        val inntektsmelding = portalinntektsmelding.somInntektsmelding()
-        håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
-        val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
-        addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
-
-        inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
-        return inntektsmelding
     }
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode, harFraNabolaget: Boolean): Beløpstidslinje {
