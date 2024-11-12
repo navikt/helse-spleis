@@ -9,6 +9,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -16,10 +17,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.Personidentifikator
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.AfterAll
@@ -106,7 +106,7 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             harOpphørAvNaturalytelser = false,
-            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO(vedtaksperiodeId, LocalDate.EPOCH),
+            avsendersystem = Inntektsmelding.Avsendersystem.Nav(vedtaksperiodeId, LocalDate.EPOCH),
             mottatt = LocalDateTime.now()
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)

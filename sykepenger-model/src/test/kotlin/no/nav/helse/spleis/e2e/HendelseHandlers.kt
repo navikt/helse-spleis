@@ -20,8 +20,8 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NAV_NO
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.Nav
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NavSelvbestemt
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -547,7 +547,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
 }
 
 private fun erPortal(avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate) -> Inntektsmelding.Avsendersystem) = avsendersystem(UUID.randomUUID(), LocalDate.EPOCH).let {
-    it is NAV_NO || it is NAV_NO_SELVBESTEMT
+    it is Nav || it is NavSelvbestemt
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(

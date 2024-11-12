@@ -178,7 +178,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO(vedtaksperiodeId, LocalDate.EPOCH),
+                avsendersystem = Inntektsmelding.Avsendersystem.Nav(vedtaksperiodeId, LocalDate.EPOCH),
                 mottatt = mottatt
             )
         }

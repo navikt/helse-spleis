@@ -26,12 +26,12 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
+import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -110,7 +110,6 @@ class Inntektsmelding(
         return behandlinger.oppdaterDokumentsporing(dokumentsporing)
     }
 
-
     internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {
         val refusjonshistorikk = Refusjonshistorikk()
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
@@ -130,10 +129,10 @@ class Inntektsmelding(
     }
 
     sealed interface Avsendersystem {
-        data object ALTINN: Avsendersystem
+        data object Altinn: Avsendersystem
         data object LPS: Avsendersystem
-        data class NAV_NO(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate): Avsendersystem
-        data class NAV_NO_SELVBESTEMT(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate): Avsendersystem
+        data class Nav(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate): Avsendersystem
+        data class NavSelvbestemt(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate): Avsendersystem
     }
 
     class Refusjon(
@@ -219,10 +218,10 @@ class Inntektsmelding(
     private var type: Type = KlassiskInntektsmelding
     internal fun valider(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, person: Person): Boolean {
         this.type = when (avsendersystem) {
-            Avsendersystem.ALTINN,
+            Avsendersystem.Altinn,
             Avsendersystem.LPS -> KlassiskInntektsmelding
-            is Avsendersystem.NAV_NO -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
-            is Avsendersystem.NAV_NO_SELVBESTEMT -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
+            is Avsendersystem.Nav -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
+            is Avsendersystem.NavSelvbestemt -> vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
         }
         return this.type.entering(this, aktivitetslogg, person, vedtaksperioder)
     }
