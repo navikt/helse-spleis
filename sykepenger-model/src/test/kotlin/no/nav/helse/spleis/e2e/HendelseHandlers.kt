@@ -20,8 +20,6 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.Nav
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NavSelvbestemt
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -44,7 +42,10 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -204,7 +205,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
             beregnetInntekt = 20000.månedlig,
             orgnummer = it.first,
             vedtaksperiodeIdInnhenter = it.second ?: 1.vedtaksperiode,
-            avsendersystem = if (it.second == null) Avsendersystemer.ALTINN else Avsendersystemer.NAV_NO
+            avsendersystem = if (it.second == null) ALTINN else NAV_NO
         )
     }
 
@@ -506,11 +507,11 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate, førsteFraværsdag: LocalDate?) -> Inntektsmelding.Avsendersystem = Avsendersystemer.NAV_NO,
+    avsendersystem: Avsenderutleder = NAV_NO,
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     førReplay: () -> Unit = {}
 ): UUID {
-    if (erPortal(avsendersystem)) {
+    if (erNavPortal(avsendersystem)) {
         return håndterInntektsmelding(
             inntektsmeldingPortal(
                 id,
@@ -541,14 +542,9 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     )
 }
 
-private fun erPortal(avsendersystem: (vedtaksperiodeId: UUID, inntektsdato: LocalDate, førsteFraværsdag: LocalDate?) -> Inntektsmelding.Avsendersystem) = avsendersystem(UUID.randomUUID(), LocalDate.EPOCH, LocalDate.EPOCH).let {
-    it is Nav || it is NavSelvbestemt
-}
-
 internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
-    førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = ORGNUMMER,
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,

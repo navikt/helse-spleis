@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør

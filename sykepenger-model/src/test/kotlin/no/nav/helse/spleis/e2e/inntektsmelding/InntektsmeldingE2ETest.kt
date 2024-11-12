@@ -13,8 +13,8 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -24,7 +24,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.NAV_NO_SELVBESTEMT
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør

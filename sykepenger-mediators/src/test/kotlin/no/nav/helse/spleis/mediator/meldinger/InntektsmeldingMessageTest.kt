@@ -5,8 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.Altinn
 import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.LPS
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.Nav
-import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NavSelvbestemt
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NavPortal
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilAvsendersystem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -22,8 +21,8 @@ internal class InntektsmeldingMessageTest {
         assertEquals(LPS(førsteFraværsdag), objectMapper.missingNode().tilAvsendersystem(null, null, førsteFraværsdag))
         assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(mangler).tilAvsendersystem(null, null, førsteFraværsdag))
         assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(sattTilNull).tilAvsendersystem(null, null, førsteFraværsdag))
-        assertEquals(Nav(vedtaksperiodeId, inntektsdato), objectMapper.readTree(navNo).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
-        assertEquals(NavSelvbestemt(vedtaksperiodeId, inntektsdato), objectMapper.readTree(navNoSelvbestemt).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
+        assertEquals(NavPortal(vedtaksperiodeId, inntektsdato, true), objectMapper.readTree(navNo).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
+        assertEquals(NavPortal(vedtaksperiodeId, inntektsdato, false), objectMapper.readTree(navNoSelvbestemt).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
         assertEquals(Altinn(førsteFraværsdag), objectMapper.readTree(altinn).tilAvsendersystem(null, null, førsteFraværsdag))
         assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(hvaSomHelst).tilAvsendersystem(null, null, førsteFraværsdag))
     }

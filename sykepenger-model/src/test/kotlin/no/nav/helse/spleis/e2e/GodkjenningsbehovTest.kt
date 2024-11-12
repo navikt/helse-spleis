@@ -5,8 +5,7 @@ import java.util.UUID
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.LPS
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg

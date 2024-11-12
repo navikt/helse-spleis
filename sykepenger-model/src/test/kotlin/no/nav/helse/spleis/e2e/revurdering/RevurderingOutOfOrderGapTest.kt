@@ -100,7 +100,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmeldingPortal(emptyList(), orgnummer = a1, førsteFraværsdag = 25.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmeldingPortal(emptyList(), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         håndterVilkårsgrunnlagMedGhost(2.vedtaksperiode, skjæringstidspunkt = 25.januar, arbeidsgiver = a1, ghost = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)

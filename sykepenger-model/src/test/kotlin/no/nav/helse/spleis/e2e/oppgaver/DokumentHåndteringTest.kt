@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad

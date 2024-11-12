@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.Avsendersystemer.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars

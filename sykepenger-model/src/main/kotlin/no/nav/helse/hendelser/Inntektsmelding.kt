@@ -128,8 +128,7 @@ class Inntektsmelding(
     sealed interface Avsendersystem {
         data class Altinn(internal val førsteFraværsdag: LocalDate?): Avsendersystem
         data class LPS(internal val førsteFraværsdag: LocalDate?): Avsendersystem
-        data class Nav(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate): Avsendersystem
-        data class NavSelvbestemt(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate): Avsendersystem
+        data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate, internal val forespurt: Boolean): Avsendersystem
     }
 
     class Refusjon(
@@ -242,8 +241,7 @@ class Inntektsmelding(
         this.type = when (avsendersystem) {
             is Avsendersystem.Altinn -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
             is Avsendersystem.LPS -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
-            is Avsendersystem.Nav -> valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
-            is Avsendersystem.NavSelvbestemt -> valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
+            is Avsendersystem.NavPortal -> valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntetksmelding
         }
         return this.type.entering(this, aktivitetslogg) { valideringsgrunnlag.inntektsmeldingIkkeHåndtert(this) }
     }
