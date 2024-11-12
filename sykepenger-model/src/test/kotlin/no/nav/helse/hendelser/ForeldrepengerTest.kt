@@ -1,12 +1,17 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.fredag
+import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.september
+import no.nav.helse.den
+import no.nav.helse.mandag
+import no.nav.helse.til
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.torsdag
 import org.junit.jupiter.api.Test
 
 class ForeldrepengerTest {
@@ -29,6 +34,26 @@ class ForeldrepengerTest {
         val aktivitetslogg = Aktivitetslogg()
         foreldrepenger.valider(aktivitetslogg, 1.oktober til 30.oktober, false)
         aktivitetslogg.assertVarsel(Varselkode.RV_AY_12)
+    }
+
+    @Test
+    fun `100 prosent foreldrepenger mer enn 14 dager i forkant - foreldrepengene slutter på en fredag og sykepengene begynner på mandag`() {
+        val foreldrepenger = Foreldrepenger(listOf(
+            GradertPeriode(1.januar til fredag den 19.januar, 100)
+        ))
+        val aktivitetslogg = Aktivitetslogg()
+        foreldrepenger.valider(aktivitetslogg, mandag den 22.januar til 31.januar, false)
+        aktivitetslogg.assertVarsel(Varselkode.RV_AY_12)
+    }
+
+    @Test
+    fun `100 prosent foreldrepenger mer enn 14 dager i forkant - foreldrepengene slutter på en torsdag og sykepengene begynner på mandag`() {
+        val foreldrepenger = Foreldrepenger(listOf(
+            GradertPeriode(1.januar til torsdag den 18.januar, 100)
+        ))
+        val aktivitetslogg = Aktivitetslogg()
+        foreldrepenger.valider(aktivitetslogg, mandag den 22.januar til 31.januar, false)
+        aktivitetslogg.assertIngenVarsel(Varselkode.RV_AY_12)
     }
 
     @Test
