@@ -187,7 +187,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                         a2,
                         400.daglig,
                         forklaring = "forklaring",
-                        gjelder = 1.januar til 31.januar
+                        gjelder = 5.januar til 31.januar
                     )
                 )
             )
@@ -202,7 +202,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
                         assertEquals(1, tilkommendeInntekter.size)
                         assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                        assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[1.januar].beløp)
+                        assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[5.januar].beløp)
                     }
                 }
             )
