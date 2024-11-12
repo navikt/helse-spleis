@@ -27,9 +27,6 @@ Finn nyeste versjon av gradle her: https://gradle.org/releases/
 
 ```./gradlew wrapper --gradle-version $gradleVersjon```
 
-Husk å oppdater gradle versjon i build.gradle.kts filen
-```gradleVersion = "$gradleVersjon"```
-
 ## Protip for å kjøre tester raskere
 Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt eks:
 
