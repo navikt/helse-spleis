@@ -119,7 +119,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,

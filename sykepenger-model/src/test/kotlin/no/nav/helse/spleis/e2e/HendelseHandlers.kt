@@ -503,7 +503,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     orgnummer: String = ORGNUMMER,
     id: UUID = UUID.randomUUID(),
     harOpphørAvNaturalytelser: Boolean = false,
-    arbeidsforholdId: String? = null,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
@@ -535,7 +534,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             refusjon = refusjon,
             orgnummer = orgnummer,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            arbeidsforholdId = arbeidsforholdId,
             fnr = fnr,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger
@@ -556,7 +554,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     id: UUID = UUID.randomUUID(),
     harOpphørAvNaturalytelser: Boolean = false,
-    arbeidsforholdId: String? = null,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
 ): UUID {

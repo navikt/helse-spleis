@@ -153,7 +153,6 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
-    arbeidsforholdId: String? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,

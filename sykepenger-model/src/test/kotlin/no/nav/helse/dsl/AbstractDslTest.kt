@@ -241,7 +241,6 @@ internal abstract class AbstractDslTest {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now()
@@ -252,7 +251,6 @@ internal abstract class AbstractDslTest {
             førsteFraværsdag,
             refusjon,
             harOpphørAvNaturalytelser,
-            arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
             id,
             mottatt = mottatt
@@ -264,18 +262,15 @@ internal abstract class AbstractDslTest {
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID()
     ) =
         this { håndterInntektsmeldingPortal(
             arbeidsgiverperioder,
             beregnetInntekt,
-            førsteFraværsdag,
             vedtaksperiodeId,
             refusjon,
             harOpphørAvNaturalytelser,
-            arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
             id
         ) }
@@ -392,26 +387,21 @@ internal abstract class AbstractDslTest {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1,
         mottatt: LocalDateTime = LocalDateTime.now()
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id, mottatt = mottatt)
-protected fun håndterInntektsmeldingPortal(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        vedtaksperiodeId: UUID,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID(),
-        orgnummer: String = a1
-    ) =
-        bareÈnArbeidsgiver(orgnummer).håndterInntektsmeldingPortal(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, vedtaksperiodeId, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(orgnummer).håndterInntektsmelding(
+            arbeidsgiverperioder,
+            beregnetInntekt,
+            førsteFraværsdag,
+            refusjon,
+            harOpphørAvNaturalytelser,
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id,
+            mottatt = mottatt
+        )
 
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,

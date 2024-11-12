@@ -50,7 +50,6 @@ internal open class InntektsmeldingerReplayRiver(
             interestedIn("inntektsmelding.refusjon.opphoersdato", JsonNode::asLocalDate)
             interestedIn(
                 "inntektsmelding.refusjon.beloepPrMnd",
-                "inntektsmelding.arbeidsforholdId",
                 "inntektsmelding.begrunnelseForReduksjonEllerIkkeUtbetalt",
                 "inntektsmelding.opphoerAvNaturalytelser",
                 "inntektsmelding.harFlereInntektsmeldinger",

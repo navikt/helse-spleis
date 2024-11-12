@@ -46,7 +46,6 @@ internal open class InntektsmeldingerRiver(
         message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
         message.interestedIn(
             "refusjon.beloepPrMnd",
-            "arbeidsforholdId",
             "begrunnelseForReduksjonEllerIkkeUtbetalt",
             "opphoerAvNaturalytelser",
             "harFlereInntektsmeldinger",
