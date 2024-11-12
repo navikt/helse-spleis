@@ -10,6 +10,7 @@ import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
@@ -19,6 +20,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.finn
+import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -40,9 +42,9 @@ class Inntektsmelding(
     private val førsteFraværsdag: LocalDate?,
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
-    begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-    harOpphørAvNaturalytelser: Boolean,
-    harFlereInntektsmeldinger: Boolean,
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    private val harOpphørAvNaturalytelser: Boolean,
+    private val harFlereInntektsmeldinger: Boolean,
     private val avsendersystem: Avsendersystem,
     mottatt: LocalDateTime
 ) : Hendelse {
@@ -63,10 +65,10 @@ class Inntektsmelding(
     )
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
-    private val dager = DagerFraInntektsmelding(
+    private val dager get() = DagerFraInntektsmelding(
         arbeidsgiverperioder = this.arbeidsgiverperioder,
-        førsteFraværsdag = førsteFraværsdag,
-        mottatt = mottatt,
+        førsteFraværsdag = type.førsteFraværsdagForHåndteringAvDager(this),
+        mottatt = metadata.registrert,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         avsendersystem = avsendersystem,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
@@ -232,6 +234,7 @@ class Inntektsmelding(
         fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate
         fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
         fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate
+        fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding): LocalDate?
     }
 
     private data object KlassiskInntektsmelding: Type {
@@ -252,19 +255,27 @@ class Inntektsmelding(
             return if (inntektsmelding.førsteFraværsdag == null) inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
             else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(inntektsmelding.førsteFraværsdag).max()
         }
+        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = inntektsmelding.førsteFraværsdag
     }
 
     private data object ForkastetPortalinntetksmelding: Type {
         override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, vedtaksperioder: List<Vedtaksperiode>): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
             aktivitetslogg.info("Inntektsmelding ikke håndtert")
-            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.orgnummer, inntektsmelding.dager.harPeriodeInnenfor16Dager(vedtaksperioder))
+            val harPeriodeInnenfor16Dager = if (inntektsmelding.arbeidsgiverperioder.isEmpty()) {
+                true
+            } else {
+                vedtaksperioder.påvirkerArbeidsgiverperiode(inntektsmelding.arbeidsgiverperioder.periode()!!)
+            }
+            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.orgnummer, harPeriodeInnenfor16Dager)
             return false
         }
+
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun inntektsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
+        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
     private data class Portalinntetksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Type {
@@ -285,7 +296,9 @@ class Inntektsmelding(
             return skjæringstidspunkt
         }
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
-        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.skjæringstidspunkt // Ikke spør meg hvorfor den elvis'en er der, jeg bare flyttet kode jeg 👀
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.skjæringstidspunkt
+        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag
+
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
             private val logger = LoggerFactory.getLogger(Portalinntetksmelding::class.java)
