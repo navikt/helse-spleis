@@ -238,12 +238,13 @@ class Inntektsmelding(
     }
 
     internal fun valider(valideringsgrunnlag: Valideringsgrunnlag, aktivitetslogg: IAktivitetslogg): Boolean {
+        val førsteValidering = !::type.isInitialized
         this.type = when (avsendersystem) {
             is Avsendersystem.Altinn -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
             is Avsendersystem.LPS -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
             is Avsendersystem.NavPortal -> valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntektsmelding
         }
-        aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
+        if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
         return this.type.entering(this, aktivitetslogg) { valideringsgrunnlag.inntektsmeldingIkkeHåndtert(this) }
     }
 
