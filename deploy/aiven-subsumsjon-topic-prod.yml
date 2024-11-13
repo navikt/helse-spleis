@@ -14,13 +14,13 @@ spec:
         partitions: 6
         replication: 3  # see min/max requirements
         retentionBytes: -1  # -1 means unlimited
-        retentionHours: 24  # -1 means unlimited
+        retentionHours: 168  # -1 means unlimited
     acl:
         - team: tbd
           application: spedisjon
           access: write
         - team: tbd
-          application: helse-spleis
+          application: spleis
           access: write
         - team: tbd
           application: spre-subsumsjon

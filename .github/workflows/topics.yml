@@ -8,6 +8,7 @@ on:
     - 'deploy/aiven-teknisk-topic-dev.yml'
     - 'deploy/aiven-teknisk-topic-prod.yml'
     - 'deploy/aiven-subsumsjon-topic-dev'
+    - 'deploy/aiven-subsumsjon-topic-prod'
 
 jobs:
   deployDev:
@@ -32,4 +33,4 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: deploy/aiven-teknisk-topic-prod.yml
+          RESOURCE: deploy/aiven-teknisk-topic-prod.yml,deploy/aiven-subsumsjon-topic-prod
