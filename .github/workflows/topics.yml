@@ -21,7 +21,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: deploy/aiven-teknisk-topic-dev.yml,deploy/aiven-subsumsjon-topic-dev
+          RESOURCE: deploy/aiven-teknisk-topic-dev.yml,deploy/aiven-subsumsjon-topic-dev.yml
 
   deployProd:
     name: apply prod-gcp
@@ -33,4 +33,4 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: deploy/aiven-teknisk-topic-prod.yml,deploy/aiven-subsumsjon-topic-prod
+          RESOURCE: deploy/aiven-teknisk-topic-prod.yml,deploy/aiven-subsumsjon-topic-prod.yml
