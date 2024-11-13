@@ -23,11 +23,6 @@ interface Subsumsjonproducer {
             producer.send(ProducerRecord(topic, fnr, melding))
         }
     }
-    class RapidSubsumsjonproducer(private val context: MessageContext) : Subsumsjonproducer {
-        override fun send(fnr: String, melding: String) {
-            context.publish(fnr, melding)
-        }
-    }
 }
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,

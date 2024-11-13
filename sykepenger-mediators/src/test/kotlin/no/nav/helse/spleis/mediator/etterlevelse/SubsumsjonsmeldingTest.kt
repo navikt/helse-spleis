@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.networknt.schema.JsonSchemaFactory
@@ -29,6 +31,7 @@ internal class SubsumsjonsmeldingTest {
 
     private lateinit var subsumsjonMediator: SubsumsjonMediator
     private lateinit var testRapid: TestRapid
+    private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     @BeforeEach
     fun beforeEach() {
@@ -50,8 +53,14 @@ internal class SubsumsjonsmeldingTest {
             Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid"),
         ))
         subsumsjonMediator.logg(subsumsjonen)
-        subsumsjonMediator.ferdigstill(Subsumsjonproducer.RapidSubsumsjonproducer(testRapid))
-        assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
+        val subsumsjoner = buildList<JsonNode> {
+            subsumsjonMediator.ferdigstill(object : Subsumsjonproducer {
+                override fun send(fnr: String, melding: String) {
+                    add(objectMapper.readTree(melding))
+                }
+            })
+        }
+        assertSubsumsjonsmelding(subsumsjoner.first().path("subsumsjon"))
     }
 
     private val schema by lazy {

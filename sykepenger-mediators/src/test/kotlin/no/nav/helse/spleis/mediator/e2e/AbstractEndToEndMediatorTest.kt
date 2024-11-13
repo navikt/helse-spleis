@@ -86,6 +86,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
         internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         internal const val ORGNUMMER = "987654321"
         internal const val INNTEKT = 31000.00
+        private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
     }
 
     protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
@@ -93,18 +94,24 @@ internal abstract class AbstractEndToEndMediatorTest() {
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
     private lateinit var dataSource: TestDataSource
+    protected lateinit var subsumsjoner: MutableList<JsonNode>
 
     @BeforeEach
     fun setupDatabase() {
         dataSource = databaseContainer.nyTilkobling()
 
         testRapid = TestRapid()
+        subsumsjoner = mutableListOf()
         hendelseMediator = HendelseMediator(
             hendelseRepository = HendelseRepository(dataSource.ds),
             personDao = PersonDao(dataSource.ds, STØTTER_IDENTBYTTE = true),
             versjonAvKode = "test-versjon",
             støtterIdentbytte = true,
-            subsumsjonsproducer = Subsumsjonproducer.RapidSubsumsjonproducer(testRapid)
+            subsumsjonsproducer = object : Subsumsjonproducer {
+                override fun send(fnr: String, melding: String) {
+                    subsumsjoner.add(objectMapper.readTree(melding))
+                }
+            }
         )
 
         messageMediator = MessageMediator(

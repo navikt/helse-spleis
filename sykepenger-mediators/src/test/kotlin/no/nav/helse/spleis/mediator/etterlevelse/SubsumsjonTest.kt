@@ -32,7 +32,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             "Jeg, en saksbehandler, overstyrte pga 8-15"
         )))
 
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
+        val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-15" }
 
@@ -74,7 +74,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             "Jeg, en saksbehandler, overstyrte pga 8-15"
         )))
 
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
+        val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
             .last { it["paragraf"].asText() == "8-15" }
 
@@ -106,7 +106,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
 
-        val subsumsjoner = testRapid.inspektør.meldinger("subsumsjon").map { it["subsumsjon"] }
+        val subsumsjoner = subsumsjoner.map { it["subsumsjon"] }
         assertTrue(subsumsjoner.isNotEmpty())
         val subsumsjon = subsumsjoner.first { it["paragraf"].asText() == "8-17" }
         assertEquals("a", subsumsjon["bokstav"].asText())
@@ -138,7 +138,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
+        val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "b" }
 
@@ -177,7 +177,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
                 )
             )
         )
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
+        val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "c" }
 
@@ -218,7 +218,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
+        val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["ledd"].asText() == "5" }
 

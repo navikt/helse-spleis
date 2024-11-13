@@ -33,11 +33,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val factory = ConsumerProducerFactory(AivenConfig.default)
     private val rapidsConnection = RapidApplication.create(env, factory, meterRegistry = meterRegistry)
 
-    private val subsumsjonsproducer = if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
-        Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
-    } else {
-        Subsumsjonproducer.RapidSubsumsjonproducer(rapidsConnection)
-    }
+    private val subsumsjonsproducer = Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
 
     private val hendelseMediator = HendelseMediator(
         hendelseRepository = hendelseRepository,
