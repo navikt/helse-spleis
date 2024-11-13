@@ -7,6 +7,7 @@ on:
     paths:
     - 'deploy/aiven-teknisk-topic-dev.yml'
     - 'deploy/aiven-teknisk-topic-prod.yml'
+    - 'deploy/aiven-subsumsjon-topic-dev'
 
 jobs:
   deployDev:
