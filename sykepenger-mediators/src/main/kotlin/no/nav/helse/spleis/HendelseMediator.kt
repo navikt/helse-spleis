@@ -82,6 +82,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
@@ -91,7 +92,8 @@ internal class HendelseMediator(
     private val hendelseRepository: HendelseRepository,
     private val personDao: PersonDao,
     private val versjonAvKode: String,
-    private val støtterIdentbytte: Boolean = false
+    private val støtterIdentbytte: Boolean = false,
+    private val subsumsjonsproducer: Subsumsjonproducer
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val behovMediator = BehovMediator(sikkerLogg)
@@ -543,7 +545,7 @@ internal class HendelseMediator(
         aktivitetslogg: Aktivitetslogg
     ) {
         personMediator.ferdigstill(context)
-        subsumsjonMediator.ferdigstill(context)
+        subsumsjonMediator.ferdigstill(subsumsjonsproducer)
         datadelingMediator.ferdigstill(context)
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${aktivitetslogg.toString()}")

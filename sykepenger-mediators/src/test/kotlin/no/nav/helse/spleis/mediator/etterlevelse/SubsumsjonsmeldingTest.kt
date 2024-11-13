@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.januar
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.SubsumsjonMediator
+import no.nav.helse.spleis.Subsumsjonproducer
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +50,7 @@ internal class SubsumsjonsmeldingTest {
             Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid"),
         ))
         subsumsjonMediator.logg(subsumsjonen)
-        subsumsjonMediator.ferdigstill(testRapid)
+        subsumsjonMediator.ferdigstill(Subsumsjonproducer.RapidSubsumsjonproducer(testRapid))
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
     }
 

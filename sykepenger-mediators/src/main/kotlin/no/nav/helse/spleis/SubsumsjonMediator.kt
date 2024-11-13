@@ -10,8 +10,25 @@ import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
+interface Subsumsjonproducer {
+    fun send(fnr: String, melding: String)
+
+    class KafkaSubsumsjonproducer(private val topic: String, private val producer: KafkaProducer<String, String>) : Subsumsjonproducer {
+        override fun send(fnr: String, melding: String) {
+            producer.send(ProducerRecord(topic, fnr, melding))
+        }
+    }
+    class RapidSubsumsjonproducer(private val context: MessageContext) : Subsumsjonproducer {
+        override fun send(fnr: String, melding: String) {
+            context.publish(fnr, melding)
+        }
+    }
+}
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,
     private val versjonAvKode: String
@@ -56,40 +73,43 @@ internal class SubsumsjonMediator(
         }
     }
 
-    fun ferdigstill(context: MessageContext) {
+    fun ferdigstill(producer: Subsumsjonproducer) {
         if (subsumsjoner.isEmpty()) return
         logg.info("som følge av hendelse id=${message.meldingsporing.id} sendes ${subsumsjoner.size} subsumsjonsmeldinger på rapid")
         subsumsjoner
             .map { subsumsjonMelding(it) }
             .forEach {
-                context.publish(message.meldingsporing.fødselsnummer, it.toJson().also { message ->
-                    sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $message")
-                })
+                val jsonbody = it.toJson()
+                sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $message")
+                producer.send(message.meldingsporing.fødselsnummer, jsonbody)
             }
     }
 
     private fun subsumsjonMelding(event: SubsumsjonEvent): JsonMessage {
         return JsonMessage.newMessage("subsumsjon", mapOf(
             "@id" to event.id,
-            "subsumsjon" to mutableMapOf(
-                "id" to event.id,
-                "eventName" to "subsumsjon",
-                "tidsstempel" to ZonedDateTime.now(),
-                "versjon" to "1.0.0",
-                "kilde" to "spleis",
-                "versjonAvKode" to versjonAvKode,
-                "fodselsnummer" to message.meldingsporing.fødselsnummer,
-                "sporing" to event.sporing.map { it.key.tilEkstern() to it.value }.toMap(),
-                "lovverk" to event.lovverk,
-                "lovverksversjon" to event.ikrafttredelse,
-                "paragraf" to event.paragraf,
-                "input" to event.input,
-                "output" to event.output,
-                "utfall" to event.utfall
-            ).apply {
-                compute("ledd") { _, _ -> event.ledd }
-                compute("punktum") { _, _ -> event.punktum }
-                compute("bokstav") { _, _ -> event.bokstav }
+            "@opprettet" to LocalDateTime.now(),
+            "@forårsaket_av" to mapOf(
+                "id" to message.meldingsporing.id
+            ),
+            "subsumsjon" to buildMap {
+                this["id"] = event.id
+                this["eventName"] = "subsumsjon"
+                this["tidsstempel"] = ZonedDateTime.now()
+                this["versjon"] = "1.0.0"
+                this["kilde"] = "spleis"
+                this["versjonAvKode"] = versjonAvKode
+                this["fodselsnummer"] = message.meldingsporing.fødselsnummer
+                this["sporing"] = event.sporing.map { it.key.tilEkstern() to it.value }.toMap()
+                this["lovverk"] = event.lovverk
+                this["lovverksversjon"] = event.ikrafttredelse
+                this["paragraf"] = event.paragraf
+                this["input"] = event.input
+                this["output"] = event.output
+                this["utfall"] = event.utfall
+                if (event.ledd != null) { this["ledd"] = event.ledd }
+                if (event.punktum != null) { this["punktum"] = event.punktum }
+                if (event.bokstav != null) { this["bokstav"] = event.bokstav }
             }
         ))
     }

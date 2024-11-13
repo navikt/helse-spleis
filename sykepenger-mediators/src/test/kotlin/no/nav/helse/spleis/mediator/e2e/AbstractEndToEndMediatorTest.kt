@@ -46,6 +46,7 @@ import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.Subsumsjonproducer
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.TestMessageFactory
@@ -102,7 +103,8 @@ internal abstract class AbstractEndToEndMediatorTest() {
             hendelseRepository = HendelseRepository(dataSource.ds),
             personDao = PersonDao(dataSource.ds, STØTTER_IDENTBYTTE = true),
             versjonAvKode = "test-versjon",
-            støtterIdentbytte = true
+            støtterIdentbytte = true,
+            subsumsjonsproducer = Subsumsjonproducer.RapidSubsumsjonproducer(testRapid)
         )
 
         messageMediator = MessageMediator(
