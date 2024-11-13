@@ -78,7 +78,9 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                         meldingsreferanseId = meldingsreferanseId,
                         fom = refusjonsopplysning.path("fom").asLocalDate(),
                         tom = refusjonsopplysning.path("tom").asOptionalLocalDate(),
-                        beløp = refusjonsopplysning.path("beløp").asDouble().månedlig
+                        beløp = refusjonsopplysning.path("beløp").asDouble().månedlig,
+                        avsender = SAKSBEHANDLER,
+                        tidsstempel = opprettet
                     ), opprettet)
             }
         }.build()

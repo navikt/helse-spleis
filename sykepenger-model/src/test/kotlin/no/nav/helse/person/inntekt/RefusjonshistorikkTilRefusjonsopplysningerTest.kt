@@ -7,6 +7,7 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -18,10 +19,19 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+
+fun Refusjonsopplysning(
+    meldingsreferanseId: UUID,
+    fom: LocalDate,
+    tom: LocalDate?,
+    beløp: Inntekt,
+) = Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp, SYSTEM, LocalDate.EPOCH.atStartOfDay())
+
 
 internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 

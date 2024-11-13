@@ -78,6 +78,7 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import kotlin.streams.asSequence
@@ -482,13 +483,17 @@ data class PersonData(
             val meldingsreferanseId: UUID,
             val fom: LocalDate,
             val tom: LocalDate?,
-            val beløp: Double
+            val beløp: Double,
+            val avsender: AvsenderData?,
+            val tidsstempel: LocalDateTime?
         ) {
             fun tilDto() = RefusjonsopplysningInnDto(
                 meldingsreferanseId = this.meldingsreferanseId,
                 fom = this.fom,
                 tom = this.tom,
-                beløp = InntektbeløpDto.MånedligDouble(beløp)
+                beløp = InntektbeløpDto.MånedligDouble(beløp),
+                avsender = avsender?.tilDto(),
+                tidsstempel = tidsstempel
             )
         }
 
@@ -1327,7 +1332,7 @@ data class PersonData(
         })
 
     }
-    data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData, val tidsstempel: LocalDateTime)
+    data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
 }
 
 private fun LocalDate.erHelg() = dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)

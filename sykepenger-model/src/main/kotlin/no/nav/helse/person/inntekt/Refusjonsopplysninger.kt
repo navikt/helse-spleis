@@ -8,6 +8,7 @@ import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningerUtDto
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -22,7 +23,9 @@ data class Refusjonsopplysning(
     val meldingsreferanseId: UUID,
     val fom: LocalDate,
     val tom: LocalDate?,
-    val beløp: Inntekt
+    val beløp: Inntekt,
+    val avsender: Avsender?,
+    val tidsstempel: LocalDateTime?
 ) {
     init {
         check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) "}
@@ -38,12 +41,14 @@ data class Refusjonsopplysning(
                     fom = it.start,
                     tom = it.endInclusive.takeUnless { tom -> tom == LocalDate.MAX },
                     beløp = this.beløp,
-                    meldingsreferanseId = this.meldingsreferanseId
+                    meldingsreferanseId = this.meldingsreferanseId,
+                    avsender = this.avsender,
+                    tidsstempel = this.tidsstempel
                 )
             }
     }
 
-    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
+    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp, avsender, tidsstempel)
 
     private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
         return if (dekker(dato)) oppdatertTom(dato.forrigeDag)
@@ -53,7 +58,7 @@ data class Refusjonsopplysning(
     private fun begrensetFra(dato: LocalDate): Refusjonsopplysning? {
         if (periode.endInclusive < dato) return null
         if (periode.start >= dato) return this
-        return Refusjonsopplysning(meldingsreferanseId, dato, tom, beløp)
+        return Refusjonsopplysning(meldingsreferanseId, dato, tom, beløp, avsender, tidsstempel)
     }
 
     private fun dekker(dag: LocalDate) = dag in periode
@@ -64,7 +69,14 @@ data class Refusjonsopplysning(
     private fun funksjoneltLik(other: Refusjonsopplysning) =
         this.periode == other.periode && this.beløp == other.beløp
 
-    override fun toString() = "$periode, ${beløp.daglig} ($meldingsreferanseId)"
+    override fun toString() = "$periode, ${beløp.daglig} ($meldingsreferanseId), ($avsender), ($tidsstempel)"
+
+    // TODO slett denne når vi har migrert inn avsender og tidsstempel 13.11.24
+    override fun equals(other: Any?): Boolean {
+        if (other !is Refusjonsopplysning) return false
+        if (this === other) return true
+        return this.fom == other.fom && this.tom == other.tom && this.beløp == other.beløp && this.meldingsreferanseId == other.meldingsreferanseId
+    }
 
     internal companion object {
         private fun List<Refusjonsopplysning>.mergeInnNyeOpplysninger(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
@@ -88,7 +100,9 @@ data class Refusjonsopplysning(
                 meldingsreferanseId = dto.meldingsreferanseId,
                 fom = dto.fom,
                 tom = dto.tom,
-                beløp = Inntekt.gjenopprett(dto.beløp)
+                beløp = Inntekt.gjenopprett(dto.beløp),
+                avsender = dto.avsender?.let { Avsender.gjenopprett(it) },
+                tidsstempel = dto.tidsstempel
             )
         }
     }
@@ -135,7 +149,7 @@ data class Refusjonsopplysning(
 
         internal fun gjenoppliv(nyttSkjæringstidspunkt: LocalDate): Refusjonsopplysninger {
             val gammelSnute = validerteRefusjonsopplysninger.firstOrNull { it.dekker(nyttSkjæringstidspunkt) } ?: validerteRefusjonsopplysninger.firstOrNull() ?: return this
-            val nySnute = Refusjonsopplysning(gammelSnute.meldingsreferanseId, nyttSkjæringstidspunkt, null, gammelSnute.beløp)
+            val nySnute = Refusjonsopplysning(gammelSnute.meldingsreferanseId, nyttSkjæringstidspunkt, null, gammelSnute.beløp, gammelSnute.avsender, gammelSnute.tidsstempel)
             return nySnute.refusjonsopplysninger.merge(this)
         }
 
@@ -245,6 +259,8 @@ data class Refusjonsopplysning(
         meldingsreferanseId = this.meldingsreferanseId,
         fom = this.fom,
         tom = this.tom,
-        beløp = this.beløp.dto()
+        beløp = this.beløp.dto(),
+        avsender = this.avsender?.dto(),
+        tidsstempel = this.tidsstempel
     )
 }

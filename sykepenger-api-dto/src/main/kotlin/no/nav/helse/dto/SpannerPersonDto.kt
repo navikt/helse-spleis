@@ -222,7 +222,9 @@ data class SpannerPersonDto(
             val meldingsreferanseId: UUID,
             val fom: LocalDate,
             val tom: LocalDate?,
-            val beløp: InntektDto
+            val beløp: InntektDto,
+            val avsender: AvsenderData?,
+            val tidsstempel: LocalDateTime?
         )
 
         data class PeriodeData(val fom: LocalDate, val tom: LocalDate)
@@ -1526,7 +1528,9 @@ private fun RefusjonsopplysningUtDto.tilPersonData() =
         meldingsreferanseId = this.meldingsreferanseId,
         fom = this.fom,
         tom = this.tom,
-        beløp = this.beløp.tilPersonData()
+        beløp = this.beløp.tilPersonData(),
+        avsender = this.avsender?.tilPersonData(),
+        tidsstempel = this.tidsstempel
     )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =
