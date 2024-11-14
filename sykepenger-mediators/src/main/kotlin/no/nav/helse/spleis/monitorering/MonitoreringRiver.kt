@@ -20,8 +20,8 @@ internal class MonitoreringRiver(
 
     init {
         River(rapidsConnection).apply {
+            precondition { it.requireValue("@event_name", "minutt") }
             validate {
-                it.demandValue("@event_name", "minutt")
                 it.require("@opprettet") { node -> LocalDateTime.parse(node.asText()) }
                 it.requireKey("system_participating_services")
             }

@@ -3,11 +3,13 @@ include("jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", 
     "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling",
     "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api")
 
+val rapidsAndRiversVersion = "2024111411041731578641.814e834a9ecd"
+
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("testcontainers", "1.20.1")
-            version("rapids-and-rivers", "2024111021211731270108.8f718ca4927d")
+            version("rapids-and-rivers", rapidsAndRiversVersion)
             version("postgres", "42.7.3")
             version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")
