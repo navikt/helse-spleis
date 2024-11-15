@@ -10,6 +10,7 @@ val ktorVersion = "3.0.1"
 val awaitilityVersion = "4.2.2"
 val mockVersion = "1.13.13"
 val jsonassertVersion = "1.5.3"
+val wiremockVersion = "3.9.2"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -45,7 +46,7 @@ dependencies {
 
     testImplementation("com.github.navikt.tbd-libs:naisful-test-app:$tbdLibsVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("org.wiremock:wiremock:3.3.1") {
+    testImplementation("org.wiremock:wiremock:$wiremockVersion") {
         exclude(group = "junit")
     }
     testImplementation("io.mockk:mockk:$mockVersion")
