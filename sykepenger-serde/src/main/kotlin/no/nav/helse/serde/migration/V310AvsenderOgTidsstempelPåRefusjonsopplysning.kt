@@ -10,6 +10,7 @@ internal class V310AvsenderOgTidsstempelPåRefusjonsopplysning: JsonMigration(ve
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val meldinger = meldingerSupplier.hentMeldinger()
         val fnr = jsonNode.path("fødselsnummer").asText()
+        val ukjenteMeldingsreferanseIder = mutableSetOf<UUID>()
         jsonNode.path("vilkårsgrunnlagHistorikk").forEach { historikkinnslag ->
             historikkinnslag.path("vilkårsgrunnlag").forEach { vilkårsgrunnlag ->
                 vilkårsgrunnlag.path("inntektsgrunnlag").path("arbeidsgiverInntektsopplysninger").forEach { arbeidsgiverInntektsopplysning ->
@@ -21,8 +22,9 @@ internal class V310AvsenderOgTidsstempelPåRefusjonsopplysning: JsonMigration(ve
                             refusjonsopplysning as ObjectNode
                             val meldingsreferanseId = UUID.fromString(refusjonsopplysning.path("meldingsreferanseId").asText())
                             val hendelse = meldinger[meldingsreferanseId]
-                            if (hendelse == null) { sikkerlogg.info("Fant ikke hendelse for meldingsreferanseId $meldingsreferanseId for person $fnr") }
-                            else {
+                            if (hendelse == null) {
+                                ukjenteMeldingsreferanseIder.add(meldingsreferanseId)
+                            } else {
                                 refusjonsopplysning.put("avsender", hendelse.meldingstype.avsender)
                                 refusjonsopplysning.put("tidsstempel", "${hendelse.lestDato}")
                             }
@@ -30,6 +32,9 @@ internal class V310AvsenderOgTidsstempelPåRefusjonsopplysning: JsonMigration(ve
                 }
             }
         }
+
+        if (ukjenteMeldingsreferanseIder.isEmpty()) return sikkerlogg.info("Migrert inn komplette refusjonsopplysninger for $fnr")
+        sikkerlogg.info("Fant ${ukjenteMeldingsreferanseIder.size} ukjente meldingsreferanser for $fnr: ${ukjenteMeldingsreferanseIder.joinToString()}")
     }
 
     internal companion object {
