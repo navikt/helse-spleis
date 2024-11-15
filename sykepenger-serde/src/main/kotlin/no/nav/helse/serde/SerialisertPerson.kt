@@ -35,6 +35,7 @@ import no.nav.helse.serde.migration.V306RefusjonstidslinjePåBehandling
 import no.nav.helse.serde.migration.V307RefusjonstidslinjePåBehandlingsendring
 import no.nav.helse.serde.migration.V308HendelseIdPåInfotrygdhistorikk
 import no.nav.helse.serde.migration.V309LeggeTilUbrukteRefusjonsopplysninger
+import no.nav.helse.serde.migration.V310AvsenderOgTidsstempelPåRefusjonsopplysning
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(val json: String) {
@@ -69,7 +70,8 @@ class SerialisertPerson(val json: String) {
             V306RefusjonstidslinjePåBehandling(),
             V307RefusjonstidslinjePåBehandlingsendring(),
             V308HendelseIdPåInfotrygdhistorikk(),
-            V309LeggeTilUbrukteRefusjonsopplysninger()
+            V309LeggeTilUbrukteRefusjonsopplysninger(),
+            V310AvsenderOgTidsstempelPåRefusjonsopplysning()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

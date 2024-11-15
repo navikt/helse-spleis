@@ -1,0 +1,140 @@
+{
+  "fødselsnummer": "1",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "75d708d5-e2b1-4ff4-9426-976921505925",
+                    "fom": "2018-01-01",
+                    "tom": "2018-01-20",
+                    "beløp": 20000.0,
+                    "avsender": "ARBEIDSGIVER",
+                    "tidsstempel": "2024-11-15T10:49:09.829616"
+                  },
+                  {
+                    "meldingsreferanseId": "75d708d5-e2b1-4ff4-9426-976921505925",
+                    "fom": "2018-01-21",
+                    "tom": "2018-01-24",
+                    "beløp": 0.0,
+                    "avsender": "ARBEIDSGIVER",
+                    "tidsstempel": "2024-11-15T10:49:09.829616"
+                  },
+                  {
+                    "meldingsreferanseId": "7bf6d038-f8b7-44f6-95e7-48f97b44d90f",
+                    "fom": "2018-01-25",
+                    "tom": null,
+                    "beløp": 10000.0,
+                    "avsender": "SAKSBEHANDLER",
+                    "tidsstempel": "2024-11-15T10:47:09.829616"
+                  }
+                ]
+              },
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8004bf7c-d520-461c-a52c-990b0b95f5ce",
+                    "fom": "2018-01-01",
+                    "tom": "2018-01-25",
+                    "beløp": 20000.0,
+                    "avsender": "ARBEIDSGIVER",
+                    "tidsstempel": "2024-11-15T10:49:09.72348"
+                  },
+                  {
+                    "meldingsreferanseId": "7bf6d038-f8b7-44f6-95e7-48f97b44d90f",
+                    "fom": "2018-01-26",
+                    "tom": null,
+                    "beløp": 9000.0,
+                    "avsender": "SAKSBEHANDLER",
+                    "tidsstempel": "2024-11-15T10:47:09.829616"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "75d708d5-e2b1-4ff4-9426-976921505925",
+                    "fom": "2018-01-01",
+                    "tom": "2018-01-20",
+                    "beløp": 20000.0,
+                    "avsender": "ARBEIDSGIVER",
+                    "tidsstempel": "2024-11-15T12:47:09.829616"
+                  },
+                  {
+                    "meldingsreferanseId": "75d708d5-e2b1-4ff4-9426-976921505925",
+                    "fom": "2018-01-21",
+                    "tom": null,
+                    "beløp": 0.0,
+                    "avsender": "ARBEIDSGIVER",
+                    "tidsstempel": "2024-11-15T12:47:09.829616"
+                  }
+                ]
+              },
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8004bf7c-d520-461c-a52c-990b0b95f5ce",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 20000.0,
+                    "avsender": null,
+                    "tidsstempel": null
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8004bf7c-d520-461c-a52c-990b0b95f5ce",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 20000.0,
+                    "avsender": null,
+                    "tidsstempel": null
+                  }
+                ]
+              },
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8004bf7c-d520-461c-a52c-990b0b95f5ce",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 20000.0,
+                    "avsender": null,
+                    "tidsstempel": null
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 310
+}
