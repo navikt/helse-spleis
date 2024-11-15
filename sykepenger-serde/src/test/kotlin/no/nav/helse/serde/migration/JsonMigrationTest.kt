@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.serde.migration.JsonMigration.Companion.skjemaVersjon
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,9 +19,9 @@ internal class JsonMigrationTest {
         var invocationCount = 0
         val supplier = {
             invocationCount += 1
-            mapOf(UUID.randomUUID() to Pair("", "{}"))
+            mapOf(UUID.randomUUID() to Hendelse(UUID.randomUUID(), "", LocalDateTime.now()))
         }
-        val meldinger = mutableListOf<Map<UUID, Pair<Navn, Json>>>()
+        val meldinger = mutableListOf<Map<UUID, Hendelse>>()
         listOf(
             object : JsonMigration(1) {
                 override val description = ""

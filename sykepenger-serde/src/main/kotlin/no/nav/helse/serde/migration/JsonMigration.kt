@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import org.slf4j.LoggerFactory
 
@@ -10,11 +11,10 @@ fun interface MeldingerSupplier {
     companion object {
         internal val empty = MeldingerSupplier { emptyMap() }
     }
-    fun hentMeldinger(): Map<UUID, Pair<Navn, Json>>
+    fun hentMeldinger(): Map<UUID, Hendelse>
 }
 
-typealias Navn = String
-typealias Json = String
+data class Hendelse(val meldingsreferanseId: UUID, val meldingstype: String, val lestDato: LocalDateTime)
 
 internal fun List<JsonMigration>.migrate(
     jsonNode: JsonNode,
@@ -23,9 +23,9 @@ internal fun List<JsonMigration>.migrate(
     JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
 
 private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
-    private val meldinger: Map<UUID, Pair<Navn, Json>> by lazy { supplier.hentMeldinger() }
+    private val meldinger: Map<UUID, Hendelse> by lazy { supplier.hentMeldinger() }
 
-    override fun hentMeldinger(): Map<UUID, Pair<Navn, Json>> = meldinger
+    override fun hentMeldinger(): Map<UUID, Hendelse> = meldinger
 }
 
 // Implements GoF Command Pattern to perform migration

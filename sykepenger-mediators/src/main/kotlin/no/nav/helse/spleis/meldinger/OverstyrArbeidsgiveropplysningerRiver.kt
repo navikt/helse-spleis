@@ -2,9 +2,9 @@ package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
@@ -29,12 +29,12 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
         message.requireArbeidsgiveropplysninger()
     }
 
-    private companion object {
+    internal companion object {
         private val JsonNode.gyldigTekst get() = isTextual && asText().isNotBlank()
         private val JsonNode.gyldigDouble get() = isNumber || asText().toDoubleOrNull() != null
         private val JsonNode.gyldigInt get() = isInt || asText().toIntOrNull() != null
 
-        private fun JsonMessage.requireArbeidsgiveropplysninger() {
+        internal fun JsonMessage.requireArbeidsgiveropplysninger() {
             require("arbeidsgivere") { require(it.size() > 0) { "Må settes minst en arbeidsgiver" } }
             requireArray("arbeidsgivere") {
                 require("organisasjonsnummer") { require(it.gyldigTekst) }

@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.db
 
+import java.time.ZoneId
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
-import no.nav.helse.serde.migration.Json
-import no.nav.helse.serde.migration.Navn
+import no.nav.helse.serde.migration.Hendelse
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.AVBRUTT_SØKNAD
@@ -162,19 +162,20 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AvbruttArbeidsledigSøknadMessage -> null // Disse trenger vi ikke å lagre
     }
 
-    internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Pair<Navn, Json>> {
+    internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
+        val relevanteMeldingstyper = setOf(INNTEKTSMELDING, OVERSTYRARBEIDSGIVEROPPLYSNINGER, OVERSTYRINNTEKT, GJENOPPLIV_VILKÅRSGRUNNLAG)
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND (melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ?)",
-                    personidentifikator.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name,
-                    OVERSTYRINNTEKT.name, VILKÅRSGRUNNLAG.name
+                    "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = ? AND (${relevanteMeldingstyper.joinToString(separator = " OR ") { "melding_type=?" }})",
+                    personidentifikator.toLong(), *relevanteMeldingstyper.map(Enum<*>::name).toTypedArray()
                 ).map {
-                    UUID.fromString(it.string("melding_id")) to Pair<Navn, Json>(
-                        it.string("melding_type"),
-                        it.string("data")
+                    Hendelse(
+                        meldingsreferanseId = UUID.fromString(it.string("melding_id")),
+                        meldingstype = it.string("melding_type"),
+                        lestDato = it.instant("lest_dato").atZone(ZoneId.systemDefault()).toLocalDateTime()
                     )
-                }.asList).toMap()
+                }.asList).associateBy { it.meldingsreferanseId }
         }
     }
 
