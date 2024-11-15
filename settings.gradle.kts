@@ -8,14 +8,14 @@ val rapidsAndRiversVersion = "2024111509181731658731.11009b44c672"
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("testcontainers", "1.20.1")
+            version("testcontainers", "1.20.3")
             version("rapids-and-rivers", rapidsAndRiversVersion)
-            version("postgres", "42.7.3")
-            version("hikari", "5.1.0")
+            version("postgres", "42.7.4")
+            version("hikari", "6.1.0")
             version("kotliquery", "1.9.0")
             version("cloudsql", "1.20.0")
-            version("flyway", "10.17.1")
-            version("logback", "1.5.7")
+            version("flyway", "10.21.0")
+            version("logback", "1.5.12")
             version("logstash", "8.0")
             version("jackson", "2.18.1")
 
@@ -32,12 +32,11 @@ dependencyResolutionManagement {
             library("kotliquery", "com.github.seratch", "kotliquery").versionRef("kotliquery")
 
             library("cloudsql", "com.google.cloud.sql", "postgres-socket-factory").versionRef("cloudsql")
-            library("flyway-core", "org.flywaydb", "flyway-core").versionRef("flyway")
             library("flyway-postgres", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
 
             library("testcontainers", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
-            bundle("flyway", listOf("flyway-core", "flyway-postgres"))
+            bundle("flyway", listOf("flyway-postgres"))
             bundle("database", listOf("postgresql", "hikari", "kotliquery"))
 
             bundle("jackson", listOf("jackson-kotlin", "jackson-datatype"))
