@@ -25,7 +25,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_FRILANS
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_SELVSTENDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRINNTEKT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG
@@ -163,12 +162,11 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
-        val relevanteMeldingstyper = setOf(INNTEKTSMELDING, OVERSTYRARBEIDSGIVEROPPLYSNINGER, OVERSTYRINNTEKT, GJENOPPLIV_VILKÅRSGRUNNLAG)
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = ? AND (${relevanteMeldingstyper.joinToString(separator = " OR ") { "melding_type=?" }})",
-                    personidentifikator.toLong(), *relevanteMeldingstyper.map(Enum<*>::name).toTypedArray()
+                    "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = ?",
+                    personidentifikator.toLong()
                 ).map {
                     Hendelse(
                         meldingsreferanseId = UUID.fromString(it.string("melding_id")),
