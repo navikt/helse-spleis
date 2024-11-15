@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.jobs
 
+import com.github.navikt.tbd_libs.kafka.AivenConfig
+import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
@@ -16,8 +18,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.rapids_and_rivers.cli.AivenConfig
-import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
@@ -42,13 +42,15 @@ fun main(cliArgs: Array<String>) {
     val args = cliArgs.takeIf(Array<*>::isNotEmpty)?.toList() ?: System.getenv("RUNTIME_OPTS").split(" ")
     if (args.isEmpty()) return log.error("Provide a task name as CLI argument")
 
+    val factory by lazy { ConsumerProducerFactory(AivenConfig.default) }
+
     when (val task = args[0].trim().lowercase()) {
         "vacuum" -> vacuumTask()
-        "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
-        "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
+        "avstemming" -> avstemmingTask(factory, args.getOrNull(1)?.toIntOrNull())
+        "migrate" -> migrateTask(factory)
         "migrate_v2" -> migrateV2Task(args[1].trim())
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
-        "migrereg" -> migrereGrunnbeløp(ConsumerProducerFactory(AivenConfig.default), args[1].trim())
+        "migrereg" -> migrereGrunnbeløp(factory, args[1].trim())
         else -> log.error("Unknown task $task")
     }
 }

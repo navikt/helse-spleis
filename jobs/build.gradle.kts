@@ -1,5 +1,6 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
-val rapidsAndRiversCliVersion = "1.6191629"
+val tbdLibsVersion = "2024.11.14-10.46-bc229a23"
+val jacksonVersion = "2.18.1"
 
 tasks.withType<Test> {
     useJUnitPlatform()
@@ -9,7 +10,9 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers-cli:$rapidsAndRiversCliVersion")
+    implementation("com.github.navikt.tbd-libs:kafka:$tbdLibsVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
