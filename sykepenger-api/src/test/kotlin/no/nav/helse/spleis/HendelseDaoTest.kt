@@ -50,13 +50,6 @@ internal class HendelseDaoTest {
     }
 
     @Test
-    fun `hentAlleHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource::ds, mockk(relaxed = true))
-        val events = dao.hentAlleHendelser(UNG_PERSON_FNR.toLong())
-        Assertions.assertEquals(1, events.size)
-    }
-
-    @Test
     fun `hentHendelser sql er valid`() {
         val dao = HendelseDao(dataSource::ds, mockk(relaxed = true))
         val ingenEvents = dao.hentHendelser(UNG_PERSON_FNR.toLong())

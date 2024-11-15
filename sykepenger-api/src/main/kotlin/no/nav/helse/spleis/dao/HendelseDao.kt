@@ -3,12 +3,10 @@ package no.nav.helse.spleis.dao
 import io.micrometer.core.instrument.MeterRegistry
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.serde.migration.Json
-import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.objectMapper
 import org.intellij.lang.annotations.Language
@@ -127,22 +125,6 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
             }
         }.onEach {
             PostgresProbe.hendelseLestFraDb(meterRegistry)
-        }
-    }
-
-    fun hentAlleHendelser(fødselsnummer: Long): Map<UUID, Pair<Navn, Json>> {
-        return sessionOf(dataSource()).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND (${Meldingstype.entries.joinToString(separator = " OR ") { "melding_type=?" }})",
-                    fødselsnummer, *Meldingstype.entries.map(Enum<*>::name).toTypedArray()
-                ).map {
-                    UUID.fromString(it.string("melding_id")) to Pair(
-                        it.string("melding_type"),
-                        it.string("data")
-                    )
-                }.asList
-            ).toMap()
         }
     }
 

@@ -30,7 +30,7 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
                 val request = call.receive<PersonRequest>()
                 withContext(Dispatchers.IO) {
                     val serialisertPerson = personDao.hentPersonFraFnr(request.fødselsnummer.toLong()) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(request.fødselsnummer.toLong()) }
+                    val dto = serialisertPerson.tilPersonDto()
                     val person = Person.gjenopprett(EmptyLog, dto)
                     call.respond(person.dto().tilSpannerPersonDto())
                 }
@@ -63,7 +63,7 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
                 withContext(Dispatchers.IO) {
                     val fnr = call.request.header("fnr")?.toLong() ?: throw BadRequestException("mangler fnr")
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    val dto = person.tilPersonDto { hendelseDao.hentAlleHendelser(fnr) }
+                    val dto = person.tilPersonDto()
                     call.respond(serializePersonForSporing(Person.gjenopprett(EmptyLog, dto)))
                 }
             }

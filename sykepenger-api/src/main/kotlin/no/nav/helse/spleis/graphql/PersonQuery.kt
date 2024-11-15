@@ -41,7 +41,7 @@ internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao
     return ApiMetrikker.målDatabase(meterRegistry) { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
         val spekemat = spekematClient.hentSpekemat(fnr, callId)
         ApiMetrikker.målDeserialisering(meterRegistry) {
-            val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(fnr.toLong()) }
+            val dto = serialisertPerson.tilPersonDto()
             Person.gjenopprett(EmptyLog, dto)
         }
             .let { ApiMetrikker.målByggSnapshot(meterRegistry) { serializePersonForSpeil(it, spekemat) } }
