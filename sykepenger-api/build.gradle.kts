@@ -1,7 +1,7 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
 plugins {
-    id("com.bmuschko.docker-remote-api") version "9.3.3"
+    id("com.bmuschko.docker-remote-api") version "9.4.0"
 }
 
 val tbdLibsVersion = "2024.11.15-09.09-08ca346b"
