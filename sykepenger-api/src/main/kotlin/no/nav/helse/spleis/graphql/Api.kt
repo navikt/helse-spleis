@@ -4,35 +4,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.jsontype.NamedType
 import com.github.navikt.tbd_libs.result_object.getOrThrow
 import com.github.navikt.tbd_libs.speed.SpeedClient
+import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Json
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
-import io.ktor.server.plugins.callid.callId
-import io.ktor.server.request.receiveText
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.plugins.callid.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.micrometer.core.instrument.MeterRegistry
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
-import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
-import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
+import no.nav.helse.spleis.graphql.dto.*
 import no.nav.helse.spleis.nyObjectmapper
 import no.nav.helse.spleis.objectMapper
 import org.slf4j.LoggerFactory
+import java.util.*
 
 internal object Api {
     private val logger = LoggerFactory.getLogger(Api::class.java)
@@ -67,16 +57,7 @@ internal object Api {
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val (fødselsnummer, aktørId) = try {
-                            val identer = speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
-                            identer.fødselsnummer to identer.aktørId
-                        } catch (err: Exception) {
-                            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
-                                ident to "0000000000000"
-                            } else {
-                                throw err
-                            }
-                        }
+                        val (fødselsnummer, aktørId) = speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
 
                         val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, aktørId, callId, meterRegistry)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)

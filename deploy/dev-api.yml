@@ -58,6 +58,7 @@ spec:
     outbound:
       rules:
         - application: spekemat
+        - application: speed-api-dev-proxy
   secureLogs:
     enabled: true
   envFrom:

@@ -29,7 +29,10 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     internal val speedClient = SpeedClient(
         httpClient = java.net.http.HttpClient.newHttpClient(),
         objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()),
-        tokenProvider = azureClient
+        tokenProvider = azureClient,
+        baseUrl = if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
+            "http://speed-api-dev-proxy"
+        } else null
     )
     internal val spekematClient = SpekematClient(
         tokenProvider = azureClient,
