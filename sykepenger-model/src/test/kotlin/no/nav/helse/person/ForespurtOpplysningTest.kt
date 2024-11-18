@@ -5,6 +5,7 @@ import no.nav.helse.april
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
+import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -19,7 +20,7 @@ class ForespurtOpplysningTest {
         val forespurteOpplysninger = listOf(
             PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Arbeidsgiverperiode,
-            PersonObserver.Refusjon(emptyList())
+            PersonObserver.Refusjon(emptyList<Refusjonsforslag>())
         )
 
         val expectedJson = forespurteOpplysningerMap()

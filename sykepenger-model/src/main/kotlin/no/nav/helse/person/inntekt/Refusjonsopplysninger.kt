@@ -24,8 +24,8 @@ data class Refusjonsopplysning(
     val fom: LocalDate,
     val tom: LocalDate?,
     val beløp: Inntekt,
-    val avsender: Avsender?,
-    val tidsstempel: LocalDateTime?
+    val avsender: Avsender,
+    val tidsstempel: LocalDateTime
 ) {
     init {
         check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) "}
@@ -71,13 +71,6 @@ data class Refusjonsopplysning(
 
     override fun toString() = "$periode, ${beløp.daglig} ($meldingsreferanseId), ($avsender), ($tidsstempel)"
 
-    // TODO slett denne når vi har migrert inn avsender og tidsstempel 13.11.24
-    override fun equals(other: Any?): Boolean {
-        if (other !is Refusjonsopplysning) return false
-        if (this === other) return true
-        return this.fom == other.fom && this.tom == other.tom && this.beløp == other.beløp && this.meldingsreferanseId == other.meldingsreferanseId
-    }
-
     internal companion object {
         private fun List<Refusjonsopplysning>.mergeInnNyeOpplysninger(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
             val begrensetFra = minOfOrNull { it.fom } ?: LocalDate.MIN
@@ -101,7 +94,7 @@ data class Refusjonsopplysning(
                 fom = dto.fom,
                 tom = dto.tom,
                 beløp = Inntekt.gjenopprett(dto.beløp),
-                avsender = dto.avsender?.let { Avsender.gjenopprett(it) },
+                avsender = Avsender.gjenopprett(dto.avsender),
                 tidsstempel = dto.tidsstempel
             )
         }
@@ -260,7 +253,7 @@ data class Refusjonsopplysning(
         fom = this.fom,
         tom = this.tom,
         beløp = this.beløp.dto(),
-        avsender = this.avsender?.dto(),
+        avsender = this.avsender.dto(),
         tidsstempel = this.tidsstempel
     )
 }

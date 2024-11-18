@@ -484,15 +484,15 @@ data class PersonData(
             val fom: LocalDate,
             val tom: LocalDate?,
             val beløp: Double,
-            val avsender: AvsenderData?,
-            val tidsstempel: LocalDateTime?
+            val avsender: AvsenderData,
+            val tidsstempel: LocalDateTime
         ) {
             fun tilDto() = RefusjonsopplysningInnDto(
                 meldingsreferanseId = this.meldingsreferanseId,
                 fom = this.fom,
                 tom = this.tom,
                 beløp = InntektbeløpDto.MånedligDouble(beløp),
-                avsender = avsender?.tilDto(),
+                avsender = avsender.tilDto(),
                 tidsstempel = tidsstempel
             )
         }

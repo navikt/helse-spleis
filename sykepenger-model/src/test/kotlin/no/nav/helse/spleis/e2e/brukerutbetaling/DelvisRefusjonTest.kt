@@ -2,13 +2,14 @@ package no.nav.helse.spleis.e2e.brukerutbetaling
 
 import java.time.LocalDate
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -27,6 +28,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
@@ -679,10 +681,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(inntektsmeldingId, 1.januar, 16.januar, INNTEKT),
-                Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT)
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 16.januar, INNTEKT, ARBEIDSGIVER),
+                Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT, ARBEIDSGIVER)
             ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
         )
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())

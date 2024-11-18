@@ -7,7 +7,6 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
-import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -19,19 +18,10 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-fun Refusjonsopplysning(
-    meldingsreferanseId: UUID,
-    fom: LocalDate,
-    tom: LocalDate?,
-    beløp: Inntekt,
-) = Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp, SYSTEM, LocalDate.EPOCH.atStartOfDay())
-
 
 internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
@@ -41,10 +31,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
     @Test
     fun `bruker endringer i refusjon oppgitt før siste refusjonsdag`() {
         val (id, refusjonsopplysninger, refusjonshistorikk) = endringIRefusjonFraOgMed(31.januar)
-        assertEquals(listOf(
-            Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 30.januar, 100.daglig),
-            Refusjonsopplysning(id.meldingsreferanseId, 31.januar, 1.februar, 200.daglig),
-            Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig)
+        assertLikeRefusjonsopplysninger(listOf(
+            Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 30.januar, 100.daglig, ARBEIDSGIVER),
+            Refusjonsopplysning(id.meldingsreferanseId, 31.januar, 1.februar, 200.daglig, ARBEIDSGIVER),
+            Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig, ARBEIDSGIVER)
         ), refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(1.januar til 30.januar, 100.daglig, id) + Beløpstidslinje.fra(31.januar til 1.februar, 200.daglig, id) + Beløpstidslinje.fra(2.februar til 28.februar, INGEN, id)
@@ -54,10 +44,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
     @Test
     fun `bruker endringer i refusjon oppgitt lik siste refusjonsdag`() {
         val (id, refusjonsopplysninger, refusjonshistorikk) = endringIRefusjonFraOgMed(1.februar)
-        assertEquals(listOf(
-            Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 31.januar, 100.daglig),
-            Refusjonsopplysning(id.meldingsreferanseId, 1.februar, 1.februar, 200.daglig),
-            Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig)
+        assertLikeRefusjonsopplysninger(listOf(
+            Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 31.januar, 100.daglig, ARBEIDSGIVER),
+            Refusjonsopplysning(id.meldingsreferanseId, 1.februar, 1.februar, 200.daglig, ARBEIDSGIVER),
+            Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig, ARBEIDSGIVER)
         ), refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(1.januar til 31.januar, 100.daglig, id) + Beløpstidslinje.fra(1.februar til 1.februar, 200.daglig, id) + Beløpstidslinje.fra(2.februar til 28.februar, INGEN, id)
@@ -67,9 +57,9 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
     @Test
     fun `ignorer endringer i refusjon etter siste refusjonsdag`() {
         val (id, refusjonsopplysninger, refusjonshistorikk) = endringIRefusjonFraOgMed(2.februar)
-        assertEquals(listOf(
-            Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 1.februar, 100.daglig),
-            Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig)
+        assertLikeRefusjonsopplysninger(listOf(
+            Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 1.februar, 100.daglig, ARBEIDSGIVER),
+            Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig, ARBEIDSGIVER)
         ), refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(1.januar til 1.februar, 100.daglig, id) + Beløpstidslinje.fra(2.februar til 28.februar, INGEN, id)
@@ -89,7 +79,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel,
             ))
         }
-        assertEquals(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
+        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, 0.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(20.januar til 31.januar, INGEN, kilde1)
         assertEquals(forventet, refusjonshistorikk.beløpstidslinje(20.januar til 31.januar))
@@ -109,7 +99,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
         }
         val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(5.august).inspektør.refusjonsopplysninger
-        assertEquals(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 5.august, null, 0.daglig)), refusjonsopplysninger)
+        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 5.august, null, 0.daglig, ARBEIDSGIVER)), refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(5.august til 31.august, INGEN, kilde1)
         assertEquals(forventet, refusjonshistorikk.beløpstidslinje(5.august til 31.august))
@@ -128,7 +118,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel,
             ))
         }
-        assertEquals(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 10.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(10.januar).inspektør.refusjonsopplysninger)
+        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 10.januar, null, 0.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(10.januar).inspektør.refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(10.januar til 31.januar, INGEN, kilde1)
         assertEquals(forventet, refusjonshistorikk.beløpstidslinje(10.januar til 31.januar))
@@ -156,7 +146,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde2.tidsstempel
             ))
         }
-        assertEquals(listOf(Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 1000.daglig)), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
+        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 1000.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(1.mars til 20.mars, 1000.daglig, kilde1) + Beløpstidslinje.fra(21.mars til 31.mars, 1000.daglig, kilde2)
         assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.mars til 31.mars))
@@ -184,7 +174,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, 1000.daglig)), refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger)
+        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, 1000.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger)
 
         val forventet = Beløpstidslinje.fra(1.januar til 31.januar, 1000.daglig, kilde1)
         assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
@@ -204,10 +194,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 31.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, null, INGEN)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 31.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, null, INGEN, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -241,10 +231,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde2.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 28.februar, 1000.daglig),
-                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 2000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 28.februar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 2000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -268,9 +258,9 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, 1000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, 1000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -293,9 +283,9 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, INGEN)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, INGEN, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -329,9 +319,9 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde2.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 2000.daglig)
+                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 2000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger
         )
@@ -354,10 +344,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, 500.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, 500.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -384,11 +374,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, 24.januar, 500.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 25.januar, null, 2000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, 24.januar, 500.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 25.januar, null, 2000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -431,15 +421,15 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde2.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, 24.januar, 500.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 25.januar, 28.februar, 2000.daglig),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, 24.januar, 500.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 25.januar, 28.februar, 2000.daglig, ARBEIDSGIVER),
 
-                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, 19.mars, 999.daglig),
-                Refusjonsopplysning(kilde2.meldingsreferanseId, 20.mars, 24.mars, 9.daglig),
-                Refusjonsopplysning(kilde2.meldingsreferanseId, 25.mars, null, 99.daglig)
+                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, 19.mars, 999.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde2.meldingsreferanseId, 20.mars, 24.mars, 9.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde2.meldingsreferanseId, 25.mars, null, 99.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -468,10 +458,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 endringerIRefusjon = listOf(EndringIRefusjon(500.daglig, 20.januar)),
                 tidsstempel = kilde1.tidsstempel
         ))
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, INGEN)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, INGEN, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -497,11 +487,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 18.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 19.januar, 19.januar, 500.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, INGEN),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 18.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 19.januar, 19.januar, 500.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, INGEN, ARBEIDSGIVER),
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -530,10 +520,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
         ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, INGEN)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 19.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, INGEN, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
@@ -569,10 +559,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde2.tidsstempel
             ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 30.april, 1000.daglig),
-                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mai, null, 0.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 30.april, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mai, null, 0.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
@@ -598,10 +588,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
             ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 9.februar, 1000.daglig), // Gråsonen, legges på en refusjonsopplysning strukket tilbake til skjæringstidspunktet
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 10.februar, null, 1000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 9.februar, 1000.daglig, ARBEIDSGIVER), // Gråsonen, legges på en refusjonsopplysning strukket tilbake til skjæringstidspunktet
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 10.februar, null, 1000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
@@ -625,10 +615,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
 
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 10.februar, 1000.daglig), // Gråsonen
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 11.februar, null, 1000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 10.februar, 1000.daglig, ARBEIDSGIVER), // Gråsonen
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 11.februar, null, 1000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
@@ -652,10 +642,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
             ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 19.februar, 1000.daglig), // Gråsone
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.februar, null, 1000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 19.februar, 1000.daglig, ARBEIDSGIVER), // Gråsone
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 20.februar, null, 1000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
@@ -682,11 +672,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
             ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 9.februar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 10.februar, 10.februar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 11.februar, null, 2000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.februar, 9.februar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 10.februar, 10.februar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 11.februar, null, 2000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
@@ -715,12 +705,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel
             ))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 9.januar, 1000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 10.januar, 11.januar, 2000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 12.januar, 14.januar, 3000.daglig),
-                Refusjonsopplysning(kilde1.meldingsreferanseId, 15.januar, null, 4000.daglig)
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, 9.januar, 1000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 10.januar, 11.januar, 2000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 12.januar, 14.januar, 3000.daglig, ARBEIDSGIVER),
+                Refusjonsopplysning(kilde1.meldingsreferanseId, 15.januar, null, 4000.daglig, ARBEIDSGIVER)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )

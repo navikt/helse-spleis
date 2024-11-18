@@ -7,15 +7,16 @@ import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
@@ -52,6 +53,7 @@ import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -404,8 +406,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
-        assertEquals(
-            listOf(Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig), Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig)),
+        assertLikeRefusjonsopplysninger(
+            listOf(Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig, ARBEIDSGIVER), Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig, ARBEIDSGIVER)),
             inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         )
         val korrigerendeInntektsmelding = håndterInntektsmelding(
@@ -418,10 +420,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
-        assertEquals(
+        assertLikeRefusjonsopplysninger(
             listOf(
-                Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig),
-                Refusjonsopplysning(korrigerendeInntektsmelding, 1.februar, null, beløp = 30000.månedlig)
+                Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, 32000.månedlig, ARBEIDSGIVER),
+                Refusjonsopplysning(korrigerendeInntektsmelding, 1.februar, null, 30000.månedlig, ARBEIDSGIVER)
             ),
             inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         )

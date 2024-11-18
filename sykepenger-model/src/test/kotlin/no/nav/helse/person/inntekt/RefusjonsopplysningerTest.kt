@@ -8,6 +8,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -49,13 +50,13 @@ internal class RefusjonsopplysningerTest {
 
         val beløpstidslinje = refusjonsopplysninger.beløpstidslinje {
             when (it) {
-                meldingsreferanseId1 -> Kilde(it, Avsender.ARBEIDSGIVER, LocalDateTime.MAX)
+                meldingsreferanseId1 -> Kilde(it, ARBEIDSGIVER, LocalDateTime.MAX)
                 meldingsreferanseId2 -> Kilde(it, Avsender.SAKSBEHANDLER, LocalDateTime.MAX)
                 else -> Kilde(it, Avsender.SYSTEM, LocalDateTime.MAX)
             }
         }
         val forventet =
-            Beløpstidslinje.fra(1.januar til 9.januar, 500.daglig, Kilde(meldingsreferanseId1, Avsender.ARBEIDSGIVER, LocalDateTime.MAX)) +
+            Beløpstidslinje.fra(1.januar til 9.januar, 500.daglig, Kilde(meldingsreferanseId1, ARBEIDSGIVER, LocalDateTime.MAX)) +
             Beløpstidslinje.fra(10.januar til 28.februar, INGEN, Kilde(meldingsreferanseId2, Avsender.SAKSBEHANDLER, LocalDateTime.MAX)) +
             Beløpstidslinje.fra(1.mars til 1.mars, 250.daglig, Kilde(meldingsreferanseId3, Avsender.SYSTEM, LocalDateTime.MAX))
 
@@ -596,10 +597,9 @@ internal class RefusjonsopplysningerTest {
         gamleRefusjonsopplysninger.lagreTidsnær(1.juli, historikk)
 
         val resultat = historikk.refusjonsopplysninger(1.juli)
-        assertEquals(listOf(
-            Refusjonsopplysning(meldingsreferanseId2, 1.juli, null, INGEN)
-        ).refusjonsopplysninger(), resultat)
-
+        assertLikeRefusjonsopplysninger(listOf(
+            Refusjonsopplysning(meldingsreferanseId2, 1.juli, null, INGEN, ARBEIDSGIVER)
+        ), resultat.inspektør.refusjonsopplysninger)
     }
 
     internal companion object {

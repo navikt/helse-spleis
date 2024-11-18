@@ -15,6 +15,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -55,7 +56,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 ),
                 forespurteOpplysninger = listOf(
                     PersonObserver.Inntekt(forslag = null),
-                    PersonObserver.Refusjon(forslag = emptyList()),
+                    PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
                     PersonObserver.Arbeidsgiverperiode
                 )
             )
@@ -87,7 +88,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -122,7 +123,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -221,7 +222,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar)),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList())
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
             )
         )
 

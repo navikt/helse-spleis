@@ -4,11 +4,12 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -33,6 +34,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.assertLikRefusjonsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -262,7 +264,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val sykepengegrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(INNTEKT, it.inntektsopplysning.fastsattÅrsinntekt())
-            assertEquals(Refusjonsopplysning(imId, 1.januar, null, beløp = INNTEKT), it.refusjonsopplysninger.single())
+            assertLikRefusjonsopplysning(Refusjonsopplysning(imId, 1.januar, null, beløp = INNTEKT, Avsender.ARBEIDSGIVER), it.refusjonsopplysninger.single())
         }
 
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)

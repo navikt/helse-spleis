@@ -16,6 +16,7 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -54,6 +55,7 @@ import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
@@ -544,9 +546,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            assertEquals(listOf(
-                Refusjonsopplysning(a2Inntektsmelding, 1.januar, 31.januar, INNTEKT),
-                Refusjonsopplysning(a2Inntektsmelding, 1.februar, null, INNTEKT),
+            assertLikeRefusjonsopplysninger(listOf(
+                Refusjonsopplysning(a2Inntektsmelding, 1.januar, 31.januar, INNTEKT, ARBEIDSGIVER),
+                Refusjonsopplysning(a2Inntektsmelding, 1.februar, null, INNTEKT, ARBEIDSGIVER),
             ), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar))
 
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)

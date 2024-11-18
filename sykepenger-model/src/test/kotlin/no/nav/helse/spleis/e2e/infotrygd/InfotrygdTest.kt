@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -18,6 +19,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -95,7 +97,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val meldingsreferanse = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, listOf(Triple(1.januar, null, 15000.månedlig)))), meldingsreferanseId = meldingsreferanse)
         assertEquals(antallInnslagFør + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(listOf(Refusjonsopplysning(meldingsreferanse, 1.januar, null, 15000.månedlig)), refusjonsopplysninger(1.vedtaksperiode))
+        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(meldingsreferanse, 1.januar, null, 15000.månedlig, SAKSBEHANDLER)), refusjonsopplysninger(1.vedtaksperiode))
         assertTrue(inntektsopplysning(1.vedtaksperiode) is Infotrygd)
         assertEquals(31000.månedlig, inntektsopplysning(1.vedtaksperiode).inspektør.beløp)
     }

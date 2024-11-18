@@ -223,8 +223,8 @@ data class SpannerPersonDto(
             val fom: LocalDate,
             val tom: LocalDate?,
             val beløp: InntektDto,
-            val avsender: AvsenderData?,
-            val tidsstempel: LocalDateTime?
+            val avsender: AvsenderData,
+            val tidsstempel: LocalDateTime
         )
 
         data class PeriodeData(val fom: LocalDate, val tom: LocalDate)
@@ -1529,7 +1529,7 @@ private fun RefusjonsopplysningUtDto.tilPersonData() =
         fom = this.fom,
         tom = this.tom,
         beløp = this.beløp.tilPersonData(),
-        avsender = this.avsender?.tilPersonData(),
+        avsender = this.avsender.tilPersonData(),
         tidsstempel = this.tidsstempel
     )
 

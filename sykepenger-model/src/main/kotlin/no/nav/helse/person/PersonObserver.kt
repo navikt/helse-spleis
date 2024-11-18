@@ -224,7 +224,7 @@ interface PersonObserver {
                             mapOf(
                                 "fom" to forslag.fom,
                                 "tom" to forslag.tom,
-                                "beløp" to forslag.beløp.månedlig
+                                "beløp" to forslag.månedligBeløp
                             )
                         }
                     )
@@ -241,7 +241,10 @@ interface PersonObserver {
     data class Inntekt(val forslag: Inntektsdata?) : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     object Arbeidsgiverperiode : ForespurtOpplysning()
-    data class Refusjon(val forslag: List<Refusjonsopplysning>) : ForespurtOpplysning()
+    data class Refusjon(val forslag: List<Refusjonsforslag>) : ForespurtOpplysning() {
+        constructor(forslag: List<Refusjonsopplysning>, gammelConstructor: Boolean = true): this(forslag.map { Refusjonsforslag(it.fom, it.tom, it.beløp.månedlig) })
+        data class Refusjonsforslag(val fom: LocalDate, val tom: LocalDate?, val månedligBeløp: Double)
+    }
 
     data class UtbetalingAnnullertEvent(
         val organisasjonsnummer: String,

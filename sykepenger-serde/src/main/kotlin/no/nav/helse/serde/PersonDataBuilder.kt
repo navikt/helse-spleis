@@ -840,7 +840,7 @@ private fun RefusjonsopplysningUtDto.tilPersonData() = PersonData.ArbeidsgiverDa
     fom = this.fom,
     tom = this.tom,
     beløp = this.beløp.månedligDouble.beløp,
-    avsender = this.avsender?.tilPersonData(),
+    avsender = this.avsender.tilPersonData(),
     tidsstempel = this.tidsstempel
 )
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = SkatteopplysningData(

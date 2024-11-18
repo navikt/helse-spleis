@@ -52,6 +52,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
+import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -747,7 +748,10 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode()) {
         checkNotNull (arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        val forespurtInntektOgRefusjon = person.forespurtInntektOgRefusjonsopplysninger(arbeidsgiver.organisasjonsnummer, skjæringstidspunkt, periode)
+        val forespurtInntektOgRefusjon = person.forespurtInntektOgRefusjonsopplysninger(arbeidsgiver.organisasjonsnummer, skjæringstidspunkt, periode) ?: listOf(
+            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
+        )
         val forespurteOpplysninger = forespurtInntektOgRefusjon + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
         val vedtaksperioder = when {
