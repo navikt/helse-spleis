@@ -21,8 +21,8 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.erRelevantForOverstyring
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
@@ -202,7 +202,9 @@ data class ArbeidsgiverInntektsopplysning(
             val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
             val inntekt = PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
             val forslag = inntektforslag(skjæringstidspunkt, fastsattOpplysning)
-            val refusjon = PersonObserver.Refusjon(forslag = fastsattOpplysning.refusjonsopplysninger.overlappendeEllerSenereRefusjonsopplysninger(periode))
+            val refusjon = PersonObserver.Refusjon(forslag = fastsattOpplysning.refusjonsopplysninger.overlappendeEllerSenereRefusjonsopplysninger(periode)
+                .map { PersonObserver.Refusjon.Refusjonsforslag(it.fom, it.tom, it.beløp.månedlig) }
+            )
             return Triple(inntekt, refusjon, forslag)
         }
 

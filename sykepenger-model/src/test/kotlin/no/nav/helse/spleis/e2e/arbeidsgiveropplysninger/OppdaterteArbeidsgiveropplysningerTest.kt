@@ -17,7 +17,6 @@ import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -184,7 +183,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 ),
                 forespurteOpplysninger = listOf(
                     PersonObserver.FastsattInntekt(INNTEKT),
-                    PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
+                    PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig))),
                     PersonObserver.Arbeidsgiverperiode
                 )
             )
@@ -256,7 +255,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         )
 
         assertEquals(
-            PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
+            PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig))),
             oppdatertForespørsel.forespurteOpplysninger.first { it is PersonObserver.Refusjon }
         )
     }

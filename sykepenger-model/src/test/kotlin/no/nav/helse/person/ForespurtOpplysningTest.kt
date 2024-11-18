@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -34,8 +33,8 @@ class ForespurtOpplysningTest {
             PersonObserver.FastsattInntekt(30000.månedlig),
             PersonObserver.Arbeidsgiverperiode,
             PersonObserver.Refusjon(listOf(
-                Refusjonsopplysning(UUID.randomUUID(), fom = 1.januar, tom = 31.mars, 30000.månedlig),
-                Refusjonsopplysning(UUID.randomUUID(), fom = 1.april, tom = null, INGEN)
+                Refusjonsforslag(fom = 1.januar, tom = 31.mars, 30000.månedlig.månedlig),
+                Refusjonsforslag(fom = 1.april, tom = null, INGEN.månedlig)
             ))
         )
 

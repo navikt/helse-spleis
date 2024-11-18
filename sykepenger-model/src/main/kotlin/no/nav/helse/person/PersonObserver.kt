@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -242,7 +241,6 @@ interface PersonObserver {
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     object Arbeidsgiverperiode : ForespurtOpplysning()
     data class Refusjon(val forslag: List<Refusjonsforslag>) : ForespurtOpplysning() {
-        constructor(forslag: List<Refusjonsopplysning>, gammelConstructor: Boolean = true): this(forslag.map { Refusjonsforslag(it.fom, it.tom, it.beløp.månedlig) })
         data class Refusjonsforslag(val fom: LocalDate, val tom: LocalDate?, val månedligBeløp: Double)
     }
 
