@@ -5,7 +5,11 @@ import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.azure.AzureToken
+import com.github.navikt.tbd_libs.azure.AzureTokenProvider
 import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
+import com.github.navikt.tbd_libs.result_object.Result
+import com.github.navikt.tbd_libs.result_object.ok
 import com.github.navikt.tbd_libs.speed.SpeedClient
 import io.ktor.client.HttpClient
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
@@ -17,6 +21,7 @@ import java.time.Duration
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.objectMapper
 import org.checkerframework.checker.units.qual.Speed
+import java.time.LocalDateTime
 
 internal class ApplicationConfiguration(env: Map<String, String> = System.getenv()) {
     internal val azureConfig = AzureAdAppConfig(
@@ -29,7 +34,19 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     internal val speedClient = SpeedClient(
         httpClient = java.net.http.HttpClient.newHttpClient(),
         objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()),
-        tokenProvider = azureClient,
+        tokenProvider = if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
+            object : AzureTokenProvider {
+                override fun bearerToken(scope: String): Result<AzureToken> {
+                    return AzureToken("dummy_token_i_dev", LocalDateTime.MAX).ok()
+                }
+
+                override fun onBehalfOfToken(scope: String, token: String): Result<AzureToken> {
+                    return AzureToken("dummy_obo_token_i_dev", LocalDateTime.MAX).ok()
+                }
+            }
+        } else {
+            azureClient
+        },
         baseUrl = if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
             "http://speed-api-dev-proxy"
         } else null

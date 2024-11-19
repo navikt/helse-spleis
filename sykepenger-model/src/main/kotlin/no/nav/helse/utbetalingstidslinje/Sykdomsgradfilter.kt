@@ -5,7 +5,6 @@ import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjo
 import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -45,7 +44,7 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
             subsumsjonslogg.logg(it)
         }
         if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
-        else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
+        else aktivitetslogg.info("Ingen avviste dager på grunn av 20 % samlet sykdomsgrad-regel for denne perioden")
         return avvisteTidslinjer
     }
 }
