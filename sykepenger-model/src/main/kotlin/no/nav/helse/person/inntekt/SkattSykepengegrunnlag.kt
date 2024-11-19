@@ -3,10 +3,10 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
@@ -106,6 +106,8 @@ internal class SkattSykepengegrunnlag private constructor(
             organisasjonsnummer = organisasjonsnummer
         ))
     }
+
+    override fun erSkatteopplysning(): Boolean = true
 
     override fun subsumerArbeidsforhold(
         subsumsjonslogg: Subsumsjonslogg,

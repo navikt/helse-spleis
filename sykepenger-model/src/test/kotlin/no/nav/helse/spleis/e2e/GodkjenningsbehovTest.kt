@@ -4,9 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -249,6 +253,35 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 forventetTag = "InntektFraAOrdningenLagtTilGrunn"
             )
         }
+
+    @Test
+    fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        nyPeriode(januar, a1)
+        nyPeriode(februar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2, avsendersystem = ALTINN)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
+
+        hendelselogg.assertHarTag(
+            vedtaksperiode = 1.vedtaksperiode,
+            forventetTag = "InntektFraAOrdningenLagtTilGrunn",
+            orgnummer = a2
+        )
+    }
 
 
     private fun kanAvvises(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Boolean>(
