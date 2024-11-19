@@ -76,6 +76,8 @@ class Inntektsmelding internal constructor(
         saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
     }
 
+    override fun erSkatteopplysning(): Boolean = kilde == Kilde.AOrdningen
+
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
         aktivitetslogg: IAktivitetslogg,

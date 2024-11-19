@@ -182,9 +182,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg) = siste!!.simuler(aktivitetslogg)
 
-    internal fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+    internal fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder, organisasjonsnummer: String) {
         if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
-        behandlinger.last().godkjenning(aktivitetslogg, builder)
+        behandlinger.last().godkjenning(aktivitetslogg, builder, organisasjonsnummer)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandlinger>): Utbetaling? {
@@ -754,7 +754,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun godkjenning(
                 aktivitetslogg: IAktivitetslogg,
                 behandling: Behandling,
-                utkastTilVedtakBuilder: UtkastTilVedtakBuilder
+                organisasjonsnummer: String,
+                utkastTilVedtakBuilder: UtkastTilVedtakBuilder,
+
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
@@ -762,6 +764,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
                 sykdomstidslinje.berik(utkastTilVedtakBuilder)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
+                if(grunnlagsdata.harSkatteinntekterFor(organisasjonsnummer)){
+                    utkastTilVedtakBuilder.inntektFraAOrdningenLagtTilGrunn()
+                }
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(aktivitetslogg, utkastTilVedtakBuilder.buildGodkjenningsbehov())
             }
@@ -1143,9 +1148,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.vedtakAnnullert(aktivitetslogg, id) }
         }
 
-        internal fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+        internal fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder, organisasjonsnummer: String) {
             builder.behandlingId(id).periode(arbeidsgiverperiode, periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
-            gjeldende.godkjenning(aktivitetslogg, this, builder)
+            gjeldende.godkjenning(aktivitetslogg, this, organisasjonsnummer, builder)
         }
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {

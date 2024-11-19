@@ -4,12 +4,14 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
+import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
@@ -223,6 +225,15 @@ internal fun Aktivitetslogg.assertIngenVarsel(warning: String, vararg filtre: Ak
 internal fun Aktivitetslogg.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
     val varselkoder = collectVarselkoder(*filtre)
     assertFalse(varselkoder.contains(varselkode), "\nFant en varselkode vi ikke forventet:\n\t$varselkode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
+}
+
+internal fun Aktivitetslogg.assertHarTag( vedtaksperiode: IdInnhenter, orgnummer: String = ORGNUMMER, forventetTag: String){
+    val tags = this.etterspurtBehov<Set<String>>(
+        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
+        behov = Aktivitet.Behov.Behovtype.Godkjenning,
+        felt = "tags"
+    )
+    assertTrue(tags?.contains(forventetTag) ?: false, "Fant ikke forventet tag: $forventetTag. Faktiske tags: $tags ")
 }
 
 internal fun Aktivitetslogg.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {

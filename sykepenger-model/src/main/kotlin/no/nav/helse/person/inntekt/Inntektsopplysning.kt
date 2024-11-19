@@ -119,6 +119,8 @@ sealed class Inntektsopplysning(
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {}
 
+    internal open fun erSkatteopplysning() : Boolean = false
+
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =
             erOmregnetÅrsinntektEndret(listOf(før), listOf(etter))

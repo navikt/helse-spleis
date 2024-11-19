@@ -466,6 +466,9 @@ internal class Inntektsgrunnlag private constructor(
         inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
         tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) }
     )
+
+    fun harSkatteinntekterFor(organisasjonsnummer: String): Boolean =
+        arbeidsgiverInntektsopplysninger.finn(organisasjonsnummer)?.inntektsopplysning?.erSkatteopplysning() ?: false
 }
 
 internal data class InntektsgrunnlagView(

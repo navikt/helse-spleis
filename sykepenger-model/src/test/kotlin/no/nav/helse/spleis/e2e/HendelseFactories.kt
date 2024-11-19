@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -53,9 +54,11 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
@@ -148,7 +151,7 @@ internal fun AbstractEndToEndTest.søknad(
 internal fun AbstractEndToEndTest.inntektsmelding(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
-    beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
+    beregnetInntekt: Inntekt = INNTEKT,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
@@ -207,7 +210,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
 internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
-    beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
+    beregnetInntekt: Inntekt = INNTEKT,
     vedtaksperiodeId: UUID,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
@@ -268,6 +271,26 @@ internal fun utbetalingpåminnelse(
     )
 }
 
+internal fun sykepengegrunnlagForArbeidsgiver(
+    vedtaksperiodeId: UUID,
+    skjæringstidspunkt: LocalDate = 1.januar,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+): SykepengegrunnlagForArbeidsgiver {
+    return SykepengegrunnlagForArbeidsgiver(
+        meldingsreferanseId = UUID.randomUUID(),
+        vedtaksperiodeId = vedtaksperiodeId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        orgnummer = orgnummer,
+        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map { ArbeidsgiverInntekt.MånedligInntekt(
+            yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
+            inntekt = INNTEKT,
+            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+            fordel = "",
+            beskrivelse = ""
+        ) })
+    )
+}
+
 internal fun påminnelse(
     vedtaksperiodeId: UUID,
     påminnetTilstand: TilstandType,
@@ -315,7 +338,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
 }
 
 internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
-    meldingsreferanseId : UUID = UUID.randomUUID(),
+    meldingsreferanseId: UUID = UUID.randomUUID(),
     utbetalinger: List<Infotrygdperiode> = listOf(),
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
@@ -527,7 +550,7 @@ private fun lagMånedsinntekter(
 internal fun Inntektperioder.lagInntektperioder(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fom: LocalDate,
-    inntekt: Inntekt = AbstractEndToEndTest.INNTEKT
+    inntekt: Inntekt = INNTEKT
 ) =
     fom.minusYears(1) til fom.minusMonths(1) inntekter {
         orgnummer inntekt inntekt

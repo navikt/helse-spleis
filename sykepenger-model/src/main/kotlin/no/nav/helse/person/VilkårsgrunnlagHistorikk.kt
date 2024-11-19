@@ -377,6 +377,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ): VilkårsgrunnlagUtDto
 
         fun faktaavklarteInntekter() = inntektsgrunnlag.faktaavklarteInntekter()
+        internal open fun harSkatteinntekterFor(organisasjonsnummer: String): Boolean {
+            return inntektsgrunnlag.harSkatteinntekterFor(organisasjonsnummer)
+        }
     }
 
     internal class Grunnlagsdata(
@@ -513,6 +516,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
+        override fun harSkatteinntekterFor(organisasjonsnummer: String) = false
 
         override fun equals(other: Any?): Boolean {
             if (other !is InfotrygdVilkårsgrunnlag) return false

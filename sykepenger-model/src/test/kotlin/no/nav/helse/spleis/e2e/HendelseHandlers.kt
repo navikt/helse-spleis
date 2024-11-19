@@ -32,6 +32,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -689,7 +690,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     besvart: LocalDateTime = LocalDateTime.now(),
-    meldingsreferanseId : UUID = UUID.randomUUID()
+    meldingsreferanseId: UUID = UUID.randomUUID()
 ): UUID {
     utbetalingshistorikkEtterInfotrygdEndring(
         meldingsreferanseId = meldingsreferanseId,
@@ -753,6 +754,16 @@ internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
 }
 
 internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndter)
+
+internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
+    vedtaksperiodeId: IdInnhenter,
+    skjæringstidspunkt: LocalDate = 1.januar,
+    orgnummer: String = ORGNUMMER
+): UUID {
+    val inntektFraAOrdningen : SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt)
+    inntektFraAOrdningen.håndter(Person::håndter)
+    return inntektFraAOrdningen.metadata.meldingsreferanseId
+}
 
 internal fun AbstractEndToEndTest.håndterPåminnelse(
     vedtaksperiodeIdInnhenter: IdInnhenter,
