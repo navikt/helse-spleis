@@ -9,7 +9,9 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.refusjon.RefusjonsservitørView
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -94,4 +96,71 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
         }
     }
 
+    private fun setup5og6() {
+        håndterSøknad(januar)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 28.februar),
+            beregnetInntekt = INNTEKT,
+            id = inntektsmeldingId1,
+            mottatt = inntektsmeldingMottatt1,
+            harOpphørAvNaturalytelser = true
+        )
+    }
+
+    @Test
+    @Order(5)
+    fun `Inntektsmeldingen støttes ikke - med toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.enable {
+        a1 {
+            setup5og6()
+            forrigeUbrukteRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger
+        }
+    }
+
+    @Test
+    @Order(6)
+    fun `Inntektsmeldingen støttes ikke - uten toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+        a1 {
+            setup5og6()
+            migrerUbrukteRefusjonsopplysninger()
+            assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
+
+    private fun setup7og8() {
+        a1{
+            håndterSøknad(januar)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 28.februar),
+                beregnetInntekt = INNTEKT,
+                id = inntektsmeldingId1,
+                mottatt = inntektsmeldingMottatt1
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
+        }
+    }
+
+    @Test
+    @Order(7)
+    fun `Periode er kastet og utbetalt i Infotrygd - med toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.enable {
+        a1 {
+            setup7og8()
+            forrigeUbrukteRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger
+        }
+    }
+
+    @Test
+    @Order(8)
+    fun `Periode er kastet og utbetalt i Infotrygd - uten toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+        a1 {
+            setup7og8()
+            migrerUbrukteRefusjonsopplysninger()
+            assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
 }

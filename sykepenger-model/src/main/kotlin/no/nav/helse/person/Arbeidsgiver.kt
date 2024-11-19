@@ -174,8 +174,11 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
-            forEach { arbeidsgiver -> arbeidsgiver.migrerUbrukteRefusjonsopplysninger(aktivitetslogg) }
+        internal fun List<Arbeidsgiver>.migrerUbrukteRefusjonsopplysninger(
+            aktivitetslogg: IAktivitetslogg,
+            sisteUtbetalteDagIInfotrygd: LocalDate?
+        ) {
+            forEach { arbeidsgiver -> arbeidsgiver.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, sisteUtbetalteDagIInfotrygd) }
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
@@ -307,8 +310,11 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
-        val sisteTom = vedtaksperioder.lastOrNull()?.periode()?.endInclusive
+    private fun migrerUbrukteRefusjonsopplysninger(
+        aktivitetslogg: IAktivitetslogg,
+        sisteUtbetalteDagIInfotrygd: LocalDate?
+    ) {
+        val sisteTom = listOfNotNull(vedtaksperioder.lastOrNull()?.periode()?.endInclusive, sisteUtbetalteDagIInfotrygd).maxOrNull()
         val refusjonsservitørFraRefusjonshistorikk = refusjonshistorikk.refusjonsservitør(fom = sisteTom?.nesteDag)
         refusjonsservitørFraRefusjonshistorikk.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }

@@ -329,6 +329,11 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
+        internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) {
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
+                .håndter(Person::håndter)
+        }
+
         internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.sisteUtbetalingId { vedtaksperiodeId }, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
             arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, utbetalingId, automatisert, vedtakFattetTidspunkt)
                 .håndter(Person::håndter)

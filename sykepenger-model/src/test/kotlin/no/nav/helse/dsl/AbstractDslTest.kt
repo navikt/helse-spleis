@@ -31,6 +31,7 @@ import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.serde.assertPersonEquals
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
@@ -299,6 +300,8 @@ internal abstract class AbstractDslTest {
         this { håndterSimulering(vedtaksperiodeId) }
     protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true) =
         this { håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent) }
+    protected fun String.håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) =
+        this { håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger) }
     protected fun String.håndterUtbetalt(status: Oppdragstatus) =
         this { håndterUtbetalt(status) }
     protected fun String.håndterAnnullering(utbetalingId: UUID) =
