@@ -40,6 +40,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -73,6 +74,7 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsservitør
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -170,6 +172,10 @@ internal class Arbeidsgiver private constructor(
             forEach { arbeidsgiver ->
                 arbeidsgiver.vedtaksperioder.venter(nestemann)
             }
+        }
+
+        internal fun List<Arbeidsgiver>.migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
+            forEach { arbeidsgiver -> arbeidsgiver.migrerUbrukteRefusjonsopplysninger(aktivitetslogg) }
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
@@ -299,6 +305,12 @@ internal class Arbeidsgiver private constructor(
             forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, arbeidsgiver, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
             return arbeidsgiver
         }
+    }
+
+    private fun migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
+        val sisteTom = vedtaksperioder.lastOrNull()?.periode()?.endInclusive
+        val refusjonsservitørFraRefusjonshistorikk = refusjonshistorikk.refusjonsservitør(fom = sisteTom?.nesteDag)
+        refusjonsservitørFraRefusjonshistorikk.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
@@ -745,6 +757,7 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse) {
             håndter(hendelse, aktivitetslogg, servitør)
         }
+        if (Toggle.LagreUbrukteRefusjonsopplysninger.disabled) return
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 

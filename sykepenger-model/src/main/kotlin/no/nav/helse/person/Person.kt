@@ -58,6 +58,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
+import no.nav.helse.person.Arbeidsgiver.Companion.migrerUbrukteRefusjonsopplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
@@ -842,6 +843,11 @@ class Person private constructor(
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
+
+    internal fun migrerUbrukteRefusjonsopplysninger() {
+        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg())
+    }
+
 
     fun dto() = PersonUtDto(
         fødselsnummer = personidentifikator.toString(),

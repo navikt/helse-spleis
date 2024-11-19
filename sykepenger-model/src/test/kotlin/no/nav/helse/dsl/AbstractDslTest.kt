@@ -353,6 +353,9 @@ internal abstract class AbstractDslTest {
     ) =
         this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
+    protected fun migrerUbrukteRefusjonsopplysninger() {
+        person.migrerUbrukteRefusjonsopplysninger()
+    }
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     private fun bareÈnArbeidsgiver(orgnr: String): String {

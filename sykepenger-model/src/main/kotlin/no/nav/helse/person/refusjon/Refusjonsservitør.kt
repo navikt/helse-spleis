@@ -2,7 +2,6 @@ package no.nav.helse.person.refusjon
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import no.nav.helse.Toggle
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -36,7 +35,6 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
 
     // Serverer våre rester til en annen servitør
     internal fun servér(other: Refusjonsservitør, aktivitetslogg: IAktivitetslogg) {
-        if (Toggle.LagreUbrukteRefusjonsopplysninger.disabled) return
         this.refusjonsrester.filterValues { it.isNotEmpty() }.forEach { (dato, beløpstidslinje) ->
             aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${beløpstidslinje.perioderMedBeløp.joinToString()}")
             other.leggTil(dato, beløpstidslinje)
