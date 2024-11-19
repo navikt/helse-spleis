@@ -104,6 +104,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertGodkjenningsbehov(tags = setOf("Ferie"))
+        val utkastTilvedtak = observatør.utkastTilVedtakEventer.last()
+        assertTrue(utkastTilvedtak.tags.contains("Ferie"))
     }
 
     @Test

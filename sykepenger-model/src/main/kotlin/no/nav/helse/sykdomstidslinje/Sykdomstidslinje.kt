@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde.Companion.
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
@@ -87,13 +86,6 @@ class Sykdomstidslinje private constructor(
      */
     internal fun fremTilOgMed(dato: LocalDate) =
         if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
-
-    internal fun berik(utkastTilVedtakBuilder: UtkastTilVedtakBuilder) {
-        periode?.find { erEnFerieDag(this[it]) }?.let {
-            utkastTilVedtakBuilder.ferie()
-        }
-    }
-
 
     internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
@@ -197,8 +189,6 @@ class Sykdomstidslinje private constructor(
                 val utenProblemdager = Sykdomstidslinje(sykdomstidslinje.dager.filter { (_, dag) -> dag !is ProblemDag }.toSortedMap(), sykdomstidslinje.periode)
                 acc.merge(utenProblemdager, replace)
             }
-
-        private fun erEnFerieDag(it: Dag) = it is Feriedag
 
         internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) =
             Skjæringstidspunkt(samletTidslinje(tidslinjer))

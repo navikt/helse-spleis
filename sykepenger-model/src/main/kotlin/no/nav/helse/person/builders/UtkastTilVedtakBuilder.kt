@@ -7,6 +7,8 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
@@ -29,7 +31,6 @@ internal class UtkastTilVedtakBuilder(
         else tags.add(Tag.Førstegangsbehandling)
     }
 
-    internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
     internal fun ferie() = apply { tags.add(Tag.Ferie) }
 
@@ -49,7 +50,7 @@ internal class UtkastTilVedtakBuilder(
         val gjennomført = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(arbeidsgiverperiode.periode()?.count() ?: 0)
         val arbeidsgiverperiodePåstartetITidligerePeriode = arbeidsgiverperiode.isNotEmpty() && periode.start >= arbeidsgiverperiode.last().endInclusive
         if (!harPeriodeRettFør && gjennomført && arbeidsgiverperiodePåstartetITidligerePeriode) {
-            ingenNyArbeidsgiverperiode()
+            tags.add(Tag.IngenNyArbeidsgiverperiode)
         }
     }
 
@@ -96,6 +97,11 @@ internal class UtkastTilVedtakBuilder(
         val behandlingsresultat = UtbetalingstidslinjeInfo(utbetalingstidslinje).behandlingsresultat()
         tags.add(behandlingsresultat)
     }
+
+    internal fun sykdomstidslinje(sykdomstidslinje: Sykdomstidslinje) = apply {
+        if (sykdomstidslinje.any { it is Dag.Feriedag }) tags.add(Tag.Ferie)
+    }
+
 
     private var sykepengegrunnlag by Delegates.notNull<Double>()
     private lateinit var beregningsgrunnlag: Inntekt
