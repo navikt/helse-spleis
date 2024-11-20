@@ -6,10 +6,18 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.refusjon.RefusjonsservitørView
 import no.nav.helse.økonomi.Inntekt
@@ -40,6 +48,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             id = meldingsreferanseId1,
             mottatt = mottatt1
         )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
     }
 
     @Test
@@ -77,6 +86,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             id = meldingsreferanseId2,
             mottatt = mottatt2
         )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
     }
 
     @Test
@@ -239,6 +249,37 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             setup11og12()
             migrerUbrukteRefusjonsopplysninger()
             assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
+
+    @Test
+    fun `Perioder som ikke er vilkårsprøvd må anses som ubrukte refusjonsopplysninger`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+        a1 {
+            tilGodkjenning(januar)
+            håndterSøknad(mars)
+            håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1)
+
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger)
+
+            migrerUbrukteRefusjonsopplysninger()
+
+            assertEquals(RefusjonsservitørView(mapOf(1.mars to Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1)))), inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
+
+    @Test
+    fun `Når siste periode er AUU anser vi det som ubrukte refusjonsopplysninger`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+        a1 {
+            håndterSøknad(1.januar til 10.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), id = meldingsreferanseId1, mottatt = mottatt1)
+
+            assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger)
+
+            migrerUbrukteRefusjonsopplysninger()
+
+            assertEquals(RefusjonsservitørView(mapOf(1.januar to Beløpstidslinje.fra(1.januar.somPeriode(), INNTEKT, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1)))), inspektør.ubrukteRefusjonsopplysninger)
         }
     }
 }

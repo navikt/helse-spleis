@@ -3056,6 +3056,9 @@ internal class Vedtaksperiode private constructor(
             it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId))
         }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
+        internal fun List<Vedtaksperiode>.sisteVilkårsprøvdePeriode() =
+            lastOrNull { it.vilkårsgrunnlag != null }
+
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
