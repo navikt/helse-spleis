@@ -146,11 +146,11 @@ data class Refusjonsopplysning(
             return nySnute.refusjonsopplysninger.merge(this)
         }
 
-        internal fun beløpstidslinje(kilde: (meldingsreferanseId: UUID) -> Kilde) = validerteRefusjonsopplysninger.fold(Beløpstidslinje()) { samletBeløpstidslinje, refusjonsopplysning ->
+        internal fun beløpstidslinje() = validerteRefusjonsopplysninger.fold(Beløpstidslinje()) { samletBeløpstidslinje, refusjonsopplysning ->
             samletBeløpstidslinje + Beløpstidslinje.fra(
                 periode = refusjonsopplysning.fom til (refusjonsopplysning.tom ?: refusjonsopplysning.fom),
                 beløp = refusjonsopplysning.beløp,
-                kilde = kilde(refusjonsopplysning.meldingsreferanseId)
+                kilde = Kilde(refusjonsopplysning.meldingsreferanseId, refusjonsopplysning.avsender, refusjonsopplysning.tidsstempel)
             )
         }
 

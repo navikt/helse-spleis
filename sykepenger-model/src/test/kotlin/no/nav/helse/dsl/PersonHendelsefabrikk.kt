@@ -62,7 +62,7 @@ internal class PersonHendelsefabrikk() {
         OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsreferanseId,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt),
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt, tidsstempel),
             refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(skjæringstidspunkt, meldingsreferanseId, tidsstempel),
             opprettet = tidsstempel
         )
@@ -88,17 +88,21 @@ internal class OverstyrtArbeidsgiveropplysning(
 ) {
     private fun refusjonsopplysninger(førsteDag: LocalDate) =  refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
     internal companion object {
-        private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, inntektsopplysning: (overstyrtArbeidsgiveropplysning: OverstyrtArbeidsgiveropplysning) -> Inntektsopplysning) =
+        private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, tidsstempel: LocalDateTime, inntektsopplysning: (overstyrtArbeidsgiveropplysning: OverstyrtArbeidsgiveropplysning) -> Inntektsopplysning) =
             map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = it.orgnummer,
                     gjelder = gjelder,
                     inntektsopplysning = inntektsopplysning(it),
-                    refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(gjelder.start).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, LocalDateTime.now()), LocalDateTime.now()) } }.build()
+                    refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(gjelder.start).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, tidsstempel), tidsstempel) } }.build()
                 )
             }
-        internal fun List<OverstyrtArbeidsgiveropplysning>.medSaksbehandlerinntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt) {
+        internal fun List<OverstyrtArbeidsgiveropplysning>.medSaksbehandlerinntekt(
+            meldingsreferanseId: UUID,
+            skjæringstidspunkt: LocalDate,
+            tidsstempel: LocalDateTime
+        ) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt, tidsstempel) {
             checkNotNull(it.forklaring) { "Forklaring må settes på Saksbehandlerinntekt"}
             Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now())
         }

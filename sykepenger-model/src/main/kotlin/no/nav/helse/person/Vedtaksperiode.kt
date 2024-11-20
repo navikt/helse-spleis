@@ -49,6 +49,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
@@ -1136,6 +1137,12 @@ internal class Vedtaksperiode private constructor(
             gjelder = skjæringstidspunkt til LocalDate.MAX,
             refusjonsopplysninger = Refusjonsopplysninger()
         )
+    }
+
+    internal fun refusjonsservitørForUbrukteRefusjonsopplysninger(): Refusjonsservitør? {
+        val beløpstidslinje = vilkårsgrunnlag?.refusjonsopplysninger(arbeidsgiver.organisasjonsnummer)?.beløpstidslinje() ?: return null
+        val ubruktDel = beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag).takeUnless { it.isEmpty() } ?: return null
+        return Refusjonsservitør(mapOf(startdatoPåSammenhengendeVedtaksperioder to ubruktDel))
     }
 
     private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg): Maksdatoresultat {

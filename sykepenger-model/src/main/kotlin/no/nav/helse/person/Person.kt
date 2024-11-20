@@ -848,7 +848,6 @@ class Person private constructor(
         arbeidsgivere.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg(), infotrygdhistorikk.sisteUtbetalteDag())
     }
 
-
     fun dto() = PersonUtDto(
         fødselsnummer = personidentifikator.toString(),
         alder = alder.dto(),

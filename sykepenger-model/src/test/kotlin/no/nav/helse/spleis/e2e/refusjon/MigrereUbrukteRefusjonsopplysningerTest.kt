@@ -1,9 +1,8 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -27,10 +26,10 @@ import org.junit.jupiter.api.TestMethodOrder
 internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
 
     private lateinit var forrigeUbrukteRefusjonsopplysninger: RefusjonsservitørView
-    private val inntektsmeldingId1 = UUID.randomUUID()
-    private val inntektsmeldingMottatt1 = LocalDateTime.now()
-    private val inntektsmeldingId2 = UUID.randomUUID()
-    private val inntektsmeldingMottatt2 = inntektsmeldingMottatt1.plusSeconds(1)
+    private val meldingsreferanseId1 = UUID.randomUUID()
+    private val mottatt1 = LocalDate.EPOCH.atStartOfDay()
+    private val meldingsreferanseId2 = UUID.randomUUID()
+    private val mottatt2 = mottatt1.plusYears(1)
 
     private fun setup1og2() {
         håndterSøknad(januar)
@@ -38,8 +37,8 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 28.februar),
             beregnetInntekt = INNTEKT,
-            id = inntektsmeldingId1,
-            mottatt = inntektsmeldingMottatt1
+            id = meldingsreferanseId1,
+            mottatt = mottatt1
         )
     }
 
@@ -68,15 +67,15 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT * 2, opphørsdato = 28.februar),
             beregnetInntekt = INNTEKT,
-            id = inntektsmeldingId1,
-            mottatt = inntektsmeldingMottatt1
+            id = meldingsreferanseId1,
+            mottatt = mottatt1
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = 28.februar),
             beregnetInntekt = INNTEKT,
-            id = inntektsmeldingId2,
-            mottatt = inntektsmeldingMottatt2
+            id = meldingsreferanseId2,
+            mottatt = mottatt2
         )
     }
 
@@ -105,8 +104,8 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 28.februar),
             beregnetInntekt = INNTEKT,
-            id = inntektsmeldingId1,
-            mottatt = inntektsmeldingMottatt1,
+            id = meldingsreferanseId1,
+            mottatt = mottatt1,
             harOpphørAvNaturalytelser = true
         )
     }
@@ -137,8 +136,8 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 28.februar),
                 beregnetInntekt = INNTEKT,
-                id = inntektsmeldingId1,
-                mottatt = inntektsmeldingMottatt1
+                id = meldingsreferanseId1,
+                mottatt = mottatt1
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -173,19 +172,24 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
-                id = inntektsmeldingId1,
-                mottatt = inntektsmeldingMottatt1
+                id = meldingsreferanseId1,
+                mottatt = mottatt1
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
-                orgnummer = a1,
-                inntekt = INNTEKT,
-                forklaring = "foo",
-                subsumsjon = null,
-                refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, Inntekt.INGEN))
-            )))
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT,
+                    forklaring = "foo",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2), Triple(1.februar, null, Inntekt.INGEN))
+                )),
+                hendelseId = meldingsreferanseId2,
+                tidsstempel = mottatt2
+            )
         }
     }
 
@@ -204,11 +208,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
         a1 {
             setup9og10()
             migrerUbrukteRefusjonsopplysninger()
-            assertForventetFeil(
-                forklaring = "Har ikke migrert dette ennå",
-                nå = { assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger) },
-                ønsket = { assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger) }
-            )
+            assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
         }
     }
 
@@ -217,8 +217,8 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
-                id = inntektsmeldingId1,
-                mottatt = inntektsmeldingMottatt1
+                id = meldingsreferanseId1,
+                mottatt = mottatt1
             )
         }
     }

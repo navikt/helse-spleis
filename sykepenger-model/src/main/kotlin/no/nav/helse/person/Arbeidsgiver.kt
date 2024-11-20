@@ -319,6 +319,10 @@ internal class Arbeidsgiver private constructor(
         val sisteTom = listOfNotNull(sisteVedtaksperiode?.periode()?.endInclusive, sisteUtbetalteDagIInfotrygd).maxOrNull()
         val refusjonsservitørFraRefusjonshistorikk = refusjonshistorikk.refusjonsservitør(stardatoPåSammenhengendeVedtaksperioder = stardatoPåSammenhengendeVedtaksperioder, fom = sisteTom?.nesteDag)
         refusjonsservitørFraRefusjonshistorikk.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
+
+        if (sisteVedtaksperiode == null) return
+        val refusjonsservitørFraSisteInntektsgrunnlag = sisteVedtaksperiode.refusjonsservitørForUbrukteRefusjonsopplysninger() ?: return
+        refusjonsservitørFraSisteInntektsgrunnlag.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
