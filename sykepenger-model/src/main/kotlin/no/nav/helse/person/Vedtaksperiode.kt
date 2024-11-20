@@ -3057,8 +3057,11 @@ internal class Vedtaksperiode private constructor(
             it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId))
         }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
-        internal fun List<Vedtaksperiode>.sisteVilkårsprøvdePeriode() =
-            lastOrNull { it.vilkårsgrunnlag != null }
+        internal fun List<Vedtaksperiode>.sistePeriodeRelevantForMigreringAvUbrukteRefusjonsopplysninger(): Vedtaksperiode? {
+            val sistePeriode = lastOrNull() ?: return null
+            if (sistePeriode.tilstand is AvsluttetUtenUtbetaling) return sistePeriode
+            return lastOrNull { it.vilkårsgrunnlag != null }
+        }
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {

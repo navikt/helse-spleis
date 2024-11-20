@@ -21,7 +21,7 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.refusjon.RefusjonsservitørView
-import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.MethodOrderer
@@ -196,7 +196,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
                     inntekt = INNTEKT,
                     forklaring = "foo",
                     subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2), Triple(1.februar, null, Inntekt.INGEN))
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2), Triple(1.februar, null, INGEN))
                 )),
                 hendelseId = meldingsreferanseId2,
                 tidsstempel = mottatt2
@@ -264,7 +264,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
                     inntekt = INNTEKT,
                     forklaring = "foo",
                     subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, Inntekt.INGEN))
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
                 )),
             )
             håndterUtbetalingshistorikkEtterInfotrygdendring(PersonUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT))
@@ -295,16 +295,19 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Når siste periode er AUU anser vi det som ubrukte refusjonsopplysninger`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+    fun `Når siste periode er AUU anser vi kun refusjonsopplysninger etter denne perioden som ubrukte`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
         a1 {
             håndterSøknad(1.januar til 10.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), id = meldingsreferanseId1, mottatt = mottatt1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 25.januar), id = meldingsreferanseId1, mottatt = mottatt1)
 
             assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger)
 
             migrerUbrukteRefusjonsopplysninger()
 
-            assertEquals(RefusjonsservitørView(mapOf(1.januar to Beløpstidslinje.fra(1.januar.somPeriode(), INNTEKT, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1)))), inspektør.ubrukteRefusjonsopplysninger)
+            val beløpstidslinje = Beløpstidslinje.fra(11.januar til 25.januar, INNTEKT, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1)) +
+                    Beløpstidslinje.fra(26.januar.somPeriode(), INGEN, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1))
+
+            assertEquals(RefusjonsservitørView(mapOf(1.januar to beløpstidslinje)), inspektør.ubrukteRefusjonsopplysninger)
         }
     }
 }

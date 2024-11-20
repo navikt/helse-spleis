@@ -59,7 +59,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonseventyr
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
-import no.nav.helse.person.Vedtaksperiode.Companion.sisteVilkårsprøvdePeriode
+import no.nav.helse.person.Vedtaksperiode.Companion.sistePeriodeRelevantForMigreringAvUbrukteRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
@@ -316,7 +316,7 @@ internal class Arbeidsgiver private constructor(
         sisteUtbetalteDagIInfotrygd: LocalDate?
     ) {
         aktivitetslogg.kontekst(this)
-        val sisteVedtaksperiode = vedtaksperioder.sisteVilkårsprøvdePeriode()
+        val sisteVedtaksperiode = vedtaksperioder.sistePeriodeRelevantForMigreringAvUbrukteRefusjonsopplysninger()
         val stardatoPåSammenhengendeVedtaksperioder = sisteVedtaksperiode?.let { startdatoPåSammenhengendeVedtaksperioder(it) }
         val sisteTom = listOfNotNull(sisteVedtaksperiode?.periode()?.endInclusive, sisteUtbetalteDagIInfotrygd).maxOrNull()
         val refusjonsservitørFraRefusjonshistorikk = refusjonshistorikk.refusjonsservitør(stardatoPåSammenhengendeVedtaksperioder = stardatoPåSammenhengendeVedtaksperioder, fom = sisteTom?.nesteDag)
