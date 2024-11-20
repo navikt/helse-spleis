@@ -3,7 +3,9 @@ package no.nav.helse.spleis.e2e.refusjon
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -11,6 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.refusjon.RefusjonsservitørView
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.MethodOrderer
@@ -161,6 +164,51 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             setup7og8()
             migrerUbrukteRefusjonsopplysninger()
             assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
+
+    private fun setup9og10() {
+        a1{
+            håndterSøknad(januar)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                id = inntektsmeldingId1,
+                mottatt = inntektsmeldingMottatt1
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT,
+                forklaring = "foo",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, Inntekt.INGEN))
+            )))
+        }
+    }
+
+    @Test
+    @Order(9)
+    fun `Saksbehandler overstyrer refusjon frem i tid - med toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.enable {
+        a1 {
+            setup9og10()
+            forrigeUbrukteRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger
+        }
+    }
+
+    @Test
+    @Order(10)
+    fun `Saksbehandler overstyrer refusjon frem i tid - uten toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+        a1 {
+            setup9og10()
+            migrerUbrukteRefusjonsopplysninger()
+            assertForventetFeil(
+                forklaring = "Har ikke migrert dette ennå",
+                nå = { assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger) },
+                ønsket = { assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger) }
+            )
         }
     }
 }
