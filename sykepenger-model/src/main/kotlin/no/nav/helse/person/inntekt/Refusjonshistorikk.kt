@@ -198,8 +198,12 @@ internal class Refusjonshistorikk {
                     return aktuelle.sortedBy { it.tidsstempel }.map { it.beløpstidslinje(søkevindu.endInclusive) }.fold(Beløpstidslinje(), Beløpstidslinje::plus).subset(søkevindu)
                 }
 
-                internal fun Refusjonshistorikk.refusjonsservitør(fom: LocalDate?): Refusjonsservitør {
-                    return Refusjonsservitør(refusjoner.groupBy { it.startskuddet }.mapValues { (_, refusjoner) ->
+                internal fun Refusjonshistorikk.refusjonsservitør(
+                    fom: LocalDate?,
+                    stardatoPåSammenhengendeVedtaksperioder: LocalDate?
+                ): Refusjonsservitør {
+                    val aktuelle = refusjoner.filter { it.startskuddet >= (stardatoPåSammenhengendeVedtaksperioder ?: LocalDate.MIN) }
+                    return Refusjonsservitør(aktuelle.groupBy { it.startskuddet }.mapValues { (_, refusjoner) ->
                         val beløpstidslinje = refusjoner.map { it.beløpstidslinje() }.fold(Beløpstidslinje(), Beløpstidslinje::plus).fyll()
                         if (fom == null) beløpstidslinje
                         else beløpstidslinje.fraOgMed(fom)
