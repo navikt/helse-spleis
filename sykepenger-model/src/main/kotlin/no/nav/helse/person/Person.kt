@@ -409,6 +409,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler personpåminnelse")
         aktivitetslogg.info("Håndterer påminnelse for person")
+        migrerUbrukteRefusjonsopplysninger(aktivitetslogg)
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
@@ -844,8 +845,9 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
 
-    internal fun migrerUbrukteRefusjonsopplysninger() {
-        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg(), infotrygdhistorikk.sisteUtbetalteDag())
+    internal fun migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Migrerer ubrukte refusjonsopplysninger")
+        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, infotrygdhistorikk.sisteUtbetalteDag())
     }
 
     fun dto() = PersonUtDto(

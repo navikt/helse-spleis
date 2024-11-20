@@ -30,6 +30,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.serde.assertPersonEquals
@@ -357,7 +358,7 @@ internal abstract class AbstractDslTest {
         this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
     protected fun migrerUbrukteRefusjonsopplysninger() {
-        person.migrerUbrukteRefusjonsopplysninger()
+        person.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg())
     }
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
