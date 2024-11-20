@@ -86,6 +86,8 @@ class Inntektsmelding(
         return inntektsdato
     }
 
+    internal fun skjæringstidspunkt(person: Person) = type.skjæringstidspunkt(this, person)
+
     private val refusjonsElement get() = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = metadata.meldingsreferanseId,
         førsteFraværsdag = type.refusjonsdato(this),
@@ -257,6 +259,7 @@ class Inntektsmelding(
         fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
         fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate
         fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding): LocalDate?
+        fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person): LocalDate
     }
 
     private data class KlassiskInntektsmelding(private val førsteFraværsdag: LocalDate?): Type {
@@ -278,6 +281,8 @@ class Inntektsmelding(
             else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
         }
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = førsteFraværsdag
+        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) =
+            person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato(inntektsmelding).somPeriode())
     }
 
     private data object ForkastetPortalinntektsmelding: Type {
@@ -292,6 +297,7 @@ class Inntektsmelding(
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
+        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
     private data class Portalinntetksmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.MinimalVedtaksperiode, private val inntektsdato: LocalDate) : Type {
@@ -311,6 +317,7 @@ class Inntektsmelding(
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = minimalVedtaksperiode.førsteFraværsdag() ?: minimalVedtaksperiode.skjæringstidspunkt()
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = minimalVedtaksperiode.førsteFraværsdag()
+        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = minimalVedtaksperiode.skjæringstidspunkt()
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

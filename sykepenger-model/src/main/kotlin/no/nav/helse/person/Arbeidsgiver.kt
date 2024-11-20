@@ -851,7 +851,7 @@ internal class Arbeidsgiver private constructor(
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-        val skjæringstidspunkt = person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato.somPeriode())
+        val skjæringstidspunkt = inntektsmelding.skjæringstidspunkt(person)
 
         if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
             aktivitetslogg.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
