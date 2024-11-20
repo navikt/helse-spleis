@@ -1139,9 +1139,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun refusjonsservitørForUbrukteRefusjonsopplysninger(): Refusjonsservitør? {
+    internal fun refusjonsservitørForUbrukteRefusjonsopplysninger(sisteUtbetalteDagIInfotrygd: LocalDate?): Refusjonsservitør? {
         val beløpstidslinje = vilkårsgrunnlag?.refusjonsopplysninger(arbeidsgiver.organisasjonsnummer)?.beløpstidslinje() ?: return null
-        val ubruktDel = beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag).takeUnless { it.isEmpty() } ?: return null
+        val fraOgMed = listOfNotNull(periode.endInclusive, sisteUtbetalteDagIInfotrygd).max().nesteDag
+        val ubruktDel = beløpstidslinje.fraOgMed(fraOgMed).takeUnless { it.isEmpty() } ?: return null
         return Refusjonsservitør(mapOf(startdatoPåSammenhengendeVedtaksperioder to ubruktDel))
     }
 

@@ -19,6 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.refusjon.RefusjonsservitørView
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -249,6 +250,30 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             setup11og12()
             migrerUbrukteRefusjonsopplysninger()
             assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
+
+    @Test
+    fun `Hensyntar Infotrygd-utbetaling ved ubrukte refusjonsopplysninger i inntektsgrunnlaget`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable{
+        a1 {
+            nyttVedtak(januar)
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT,
+                    forklaring = "foo",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, Inntekt.INGEN))
+                )),
+            )
+            håndterUtbetalingshistorikkEtterInfotrygdendring(PersonUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT))
+
+            assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger)
+
+            migrerUbrukteRefusjonsopplysninger()
+
+            assertEquals(RefusjonsservitørView(emptyMap()), inspektør.ubrukteRefusjonsopplysninger)
         }
     }
 

@@ -315,6 +315,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         sisteUtbetalteDagIInfotrygd: LocalDate?
     ) {
+        aktivitetslogg.kontekst(this)
         val sisteVedtaksperiode = vedtaksperioder.sisteVilkårsprøvdePeriode()
         val stardatoPåSammenhengendeVedtaksperioder = sisteVedtaksperiode?.let { startdatoPåSammenhengendeVedtaksperioder(it) }
         val sisteTom = listOfNotNull(sisteVedtaksperiode?.periode()?.endInclusive, sisteUtbetalteDagIInfotrygd).maxOrNull()
@@ -322,7 +323,7 @@ internal class Arbeidsgiver private constructor(
         refusjonsservitørFraRefusjonshistorikk.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
 
         if (sisteVedtaksperiode == null) return
-        val refusjonsservitørFraSisteInntektsgrunnlag = sisteVedtaksperiode.refusjonsservitørForUbrukteRefusjonsopplysninger() ?: return
+        val refusjonsservitørFraSisteInntektsgrunnlag = sisteVedtaksperiode.refusjonsservitørForUbrukteRefusjonsopplysninger(sisteUtbetalteDagIInfotrygd) ?: return
         refusjonsservitørFraSisteInntektsgrunnlag.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 
