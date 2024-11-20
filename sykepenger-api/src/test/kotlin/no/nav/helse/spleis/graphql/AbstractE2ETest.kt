@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -132,6 +133,21 @@ internal abstract class AbstractE2ETest {
         if (behov != null) håndterUtbetalingshistorikk(behov.vedtaksperiodeId, orgnummer = behov.orgnummer)
 
         return søknadId
+    }
+
+    protected fun håndterPåminnelse(
+        orgnummer: String = a1,
+        vedtaksperiode: Int = 1,
+        tilstand: TilstandType,
+        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
+    ) {
+
+        val påminnelse = fabrikker.getValue(orgnummer).lagPåminnelse(
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiode.id(orgnummer),
+            tilstand = tilstand,
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt
+        )
+        påminnelse.håndter(Person::håndter)
     }
 
     protected fun håndterUtbetalingshistorikk(vedtaksperiodeId: UUID, orgnummer: String) {

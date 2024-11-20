@@ -1,8 +1,11 @@
 package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate.EPOCH
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -13,6 +16,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
@@ -411,6 +416,30 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
                 .sammenslåttTidslinje[28]
                 .utbetalingsinfo!!
                 .totalGrad)
+    }
+
+    @Test
+    fun `Skatteinntekt vises som AO`() {
+        håndterSøknad(1.januar til 31.januar)
+        håndterPåminnelse(tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(4L))
+        håndterSykepengegrunnlagForArbeidsgiver(
+            skjæringstidspunkt = 1.januar,
+            skatteinntekter = listOf(
+                ArbeidsgiverInntekt.MånedligInntekt(desember(2017), 31000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                ArbeidsgiverInntekt.MånedligInntekt(november(2017), 31000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                ArbeidsgiverInntekt.MånedligInntekt(oktober(2017), 31000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+            )
+        )
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+
+        val personDto = speilApi()
+        val vilkårsgrunnlagId = personDto.vilkårsgrunnlag.keys.single()
+        assertEquals(
+            Inntektkilde.AOrdningen,
+            personDto.vilkårsgrunnlag[vilkårsgrunnlagId]!!.inntekter.first().omregnetÅrsinntekt.kilde
+        )
     }
 
 }
