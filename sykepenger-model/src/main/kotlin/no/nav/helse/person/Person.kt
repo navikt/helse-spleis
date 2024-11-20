@@ -845,8 +845,7 @@ class Person private constructor(
     }
 
     internal fun migrerUbrukteRefusjonsopplysninger() {
-        val sisteUtbetalteDagIInfotrygd = infotrygdhistorikk.siste.perioder.maxOfOrNull { it.periode.endInclusive }
-        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg(), sisteUtbetalteDagIInfotrygd)
+        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg(), infotrygdhistorikk.sisteUtbetalteDag())
     }
 
 

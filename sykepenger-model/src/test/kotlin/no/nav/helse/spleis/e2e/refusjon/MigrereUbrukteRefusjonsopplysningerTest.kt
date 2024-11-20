@@ -211,4 +211,34 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             )
         }
     }
+
+    private fun setup11og12() {
+        a1 {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                id = inntektsmeldingId1,
+                mottatt = inntektsmeldingMottatt1
+            )
+        }
+    }
+
+    @Test
+    @Order(11)
+    fun `Har kun fått IM - med toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.enable {
+        a1 {
+            setup11og12()
+            forrigeUbrukteRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger
+        }
+    }
+
+    @Test
+    @Order(12)
+    fun `Har kun fått IM - uten toggle`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
+        a1 {
+            setup11og12()
+            migrerUbrukteRefusjonsopplysninger()
+            assertEquals(forrigeUbrukteRefusjonsopplysninger, inspektør.ubrukteRefusjonsopplysninger)
+        }
+    }
 }
