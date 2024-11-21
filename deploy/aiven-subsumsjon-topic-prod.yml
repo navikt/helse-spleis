@@ -20,6 +20,9 @@ spec:
           application: spedisjon
           access: write
         - team: tbd
+          application: spedisjon-async
+          access: write
+        - team: tbd
           application: spleis
           access: write
         - team: tbd

@@ -96,6 +96,9 @@ spec:
           application: spedisjon
           access: readwrite
         - team: tbd
+          application: spedisjon-async
+          access: readwrite
+        - team: tbd
           application: speider
           access: readwrite
         - team: tbd
