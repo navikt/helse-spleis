@@ -844,7 +844,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 val vilkårsgrunnlag = endring.grunnlagsdata
                 val refusjonstidslinje = when {
                     vilkårsgrunnlag == null && endring.id == sisteEndringId -> vedManglendeInntektsgrunnlagPåSisteEndring().also {
-                        aktivitetslogg.info("Siste endring ${endring.id} har ikke vilkårsgrunnlag. Migrerer inn refusjonsopplysninger fra nabolaget og ubrukte refusjonsopplysninger")
+                        if (this.tilstand !is Tilstand.AvsluttetUtenVedtak) {
+                            aktivitetslogg.info("Siste endring ${endring.id} har ikke vilkårsgrunnlag. Migrerer inn refusjonsopplysninger fra nabolaget og ubrukte refusjonsopplysninger")
+                        }
                     }
                     vilkårsgrunnlag == null -> Beløpstidslinje()
                     else -> vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
