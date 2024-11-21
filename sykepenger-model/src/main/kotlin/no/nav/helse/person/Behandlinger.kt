@@ -220,8 +220,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
-    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) =
-        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
+    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String, vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje) =
+        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, vedManglendeInntektsgrunnlagPåSisteEndring) }
 
     fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
         this.behandlinger.last().vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
@@ -837,10 +837,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.forkastVedtaksperiode(this, arbeidsgiver, hendelse, aktivitetslogg)
         }
 
-        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
-            val vilkårsgrunnlag = endringer.last().grunnlagsdata ?: return // TODO Her skal nabolagskode
-            val refusjonstidslinje = vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
-            endringer.last().refusjonstidslinje = refusjonstidslinje
+        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String, vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje) {
+            val sisteEndringId = endringer.last().id
+            endringer.forEach { endring ->
+                val vilkårsgrunnlag = endring.grunnlagsdata
+                val refusjonstidslinje = when {
+                    vilkårsgrunnlag == null && endring.id == sisteEndringId -> vedManglendeInntektsgrunnlagPåSisteEndring().also {
+                        aktivitetslogg.info("Siste endring ${endring.id} har ikke vilkårsgrunnlag. Migrerer inn refusjonsopplysninger fra nabolaget og ubrukte refusjonsopplysninger")
+                    }
+                    vilkårsgrunnlag == null -> Beløpstidslinje()
+                    else -> vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
+                }
+                endring.refusjonstidslinje = refusjonstidslinje
+            }
         }
 
         private fun tilstand(nyTilstand: Tilstand, aktivitetslogg: IAktivitetslogg) {

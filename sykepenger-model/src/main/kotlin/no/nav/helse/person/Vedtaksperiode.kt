@@ -1248,11 +1248,15 @@ internal class Vedtaksperiode private constructor(
         return (nabolagFør.asReversed() + nabolagEtter)
     }
 
-    private fun videreførRefusjonsopplysningerFraNabo(hendelse: Hendelse? = null, aktivitetslogg: IAktivitetslogg) {
-        if (refusjonstidslinje.isNotEmpty()) return
+    private fun eksisterendeRefusjonsopplysninger(): Beløpstidslinje {
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
         val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
-        val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
+        return (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
+    }
+
+    private fun videreførEksisterendeRefusjonsopplysninger(hendelse: Hendelse? = null, aktivitetslogg: IAktivitetslogg) {
+        if (refusjonstidslinje.isNotEmpty()) return
+        val benyttetRefusjonstidslinje = eksisterendeRefusjonsopplysninger()
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
     }
@@ -1481,7 +1485,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, vedtaksperiode, arbeidsgivere)
             infotrygdhistorikk.valider(aktivitetslogg, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer)
             vedtaksperiode.håndterSøknad(søknad, aktivitetslogg)
-            vedtaksperiode.videreførRefusjonsopplysningerFraNabo(søknad, aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(søknad, aktivitetslogg)
             aktivitetslogg.info("Fullført behandling av søknad")
             vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.Companion.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode), aktivitetslogg)
             if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
@@ -1925,7 +1929,7 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.videreførRefusjonsopplysningerFraNabo(aktivitetslogg = aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
             vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)
             if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
             if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
@@ -1988,7 +1992,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.videreførRefusjonsopplysningerFraNabo(aktivitetslogg = aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
             vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
         }
 
@@ -3064,7 +3068,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
-            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
+            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, it::eksisterendeRefusjonsopplysninger) }
         }
 
         // Fredet funksjonsnavn

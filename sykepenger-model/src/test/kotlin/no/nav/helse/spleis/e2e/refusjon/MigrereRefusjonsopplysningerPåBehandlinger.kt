@@ -2,16 +2,18 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
+import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
+import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
+import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.beløp.Beløpstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.MethodOrderer
@@ -34,8 +36,8 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = TestPerson.INNTEKT, opphørsdato = 25.januar),
-            beregnetInntekt = TestPerson.INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
+            beregnetInntekt = INNTEKT,
             id = meldingsreferanseId1,
             mottatt = mottatt1
         )
@@ -45,7 +47,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
 
     @Test
     @Order(1)
-    fun `Vedtaksperiode med én beregnet endring - med toggle`() = Toggle.LagreRefusjonsopplysningerPåBehandling.enable {
+    fun `Vedtaksperiode med én beregnet endring - med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
         a1 {
             setup1og2()
             forrigeRefusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
@@ -54,7 +56,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
 
     @Test
     @Order(2)
-    fun `Vedtaksperiode med én beregnet endring - uten toggle`() = Toggle.LagreRefusjonsopplysningerPåBehandling.disable {
+    fun `Vedtaksperiode med én beregnet endring - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
             setup1og2()
             migrerRefusjonsopplysningerPåBehandlinger()
@@ -68,7 +70,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
-                beregnetInntekt = TestPerson.INNTEKT,
+                beregnetInntekt = INNTEKT,
                 id = meldingsreferanseId1,
                 mottatt = mottatt1
             )
@@ -102,7 +104,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
 
     @Test
     @Order(3)
-    fun `Vedtaksperiode med flere beregnede endringer - med toggle`() = Toggle.LagreRefusjonsopplysningerPåBehandling.enable {
+    fun `Vedtaksperiode med flere beregnede endringer - med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
         a1 {
             setup3og4()
             forrigeRefusjonstidslinje = inspektør.refusjonstidslinjeFraFørsteBeregnedeEndring
@@ -111,16 +113,39 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
 
     @Test
     @Order(4)
-    fun `Vedtaksperiode med flere beregnede endringer - uten toggle`() = Toggle.LagreRefusjonsopplysningerPåBehandling.disable {
+    fun `Vedtaksperiode med flere beregnede endringer - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
             setup3og4()
             migrerRefusjonsopplysningerPåBehandlinger()
-            assertForventetFeil(
-                forklaring = "Har kun migrert inn siste endring",
-                nå = { assertEquals(Beløpstidslinje(), inspektør.refusjonstidslinjeFraFørsteBeregnedeEndring) },
-                ønsket = { assertEquals(forrigeRefusjonstidslinje, inspektør.refusjonstidslinjeFraFørsteBeregnedeEndring) }
-            )
+            assertEquals(forrigeRefusjonstidslinje, inspektør.refusjonstidslinjeFraFørsteBeregnedeEndring)
         }
     }
 
+    private fun setup5og6() {
+        a1 {
+            tilGodkjenning(januar)
+            håndterSøknad(mars)
+            håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1)
+        }
+    }
+
+    @Test
+    @Order(5)
+    fun `Siste vedtaksperiode har fått IM, men er ikke beregnet - med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            setup5og6()
+            forrigeRefusjonstidslinje = inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+        }
+    }
+
+    @Test
+    @Order(6)
+    fun `Siste vedtaksperiode har fått IM, men er ikke beregnet - uten toggle`() = setOf(LagreRefusjonsopplysningerPåBehandling, LagreUbrukteRefusjonsopplysninger).disable {
+        a1 {
+            setup5og6()
+            migrerUbrukteRefusjonsopplysninger()
+            migrerRefusjonsopplysningerPåBehandlinger()
+            assertEquals(forrigeRefusjonstidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
+        }
+    }
 }
