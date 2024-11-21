@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -62,15 +61,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag()
             håndterYtelser(1.vedtaksperiode)
 
-            assertForventetFeil(
-                forklaring = "Refusjonsopplysningene strekker seg ikke sammen med vedtaksperioden",
-                nå = {
-                    assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, 10.januar til 31.januar, INNTEKT)
-                },
-                ønsket = {
-                    assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
-                }
-            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
         }
     }
 

@@ -711,6 +711,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = dokument,
                 sykdomstidslinje = sykdomstidslinje,
                 utbetalingstidslinje = Utbetalingstidslinje(),
+                refusjonstidslinje = this.refusjonstidslinje.fyll(periode),
                 periode = periode,
                 skjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode),
                 arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
