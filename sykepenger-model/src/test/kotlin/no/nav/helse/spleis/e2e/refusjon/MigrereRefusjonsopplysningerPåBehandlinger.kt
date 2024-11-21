@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
 import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
 import no.nav.helse.Toggle.Companion.disable
+import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -146,6 +147,35 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
             migrerUbrukteRefusjonsopplysninger()
             migrerRefusjonsopplysningerPåBehandlinger()
             assertEquals(forrigeRefusjonstidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
+        }
+    }
+
+    private fun setup7og8() {
+        a1 {
+            tilGodkjenning(januar)
+            håndterSøknad(mars)
+            håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1)
+            håndterSøknad(april)
+        }
+    }
+
+    @Test
+    @Order(7)
+    fun `Siste vedtaksperiode har fått IM og forlengelsessøknad - med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            setup7og8()
+            forrigeRefusjonstidslinje = inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
+        }
+    }
+
+    @Test
+    @Order(8)
+    fun `Siste vedtaksperiode har fått IM og forlengelsessøknad - uten toggle`() = setOf(LagreRefusjonsopplysningerPåBehandling, LagreUbrukteRefusjonsopplysninger).disable {
+        a1 {
+            setup7og8()
+            migrerUbrukteRefusjonsopplysninger()
+            migrerRefusjonsopplysningerPåBehandlinger()
+            assertEquals(forrigeRefusjonstidslinje, inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje)
         }
     }
 }
