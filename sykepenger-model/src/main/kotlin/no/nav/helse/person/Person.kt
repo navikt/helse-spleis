@@ -58,6 +58,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
+import no.nav.helse.person.Arbeidsgiver.Companion.migrerRefusjonsopplysningerPåBehandlinger
 import no.nav.helse.person.Arbeidsgiver.Companion.migrerUbrukteRefusjonsopplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -848,6 +849,11 @@ class Person private constructor(
     internal fun migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Migrerer ubrukte refusjonsopplysninger")
         arbeidsgivere.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, infotrygdhistorikk.sisteUtbetalteDag())
+    }
+
+    internal fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: Aktivitetslogg) {
+        aktivitetslogg.info("Migrerer refusjonsopplysninger på behandlinger")
+        arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
     }
 
     fun dto() = PersonUtDto(

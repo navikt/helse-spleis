@@ -53,6 +53,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
+import no.nav.helse.person.Vedtaksperiode.Companion.migrerRefusjonsopplysningerPåBehandlinger
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
@@ -180,6 +181,10 @@ internal class Arbeidsgiver private constructor(
             sisteUtbetalteDagIInfotrygd: LocalDate?
         ) {
             forEach { arbeidsgiver -> arbeidsgiver.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, sisteUtbetalteDagIInfotrygd) }
+        }
+
+        internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
+            forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg) }
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
@@ -326,6 +331,8 @@ internal class Arbeidsgiver private constructor(
         val refusjonsservitørFraSisteInntektsgrunnlag = sisteVedtaksperiode.refusjonsservitørForUbrukteRefusjonsopplysninger(sisteUtbetalteDagIInfotrygd) ?: return
         refusjonsservitørFraSisteInntektsgrunnlag.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
+
+    private fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) = vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer)
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
 

@@ -361,6 +361,10 @@ internal abstract class AbstractDslTest {
         person.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg())
     }
 
+    protected fun migrerRefusjonsopplysningerPåBehandlinger() {
+        person.migrerRefusjonsopplysningerPåBehandlinger(Aktivitetslogg())
+    }
+
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     private fun bareÈnArbeidsgiver(orgnr: String): String {
         check(testperson.view().arbeidsgivere.size < 2) {

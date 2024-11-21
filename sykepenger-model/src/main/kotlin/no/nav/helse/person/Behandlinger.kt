@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -219,6 +220,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
+    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) =
+        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
 
     fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
         this.behandlinger.last().vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
@@ -477,6 +480,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
             nyRefusjonstidslinje: Beløpstidslinje
         ): Behandling? {
+            if (Toggle.LagreRefusjonsopplysningerPåBehandling.disabled) return null
             val refusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
             if (!erEndringIRefusjonsopplysninger(refusjonsopplysningerForPerioden)) return null
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, gjeldende.refusjonstidslinje + refusjonsopplysningerForPerioden)
@@ -496,7 +500,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dokumentsporing: Dokumentsporing,
             val sykdomstidslinje: Sykdomstidslinje,
             val utbetalingstidslinje: Utbetalingstidslinje,
-            val refusjonstidslinje: Beløpstidslinje,
+            var refusjonstidslinje: Beløpstidslinje, // TODO denne må endres tilbake til val når vi har migrert refusjonsopplysninger 21.11.24
             val skjæringstidspunkt: LocalDate,
             val arbeidsgiverperiode: List<Periode>,
             val maksdatoresultat: Maksdatoresultat
@@ -831,6 +835,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun forkastVedtaksperiode(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
             return tilstand.forkastVedtaksperiode(this, arbeidsgiver, hendelse, aktivitetslogg)
+        }
+
+        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
+            val vilkårsgrunnlag = endringer.last().grunnlagsdata ?: return // TODO Her skal nabolagskode
+            val refusjonstidslinje = vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
+            endringer.last().refusjonstidslinje = refusjonstidslinje
         }
 
         private fun tilstand(nyTilstand: Tilstand, aktivitetslogg: IAktivitetslogg) {

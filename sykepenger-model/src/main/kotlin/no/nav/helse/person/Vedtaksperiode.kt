@@ -3063,6 +3063,10 @@ internal class Vedtaksperiode private constructor(
             return lastOrNull { it.vilkårsgrunnlag != null }
         }
 
+        internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
+            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
+        }
+
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
