@@ -410,7 +410,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler personpåminnelse")
         aktivitetslogg.info("Håndterer påminnelse for person")
-        migrerUbrukteRefusjonsopplysninger(aktivitetslogg)
+        migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
@@ -851,7 +851,7 @@ class Person private constructor(
         arbeidsgivere.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, infotrygdhistorikk.sisteUtbetalteDag())
     }
 
-    internal fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: Aktivitetslogg) {
+    internal fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Migrerer refusjonsopplysninger på behandlinger")
         arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
     }
