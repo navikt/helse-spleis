@@ -105,12 +105,6 @@ data class ArbeidsgiverInntektsopplysning(
         inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, orgnummer, saksbehandleroverstyring)
     }
 
-    internal fun gjenoppliv(forrigeSkjæringstidspunkt: LocalDate, nyttSkjæringstidspunkt: LocalDate): ArbeidsgiverInntektsopplysning {
-        if (forrigeSkjæringstidspunkt == nyttSkjæringstidspunkt) return this // Intet nytt fra vestfronten
-        if (nyttSkjæringstidspunkt > gjelder.endInclusive) return this // Unngår å havne i problemer med ugyldige perioder
-        return ArbeidsgiverInntektsopplysning(orgnummer, nyttSkjæringstidspunkt til gjelder.endInclusive, inntektsopplysning, refusjonsopplysninger.gjenoppliv(nyttSkjæringstidspunkt))
-    }
-
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
             .map { VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(

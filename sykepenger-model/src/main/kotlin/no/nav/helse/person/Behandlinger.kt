@@ -24,7 +24,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
@@ -590,7 +589,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(metadata.meldingsreferanseId)
                         is Dødsmelding,
-                        is GjenopplivVilkårsgrunnlag,
                         is IdentOpphørt,
                         is Infotrygdendring,
                         is Migrate,

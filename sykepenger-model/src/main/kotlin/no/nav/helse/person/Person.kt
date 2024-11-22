@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
@@ -219,13 +218,6 @@ class Person private constructor(
         registrer(aktivitetslogg, "Behandler replay av inntektsmeldinger")
         finnArbeidsgiver(replays.behandlingsporing, aktivitetslogg).håndter(replays, aktivitetslogg)
         håndterGjenoppta(replays, aktivitetslogg)
-    }
-
-    fun håndter(gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
-        gjenopplivVilkårsgrunnlag.valider(arbeidsgivere.map { it.organisasjonsnummer() })
-        gjenopplivVilkårsgrunnlag.gjenoppliv(aktivitetslogg, vilkårsgrunnlagHistorikk)
-        gjenopptaBehandling(aktivitetslogg)
-        håndterGjenoppta(gjenopplivVilkårsgrunnlag, aktivitetslogg)
     }
 
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding, aktivitetslogg: IAktivitetslogg) {

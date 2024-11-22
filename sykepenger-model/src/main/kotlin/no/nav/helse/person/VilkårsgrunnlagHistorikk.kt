@@ -15,7 +15,6 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -54,19 +53,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val nytt = Innslag(siste, vilkårsgrunnlag.toList())
         if (nytt == siste) return
         historikk.add(0, nytt)
-    }
-
-    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) {
-        if (!kanGjenopplive(hendelse, aktivitetslogg, vilkårsgrunnlagId, nyttSkjæringstidspunkt)) return aktivitetslogg.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
-        val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, aktivitetslogg, vilkårsgrunnlagId, nyttSkjæringstidspunkt) } ?: return aktivitetslogg.info("Fant ikke vilkårsgrunnlag å gjenopplive")
-        lagre(gjenopplivet)
-    }
-
-    private fun kanGjenopplive(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): Boolean {
-        return when (nyttSkjæringstidspunkt) {
-            null -> sisteInnlag()?.gjennoppliv(hendelse, aktivitetslogg, vilkårsgrunnlagId, null) == null
-            else -> sisteInnlag()?.vilkårsgrunnlagFor(nyttSkjæringstidspunkt) == null
-        }
     }
 
     internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>) {
@@ -167,8 +153,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: Set<LocalDate>): Map<LocalDate, VilkårsgrunnlagElement> {
             return vilkårsgrunnlag.filter { (dato, _) -> dato in sykefraværstilfeller }
         }
-
-        internal fun gjennoppliv(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, aktivitetslogg, vilkårsgrunnlagId, nyttSkjæringstidspunkt) }
 
         internal companion object {
             fun gjenopprett(
@@ -336,12 +320,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun berik(builder: UtkastTilVedtakBuilder) {
             builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
             inntektsgrunnlag.berik(builder)
-        }
-
-        internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {
-            if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
-            val gjenopplivetSykepengegrunnlag = this.inntektsgrunnlag.gjenoppliv(hendelse, aktivitetslogg, nyttSkjæringstidspunkt) ?: return null
-            return kopierMed(aktivitetslogg, gjenopplivetSykepengegrunnlag, this.opptjening, EmptyLog, nyttSkjæringstidspunkt)
         }
 
         internal companion object {

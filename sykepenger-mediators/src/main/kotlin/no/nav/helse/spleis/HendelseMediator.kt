@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
@@ -48,7 +47,6 @@ import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
-import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -452,16 +450,6 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
-        message: GjenopplivVilkårsgrunnlagMessage,
-        gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag,
-        context: MessageContext
-    ) {
-        hentPersonOgHåndter(message, context) { person, aktivitetslogg ->
-            person.håndter(gjenopplivVilkårsgrunnlag, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(
         message: SkjønnsmessigFastsettelseMessage,
         skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
         context: MessageContext
@@ -653,7 +641,6 @@ internal interface IHendelseMediator {
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
     fun behandle(avbruttSøknadMessage: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
     fun behandle(avbruttArbeidsledigSøknadMessage: AvbruttArbeidsledigSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
-    fun behandle(message: GjenopplivVilkårsgrunnlagMessage, gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, context: MessageContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
     fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: MessageContext)
 }

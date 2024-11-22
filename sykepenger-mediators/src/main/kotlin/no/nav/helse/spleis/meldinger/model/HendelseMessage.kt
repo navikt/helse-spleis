@@ -86,7 +86,6 @@ private val HendelseMessage.kontekstnavn get() = when (this) {
     is YtelserMessage -> "Ytelser"
     is DødsmeldingMessage -> "Dødsmelding"
     is ForkastSykmeldingsperioderMessage -> "ForkastSykmeldingsperioder"
-    is GjenopplivVilkårsgrunnlagMessage -> "GjenopplivVilkårsgrunnlag"
     is GrunnbeløpsreguleringMessage -> "Grunnbeløpsregulering"
     is IdentOpphørtMessage -> "IdentOpphørt"
     is InfotrygdendringMessage -> "Infotrygdendring"

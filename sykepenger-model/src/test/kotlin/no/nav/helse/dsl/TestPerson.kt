@@ -389,11 +389,6 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
-        internal fun håndterGjenopplivVilkårsgrunnlag(skjæringstidspunkt: LocalDate?, vilkårsgrunnlagId: UUID) {
-            arbeidsgiverHendelsefabrikk.lagGjenopplivVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagId)
-                .håndter(Person::håndter)
-        }
-
         internal fun håndterPersonPåminnelse() {
             personHendelsefabrikk.lagPåminnelse()
                 .håndter(Person::håndter)

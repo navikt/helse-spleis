@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
-import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -270,23 +269,6 @@ internal class Inntektsgrunnlag private constructor(
         val overstyrtTilkommenInntekt = tilkommendeInntekter.overstyr(hendelse)
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, overstyrtTilkommenInntekt, subsumsjonslogg)
-    }
-
-    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, aktivitetslogg: IAktivitetslogg, nyttSkjæringstidspunkt: LocalDate?): Inntektsgrunnlag? {
-        val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
-        val nyeArbeidsgiverInntektsopplysninger = hendelse.arbeidsgiverinntektsopplysninger(skjæringstidspunkt)
-        if (arbeidsgiverInntektsopplysninger.isNotEmpty() && nyeArbeidsgiverInntektsopplysninger.isNotEmpty()) {
-            aktivitetslogg.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger inntektsopplysninger.")
-            return null
-        }
-
-        val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger.map { it.gjenoppliv(this.skjæringstidspunkt, skjæringstidspunkt) }
-
-        if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) {
-            aktivitetslogg.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")
-            return null
-        }
-        return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt)
     }
 
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {

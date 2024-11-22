@@ -140,12 +140,6 @@ data class Refusjonsopplysning(
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.mergeInnNyeOpplysninger(other.validerteRefusjonsopplysninger))
         }
 
-        internal fun gjenoppliv(nyttSkjæringstidspunkt: LocalDate): Refusjonsopplysninger {
-            val gammelSnute = validerteRefusjonsopplysninger.firstOrNull { it.dekker(nyttSkjæringstidspunkt) } ?: validerteRefusjonsopplysninger.firstOrNull() ?: return this
-            val nySnute = Refusjonsopplysning(gammelSnute.meldingsreferanseId, nyttSkjæringstidspunkt, null, gammelSnute.beløp, gammelSnute.avsender, gammelSnute.tidsstempel)
-            return nySnute.refusjonsopplysninger.merge(this)
-        }
-
         internal fun beløpstidslinje() = validerteRefusjonsopplysninger.fold(Beløpstidslinje()) { samletBeløpstidslinje, refusjonsopplysning ->
             samletBeløpstidslinje + Beløpstidslinje.fra(
                 periode = refusjonsopplysning.fom til (refusjonsopplysning.tom ?: refusjonsopplysning.fom),

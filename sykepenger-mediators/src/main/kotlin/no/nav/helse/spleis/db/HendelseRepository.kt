@@ -48,7 +48,6 @@ import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
-import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -145,7 +144,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is DødsmeldingMessage -> DØDSMELDING
         is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
         is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
-        is GjenopplivVilkårsgrunnlagMessage -> GJENOPPLIV_VILKÅRSGRUNNLAG
         is IdentOpphørtMessage -> IDENT_OPPHØRT
         is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
         is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
