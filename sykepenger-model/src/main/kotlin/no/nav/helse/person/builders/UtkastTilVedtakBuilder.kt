@@ -171,7 +171,7 @@ internal class UtkastTilVedtakBuilder(
         init {
             check(arbeidsgiverinntekter.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
             if (tilkomneArbeidsgivere.isNotEmpty()) tags.add(Tag.TilkommenInntekt)
-            if (arbeidsgiverinntekter.size == 1 && tilkomneArbeidsgivere.isEmpty()) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
+            if (arbeidsgiverinntekter.size + tilkomneArbeidsgivere.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
             if (arbeidsgiverinntekter.single { it.arbeidsgiver == arbeidsgiver }.skatteopplysning) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
         }
 
@@ -200,6 +200,10 @@ internal class UtkastTilVedtakBuilder(
 
         private val beregningsgrunnlagForAvsluttetMedVedtak: Double = sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak().also {
             check(it == beregningsgrunnlag.årlig) { "Beregningsgrunnlag ${beregningsgrunnlag.årlig} er noe annet enn beregningsgrunnlag beregnet fra sykepengegrunnlagsfakta $it" }
+        }
+
+        private val inntektForAvsluttetMedVedtak: Double = sykepengegrunnlagsfakta.inntektForAvsluttetMedVedtak().also {
+            check(it == beregningsgrunnlag.månedlig) { "Inntekt ${beregningsgrunnlag.månedlig} er noe annet enn inntekt beregnet fra sykepengegrunnlagsfakta $it" }
         }
 
         private val omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak = sykepengegrunnlagsfakta.omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak()
@@ -293,7 +297,7 @@ internal class UtkastTilVedtakBuilder(
             // Til ettertanke: Denne hentet data fra sykepengegrunnlagsfakta som har to desimaler
             // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlagPerArbeidsgiver"
             omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak,
-            inntekt = beregningsgrunnlag.månedlig, // TODO: Til ettertanke: What? 👀 Denne håper jeg ingen bruker
+            inntekt = inntektForAvsluttetMedVedtak, // TODO: Til ettertanke: What? 👀 Denne håper jeg ingen bruker
             utbetalingId = utbetalingId,
             sykepengegrunnlagsbegrensning = sykepengegrunnlagsbegrensningForAvsluttetMedVedtak,
             vedtakFattetTidspunkt = vedtakFattet,
@@ -345,6 +349,8 @@ internal class UtkastTilVedtakBuilder(
             is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.skjønnsfastsatt
             else -> fakta.omregnetÅrsinntekt
         }
+
+        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.inntektForAvsluttetMedVedtak() = beregningsgrunnlagForAvsluttetMedVedtak() / 12
 
         private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak(): Map<String, Double> = when (val fakta = this) {
             is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> emptyMap()
