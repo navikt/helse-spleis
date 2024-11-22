@@ -3,13 +3,17 @@ package no.nav.helse.dsl
 import java.lang.IllegalStateException
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
+import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -185,6 +189,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
         validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
+        validerRefusjonsopplysningerPåBehandlinger()
         IM.bekreftEntydighåndtering()
     }
 
@@ -253,8 +258,28 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         }
     }
 
+    private fun validerRefusjonsopplysningerPåBehandlinger() {
+        arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
+            arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger.forEach behandling@ { behandling ->
+                    behandling.endringer.last().let { endring ->
+                        if (endring.refusjonstidslinje.isEmpty()) {
+                            if (behandling.tilstand == AVSLUTTET_UTEN_VEDTAK) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
+                            if (vedtaksperiode.tilstand in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling// Ikke fått refusjonsopplysninger enda da
+                            error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand}")
+                        }
+                        val perioder = endring.refusjonstidslinje.perioderMedBeløp
+                        check(perioder.size == 1) { "Burde ikke være noen hull i refusjonstidslinjen." }
+                        check(perioder.single() == endring.periode) { "Refusjonstidslinjen skal dekke hele perioden. Perioden er ${endring.periode}, refusjonsopplysninger for $perioder" }
+                    }
+                }
+            }
+        }
+    }
+
+
     private fun BehandlingView.gyldigTilInfotrygd() = tilstand == BehandlingView.TilstandView.TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
-    private fun BehandlingView.gyldigAvsluttetUtenUtbetaling() = tilstand == BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
+    private fun BehandlingView.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
     private fun BehandlingView.gyldigAvsluttet() = tilstand == BehandlingView.TilstandView.VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
     private val BehandlingView.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
 
