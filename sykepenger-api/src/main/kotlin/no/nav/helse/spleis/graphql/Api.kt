@@ -57,9 +57,9 @@ internal object Api {
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val (fødselsnummer, aktørId) = speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
+                        val (_, aktørId) = speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
 
-                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, aktørId, callId, meterRegistry)
+                        val person = personResolver(spekematClient, personDao, hendelseDao, ident, aktørId, callId, meterRegistry)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")
