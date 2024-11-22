@@ -80,13 +80,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
         // Med nye refusjonsopplysnigner vil det tolkes som 0,- i refusjon
         val nyeRefusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
-        val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.first().dato til nyeRefusjonsopplysninger.last().dato
-        assertTrue(nyeRefusjonsopplysninger.all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
-        assertForventetFeil(
-            forklaring = "Skal ikke refusjonstidslinjen strekke seg over hele perioden da??",
-            nå = { assertEquals(10.januar til 31.januar, nyeRefusjonsopplysningerPeriode) },
-            ønsket = { assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode) }
-        )
+        val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.perioderMedBeløp.single()
+        assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode)
+        assertTrue(nyeRefusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
+        assertTrue(nyeRefusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
     }
 
     @Test

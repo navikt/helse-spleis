@@ -481,13 +481,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyRefusjonstidslinje: Beløpstidslinje
         ): Behandling? {
             if (Toggle.LagreRefusjonsopplysningerPåBehandling.disabled) return null
-            val refusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
-            if (!erEndringIRefusjonsopplysninger(refusjonsopplysningerForPerioden)) return null
-            return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, gjeldende.refusjonstidslinje + refusjonsopplysningerForPerioden)
+            val nyeRefusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
+            val benyttetRefusjonsopplysninger = (gjeldende.refusjonstidslinje + nyeRefusjonsopplysningerForPerioden).fyll(periode)
+            if (benyttetRefusjonsopplysninger == gjeldende.refusjonstidslinje) return null // Ingen endring
+            return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, benyttetRefusjonsopplysninger)
         }
-
-        private fun erEndringIRefusjonsopplysninger(nyeRefusjonsopplysninger: Beløpstidslinje) =
-            (gjeldende.refusjonstidslinje + nyeRefusjonsopplysninger) != gjeldende.refusjonstidslinje
 
         // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett
         data class Endring(

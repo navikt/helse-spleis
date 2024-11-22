@@ -252,12 +252,12 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
-            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, mars, INNTEKT*1.1)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT*1.1)
 
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
-            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, mars, INNTEKT*1.1)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT*1.1)
         }
     }
 
