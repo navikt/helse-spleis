@@ -1962,6 +1962,23 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.lagreInntekt(sykepengegrunnlagForArbeidsgiver)
             vedtaksperiode.behandlinger.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver, vedtaksperiode.person)
             vedtaksperiode.behandlinger.oppdaterDokumentsporing(Dokumentsporing.inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId))
+            val ingenRefusjon = Beløpstidslinje.fra(
+                periode = vedtaksperiode.periode,
+                beløp = Inntekt.INGEN,
+                kilde = Kilde(
+                    sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+                    sykepengegrunnlagForArbeidsgiver.metadata.avsender,
+                    sykepengegrunnlagForArbeidsgiver.metadata.innsendt
+                )
+            )
+            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(
+                arbeidsgiver = vedtaksperiode.arbeidsgiver,
+                hendelse = sykepengegrunnlagForArbeidsgiver,
+                aktivitetslogg = aktivitetslogg,
+                beregnSkjæringstidspunkt = vedtaksperiode.person.beregnSkjæringstidspunkt(),
+                beregnArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist),
+                refusjonstidslinje = ingenRefusjon
+            )
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
         }
 
