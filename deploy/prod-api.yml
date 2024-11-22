@@ -67,8 +67,10 @@ spec:
     value: "europe-north1"
   - name: DATABASE_INSTANCE
     value: "spleis2"
-  - name: NyRevurdering
-    value: "false"
   - name: SPEKEMAT_SCOPE
     value: "api://prod-gcp.tbd.spekemat/.default"
+  - name: SPEED_API_URL
+    value: http://speed-api
+  - name: TOKEN_ENDPOINT_ENV_KEY
+    value: AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
 
