@@ -8,7 +8,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -231,7 +230,8 @@ data class ArbeidsgiverInntektsopplysning(
                     arbeidsgiver = arbeidsgiver.orgnummer,
                     omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
                     skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt() else null,
-                    gjelder = arbeidsgiver.gjelder
+                    gjelder = arbeidsgiver.gjelder,
+                    skatteopplysning = arbeidsgiver.inntektsopplysning.erSkatteopplysning()
                 )
             }
 

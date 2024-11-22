@@ -755,18 +755,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun godkjenning(
                 aktivitetslogg: IAktivitetslogg,
                 behandling: Behandling,
-                organisasjonsnummer: String,
-                utkastTilVedtakBuilder: UtkastTilVedtakBuilder,
-
+                utkastTilVedtakBuilder: UtkastTilVedtakBuilder
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
                 aktivitetslogg.kontekst(utbetaling)
                 utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling).sykdomstidslinje(sykdomstidslinje)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
-                if(grunnlagsdata.harSkatteinntekterFor(organisasjonsnummer)){
-                    utkastTilVedtakBuilder.inntektFraAOrdningenLagtTilGrunn()
-                }
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(aktivitetslogg, utkastTilVedtakBuilder.buildGodkjenningsbehov())
             }
@@ -1167,7 +1162,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder, organisasjonsnummer: String) {
             builder.behandlingId(id).periode(arbeidsgiverperiode, periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
-            gjeldende.godkjenning(aktivitetslogg, this, organisasjonsnummer, builder)
+            gjeldende.godkjenning(aktivitetslogg, this, builder)
         }
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {

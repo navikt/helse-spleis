@@ -32,8 +32,6 @@ internal class UtkastTilVedtakBuilder(
     }
 
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
-    internal fun ferie() = apply { tags.add(Tag.Ferie) }
-    internal fun inntektFraAOrdningenLagtTilGrunn() = apply { tags.add(Tag.InntektFraAOrdningenLagtTilGrunn) }
 
     private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
     private val relevantePerioder = mutableSetOf<RelevantPeriode>()
@@ -120,10 +118,10 @@ internal class UtkastTilVedtakBuilder(
         if (inngangsvilkårFraInfotrygd) tags.add(Tag.InngangsvilkårFraInfotrygd)
     }
 
-    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode)
+    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode, val skatteopplysning: Boolean)
     private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
-    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode) = apply {
-        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder))
+    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode, skatteopplysning: Boolean) = apply {
+        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder, skatteopplysning))
     }
 
     private val tilkomneArbeidsgivere = mutableSetOf<String>()
@@ -165,17 +163,16 @@ internal class UtkastTilVedtakBuilder(
     internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
 
     private inner class Build {
-        private val arbeidsgivereISykepengegrunnlaget = arbeidsgiverinntekter.also {
-            check(it.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
-        }
-        private val skjønnsfastsatt = arbeidsgivereISykepengegrunnlaget.any { it.skjønnsfastsatt != null }.also {
-            if (it) check(arbeidsgivereISykepengegrunnlaget.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
+        private val skjønnsfastsatt = arbeidsgiverinntekter.any { it.skjønnsfastsatt != null }.also {
+            if (it) check(arbeidsgiverinntekter.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
         }
         private val perioderMedSammeSkjæringstidspunkt = relevantePerioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         init {
+            check(arbeidsgiverinntekter.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
             if (tilkomneArbeidsgivere.isNotEmpty()) tags.add(Tag.TilkommenInntekt)
-            if (arbeidsgivereISykepengegrunnlaget.size == 1 && tilkomneArbeidsgivere.isEmpty()) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
+            if (arbeidsgiverinntekter.size == 1 && tilkomneArbeidsgivere.isEmpty()) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
+            if (arbeidsgiverinntekter.single { it.arbeidsgiver == arbeidsgiver }.skatteopplysning) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
         }
 
         private val sykepengegrunnlagsfakta: PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta = when {
@@ -185,7 +182,7 @@ internal class UtkastTilVedtakBuilder(
             skjønnsfastsatt ->  PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
                 `6G`= seksG,
-                arbeidsgivere = arbeidsgivereISykepengegrunnlaget.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
+                arbeidsgivere = arbeidsgiverinntekter.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
                     arbeidsgiver = it.arbeidsgiver,
                     omregnetÅrsinntekt = it.omregnedeÅrsinntekt,
                     skjønnsfastsatt = it.skjønnsfastsatt!!
@@ -194,7 +191,7 @@ internal class UtkastTilVedtakBuilder(
             else -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
                 `6G`= seksG,
-                arbeidsgivere = arbeidsgivereISykepengegrunnlaget.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
+                arbeidsgivere = arbeidsgiverinntekter.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
                     arbeidsgiver = it.arbeidsgiver,
                     omregnetÅrsinntekt = it.omregnedeÅrsinntekt
                 )}
