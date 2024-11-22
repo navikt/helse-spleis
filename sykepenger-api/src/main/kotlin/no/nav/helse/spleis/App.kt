@@ -8,6 +8,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.naisful.naisApp
 import com.github.navikt.tbd_libs.speed.SpeedClient
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.request.header
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import javax.sql.DataSource
@@ -17,6 +21,7 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
+import kotlin.text.get
 
 internal val nyObjectmapper get() = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -56,6 +61,17 @@ internal fun createApp(
     objectMapper = objectMapper,
     applicationLogger = logg,
     callLogger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging"),
+    timersConfig = { call, _ ->
+        this
+            .tag("azp_name", call.principal<JWTPrincipal>()?.get("azp_name") ?: "n/a")
+            // https://github.com/linkerd/polixy/blob/main/DESIGN.md#l5d-client-id-client-id
+            // eksempel: <APP>.<NAMESPACE>.serviceaccount.identity.linkerd.cluster.local
+            .tag("konsument", call.request.header("L5d-Client-Id") ?: "n/a")
+    },
+    mdcEntries = mapOf(
+        "azp_name" to { call: ApplicationCall -> call.principal<JWTPrincipal>()?.get("azp_name") },
+        "konsument" to { call: ApplicationCall -> call.request.header("L5d-Client-Id") }
+    ),
     port = port,
     applicationModule = {
         azureAdAppAuthentication(azureConfig)
