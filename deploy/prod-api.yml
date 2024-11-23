@@ -17,6 +17,7 @@ spec:
   readiness:
     path: /isready
     initialDelay: 5
+    periodSeconds: 1
   resources:
     limits:
       memory: 5Gi
