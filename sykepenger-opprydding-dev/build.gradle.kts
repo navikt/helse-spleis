@@ -5,7 +5,7 @@ plugins {
 }
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
-val tbdLibsVersion = "2024.11.23-14.22-c649da38"
+val tbdLibsVersion = "2024.11.24-12.01-42fdc22d"
 
 dependencies {
     implementation(libs.rapids.and.rivers)
