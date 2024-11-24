@@ -20,16 +20,14 @@ val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, Prometheus
 
 // Understands how to build our application server
 class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
+    private val factory = ConsumerProducerFactory(AivenConfig.default)
+    private val rapidsConnection = RapidApplication.create(env, factory, meterRegistry = meterRegistry)
 
     // Håndter on-prem og gcp database tilkobling forskjellig
     private val dataSourceBuilder = DataSourceBuilder(env)
-
     private val STØTTER_IDENTBYTTE = env["IDENTBYTTE"]?.equals("true", ignoreCase = true) == true
-
     private val hendelseRepository = HendelseRepository(dataSourceBuilder.dataSource)
     private val personDao = PersonDao(dataSourceBuilder.dataSource, STØTTER_IDENTBYTTE)
-    private val factory = ConsumerProducerFactory(AivenConfig.default)
-    private val rapidsConnection = RapidApplication.create(env, factory, meterRegistry = meterRegistry)
 
     private val subsumsjonsproducer = Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
 

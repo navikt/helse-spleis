@@ -18,11 +18,15 @@ internal class DataSourceBuilder(env: Map<String, String>) {
 
     private val migrationConfig = HikariConfig().apply {
         baseConnectionConfig.copyStateTo(this)
+        poolName = "flyway"
         maximumPoolSize = 2
+        metricRegistry = meterRegistry
     }
     private val appConfig = HikariConfig().apply {
         baseConnectionConfig.copyStateTo(this)
+        poolName = "app"
         maximumPoolSize = 2
+        metricRegistry = meterRegistry
     }
 
     val dataSource by lazy { HikariDataSource(appConfig) }
