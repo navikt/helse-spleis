@@ -6,15 +6,19 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
 import com.github.navikt.tbd_libs.azure.createDefaultAzureTokenClient
+import com.github.navikt.tbd_libs.naisful.postgres.ConnectionConfigFactory
+import com.github.navikt.tbd_libs.naisful.postgres.jdbcUrlWithGoogleSocketFactory
 import com.github.navikt.tbd_libs.speed.SpeedClient
-import io.ktor.server.auth.jwt.JWTAuthenticationProvider
-import io.ktor.server.auth.jwt.JWTPrincipal
-import java.net.URI
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import io.ktor.server.auth.jwt.*
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.objectMapper
+import java.net.URI
 import java.net.http.HttpClient
 
-internal class ApplicationConfiguration(env: Map<String, String> = System.getenv()) {
+internal class ApplicationConfiguration(meterRegistry: MeterRegistry, env: Map<String, String> = System.getenv()) {
     internal val azureConfig = AzureAdAppConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
         issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
@@ -38,16 +42,19 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         scope = env.getValue("SPEKEMAT_SCOPE")
     )
 
-    // Håndter on-prem og gcp database tilkobling forskjellig
-    internal val dataSourceConfiguration = DataSourceConfiguration(
-        jdbcUrl = env["DATABASE_JDBC_URL"],
-        gcpProjectId = env["GCP_TEAM_PROJECT_ID"],
-        databaseRegion = env["DATABASE_REGION"],
-        databaseInstance = env["DATABASE_INSTANCE"],
-        databaseUsername = env["DATABASE_SPLEIS_API_USERNAME"],
-        databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"],
-        databaseName = env["DATABASE_SPLEIS_API_DATABASE"]
-    )
+    private val hikariConfig = HikariConfig().apply {
+        jdbcUrl = jdbcUrlWithGoogleSocketFactory(
+            databaseInstance = env.getValue("DATABASE_INSTANCE"),
+            metode = ConnectionConfigFactory.MountPath("/var/run/secrets/spleis_sql")
+        )
+        poolName = "app"
+        maximumPoolSize = 5
+        metricRegistry = meterRegistry
+    }
+
+    internal val dataSource by lazy {
+        HikariDataSource(hikariConfig)
+    }
 }
 
 internal class AzureAdAppConfig(

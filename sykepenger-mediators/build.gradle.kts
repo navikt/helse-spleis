@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.bundles.flyway)
+    implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
 
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")

@@ -24,12 +24,10 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     // Håndter on-prem og gcp database tilkobling forskjellig
     private val dataSourceBuilder = DataSourceBuilder(env)
 
-    private val dataSource = dataSourceBuilder.getDataSource()
-
     private val STØTTER_IDENTBYTTE = env["IDENTBYTTE"]?.equals("true", ignoreCase = true) == true
 
-    private val hendelseRepository = HendelseRepository(dataSource)
-    private val personDao = PersonDao(dataSource, STØTTER_IDENTBYTTE)
+    private val hendelseRepository = HendelseRepository(dataSourceBuilder.dataSource)
+    private val personDao = PersonDao(dataSourceBuilder.dataSource, STØTTER_IDENTBYTTE)
     private val factory = ConsumerProducerFactory(AivenConfig.default)
     private val rapidsConnection = RapidApplication.create(env, factory, meterRegistry = meterRegistry)
 

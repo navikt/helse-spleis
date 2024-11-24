@@ -62,15 +62,12 @@ spec:
         - application: speed-api-dev-proxy
   secureLogs:
     enabled: true
-  envFrom:
+  filesFrom:
     - secret: google-sql-helse-spleis-spleis-spleis-api-cf4f5c2c
+      mountPath: /var/run/secrets/spleis_sql
   env:
-  - name: DATABASE_REGION
-    value: "europe-north1"
   - name: DATABASE_INSTANCE
     value: "helse-spleis"
-  - name: DATABASE_DATABASE
-    value: "spleis"
   - name: SPEKEMAT_SCOPE
     value: "api://dev-gcp.tbd.spekemat/.default"
   - name: SPEED_API_URL

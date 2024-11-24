@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
     implementation(project(":sykepenger-utbetaling"))
+    implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
 
     testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
     testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")

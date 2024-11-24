@@ -1,5 +1,7 @@
 package no.nav.helse
 
+import com.github.navikt.tbd_libs.naisful.postgres.ConnectionConfigFactory
+import com.github.navikt.tbd_libs.naisful.postgres.defaultJdbcUrl
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
@@ -10,30 +12,30 @@ import org.slf4j.LoggerFactory
 // Understands how to create a data source from environment variables
 internal class DataSourceBuilder(env: Map<String, String>) {
 
-    private val hikariConfig = HikariConfig().apply {
-        jdbcUrl = env["DATABASE_JDBC_URL"] ?: String.format(
-            "jdbc:postgresql://%s:%s/%s",
-            requireNotNull(env["DATABASE_HOST"]) { "database host must be set if jdbc url is not provided" },
-            requireNotNull(env["DATABASE_PORT"]) { "database port must be set if jdbc url is not provided" },
-            requireNotNull(env["DATABASE_DATABASE"]) { "database name must be set if jdbc url is not provided" })
-        username = requireNotNull(env["DATABASE_USERNAME"]) { "databasebrukernavn må settes" }
-        password = requireNotNull(env["DATABASE_PASSWORD"]) { "databasepassord må settes" }
-        maximumPoolSize = 2
-        connectionTimeout = Duration.ofSeconds(30).toMillis()
-        maxLifetime = Duration.ofMinutes(30).toMillis()
-        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
+    private val baseConnectionConfig = HikariConfig().apply {
+        jdbcUrl = defaultJdbcUrl(ConnectionConfigFactory.Env(env = env, envVarPrefix = "DATABASE"))
     }
 
-    internal fun getDataSource() = dataSource
-    private val dataSource by lazy { HikariDataSource(hikariConfig) }
+    private val migrationConfig = HikariConfig().apply {
+        baseConnectionConfig.copyStateTo(this)
+        maximumPoolSize = 2
+    }
+    private val appConfig = HikariConfig().apply {
+        baseConnectionConfig.copyStateTo(this)
+        maximumPoolSize = 2
+    }
+
+    val dataSource by lazy { HikariDataSource(appConfig) }
 
     internal fun migrate() {
         logger.info("Migrerer database")
-        Flyway.configure()
-            .dataSource(dataSource)
-            .lockRetryCount(-1)
-            .load()
-            .migrate()
+        HikariDataSource(migrationConfig).use { flywayDataSource ->
+            Flyway.configure()
+                .dataSource(flywayDataSource)
+                .lockRetryCount(-1)
+                .load()
+                .migrate()
+        }
         logger.info("Migrering ferdig!")
     }
 

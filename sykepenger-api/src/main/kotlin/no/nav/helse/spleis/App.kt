@@ -39,13 +39,9 @@ fun main() {
         logg.error("Uncaught exception in thread ${thread.name}: {}", err.message, err)
     }
 
-    val config = ApplicationConfiguration()
-    val dataSource by lazy {
-        // viktig å cache resultatet fra getDataSource() fordi den gir en -ny- tilkobling hver gang.
-        // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
-        config.dataSourceConfiguration.getDataSource()
-    }
-    val app = createApp(config.azureConfig, config.speedClient, config.spekematClient, { dataSource })
+    val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    val config = ApplicationConfiguration(meterRegistry)
+    val app = createApp(config.azureConfig, config.speedClient, config.spekematClient, { config.dataSource }, meterRegistry)
     app.start(wait = true)
 }
 

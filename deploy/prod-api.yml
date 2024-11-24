@@ -61,11 +61,10 @@ spec:
         - application: speed-api
   secureLogs:
     enabled: true
-  envFrom:
+  filesFrom:
     - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
+      mountPath: /var/run/secrets/spleis_sql
   env:
-  - name: DATABASE_REGION
-    value: "europe-north1"
   - name: DATABASE_INSTANCE
     value: "spleis2"
   - name: SPEKEMAT_SCOPE
