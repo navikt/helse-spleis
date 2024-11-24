@@ -93,14 +93,23 @@ internal class UtkastTilVedtakBuilder(
     }
 
     internal fun utbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) = apply {
-        val behandlingsresultat = UtbetalingstidslinjeInfo(utbetalingstidslinje).behandlingsresultat()
-        tags.add(behandlingsresultat)
+        tags.add(utbetalingstidslinje.behandlingsresultat)
+    }
+
+    private val Utbetalingstidslinje.behandlingsresultat get(): Tag {
+        val avvistDag = any { it is Utbetalingsdag.AvvistDag || it is Utbetalingsdag.ForeldetDag }
+        val navDag = any { it is Utbetalingsdag.NavDag }
+
+        return when {
+            !navDag -> Tag.Avslag
+            navDag && avvistDag -> Tag.DelvisInnvilget
+            else -> Tag.Innvilget
+        }
     }
 
     internal fun sykdomstidslinje(sykdomstidslinje: Sykdomstidslinje) = apply {
         if (sykdomstidslinje.any { it is Dag.Feriedag }) tags.add(Tag.Ferie)
     }
-
 
     private var sykepengegrunnlag by Delegates.notNull<Double>()
     private lateinit var beregningsgrunnlag: Inntekt
@@ -125,37 +134,10 @@ internal class UtkastTilVedtakBuilder(
     }
 
     private val tilkomneArbeidsgivere = mutableSetOf<String>()
-    internal fun tilkommetInntekt(orgnr: String) {
-        tilkomneArbeidsgivere.add(orgnr)
+    internal fun tilkommetInntekt(arbeidsgiver: String) {
+        tilkomneArbeidsgivere.add(arbeidsgiver)
     }
-
-    private class UtbetalingstidslinjeInfo(utbetalingstidslinje: Utbetalingstidslinje) {
-        private var avvistDag = false
-        private var navDag = false
-
-        init {
-            utbetalingstidslinje.forEach { dag ->
-                when (dag) {
-                    is Utbetalingsdag.AvvistDag -> avvistDag = true
-                    is Utbetalingsdag.ForeldetDag -> avvistDag = true
-                    is Utbetalingsdag.NavDag -> navDag = true
-                    is Utbetalingsdag.Arbeidsdag,
-                    is Utbetalingsdag.ArbeidsgiverperiodeDag,
-                    is Utbetalingsdag.ArbeidsgiverperiodedagNav,
-                    is Utbetalingsdag.Fridag,
-                    is Utbetalingsdag.NavHelgDag,
-                    is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */ }
-                }
-            }
-        }
-
-        fun behandlingsresultat() = when {
-            !navDag -> Tag.Avslag
-            navDag && avvistDag -> Tag.DelvisInnvilget
-            else -> Tag.Innvilget
-        }
-    }
-
+    
     private val build by lazy { Build() }
 
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
