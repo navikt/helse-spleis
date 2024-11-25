@@ -2821,6 +2821,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.forventerInntekt()) {
                 revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
                 revurdering.loggDersomKorrigerendeSøknad(aktivitetslogg, "Startet omgjøring grunnet korrigerende søknad")
+                vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
                 aktivitetslogg.info(RV_RV_1.varseltekst)
                 if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
                     aktivitetslogg.info("mangler nødvendige opplysninger fra arbeidsgiver")
