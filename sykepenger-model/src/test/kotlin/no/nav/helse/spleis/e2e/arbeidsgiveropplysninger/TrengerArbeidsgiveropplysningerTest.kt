@@ -538,6 +538,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
+        // TODO: Refusjonsopplysninger på behandling ->
+        //  Denne testen klager på at den har gått videre uten refusjonsopplysninge (UgyldigeSituasjonerObservatør).
+        //  Så denne vil løses (stå å vente på IM) når refusjonsopplysninger på behandlingen er førende for om perioden har refusjonsopplysninger hen trenger.
         assertForventetFeil(
             forklaring = "perioden i mars (2.vedtaksperiode for a2) har en ny arbeidsgiverperiode og skal vente på opplysninger fra AG",
             nå = {
@@ -580,6 +583,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
+        // TODO: Refusjonsopplysninger på behandling ->
+        //  Denne testen klager på at den har gått videre uten refusjonsopplysninge (UgyldigeSituasjonerObservatør).
+        //  Så denne vil løses (stå å vente på IM) når refusjonsopplysninger på behandlingen er førende for om perioden har refusjonsopplysninger hen trenger.
         assertForventetFeil(
             forklaring = "perioden i mars (2.vedtaksperiode for a2) har en ny arbeidsgiverperiode og skal vente på opplysninger fra AG",
             nå = {
