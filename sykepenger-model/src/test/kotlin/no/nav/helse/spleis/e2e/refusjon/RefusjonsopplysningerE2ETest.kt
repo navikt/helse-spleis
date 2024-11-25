@@ -120,6 +120,11 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
+            assertForventetFeil(
+                forklaring = "Går feilaktig videre tross oppholdsdag.",
+                nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) },
+                ønsket = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)}
+            )
             håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar)
         }
         a2 {
@@ -142,6 +147,11 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
+            assertForventetFeil(
+                forklaring = "Går feilaktig videre tross oppholdsdag.",
+                nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) },
+                ønsket = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)}
+            )
             håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
 
             håndterYtelser(1.vedtaksperiode)
