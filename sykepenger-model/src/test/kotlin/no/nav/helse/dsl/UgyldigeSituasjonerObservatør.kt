@@ -15,7 +15,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -24,7 +23,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import kotlin.check
@@ -145,10 +143,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun sjekkUgyldigeVentesituasjoner(event: PersonObserver.VedtaksperiodeVenterEvent) {
-        // En linje å kommentere inn om man kjeder seg 🫠
-        //if (event.trengerNyInntektsmeldingEtterFlyttetSkjæringstidspunkt()) error("vedtaksperiode på ${event.organisasjonsnummer} venter på ${event.venterPå}")
         if (event.venterPå.venteårsak.hva != "HJELP") return // Om vi venter på noe annet enn hjelp er det OK 👍
-        if (event.venterPå.venteårsak.hvorfor == "FLERE_SKJÆRINGSTIDSPUNKT") return // Dette kan skje :(
         """
         Har du endret/opprettet en vedtaksperiodetilstand uten å vurdere konsekvensene av 'venteårsak'? 
         Eller har du klart å skriv en test vi ikke støtter? 

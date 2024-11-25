@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.desember
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -112,7 +113,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         }
 
         observatør.vedtaksperiodeVenter.clear()
-        håndterSøknad(10.januar til 26.januar)
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_REVURDERING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!"){
+            håndterSøknad(10.januar til 26.januar)
+        }
         observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
 
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->

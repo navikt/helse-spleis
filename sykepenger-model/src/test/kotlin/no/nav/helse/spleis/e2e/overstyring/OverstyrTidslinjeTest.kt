@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import no.nav.helse.august
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -239,7 +240,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[6.februar]::class)
         nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
-        håndterInntektsmelding(listOf(16.januar til 31.januar), avsendersystem = ALTINN)
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_INNTEKTSMELDING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!"){
+            håndterInntektsmelding(listOf(16.januar til 31.januar), avsendersystem = ALTINN)
+        }
         observatør.assertVenter(1.vedtaksperiode.id(ORGNUMMER), venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
