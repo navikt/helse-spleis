@@ -3,7 +3,6 @@ package no.nav.helse.dsl
 import java.lang.IllegalStateException
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
@@ -133,11 +132,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
     }
 
-    override fun behandlingUtført() {
-        bekreftIngenUgyldigeSituasjoner(person.personlogg)
-        IM.behandlingUtført()
-    }
-
     override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         søknader[søknadId] = null
     }
@@ -184,7 +178,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger hjelp! 😱"
     }
 
-    internal fun bekreftIngenUgyldigeSituasjoner(aktivitetslogg: Aktivitetslogg) {
+    override fun behandlingUtført() {
+        bekreftIngenUgyldigeSituasjoner(person.personlogg)
+        IM.behandlingUtført()
+    }
+
+    private fun bekreftIngenUgyldigeSituasjoner(aktivitetslogg: Aktivitetslogg) {
         bekreftIngenOverlappende()
         bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg)
         validerSykdomshistorikk()

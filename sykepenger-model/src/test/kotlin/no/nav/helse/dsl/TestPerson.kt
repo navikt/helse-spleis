@@ -120,10 +120,6 @@ internal class TestPerson(
         behovsamler.bekreftBehovOppfylt()
     }
 
-    internal fun bekreftIngenUgyldigeSituasjoner() {
-        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner(person.personlogg)
-    }
-
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
         personHendelsefabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
             .håndter(Person::håndter)

@@ -27,7 +27,6 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractPersonTest {
@@ -92,11 +91,6 @@ internal abstract class AbstractPersonTest {
     @BeforeEach
     internal fun createTestPerson() {
         createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO)
-    }
-
-    @AfterEach
-    fun verify() {
-        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner(person.personlogg)
     }
 
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object: ArbeidsgiverRegler {

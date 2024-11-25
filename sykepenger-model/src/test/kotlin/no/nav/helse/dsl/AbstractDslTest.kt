@@ -533,7 +533,6 @@ internal abstract class AbstractDslTest {
     @AfterEach
     fun verify() {
         testperson.bekreftBehovOppfylt()
-        testperson.bekreftIngenUgyldigeSituasjoner()
     }
 
     fun dumpLog() = deferredLog.dumpLog()
