@@ -16,9 +16,14 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiver(
     override val behov = listOf(Sykepengehistorikk)
     override val riverName = "Utbetalingshistorikk etter infotrygdendring"
 
+    init {
+        river.precondition { message ->
+            message.require("@behov") { require(it.size() == 1) }
+            message.forbid("fagsystemId", "vedtaksperiodeId")
+        }
+    }
+
     override fun validate(message: JsonMessage) {
-        message.demand("@behov") { require(it.size() == 1) }
-        message.rejectKey("fagsystemId", "vedtaksperiodeId")
         validerSykepengehistorikk(message)
     }
 

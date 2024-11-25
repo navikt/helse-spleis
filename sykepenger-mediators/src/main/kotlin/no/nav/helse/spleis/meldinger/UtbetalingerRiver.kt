@@ -20,9 +20,14 @@ internal class UtbetalingerRiver(
 
     private val gyldigeStatuser = Oppdragstatus.entries.map(Enum<*>::name)
 
+    init {
+        river.precondition { message ->
+            message.forbidValue("@løsning.${Utbetaling.name}.status", "MOTTATT")
+        }
+    }
+
     override fun validate(message: JsonMessage) {
         message.requireKey("@løsning.${Utbetaling.name}")
-        message.rejectValue("@løsning.${Utbetaling.name}.status", "MOTTATT")
         message.requireAny("@løsning.${Utbetaling.name}.status", gyldigeStatuser)
         message.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
         message.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
