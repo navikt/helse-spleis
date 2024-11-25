@@ -16,13 +16,13 @@ internal abstract class BehovRiver(
     protected abstract val behov: List<Aktivitet.Behov.Behovtype>
 
     init {
-        river.validate(::validateBehov)
-    }
-
-    private fun validateBehov(packet: JsonMessage) {
-        packet.demandValue("@final", true)
-        packet.demandAll("@behov", behov.map(Enum<*>::name))
-        packet.requireKey("@løsning", "fødselsnummer")
-        packet.require("@besvart", JsonNode::asLocalDateTime)
+        river.precondition { packet ->
+            packet.requireValue("@final", true)
+            packet.requireAll("@behov", behov.map(Enum<*>::name))
+        }
+        river.validate { packet ->
+            packet.requireKey("@løsning", "fødselsnummer")
+            packet.require("@besvart", JsonNode::asLocalDateTime)
+        }
     }
 }

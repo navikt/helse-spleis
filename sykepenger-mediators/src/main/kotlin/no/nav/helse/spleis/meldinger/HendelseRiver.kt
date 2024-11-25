@@ -25,17 +25,15 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
         RiverImpl(river)
     }
 
-    private fun validateHendelse(packet: JsonMessage) {
-        packet.demandValue("@event_name", eventName)
-        packet.require("@opprettet", JsonNode::asLocalDateTime)
-        packet.require("@id") { UUID.fromString(it.asText()) }
-    }
-
     protected abstract fun createMessage(packet: JsonMessage): HendelseMessage
 
     private inner class RiverImpl(river: River) : River.PacketListener {
         init {
-            river.validate(::validateHendelse)
+            river.precondition { it.requireValue("@event_name", eventName) }
+            river.validate { packet ->
+                packet.require("@opprettet", JsonNode::asLocalDateTime)
+                packet.require("@id") { UUID.fromString(it.asText()) }
+            }
             river.validate(this@HendelseRiver)
             river.register(this)
         }
