@@ -3,7 +3,7 @@ include("jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", 
     "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling",
     "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api")
 
-val rapidsAndRiversVersion = "2024112412131732446804.1b3dcc636bed"
+val rapidsAndRiversVersion = "2024112510241732526640.8542991368ca"
 
 dependencyResolutionManagement {
     versionCatalogs {
