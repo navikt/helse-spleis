@@ -523,7 +523,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
                 orgnummer = orgnummer,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                harFlereInntektsmeldinger = harFlereInntektsmeldinger
+                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+                avsendersystem = avsendersystem
             )
         )
     }
@@ -553,6 +554,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     harOpphørAvNaturalytelser: Boolean = false,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
+    avsendersystem: Avsenderutleder = NAV_NO
 ): UUID {
     val portalinntektsmelding = inntektsmeldingPortal(
         id,
@@ -564,6 +566,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        avsendersystem = avsendersystem,
     )
     return håndterInntektsmelding(portalinntektsmelding)
 }

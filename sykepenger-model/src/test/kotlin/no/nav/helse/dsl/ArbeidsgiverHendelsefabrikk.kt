@@ -44,6 +44,9 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -201,7 +204,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
-        mottatt: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        avsenderSystem: Avsenderutleder
     ) = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
@@ -211,7 +215,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
+        avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, avsenderSystem == NAV_NO),
         mottatt = mottatt
     )
 

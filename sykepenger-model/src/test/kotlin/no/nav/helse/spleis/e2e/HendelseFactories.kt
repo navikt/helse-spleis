@@ -42,6 +42,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -216,7 +217,8 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false
+    harFlereInntektsmeldinger: Boolean = false,
+    avsendersystem: Avsenderutleder
 ): Inntektsmelding {
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
@@ -227,7 +229,8 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         id = id,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        avsenderSystem = avsendersystem
     )
 }
 

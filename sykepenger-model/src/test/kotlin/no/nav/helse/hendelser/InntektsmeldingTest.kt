@@ -7,6 +7,8 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
+import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -517,7 +519,8 @@ internal class InntektsmeldingTest {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        avsenderSystem: Avsenderutleder = NAV_NO
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
@@ -525,7 +528,8 @@ internal class InntektsmeldingTest {
             beregnetInntekt = beregnetInntekt,
             vedtaksperiodeId = vedtaksperiodeId,
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            avsenderSystem = avsenderSystem
         )
         inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.MinimalVedtaksperiode({ null }, { LocalDate.EPOCH })

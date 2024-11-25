@@ -117,6 +117,27 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `Skal ikke håndtere selvbestemte inntektsmeldinger som treffer en forlengelse`() {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        val id = håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT*2, avsendersystem = NAV_NO_SELVBESTEMT)
+        assertForventetFeil(
+            forklaring = "Ønsker ikke å håndtere selvbestemte inntektsmeldinger som treffer en forlengelse",
+            nå = {
+                assertFalse(id in observatør.inntektsmeldingIkkeHåndtert)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            },
+            ønsket = {
+                assertTrue(id in observatør.inntektsmeldingIkkeHåndtert)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            }
+        )
+
+    }
+
+    @Test
     fun `Når vedtaksperioden er forkastet skal vi ikke bruke portal-inntektsmeldingen som peker på den`() {
         nyttVedtak(januar)
 

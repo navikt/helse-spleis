@@ -29,6 +29,8 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -245,7 +247,8 @@ internal class TestPerson(
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
             orgnummer: String = "",
-            mottatt: LocalDateTime = LocalDateTime.now()
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            avsenderSystem: Avsenderutleder = NAV_NO
         ): UUID {
             arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
                 arbeidsgiverperioder,
@@ -255,7 +258,8 @@ internal class TestPerson(
                 harOpphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
-                mottatt = mottatt
+                mottatt = mottatt,
+                avsenderSystem = avsenderSystem
             ).håndter(Person::håndter)
             return id
         }
