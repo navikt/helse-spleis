@@ -24,6 +24,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertThrows
 import kotlin.check
 import kotlin.checkNotNull
 import kotlin.collections.any
@@ -136,7 +139,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         søknader[søknadId] = null
     }
 
-    override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
+    override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) = sjekk {
         sjekkUgyldigeVentesituasjoner(event)
         sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
     }
@@ -183,7 +186,14 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         IM.behandlingUtført()
     }
 
-    private fun bekreftIngenUgyldigeSituasjoner(aktivitetslogg: Aktivitetslogg) {
+    private fun sjekk(block: () -> Unit) {
+        try { block() } catch (throwable: Throwable) {
+            if (throwable is UgyldigSituasjonException) throw throwable
+            throw UgyldigSituasjonException(throwable)
+        }
+    }
+
+    private fun bekreftIngenUgyldigeSituasjoner(aktivitetslogg: Aktivitetslogg) = sjekk {
         bekreftIngenOverlappende()
         bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg)
         validerSykdomshistorikk()
@@ -357,5 +367,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private enum class Behandlingstatus {
         ÅPEN, LUKKET, AVBRUTT, ANNULLERT, AVSLUTTET
+    }
+
+    internal companion object {
+        internal class UgyldigSituasjonException(cause: Throwable): Throwable(cause.message, cause)
+
+        internal fun assertUgyldigSituasjon(forventetUgyldigSituasjon: String, block: () -> Unit) {
+            val ugyldigSituasjon = assertThrows<UgyldigSituasjonException> { block() }.message
+            assertTrue(ugyldigSituasjon?.contains(forventetUgyldigSituasjon) == true) {
+                "Forventet ugyldig situasjon '$forventetUgyldigSituasjon', men var '$ugyldigSituasjon'"
+            }
+        }
     }
 }

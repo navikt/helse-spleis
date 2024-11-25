@@ -80,7 +80,6 @@ internal abstract class AbstractPersonTest {
 
     lateinit var person: Person
     lateinit var observatør: TestObservatør
-    lateinit var ugyldigeSituasjonerObservatør: UgyldigeSituasjonerObservatør
     lateinit var jurist: SubsumsjonsListLog
     val inspektør get() = inspektør(ORGNUMMER)
 
@@ -113,7 +112,7 @@ internal abstract class AbstractPersonTest {
         jurist = SubsumsjonsListLog()
         person = block(jurist)
         observatør = TestObservatør(person)
-        ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
+        UgyldigeSituasjonerObservatør(person)
         return person
     }
 

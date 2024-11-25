@@ -94,7 +94,9 @@ internal class TestPerson(
         it.addObserver(observatør)
     }
 
-    private val ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
+    init {
+        UgyldigeSituasjonerObservatør(person)
+    }
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
@@ -111,8 +113,9 @@ internal class TestPerson(
 
     private fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg()
-        person.håndter(this, forrigeAktivitetslogg)
-        behovsamler.registrerBehov(forrigeAktivitetslogg)
+        try { person.håndter(this, forrigeAktivitetslogg) } finally {
+            behovsamler.registrerBehov(forrigeAktivitetslogg)
+        }
         return this
     }
 
