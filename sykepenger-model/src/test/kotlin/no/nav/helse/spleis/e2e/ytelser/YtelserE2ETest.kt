@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.ytelser
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
@@ -121,7 +122,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         observatør.vedtaksperiodeVenter.clear()
-        assertThrows<IllegalStateException> { håndterSøknad(februar) } // Denne kastes fra UgyldigeSituasjonerObservatør
+        assertUgyldigSituasjon("En vedtaksperiode i AVSLUTTET_UTEN_UTBETALING trenger hjelp fordi VIL_OMGJØRES!") { håndterSøknad(februar) }
         val venter = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(ORGNUMMER) }
         assertEquals("HJELP", venter.venterPå.venteårsak.hva)
         assertEquals("VIL_OMGJØRES", venter.venterPå.venteårsak.hvorfor)

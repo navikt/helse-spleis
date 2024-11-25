@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
@@ -161,7 +162,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        }
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(1).utbetalingId)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, REVURDERING_FEILET, TIL_INFOTRYGD)
@@ -580,7 +583,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        }
 
         assertTilstander(
             1.vedtaksperiode,
@@ -937,10 +942,14 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        }
 
         håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar))
-        håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
+        assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+            håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
+        }
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
     }

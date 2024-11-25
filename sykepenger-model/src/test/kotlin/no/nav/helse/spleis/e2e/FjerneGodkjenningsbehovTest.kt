@@ -4,6 +4,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -95,7 +96,9 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = false)
+            assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = false)
+            }
             assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
         }
