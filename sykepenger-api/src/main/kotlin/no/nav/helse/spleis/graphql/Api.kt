@@ -52,7 +52,7 @@ internal object Api {
     internal fun Application.installGraphQLApi(speedClient: SpeedClient, spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao, meterRegistry: MeterRegistry) {
         routing {
             authenticate(optional = true) {
-                post("/graphql{...}") {
+                post("/graphql") {
                     val ident = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
