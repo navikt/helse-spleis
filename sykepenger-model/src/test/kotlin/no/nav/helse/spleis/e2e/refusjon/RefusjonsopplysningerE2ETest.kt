@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -14,7 +13,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -32,11 +30,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a2 { forlengVedtak(februar) }
         a1 {
             håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(2.februar, 2.februar))
-            assertForventetFeil(
-                forklaring = "Her har vi oppholdsdager 1.feb - 2.feb, en 🐛 gjør at vi leter etter oppholdsdager _etter_ periode.start hvilket gjør at vi ignorerer arbeidsdagen 1.februar og løper videre.",
-                nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) },
-                ønsket = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
-            )
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
@@ -120,11 +114,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
-            assertForventetFeil(
-                forklaring = "Går feilaktig videre tross oppholdsdag.",
-                nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) },
-                ønsket = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)}
-            )
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar)
         }
         a2 {
@@ -147,11 +137,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
-            assertForventetFeil(
-                forklaring = "Går feilaktig videre tross oppholdsdag.",
-                nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) },
-                ønsket = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)}
-            )
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
 
             håndterYtelser(1.vedtaksperiode)
