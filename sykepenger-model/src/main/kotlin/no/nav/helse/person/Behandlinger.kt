@@ -1685,6 +1685,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         kilde = Behandlingkilde(hendelse.metadata)
                     )
                 }
+
+                override fun håndterRefusjonsopplysninger(
+                    arbeidsgiver: Arbeidsgiver,
+                    behandling: Behandling,
+                    hendelse: Hendelse?,
+                    aktivitetslogg: IAktivitetslogg,
+                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
+                    nyeRefusjonsopplysninger: Beløpstidslinje
+                ): Behandling {
+                    return behandling.nyBehandlingMedRefusjonstidslinje(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetOmgjøring)
+                }
+
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =
                     behandling.kanForkastingAvKortPeriodeTillates(aktivitetslogg, arbeidsgiverUtbetalinger)
 

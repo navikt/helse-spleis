@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -63,14 +62,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, 1.januar til 20.januar, INNTEKT)
-            assertForventetFeil(
-                forklaring = """
-                    Behandling på 1.vedtaksperiode åpnes pga. dager fra IM, men 2.vedtaksperiode åpnes det kun som følge
-                    av at det er en periode etterpå. Når refusjonsopplysningene treffer stor den fortsatt i AUU og håndterer ikke refusjonsopplysningene.
-                """,
-                nå = { assertEquals(Beløpstidslinje(), inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje) },
-                ønsket = { assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 21.januar til 25.januar, INNTEKT) }
-            )
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 21.januar til 25.januar, INNTEKT)
         }
     }
 
