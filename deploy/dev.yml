@@ -62,3 +62,5 @@ spec:
     value: "false"
   - name: INNTEKTSMELDING_SOM_IKKEKOMMER
     value: "true"
+  - name: VEDTAKSPERIODER_VENTER
+    value: "true""
