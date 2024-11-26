@@ -1,8 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
@@ -14,6 +11,9 @@ import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyer
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class SkattSykepengegrunnlag private constructor(
     id: UUID,
@@ -56,25 +56,24 @@ internal class SkattSykepengegrunnlag private constructor(
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger), ansattPerioder, tidsstempel)
 
-    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
-        if (this.dato != skjæringstidspunkt) return null
-        if (ansattPerioder.isEmpty()) return null
+    fun kanBrukes(skjæringstidspunkt: LocalDate): Boolean {
+        if (this.dato != skjæringstidspunkt) return false
+        if (ansattPerioder.isEmpty()) return false
         // ser bort fra skatteinntekter om man ikke er ansatt på skjæringstidspunktet:
-        if (!ansattVedSkjæringstidspunkt(skjæringstidspunkt)) return null
-        // bruker skatteinntekter om det foreligger inntekter innenfor 2 mnd fra skjæringstidspunktet:
-        if (sisteMåneder(skjæringstidspunkt, MAKS_INNTEKT_GAP, inntektsopplysninger).isNotEmpty()) return this
-        // ser bort fra skatteinntekter om man er ansatt på skjæringstidspunktet, men inntektene er eldre enn 2 mnd fra skjæringstidspunktet (avsluttet arb.forhold?):
-        if (inntektsopplysninger.isNotEmpty()) return null
-        // ser bort fra skatteinntekter om arb.forholdet er eldre enn 2 mnd fra skjæringstidspunktet:
-        if (!nyoppstartetArbeidsforhold(skjæringstidspunkt)) return null
-        // nyoppstartet arbeidsforhold (startdato innen 2 mnd fra skjæringstidspunktet), og ingen inntekter foreligger:
-        // todo bare returnere "this" og mappe ut IKKE_RAPPORTERT i SpeilBuilder?
-        return IkkeRapportert(
+        if (!ansattVedSkjæringstidspunkt(skjæringstidspunkt)) return false
+        if (inntektsopplysninger.isEmpty()) {
+            return nyoppstartetArbeidsforhold(skjæringstidspunkt)
+        }
+        return sisteMåneder(skjæringstidspunkt, MAKS_INNTEKT_GAP, inntektsopplysninger).isNotEmpty()
+    }
+
+    internal fun somSykepengegrunnlag() =
+        if (!inntektsopplysninger.isEmpty()) this
+        else IkkeRapportert(
             hendelseId = this.hendelseId,
             dato = this.dato,
             tidsstempel = this.tidsstempel
         )
-    }
 
     private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate) =
         ansattPerioder.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)

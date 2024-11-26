@@ -4,7 +4,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
-import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsmelding.Companion.avklarSykepengegrunnlag
 
 internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
 

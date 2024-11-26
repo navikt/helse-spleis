@@ -1,17 +1,19 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.person.inntekt.Inntektsmelding.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsmelding.Companion.finnInntektsmeldingForSkjæringstidspunkt
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class InntektsopplysningTest {
     private companion object {
@@ -90,60 +92,42 @@ internal class InntektsopplysningTest {
         val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now())
         val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
 
-        assertEquals(im2, im1.beste(im2))
-        assertEquals(im2, im2.beste(im1))
+        assertEquals(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
     }
 
     @Test
     fun `turnering - skatt vs inntektsmelding`() {
         val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT)
-        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
-        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 31.januar, emptyList(), emptyList())
+        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, listOf(
+            Skatteopplysning(
+                hendelseId = UUID.randomUUID(),
+                beløp = 25000.månedlig,
+                måned = 1.januar.yearMonth,
+                type = LØNNSINNTEKT,
+                fordel = "",
+                beskrivelse = "",
+                tidsstempel = LocalDateTime.now()
+            )
+        ), listOf(
+            AnsattPeriode(LocalDate.EPOCH, null),
+        ))
+        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 31.januar, listOf(
+            Skatteopplysning(
+                hendelseId = UUID.randomUUID(),
+                beløp = 25000.månedlig,
+                måned = 1.desember(2017).yearMonth,
+                type = LØNNSINNTEKT,
+                fordel = "",
+                beskrivelse = "",
+                tidsstempel = LocalDateTime.now()
+            )
+        ), listOf(
+            AnsattPeriode(LocalDate.EPOCH, null),
+        ))
 
-        assertEquals(im, im.beste(skatt1))
-        assertEquals(im, skatt1.beste(im))
-
-        assertEquals(skatt2, im.beste(skatt2))
-        assertEquals(skatt2, skatt2.beste(im))
-    }
-
-    @Test
-    fun `turnering - ikkeRapportert vs inntektsmelding`() {
-        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT)
-        val ikkeRapportert1 = IkkeRapportert(1.februar, UUID.randomUUID(), LocalDateTime.now())
-        val ikkeRapportert2 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
-
-        assertEquals(im, im.beste(ikkeRapportert1))
-        assertEquals(im, ikkeRapportert1.beste(im))
-
-        assertEquals(ikkeRapportert2, ikkeRapportert2.beste(im))
-        assertEquals(ikkeRapportert2, im.beste(ikkeRapportert2))
-    }
-
-    @Test
-    fun `turnering - ikkeRapportert vs skatt`() {
-        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
-        val ikkeRapportert = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
-
-        assertThrows<IllegalStateException> { assertEquals(skatt, skatt.beste(ikkeRapportert)) }
-        assertThrows<IllegalStateException> { assertEquals(skatt, ikkeRapportert.beste(skatt)) }
-    }
-
-    @Test
-    fun `turnering - skatt vs skatt`() {
-        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
-        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
-
-        assertThrows<IllegalStateException> { skatt1.beste(skatt2) }
-        assertThrows<IllegalStateException> { skatt2.beste(skatt1) }
-    }
-
-    @Test
-    fun `turnering - ikkeRapportert vs ikkeRapportert`() {
-        val ikkeRapportert1 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
-        val ikkeRapportert2 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
-
-        assertThrows<IllegalStateException> { ikkeRapportert1.beste(ikkeRapportert2) }
-        assertThrows<IllegalStateException> { ikkeRapportert2.beste(ikkeRapportert1) }
+        assertSame(im, listOf(im).avklarSykepengegrunnlag(1.februar, 10.februar, skatt1))
+        assertSame(skatt2, listOf(im).avklarSykepengegrunnlag(31.januar, 10.februar, skatt2))
+        assertSame(im, im.avklarSykepengegrunnlag(skatt1))
+        assertSame(skatt2, im.avklarSykepengegrunnlag(skatt2))
     }
 }

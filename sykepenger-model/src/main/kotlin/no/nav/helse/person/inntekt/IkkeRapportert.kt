@@ -14,8 +14,6 @@ internal class IkkeRapportert(
     tidsstempel: LocalDateTime
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, Inntekt.INGEN, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), hendelseId, dato, tidsstempel)
-    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
-        takeIf { this.dato == skjæringstidspunkt }
 
     override fun kanOverstyresAv(ny: Inntektsopplysning) = true
 

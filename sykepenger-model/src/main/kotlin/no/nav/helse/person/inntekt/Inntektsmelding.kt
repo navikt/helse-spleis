@@ -13,6 +13,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding internal constructor(
@@ -22,7 +23,7 @@ class Inntektsmelding internal constructor(
     beløp: Inntekt,
     tidsstempel: LocalDateTime,
     private val kilde: Kilde
-) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde = Kilde.Arbeidsgiver, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
@@ -45,9 +46,8 @@ class Inntektsmelding internal constructor(
         if (erOmregnetÅrsinntektEndret(this, gammel)) this
         else gammel.overstyrer(this)
 
-    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
-        if (dato == skjæringstidspunkt) return this
-        if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
+    internal fun avklarSykepengegrunnlag(skatt: AvklarbarSykepengegrunnlag): Inntektsopplysning {
+        if (skatt.dato.yearMonth < this.dato.yearMonth) return skatt
         return this
     }
 
@@ -134,6 +134,17 @@ class Inntektsmelding internal constructor(
                 tidsstempel = dto.tidsstempel,
                 kilde = Kilde.gjenopprett(dto.kilde),
             )
+        }
+
+        internal fun List<Inntektsmelding>.finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsmelding? {
+            val inntektsmeldinger = this.filter { it.dato == skjæringstidspunkt || it.dato == førsteFraværsdag }
+            return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.tidsstempel }
+        }
+
+        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? {
+            val inntektsmelding = finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
+            val skatt = skattSykepengegrunnlag?.takeIf { it.kanBrukes(skjæringstidspunkt) }?.somSykepengegrunnlag() ?: return inntektsmelding
+            return inntektsmelding?.avklarSykepengegrunnlag(skatt) ?: skatt
         }
     }
 }
