@@ -58,6 +58,11 @@ spec:
         flags:
           - name: max_connections
             value: "350"
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudprofiler.agent
   secureLogs:
     enabled: true
   env:
@@ -71,3 +76,5 @@ spec:
     value: NONE
   - name: TILKOMMEN_ARBEIDSGIVER
     value: "false"
+  - name: JAVA_TOOL_OPTIONS
+    value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1"
