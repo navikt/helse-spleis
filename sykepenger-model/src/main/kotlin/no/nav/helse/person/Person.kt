@@ -484,10 +484,6 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeEndret(event) }
     }
 
-    internal fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
-        observers.forEach { it.vedtaksperiodeVenter(event) }
-    }
-
     internal fun inntektsmeldingReplay(
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
@@ -801,11 +797,9 @@ class Person private constructor(
             is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */ }
             else -> {
                 val nestemann = arbeidsgivere.nestemann() ?: return
-                arbeidsgivere.venter(nestemann)
+                val eventer = arbeidsgivere.venter(nestemann)
                     .map { it.event() }
-                    .forEach { event ->
-                        observers.forEach { it.vedtaksperiodeVenter(event) }
-                    }
+                observers.forEach { it.vedtaksperioderVenter(eventer) }
             }
         }
     }

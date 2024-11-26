@@ -620,7 +620,7 @@ interface PersonObserver {
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
-    fun vedtaksperiodeVenter(event: VedtaksperiodeVenterEvent) {}
+    fun vedtaksperioderVenter(eventer: List<VedtaksperiodeVenterEvent>) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}

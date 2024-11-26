@@ -78,8 +78,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
     }
 
-    override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
-        vedtaksperiodeVenter.add(event)
+    override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
+        vedtaksperiodeVenter.addAll(eventer)
     }
 
     fun forkastedePerioder() = forkastedeEventer.size

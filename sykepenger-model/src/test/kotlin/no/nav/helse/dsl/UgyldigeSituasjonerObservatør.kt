@@ -137,9 +137,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         søknader[søknadId] = null
     }
 
-    override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) = sjekk {
-        sjekkUgyldigeVentesituasjoner(event)
-        sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
+    override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) = sjekk {
+        eventer.forEach { event ->
+            sjekkUgyldigeVentesituasjoner(event)
+            sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
+        }
     }
 
     private fun sjekkUgyldigeVentesituasjoner(event: PersonObserver.VedtaksperiodeVenterEvent) {

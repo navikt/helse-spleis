@@ -280,25 +280,27 @@ internal class PersonMediator(
         )))
     }
 
-    override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
-        queueMessage(JsonMessage.newMessage("vedtaksperiode_venter", mapOf(
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId,
-            "skjæringstidspunkt" to event.skjæringstidspunkt,
-            "hendelser" to event.hendelser,
-            "ventetSiden" to event.ventetSiden,
-            "venterTil" to event.venterTil,
-            "venterPå" to mapOf(
-                "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
-                "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
-                "organisasjonsnummer" to event.venterPå.organisasjonsnummer,
-                "venteårsak" to mapOf(
-                    "hva" to event.venterPå.venteårsak.hva,
-                    "hvorfor" to event.venterPå.venteårsak.hvorfor
+    override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
+        eventer.forEach { event ->
+            queueMessage(JsonMessage.newMessage("vedtaksperiode_venter", mapOf(
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "hendelser" to event.hendelser,
+                "ventetSiden" to event.ventetSiden,
+                "venterTil" to event.venterTil,
+                "venterPå" to mapOf(
+                    "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
+                    "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
+                    "organisasjonsnummer" to event.venterPå.organisasjonsnummer,
+                    "venteårsak" to mapOf(
+                        "hva" to event.venterPå.venteårsak.hva,
+                        "hvorfor" to event.venterPå.venteårsak.hvorfor
+                    )
                 )
-            )
-        )))
+            )))
+        }
     }
 
     override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
