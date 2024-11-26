@@ -36,6 +36,18 @@ legg til denne verdien
 
 ```testcontainers.reuse.enable=true```
 
+## Hvorfor Spleis?
+
+Da ytelsen sykepenger skulle automatiseres, ble det tidlig laget en skisse over tjenester som skulle inngå i dette arbeidet. Vi så for oss tre tjenester som tok imot relevante dokumenter (sykmelding, søknad, og inntektsmelding), én tjeneste som skulle spleise disse sammen til en sak, og én tjeneste som skulle behandle saken.
+
+De tre første tjenesten rakk aldri bli navngitt.
+
+Tjenesten som skulle behandle saken ble kalt Spa.
+
+Tjenesten som skulle spleise dokumentene sammen til en sak ble kalt **Spleis**.
+
+Det ble relativt fort klart at vi ikke kunne regne med en så enkel flyt som 1. Dokumenter inn, 2. Sammenstill data, 3. Behandle sak, så Spleis endte opp med å gjøre brorparten av saksbehandlingen, Spa ble aldri laget, og dokument-inntaket er i stor grad håndtert av andre team.
+
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
