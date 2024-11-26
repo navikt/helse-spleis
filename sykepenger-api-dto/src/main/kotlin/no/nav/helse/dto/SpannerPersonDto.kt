@@ -311,6 +311,10 @@ data class SpannerPersonDto(
             val tom: LocalDate
         )
 
+        data class Gjeldende(
+            val refusjonstidslinje: BeløpstidslinjeData
+        )
+
         data class VedtaksperiodeData(
             val id: UUID,
             val tilstand: TilstandType,
@@ -325,6 +329,8 @@ data class SpannerPersonDto(
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
         ) {
+            val gjeldende = Gjeldende(behandlinger.last().endringer.last().refusjonstidslinje)
+
             enum class TilstandType {
                 AVVENTER_HISTORIKK,
                 AVVENTER_GODKJENNING,
