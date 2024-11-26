@@ -1,10 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
@@ -16,74 +11,23 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
-import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Behandlingsavgjørelse
-import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
-import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Revurderingseventyr
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Validation.Companion.validation
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.person.TilstandType.REVURDERING_FEILET
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
-import no.nav.helse.person.Venteårsak.Hva.BEREGNING
-import no.nav.helse.person.Venteårsak.Hva.GODKJENNING
-import no.nav.helse.person.Venteårsak.Hva.HJELP
-import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hva.SØKNAD
-import no.nav.helse.person.Venteårsak.Hva.UTBETALING
-import no.nav.helse.person.Venteårsak.Hvorfor.FLERE_SKJÆRINGSTIDSPUNKT
-import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
-import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
-import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
+import no.nav.helse.person.Venteårsak.Hva.*
+import no.nav.helse.person.Venteårsak.Hvorfor.*
+import no.nav.helse.person.aktivitetslogg.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -96,64 +40,27 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_32
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_34
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_35
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_36
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
-import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
-import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
-import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
-import kotlin.collections.component1
-import kotlin.collections.component2
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -823,10 +730,6 @@ internal class Vedtaksperiode private constructor(
             trengerArbeidsgiverperiode = trengerArbeidsgiverperiode,
             erPotensiellForespørsel = !forventerInntekt()
         )
-    }
-
-    private fun emitVedtaksperiodeVenter(vedtaksperiodeVenter: VedtaksperiodeVenter) {
-        person.vedtaksperiodeVenter(vedtaksperiodeVenter.event())
     }
 
     private fun emitVedtaksperiodeEndret(previousState: Vedtaksperiodetilstand) {
@@ -3205,13 +3108,8 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {
-            forEach { vedtaksperiode ->
-                vedtaksperiode.tilstand.venter(vedtaksperiode, nestemann)?.also {
-                    vedtaksperiode.emitVedtaksperiodeVenter(it)
-                }
-            }
-        }
+        internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) =
+            mapNotNull { vedtaksperiode -> vedtaksperiode.tilstand.venter(vedtaksperiode, nestemann) }
 
         internal fun List<Vedtaksperiode>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) = forEach { it.validerTilstand(hendelse, aktivitetslogg) }
 

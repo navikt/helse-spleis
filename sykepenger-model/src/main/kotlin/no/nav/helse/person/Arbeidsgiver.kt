@@ -168,11 +168,8 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) {
-            forEach { arbeidsgiver ->
-                arbeidsgiver.vedtaksperioder.venter(nestemann)
-            }
-        }
+        internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
+            flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
 
         internal fun List<Arbeidsgiver>.migrerUbrukteRefusjonsopplysninger(
             aktivitetslogg: IAktivitetslogg,

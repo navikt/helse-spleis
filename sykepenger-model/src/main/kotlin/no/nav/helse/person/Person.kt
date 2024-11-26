@@ -802,6 +802,10 @@ class Person private constructor(
             else -> {
                 val nestemann = arbeidsgivere.nestemann() ?: return
                 arbeidsgivere.venter(nestemann)
+                    .map { it.event() }
+                    .forEach { event ->
+                        observers.forEach { it.vedtaksperiodeVenter(event) }
+                    }
             }
         }
     }
