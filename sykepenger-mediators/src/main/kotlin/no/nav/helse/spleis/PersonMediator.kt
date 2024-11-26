@@ -5,19 +5,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
-import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spleis.PersonMediator.Pakke.Companion.loggAntallVedtaksperioderVenter
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.util.*
 
 internal class PersonMediator(
     private val message: HendelseMessage
@@ -36,7 +33,6 @@ internal class PersonMediator(
 
     private fun sendUtgåendeMeldinger(context: MessageContext) {
         if (meldinger.isEmpty()) return
-        meldinger.loggAntallVedtaksperioderVenter()
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
         meldinger.forEach { pakke -> pakke.publish(context) }
     }
@@ -281,32 +277,10 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
-        if (System.getenv("VEDTAKSPERIODER_VENTER").toBoolean()) {
-            queueMessage(JsonMessage.newMessage("vedtaksperioder_venter", mapOf(
-                "vedtaksperioder" to eventer.map { event ->
-                    mapOf(
-                        "organisasjonsnummer" to event.organisasjonsnummer,
-                        "vedtaksperiodeId" to event.vedtaksperiodeId,
-                        "behandlingId" to event.behandlingId,
-                        "skjæringstidspunkt" to event.skjæringstidspunkt,
-                        "hendelser" to event.hendelser,
-                        "ventetSiden" to event.ventetSiden,
-                        "venterTil" to event.venterTil,
-                        "venterPå" to mapOf(
-                            "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
-                            "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
-                            "organisasjonsnummer" to event.venterPå.organisasjonsnummer,
-                            "venteårsak" to mapOf(
-                                "hva" to event.venterPå.venteårsak.hva,
-                                "hvorfor" to event.venterPå.venteårsak.hvorfor
-                            )
-                        )
-                    )
-                }
-            )))
-        } else {
-            eventer.forEach { event ->
-                queueMessage(JsonMessage.newMessage("vedtaksperiode_venter", mapOf(
+        if (eventer.isEmpty()) return
+        queueMessage(JsonMessage.newMessage("vedtaksperioder_venter", mapOf(
+            "vedtaksperioder" to eventer.map { event ->
+                mapOf(
                     "organisasjonsnummer" to event.organisasjonsnummer,
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "behandlingId" to event.behandlingId,
@@ -323,9 +297,9 @@ internal class PersonMediator(
                             "hvorfor" to event.venterPå.venteårsak.hvorfor
                         )
                     )
-                )))
+                )
             }
-        }
+        )))
     }
 
     override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
@@ -494,15 +468,6 @@ internal class PersonMediator(
     ) {
         fun publish(context: MessageContext) {
             context.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
-        }
-
-        companion object {
-            private const val VedtaksperiodeVenter = "vedtaksperiode_venter"
-
-            fun List<Pakke>.loggAntallVedtaksperioderVenter() {
-                val antall = filter { it.eventName == VedtaksperiodeVenter }.takeUnless { it.isEmpty() }?.size ?: return
-                sikkerLogg.info("Sender $antall vedtaksperiode_venter eventer", keyValue("fødselsnummer", first().fødselsnummer))
-            }
         }
     }
 

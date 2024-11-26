@@ -76,14 +76,9 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
     }
-    private val vedtaksperiodeVenter get() =
-        if (System.getenv("VEDTAKSPERIODER_VENTER").toBoolean()) {
-            testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
-                node.path("vedtaksperioder")
-            }
-        } else {
-            testRapid.inspektør.meldinger("vedtaksperiode_venter")
-        }
+    private val vedtaksperiodeVenter get() = testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
+        node.path("vedtaksperioder")
+    }
     private fun assertAntallOgSisteÅrsak(forventetAntall: Int, forventetÅrsak: String? = null) {
         val vedtaksperiodeVenter = vedtaksperiodeVenter
         assertEquals(forventetAntall, vedtaksperiodeVenter.size)
