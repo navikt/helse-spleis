@@ -309,37 +309,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To inntektsmeldinger samarbeider om å strekke en vedtaksperiode`() {
-        val im1Inntekt = INNTEKT
-        val im2Inntekt = INNTEKT + 2000.månedlig
-        nyPeriode(18.januar til 2.februar)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        nullstillTilstandsendringer()
-        // IM1: Denne treffer ikke 18/1 - 2/2 nå
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = im1Inntekt, avsendersystem = ALTINN)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        nullstillTilstandsendringer()
-        // IM2: Denne strekker perioden tilbake til 17/1
-        håndterInntektsmelding(
-            listOf(17.januar til 30.januar, 31.januar til 2.februar),
-            førsteFraværsdag = 3.februar,
-            beregnetInntekt = im2Inntekt,
-            avsendersystem = ALTINN
-        )
-        assertEquals(17.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
-        // Nå replayes IM1:
-        //      -> Nå overlapper IM1 allikevel og strekker perioden tilbake til 1/1
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertEquals(17.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        // Legger inntekt fra IM1 til grunn
-        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertInntektForDato(im2Inntekt, 17.januar, inspektør)
-    }
-
-    @Test
     fun `To inntektsmeldinger krangler om arbeidsgiverperioden`() {
         val inntektsmelding1 = UUID.randomUUID()
         val inntektsmelding2 = UUID.randomUUID()

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -1005,7 +1006,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet - nærmere enn 18 dager fra neste - da gjenbruker vi tidsnære opplysninger`() {
+    fun `Out of order som overlapper med annen AG i trippeloverlapp og flytter skjæringstidspunktet - nærmere enn 18 dager fra neste - da gjenbruker vi tidsnære opplysninger`() {
         nyPeriode(mars, a1)
         nyPeriode(20.mars til 20.april, a2)
 
@@ -1040,7 +1041,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         // siden perioden slutter på en fredag starter ikke oppholdstelling i arbeidsgiverperioden før mandagen.
         // 10.februar-2.mars hører derfor til samme arbeidsgiverperioden som 20.mars-4.april, ettersom avstanden mellom
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
-        nyPeriode(10.februar til 2.mars, a2)
+        assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_VILKÅRSPRØVING") { nyPeriode(10.februar til 2.mars, a2) }
+        // Her gjenlagres ikke refusjonsopplysninger når vi tar i bruk nye refusjonsopplysninger så vil denne saken bli stående i AvventerInntektsmelding
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)

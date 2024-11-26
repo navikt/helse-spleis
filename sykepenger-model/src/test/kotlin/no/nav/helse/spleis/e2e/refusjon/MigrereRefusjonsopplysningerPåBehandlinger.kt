@@ -9,7 +9,8 @@ import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
+import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -33,17 +34,22 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
     private val meldingsreferanseId2 = UUID.randomUUID()
     private val mottatt2 = mottatt1.plusYears(1)
 
+    private fun tillatUgyldigSituasjon(block: () -> Unit) {
+        if (LagreRefusjonsopplysningerPåBehandling.enabled) return block()
+        assertUgyldigSituasjon("") { block() }
+    }
+
     private fun setup1og2() {
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        tillatUgyldigSituasjon {  håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
             beregnetInntekt = INNTEKT,
             id = meldingsreferanseId1,
             mottatt = mottatt1
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        ) }
+        tillatUgyldigSituasjon {  håndterVilkårsgrunnlag(1.vedtaksperiode) }
+        tillatUgyldigSituasjon {  håndterYtelser(1.vedtaksperiode) }
     }
 
     @Test
@@ -68,17 +74,17 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
     private fun setup3og4() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(
+            tillatUgyldigSituasjon { håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
                 beregnetInntekt = INNTEKT,
                 id = meldingsreferanseId1,
                 mottatt = mottatt1
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(
+            ) }
+            tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
                 overstyringer = listOf(
                     OverstyrtArbeidsgiveropplysning(
@@ -91,8 +97,8 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
                 ),
                 hendelseId = meldingsreferanseId2,
                 tidsstempel = mottatt2
-            )
-            håndterYtelser(1.vedtaksperiode)
+            ) }
+            tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
         }
     }
 
@@ -124,9 +130,13 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
 
     private fun setup5og6() {
         a1 {
-            tilGodkjenning(januar)
-            håndterSøknad(mars)
-            håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1)
+            val vedtaksperiode = nyPeriode(januar)
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+            tillatUgyldigSituasjon { håndterVilkårsgrunnlag(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterYtelser(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSøknad(mars) }
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1) }
         }
     }
 
@@ -152,10 +162,14 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
 
     private fun setup7og8() {
         a1 {
-            tilGodkjenning(januar)
-            håndterSøknad(mars)
-            håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1)
-            håndterSøknad(april)
+            val vedtaksperiode = nyPeriode(januar)
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+            tillatUgyldigSituasjon { håndterVilkårsgrunnlag(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterYtelser(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSøknad(mars) }
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.mars til 16.mars), id = meldingsreferanseId1, mottatt = mottatt1) }
+            tillatUgyldigSituasjon { håndterSøknad(april) }
         }
     }
 

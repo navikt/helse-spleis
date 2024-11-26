@@ -194,7 +194,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
         validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
-        //validerRefusjonsopplysningerPåBehandlinger()
+        validerRefusjonsopplysningerPåBehandlinger()
         IM.bekreftEntydighåndtering()
     }
 
