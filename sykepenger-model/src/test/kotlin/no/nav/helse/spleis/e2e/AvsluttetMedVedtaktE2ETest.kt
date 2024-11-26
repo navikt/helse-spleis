@@ -50,9 +50,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(inspektør.utbetaling(0).utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).tilstand)
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 372000.0,
-            `6G` = 561804.0,
-            arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0))
+            omregnetÅrsinntekt = 372_000.0,
+            sykepengegrunnlag = 372_000.0,
+            `6G` = 561_804.0,
+            arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0))
         )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
     }
@@ -88,8 +89,9 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(inspektør.utbetaling(1).utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).tilstand)
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 372000.0,
+            omregnetÅrsinntekt = 372_000.0,
             `6G` = 561804.0,
+            sykepengegrunnlag = 372_000.0,
             arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0))
         )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
@@ -120,11 +122,12 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 744000.0,
-            `6G` = 599148.0,
+            omregnetÅrsinntekt = 744_000.0,
+            `6G` = 599_148.0,
+            sykepengegrunnlag = 599_148.0,
             arbeidsgivere = listOf(
-                FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0),
-                FastsattEtterHovedregel.Arbeidsgiver(a2, 372000.0),
+                FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0),
+                FastsattEtterHovedregel.Arbeidsgiver(a2, 372_000.0),
             )
         )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
@@ -165,11 +168,12 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
-            omregnetÅrsinntekt = 1068000.0,
-            `6G` = 599148.0,
+            omregnetÅrsinntekt = 1_068_000.0,
+            `6G` = 599_148.0,
+            sykepengegrunnlag = 599_148.0,
             arbeidsgivere = listOf(
-                FastsattEtterSkjønn.Arbeidsgiver(a1, 540000.0, 552000.0),
-                FastsattEtterSkjønn.Arbeidsgiver(a2, 528000.0, 540000.0),
+                FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0),
+                FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0),
             )
         )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)

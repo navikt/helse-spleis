@@ -543,11 +543,11 @@ interface PersonObserver {
         data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta {
             override val fastsatt = "IInfotrygd"
         }
-        data class FastsattEtterHovedregel(override val omregnetÅrsinntekt: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
+        data class FastsattEtterHovedregel(override val omregnetÅrsinntekt: Double, val sykepengegrunnlag: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
             override val fastsatt = "EtterHovedregel"
             data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double)
         }
-        data class FastsattEtterSkjønn(override val omregnetÅrsinntekt: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
+        data class FastsattEtterSkjønn(override val omregnetÅrsinntekt: Double, val sykepengegrunnlag: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
             override val fastsatt = "EtterSkjønn"
             val skjønnsfastsatt = arbeidsgivere.sumOf { it.skjønnsfastsatt }
             data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double)

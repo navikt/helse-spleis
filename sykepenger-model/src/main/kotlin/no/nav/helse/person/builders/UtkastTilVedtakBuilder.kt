@@ -163,6 +163,7 @@ internal class UtkastTilVedtakBuilder(
             }
             skjønnsfastsatt ->  PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
+                sykepengegrunnlag = sykepengegrunnlag,
                 `6G`= seksG,
                 arbeidsgivere = arbeidsgiverinntekter.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
                     arbeidsgiver = it.arbeidsgiver,
@@ -172,6 +173,7 @@ internal class UtkastTilVedtakBuilder(
             )
             else -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
+                sykepengegrunnlag = sykepengegrunnlag,
                 `6G`= seksG,
                 arbeidsgivere = arbeidsgiverinntekter.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
                     arbeidsgiver = it.arbeidsgiver,
@@ -227,6 +229,7 @@ internal class UtkastTilVedtakBuilder(
                 )
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+                    "sykepengegrunnlag" to sykepengegrunnlag,
                     "6G" to seksG,
                     "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
                     "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {

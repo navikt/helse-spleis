@@ -60,8 +60,9 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a2).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 480000.0,
-                "6G" to 561804.0,
+                "omregnetÅrsinntektTotalt" to 480_000.0,
+                "sykepengegrunnlag" to 480_000.0,
+                "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
@@ -81,15 +82,16 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1)
         assertGodkjenningsbehov(
             tags = setOf("Arbeidsgiverutbetaling"),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)),
+            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240_000.0)),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 240000.0,
-                "6G" to 561804.0,
+                "omregnetÅrsinntektTotalt" to 240_000.0,
+                "sykepengegrunnlag" to 240_000.0,
+                "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 240000.0
+                        "omregnetÅrsinntekt" to 240_000.0
                     )
                 )
             )
@@ -113,10 +115,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1, beregnetInntekt = 100000.månedlig)
         assertGodkjenningsbehov(
             tags = setOf("Arbeidsgiverutbetaling", "6GBegrenset"),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1200000.0)),
+            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1_200_000.0)),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 1200000.0,
-                "6G" to 561804.0,
+                "omregnetÅrsinntektTotalt" to 1_200_000.0,
+                "sykepengegrunnlag" to 561_804.0,
+                "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
@@ -150,7 +153,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             ),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 10000.månedlig.årlig,
-                "6G" to 561804.0,
+                "6G" to 561_804.0,
+                "sykepengegrunnlag" to 10000.månedlig.årlig,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
@@ -309,7 +313,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             ),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
-                "6G" to 561804.0,
+                "sykepengegrunnlag" to INNTEKT.årlig,
+                "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
@@ -361,8 +366,9 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 40000.månedlig.årlig,
-                "6G" to 561804.0,
+                "omregnetÅrsinntektTotalt" to 40_000.månedlig.årlig,
+                "sykepengegrunnlag" to 40_000.månedlig.årlig,
+                "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
@@ -566,7 +572,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         ),
         sykepengegrunnlagsfakta: Map<String, Any> = mapOf(
             "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
-            "6G" to 561804.0,
+            "sykepengegrunnlag" to 372_000.0,
+            "6G" to 561_804.0,
             "fastsatt" to "EtterHovedregel",
             "arbeidsgivere" to listOf(
                 mapOf(

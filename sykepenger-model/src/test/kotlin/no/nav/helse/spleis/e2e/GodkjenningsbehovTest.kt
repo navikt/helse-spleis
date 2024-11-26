@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
@@ -46,6 +47,28 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
+
+    private fun omregnedeÅrsinntedekter(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<List<Map<String, Any>>>(
+        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
+        behov = Aktivitet.Behov.Behovtype.Godkjenning,
+        felt = "omregnedeÅrsinntekter"
+    )!!.map {
+        OmregnetÅrsinntektFraGodkjenningsbehov(
+            orgnummer = it.getValue("organisasjonsnummer") as String,
+            beløp = (it.getValue("beløp") as Double).årlig
+        )
+    }
+
+    private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, Any>>(
+        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
+        behov = Aktivitet.Behov.Behovtype.Godkjenning,
+        felt = "sykepengegrunnlagsfakta"
+    )!!["sykepengegrunnlag"]
+    @Test
+    fun `sender med sykepengegrunnlag i godkjenningsbehovet`() {
+        tilGodkjenning(januar, beregnetInntekt = INNTEKT*6, organisasjonsnummere = arrayOf(a1))
+        assertEquals(Grunnbeløp.`6G`.beløp(1.januar).årlig, sykepengegrunnlag(1.vedtaksperiode))
+    }
 
     @Test
     fun `sender med feil vilkårsgrunnlagId i påminnet godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden`() {
