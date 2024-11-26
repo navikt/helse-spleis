@@ -95,9 +95,6 @@ spec:
           application: sparkel-sykepengeperioder
           access: readwrite
         - team: tbd
-          application: spedisjon
-          access: readwrite
-        - team: tbd
           application: spedisjon-async
           access: readwrite
         - team: tbd

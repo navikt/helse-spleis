@@ -17,12 +17,6 @@ spec:
         retentionHours: 24  # -1 means unlimited
     acl:
         - team: tbd
-          application: spedisjon
-          access: write
-        - team: tbd
-          application: spedisjon-async
-          access: write
-        - team: tbd
           application: helse-spleis
           access: write
         - team: tbd
