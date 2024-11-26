@@ -403,7 +403,7 @@ class Person private constructor(
         registrer(aktivitetslogg, "Behandler personpåminnelse")
         aktivitetslogg.info("Håndterer påminnelse for person")
         migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
-        håndterGjenoppta(påminnelse, aktivitetslogg)
+        //håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
