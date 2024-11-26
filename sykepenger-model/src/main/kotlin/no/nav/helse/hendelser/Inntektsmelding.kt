@@ -133,8 +133,6 @@ class Inntektsmelding(
         data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate, internal val forespurt: Boolean): Avsendersystem
     }
 
-    internal fun erSelvbestemtPortalinntektsmelding() = avsendersystem is Avsendersystem.NavPortal && !avsendersystem.forespurt
-
     class Refusjon(
         val beløp: Inntekt?,
         val opphørsdato: LocalDate?,
@@ -246,10 +244,18 @@ class Inntektsmelding(
         this.type = when (avsendersystem) {
             is Avsendersystem.Altinn -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
             is Avsendersystem.LPS -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
-            is Avsendersystem.NavPortal -> valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntektsmelding
+            is Avsendersystem.NavPortal -> {
+                valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let {
+                    if (avsendersystem.forespurt) {
+                        ForespurtPortalinntektsmelding(it, avsendersystem.inntektsdato)
+                    } else {
+                        SelvbestemtPortalinntektsmelding(it, avsendersystem.inntektsdato)
+                    }
+                } ?: ForkastetPortalinntektsmelding
+            }
         }
         if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
-        return this.type.entering(this, aktivitetslogg) {
+        return this.type.valider(this, aktivitetslogg) {
             valideringsgrunnlag.inntektsmeldingIkkeHåndtert(this)
         }
     }
@@ -258,7 +264,7 @@ class Inntektsmelding(
         valider(Valideringsgrunnlag.DefaultValideringsgrunnlag(vedtaksperioder, person), aktivitetslogg)
 
     private sealed interface Type {
-        fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean
+        fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean
         fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
         fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate
         fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
@@ -268,7 +274,7 @@ class Inntektsmelding(
     }
 
     private data class KlassiskInntektsmelding(private val førsteFraværsdag: LocalDate?): Type {
-        override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
             if (inntektsmelding.arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) error("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
             return true
         }
@@ -291,7 +297,7 @@ class Inntektsmelding(
     }
 
     private data object ForkastetPortalinntektsmelding: Type {
-        override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
             aktivitetslogg.info("Inntektsmelding ikke håndtert")
             inntektsmeldingIkkeHåndtert()
@@ -305,14 +311,7 @@ class Inntektsmelding(
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
-    private data class Portalinntetksmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.ForenkletVedtaksperiode, private val inntektsdato: LocalDate) : Type {
-        override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
-            val teitInntektsmelding = minimalVedtaksperiode.erForlengelse() && inntektsmelding.erSelvbestemtPortalinntektsmelding()
-            if (!teitInntektsmelding) return true
-            inntektsmeldingIkkeHåndtert()
-            return false
-        }
-
+    private abstract class PortalInntektsmeldings(private val minimalVedtaksperiode: Valideringsgrunnlag.ForenkletVedtaksperiode, private val inntektsdato: LocalDate) : Type {
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = minimalVedtaksperiode.skjæringstidspunkt()
@@ -332,7 +331,19 @@ class Inntektsmelding(
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-            private val logger = LoggerFactory.getLogger(Portalinntetksmelding::class.java)
+            private val logger = LoggerFactory.getLogger(ForespurtPortalinntektsmelding::class.java)
+        }
+    }
+
+    private data class ForespurtPortalinntektsmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.ForenkletVedtaksperiode, private val inntektsdato: LocalDate) : PortalInntektsmeldings(minimalVedtaksperiode, inntektsdato) {
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean = true
+    }
+
+    private data class SelvbestemtPortalinntektsmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.ForenkletVedtaksperiode, private val inntektsdato: LocalDate) : PortalInntektsmeldings(minimalVedtaksperiode, inntektsdato) {
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
+            if (!minimalVedtaksperiode.erForlengelse()) return true
+            inntektsmeldingIkkeHåndtert()
+            return false
         }
     }
 }
