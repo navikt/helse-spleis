@@ -71,3 +71,5 @@ spec:
     value: NONE
   - name: TILKOMMEN_ARBEIDSGIVER
     value: "false"
+  - name: VEDTAKSPERIODER_VENTER
+    value: "true"
