@@ -205,8 +205,8 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = 20000.månedlig,
             orgnummer = it.first,
-            vedtaksperiodeIdInnhenter = it.second ?: 1.vedtaksperiode,
-            avsendersystem = if (it.second == null) ALTINN else NAV_NO
+            avsendersystem = if (it.second == null) ALTINN else NAV_NO,
+            vedtaksperiodeIdInnhenter = it.second ?: 1.vedtaksperiode
         )
     }
 

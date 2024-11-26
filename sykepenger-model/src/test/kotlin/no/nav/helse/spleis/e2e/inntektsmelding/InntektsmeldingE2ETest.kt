@@ -13,8 +13,6 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -24,6 +22,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -55,6 +55,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -122,18 +123,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        val id = håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT*2, avsendersystem = NAV_NO_SELVBESTEMT)
-        assertForventetFeil(
-            forklaring = "Ønsker ikke å håndtere selvbestemte inntektsmeldinger som treffer en forlengelse",
-            nå = {
-                assertFalse(id in observatør.inntektsmeldingIkkeHåndtert)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            },
-            ønsket = {
-                assertTrue(id in observatør.inntektsmeldingIkkeHåndtert)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            }
-        )
+        val inntektsmeldingId = håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT*2, avsendersystem = NAV_NO_SELVBESTEMT, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
     }
 
@@ -1839,15 +1832,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSFFFF FFFFFFF FFFFFFF FFFFFFF FFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
-        håndterInntektsmelding(listOf(27.februar til 14.mars), avsendersystem = NAV_NO_SELVBESTEMT, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        håndterInntektsmelding(listOf(27.februar til 14.mars), avsendersystem = ALTINN)
         // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSFFFF FFFFFFF FFFFFFF FFFFFFF FFFSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(2.vedtaksperiode)
@@ -1858,7 +1848,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())

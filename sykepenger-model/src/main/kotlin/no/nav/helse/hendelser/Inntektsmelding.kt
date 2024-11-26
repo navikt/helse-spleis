@@ -133,6 +133,8 @@ class Inntektsmelding(
         data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate, internal val forespurt: Boolean): Avsendersystem
     }
 
+    internal fun erSelvbestemtPortalinntektsmelding() = avsendersystem is Avsendersystem.NavPortal && !avsendersystem.forespurt
+
     class Refusjon(
         val beløp: Inntekt?,
         val opphørsdato: LocalDate?,
@@ -216,14 +218,14 @@ class Inntektsmelding(
     private lateinit var type: Type
 
     internal interface Valideringsgrunnlag {
-        fun vedtaksperiode(vedtaksperiodeId: UUID): MinimalVedtaksperiode?
+        fun vedtaksperiode(vedtaksperiodeId: UUID): ForenkletVedtaksperiode?
         fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding)
 
-        data class MinimalVedtaksperiode(val førsteFraværsdag: () -> LocalDate?, val skjæringstidspunkt: () -> LocalDate)
+        data class ForenkletVedtaksperiode(val førsteFraværsdag: () -> LocalDate?, val skjæringstidspunkt: () -> LocalDate, val erForlengelse: () -> Boolean)
         data class DefaultValideringsgrunnlag(private val vedtaksperioder: List<Vedtaksperiode>, private val person: Person): Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID): MinimalVedtaksperiode? {
+            override fun vedtaksperiode(vedtaksperiodeId: UUID): ForenkletVedtaksperiode? {
                 val vedtaksperiode = vedtaksperioder.finn(vedtaksperiodeId) ?: return null
-                return MinimalVedtaksperiode(vedtaksperiode::førsteFraværsdag, vedtaksperiode::skjæringstidspunkt)
+                return ForenkletVedtaksperiode(vedtaksperiode::førsteFraværsdag, vedtaksperiode::skjæringstidspunkt, vedtaksperiode::erForlengelse)
             }
 
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {
@@ -247,10 +249,13 @@ class Inntektsmelding(
             is Avsendersystem.NavPortal -> valideringsgrunnlag.vedtaksperiode(avsendersystem.vedtaksperiodeId)?.let { Portalinntetksmelding(it, avsendersystem.inntektsdato) } ?: ForkastetPortalinntektsmelding
         }
         if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
-        return this.type.entering(this, aktivitetslogg) { valideringsgrunnlag.inntektsmeldingIkkeHåndtert(this) }
+        return this.type.entering(this, aktivitetslogg) {
+            valideringsgrunnlag.inntektsmeldingIkkeHåndtert(this)
+        }
     }
 
-    internal fun valider(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, person: Person) = valider(Valideringsgrunnlag.DefaultValideringsgrunnlag(vedtaksperioder, person), aktivitetslogg)
+    internal fun valider(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, person: Person) =
+        valider(Valideringsgrunnlag.DefaultValideringsgrunnlag(vedtaksperioder, person), aktivitetslogg)
 
     private sealed interface Type {
         fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean
@@ -300,8 +305,14 @@ class Inntektsmelding(
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
     }
 
-    private data class Portalinntetksmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.MinimalVedtaksperiode, private val inntektsdato: LocalDate) : Type {
-        override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit) = true
+    private data class Portalinntetksmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.ForenkletVedtaksperiode, private val inntektsdato: LocalDate) : Type {
+        override fun entering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
+            val teitInntektsmelding = minimalVedtaksperiode.erForlengelse() && inntektsmelding.erSelvbestemtPortalinntektsmelding()
+            if (!teitInntektsmelding) return true
+            inntektsmeldingIkkeHåndtert()
+            return false
+        }
+
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = minimalVedtaksperiode.skjæringstidspunkt()

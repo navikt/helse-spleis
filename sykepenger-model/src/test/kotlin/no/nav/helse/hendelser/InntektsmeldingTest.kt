@@ -520,7 +520,8 @@ internal class InntektsmeldingTest {
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: Avsenderutleder = NAV_NO
+        avsenderSystem: Avsenderutleder = NAV_NO,
+        erForlengelse: Boolean = false
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
@@ -532,7 +533,7 @@ internal class InntektsmeldingTest {
             avsenderSystem = avsenderSystem
         )
         inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.MinimalVedtaksperiode({ null }, { LocalDate.EPOCH })
+            override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.ForenkletVedtaksperiode({ null }, { LocalDate.EPOCH }, { erForlengelse })
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, aktivitetslogg)
 
