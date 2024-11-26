@@ -47,6 +47,11 @@ spec:
               - name: spleis-opprydding-dev
               - name: spleis-avstemming
               - name: spleis-migrate
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudprofiler.agent
   secureLogs:
     enabled: true
   env:
@@ -62,3 +67,5 @@ spec:
     value: "false"
   - name: INNTEKTSMELDING_SOM_IKKEKOMMER
     value: "true"
+  - name: JAVA_TOOL_OPTIONS
+    value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
