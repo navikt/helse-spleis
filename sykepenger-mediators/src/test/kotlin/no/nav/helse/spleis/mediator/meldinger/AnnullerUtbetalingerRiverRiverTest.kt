@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.util.*
-import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 
 internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {

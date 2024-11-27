@@ -1,5 +1,8 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
@@ -11,9 +14,6 @@ import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyer
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SkattSykepengegrunnlag private constructor(
     id: UUID,
@@ -32,7 +32,11 @@ internal class SkattSykepengegrunnlag private constructor(
                 id = dto.id,
                 hendelseId = dto.hendelseId,
                 dato = dto.dato,
-                inntektsopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) },
+                inntektsopplysninger = dto.inntektsopplysninger.map {
+                    Skatteopplysning.gjenopprett(
+                        it
+                    )
+                },
                 ansattPerioder = dto.ansattPerioder.map { AnsattPeriode.gjenopprett(it) },
                 tidsstempel = dto.tidsstempel
             )
@@ -46,7 +50,15 @@ internal class SkattSykepengegrunnlag private constructor(
         inntektsopplysninger: List<Skatteopplysning>,
         ansattPerioder: List<AnsattPeriode>,
         tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : this(id, hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), inntektsopplysninger, ansattPerioder, tidsstempel)
+    ) : this(
+        id,
+        hendelseId,
+        dato,
+        Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger),
+        inntektsopplysninger,
+        ansattPerioder,
+        tidsstempel
+    )
 
     internal constructor(
         hendelseId: UUID,
@@ -54,7 +66,14 @@ internal class SkattSykepengegrunnlag private constructor(
         inntektsopplysninger: List<Skatteopplysning>,
         ansattPerioder: List<AnsattPeriode>,
         tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger), ansattPerioder, tidsstempel)
+    ) : this(
+        UUID.randomUUID(),
+        hendelseId,
+        dato,
+        Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger),
+        ansattPerioder,
+        tidsstempel
+    )
 
     fun kanBrukes(skjæringstidspunkt: LocalDate): Boolean {
         if (this.dato != skjæringstidspunkt) return false
@@ -90,20 +109,28 @@ internal class SkattSykepengegrunnlag private constructor(
         return ny.overstyrer(this)
     }
 
-    override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
-        subsumsjonslogg.logg(`§ 8-28 ledd 3 bokstav a`(
-            organisasjonsnummer = organisasjonsnummer,
-            skjæringstidspunkt = dato,
-            inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
-            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-            grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-        ))
-        subsumsjonslogg.logg(`§ 8-29`(
-            skjæringstidspunkt = dato,
-            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-            inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
-            organisasjonsnummer = organisasjonsnummer
-        ))
+    override fun subsumerSykepengegrunnlag(
+        subsumsjonslogg: Subsumsjonslogg,
+        organisasjonsnummer: String,
+        startdatoArbeidsforhold: LocalDate?
+    ) {
+        subsumsjonslogg.logg(
+            `§ 8-28 ledd 3 bokstav a`(
+                organisasjonsnummer = organisasjonsnummer,
+                skjæringstidspunkt = dato,
+                inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
+            )
+        )
+        subsumsjonslogg.logg(
+            `§ 8-29`(
+                skjæringstidspunkt = dato,
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
+                inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
+                organisasjonsnummer = organisasjonsnummer
+            )
+        )
     }
 
     override fun erSkatteopplysning(): Boolean = true
@@ -114,13 +141,15 @@ internal class SkattSykepengegrunnlag private constructor(
         forklaring: String,
         oppfylt: Boolean
     ) = apply {
-        subsumsjonslogg.logg(`§ 8-15`(
-            skjæringstidspunkt = dato,
-            organisasjonsnummer = organisasjonsnummer,
-            inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
-            forklaring = forklaring,
-            oppfylt = oppfylt
-        ))
+        subsumsjonslogg.logg(
+            `§ 8-15`(
+                skjæringstidspunkt = dato,
+                organisasjonsnummer = organisasjonsnummer,
+                inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
+                forklaring = forklaring,
+                oppfylt = oppfylt
+            )
+        )
     }
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
@@ -138,6 +167,7 @@ internal class SkattSykepengegrunnlag private constructor(
             tidsstempel = this.tidsstempel
         )
     }
+
     override fun dto() =
         InntektsopplysningUtDto.SkattSykepengegrunnlagDto(
             id = id,
@@ -153,14 +183,23 @@ class AnsattPeriode(
     private val ansattFom: LocalDate,
     private val ansattTom: LocalDate?
 ) {
-    fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
+    fun gjelder(skjæringstidspunkt: LocalDate) =
+        ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
+
     fun harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
         ansattFom >= skjæringstidspunkt.withDayOfMonth(1).minusMonths(antallMåneder.toLong())
+
     companion object {
-        fun List<AnsattPeriode>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
+        fun List<AnsattPeriode>.harArbeidsforholdNyereEnn(
+            skjæringstidspunkt: LocalDate,
+            antallMåneder: Int
+        ) =
             harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()
 
-        private fun List<AnsattPeriode>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
+        private fun List<AnsattPeriode>.harArbeidetMindreEnn(
+            skjæringstidspunkt: LocalDate,
+            antallMåneder: Int
+        ) = this
             .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
             .filter { it.gjelder(skjæringstidspunkt) }
 

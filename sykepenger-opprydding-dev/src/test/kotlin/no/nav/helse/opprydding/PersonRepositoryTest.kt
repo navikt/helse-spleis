@@ -15,7 +15,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest: DBTest() {
+internal class PersonRepositoryTest : DBTest() {
 
     private lateinit var personRepository: PersonRepository
 
@@ -61,13 +61,23 @@ internal class PersonRepositoryTest: DBTest() {
 
     private fun finnPerson(fødselsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
+            session.run(
+                queryOf(
+                    "SELECT COUNT(1) FROM person WHERE fnr = ?",
+                    fødselsnummer.toLong()
+                ).map { it.int(1) }.asSingle
+            )
         } ?: 0
     }
 
     private fun finnMelding(fødselsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM melding WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
+            session.run(
+                queryOf(
+                    "SELECT COUNT(1) FROM melding WHERE fnr = ?",
+                    fødselsnummer.toLong()
+                ).map { it.int(1) }.asSingle
+            )
         } ?: 0
     }
 

@@ -10,10 +10,12 @@ internal class NySøknadBuilder : SøknadBuilder() {
     private var fremtidigSøknad = false
 
     override fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?) = apply {
-        sykemeldingsperioder.add(Sykmeldingsperiode(
-            fom = fom,
-            tom = tom
-        ))
+        sykemeldingsperioder.add(
+            Sykmeldingsperiode(
+                fom = fom,
+                tom = tom
+            )
+        )
     }
 
     internal fun fremtidigSøknad(erFremtidig: Boolean) {

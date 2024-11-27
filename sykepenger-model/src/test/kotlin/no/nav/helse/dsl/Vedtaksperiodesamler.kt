@@ -21,7 +21,8 @@ internal class Vedtaksperiodesamler : PersonObserver {
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
         sisteVedtaksperiode = event.vedtaksperiodeId
-        if (vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)) {
+        if (vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }
+                .add(event.vedtaksperiodeId)) {
             sisteOpprettetVedtaksperiode = sisteVedtaksperiode
         }
     }

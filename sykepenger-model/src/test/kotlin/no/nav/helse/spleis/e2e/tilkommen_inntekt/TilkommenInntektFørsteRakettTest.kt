@@ -24,7 +24,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(
-                Sykdom(1.februar, 28.februar,100.prosent),
+                Sykdom(1.februar, 28.februar, 100.prosent),
                 Permisjon(20.februar, 28.februar),
                 tilkomneInntekter = listOf(
                     TilkommenInntekt(1.februar, 28.februar, a2, 10000)
@@ -35,7 +35,9 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1))
+                assertTrue(
+                    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1)
+                )
             }
         }
     }
@@ -56,7 +58,9 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1))
+                assertTrue(
+                    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1)
+                )
             }
         }
     }
@@ -78,7 +82,9 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1))
+                assertTrue(
+                    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1)
+                )
             }
         }
     }
@@ -88,7 +94,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(
-                Sykdom(1.februar, 28.februar,100.prosent),
+                Sykdom(1.februar, 28.februar, 100.prosent),
                 tilkomneInntekter = listOf(
                     TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )

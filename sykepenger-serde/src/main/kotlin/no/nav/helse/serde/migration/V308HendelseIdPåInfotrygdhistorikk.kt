@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V308HendelseIdPåInfotrygdhistorikk: JsonMigration(version = 308) {
+internal class V308HendelseIdPåInfotrygdhistorikk : JsonMigration(version = 308) {
     override val description = "lager en default id på infotrygdhistorikk uten hendelseId"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

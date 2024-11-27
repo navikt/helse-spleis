@@ -28,19 +28,25 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
         val oppdaterte = Utbetalingstidslinje.totalSykdomsgrad(tidslinjer)
 
         val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
-        val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
+        val avvistePerioder =
+            minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
         if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) {
             aktivitetslogg.varsel(RV_VV_17)
         }
 
-        val avvisteTidslinjer = avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
+        val avvisteTidslinjer =
+            avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
 
         Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
             logg(`§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder))
         }
         val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
-        `§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
+        `§ 8-13 ledd 1`(
+            periode,
+            avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(),
+            tidslinjerForSubsumsjon
+        ).forEach {
             subsumsjonslogg.logg(it)
         }
         if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)

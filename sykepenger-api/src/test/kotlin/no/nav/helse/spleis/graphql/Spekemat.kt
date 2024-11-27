@@ -14,6 +14,7 @@ class Spekemat : PersonObserver {
     fun resultat() = SpekematDTO(
         pakker = arbeidsgivere.mapNotNull { resultat(it.key) }
     )
+
     fun resultat(orgnr: String) = arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr)
 
     private fun List<PølseradDto>.mapTilPølsepakkeDTO(orgnr: String) =

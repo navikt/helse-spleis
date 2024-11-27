@@ -24,7 +24,8 @@ import no.nav.helse.spleis.Meldingsporing
 import org.slf4j.LoggerFactory
 
 // Understands a JSON message representing an Ytelserbehov
-internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) :
+    BehovMessage(packet) {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -37,11 +38,13 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
-    private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)?: emptyList()
-    private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)
-         ?: emptyList()
+    private val foreldrepengerytelse =
+        packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
+            .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode) ?: emptyList()
+    private val svangerskapsytelse =
+        packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
+            .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)
+            ?: emptyList()
 
     private val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     private val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
@@ -55,12 +58,13 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val opplæringspenger =
         Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map(::asGradertPeriode))
 
-    private val institusjonsopphold = Institusjonsopphold(packet["@løsning.${Behovtype.Institusjonsopphold.name}"].map {
-        Institusjonsoppholdsperiode(
-            it.path("startdato").asLocalDate(),
-            it.path("faktiskSluttdato").asOptionalLocalDate()
-        )
-    })
+    private val institusjonsopphold =
+        Institusjonsopphold(packet["@løsning.${Behovtype.Institusjonsopphold.name}"].map {
+            Institusjonsoppholdsperiode(
+                it.path("startdato").asLocalDate(),
+                it.path("faktiskSluttdato").asOptionalLocalDate()
+            )
+        })
 
     init {
         packet["@løsning.${Behovtype.Arbeidsavklaringspenger.name}.meldekortperioder"].map(::asDatePair)
@@ -90,7 +94,12 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map {
+                Periode(
+                    it.first,
+                    it.second
+                )
+            }),
             dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) })
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for")

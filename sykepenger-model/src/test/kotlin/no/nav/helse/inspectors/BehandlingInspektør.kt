@@ -37,7 +37,12 @@ internal class BehandlingInspektør(view: BehandlingView) {
         tilstand = view.tilstand,
         vedtakFattet = view.vedtakFattet,
         avsluttet = view.avsluttet,
-        kilde = Behandling.Behandlingkilde(view.kilde.meldingsreferanseId, view.kilde.innsendt, view.kilde.registert, view.kilde.avsender)
+        kilde = Behandling.Behandlingkilde(
+            view.kilde.meldingsreferanseId,
+            view.kilde.innsendt,
+            view.kilde.registert,
+            view.kilde.avsender
+        )
     )
 
     internal val arbeidsgiverperiode get() = behandling.endringer.last().arbeidsgiverperiode
@@ -68,10 +73,10 @@ internal class BehandlingInspektør(view: BehandlingView) {
         )
 
         data class Behandlingkilde(
-           val meldingsreferanseId: UUID,
-           val innsendt: LocalDateTime,
-           val registert: LocalDateTime,
-           val avsender: Avsender
+            val meldingsreferanseId: UUID,
+            val innsendt: LocalDateTime,
+            val registert: LocalDateTime,
+            val avsender: Avsender
         )
     }
 }

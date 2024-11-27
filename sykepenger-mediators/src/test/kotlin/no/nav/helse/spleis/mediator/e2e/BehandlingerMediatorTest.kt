@@ -15,8 +15,19 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak iverksatt`() {
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -39,8 +50,19 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak fattet`() {
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -59,7 +81,15 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `avsluttet uten utbetaling`() {
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 10.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet").single()
         val behandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet)
@@ -76,12 +106,15 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak annulleres`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
+        val utbetalingId =
+            testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
         sendAnnullering(utbetalingId)
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet")
-        val førsteBehandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet.first())
-        val sisteBehandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet.last())
+        val førsteBehandlingOpprettetIndeks =
+            testRapid.inspektør.indeksFor(behandlingOpprettet.first())
+        val sisteBehandlingOpprettetIndeks =
+            testRapid.inspektør.indeksFor(behandlingOpprettet.last())
         val behandlingLukket = testRapid.inspektør.meldinger("behandling_lukket").single()
         val behandlingLukketIndeks = testRapid.inspektør.indeksFor(behandlingLukket)
         val behandlingForkastet = testRapid.inspektør.meldinger("behandling_forkastet").single()

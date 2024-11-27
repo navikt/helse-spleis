@@ -44,16 +44,33 @@ import org.junit.jupiter.api.Test
 internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forledet søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
+        håndterSykmelding(
+            Sykmeldingsperiode(1.januar, 31.januar),
+            mottatt = 1.januar(2019).atStartOfDay()
+        )
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.januar(2019)
+        )
         assertVarsel(RV_SØ_2)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING
+        )
     }
 
     @Test
     fun `forledet søknad med inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
+        håndterSykmelding(
+            Sykmeldingsperiode(1.januar, 31.januar),
+            mottatt = 1.januar(2019).atStartOfDay()
+        )
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.januar(2019)
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertVarsel(RV_SØ_2)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -84,7 +101,10 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
+        assertEquals(
+            Dag.ForeldetSykedag::class,
+            inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class
+        )
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -97,6 +117,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             AVSLUTTET
         )
     }
+
     @Test
     fun `foreldet dag innenfor agp -- kan lukkes uten manuell behandling`() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 16.februar))
@@ -106,7 +127,10 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             sendtTilNAVEllerArbeidsgiver = 1.mai
         )
         håndterInntektsmelding(listOf(16.januar til 31.januar))
-        assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
+        assertEquals(
+            Dag.ForeldetSykedag::class,
+            inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class
+        )
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -121,8 +145,14 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forledet søknad ved forlengelse`() {
         nyttVedtak(januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), mottatt = 1.februar(2019).atStartOfDay())
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2019))
+        håndterSykmelding(
+            Sykmeldingsperiode(1.februar, 28.februar),
+            mottatt = 1.februar(2019).atStartOfDay()
+        )
+        håndterSøknad(
+            Sykdom(1.februar, 28.februar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.februar(2019)
+        )
         assertVarsel(RV_SØ_2)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
@@ -133,14 +163,20 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
 
         // foreldet søknad :(
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterSøknad(
+            Sykdom(1.januar, 19.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         // foreldet søknad :(
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterSøknad(
+            Sykdom(20.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -163,15 +199,25 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
 
         // foreldet søknad :(
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterSøknad(
+            Sykdom(1.januar, 19.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         // foreldet søknad :(
-        håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 24.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterSøknad(
+            Sykdom(24.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 24.januar,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -203,15 +249,24 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(19.februar, 12.mars))
 
         // foreldet søknad :(
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
+        håndterSøknad(
+            Sykdom(1.januar, 19.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.juni
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         // foreldet søknad :(
-        håndterSøknad(Sykdom(19.februar, 12.mars, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juli)
-        håndterInntektsmelding(listOf(19.februar til 6.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterSøknad(
+            Sykdom(19.februar, 12.mars, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.juli
+        )
+        håndterInntektsmelding(
+            listOf(19.februar til 6.mars),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -232,7 +287,10 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 3.mai)
+        håndterSøknad(
+            Sykdom(1.januar, 19.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 3.mai
+        )
 
         assertForventetFeil(
             forklaring = "Skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden",

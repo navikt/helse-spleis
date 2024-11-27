@@ -57,7 +57,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        assertEquals((1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(), feriepengeberegner.feriepengedatoer())
+        assertEquals(
+            (1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(),
+            feriepengeberegner.feriepengedatoer()
+        )
     }
 
     @Test
@@ -67,7 +70,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        assertEquals(41 * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver())
+        assertEquals(
+            41 * SpleisArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver()
+        )
     }
 
     @Test
@@ -89,7 +95,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(10 * InfotrygdArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver())
+        assertEquals(
+            10 * InfotrygdArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver()
+        )
     }
 
     @Test
@@ -100,7 +109,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals((12 * InfotrygdPersonbeløp + 10 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
+        assertEquals(
+            (12 * InfotrygdPersonbeløp + 10 * InfotrygdArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygd()
+        )
     }
 
     @Test
@@ -109,19 +121,33 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(10 * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver(ORGNUMMER))
+        assertEquals(
+            10 * SpleisArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver(ORGNUMMER)
+        )
         assertEquals(0.0, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("otherOrgn"))
     }
 
     @Test
     fun `beregner spleis sitt bidrag til feriepengene for to arbeidsgivere`() {
         val feriepengeberegner = feriepengeberegner(
-            spleisArbeidsgiver = "456789123".spleisArbeidsgiver(1.januar til 10.januar) + "789123456".spleisArbeidsgiver(1.januar til 12.januar)
+            spleisArbeidsgiver = "456789123".spleisArbeidsgiver(1.januar til 10.januar) + "789123456".spleisArbeidsgiver(
+                1.januar til 12.januar
+            )
         )
 
-        assertEquals((10 + 12) * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver())
-        assertEquals(10 * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("456789123"))
-        assertEquals(12 * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("789123456"))
+        assertEquals(
+            (10 + 12) * SpleisArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver()
+        )
+        assertEquals(
+            10 * SpleisArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("456789123")
+        )
+        assertEquals(
+            12 * SpleisArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("789123456")
+        )
     }
 
     @Test
@@ -130,7 +156,10 @@ internal class FeriepengeberegnerTest {
             infotrygdPerson = itPerson(1.januar til 10.januar)
         )
 
-        assertEquals(10 * InfotrygdPersonbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson(ORGNUMMER))
+        assertEquals(
+            10 * InfotrygdPersonbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdPerson(ORGNUMMER)
+        )
         assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygdPerson("otherOrgn"))
     }
 
@@ -140,9 +169,18 @@ internal class FeriepengeberegnerTest {
             infotrygdPerson = "456789123".itPerson(1.januar til 10.januar) + "789123456".itPerson(1.januar til 12.januar)
         )
 
-        assertEquals((10 + 12) * InfotrygdPersonbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson())
-        assertEquals(10 * InfotrygdPersonbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson("456789123"))
-        assertEquals(12 * InfotrygdPersonbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson("789123456"))
+        assertEquals(
+            (10 + 12) * InfotrygdPersonbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdPerson()
+        )
+        assertEquals(
+            10 * InfotrygdPersonbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdPerson("456789123")
+        )
+        assertEquals(
+            12 * InfotrygdPersonbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdPerson("789123456")
+        )
     }
 
     @Test
@@ -151,19 +189,33 @@ internal class FeriepengeberegnerTest {
             infotrygdArbeidsgiver = itArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(10 * InfotrygdArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(ORGNUMMER))
+        assertEquals(
+            10 * InfotrygdArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(ORGNUMMER)
+        )
         assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("otherOrgn"))
     }
 
     @Test
     fun `beregner infotrygd-arbeidsgiver sitt bidrag til feriepengene for to arbeidsgivere`() {
         val feriepengeberegner = feriepengeberegner(
-            infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 10.januar) + "789123456".itArbeidsgiver(1.januar til 12.januar)
+            infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 10.januar) + "789123456".itArbeidsgiver(
+                1.januar til 12.januar
+            )
         )
 
-        assertEquals((10 + 12) * InfotrygdArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver())
-        assertEquals(10 * InfotrygdArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("456789123"))
-        assertEquals(12 * InfotrygdArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("789123456"))
+        assertEquals(
+            (10 + 12) * InfotrygdArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver()
+        )
+        assertEquals(
+            10 * InfotrygdArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("456789123")
+        )
+        assertEquals(
+            12 * InfotrygdArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("789123456")
+        )
     }
 
     @Test
@@ -173,7 +225,10 @@ internal class FeriepengeberegnerTest {
             infotrygdArbeidsgiver = itArbeidsgiver(1.januar til 12.januar)
         )
 
-        assertEquals((10 * InfotrygdPersonbeløp + 12 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd(ORGNUMMER))
+        assertEquals(
+            (10 * InfotrygdPersonbeløp + 12 * InfotrygdArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygd(ORGNUMMER)
+        )
         assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygd("otherOrgn"))
     }
 
@@ -181,12 +236,23 @@ internal class FeriepengeberegnerTest {
     fun `beregner infotrygd sitt totale bidrag til feriepengene for to arbeidsgivere`() {
         val feriepengeberegner = feriepengeberegner(
             infotrygdPerson = "456789123".itPerson(1.januar til 10.januar) + "789123456".itPerson(1.januar til 12.januar),
-            infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 14.januar) + "789123456".itArbeidsgiver(1.januar til 16.januar)
+            infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 14.januar) + "789123456".itArbeidsgiver(
+                1.januar til 16.januar
+            )
         )
 
-        assertEquals(((10 + 12) * InfotrygdPersonbeløp + (14 + 16) * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
-        assertEquals((10 * InfotrygdPersonbeløp + 14 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd("456789123"))
-        assertEquals((12 * InfotrygdPersonbeløp + 16 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd("789123456"))
+        assertEquals(
+            ((10 + 12) * InfotrygdPersonbeløp + (14 + 16) * InfotrygdArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygd()
+        )
+        assertEquals(
+            (10 * InfotrygdPersonbeløp + 14 * InfotrygdArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygd("456789123")
+        )
+        assertEquals(
+            (12 * InfotrygdPersonbeløp + 16 * InfotrygdArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygd("789123456")
+        )
     }
 
     @Test
@@ -198,8 +264,14 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(15.januar til 31.januar)
         )
 
-        assertEquals((10 * InfotrygdPersonbeløp + 14 * InfotrygdArbeidsgiverbeløp) * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
-        assertEquals(17 * SpleisArbeidsgiverbeløp * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver())
+        assertEquals(
+            (10 * InfotrygdPersonbeløp + 14 * InfotrygdArbeidsgiverbeløp) * GAMMEL_SATS,
+            feriepengeberegner.beregnFeriepengerForInfotrygd()
+        )
+        assertEquals(
+            17 * SpleisArbeidsgiverbeløp * GAMMEL_SATS,
+            feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver()
+        )
     }
 
     @Test
@@ -210,7 +282,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals((10 * InfotrygdArbeidsgiverbeløp + 10 * SpleisArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForArbeidsgiver(ORGNUMMER))
+        assertEquals(
+            (10 * InfotrygdArbeidsgiverbeløp + 10 * SpleisArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForArbeidsgiver(ORGNUMMER)
+        )
     }
 
     @Test
@@ -220,7 +295,10 @@ internal class FeriepengeberegnerTest {
             spleisPerson = spleisPerson(1.januar til 10.januar)
         )
 
-        assertEquals((20 * InfotrygdPersonbeløp + 10 * SpleisPersonbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForPerson(ORGNUMMER))
+        assertEquals(
+            (20 * InfotrygdPersonbeløp + 10 * SpleisPersonbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengerForPerson(ORGNUMMER)
+        )
     }
 
     @Test
@@ -231,7 +309,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(10 * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
+        assertEquals(
+            10 * SpleisArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER)
+        )
     }
 
     @Test
@@ -242,7 +323,10 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals((10 * SpleisArbeidsgiverbeløp - 10 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
+        assertEquals(
+            (10 * SpleisArbeidsgiverbeløp - 10 * InfotrygdArbeidsgiverbeløp) * UNG_SATS,
+            feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER)
+        )
     }
 
     @Test
@@ -253,20 +337,35 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(38 * InfotrygdArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(ORGNUMMER))
+        assertEquals(
+            38 * InfotrygdArbeidsgiverbeløp * UNG_SATS,
+            feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(ORGNUMMER)
+        )
     }
 
     private fun itPerson(periode: Periode) =
         ORGNUMMER.itPerson(periode)
 
     private fun String.itPerson(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.InfotrygdPerson(this, it, InfotrygdPersonbeløp) }
+        periode.map {
+            Feriepengeberegner.UtbetaltDag.InfotrygdPerson(
+                this,
+                it,
+                InfotrygdPersonbeløp
+            )
+        }
 
     private fun itArbeidsgiver(periode: Periode) =
         ORGNUMMER.itArbeidsgiver(periode)
 
     private fun String.itArbeidsgiver(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver(this, it, InfotrygdArbeidsgiverbeløp) }
+        periode.map {
+            Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver(
+                this,
+                it,
+                InfotrygdArbeidsgiverbeløp
+            )
+        }
 
     private fun spleisArbeidsgiver(periode: Periode) =
         ORGNUMMER.spleisArbeidsgiver(periode)
@@ -275,7 +374,13 @@ internal class FeriepengeberegnerTest {
         ORGNUMMER.spleisPerson(periode)
 
     private fun String.spleisArbeidsgiver(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver(this, it, SpleisArbeidsgiverbeløp) }
+        periode.map {
+            Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver(
+                this,
+                it,
+                SpleisArbeidsgiverbeløp
+            )
+        }
 
     private fun String.spleisPerson(periode: Periode) =
         periode.map { Feriepengeberegner.UtbetaltDag.SpleisPerson(this, it, SpleisPersonbeløp) }

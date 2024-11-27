@@ -14,7 +14,10 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.utbetalinger
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class UtbetalingshistorikkEtterInfotrygdendringMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : BehovMessage(packet) {
 
     private val besvart = packet["@besvart"].asLocalDateTime()
 

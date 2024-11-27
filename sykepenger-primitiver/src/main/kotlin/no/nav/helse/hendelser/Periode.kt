@@ -4,11 +4,10 @@ import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
-import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.nesteDag
-import kotlin.collections.plus
 
 // Understands beginning and end of a time interval
 class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -31,13 +30,18 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
+        fun Iterable<Periode>.periode() =
+            if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
+
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(
             mergeKantIKant
         )
-        fun Iterable<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() = map(LocalDate::somPeriode).merge(
-            mergeOverHelg
-        )
+
+        fun Iterable<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() =
+            map(LocalDate::somPeriode).merge(
+                mergeOverHelg
+            )
+
         fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
 
@@ -55,13 +59,15 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
                 result.dropLast(1) + (result.lastOrNull()?.trim(trimperiode) ?: emptyList())
             }
 
-        val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
+        val Iterable<LocalDate>.omsluttendePeriode
+            get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
 
         fun Iterable<LocalDate>.periodeRettFør(dato: LocalDate): Periode? {
             val rettFør = sorted().lastOrNull { it.erRettFør(dato) } ?: return null
-            return grupperSammenhengendePerioderMedHensynTilHelg().single { rettFør in it }.let { periode ->
-                periode.subset(periode.start til rettFør)
-            }
+            return grupperSammenhengendePerioderMedHensynTilHelg().single { rettFør in it }
+                .let { periode ->
+                    periode.subset(periode.start til rettFør)
+                }
         }
 
         private fun Iterable<Periode>.merge(erForlengelse: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean = mergeKantIKant): List<Periode> {
@@ -181,7 +187,10 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     override fun hashCode() = start.hashCode() * 37 + endInclusive.hashCode()
 
     fun merge(other: Periode, erForlengelseStrategy: (LocalDate, LocalDate) -> Boolean): Periode {
-        if (this.overlapperMed(other) || erForlengelseStrategy(this.endInclusive, other.start) || erForlengelseStrategy(other.endInclusive, this.start)) {
+        if (this.overlapperMed(other) || erForlengelseStrategy(
+                this.endInclusive,
+                other.start
+            ) || erForlengelseStrategy(other.endInclusive, this.start)) {
             return this + other
         }
         return this

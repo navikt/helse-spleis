@@ -26,7 +26,8 @@ internal class SkattInntektsgrunnlagTest {
 
     @Test
     fun `bruker kun tre måneder før skjæringstidspunktet`() {
-        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 10.april, inntektsopplysninger = listOf(
+        val skatt = SkattSykepengegrunnlag(
+            UUID.randomUUID(), 10.april, inntektsopplysninger = listOf(
             Skatteopplysning(
                 hendelseId = UUID.randomUUID(),
                 beløp = 1000.daglig,
@@ -67,7 +68,8 @@ internal class SkattInntektsgrunnlagTest {
 
     @Test
     fun `bruker ikke inntekter samme måned som skjæringstidspunktet`() {
-        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 10.april, inntektsopplysninger = listOf(
+        val skatt = SkattSykepengegrunnlag(
+            UUID.randomUUID(), 10.april, inntektsopplysninger = listOf(
             Skatteopplysning(
                 hendelseId = UUID.randomUUID(),
                 beløp = 1000.daglig,
@@ -108,7 +110,8 @@ internal class SkattInntektsgrunnlagTest {
 
     @Test
     fun `setter negativt omregnet årsinntekt til 0`() {
-        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
+        val skatt = SkattSykepengegrunnlag(
+            UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
             Skatteopplysning(
                 hendelseId = UUID.randomUUID(),
                 beløp = (-2500).daglig,

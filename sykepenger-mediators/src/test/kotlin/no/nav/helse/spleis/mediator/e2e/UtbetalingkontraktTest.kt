@@ -32,9 +32,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `ny utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
@@ -56,9 +65,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `utbetaling utbetalt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -73,9 +91,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `manuell behandling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -92,9 +119,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `automatisk behandling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -110,8 +146,19 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `arbeid ikke gjenopptatt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -119,50 +166,92 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
         sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 1.mars)
         sendVilkårsgrunnlag(1)
         sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
 
-        sendOverstyringTidslinje((1.februar til 28.februar).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        sendOverstyringTidslinje((1.februar til 28.februar).map {
+            ManuellOverskrivingDag(
+                it,
+                Dagtype.ArbeidIkkeGjenopptattDag
+            )
+        })
         sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 1, automatiskBehandling = true)
         sendUtbetaling()
 
         val utbetaltEvent = testRapid.inspektør.siste("utbetaling_utbetalt")
-        val utbetalingsdager = utbetaltEvent["utbetalingsdager"].associate { it.path("dato").asLocalDate() to it.path("type").asText() }
-        (1.februar til 28.februar).forEach { assertEquals("ArbeidIkkeGjenopptattDag", utbetalingsdager[it]) }
+        val utbetalingsdager = utbetaltEvent["utbetalingsdager"].associate {
+            it.path("dato").asLocalDate() to it.path("type").asText()
+        }
+        (1.februar til 28.februar).forEach {
+            assertEquals(
+                "ArbeidIkkeGjenopptattDag",
+                utbetalingsdager[it]
+            )
+        }
     }
 
     @Test
     fun `spleis sender korrekt grad (avrundet) ut`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30, faktiskGrad = 80))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 30,
+                    faktiskGrad = 80
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
         sendUtbetaling()
         val utbetaling = testRapid.inspektør.siste("utbetaling_utbetalt")
-        assertEquals(20.0, utbetaling.path("arbeidsgiverOppdrag").path("linjer").first().path("grad").asDouble())
+        assertEquals(
+            20.0,
+            utbetaling.path("arbeidsgiverOppdrag").path("linjer").first().path("grad").asDouble()
+        )
     }
 
     @Test
     fun `Feriedager og permisjonsdager blir mappet riktig fra utbetalingstidslinjen for utbetaling_utbetalt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             fravær = listOf(
                 FravarDTO(fom = 20.januar, tom = 21.januar, type = FravarstypeDTO.FERIE),
                 FravarDTO(fom = 22.januar, tom = 22.januar, type = FravarstypeDTO.PERMISJON)
             )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -170,18 +259,35 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetaling = testRapid.inspektør.siste("utbetaling_utbetalt")
 
-        assertEquals(2, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Feriedag" }.size)
-        assertEquals(1, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Permisjonsdag" }.size)
+        assertEquals(
+            2,
+            utbetaling.path("utbetalingsdager").toList()
+                .filter { it["type"].asText() == "Feriedag" }.size
+        )
+        assertEquals(
+            1,
+            utbetaling.path("utbetalingsdager").toList()
+                .filter { it["type"].asText() == "Permisjonsdag" }.size
+        )
     }
 
     @Test
     fun `Feriedager og permisjonsdager blir mappet riktig fra utbetalingstidslinjen for utbetaling_uten_utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             fravær = listOf(FravarDTO(fom = 25.januar, tom = 26.januar, FravarstypeDTO.FERIE))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -190,7 +296,13 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 27.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.PERMISJON))
         )
         sendYtelser(1)
@@ -198,8 +310,16 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
         val utbetaling = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
 
-        assertEquals(2, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Feriedag" }.size)
-        assertEquals(5, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Permisjonsdag" }.size)
+        assertEquals(
+            2,
+            utbetaling.path("utbetalingsdager").toList()
+                .filter { it["type"].asText() == "Feriedag" }.size
+        )
+        assertEquals(
+            5,
+            utbetaling.path("utbetalingsdager").toList()
+                .filter { it["type"].asText() == "Permisjonsdag" }.size
+        )
     }
 
     @Test
@@ -209,9 +329,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15)
         )
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                ), SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15)
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -225,9 +354,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `utbetaling uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -236,7 +374,13 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 27.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
         )
         sendYtelser(1)
@@ -251,9 +395,18 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `annullering full refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -284,10 +437,16 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `annullering delvis refusjon`()  {
+    fun `annullering delvis refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
@@ -296,7 +455,11 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
+        sendSimulering(
+            0,
+            SimuleringMessage.Simuleringstatus.OK,
+            forventedeFagområder = setOf("SPREF", "SP")
+        )
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         sendAnnullering(utbetalingId.toString())
@@ -325,7 +488,13 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     fun `annullering ingen refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
@@ -361,13 +530,19 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertUtbetaltInkluderAvviste(melding: JsonNode) {
         assertUtbetalt(melding)
-        melding.path("utbetalingsdager").toList().filter { it["type"].asText() == "AvvistDag" }.also { avvisteDager ->
-            assertTrue(avvisteDager.isNotEmpty())
-            assertTrue(avvisteDager.all { it.hasNonNull("begrunnelser") })
-        }
+        melding.path("utbetalingsdager").toList().filter { it["type"].asText() == "AvvistDag" }
+            .also { avvisteDager ->
+                assertTrue(avvisteDager.isNotEmpty())
+                assertTrue(avvisteDager.all { it.hasNonNull("begrunnelser") })
+            }
     }
 
-    private fun assertUtbetalingEndret(melding: JsonNode, fra: String, til: String, annullering: Boolean = false) {
+    private fun assertUtbetalingEndret(
+        melding: JsonNode,
+        fra: String,
+        til: String,
+        annullering: Boolean = false
+    ) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
@@ -464,14 +639,30 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         }
     }
 
-    private val arbeidsgiverFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText().also { check(it.matches(
-        FagsystemIdRegex
-    )) }
-    private val personFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag").path("fagsystemId").asText().also { check(it.matches(
-        FagsystemIdRegex
-    )) }
-    private val utbetalingId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").let { UUID.fromString(it.asText()) }
-    private val korrelasjonsId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId").let { UUID.fromString(it.asText()) }
+    private val arbeidsgiverFagsystemId
+        get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag")
+            .path("fagsystemId").asText().also {
+            check(
+                it.matches(
+                    FagsystemIdRegex
+                )
+            )
+        }
+    private val personFagsystemId
+        get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag")
+            .path("fagsystemId").asText().also {
+            check(
+                it.matches(
+                    FagsystemIdRegex
+                )
+            )
+        }
+    private val utbetalingId
+        get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId")
+            .let { UUID.fromString(it.asText()) }
+    private val korrelasjonsId
+        get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId")
+            .let { UUID.fromString(it.asText()) }
 
 
     private companion object {

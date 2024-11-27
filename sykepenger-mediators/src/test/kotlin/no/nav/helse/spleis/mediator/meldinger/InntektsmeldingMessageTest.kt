@@ -17,14 +17,39 @@ internal class InntektsmeldingMessageTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val inntektsdato = LocalDate.EPOCH
         val førsteFraværsdag = LocalDate.EPOCH.plusDays(1)
-        assertEquals(LPS(førsteFraværsdag),  objectMapper.nullNode().tilAvsendersystem(null, null, førsteFraværsdag))
-        assertEquals(LPS(førsteFraværsdag), objectMapper.missingNode().tilAvsendersystem(null, null, førsteFraværsdag))
-        assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(mangler).tilAvsendersystem(null, null, førsteFraværsdag))
-        assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(sattTilNull).tilAvsendersystem(null, null, førsteFraværsdag))
-        assertEquals(NavPortal(vedtaksperiodeId, inntektsdato, true), objectMapper.readTree(navNo).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
-        assertEquals(NavPortal(vedtaksperiodeId, inntektsdato, false), objectMapper.readTree(navNoSelvbestemt).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null))
-        assertEquals(Altinn(førsteFraværsdag), objectMapper.readTree(altinn).tilAvsendersystem(null, null, førsteFraværsdag))
-        assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(hvaSomHelst).tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(
+            LPS(førsteFraværsdag),
+            objectMapper.nullNode().tilAvsendersystem(null, null, førsteFraværsdag)
+        )
+        assertEquals(
+            LPS(førsteFraværsdag),
+            objectMapper.missingNode().tilAvsendersystem(null, null, førsteFraværsdag)
+        )
+        assertEquals(
+            LPS(førsteFraværsdag),
+            objectMapper.readTree(mangler).tilAvsendersystem(null, null, førsteFraværsdag)
+        )
+        assertEquals(
+            LPS(førsteFraværsdag),
+            objectMapper.readTree(sattTilNull).tilAvsendersystem(null, null, førsteFraværsdag)
+        )
+        assertEquals(
+            NavPortal(vedtaksperiodeId, inntektsdato, true),
+            objectMapper.readTree(navNo).tilAvsendersystem(vedtaksperiodeId, inntektsdato, null)
+        )
+        assertEquals(
+            NavPortal(vedtaksperiodeId, inntektsdato, false),
+            objectMapper.readTree(navNoSelvbestemt)
+                .tilAvsendersystem(vedtaksperiodeId, inntektsdato, null)
+        )
+        assertEquals(
+            Altinn(førsteFraværsdag),
+            objectMapper.readTree(altinn).tilAvsendersystem(null, null, førsteFraværsdag)
+        )
+        assertEquals(
+            LPS(førsteFraværsdag),
+            objectMapper.readTree(hvaSomHelst).tilAvsendersystem(null, null, førsteFraværsdag)
+        )
     }
 
     private companion object {

@@ -25,5 +25,6 @@ class SkjønnsmessigFastsettelse(
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
     }
 
-    override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
+    override fun erRelevant(skjæringstidspunkt: LocalDate) =
+        this.skjæringstidspunkt == skjæringstidspunkt
 }

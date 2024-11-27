@@ -23,7 +23,10 @@ internal class PensjonsgivendeInntektTest {
             PensjonsgivendeInntekt(2014, 380000.årlig),
         )
 
-        assertEquals(478906.årlig, SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(16.juni))
+        assertEquals(
+            478906.årlig,
+            SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(16.juni)
+        )
     }
 
     @Test
@@ -46,8 +49,12 @@ internal class PensjonsgivendeInntektTest {
         )
 
         val skjæringstidspunkt = 12.mai
-        val expected = (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).årlig.toInt().årlig
-        assertEquals(expected, SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(skjæringstidspunkt))
+        val expected =
+            (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).årlig.toInt().årlig
+        assertEquals(
+            expected,
+            SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(skjæringstidspunkt)
+        )
     }
 }
 

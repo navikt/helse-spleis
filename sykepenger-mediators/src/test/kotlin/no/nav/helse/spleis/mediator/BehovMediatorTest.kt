@@ -37,9 +37,10 @@ class BehovMediatorTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
 
-        private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-            it.requireKey("@event_name")
-        }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
+        private val eksempelmelding =
+            MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
+                it.requireKey("@event_name")
+            }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
@@ -78,8 +79,8 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            "historikkFom" to LocalDate.now()
+        )
         )
         aktivitetslogg.behov(Foreldrepenger, "Trenger foreldrepengeytelser")
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
@@ -104,11 +105,17 @@ class BehovMediatorTest {
             assertDoesNotThrow { UUID.fromString(it["@behovId"].asText()) }
             assertTrue(it.hasNonNull("@opprettet"))
             assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
-            assertEquals(listOf("Sykepengehistorikk", "Foreldrepenger"), it["@behov"].map(JsonNode::asText))
+            assertEquals(
+                listOf("Sykepengehistorikk", "Foreldrepenger"),
+                it["@behov"].map(JsonNode::asText)
+            )
             assertEquals("behov", it["@event_name"].asText())
             assertEquals("Arbeidsgiver 1", it["Arbeidsgiver"].asText())
             assertEquals("Vedtaksperiode 1", it["Vedtaksperiode"].asText())
-            assertEquals(LocalDate.now().toString(), it[Sykepengehistorikk.name]["historikkFom"].asText())
+            assertEquals(
+                LocalDate.now().toString(),
+                it[Sykepengehistorikk.name]["historikkFom"].asText()
+            )
         }
         objectMapper.readTree(messages[1].second).also {
             assertEquals("behov", it["@event_name"].asText())
@@ -134,13 +141,13 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            "historikkFom" to LocalDate.now()
+        )
         )
         aktivitetslogg.behov(
             Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            "historikkFom" to LocalDate.now()
+        )
         )
 
         assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -155,13 +162,13 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            "historikkFom" to LocalDate.now().minusDays(1)
+        )
         )
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            "historikkFom" to LocalDate.now().minusDays(1)
+        )
         )
 
         assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -176,16 +183,22 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            "historikkFom" to LocalDate.now().minusDays(1)
+        )
         )
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(2)
-            )
+            "historikkFom" to LocalDate.now().minusDays(2)
+        )
         )
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
+        assertThrows<IllegalArgumentException> {
+            behovMediator.håndter(
+                testRapid,
+                eksempelmelding,
+                aktivitetslogg
+            )
+        }
     }
 
     @Test
@@ -211,7 +224,13 @@ class BehovMediatorTest {
         aktivitetslogg.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf("a" to 1))
         aktivitetslogg.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf("a" to 2))
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
+        assertThrows<IllegalArgumentException> {
+            behovMediator.håndter(
+                testRapid,
+                eksempelmelding,
+                aktivitetslogg
+            )
+        }
     }
 
     private class TestKontekst(

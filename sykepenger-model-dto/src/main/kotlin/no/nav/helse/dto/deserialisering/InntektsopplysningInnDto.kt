@@ -65,6 +65,7 @@ sealed class InntektsopplysningInnDto {
             AOrdningen
         }
     }
+
     data class SkattSykepengegrunnlagDto(
         override val id: UUID,
         override val hendelseId: UUID,

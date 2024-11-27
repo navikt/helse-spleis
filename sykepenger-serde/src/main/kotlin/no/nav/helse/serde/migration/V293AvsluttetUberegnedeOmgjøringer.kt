@@ -7,7 +7,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V293AvsluttetUberegnedeOmgjøringer: JsonMigration(version = 293) {
+internal class V293AvsluttetUberegnedeOmgjøringer : JsonMigration(version = 293) {
     override val description = "avslutter uberegnede omgjøringer for auu-perioder"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -37,7 +37,10 @@ internal class V293AvsluttetUberegnedeOmgjøringer: JsonMigration(version = 293)
         if (siste.path("tilstand").asText() != "UBEREGNET_OMGJØRING") return
         val avsluttet = vedtaksperiode.path("oppdatert").asText()
 
-        sikkerLogg.info("lukker behandling=${siste.path("id").asText()} for {}", kv("vedtaksperiodeId", vedtaksperiode.path("id").asText()))
+        sikkerLogg.info(
+            "lukker behandling=${siste.path("id").asText()} for {}",
+            kv("vedtaksperiodeId", vedtaksperiode.path("id").asText())
+        )
         siste as ObjectNode
         siste.put("tilstand", "AVSLUTTET_UTEN_VEDTAK")
         siste.put("avsluttet", avsluttet)

@@ -30,7 +30,14 @@ import org.junit.jupiter.api.Test
 internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening`() {
-        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT))
+        personMedArbeidsforhold(
+            Vilkårsgrunnlag.Arbeidsforhold(
+                a1,
+                LocalDate.EPOCH,
+                null,
+                Arbeidsforholdtype.ORDINÆRT
+            )
+        )
         assertHarArbeidsforhold(1.januar, a1)
         assertHarIkkeArbeidsforhold(1.januar, a2)
     }
@@ -48,8 +55,18 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening om tilstøtende`() {
         personMedArbeidsforhold(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, 20.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017), Arbeidsforholdtype.ORDINÆRT)
+            Vilkårsgrunnlag.Arbeidsforhold(
+                a1,
+                20.desember(2017),
+                null,
+                Arbeidsforholdtype.ORDINÆRT
+            ),
+            Vilkårsgrunnlag.Arbeidsforhold(
+                a2,
+                LocalDate.EPOCH,
+                19.desember(2017),
+                Arbeidsforholdtype.ORDINÆRT
+            )
         )
 
         assertHarArbeidsforhold(1.januar, a1)
@@ -60,7 +77,12 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     fun `lagrer arbeidsforhold brukt til opptjening ved overlapp`() {
         personMedArbeidsforhold(
             Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 24.desember(2017), Arbeidsforholdtype.ORDINÆRT)
+            Vilkårsgrunnlag.Arbeidsforhold(
+                a2,
+                LocalDate.EPOCH,
+                24.desember(2017),
+                Arbeidsforholdtype.ORDINÆRT
+            )
         )
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
@@ -68,8 +90,16 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {
-        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null, Arbeidsforholdtype.ORDINÆRT))
-        val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
+        personMedArbeidsforhold(
+            Vilkårsgrunnlag.Arbeidsforhold(
+                a1,
+                ansattFom = 31.desember(2017),
+                ansattTom = null,
+                Arbeidsforholdtype.ORDINÆRT
+            )
+        )
+        val grunnlagsdata =
+            person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
         assertEquals(1, grunnlagsdata.opptjening!!.opptjeningsdager())
         assertEquals(false, grunnlagsdata.opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -88,7 +118,12 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
         val arbeidsforhold = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017), Arbeidsforholdtype.ORDINÆRT)
+            Vilkårsgrunnlag.Arbeidsforhold(
+                a2,
+                1.desember(2017),
+                31.desember(2017),
+                Arbeidsforholdtype.ORDINÆRT
+            )
         )
 
         håndterVilkårsgrunnlag(
@@ -102,7 +137,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+            ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -123,7 +159,11 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INGEN, 1.januar)
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                ORGNUMMER,
+                INGEN,
+                1.januar
+            )
         )
 
         assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
@@ -133,20 +173,36 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         assertEquals(0, inspektør.utbetaling(0).utbetalingstidslinje.inspektør.avvistDagTeller)
     }
 
-    private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
+    private fun personMedArbeidsforhold(
+        vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
+    ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = a1)
         håndterSøknad(fom til tom, orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
-        håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter,
+            arbeidsforhold = arbeidsforhold.toList(),
+            orgnummer = a1
+        )
     }
+
     companion object {
-        fun AbstractEndToEndTest.assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
+        fun AbstractEndToEndTest.assertHarArbeidsforhold(
+            skjæringstidspunkt: LocalDate,
+            arbeidsforhold: String
+        ) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
             assertNotNull(vilkårsgrunnlag)
             assertTrue(vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.any { it.orgnummer == arbeidsforhold })
         }
 
-        fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
+        fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(
+            skjæringstidspunkt: LocalDate,
+            arbeidsforhold: String
+        ) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
             assertNotNull(vilkårsgrunnlag)
             assertFalse(vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.any { it.orgnummer == arbeidsforhold })

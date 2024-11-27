@@ -83,7 +83,8 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                     "forklaring",
                     null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                ))
+                )
+            )
         )
 
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
@@ -101,15 +102,30 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val tom = 31.januar
         nyPeriode(fom til tom, orgnummer = a1)
         nyPeriode(fom til tom, orgnummer = a2)
-        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
-        val korrigertInntektsmeldingIdA2 = håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a2)
+        val korrigertInntektsmeldingIdA1 =
+            håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
+        val korrigertInntektsmeldingIdA2 =
+            håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a2)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(INNTEKT, 1.januar, a1, a2),
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(
+                INNTEKT,
+                1.januar,
+                a1,
+                a2
+            ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -161,15 +177,29 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val tom = 31.januar
         nyPeriode(fom til tom, orgnummer = a1)
         nyPeriode(fom til tom, orgnummer = a2)
-        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
+        val korrigertInntektsmeldingIdA1 =
+            håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a2)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(INNTEKT, 1.januar, a1, a2),
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(
+                INNTEKT,
+                1.januar,
+                a1,
+                a2
+            ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

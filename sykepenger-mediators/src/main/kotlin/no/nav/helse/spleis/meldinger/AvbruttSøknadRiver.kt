@@ -23,8 +23,10 @@ internal class AvbruttSøknadRiver(
         message.require("tom", JsonNode::asLocalDate)
     }
 
-    override fun createMessage(packet: JsonMessage) = AvbruttSøknadMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = AvbruttSøknadMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fnr"].asText()
-    ))
+    )
+    )
 }

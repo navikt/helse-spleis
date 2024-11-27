@@ -1,16 +1,17 @@
 package no.nav.helse.spleis.mediator.meldinger
 
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mai
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
@@ -22,7 +23,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import org.junit.jupiter.api.Test
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class InntektsmeldingerRiverTest : RiverTest() {
 
@@ -40,7 +40,12 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         arbeidsforholdId = null,
         beregnetInntekt = BigDecimal.ONE,
         refusjon = Refusjon(beloepPrMnd = BigDecimal.ONE, opphoersdato = LocalDate.now()),
-        endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+        endringIRefusjoner = listOf(
+            EndringIRefusjon(
+                endringsdato = LocalDate.now(),
+                beloep = BigDecimal.ONE
+            )
+        ),
         opphoerAvNaturalytelser = emptyList(),
         gjenopptakelseNaturalytelser = emptyList(),
         arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
@@ -65,7 +70,12 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         arbeidsforholdId = null,
         beregnetInntekt = BigDecimal.ONE,
         refusjon = Refusjon(beloepPrMnd = null, opphoersdato = null),
-        endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+        endringIRefusjoner = listOf(
+            EndringIRefusjon(
+                endringsdato = LocalDate.now(),
+                beloep = BigDecimal.ONE
+            )
+        ),
         opphoerAvNaturalytelser = emptyList(),
         gjenopptakelseNaturalytelser = emptyList(),
         arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
@@ -83,12 +93,20 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
     private val ValidInntektsmeldingWithUnknownFieldsJson =
         ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
 
-    private val ValidInntektsmeldingMedOpphørAvNaturalytelser = ValidInntektsmelding.set<ObjectNode>(
-        "opphoerAvNaturalytelser",
-        listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
-    ).toJson()
+    private val ValidInntektsmeldingMedOpphørAvNaturalytelser =
+        ValidInntektsmelding.set<ObjectNode>(
+            "opphoerAvNaturalytelser",
+            listOf(
+                OpphoerAvNaturalytelse(
+                    ELEKTRONISKKOMMUNIKASJON,
+                    LocalDate.now(),
+                    BigDecimal(589.00)
+                )
+            ).toJsonNode()
+        ).toJson()
 
-    private val ValidInntektsmeldingMedVedtaksperiodeId = ValidInntektsmelding.put("vedtaksperiodeId", UUID.randomUUID().toString()).toJson()
+    private val ValidInntektsmeldingMedVedtaksperiodeId =
+        ValidInntektsmelding.put("vedtaksperiodeId", UUID.randomUUID().toString()).toJson()
 
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         InntektsmeldingerRiver(rapidsConnection, mediator)
@@ -108,6 +126,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
         assertNoErrors(ValidInntektsmeldingMedVedtaksperiodeId)
     }
+
     private fun ObjectNode.toJson(): String = put("fødselsdato", "$fødselsdato").toString()
 }
 
@@ -115,10 +134,11 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
-    put("@id", UUID.randomUUID().toString())
-    put("@event_name", "inntektsmelding")
-    put("@opprettet", LocalDateTime.now().toString())
-}
+private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode =
+    objectMapper.valueToTree<ObjectNode>(this).apply {
+        put("@id", UUID.randomUUID().toString())
+        put("@event_name", "inntektsmelding")
+        put("@opprettet", LocalDateTime.now().toString())
+    }
 
 private fun List<OpphoerAvNaturalytelse>.toJsonNode(): JsonNode = objectMapper.valueToTree(this)

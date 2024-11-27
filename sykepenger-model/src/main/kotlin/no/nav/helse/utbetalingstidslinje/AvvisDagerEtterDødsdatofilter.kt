@@ -8,7 +8,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 
 internal class AvvisDagerEtterDødsdatofilter(
     private val alder: Alder,
-): UtbetalingstidslinjerFilter {
+) : UtbetalingstidslinjerFilter {
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,

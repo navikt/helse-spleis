@@ -20,5 +20,6 @@ data class Utbetalingsak(
     init {
         check(vedtaksperioder.isNotEmpty())
     }
+
     val omsluttendePeriode = vedtaksperioder.periode()!!.oppdaterFom(startperiode)
 }

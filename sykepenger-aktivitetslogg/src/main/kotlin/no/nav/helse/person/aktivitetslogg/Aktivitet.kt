@@ -27,13 +27,16 @@ sealed class Aktivitet(
     override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
         .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
 
-    override fun toString() = label + "  \t" + tidsstempel.format(tidsstempelformat) + "  \t" + melding + meldingerString()
+    override fun toString() =
+        label + "  \t" + tidsstempel.format(tidsstempelformat) + "  \t" + melding + meldingerString()
 
     private fun meldingerString(): String {
         return kontekster.joinToString(separator = "") { " (${it.melding()})" }
     }
 
-    operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
+    operator fun contains(kontekst: Aktivitetskontekst) =
+        kontekst.toSpesifikkKontekst() in kontekster
+
     class Info private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
@@ -54,7 +57,11 @@ sealed class Aktivitet(
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 25, 'W', melding, tidsstempel, kontekster) {
         companion object {
-            internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String) =
+            internal fun opprett(
+                kontekster: List<SpesifikkKontekst>,
+                kode: Varselkode,
+                melding: String
+            ) =
                 Varsel(UUID.randomUUID(), kontekster, kode, melding = melding)
         }
     }
@@ -68,8 +75,14 @@ sealed class Aktivitet(
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 50, 'N', melding, tidsstempel, kontekster) {
         companion object {
-            internal fun opprett(type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>) = Behov(
-                UUID.randomUUID(), type, kontekster, melding, detaljer)
+            internal fun opprett(
+                type: Behovtype,
+                kontekster: List<SpesifikkKontekst>,
+                melding: String,
+                detaljer: Map<String, Any?>
+            ) = Behov(
+                UUID.randomUUID(), type, kontekster, melding, detaljer
+            )
 
             fun utbetalingshistorikk(
                 aktivitetslogg: IAktivitetslogg,
@@ -77,9 +90,9 @@ sealed class Aktivitet(
             ) {
                 aktivitetslogg.behov(
                     Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
-                        "historikkFom" to periode.start.toString(),
-                        "historikkTom" to periode.endInclusive.toString()
-                    )
+                    "historikkFom" to periode.start.toString(),
+                    "historikkTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -87,9 +100,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Foreldrepenger,
                     "Trenger informasjon om foreldrepengeytelser fra FPSAK", mapOf(
-                        "foreldrepengerFom" to periode.start.toString(),
-                        "foreldrepengerTom" to periode.endInclusive.toString()
-                    )
+                    "foreldrepengerFom" to periode.start.toString(),
+                    "foreldrepengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -97,9 +110,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Pleiepenger,
                     "Trenger informasjon om pleiepengeytelser fra Infotrygd", mapOf(
-                        "pleiepengerFom" to periode.start.toString(),
-                        "pleiepengerTom" to periode.endInclusive.toString()
-                    )
+                    "pleiepengerFom" to periode.start.toString(),
+                    "pleiepengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -107,9 +120,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Omsorgspenger,
                     "Trenger informasjon om omsorgspengerytelser fra Infotrygd", mapOf(
-                        "omsorgspengerFom" to periode.start.toString(),
-                        "omsorgspengerTom" to periode.endInclusive.toString()
-                    )
+                    "omsorgspengerFom" to periode.start.toString(),
+                    "omsorgspengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -117,19 +130,22 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Opplæringspenger,
                     "Trenger informasjon om opplæringspengerytelser fra Infotrygd", mapOf(
-                        "opplæringspengerFom" to periode.start.toString(),
-                        "opplæringspengerTom" to periode.endInclusive.toString()
-                    )
+                    "opplæringspengerFom" to periode.start.toString(),
+                    "opplæringspengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
-            fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
+            fun institusjonsopphold(
+                aktivitetslogg: IAktivitetslogg,
+                periode: ClosedRange<LocalDate>
+            ) {
                 aktivitetslogg.behov(
                     Behovtype.Institusjonsopphold,
                     "Trenger informasjon om institusjonsopphold fra Inst2", mapOf(
-                        "institusjonsoppholdFom" to periode.start.toString(),
-                        "institusjonsoppholdTom" to periode.endInclusive.toString()
-                    )
+                    "institusjonsoppholdFom" to periode.start.toString(),
+                    "institusjonsoppholdTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -187,41 +203,58 @@ sealed class Aktivitet(
             }
 
             fun arbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
-                aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold", mapOf(
+                aktivitetslogg.behov(
+                    Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold", mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt.toString()
-                ))
+                )
+                )
             }
 
             fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
-                        "periodeFom" to fom.toString(),
-                        "periodeTom" to tom.toString()
-                    )
+                    "periodeFom" to fom.toString(),
+                    "periodeTom" to tom.toString()
+                )
                 )
             }
 
-            fun arbeidsavklaringspenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+            fun arbeidsavklaringspenger(
+                aktivitetslogg: IAktivitetslogg,
+                fom: LocalDate,
+                tom: LocalDate
+            ) {
                 aktivitetslogg.behov(
-                    Behovtype.Arbeidsavklaringspenger, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
+                    Behovtype.Arbeidsavklaringspenger,
+                    "Trenger informasjon om arbeidsavklaringspenger",
+                    mapOf(
                         "periodeFom" to fom.toString(),
                         "periodeTom" to tom.toString()
                     )
                 )
             }
 
-            fun medlemskap(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, fom: LocalDate, tom: LocalDate) {
+            fun medlemskap(
+                aktivitetslogg: IAktivitetslogg,
+                skjæringstidspunkt: LocalDate,
+                fom: LocalDate,
+                tom: LocalDate
+            ) {
                 aktivitetslogg.behov(
                     Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
-                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                        "medlemskapPeriodeFom" to fom.toString(),
-                        "medlemskapPeriodeTom" to tom.toString()
-                    )
+                    "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+                    "medlemskapPeriodeFom" to fom.toString(),
+                    "medlemskapPeriodeTom" to tom.toString()
+                )
                 )
             }
 
             fun godkjenning(aktivitetslogg: IAktivitetslogg, godkjenningsbehov: Map<String, Any>) {
-                aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", godkjenningsbehov)
+                aktivitetslogg.behov(
+                    Behovtype.Godkjenning,
+                    "Forespør godkjenning fra saksbehandler",
+                    godkjenningsbehov
+                )
             }
         }
 
@@ -259,7 +292,11 @@ sealed class Aktivitet(
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Aktivitet(id, 75, 'E', melding, tidsstempel, kontekster) {
         companion object {
-            internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String) =
+            internal fun opprett(
+                kontekster: List<SpesifikkKontekst>,
+                kode: Varselkode,
+                melding: String
+            ) =
                 FunksjonellFeil(UUID.randomUUID(), kontekster, kode, melding)
         }
     }

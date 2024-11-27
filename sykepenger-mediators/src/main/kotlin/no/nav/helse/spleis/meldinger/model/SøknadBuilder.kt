@@ -2,8 +2,8 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.Periode
 import kotlin.properties.Delegates
+import no.nav.helse.hendelser.Periode
 
 internal abstract class SøknadBuilder {
     protected lateinit var sykmeldingSkrevet: LocalDateTime
@@ -18,15 +18,23 @@ internal abstract class SøknadBuilder {
     protected var yrkesskade by Delegates.notNull<Boolean>()
     protected var innsendt: LocalDateTime? = null
 
-    internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) = apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
+    internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) =
+        apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
+
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
-    internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
+    internal fun organisasjonsnummer(organisasjonsnummer: String) =
+        apply { this.organisasjonsnummer = organisasjonsnummer }
+
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }
     internal fun permittert(permittert: Boolean) = apply { this.permittert = permittert }
-    internal fun egenmeldinger(egenmeldinger: List<Periode>) = apply { this.egenmeldinger = egenmeldinger }
-    internal fun arbeidUtenforNorge(arbeidUtenforNorge: Boolean) = apply { this.arbeidUtenforNorge = arbeidUtenforNorge }
+    internal fun egenmeldinger(egenmeldinger: List<Periode>) =
+        apply { this.egenmeldinger = egenmeldinger }
+
+    internal fun arbeidUtenforNorge(arbeidUtenforNorge: Boolean) =
+        apply { this.arbeidUtenforNorge = arbeidUtenforNorge }
+
     internal fun yrkesskade(yrkesskade: Boolean) = apply { this.yrkesskade = yrkesskade }
     internal fun fravær(type: String, fom: LocalDate, tom: LocalDate?) {
         when (type) {
@@ -38,7 +46,12 @@ internal abstract class SøknadBuilder {
 
     internal open fun inntektskilde(andreInntektskilder: Boolean) = apply {}
 
-    internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
+    internal abstract fun periode(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Int,
+        arbeidshelse: Int?
+    ): SøknadBuilder
 
     internal open fun permisjon(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun ferie(fom: LocalDate, tom: LocalDate) = apply {}

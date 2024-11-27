@@ -36,20 +36,52 @@ class BehandlingSubsumsjonslogg(
         // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
         // alt kan subsummeres i kontekst av en behandling.
         check(kontekster.count { it.type == KontekstType.Vedtaksperiode } <= 1) {
-            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${kontekster.joinToString(separator = "\n")}"
+            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${
+                kontekster.joinToString(
+                    separator = "\n"
+                )
+            }"
         }
     }
 
     fun medFødselsnummer(personidentifikator: String) =
-        kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Fødselsnummer, personidentifikator)))
+        kopierMedKontekst(
+            listOf(
+                Subsumsjonskontekst(
+                    KontekstType.Fødselsnummer,
+                    personidentifikator
+                )
+            )
+        )
 
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
-        kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)))
+        kopierMedKontekst(
+            listOf(
+                Subsumsjonskontekst(
+                    KontekstType.Organisasjonsnummer,
+                    organisasjonsnummer
+                )
+            )
+        )
 
     fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<Subsumsjonskontekst>) =
-        kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Vedtaksperiode, vedtaksperiodeId.toString())) + hendelseIder)
+        kopierMedKontekst(
+            listOf(
+                Subsumsjonskontekst(
+                    KontekstType.Vedtaksperiode,
+                    vedtaksperiodeId.toString()
+                )
+            ) + hendelseIder
+        )
 
-    fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Inntektsmelding, inntektsmeldingId.toString())))
+    fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(
+        listOf(
+            Subsumsjonskontekst(
+                KontekstType.Inntektsmelding,
+                inntektsmeldingId.toString()
+            )
+        )
+    )
 
     private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>) =
         BehandlingSubsumsjonslogg(this, this.kontekster + kontekster)

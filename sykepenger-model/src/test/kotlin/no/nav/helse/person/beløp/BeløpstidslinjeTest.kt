@@ -43,7 +43,8 @@ internal class BeløpstidslinjeTest {
         val fylt = sammenslått.fyll()
         assertEquals(listOf(1.januar til 30.april), fylt.perioderMedBeløp)
 
-        val forventet = (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig fra 1.mars til 1.april) + (Systemet oppgir 3000.daglig fra 2.april til 30.april)
+        val forventet =
+            (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig fra 1.mars til 1.april) + (Systemet oppgir 3000.daglig fra 2.april til 30.april)
         assertEquals(forventet, fylt)
     }
 
@@ -73,7 +74,8 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `beløpstidlinje lager en tidslinje med beløp og kilde`() {
-        val beløpstidslinje = (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 10.januar) og (Saksbehandler oppgir 15500.månedlig fra 11.januar til 31.januar)
+        val beløpstidslinje =
+            (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 10.januar) og (Saksbehandler oppgir 15500.månedlig fra 11.januar til 31.januar)
 
         assertEquals(10, beløpstidslinje.count { it.kilde == Arbeidsgiver })
         assertEquals(21, beløpstidslinje.count { it.kilde == Saksbehandler })
@@ -95,20 +97,24 @@ internal class BeløpstidslinjeTest {
     @Test
     fun `Man skal ikke kunne opprette en ny tidslinje med overlappende dager`() {
         assertThrows<IllegalArgumentException> {
-            Beløpstidslinje(Beløpsdag(1.januar, 1.daglig, Arbeidsgiver), Beløpsdag(1.januar, 2.daglig, Sykmeldt))
+            Beløpstidslinje(
+                Beløpsdag(1.januar, 1.daglig, Arbeidsgiver),
+                Beløpsdag(1.januar, 2.daglig, Sykmeldt)
+            )
         }
     }
 
     @Test
-    fun `Du haver to stykk beløpstidslinje, som du ønsker forent`()  {
-        val gammelTidslinje = (Arbeidsgiver oppgir 31000.månedlig hele januar) og (Arbeidsgiver oppgir 0.daglig hele mars)
+    fun `Du haver to stykk beløpstidslinje, som du ønsker forent`() {
+        val gammelTidslinje =
+            (Arbeidsgiver oppgir 31000.månedlig hele januar) og (Arbeidsgiver oppgir 0.daglig hele mars)
 
         val nyTidslinje = (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars)
 
         val forventetTidslinje =
             (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 19.januar) og
-            (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
-            (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
+                (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
+                (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
 
         assertEquals(forventetTidslinje, gammelTidslinje og nyTidslinje)
     }
@@ -175,7 +181,10 @@ internal class BeløpstidslinjeTest {
         val tidslinje = Arbeidsgiver oppgir 1000.daglig hele februar
         assertEquals(tidslinje, tidslinje.strekk(februar))
         assertEquals(tidslinje, tidslinje.strekk(2.februar til 28.februar))
-        assertEquals(Arbeidsgiver oppgir 1000.daglig fra 31.januar til 28.februar, tidslinje.strekk(31.januar til 28.februar))
+        assertEquals(
+            Arbeidsgiver oppgir 1000.daglig fra 31.januar til 28.februar,
+            tidslinje.strekk(31.januar til 28.februar)
+        )
     }
 
     @Test
@@ -183,31 +192,53 @@ internal class BeløpstidslinjeTest {
         val tidslinje = Arbeidsgiver oppgir 1000.daglig hele februar
         assertEquals(tidslinje, tidslinje.strekk(februar))
         assertEquals(tidslinje, tidslinje.strekk(1.februar til 27.februar))
-        assertEquals(Arbeidsgiver oppgir 1000.daglig fra 1.februar til 1.mars, tidslinje.strekk(1.februar til 1.mars))
+        assertEquals(
+            Arbeidsgiver oppgir 1000.daglig fra 1.februar til 1.mars,
+            tidslinje.strekk(1.februar til 1.mars)
+        )
     }
 
     @Test
     fun `Strekker en beløpstidslinje i snuten og halen`() {
-        val tidslinje = (Arbeidsgiver oppgir 1000.daglig kun 1.februar) og (Saksbehandler oppgir 2000.daglig kun 28.februar)
-        val forventet = (Arbeidsgiver oppgir 1000.daglig fra 31.januar til 1.februar) og (Saksbehandler oppgir 2000.daglig fra 28.februar til 1.mars)
+        val tidslinje =
+            (Arbeidsgiver oppgir 1000.daglig kun 1.februar) og (Saksbehandler oppgir 2000.daglig kun 28.februar)
+        val forventet =
+            (Arbeidsgiver oppgir 1000.daglig fra 31.januar til 1.februar) og (Saksbehandler oppgir 2000.daglig fra 28.februar til 1.mars)
         assertEquals(forventet, tidslinje.strekk(31.januar til 1.mars))
         assertEquals(UkjentDag, forventet[2.februar])
         assertEquals(UkjentDag, forventet[27.februar])
 
-        assertEquals(Systemet oppgir 100.daglig fra 5.januar til 7.januar, (Systemet oppgir 100.daglig kun 6.januar).strekk(5.januar til 7.januar))
+        assertEquals(
+            Systemet oppgir 100.daglig fra 5.januar til 7.januar,
+            (Systemet oppgir 100.daglig kun 6.januar).strekk(5.januar til 7.januar)
+        )
     }
 
     @Test
     fun `Finne første endring i beløp`() {
         assertNull(Beløpstidslinje().førsteEndring(Beløpstidslinje()))
         assertNull((Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig hele januar))
-        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 101.daglig hele januar))
-        assertEquals(15.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring((Arbeidsgiver oppgir 100.daglig fra 1.januar til 14.januar) og (Arbeidsgiver oppgir 101.daglig kun 15.januar)))
+        assertEquals(
+            1.januar,
+            (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 101.daglig hele januar)
+        )
+        assertEquals(
+            15.januar,
+            (Saksbehandler oppgir 100.daglig hele januar).førsteEndring((Arbeidsgiver oppgir 100.daglig fra 1.januar til 14.januar) og (Arbeidsgiver oppgir 101.daglig kun 15.januar))
+        )
 
-        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig fra 2.januar til 31.januar))
-        assertEquals(31.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig fra 1.januar til 30.januar))
-        val hulleteSaksbehandler = (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 31.januar)
-        val hulleteArbeidsgiver = (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 30.januar)
+        assertEquals(
+            1.januar,
+            (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig fra 2.januar til 31.januar)
+        )
+        assertEquals(
+            31.januar,
+            (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig fra 1.januar til 30.januar)
+        )
+        val hulleteSaksbehandler =
+            (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 31.januar)
+        val hulleteArbeidsgiver =
+            (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 30.januar)
         assertEquals(30.januar, hulleteSaksbehandler.førsteEndring(hulleteArbeidsgiver))
         assertEquals(30.januar, hulleteArbeidsgiver.førsteEndring(hulleteSaksbehandler))
     }
@@ -215,36 +246,47 @@ internal class BeløpstidslinjeTest {
     @Test
     fun dto() {
         val tidslinje = (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
-                (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
-                (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
+            (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
+            (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
 
-        val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId, Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
-        assertEquals(BeløpstidslinjeDto(
-            perioder = listOf(
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 1.februar,
-                    tom = 1.februar,
-                    dagligBeløp = 500.0,
-                    kilde = kilde
-                ),
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 2.februar,
-                    tom = 10.februar,
-                    dagligBeløp = 250.0,
-                    kilde = kilde
-                ),
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 11.februar,
-                    tom = 12.februar,
-                    dagligBeløp = 500.0,
-                    kilde = kilde
+        val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+            Arbeidsgiver.meldingsreferanseId,
+            Arbeidsgiver.avsender.dto(),
+            Arbeidsgiver.tidsstempel
+        )
+        assertEquals(
+            BeløpstidslinjeDto(
+                perioder = listOf(
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = 1.februar,
+                        tom = 1.februar,
+                        dagligBeløp = 500.0,
+                        kilde = kilde
+                    ),
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = 2.februar,
+                        tom = 10.februar,
+                        dagligBeløp = 250.0,
+                        kilde = kilde
+                    ),
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = 11.februar,
+                        tom = 12.februar,
+                        dagligBeløp = 500.0,
+                        kilde = kilde
+                    )
                 )
-            )
-        ), tidslinje.dto())
+            ), tidslinje.dto()
+        )
     }
 
     internal companion object {
-        internal fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
+        internal fun assertBeløpstidslinje(
+            beløpstidslinje: Beløpstidslinje,
+            periode: Periode,
+            beløp: Inntekt,
+            meldingsreferanseId: UUID? = null
+        ) {
             assertTrue(beløpstidslinje.isNotEmpty())
             assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
             assertTrue(beløpstidslinje.all { it.beløp == beløp })

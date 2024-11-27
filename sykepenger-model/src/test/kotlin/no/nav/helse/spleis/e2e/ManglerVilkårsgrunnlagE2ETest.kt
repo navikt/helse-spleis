@@ -42,12 +42,20 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
         nyPeriode(22.januar til 31.januar)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 22.januar,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -70,15 +78,32 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.januar,
+                31.januar,
+                100.prosent,
+                INNTEKT
+            )
+        )
         nyPeriode(10.mars til 31.mars)
-        håndterInntektsmelding(listOf(10.mars til 26.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(10.mars til 26.mars),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(setOf(1.februar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
+        assertEquals(
+            setOf(1.februar, 10.mars),
+            person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt
+        )
 
-        assertEquals(listOf(1.februar til 16.februar), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
+        assertEquals(
+            listOf(1.februar til 16.februar),
+            inspektør.arbeidsgiverperioder(1.vedtaksperiode)
+        )
         // infotrygdendringen påvirker beregning av agp for 2.vedtaksperiode siden den er åpnet opp.
         // 1.vedtaksperiode forblir uendret siden den ikke har fått ny behandling
         assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
@@ -88,8 +113,14 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertIngenVarsel(Varselkode.RV_OS_2)
         inspektør.utbetaling(1).also { utbetalinginspektør ->
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
-            assertEquals(17.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
-            assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.periode)
+            assertEquals(
+                17.februar til 28.februar,
+                utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode
+            )
+            assertEquals(
+                10.mars til 30.mars,
+                utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.periode
+            )
         }
     }
 
@@ -98,7 +129,11 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 3.januar)
         håndterSøknad(31.januar til 5.februar)
         // perioden 4. til 9.januar er paddet arbeidsdager; perioden 23.januar til 30.januar er "implisitte arbeidsdager" (ukjentdager på sykdomtsidslinjen)
-        håndterInntektsmelding(listOf(1.januar til 3.januar, 10.januar til 22.januar), førsteFraværsdag = 31.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 3.januar, 10.januar til 22.januar),
+            førsteFraværsdag = 31.januar,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -113,10 +148,14 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         }
 
         observatør.vedtaksperiodeVenter.clear()
-        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_REVURDERING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!"){
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_REVURDERING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!") {
             håndterSøknad(10.januar til 26.januar)
         }
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
+        observatør.assertVenter(
+            2.vedtaksperiode.id(a1),
+            venterPåHva = HJELP,
+            fordi = FLERE_SKJÆRINGSTIDSPUNKT
+        )
 
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[4.januar])
@@ -138,7 +177,10 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         val assertTilstandFørInntektsmeldingHensyntas: () -> Unit = {
             val førsteUtbetalingsdagIInfotrygd = 1.januar
-            assertEquals(førsteUtbetalingsdagIInfotrygd, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(
+                førsteUtbetalingsdagIInfotrygd,
+                inspektør.skjæringstidspunkt(1.vedtaksperiode)
+            )
             assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
             assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.infotrygd)
         }
@@ -176,13 +218,22 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+            avsendersystem = ALTINN
+        )
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
@@ -195,13 +246,24 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+            avsendersystem = ALTINN
+        )
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
     }
 }

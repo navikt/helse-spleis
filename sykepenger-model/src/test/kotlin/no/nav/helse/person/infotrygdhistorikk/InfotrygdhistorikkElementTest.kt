@@ -65,7 +65,13 @@ internal class InfotrygdhistorikkElementTest {
     fun `lik historikk`() {
         val perioder = listOf(
             Friperiode(1.januar, 31.januar),
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode(
+                "orgnr",
+                1.februar,
+                28.februar,
+                100.prosent,
+                25000.månedlig
+            )
         )
         val inntekter = listOf(
             Inntektsopplysning("orgnr", 1.januar, 25000.månedlig, true)
@@ -75,8 +81,14 @@ internal class InfotrygdhistorikkElementTest {
         )
         assertEquals(nyttHistorikkelement(), nyttHistorikkelement())
         assertEquals(nyttHistorikkelement(perioder), nyttHistorikkelement(perioder))
-        assertNotEquals(nyttHistorikkelement(perioder, inntekter), nyttHistorikkelement(inntekter = inntekter))
-        assertNotEquals(nyttHistorikkelement(perioder, inntekter), nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder))
+        assertNotEquals(
+            nyttHistorikkelement(perioder, inntekter),
+            nyttHistorikkelement(inntekter = inntekter)
+        )
+        assertNotEquals(
+            nyttHistorikkelement(perioder, inntekter),
+            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder)
+        )
         assertEquals(nyttHistorikkelement(), nyttHistorikkelement())
     }
 
@@ -89,14 +101,26 @@ internal class InfotrygdhistorikkElementTest {
     fun `person- og arbeidsgiverutbetaling på samme dag`() {
         val element1 = nyttHistorikkelement(
             perioder = listOf(
-                ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
+                ArbeidsgiverUtbetalingsperiode(
+                    "orgnr",
+                    1.januar,
+                    1.januar,
+                    100.prosent,
+                    1000.daglig
+                ),
                 PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
             )
         )
         val identiskElement = nyttHistorikkelement(
             perioder = listOf(
                 PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
-                ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
+                ArbeidsgiverUtbetalingsperiode(
+                    "orgnr",
+                    1.januar,
+                    1.januar,
+                    100.prosent,
+                    1000.daglig
+                )
             )
         )
         assertEquals(element1, identiskElement)
@@ -135,7 +159,13 @@ internal class InfotrygdhistorikkElementTest {
     fun `samlet utbetalingstidslinje`() {
         val element = nyttHistorikkelement(
             listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
+                ArbeidsgiverUtbetalingsperiode(
+                    "ag1",
+                    1.januar,
+                    10.januar,
+                    100.prosent,
+                    25000.månedlig
+                ),
                 Friperiode(11.januar, 20.januar),
             )
         )
@@ -148,10 +178,28 @@ internal class InfotrygdhistorikkElementTest {
     fun `sammenhengende tidslinje`() {
         val element = nyttHistorikkelement(
             listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
+                ArbeidsgiverUtbetalingsperiode(
+                    "ag1",
+                    1.januar,
+                    10.januar,
+                    100.prosent,
+                    25000.månedlig
+                ),
                 Friperiode(11.januar, 12.januar),
-                ArbeidsgiverUtbetalingsperiode("ag2", 13.januar, 15.januar, 100.prosent, 25000.månedlig),
-                ArbeidsgiverUtbetalingsperiode("ag1", 16.januar, 20.januar, 100.prosent, 25000.månedlig)
+                ArbeidsgiverUtbetalingsperiode(
+                    "ag2",
+                    13.januar,
+                    15.januar,
+                    100.prosent,
+                    25000.månedlig
+                ),
+                ArbeidsgiverUtbetalingsperiode(
+                    "ag1",
+                    16.januar,
+                    20.januar,
+                    100.prosent,
+                    25000.månedlig
+                )
             )
         )
         val tidslinje = element.sykdomstidslinje()
@@ -287,11 +335,22 @@ internal class InfotrygdhistorikkElementTest {
                 (100 * gradering).roundToInt().prosent,
                 (dagsats * gradering).roundToInt().daglig
             ),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, dagsats.daglig)
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.februar,
+                28.februar,
+                100.prosent,
+                dagsats.daglig
+            )
         )
 
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, (dagsats * gradering).roundToInt().daglig, true),
+            Inntektsopplysning(
+                ORGNUMMER,
+                1.januar,
+                (dagsats * gradering).roundToInt().daglig,
+                true
+            ),
             Inntektsopplysning(ORGNUMMER, 1.februar, dagsats.daglig, true)
         )
 
@@ -303,8 +362,20 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `lager ikke warning når dagsats ikke endrer seg i en sammenhengende periode`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.januar,
+                31.januar,
+                100.prosent,
+                1234.daglig
+            ),
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.februar,
+                28.februar,
+                100.prosent,
+                1234.daglig
+            )
         )
         val inntekter = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true),
@@ -318,11 +389,18 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.januar,
+                10.januar,
+                100.prosent,
+                1234.daglig
+            ),
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
 
-        val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
+        val tidslinje =
+            utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
         aktivitetslogg.assertIngenVarsler()
 
@@ -335,12 +413,25 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `RefusjonTilArbeidsgiver regnes som utbetalingsdag selv om den overlapper med ferie`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.januar,
+                10.januar,
+                100.prosent,
+                1234.daglig
+            ),
             Friperiode(5.januar, 20.januar),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.januar, 25.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                15.januar,
+                25.januar,
+                100.prosent,
+                1234.daglig
+            )
         )
 
-        val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
+        val tidslinje =
+            utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
         aktivitetslogg.assertIngenVarsler()
 
@@ -353,10 +444,17 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Feiler ikke selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                1.januar,
+                10.januar,
+                100.prosent,
+                1234.daglig
+            ),
         )
 
-        val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
+        val tidslinje =
+            utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
         val inspektør = tidslinje.inspektør
         assertEquals(1.januar, inspektør.førstedato)
@@ -497,7 +595,13 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar(2018), 4321.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periode(1.februar(2019), 28.februar(2019)), "ag1"))
+        assertTrue(
+            element.valider(
+                aktivitetslogg,
+                Periode(1.februar(2019), 28.februar(2019)),
+                "ag1"
+            )
+        )
         aktivitetslogg.assertIngenVarsler()
     }
 

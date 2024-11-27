@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import java.time.LocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import java.time.LocalDate
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
@@ -30,5 +30,6 @@ internal class InfotrygdendringerRiverTest : RiverTest() {
         InfotrygdendringerRiver(rapidsConnection, mediator)
     }
 
-    private val testMessageFactory = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, LocalDate.of(1992, 2, 12))
+    private val testMessageFactory =
+        TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, LocalDate.of(1992, 2, 12))
 }

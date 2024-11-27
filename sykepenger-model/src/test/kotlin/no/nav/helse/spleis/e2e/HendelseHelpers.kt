@@ -13,7 +13,11 @@ internal class EtterspurtBehov(
     private val vedtaksperiodeId: UUID
 ) {
     companion object {
-        internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: String, type: Aktivitet.Behov.Behovtype) {
+        internal fun fjern(
+            liste: MutableList<EtterspurtBehov>,
+            orgnummer: String,
+            type: Aktivitet.Behov.Behovtype
+        ) {
             liste.removeIf { it.orgnummer == orgnummer && it.type == type }
         }
 
@@ -37,7 +41,11 @@ internal class EtterspurtBehov(
             vedtaksperiodeIdInnhenter: IdInnhenter,
             orgnummer: String
         ) =
-            ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) }
+            ikkeBesvarteBehov.firstOrNull {
+                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(
+                    orgnummer
+                )
+            }
 
         internal fun finnEtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
@@ -47,12 +55,17 @@ internal class EtterspurtBehov(
             tilstand: TilstandType
         ) =
             ikkeBesvarteBehov.firstOrNull {
-                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) && it.tilstand == tilstand
+                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(
+                    orgnummer
+                ) && it.tilstand == tilstand
             }
     }
 
     override fun toString() = "$type ($tilstand)"
 }
 
-internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =
+internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(
+    orgnummer: String,
+    vedtaksperiodeIdInnhenter: IdInnhenter
+) =
     inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)

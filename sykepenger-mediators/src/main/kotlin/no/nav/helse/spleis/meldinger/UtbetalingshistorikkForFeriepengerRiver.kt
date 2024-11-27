@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -24,10 +24,12 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
         validerSykepengehistorikk(message)
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {
@@ -37,7 +39,10 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
                 interestedIn("fom", JsonNode::asLocalDate)
                 interestedIn("tom", JsonNode::asLocalDate)
                 requireKey("dagsats", "utbetalingsGrad", "orgnummer")
-                requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
+                requireAny(
+                    "typeKode",
+                    listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", "")
+                )
             }
             message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengehistorikk") {
                 interestedIn("fom", JsonNode::asLocalDate)

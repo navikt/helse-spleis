@@ -12,13 +12,24 @@ import org.junit.jupiter.api.Test
 internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `sender ut vedtaksperiode venter`(){
+    fun `sender ut vedtaksperiode venter`() {
         assertAntallOgSisteÅrsak(0)
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(0)
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
         assertAntallOgSisteÅrsak(2, "INNTEKTSMELDING")
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         assertAntallOgSisteÅrsak(2)
         sendVilkårsgrunnlag(0)
         assertAntallOgSisteÅrsak(3, "BEREGNING")
@@ -33,26 +44,51 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `unngår å sende unødvendig vedtaksperiode venter når replay treffer`(){
-        sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 2.januar)
-        sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 3.januar)
+    fun `unngår å sende unødvendig vedtaksperiode venter når replay treffer`() {
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.februar, tom = 16.februar)),
+            førsteFraværsdag = 2.januar
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.mars, tom = 16.mars)),
+            førsteFraværsdag = 3.januar
+        )
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(0)
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
         assertAntallOgSisteÅrsak(1) // Står i AVVENTER_VILKÅRSPRØVING som ikke implementerer venter
         sendVilkårsgrunnlag(0)
         assertAntallOgSisteÅrsak(2, "BEREGNING")
     }
 
     @Test
-    fun `replay som bommer på person som allerede har Infotrygdhistorikk`(){
+    fun `replay som bommer på person som allerede har Infotrygdhistorikk`() {
         nyttVedtakJanuar()
         val antallVedtaksperiodeVenter = vedtaksperiodeVenter.size
-        sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 1.februar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.februar, tom = 16.februar)),
+            førsteFraværsdag = 1.februar
+        )
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter)
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter + 2, "INNTEKTSMELDING")
     }
 
@@ -62,28 +98,53 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         val antallVedtaksperiodeVenter = vedtaksperiodeVenter.size
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter)
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 50))) // Lavere grad
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 50
+                )
+            )
+        ) // Lavere grad
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter + 1, "BEREGNING")
     }
 
     private fun nyttVedtakJanuar() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
     }
-    private val vedtaksperiodeVenter get() = testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
-        node.path("vedtaksperioder")
-    }
+
+    private val vedtaksperiodeVenter
+        get() = testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
+            node.path("vedtaksperioder")
+        }
+
     private fun assertAntallOgSisteÅrsak(forventetAntall: Int, forventetÅrsak: String? = null) {
         val vedtaksperiodeVenter = vedtaksperiodeVenter
         assertEquals(forventetAntall, vedtaksperiodeVenter.size)
         forventetÅrsak?.let {
-            assertEquals(it, vedtaksperiodeVenter.last().path("venterPå").path("venteårsak").path("hva").asText())
+            assertEquals(
+                it,
+                vedtaksperiodeVenter.last().path("venterPå").path("venteårsak").path("hva").asText()
+            )
         }
     }
 

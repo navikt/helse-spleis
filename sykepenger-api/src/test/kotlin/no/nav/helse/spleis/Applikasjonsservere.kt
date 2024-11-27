@@ -33,8 +33,11 @@ import org.junit.jupiter.api.Assertions
 
 internal class Applikasjonsservere(private val poolSize: Int) {
     constructor() : this(POOL_SIZE)
+
     companion object {
-        private val JUNIT_PARALLELISM = System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt() ?: 1
+        private val JUNIT_PARALLELISM =
+            System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt()
+                ?: 1
 
         private const val MIN_POOL_SIZE = 1
         private val MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors()
@@ -59,10 +62,14 @@ internal class Applikasjonsservere(private val poolSize: Int) {
     }
 
     fun nyAppserver(): Applikasjonserver {
-        return tilgjengelige.poll(20, TimeUnit.SECONDS) ?: throw RuntimeException("Ventet i 20 sekunder uten å få en ledig appserver")
+        return tilgjengelige.poll(20, TimeUnit.SECONDS)
+            ?: throw RuntimeException("Ventet i 20 sekunder uten å få en ledig appserver")
     }
 
-    fun kjørTest(testdata: (TestDataSource) -> Unit, testblokk: suspend BlackboxTestContext.() -> Unit) {
+    fun kjørTest(
+        testdata: (TestDataSource) -> Unit,
+        testblokk: suspend BlackboxTestContext.() -> Unit
+    ) {
         val appserver = nyAppserver()
         try {
             appserver.kjørTest(testdata, testblokk)
@@ -93,20 +100,34 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         Applikasjonserver(navn, azureConfig, issuer)
     }
 
-    internal class Applikasjonserver(private val navn: String, azureConfig: AzureAdAppConfig, issuer: Issuer) {
+    internal class Applikasjonserver(
+        private val navn: String,
+        azureConfig: AzureAdAppConfig,
+        issuer: Issuer
+    ) {
         private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val speedClient = mockk<SpeedClient>()
         private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(azureConfig, speedClient, spekematClient, { testDataSource.ds }, registry, randomPort)
+            createApp(
+                azureConfig,
+                speedClient,
+                spekematClient,
+                { testDataSource.ds },
+                registry,
+                randomPort
+            )
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 
         private var startetOpp = false
 
-        fun kjørTest(testdata: (TestDataSource) -> Unit = {}, testblokk: suspend BlackboxTestContext.() -> Unit) {
+        fun kjørTest(
+            testdata: (TestDataSource) -> Unit = {},
+            testblokk: suspend BlackboxTestContext.() -> Unit
+        ) {
             testDataSource = databaseContainer.nyTilkobling()
             try {
                 startOpp(testdata)

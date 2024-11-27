@@ -24,7 +24,11 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         expectedJson: String,
         originalJson: String,
         jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
-    ) = assertMigrationRaw(expectedJson.readResource(), originalJson.readResource(), jsonCompareMode)
+    ) = assertMigrationRaw(
+        expectedJson.readResource(),
+        originalJson.readResource(),
+        jsonCompareMode
+    )
 
     protected fun assertMigrationRaw(
         expectedJson: String,
@@ -45,9 +49,15 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         when (expected) {
             is ArrayNode -> {
                 if (actual is ArrayNode) {
-                    expected.forEachIndexed { index, value -> erstattPlaceholders(value, actual.path(index)) }
+                    expected.forEachIndexed { index, value ->
+                        erstattPlaceholders(
+                            value,
+                            actual.path(index)
+                        )
+                    }
                 }
             }
+
             is ObjectNode -> {
                 if (actual is ObjectNode) {
                     expected.fields().forEach { (key, value) ->
@@ -59,7 +69,10 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
                                 }
                             }
 
-                            is ArrayNode, is ObjectNode -> erstattPlaceholders(value, actual.path(key))
+                            is ArrayNode, is ObjectNode -> erstattPlaceholders(
+                                value,
+                                actual.path(key)
+                            )
                         }
                     }
                 }
@@ -85,6 +98,7 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         private val placeholderRegex = "<!.*!>".toRegex()
 
         internal fun String.readResource() =
-            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: error("did not find resource <$this>")
+            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8)
+                ?: error("did not find resource <$this>")
     }
 }

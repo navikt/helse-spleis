@@ -149,13 +149,24 @@ internal class MessageMediator(
         }
     }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+    override fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata
+    ) {
         riverErrors.add(riverName to problems)
     }
 
     fun afterRiverHandling(message: String) {
         if (messageRecognized || riverErrors.isEmpty()) return
-        sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        sikkerLogg.warn(
+            "kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${
+                riverErrors.joinToString(
+                    separator = "\n"
+                ) { "${it.first}:\n${it.second}" }
+            }"
+        )
     }
 
     private fun severeErrorHandler(err: Exception, message: HendelseMessage) {
@@ -167,7 +178,11 @@ internal class MessageMediator(
         errorHandler(err, message.toJson(), message.secureDiagnosticinfo())
     }
 
-    private fun errorHandler(err: Exception, message: String, context: Map<String, String> = emptyMap()) {
+    private fun errorHandler(
+        err: Exception,
+        message: String,
+        context: Map<String, String> = emptyMap()
+    ) {
         log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
         withMDC(context) { sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err) }
     }
@@ -180,7 +195,12 @@ internal class MessageMediator(
             rapidsConnection.register(this)
         }
 
-        override fun onMessage(message: String, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+        override fun onMessage(
+            message: String,
+            context: MessageContext,
+            metadata: MessageMetadata,
+            meterRegistry: MeterRegistry
+        ) {
             beforeRiverHandling()
             notifyMessage(message, context, metadata, meterRegistry)
             afterRiverHandling(message)
@@ -203,5 +223,10 @@ internal class MessageMediator(
 
 internal interface IMessageMediator {
     fun onRecognizedMessage(message: HendelseMessage, context: MessageContext)
-    fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata)
+    fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata
+    )
 }

@@ -6,7 +6,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
-internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
+internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) =
+    Inntektperioder(block).inntekter()
 
 internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
     private val liste = mutableListOf<Pair<String, List<ArbeidsgiverInntekt.MånedligInntekt>>>()
@@ -25,15 +26,16 @@ internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
         this.map(YearMonth::from)
             .distinct()
             .flatMap { yearMonth ->
-                Inntekter(block).toList().groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekt) ->
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth,
-                        inntekt,
-                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                        "kontantytelse",
-                        "fastloenn"
-                    )
-                }.toList()
+                Inntekter(block).toList()
+                    .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekt) ->
+                        ArbeidsgiverInntekt.MånedligInntekt(
+                            yearMonth,
+                            inntekt,
+                            ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                            "kontantytelse",
+                            "fastloenn"
+                        )
+                    }.toList()
             }
             .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekt) -> inntekt }
             .map { (arbeidsgiver, inntekter) ->

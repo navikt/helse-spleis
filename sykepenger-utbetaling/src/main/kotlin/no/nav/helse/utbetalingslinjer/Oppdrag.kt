@@ -141,9 +141,12 @@ class Oppdrag private constructor(
         )
     }
 
-    private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
+    private operator fun contains(other: Oppdrag) =
+        this.tilhører(other) || this.overlapperMed(other)
 
-    fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
+    fun tilhører(other: Oppdrag) =
+        this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
+
     private fun overlapperMed(other: Oppdrag) =
         this.linjeperiode?.let { other.linjeperiode?.overlapperMed(it) } ?: false
 
@@ -156,7 +159,11 @@ class Oppdrag private constructor(
         if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
         aktivitetslogg.kontekst(this)
-        aktivitetslogg.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler, maksdato))
+        aktivitetslogg.behov(
+            Behovtype.Utbetaling,
+            "Trenger å sende utbetaling til Oppdrag",
+            behovdetaljer(saksbehandler, maksdato)
+        )
     }
 
     fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
@@ -164,12 +171,20 @@ class Oppdrag private constructor(
         check(endringskode != Endringskode.UEND)
         check(status == null)
         aktivitetslogg.kontekst(this)
-        aktivitetslogg.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", behovdetaljer(saksbehandler, maksdato))
+        aktivitetslogg.behov(
+            Behovtype.Simulering,
+            "Trenger simulering fra Oppdragssystemet",
+            behovdetaljer(saksbehandler, maksdato)
+        )
     }
 
-    override fun toSpesifikkKontekst() = SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
+    override fun toSpesifikkKontekst() =
+        SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
 
-    private fun behovdetaljer(saksbehandler: String, maksdato: LocalDate?): MutableMap<String, Any> {
+    private fun behovdetaljer(
+        saksbehandler: String,
+        maksdato: LocalDate?
+    ): MutableMap<String, Any> {
         return mutableMapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
@@ -297,10 +312,13 @@ class Oppdrag private constructor(
             endringskode = Endringskode.UEND
         )
         else kopierMed(
-            linjer = listOf(tidligere.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().first().fom)),
+            linjer = listOf(
+                tidligere.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().first().fom)
+            ),
             fagsystemId = tidligere.fagsystemId,
             endringskode = Endringskode.ENDR
         )
+
     // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
     // automatisk opphøre alle eventuelle linjer med fom > b.
     //
@@ -331,9 +349,14 @@ class Oppdrag private constructor(
         tidligere.last().opphørslinje(tidligere.first().fom)
 
 
-    private fun medFagsystemId(other: Oppdrag) = kopierMed(this.linjer, fagsystemId = other.fagsystemId)
+    private fun medFagsystemId(other: Oppdrag) =
+        kopierMed(this.linjer, fagsystemId = other.fagsystemId)
 
-    private fun kopierMed(linjer: List<Utbetalingslinje>, fagsystemId: String = this.fagsystemId, endringskode: Endringskode = this.endringskode) = Oppdrag(
+    private fun kopierMed(
+        linjer: List<Utbetalingslinje>,
+        fagsystemId: String = this.fagsystemId,
+        endringskode: Endringskode = this.endringskode
+    ) = Oppdrag(
         mottaker = mottaker,
         fagområde = fagområde,
         linjer = linjer.map { it.kopier() }.toMutableList(),
@@ -356,14 +379,17 @@ class Oppdrag private constructor(
     fun lagreOverføringsinformasjon(hendelse: UtbetalingmodulHendelse) {
         if (hendelse.fagsystemId != this.fagsystemId) return
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
-        if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
+        if (this.overføringstidspunkt == null) this.overføringstidspunkt =
+            hendelse.overføringstidspunkt
         this.status = hendelse.status
     }
+
     fun håndter(simulering: SimuleringHendelse) {
         if (simulering.fagsystemId != this.fagsystemId || simulering.fagområde != this.fagområde || !simulering.simuleringOK) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringsResultat
     }
+
     fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private class DifferanseBuilder(
@@ -379,7 +405,10 @@ class Oppdrag private constructor(
         // *) en linje kan endres dersom "tom"-dato eller grad er eneste forskjell
         //    ulik dagsats eller fom-dato medfører enten at linjen får status OPPH, eller at man overskriver
         //    ved å sende NY linjer
-        fun kalkulerDifferanse(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        fun kalkulerDifferanse(
+            avtroppendeOppdrag: Oppdrag,
+            aktivitetslogg: IAktivitetslogg
+        ): Oppdrag {
             this.linkTo = avtroppendeOppdrag.last()
             val kobletTil = påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             val medLinkeLinjer = kopierLikeLinjer(kobletTil, avtroppendeOppdrag, aktivitetslogg)
@@ -402,20 +431,44 @@ class Oppdrag private constructor(
             return listOf(opphørslinje, linketTilForrige)
         }
 
-        private fun kopierLikeLinjer(nytt: Oppdrag, tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-            tilstand = if (tidligere.last().tom > nytt.last().tom) Slett(nytt.last()) else Identisk()
+        private fun kopierLikeLinjer(
+            nytt: Oppdrag,
+            tidligere: Oppdrag,
+            aktivitetslogg: IAktivitetslogg
+        ): Oppdrag {
+            tilstand =
+                if (tidligere.last().tom > nytt.last().tom) Slett(nytt.last()) else Identisk()
             sisteLinjeITidligereOppdrag = tidligere.last()
-            val linjer = nytt.zip(tidligere).map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
+            val linjer = nytt.zip(tidligere)
+                .map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
             val remaining = (nytt.size - minOf(nytt.size, tidligere.size)).coerceAtLeast(0)
             val nyeLinjer = nytt.takeLast(remaining)
             return nytt.kopierMed(linjer + kjedeSammenLinjer(nyeLinjer, linjer.last()))
         }
 
-        private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+        private fun håndterUlikhet(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje,
+            aktivitetslogg: IAktivitetslogg
+        ): List<Utbetalingslinje> {
             return when {
-                nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
-                nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
-                nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, aktivitetslogg, tidligere.fom)
+                nåværende.kanEndreEksisterendeLinje(
+                    tidligere,
+                    sisteLinjeITidligereOppdrag
+                ) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
+
+                nåværende.skalOpphøreOgErstatte(
+                    tidligere,
+                    sisteLinjeITidligereOppdrag
+                ) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
+
+                nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(
+                    nåværende,
+                    sisteLinjeITidligereOppdrag,
+                    aktivitetslogg,
+                    tidligere.fom
+                )
+
                 else -> listOf(opprettNyLinje(nåværende))
             }
         }
@@ -429,18 +482,30 @@ class Oppdrag private constructor(
 
 
         private interface Tilstand {
-            fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje>
+            fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg
+            ): List<Utbetalingslinje>
         }
 
         private inner class Identisk : Tilstand {
-            override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+            override fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg
+            ): List<Utbetalingslinje> {
                 if (nåværende == tidligere) return listOf(nåværende.markerUendret(tidligere))
                 return håndterUlikhet(nåværende, tidligere, aktivitetslogg)
             }
         }
 
         private inner class Slett(private val sisteLinjeINyttOppdrag: Utbetalingslinje) : Tilstand {
-            override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+            override fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg
+            ): List<Utbetalingslinje> {
                 if (nåværende == tidligere) {
                     if (nåværende == sisteLinjeINyttOppdrag) return listOf(nåværende.kobleTil(linkTo))
                     return listOf(nåværende.markerUendret(tidligere))
@@ -450,7 +515,11 @@ class Oppdrag private constructor(
         }
 
         private inner class Ny : Tilstand {
-            override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+            override fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg
+            ): List<Utbetalingslinje> {
                 val nyLinje = nåværende.kobleTil(linkTo)
                 linkTo = nyLinje
                 return listOf(nyLinje)

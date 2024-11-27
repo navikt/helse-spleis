@@ -55,11 +55,13 @@ internal class SøknadTest {
 
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var søknad: Søknad
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     @Test
     fun `søknad med bare sykdom`() {
@@ -84,38 +86,89 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med overlappende ferie og permisjon`() {
-        søknad(Sykdom(1.januar, 1.januar, 100.prosent), Ferie(1.januar, 1.januar), Permisjon(1.januar, 1.januar))
+        søknad(
+            Sykdom(1.januar, 1.januar, 100.prosent),
+            Ferie(1.januar, 1.januar),
+            Permisjon(1.januar, 1.januar)
+        )
         assertEquals(Dag.Feriedag::class, søknad.sykdomstidslinje()[1.januar]::class)
     }
 
     @Test
     fun `søknad med ferie som inneholder utlandsopphold`() {
-        `utlandsopphold og ferie`(Ferie(2.januar, 4.januar), Utlandsopphold(2.januar, 4.januar), false)
-        `utlandsopphold og ferie`(Ferie(2.januar, 6.januar), Utlandsopphold(2.januar, 4.januar), false)
-        `utlandsopphold og ferie`(Ferie(1.januar, 4.januar), Utlandsopphold(2.januar, 4.januar), false)
-        `utlandsopphold og ferie`(Ferie(1.januar, 6.januar), Utlandsopphold(2.januar, 4.januar), false)
-        `utlandsopphold og ferie`(Ferie(1.januar, 3.januar), Utlandsopphold(2.januar, 4.januar), true)
-        `utlandsopphold og ferie`(Ferie(3.januar, 7.januar), Utlandsopphold(2.januar, 4.januar), true)
-        `utlandsopphold og ferie`(Ferie(1.januar, 1.januar), Utlandsopphold(2.januar, 4.januar), true)
-        `utlandsopphold og ferie`(Ferie(5.januar, 9.januar), Utlandsopphold(2.januar, 4.januar), true)
+        `utlandsopphold og ferie`(
+            Ferie(2.januar, 4.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            false
+        )
+        `utlandsopphold og ferie`(
+            Ferie(2.januar, 6.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            false
+        )
+        `utlandsopphold og ferie`(
+            Ferie(1.januar, 4.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            false
+        )
+        `utlandsopphold og ferie`(
+            Ferie(1.januar, 6.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            false
+        )
+        `utlandsopphold og ferie`(
+            Ferie(1.januar, 3.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            true
+        )
+        `utlandsopphold og ferie`(
+            Ferie(3.januar, 7.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            true
+        )
+        `utlandsopphold og ferie`(
+            Ferie(1.januar, 1.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            true
+        )
+        `utlandsopphold og ferie`(
+            Ferie(5.januar, 9.januar),
+            Utlandsopphold(2.januar, 4.januar),
+            true
+        )
     }
 
-    private fun `utlandsopphold og ferie`(ferie: Ferie, utlandsopphold: Utlandsopphold, skalHaWarning: Boolean) {
+    private fun `utlandsopphold og ferie`(
+        ferie: Ferie,
+        utlandsopphold: Utlandsopphold,
+        skalHaWarning: Boolean
+    ) {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), ferie, utlandsopphold)
-        assertEquals(skalHaWarning, søknad.valider(aktivitetslogg, null, jurist).harVarslerEllerVerre())
+        assertEquals(
+            skalHaWarning,
+            søknad.valider(aktivitetslogg, null, jurist).harVarslerEllerVerre()
+        )
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 1.november)
+        søknad(
+            Sykdom(1.januar, 10.januar, 100.prosent),
+            hendelsefabrikk = fyller18År2NovemberHendelsefabrikk,
+            sendtTilNAVEllerArbeidsgiver = 1.november
+        )
         assertTrue(søknad.forUng(aktivitetslogg, november2.alder))
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 2.november)
+        søknad(
+            Sykdom(1.januar, 10.januar, 100.prosent),
+            hendelsefabrikk = fyller18År2NovemberHendelsefabrikk,
+            sendtTilNAVEllerArbeidsgiver = 2.november
+        )
         assertFalse(søknad.forUng(aktivitetslogg, november2.alder))
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
@@ -137,7 +190,12 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med papirsykmelding utenfor søknadsperioden`() {
-        assertThrows<IllegalStateException> { søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(11.januar, 16.januar)) }
+        assertThrows<IllegalStateException> {
+            søknad(
+                Sykdom(1.januar, 10.januar, 100.prosent),
+                Papirsykmelding(11.januar, 16.januar)
+            )
+        }
     }
 
     @Test
@@ -169,17 +227,32 @@ internal class SøknadTest {
 
     @Test
     fun `ferie etter sykdomsvindu - ikke et realistisk scenario`() {
-        assertThrows<IllegalStateException> { søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 16.januar)) }
+        assertThrows<IllegalStateException> {
+            søknad(
+                Sykdom(1.januar, 10.januar, 100.prosent),
+                Ferie(2.januar, 16.januar)
+            )
+        }
     }
 
     @Test
     fun `permisjon ligger utenfor sykdomsvindu`() {
-        assertThrows<IllegalStateException> { søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(2.januar, 16.januar)) }
+        assertThrows<IllegalStateException> {
+            søknad(
+                Sykdom(1.januar, 10.januar, 100.prosent),
+                Permisjon(2.januar, 16.januar)
+            )
+        }
     }
 
     @Test
     fun `arbeidag ligger utenfor sykdomsvindu`() {
-        assertThrows<IllegalStateException> { søknad(Sykdom(1.januar, 10.januar, 100.prosent), Arbeid(2.januar, 16.januar)) }
+        assertThrows<IllegalStateException> {
+            søknad(
+                Sykdom(1.januar, 10.januar, 100.prosent),
+                Arbeid(2.januar, 16.januar)
+            )
+        }
     }
 
     @Test
@@ -241,7 +314,10 @@ internal class SøknadTest {
     @ParameterizedTest
     @ValueSource(strings = ["UGYLDIG_TILBAKEDATERING", "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "UNDER_BEHANDLING", "DELVIS_GODKJENT"])
     fun `søknad med tilbakedateringmerknad får warning`(merknad: String) {
-        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad(merknad)))
+        søknad(
+            Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent),
+            merknaderFraSykmelding = listOf(Merknad(merknad))
+        )
         søknad.valider(aktivitetslogg, null, jurist)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
         aktivitetslogg.assertVarsel(RV_SØ_3)
@@ -267,14 +343,20 @@ internal class SøknadTest {
 
     @Test
     fun `ikke jobbet siste 14 dager i annet arbeidsforhold`() {
-        søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = true)
+        søknad(
+            Sykdom(1.januar, 20.januar, 100.prosent),
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = true
+        )
         søknad.valider(aktivitetslogg, null, EmptyLog)
         aktivitetslogg.assertVarsel(RV_SØ_44)
     }
 
     @Test
     fun `jobbet siste 14 dager i annet arbeidsforhold`() {
-        søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false)
+        søknad(
+            Sykdom(1.januar, 20.januar, 100.prosent),
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false
+        )
         søknad.valider(aktivitetslogg, null, EmptyLog)
         aktivitetslogg.assertIngenVarsler()
     }
@@ -294,7 +376,9 @@ internal class SøknadTest {
         søknad = hendelsefabrikk.lagSøknad(
             perioder = perioder,
             andreInntektskilder = andreInntektskilder,
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver
+                ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive
+                ?: LocalDate.now(),
             sykmeldingSkrevet = LocalDateTime.now(),
             ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
             merknaderFraSykmelding = merknaderFraSykmelding,

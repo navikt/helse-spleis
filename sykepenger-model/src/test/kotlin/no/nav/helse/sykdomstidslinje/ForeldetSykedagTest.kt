@@ -30,7 +30,8 @@ internal class ForeldetSykedagTest {
         )
     }
 
-    @Test fun `omgående innsending`() {
+    @Test
+    fun `omgående innsending`() {
         undersøke(søknad(1.mars)).also {
             assertEquals(28, it.antallDager)
             assertEquals(20, it.dagteller[Sykedag::class])
@@ -39,7 +40,8 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test fun `siste dag innlevering`() {
+    @Test
+    fun `siste dag innlevering`() {
         undersøke(søknad(30.april)).also {
             assertEquals(28, it.antallDager)
             assertEquals(20, it.dagteller[Sykedag::class])
@@ -48,7 +50,8 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test fun `Noen dager er ugyldige`() {
+    @Test
+    fun `Noen dager er ugyldige`() {
         undersøke(søknad(1.mai)).also {
             assertEquals(28, it.antallDager)
             assertEquals(10, it.dagteller[Sykedag::class])
@@ -57,7 +60,8 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test fun `Alle dager er ugyldige`() {
+    @Test
+    fun `Alle dager er ugyldige`() {
         undersøke(søknad(1.juni)).also {
             assertEquals(28, it.antallDager)
             assertNull(it.dagteller[Sykedag::class])
@@ -67,7 +71,13 @@ internal class ForeldetSykedagTest {
     }
 
     private fun søknad(sendtTilNAV: LocalDate) = hendelefabrikk.lagSøknad(
-        perioder = arrayOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
+        perioder = arrayOf(
+            Sykdom(
+                18.januar,
+                14.februar,
+                100.prosent
+            )
+        ), // 10 sykedag januar & februar
         sendtTilNAVEllerArbeidsgiver = sendtTilNAV
     )
 

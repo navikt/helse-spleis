@@ -43,7 +43,10 @@ internal class EtterlevelseSykdomstidslinjeTest {
             builder.dager().isNotEmpty()
         }
 
-        assertEquals(0, feilaktigSubsummért.size) { "Feilaktig subsummérte dagtyper: ${feilaktigSubsummért.map { (_, dag) -> dag::class.simpleName }}" }
+        assertEquals(
+            0,
+            feilaktigSubsummért.size
+        ) { "Feilaktig subsummérte dagtyper: ${feilaktigSubsummért.map { (_, dag) -> dag::class.simpleName }}" }
 
         // Forsikrer oss om at de dagene som skal subsummeres inngår i tidslinjen
         val manglerSubsummering = subsummérbareDager.filter { (dato, dag) ->
@@ -52,12 +55,18 @@ internal class EtterlevelseSykdomstidslinjeTest {
             builder.dager().isEmpty()
         }
 
-        assertEquals(0, manglerSubsummering.size) { "Dagtyper som mangler subsummering: ${manglerSubsummering.map { (_, dag) -> dag::class.simpleName }}" }
+        assertEquals(
+            0,
+            manglerSubsummering.size
+        ) { "Dagtyper som mangler subsummering: ${manglerSubsummering.map { (_, dag) -> dag::class.simpleName }}" }
     }
 
     private companion object {
-        private fun LocalDate.subsummérbar(dag: (dato: LocalDate) -> Dag) = Triple(this, dag(this), true)
-        private fun LocalDate.ikkeSubsummérbar(dag: (dato: LocalDate) -> Dag) = Triple(this, dag(this), false)
+        private fun LocalDate.subsummérbar(dag: (dato: LocalDate) -> Dag) =
+            Triple(this, dag(this), true)
+
+        private fun LocalDate.ikkeSubsummérbar(dag: (dato: LocalDate) -> Dag) =
+            Triple(this, dag(this), false)
     }
 }
 

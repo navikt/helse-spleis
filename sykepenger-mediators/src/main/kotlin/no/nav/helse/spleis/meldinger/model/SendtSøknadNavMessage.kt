@@ -16,17 +16,34 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 
 // Understands a JSON message representing a Søknad that is sent to NAV
-internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder) {
+internal class SendtSøknadNavMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+    private val builder: SendtSøknadBuilder = SendtSøknadBuilder()
+) : SøknadMessage(packet, builder) {
 
-    override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
+    override fun _behandle(
+        mediator: IHendelseMediator,
+        personopplysninger: Personopplysninger,
+        packet: JsonMessage,
+        context: MessageContext
+    ) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) } .toSet())
+        mediator.behandle(
+            personopplysninger,
+            this,
+            builder.build(meldingsporing),
+            context,
+            packet["historiskeFolkeregisteridenter"].map(JsonNode::asText)
+                .map { Personidentifikator(it) }.toSet())
     }
 
     internal companion object {
         internal fun byggSendtSøknad(builder: SendtSøknadBuilder, packet: JsonMessage) {
-            builder.permittert(packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false)
+            builder.permittert(
+                packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }
+                    ?.let { true } ?: false)
             builder.egenmeldinger(packet["egenmeldingsdagerFraSykmelding"]
                 .takeIf(JsonNode::isArray)
                 ?.map { LocalDate.parse(it.asText()) }
@@ -34,14 +51,26 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
                 ?: emptyList()
             )
             packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.forEach {
-                builder.merknader(it.path("type").asText(), it.path("beskrivelse").takeUnless { it.isMissingOrNull() }?.asText())
+                builder.merknader(
+                    it.path("type").asText(),
+                    it.path("beskrivelse").takeUnless { it.isMissingOrNull() }?.asText()
+                )
             }
             packet["papirsykmeldinger"].forEach {
-                builder.papirsykmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
+                builder.papirsykmelding(
+                    fom = it.path("fom").asLocalDate(),
+                    tom = it.path("tom").asLocalDate()
+                )
             }
-            val ikkeJobbetIDetSisteFraAnnetArbeidsforhold = harSvartNeiOmIkkeJobbetIDetSisteFraAnnetArbeidsforhold(packet["sporsmal"])
-            builder.ikkeJobbetIDetSisteFraAnnetArbeidsforhold(ikkeJobbetIDetSisteFraAnnetArbeidsforhold)
-            val inntektskilder = andreInntektskilder(packet["andreInntektskilder"], ikkeJobbetIDetSisteFraAnnetArbeidsforhold)
+            val ikkeJobbetIDetSisteFraAnnetArbeidsforhold =
+                harSvartNeiOmIkkeJobbetIDetSisteFraAnnetArbeidsforhold(packet["sporsmal"])
+            builder.ikkeJobbetIDetSisteFraAnnetArbeidsforhold(
+                ikkeJobbetIDetSisteFraAnnetArbeidsforhold
+            )
+            val inntektskilder = andreInntektskilder(
+                packet["andreInntektskilder"],
+                ikkeJobbetIDetSisteFraAnnetArbeidsforhold
+            )
             builder.inntektskilde(inntektskilder.isNotEmpty())
 
             packet["inntektFraNyttArbeidsforhold"].takeIf(JsonNode::isArray)?.forEach {
@@ -67,7 +96,10 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
             builder.sendTilGosys(packet["sendTilGosys"].asBoolean(false))
         }
 
-        private fun andreInntektskilder(andreInntektskilder: JsonNode, ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean): List<String> {
+        private fun andreInntektskilder(
+            andreInntektskilder: JsonNode,
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean
+        ): List<String> {
             if (andreInntektskilder !is ArrayNode) return emptyList()
             // fjerner ANDRE_ARBEIDSFORHOLD dersom <ikkeJobbetIDetSisteFraAnnetArbeidsforhold> er satt til true
             return andreInntektskilder
@@ -78,7 +110,10 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
         private fun harSvartNeiOmIkkeJobbetIDetSisteFraAnnetArbeidsforhold(listeAvSpørsmål: JsonNode): Boolean {
             val svarene = spørsmål(listeAvSpørsmål)
             val svarPåOmJobbetIDetSiste = svarene
-                .firstOrNull { it.path("tag").asText() == "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE" }
+                .firstOrNull {
+                    it.path("tag")
+                        .asText() == "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE"
+                }
                 ?.path("svar")
                 ?.singleOrNull()
             return svarPåOmJobbetIDetSiste?.path("verdi")?.asText() == "NEI"

@@ -51,18 +51,19 @@ tasks.withType<Jar> {
 
     manifest {
         attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
-        }
+        attributes["Class-Path"] =
+            configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }
     }
     finalizedBy(":sykepenger-mediators:remove_spleis_mediators_db_container")
 }
 
 tasks.withType<Test> {
-        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-        systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
-        systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
+    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+    systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
+    systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
 }
 
 tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {

@@ -55,13 +55,16 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         harAndreInntektskilder = andreInntektskilder
     }
 
-    internal fun ikkeJobbetIDetSisteFraAnnetArbeidsforhold(ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean) = apply {
-        this.ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold
-    }
+    internal fun ikkeJobbetIDetSisteFraAnnetArbeidsforhold(ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean) =
+        apply {
+            this.ikkeJobbetIDetSisteFraAnnetArbeidsforhold =
+                ikkeJobbetIDetSisteFraAnnetArbeidsforhold
+        }
 
     override fun utenlandskSykmelding(utenlandsk: Boolean) = apply {
         utenlandskSykmelding = utenlandsk
     }
+
     override fun sendTilGosys(tilGosys: Boolean) = apply {
         sendTilGosys = tilGosys
     }

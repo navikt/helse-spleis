@@ -16,12 +16,17 @@ import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
 
-val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
+val meterRegistry = PrometheusMeterRegistry(
+    PrometheusConfig.DEFAULT,
+    PrometheusRegistry.defaultRegistry,
+    Clock.SYSTEM
+)
 
 // Understands how to build our application server
 class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val factory = ConsumerProducerFactory(AivenConfig.default)
-    private val rapidsConnection = RapidApplication.create(env, factory, meterRegistry = meterRegistry)
+    private val rapidsConnection =
+        RapidApplication.create(env, factory, meterRegistry = meterRegistry)
 
     // Håndter on-prem og gcp database tilkobling forskjellig
     private val dataSourceBuilder = DataSourceBuilder(env)
@@ -29,7 +34,8 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val hendelseRepository = HendelseRepository(dataSourceBuilder.dataSource)
     private val personDao = PersonDao(dataSourceBuilder.dataSource, STØTTER_IDENTBYTTE)
 
-    private val subsumsjonsproducer = Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
+    private val subsumsjonsproducer =
+        Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
 
     private val hendelseMediator = HendelseMediator(
         hendelseRepository = hendelseRepository,
@@ -57,6 +63,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     }
 
     private fun versjonAvKode(env: Map<String, String>): String {
-        return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
+        return env["NAIS_APP_IMAGE"]
+            ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
     }
 }

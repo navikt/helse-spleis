@@ -90,7 +90,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     @Test
     fun `En egenmelding på bare en arbeidsgiver`() {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 1.januar), orgnummer = a2)
+        håndterSøknad(
+            Sykdom(2.januar, 17.januar, 100.prosent),
+            egenmeldinger = listOf(1.januar til 1.januar),
+            orgnummer = a2
+        )
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
@@ -104,7 +108,13 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        assertDoesNotThrow { håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2) }
+        assertDoesNotThrow {
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                påminnetTilstand = AVVENTER_BLOKKERENDE_PERIODE,
+                orgnummer = a2
+            )
+        }
     }
 
     @Test
@@ -134,13 +144,25 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -190,7 +212,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `foreldet dag på ag1 påvirker ikke total sykdomsgrad`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai, orgnummer = a1)
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai,
+            orgnummer = a1
+        )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
@@ -220,7 +246,12 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         forlengVedtak(februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 20000.månedlig, orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            beregnetInntekt = 20000.månedlig,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
@@ -233,7 +264,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        assertEquals(0, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
+        assertEquals(
+            0,
+            inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller
+        )
     }
 
     @Test
@@ -253,7 +287,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             orgnummer = a1
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -320,8 +354,23 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         assertIngenFunksjonelleFeil()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a2
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            orgnummer = a1
+        )
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
@@ -360,14 +409,27 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(2.januar til 17.januar),
+            førsteFraværsdag = 2.januar,
+            orgnummer = a2
+        )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 20.januar, orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(2.januar til 17.januar),
+            førsteFraværsdag = 20.januar,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -401,8 +463,16 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a2
+        )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
@@ -419,16 +489,26 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT * 0.95
-                }
-            }),
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT * 0.95
+                    }
+                }),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             ),
             orgnummer = a1
         )
@@ -443,18 +523,32 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail("Mangler vilkårsgrunnlag")
+        val vilkårsgrunnlag =
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail("Mangler vilkårsgrunnlag")
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            orgnummer = a1
+        )
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        val inntekter = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+        val inntekter =
+            vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
         val inntekterA1 = inntekter.getValue(a1).inspektør
         val inntekterA2 = inntekter.getValue(a2).inspektør
 
-        assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, inntekterA1.inntektsopplysning::class)
-        assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, inntekterA2.inntektsopplysning::class)
+        assertEquals(
+            no.nav.helse.person.inntekt.Inntektsmelding::class,
+            inntekterA1.inntektsopplysning::class
+        )
+        assertEquals(
+            no.nav.helse.person.inntekt.Inntektsmelding::class,
+            inntekterA2.inntektsopplysning::class
+        )
         assertEquals(INNTEKT, inntekterA2.inntektsopplysning.inspektør.beløp)
     }
 
@@ -466,7 +560,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent), orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
 
         håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent), orgnummer = a1)
@@ -475,8 +573,16 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent), orgnummer = a2)
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-        håndterInntektsmelding(listOf(25.januar til 9.februar), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        håndterInntektsmelding(listOf(25.januar til 9.februar), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(25.januar til 9.februar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(25.januar til 9.februar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -531,8 +637,18 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -576,8 +692,18 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -629,7 +755,13 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            orgnummer = a2
+        )
     }
 
     @Test
@@ -708,7 +840,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD,
             orgnummer = a1
         )
@@ -822,7 +954,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = orgnummer)
     }
 
-    private fun vilkårsprøv(vedtaksperiode: IdInnhenter, orgnummer: String, skjæringstidspunkt: LocalDate) {
+    private fun vilkårsprøv(
+        vedtaksperiode: IdInnhenter,
+        orgnummer: String,
+        skjæringstidspunkt: LocalDate
+    ) {
         håndterVilkårsgrunnlag(
             vedtaksperiode, orgnummer = orgnummer,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -832,13 +968,25 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
     }
 
-    private fun utbetalPeriode(vedtaksperiode: IdInnhenter, orgnummer: String, skjæringstidspunkt: LocalDate) {
+    private fun utbetalPeriode(
+        vedtaksperiode: IdInnhenter,
+        orgnummer: String,
+        skjæringstidspunkt: LocalDate
+    ) {
         vilkårsprøv(vedtaksperiode, orgnummer, skjæringstidspunkt)
         utbetalPeriodeEtterVilkårsprøving(vedtaksperiode, orgnummer)
     }

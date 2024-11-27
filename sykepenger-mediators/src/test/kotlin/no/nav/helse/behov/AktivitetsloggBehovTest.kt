@@ -20,7 +20,7 @@ internal class AktivitetsloggBehovTest {
     }
 
     @Test
-    fun `kan hente ut behov`(){
+    fun `kan hente ut behov`() {
         val hendelse1 = aktivitetslogg.barn()
         hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -46,7 +46,7 @@ internal class AktivitetsloggBehovTest {
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

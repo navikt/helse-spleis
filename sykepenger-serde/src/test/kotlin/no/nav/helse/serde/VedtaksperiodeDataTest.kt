@@ -48,6 +48,10 @@ internal class VedtaksperiodeDataTest {
         )
 
         assertEquals(expected, actual)
-        JSONAssert.assertEquals(json, serdeObjectMapper.writeValueAsString(actual), JSONCompareMode.NON_EXTENSIBLE)
+        JSONAssert.assertEquals(
+            json,
+            serdeObjectMapper.writeValueAsString(actual),
+            JSONCompareMode.NON_EXTENSIBLE
+        )
     }
 }

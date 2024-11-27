@@ -16,5 +16,8 @@ fun <T> retry(timeout: Duration = Duration.ofSeconds(5), whatToRetry: () -> T): 
         }
         runBlocking { delay(100L) }
     } while ((System.currentTimeMillis() - starttime) < timeout.toMillis())
-    throw RuntimeException("Gav opp å vente på OK resultat etter ${timeout.toMillis()} ms", exception)
+    throw RuntimeException(
+        "Gav opp å vente på OK resultat etter ${timeout.toMillis()} ms",
+        exception
+    )
 }

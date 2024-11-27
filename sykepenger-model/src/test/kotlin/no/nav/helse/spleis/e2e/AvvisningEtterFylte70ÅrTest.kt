@@ -32,7 +32,8 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Person over 70 får alle dager etter AGP avvist med Over70 som begrunnelse`() {
-        person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
+        person =
+            createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -41,10 +42,14 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag}
-        val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavDag }
-        val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag }
+        val avvisteDager =
+            observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val arbeidsgiverperiodedager =
+            observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+        val navDager =
+            observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavDag }
+        val navHelgedager =
+            observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag }
 
         assertEquals(11, avvisteDager.size)
         assertEquals(16, arbeidsgiverperiodedager.size)
@@ -78,13 +83,18 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(11.juli, 31.juli))
         håndterSøknad(11.juli til 31.juli)
-        håndterInntektsmelding(listOf(11.juli til 26.juli), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(11.juli til 26.juli),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag}
+        val avvisteDager =
+            observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val arbeidsgiverperiodedager =
+            observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
 
         assertEquals(3, avvisteDager.size)
         assertEquals(16, arbeidsgiverperiodedager.size)
@@ -122,7 +132,8 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en søndag`() {
-        person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
+        person =
+            createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -135,7 +146,8 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en mandag`() {
-        person = createTestPerson(FYLLER_70_TOOGTYVENDE_JANUAR, FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO)
+        person =
+            createTestPerson(FYLLER_70_TOOGTYVENDE_JANUAR, FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)

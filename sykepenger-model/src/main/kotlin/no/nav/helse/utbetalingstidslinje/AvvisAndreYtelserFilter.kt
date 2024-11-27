@@ -12,7 +12,7 @@ internal class AvvisAndreYtelserFilter(
     private val arbeidsavklaringspenger: List<Periode>,
     private val opplæringspenger: List<Periode>,
     private val omsorgspenger: List<Periode>,
-): UtbetalingstidslinjerFilter {
+) : UtbetalingstidslinjerFilter {
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,

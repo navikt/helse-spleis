@@ -24,7 +24,16 @@ internal class SendtNavSøknaderRiver(
             require("tom", JsonNode::asLocalDate)
         }
         message.requireArray("fravar") {
-            requireAny("type", listOf("UTDANNING_FULLTID", "UTDANNING_DELTID", "PERMISJON", "FERIE", "UTLANDSOPPHOLD"))
+            requireAny(
+                "type",
+                listOf(
+                    "UTDANNING_FULLTID",
+                    "UTDANNING_DELTID",
+                    "PERMISJON",
+                    "FERIE",
+                    "UTLANDSOPPHOLD"
+                )
+            )
             require("fom", JsonNode::asLocalDate)
             interestedIn("tom") { it.asLocalDate() }
         }
@@ -38,11 +47,22 @@ internal class SendtNavSøknaderRiver(
                 require("tom") { JsonNode::asLocalDate }
             }
         }
-        message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
+        message.interestedIn(
+            "sporsmal",
+            "arbeidGjenopptatt",
+            "andreInntektskilder",
+            "permitteringer",
+            "merknaderFraSykmelding",
+            "opprinneligSendt",
+            "utenlandskSykmelding",
+            "sendTilGosys"
+        )
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fnr"].asText()
-    ))
+    )
+    )
 }

@@ -23,11 +23,12 @@ internal class ProsentdelTest {
         assertEquals(100.prosent, result)
     }
 
-    @Test fun equality() {
-        assertEquals(ratio(1.0, 4.0), 25.0.prosent )
-        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent )
-        assertNotEquals(ratio(1.0, 4.0), Any() )
-        assertNotEquals(ratio(1.0, 4.0), null )
+    @Test
+    fun equality() {
+        assertEquals(ratio(1.0, 4.0), 25.0.prosent)
+        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent)
+        assertNotEquals(ratio(1.0, 4.0), Any())
+        assertNotEquals(ratio(1.0, 4.0), null)
     }
 
     @Test
@@ -73,7 +74,8 @@ internal class ProsentdelTest {
         assertThrows<IllegalArgumentException> { (100.001).prosent }
     }
 
-    @Test fun minimumssyke() {
+    @Test
+    fun minimumssyke() {
         assertFalse(25.prosent.erUnderGrensen())
         assertFalse(20.prosent.erUnderGrensen())
         assertTrue(15.prosent.erUnderGrensen())

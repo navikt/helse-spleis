@@ -47,11 +47,13 @@ internal class SubsumsjonsmeldingTest {
         val subsumsjonen = `§ 8-17 ledd 2`(
             listOf(1.januar(2018).somPeriode()),
             MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
-        ).copy(kontekster = listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid"),
-        ))
+        ).copy(
+            kontekster = listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid"),
+            )
+        )
         subsumsjonMediator.logg(subsumsjonen)
         val subsumsjoner = buildList<JsonNode> {
             subsumsjonMediator.ferdigstill(object : Subsumsjonproducer {
@@ -73,7 +75,8 @@ internal class SubsumsjonsmeldingTest {
         try {
             assertEquals(emptySet<ValidationMessage>(), schema.validate(melding))
         } catch (_: Exception) {
-            LoggerFactory.getLogger(SubsumsjonsmeldingTest::class.java).warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
+            LoggerFactory.getLogger(SubsumsjonsmeldingTest::class.java)
+                .warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
         }
     }
 }

@@ -22,7 +22,8 @@ internal open class InntektsmeldingMessage(
     override val meldingsporing: Meldingsporing
 ) : HendelseMessage(packet) {
     private val refusjon = Inntektsmelding.Refusjon(
-        beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
+        beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)
+            ?.asDouble()?.månedlig,
         opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
         endringerIRefusjon = packet["endringIRefusjoner"].map {
             Inntektsmelding.Refusjon.EndringIRefusjon(
@@ -31,7 +32,8 @@ internal open class InntektsmeldingMessage(
             )
         }
     )
-    private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()
+        ?.let { UUID.fromString(it) }
     private val orgnummer = packet["virksomhetsnummer"].asText()
 
     private val mottatt = packet["mottattDato"].asLocalDateTime()
@@ -43,7 +45,8 @@ internal open class InntektsmeldingMessage(
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
     private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
-    private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato, førsteFraværsdag)
+    private val avsendersystem =
+        packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato, førsteFraværsdag)
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -64,19 +67,26 @@ internal open class InntektsmeldingMessage(
     }
 
     internal companion object {
-        internal fun JsonNode.tilAvsendersystem(vedtaksperiodeId: UUID?, inntektsdato: LocalDate?, førsteFraværsdag: LocalDate?): Inntektsmelding.Avsendersystem {
-            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
+        internal fun JsonNode.tilAvsendersystem(
+            vedtaksperiodeId: UUID?,
+            inntektsdato: LocalDate?,
+            førsteFraværsdag: LocalDate?
+        ): Inntektsmelding.Avsendersystem {
+            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText()
+                ?: return Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             return when (navn) {
                 "NAV_NO" -> Inntektsmelding.Avsendersystem.NavPortal(
                     vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO skal ha vedtaksperiodeId " },
                     inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO skal ha inntektsdato " },
                     forespurt = true
                 )
+
                 "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NavPortal(
                     vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha vedtaksperiodeId " },
                     inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha inntektsdato " },
                     forespurt = false
                 )
+
                 "AltinnPortal" -> Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag)
                 else -> Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             }

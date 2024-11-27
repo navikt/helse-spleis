@@ -25,13 +25,19 @@ internal class JsonMigrationTest {
         listOf(
             object : JsonMigration(1) {
                 override val description = ""
-                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+                override fun doMigration(
+                    jsonNode: ObjectNode,
+                    meldingerSupplier: MeldingerSupplier
+                ) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             },
             object : JsonMigration(2) {
                 override val description = ""
-                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+                override fun doMigration(
+                    jsonNode: ObjectNode,
+                    meldingerSupplier: MeldingerSupplier
+                ) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             }
@@ -124,7 +130,11 @@ internal class JsonMigrationTest {
 
     private fun JsonNode.migrate(migration: JsonMigration) = listOf(migration).migrate(this)
 
-    private class AddFieldMigration(version: Int, private val field: String, private val value: String) :
+    private class AddFieldMigration(
+        version: Int,
+        private val field: String,
+        private val value: String
+    ) :
         JsonMigration(version) {
         override val description = "Test migration"
 

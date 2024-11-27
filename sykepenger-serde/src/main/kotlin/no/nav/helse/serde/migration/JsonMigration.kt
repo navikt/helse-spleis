@@ -11,10 +11,15 @@ fun interface MeldingerSupplier {
     companion object {
         internal val empty = MeldingerSupplier { emptyMap() }
     }
+
     fun hentMeldinger(): Map<UUID, Hendelse>
 }
 
-data class Hendelse(val meldingsreferanseId: UUID, val meldingstype: String, val lestDato: LocalDateTime)
+data class Hendelse(
+    val meldingsreferanseId: UUID,
+    val meldingstype: String,
+    val lestDato: LocalDateTime
+)
 
 internal fun List<JsonMigration>.migrate(
     jsonNode: JsonNode,
@@ -22,7 +27,8 @@ internal fun List<JsonMigration>.migrate(
 ) =
     JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
 
-private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
+private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier) :
+    MeldingerSupplier {
     private val meldinger: Map<UUID, Hendelse> by lazy { supplier.hentMeldinger() }
 
     override fun hentMeldinger(): Map<UUID, Hendelse> = meldinger
@@ -45,7 +51,9 @@ internal abstract class JsonMigration(private val version: Int) {
         ) = jsonNode.apply {
             require(this is ObjectNode) { "Kan kun migrere ObjectNodes" }
             val sortedMigrations = migrations.sortedBy { it.version }
-            require(sortedMigrations.windowed(2).none { (a, b) -> a.version == b.version }) { "Versjoner må være unike" }
+            require(
+                sortedMigrations.windowed(2)
+                    .none { (a, b) -> a.version == b.version }) { "Versjoner må være unike" }
             sortedMigrations.forEach { it.migrate(this, supplier) }
         }
 

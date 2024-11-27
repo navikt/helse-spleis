@@ -25,15 +25,23 @@ internal class AvvisAndreYtelserFilterTest {
         )
 
         val tidslinje = tidslinjeOf(9.NAV)
-        val result = filter.filter(listOf(tidslinje), tidslinje.periode(), Aktivitetslogg(), EmptyLog).single().inspektør
+        val result =
+            filter.filter(listOf(tidslinje), tidslinje.periode(), Aktivitetslogg(), EmptyLog)
+                .single().inspektør
 
         assertEquals(7, result.avvistDagTeller)
         assertEquals(Begrunnelse.AndreYtelserForeldrepenger, result.begrunnelse(1.januar).single())
-        assertEquals(Begrunnelse.AndreYtelserSvangerskapspenger, result.begrunnelse(2.januar).single())
+        assertEquals(
+            Begrunnelse.AndreYtelserSvangerskapspenger,
+            result.begrunnelse(2.januar).single()
+        )
         assertEquals(Begrunnelse.AndreYtelserPleiepenger, result.begrunnelse(3.januar).single())
         assertEquals(Begrunnelse.AndreYtelserDagpenger, result.begrunnelse(4.januar).single())
         assertEquals(Begrunnelse.AndreYtelserAap, result.begrunnelse(5.januar).single())
-        assertEquals(Begrunnelse.AndreYtelserOpplaringspenger, result.begrunnelse(8.januar).single())
+        assertEquals(
+            Begrunnelse.AndreYtelserOpplaringspenger,
+            result.begrunnelse(8.januar).single()
+        )
         assertEquals(Begrunnelse.AndreYtelserOmsorgspenger, result.begrunnelse(9.januar).single())
     }
 }

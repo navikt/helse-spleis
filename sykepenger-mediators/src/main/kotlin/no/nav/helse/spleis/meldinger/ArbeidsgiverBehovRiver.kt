@@ -1,4 +1,3 @@
-
 package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage

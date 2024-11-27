@@ -52,17 +52,28 @@ internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk.view())
     private val subsumsjonslogg = SubsumsjonsListLog()
-    private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        subsumsjonslogg, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     companion object {
         private const val ORGNR = "123456789"
-        private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT))
+        private val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(
+                ORGNR,
+                1.desember(2017),
+                type = Arbeidsforholdtype.ORDINÆRT
+            )
+        )
         private val arbeidsforholdFraHistorikk = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforhold(1.desember(2017), null, false)))
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                ORGNR,
+                listOf(Arbeidsforhold(1.desember(2017), null, false))
+            )
         )
     }
 
@@ -78,7 +89,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
+                opptjening = Opptjening.nyOpptjening(
+                    arbeidsforholdFraHistorikk,
+                    skjæringstidspunkt
+                ),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),
@@ -88,7 +102,10 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlag1Januar = grunnlagMedSkjæringstidspunkt(1.januar)
         val grunnlag1Februar = grunnlagMedSkjæringstidspunkt(1.februar)
 
-        assertEquals(1.januar til LocalDate.MAX, skjæringstidspunktperioder(listOf(grunnlag1Januar)).single())
+        assertEquals(
+            1.januar til LocalDate.MAX,
+            skjæringstidspunktperioder(listOf(grunnlag1Januar)).single()
+        )
         skjæringstidspunktperioder(listOf(grunnlag1Januar, grunnlag1Februar)).also { resultat ->
             assertEquals(listOf(januar, 1.februar til LocalDate.MAX), resultat)
         }
@@ -103,21 +120,29 @@ internal class VilkårsgrunnlagHistorikkTest {
         val gammeltSkjæringstidspunkt = 10.januar
         val nyttSkjæringstidspunkt = 1.januar
 
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = gammeltSkjæringstidspunkt,
-            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
+        historikk.lagre(
+            VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                skjæringstidspunkt = gammeltSkjæringstidspunkt,
+                inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
+                opptjening = Opptjening.nyOpptjening(
+                    arbeidsforholdFraHistorikk,
+                    gammeltSkjæringstidspunkt
+                ),
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                vurdertOk = true,
+                meldingsreferanseId = UUID.randomUUID(),
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
+        )
 
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
         historikk.oppdaterHistorikk(Aktivitetslogg(), setOf(nyttSkjæringstidspunkt))
 
         assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
-        assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
+        assertEquals(
+            0,
+            historikk.inspektør.vilkårsgrunnlagTeller[0]
+        ) { "det siste innslaget skal være tomt" }
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller[1])
         assertNull(historikk.vilkårsgrunnlagFor(gammeltSkjæringstidspunkt)) { "skal ikke beholde vilkårsgrunnlag for skjæringstidspunkter som ikke finnes" }
         assertNull(historikk.vilkårsgrunnlagFor(nyttSkjæringstidspunkt)) { "skal ikke ha vilkårsgrunnlag for skjæringstidspunkt som ikke er vilkårsprøvd" }
@@ -135,7 +160,13 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        val økonomi: Økonomi = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, Beløpstidslinje())
+        val økonomi: Økonomi = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!
+            .medInntektHvisFinnes(
+                1.januar,
+                Økonomi.ikkeBetalt(),
+                NormalArbeidstaker,
+                Beløpstidslinje()
+            )
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -151,7 +182,13 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        val økonomi: Økonomi = grunnlagsdata.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, Beløpstidslinje())
+        val økonomi: Økonomi = grunnlagsdata.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!
+            .medInntektHvisFinnes(
+                1.januar,
+                Økonomi.ikkeBetalt(),
+                NormalArbeidstaker,
+                Beløpstidslinje()
+            )
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -167,7 +204,13 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        val resultat = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)?.medInntektHvisFinnes(31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, Beløpstidslinje())
+        val resultat = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)
+            ?.medInntektHvisFinnes(
+                31.desember(2017),
+                Økonomi.ikkeBetalt(),
+                NormalArbeidstaker,
+                Beløpstidslinje()
+            )
         assertNull(resultat)
     }
 
@@ -180,7 +223,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -190,7 +237,8 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør =
+            GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertTrue(grunnlagsdataInspektør.vurdertOk)
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
     }
@@ -204,12 +252,20 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
 
         vilkårsgrunnlag.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
-        SubsumsjonInspektør(subsumsjonslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
+        SubsumsjonInspektør(subsumsjonslogg).assertVurdert(
+            paragraf = PARAGRAF_8_2,
+            ledd = 1.ledd,
+            versjon = 12.juni(2020)
+        )
     }
 
     @Test
@@ -222,7 +278,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -232,7 +292,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
@@ -248,12 +312,14 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør1 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør1 =
+            GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertTrue(grunnlagsdataInspektør1.vurdertOk)
 
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør2 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør2 =
+            GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør2.vurdertOk)
 
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
@@ -269,7 +335,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -279,7 +349,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
 
@@ -301,7 +375,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -311,7 +389,8 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør =
+            GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertTrue(grunnlagsdataInspektør.vurdertOk)
     }
 
@@ -325,7 +404,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -335,7 +418,8 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør =
+            GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
     }
 
@@ -350,7 +434,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
@@ -365,7 +453,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
@@ -376,7 +468,11 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(
+            listOf(utbetalingstidslinjeMedNavDager),
+            1.januar til 1.januar,
+            jurist
+        ).single()
         assertEquals(8, resultat.filterIsInstance<Utbetalingsdag.NavDag>().size)
     }
 
@@ -390,7 +486,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -400,10 +500,15 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør =
+            GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(
+            listOf(utbetalingstidslinjeMedNavDager),
+            1.januar til 1.januar,
+            jurist
+        ).single()
         resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
             avvisteDager.forEach {
@@ -425,7 +530,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+                "ORGNUMMER",
+                INGEN,
+                1.januar
+            ),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -435,10 +544,15 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
+        val grunnlagsdataInspektør =
+            GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(
+            listOf(utbetalingstidslinjeMedNavDager),
+            1.januar til 1.januar,
+            jurist
+        ).single()
 
         resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
@@ -459,27 +573,27 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(element1, element1)
         assertEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 1.januar,
-                inntektsgrunnlag = sykepengegrunnlag
-            )
+            skjæringstidspunkt = 1.januar,
+            inntektsgrunnlag = sykepengegrunnlag
+        )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 2.januar,
-                inntektsgrunnlag = sykepengegrunnlag
-            )
+            skjæringstidspunkt = 2.januar,
+            inntektsgrunnlag = sykepengegrunnlag
+        )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 5.februar,
-                inntektsgrunnlag = 25000.månedlig.sykepengegrunnlag
-            )
+            skjæringstidspunkt = 5.februar,
+            inntektsgrunnlag = 25000.månedlig.sykepengegrunnlag
+        )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 1.januar,
-                inntektsgrunnlag = 30900.månedlig.sykepengegrunnlag
-            )
+            skjæringstidspunkt = 1.januar,
+            inntektsgrunnlag = 30900.månedlig.sykepengegrunnlag
+        )
         )
     }
 }

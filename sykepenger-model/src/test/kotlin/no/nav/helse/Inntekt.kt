@@ -16,12 +16,26 @@ import no.nav.helse.økonomi.Inntekt
 
 internal val Inntekt.sykepengegrunnlag get() = inntektsgrunnlag(AbstractPersonTest.ORGNUMMER)
 
-internal fun Inntekt.inntektsgrunnlag(orgnr: String) = inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
-internal fun Inntekt.inntektsgrunnlag(alder: Alder) = inntektsgrunnlag(alder, AbstractPersonTest.ORGNUMMER, 1.januar)
-internal fun Inntekt.inntektsgrunnlag(skjæringstidspunkt: LocalDate) =
-    inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
+internal fun Inntekt.inntektsgrunnlag(orgnr: String) =
+    inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
 
-internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.EmptyLog, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
+internal fun Inntekt.inntektsgrunnlag(alder: Alder) =
+    inntektsgrunnlag(alder, AbstractPersonTest.ORGNUMMER, 1.januar)
+
+internal fun Inntekt.inntektsgrunnlag(skjæringstidspunkt: LocalDate) =
+    inntektsgrunnlag(
+        AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+        AbstractPersonTest.ORGNUMMER,
+        skjæringstidspunkt
+    )
+
+internal fun Inntekt.inntektsgrunnlag(
+    alder: Alder,
+    orgnr: String,
+    skjæringstidspunkt: LocalDate,
+    subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.EmptyLog,
+    refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()
+) =
     Inntektsgrunnlag(
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
@@ -35,7 +49,12 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonslogg = subsumsjonslogg
     )
-internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
+
+internal fun Inntekt.inntektsgrunnlag(
+    orgnr: String,
+    skjæringstidspunkt: LocalDate,
+    virkningstidspunkt: LocalDate
+) =
     Inntektsgrunnlag.ferdigSykepengegrunnlag(
         alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
         skjæringstidspunkt = skjæringstidspunkt,
@@ -44,7 +63,12 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
                 orgnr,
                 skjæringstidspunkt til LocalDate.MAX,
                 Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this),
-                Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, this).refusjonsopplysninger
+                Refusjonsopplysning(
+                    UUID.randomUUID(),
+                    skjæringstidspunkt,
+                    null,
+                    this
+                ).refusjonsopplysninger
             )
         ),
         deaktiverteArbeidsforhold = emptyList(),

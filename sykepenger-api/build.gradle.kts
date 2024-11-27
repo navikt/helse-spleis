@@ -79,9 +79,10 @@ tasks {
 
         manifest {
             attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                    it.name
+                }
         }
         finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
     }

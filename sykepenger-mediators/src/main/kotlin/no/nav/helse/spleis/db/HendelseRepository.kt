@@ -12,7 +12,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKA
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.AVBRUTT_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GJENOPPLIV_VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
@@ -87,7 +86,12 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         melding.lagreMelding(this)
     }
 
-    internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: UUID, json: String) {
+    internal fun lagreMelding(
+        melding: HendelseMessage,
+        personidentifikator: Personidentifikator,
+        meldingId: UUID,
+        json: String
+    ) {
         val meldingtype = meldingstype(melding) ?: return
         sessionOf(dataSource).use { session ->
             session.run(
@@ -105,14 +109,20 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     fun markerSomBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
-        session.run(queryOf("UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
-            meldingId.toString()
-        ).asUpdate)
+        session.run(
+            queryOf(
+                "UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
+                meldingId.toString()
+            ).asUpdate
+        )
     }
 
     fun erBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
         session.run(
-            queryOf("SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?", meldingId.toString())
+            queryOf(
+                "SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?",
+                meldingId.toString()
+            )
                 .map { it.localDateTimeOrNull("behandlet_tidspunkt") }.asSingle
         ) != null
     }
@@ -169,9 +179,11 @@ internal class HendelseRepository(private val dataSource: DataSource) {
                     Hendelse(
                         meldingsreferanseId = UUID.fromString(it.string("melding_id")),
                         meldingstype = it.string("melding_type"),
-                        lestDato = it.instant("lest_dato").atZone(ZoneId.systemDefault()).toLocalDateTime()
+                        lestDato = it.instant("lest_dato").atZone(ZoneId.systemDefault())
+                            .toLocalDateTime()
                     )
-                }.asList).associateBy { it.meldingsreferanseId }
+                }.asList
+            ).associateBy { it.meldingsreferanseId }
         }
     }
 

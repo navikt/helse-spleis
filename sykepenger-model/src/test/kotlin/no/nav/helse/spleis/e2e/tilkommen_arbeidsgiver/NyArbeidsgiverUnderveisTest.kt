@@ -49,8 +49,14 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 10000.månedlig), 1.januar),
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(
+                        a1 to INNTEKT,
+                        a2 to 10000.månedlig
+                    ), 1.januar
+                ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
@@ -66,12 +72,21 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(februar)
-            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterInntektsmelding(
+                listOf(1.februar til 16.februar),
+                beregnetInntekt = 10000.månedlig,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+            )
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }
-                assertInstanceOf(SkattSykepengegrunnlag::class.java, inntektA2.inspektør.inntektsopplysning)
-                assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder )
+                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single {
+                    it.gjelder(a2)
+                }
+                assertInstanceOf(
+                    SkattSykepengegrunnlag::class.java,
+                    inntektA2.inspektør.inntektsopplysning
+                )
+                assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder)
             }
         }
     }
@@ -113,7 +128,12 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     fun `Omgjøring av overlappende periode med nytt skjæringstidspunkt`() {
         a1 {
             nyttVedtak(januar)
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag),
+                    ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -123,7 +143,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterInntektsmelding(
+                listOf(31.januar til 15.februar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
@@ -143,8 +166,12 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar),
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(a1 to INNTEKT),
+                    1.januar
+                ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar, type = ORDINÆRT)
@@ -152,9 +179,16 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a2, 5000.månedlig, gjelder = 10.januar til LocalDate.MAX, forklaring = "arbeidsgiveren er tilkommen etter skjæringstidspunktet")
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    a2,
+                    5000.månedlig,
+                    gjelder = 10.januar til LocalDate.MAX,
+                    forklaring = "arbeidsgiveren er tilkommen etter skjæringstidspunktet"
+                )
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -167,7 +201,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                 }
             }
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør ->
-                assertEquals(INNTEKT, vilkårsgrunnlagInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
+                assertEquals(
+                    INNTEKT,
+                    vilkårsgrunnlagInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag
+                )
             }
         }
     }

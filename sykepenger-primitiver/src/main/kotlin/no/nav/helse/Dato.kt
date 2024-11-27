@@ -35,10 +35,13 @@ class Ukedager(private val antallUkedager: Int) {
         // Et koordinat (x, y) i en 2D-tabell med w kolonner kan omgjøres til et punkt z i en 1D-tabell ved formelen z = f(x, y, w) = wx + y
         // https://support.claris.com/s/article/Calculating-a-Finish-Date-Given-a-Starting-Date-and-the-Number-of-Work-Days-1503692916564
         private const val table = "01234012360125601456034562345612345"
-        private fun String.tilleggsdager(row: DayOfWeek, col: Int) = this[(row.value - 1) * 5 + col % 5].toString().toInt()
+        private fun String.tilleggsdager(row: DayOfWeek, col: Int) =
+            this[(row.value - 1) * 5 + col % 5].toString().toInt()
     }
+
     private fun dager(dato: LocalDate) =
         antallUkedager / 5 * 7 + table.tilleggsdager(dato.dayOfWeek, antallUkedager)
+
     operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
 
@@ -72,4 +75,5 @@ fun ukedager(fom: LocalDate, tom: LocalDate): Int {
     val justerSisteHelg = if (tom.dayOfWeek == SUNDAY) 1 else 0
     return dagerMellom - heleHelger + justerFørsteHelg - justerSisteHelg
 }
+
 fun ClosedRange<LocalDate>.ukedager() = ukedager(start, endInclusive)

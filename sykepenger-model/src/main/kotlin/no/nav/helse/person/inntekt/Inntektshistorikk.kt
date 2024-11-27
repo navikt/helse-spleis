@@ -28,8 +28,16 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         return true
     }
 
-    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? =
-        historikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag)
+    internal fun avklarSykepengegrunnlag(
+        skjæringstidspunkt: LocalDate,
+        førsteFraværsdag: LocalDate?,
+        skattSykepengegrunnlag: SkattSykepengegrunnlag?
+    ): Inntektsopplysning? =
+        historikk.avklarSykepengegrunnlag(
+            skjæringstidspunkt,
+            førsteFraværsdag,
+            skattSykepengegrunnlag
+        )
 
     internal fun dto() = InntektshistorikkUtDto(
         historikk = historikk.map { it.dto() }

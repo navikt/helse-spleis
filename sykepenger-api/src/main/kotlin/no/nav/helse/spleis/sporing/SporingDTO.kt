@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.sporing
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class PersonDTO(
     val fødselsnummer: String,

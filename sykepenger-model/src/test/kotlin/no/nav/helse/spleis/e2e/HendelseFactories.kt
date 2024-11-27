@@ -78,7 +78,9 @@ internal fun AbstractEndToEndTest.utbetaling(
         meldingsreferanseId = meldingsreferanseId,
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = utbetalingId ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
+        utbetalingId = utbetalingId
+            ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst()
+                .getValue("utbetalingId").let { UUID.fromString(it) },
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
@@ -96,7 +98,8 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         meldingsreferanseId = meldingsreferanseId,
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
+        utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst()
+            .getValue("utbetalingId").let { UUID.fromString(it) },
         status = status,
         melding = "hey",
         avstemmingsnøkkel = 654321L,
@@ -137,7 +140,8 @@ internal fun AbstractEndToEndTest.søknad(
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
-    sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
+    sykmeldingSkrevet = sykmeldingSkrevet
+        ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
     id = id,
     merknaderFraSykmelding = merknaderFraSykmelding,
     permittert = permittert,
@@ -154,7 +158,11 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
+        beregnetInntekt,
+        null,
+        emptyList()
+    ),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
@@ -202,9 +210,17 @@ internal fun AbstractEndToEndTest.inntektsmelding(
         innsenderTelefon = "tlfnr",
         innsenderFulltNavn = "SPLEIS Modell"
     )
-    inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
+    inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(
+        LocalDateTime.now(),
+        inntektsmeldinggenerator,
+        kontrakten
+    )
     inntekter[id] = beregnetInntekt
-    EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
+    EtterspurtBehov.fjern(
+        ikkeBesvarteBehov,
+        orgnummer,
+        Aktivitet.Behov.Behovtype.Sykepengehistorikk
+    )
     return inntektsmeldinggenerator()
 }
 
@@ -213,14 +229,22 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
     vedtaksperiodeId: UUID,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
+        beregnetInntekt,
+        null,
+        emptyList()
+    ),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder
 ): Inntektsmelding {
-    EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
+    EtterspurtBehov.fjern(
+        ikkeBesvarteBehov,
+        orgnummer,
+        Aktivitet.Behov.Behovtype.Sykepengehistorikk
+    )
     return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
         arbeidsgiverperioder = arbeidsgiverperioder,
         beregnetInntekt = beregnetInntekt,
@@ -239,7 +263,13 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     skjæringstidspunkt: LocalDate,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)),
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(
+        Vilkårsgrunnlag.Arbeidsforhold(
+            orgnummer,
+            1.januar(2017),
+            type = Arbeidsforholdtype.ORDINÆRT
+        )
+    ),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
@@ -284,13 +314,15 @@ internal fun sykepengegrunnlagForArbeidsgiver(
         vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkt,
         orgnummer = orgnummer,
-        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map { ArbeidsgiverInntekt.MånedligInntekt(
-            yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
-            inntekt = INNTEKT,
-            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-            fordel = "",
-            beskrivelse = ""
-        ) })
+        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map {
+            ArbeidsgiverInntekt.MånedligInntekt(
+                yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
+                inntekt = INNTEKT,
+                type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                fordel = "",
+                beskrivelse = ""
+            )
+        })
     )
 }
 
@@ -427,11 +459,18 @@ internal fun AbstractEndToEndTest.ytelser(
     )
 }
 
-internal fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
+internal fun manuellPermisjonsdag(dato: LocalDate) =
+    ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
+
 internal fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
-internal fun manuellForeldrepengedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Foreldrepengerdag)
-internal fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
-internal fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
+internal fun manuellForeldrepengedag(dato: LocalDate) =
+    ManuellOverskrivingDag(dato, Dagtype.Foreldrepengerdag)
+
+internal fun manuellSykedag(dato: LocalDate, grad: Int = 100) =
+    ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
+
+internal fun manuellArbeidsgiverdag(dato: LocalDate) =
+    ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
 
 
 internal fun AbstractEndToEndTest.simulering(
@@ -440,7 +479,8 @@ internal fun AbstractEndToEndTest.simulering(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
-) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
+) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer)
+    .filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
@@ -454,46 +494,47 @@ internal fun AbstractEndToEndTest.simulering(
     )
 }
 
-internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2000) = SimuleringResultatDto(
-    totalbeløp = totalbeløp,
-    perioder = listOf(
-        SimuleringResultatDto.SimulertPeriode(
-            fom = 17.januar,
-            tom = 20.januar,
-            utbetalinger = listOf(
-                SimuleringResultatDto.SimulertUtbetaling(
-                    forfallsdato = 21.januar,
-                    utbetalesTil = SimuleringResultatDto.Mottaker(
-                        id = orgnummer,
-                        navn = "Org Orgesen AS"
-                    ),
-                    feilkonto = false,
-                    detaljer = listOf(
-                        SimuleringResultatDto.Detaljer(
-                            fom = 17.januar,
-                            tom = 20.januar,
-                            konto = "81549300",
-                            beløp = 2000,
-                            klassekode = SimuleringResultatDto.Klassekode(
-                                kode = "SPREFAG-IOP",
-                                beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
-                            ),
-                            uføregrad = 100,
-                            utbetalingstype = "YTEL",
-                            tilbakeføring = false,
-                            sats = SimuleringResultatDto.Sats(
-                                sats = 1000.toDouble(),
-                                antall = 2,
-                                type = "DAG"
-                            ),
-                            refunderesOrgnummer = orgnummer
+internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2000) =
+    SimuleringResultatDto(
+        totalbeløp = totalbeløp,
+        perioder = listOf(
+            SimuleringResultatDto.SimulertPeriode(
+                fom = 17.januar,
+                tom = 20.januar,
+                utbetalinger = listOf(
+                    SimuleringResultatDto.SimulertUtbetaling(
+                        forfallsdato = 21.januar,
+                        utbetalesTil = SimuleringResultatDto.Mottaker(
+                            id = orgnummer,
+                            navn = "Org Orgesen AS"
+                        ),
+                        feilkonto = false,
+                        detaljer = listOf(
+                            SimuleringResultatDto.Detaljer(
+                                fom = 17.januar,
+                                tom = 20.januar,
+                                konto = "81549300",
+                                beløp = 2000,
+                                klassekode = SimuleringResultatDto.Klassekode(
+                                    kode = "SPREFAG-IOP",
+                                    beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
+                                ),
+                                uføregrad = 100,
+                                utbetalingstype = "YTEL",
+                                tilbakeføring = false,
+                                sats = SimuleringResultatDto.Sats(
+                                    sats = 1000.toDouble(),
+                                    antall = 2,
+                                    type = "DAG"
+                                ),
+                                refunderesOrgnummer = orgnummer
+                            )
                         )
                     )
                 )
             )
         )
     )
-)
 
 internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter,
@@ -502,7 +543,8 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     orgnummer: String,
     automatiskBehandling: Boolean,
     utbetalingId: UUID = UUID.fromString(
-        person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
+        person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
+            .kontekst()["utbetalingId"]
             ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
                     person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
@@ -521,7 +563,11 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     automatiskBehandling = automatiskBehandling,
 )
 
-internal fun inntektsvurderingForSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, vararg orgnummere: String) = InntektForSykepengegrunnlag(
+internal fun inntektsvurderingForSykepengegrunnlag(
+    inntekt: Inntekt,
+    skjæringstidspunkt: LocalDate,
+    vararg orgnummere: String
+) = InntektForSykepengegrunnlag(
     inntekter = orgnummere.map { orgnummer ->
         grunnlag(orgnummer, skjæringstidspunkt, inntekt.repeat(3))
     }
@@ -539,15 +585,15 @@ private fun lagMånedsinntekter(
     inntekter: List<Inntekt>
 ) = ArbeidsgiverInntekt(
     orgnummer, inntekter.mapIndexed { index, inntekt ->
-        val sluttMnd = YearMonth.from(skjæringstidspunkt)
-        ArbeidsgiverInntekt.MånedligInntekt(
-            sluttMnd.minusMonths((inntekter.size - index).toLong()),
-            inntekt,
-            ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-            "Juidy inntekt",
-            "Juidy fordel"
-        )
-    }
+    val sluttMnd = YearMonth.from(skjæringstidspunkt)
+    ArbeidsgiverInntekt.MånedligInntekt(
+        sluttMnd.minusMonths((inntekter.size - index).toLong()),
+        inntekt,
+        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+        "Juidy inntekt",
+        "Juidy fordel"
+    )
+}
 )
 
 internal fun Inntektperioder.lagInntektperioder(

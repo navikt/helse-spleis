@@ -9,9 +9,21 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `selvstendigsøknad`() {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendNySøknadSelvstendig(
+            SoknadsperiodeDTO(
+                fom = 3.januar,
+                tom = 26.januar,
+                sykmeldingsgrad = 100
+            )
+        )
         sendSelvstendigsøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         assertTilstander(0, "TIL_INFOTRYGD")
     }

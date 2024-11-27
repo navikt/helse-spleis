@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import kotlin.reflect.KClass
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -14,7 +15,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
-import kotlin.reflect.KClass
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
@@ -47,15 +47,16 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     private val økonomi = mutableMapOf<LocalDate, Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingsdag>>()
 
-    val size get() =
-        arbeidsdagTeller +
-            arbeidsgiverperiodeDagTeller +
-            avvistDagTeller +
-            fridagTeller +
-            navDagTeller +
-            navHelgDagTeller +
-            foreldetDagTeller +
-            ukjentDagTeller +
+    val size
+        get() =
+            arbeidsdagTeller +
+                arbeidsgiverperiodeDagTeller +
+                avvistDagTeller +
+                fridagTeller +
+                navDagTeller +
+                navHelgDagTeller +
+                foreldetDagTeller +
+                ukjentDagTeller +
                 arbeidsgiverperiodedagNavTeller
 
     init {
@@ -75,16 +76,19 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
                     arbeidsdager.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is ArbeidsgiverperiodeDag -> {
                     arbeidsgiverperiodeDagTeller += 1
                     arbeidsgiverdager.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is ArbeidsgiverperiodedagNav -> {
                     arbeidsgiverperiodedagNavTeller += 1
                     arbeidsgiverperiodedagerNavAnsvar.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is AvvistDag -> {
                     avvistDagTeller += 1
                     avvistedatoer.add(dag.dato)
@@ -92,15 +96,18 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
                     begrunnelser[dag.dato] = dag.begrunnelser
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is ForeldetDag -> {
                     foreldetDagTeller += 1
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is Fridag -> {
                     fridagTeller += 1
                     fridager.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is NavDag -> {
                     totalUtbetaling += dag.økonomi.arbeidsgiverbeløp?.dagligInt ?: 0
                     totalUtbetaling += dag.økonomi.personbeløp?.dagligInt ?: 0
@@ -108,11 +115,13 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
                     navdager.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is NavHelgDag -> {
                     navHelgDagTeller += 1
                     navHelgdager.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
+
                 is UkjentDag -> {
                     ukjentDagTeller += 1
                     collect(dag, dag.dato, dag.økonomi)

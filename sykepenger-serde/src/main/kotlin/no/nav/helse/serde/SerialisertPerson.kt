@@ -97,7 +97,10 @@ class SerialisertPerson(val json: String) {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
             return personData.tilPersonDto()
         } catch (err: Exception) {
-            throw DeserializationException("Feil under oversetting til modellobjekter: ${err.message}", err)
+            throw DeserializationException(
+                "Feil under oversetting til modellobjekter: ${err.message}",
+                err
+            )
         }
     }
 }

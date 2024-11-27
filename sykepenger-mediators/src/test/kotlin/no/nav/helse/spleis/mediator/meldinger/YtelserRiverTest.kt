@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import java.util.UUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import org.intellij.lang.annotations.Language
@@ -28,12 +28,12 @@ internal class YtelserRiverTest : RiverTest() {
     }
 
     @Test
-    fun `Ignorerer løsning uten pleiepenger`(){
+    fun `Ignorerer løsning uten pleiepenger`() {
         assertIgnored(utenPleiepenger)
     }
 
     @Test
-    fun `Ignorerer løsning uten omsorgspenger`(){
+    fun `Ignorerer løsning uten omsorgspenger`() {
         assertIgnored(utenOmsorgspenger)
     }
 

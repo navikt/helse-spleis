@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 
-internal class V302MaksdatoresultatPåBehandling: JsonMigration(version = 302) {
+internal class V302MaksdatoresultatPåBehandling : JsonMigration(version = 302) {
     override val description = "lagrer maksdatoresultat på behandling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

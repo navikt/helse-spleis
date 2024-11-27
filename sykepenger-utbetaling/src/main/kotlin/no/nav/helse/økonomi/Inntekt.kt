@@ -1,9 +1,9 @@
 package no.nav.helse.økonomi
 
+import kotlin.math.roundToInt
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.økonomi.Prosentdel.Companion.average
-import kotlin.math.roundToInt
 
 class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
@@ -28,7 +28,11 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         //8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
-        fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>, tilkommet: Inntekt, total: Inntekt): Prosentdel {
+        fun vektlagtGjennomsnitt(
+            parene: List<Pair<Prosentdel, Inntekt>>,
+            tilkommet: Inntekt,
+            total: Inntekt
+        ): Prosentdel {
             return parene.map { it.first to it.second.årlig }.average(tilkommet.årlig, total.årlig)
         }
 
@@ -76,7 +80,8 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
     private fun equals(other: Inntekt) = this.årlig == other.årlig
 
-    override fun compareTo(other: Inntekt) = if (this == other) 0 else this.årlig.compareTo(other.årlig)
+    override fun compareTo(other: Inntekt) =
+        if (this == other) 0 else this.årlig.compareTo(other.årlig)
 
     override fun toString(): String {
         return "[Årlig: $årlig, Månedlig: ${månedlig}, Daglig: ${daglig}]"
@@ -88,6 +93,7 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         dagligInt = dtoDagligInt(),
         dagligDouble = dtoDagligDouble()
     )
+
     private fun dtoÅrlig() = InntektbeløpDto.Årlig(this.årlig)
     fun dtoMånedligDouble() = InntektbeløpDto.MånedligDouble(månedlig)
     private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(daglig)

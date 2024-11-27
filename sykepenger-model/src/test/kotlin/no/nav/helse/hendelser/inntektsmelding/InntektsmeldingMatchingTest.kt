@@ -125,7 +125,7 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `Har blitt håndtert av`() {
-        val vedtaksperiode1 =  2.januar til 15.januar
+        val vedtaksperiode1 = 2.januar til 15.januar
         val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
@@ -143,10 +143,23 @@ internal class InntektsmeldingMatchingTest {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
         val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
 
-        assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
-        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
+        assertFalse(
+            dager.skalHåndteresAvRevurdering(
+                vedtaksperiode1,
+                sammenhengendePeriode,
+                arbeidsgiverperiode
+            )
+        )
+        assertTrue(
+            dager.skalHåndteresAvRevurdering(
+                vedtaksperiode2,
+                sammenhengendePeriode,
+                arbeidsgiverperiode
+            )
+        )
 
-        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
+        val håndtertDagerFraRevurdering =
+            dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
         assertTrue(håndtertDagerFraRevurdering)
     }
 
@@ -158,26 +171,52 @@ internal class InntektsmeldingMatchingTest {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
         val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
 
-        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
-        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
+        assertTrue(
+            dager.skalHåndteresAvRevurdering(
+                vedtaksperiode1,
+                sammenhengendePeriode,
+                arbeidsgiverperiode
+            )
+        )
+        assertTrue(
+            dager.skalHåndteresAvRevurdering(
+                vedtaksperiode2,
+                sammenhengendePeriode,
+                arbeidsgiverperiode
+            )
+        )
 
-        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
+        val håndtertDagerFraRevurdering =
+            dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
         assertFalse(håndtertDagerFraRevurdering)
     }
 
     @Test
     fun `Har ikke blitt håndtert av revurdering mindre enn 10 dager med gap`() {
-        val vedtaksperiode1 =  10.januar til 31.januar
-        val vedtaksperiode2 =  2.februar til 28.februar
+        val vedtaksperiode1 = 10.januar til 31.januar
+        val vedtaksperiode2 = 2.februar til 28.februar
         val sammenhengendePeriode1 = 10.januar til 31.januar
         val sammenhengendePeriode2 = 2.februar til 28.februar
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
         val dager = inntektsmelding(2.februar, 2.februar til 17.februar)
 
-        assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode1, arbeidsgiverperiode))
-        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode2, arbeidsgiverperiode))
+        assertFalse(
+            dager.skalHåndteresAvRevurdering(
+                vedtaksperiode1,
+                sammenhengendePeriode1,
+                arbeidsgiverperiode
+            )
+        )
+        assertTrue(
+            dager.skalHåndteresAvRevurdering(
+                vedtaksperiode2,
+                sammenhengendePeriode2,
+                arbeidsgiverperiode
+            )
+        )
 
-        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
+        val håndtertDagerFraRevurdering =
+            dager.erKorrigeringForGammel(Aktivitetslogg(), arbeidsgiverperiode)
         assertFalse(håndtertDagerFraRevurdering)
     }
 
@@ -233,7 +272,10 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(1.januar til 3.januar, dager.håndter(vedtaksperiode1))
         assertEquals(4.januar til 9.januar, dager.håndter(vedtaksperiode2))
         assertEquals(10.januar til 12.januar, dager.håndter(vedtaksperiode3))
-        assertEquals(setOf(13.januar, 14.januar, 15.januar, 16.januar), dager.inspektør.gjenståendeDager)
+        assertEquals(
+            setOf(13.januar, 14.januar, 15.januar, 16.januar),
+            dager.inspektør.gjenståendeDager
+        )
     }
 
     @Test
@@ -262,7 +304,7 @@ internal class InntektsmeldingMatchingTest {
                 beregnetInntekt = 400.månedlig,
                 førsteFraværsdag = førsteFraværsdag
             )
-            inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            inntektsmelding.valider(object : Inntektsmelding.Valideringsgrunnlag {
                 override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
                 override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
             }, Aktivitetslogg())

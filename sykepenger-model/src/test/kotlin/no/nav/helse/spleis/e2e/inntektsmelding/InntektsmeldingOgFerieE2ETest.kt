@@ -61,7 +61,11 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `ferie med gap til forrige, men samme skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -71,8 +75,16 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -83,14 +95,28 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar), orgnummer = a1)
-        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(5.februar, 20.februar), orgnummer = a1)
+        håndterSøknad(
+            Sykdom(5.februar, 20.februar, 100.prosent),
+            Ferie(5.februar, 20.februar),
+            orgnummer = a1
+        )
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            orgnummer = a1
+        )
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -115,12 +141,32 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 5.januar, a1)
         nyPeriode(10.januar til 16.januar, a1)
         nyPeriode(17.januar til 20.januar, a1)
-        nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 5.januar, 10.januar til 20.januar), orgnummer = a1, vedtaksperiodeIdInnhenter = 4.vedtaksperiode)
+        nyttVedtak(
+            21.januar til 31.januar,
+            arbeidsgiverperiode = listOf(1.januar til 5.januar, 10.januar til 20.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 4.vedtaksperiode
+        )
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(a1)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            TIL_INFOTRYGD,
+            orgnummer = a1
+        )
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            TIL_INFOTRYGD,
+            orgnummer = a1
+        )
+        assertForkastetPeriodeTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            TIL_INFOTRYGD,
+            orgnummer = a1
+        )
         assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD, orgnummer = a1)
     }
 
@@ -135,17 +181,33 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode)
+        )
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(2.vedtaksperiode)
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
 
         assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
         assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
     }
 
     @Test
@@ -159,18 +221,38 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode)
+        )
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(2.vedtaksperiode)
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
 
         assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
-        assertEquals(listOf(24.februar til 28.februar), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(
+            listOf(24.februar til 28.februar),
+            inspektør.arbeidsgiverperiode(3.vedtaksperiode)
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
     }
+
     @Test
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
         nyttVedtak(januar)
@@ -182,16 +264,30 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode)
+        )
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(2.vedtaksperiode)
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
 
         assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(24.februar til 12.mars, inspektør.periode(3.vedtaksperiode))
-        assertEquals(listOf(24.februar til 11.mars), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
+        assertEquals(
+            listOf(24.februar til 11.mars),
+            inspektør.arbeidsgiverperiode(3.vedtaksperiode)
+        )
 
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
     }

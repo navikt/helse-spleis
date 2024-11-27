@@ -37,9 +37,10 @@ tasks {
 
         manifest {
             attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                    it.name
+                }
         }
     }
 }

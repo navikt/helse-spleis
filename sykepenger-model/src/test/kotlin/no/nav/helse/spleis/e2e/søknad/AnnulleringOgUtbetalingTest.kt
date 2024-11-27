@@ -72,7 +72,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() = a1 {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -103,11 +106,34 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         val revurderingAvMars = inspektør.utbetaling(4)
 
         assertEquals(13, observatør.utbetaltEndretEventer.size)
-        assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, GODKJENT_UTEN_UTBETALING)
-        assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+        assertUtbetalingtilstander(
+            januarutbetaling.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            GODKJENT_UTEN_UTBETALING
+        )
+        assertUtbetalingtilstander(
+            marsutbetaling.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            OVERFØRT,
+            UTBETALT
+        )
         assertUtbetalingtilstander(annulleringAvJanuar.utbetalingId, NY, IKKE_UTBETALT, ANNULLERT)
-        assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+        assertUtbetalingtilstander(
+            februarutbetaling.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            OVERFØRT,
+            UTBETALT
+        )
+        assertUtbetalingtilstander(
+            revurderingAvMars.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            OVERFØRT,
+            UTBETALT
+        )
 
         assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
         assertEquals(januarutbetaling.korrelasjonsId, annulleringAvJanuar.korrelasjonsId)
@@ -119,7 +145,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         assertEquals(2, februarutbetaling.arbeidsgiverOppdrag.size)
         assertEquals(0, februarutbetaling.personOppdrag.size)
-        assertEquals(Endringskode.ENDR, februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(
+            Endringskode.ENDR,
+            februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode
+        )
         februarutbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(1.februar, linje.fom)
             assertEquals(28.februar, linje.tom)
@@ -133,7 +162,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
         assertEquals(0, revurderingAvMars.personOppdrag.size)
-        assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(
+            Endringskode.ENDR,
+            revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode
+        )
         revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(1.februar, linje.fom)
             assertEquals(30.mars, linje.tom)
@@ -144,6 +176,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
     }
+
     @Test
     fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() = a1 {
         nyttVedtak(januar)
@@ -159,7 +192,15 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterUtbetalt()
 
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsoppholdsperiode(5.februar, 15.februar)))
+        håndterYtelser(
+            3.vedtaksperiode,
+            institusjonsoppholdsperioder = listOf(
+                Institusjonsoppholdsperiode(
+                    5.februar,
+                    15.februar
+                )
+            )
+        )
 
 
         inspektør.utbetaling(0).let {
@@ -192,7 +233,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `reberegne og forkaste utbetaling som inneholder annulleringer`() = a1 {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.mai
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -207,7 +251,17 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            listOf(
+                ArbeidsgiverUtbetalingsperiode(
+                    "orgnr",
+                    1.mai(2017),
+                    5.mai(2017),
+                    100.prosent,
+                    1000.daglig
+                )
+            )
+        )
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(6, inspektør.antallUtbetalinger)
@@ -247,9 +301,27 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         val revurderingAvMars = inspektør.utbetaling(2)
 
         assertEquals(9, observatør.utbetaltEndretEventer.size)
-        assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+        assertUtbetalingtilstander(
+            januarutbetaling.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            OVERFØRT,
+            UTBETALT
+        )
+        assertUtbetalingtilstander(
+            marsutbetaling.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            OVERFØRT,
+            UTBETALT
+        )
+        assertUtbetalingtilstander(
+            revurderingAvMars.utbetalingId,
+            NY,
+            IKKE_UTBETALT,
+            OVERFØRT,
+            UTBETALT
+        )
 
         assertEquals(revurderingAvMars.korrelasjonsId, marsutbetaling.korrelasjonsId)
         assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
@@ -265,14 +337,20 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             assertEquals("OPPH", linje.statuskode)
         }
 
-        assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(
+            Endringskode.ENDR,
+            revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode
+        )
     }
 
     @Test
     fun `to uavhengige arbeidsgiverperioder blir til en som følge av overstyring`() {
         a1 {
             nyttVedtak(3.januar til 26.januar)
-            håndterSøknad(Sykdom(27.januar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
+            håndterSøknad(
+                Sykdom(27.januar, 28.februar, 100.prosent),
+                Arbeid(13.februar, 28.februar)
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -303,10 +381,34 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             val revurderingAvMars = inspektør.utbetaling(5)
 
             assertEquals(19, observatør.utbetaltEndretEventer.size)
-            assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-            assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-            assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-            assertUtbetalingtilstander(annulleringAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, ANNULLERT)
+            assertUtbetalingtilstander(
+                januarutbetaling.utbetalingId,
+                NY,
+                IKKE_UTBETALT,
+                OVERFØRT,
+                UTBETALT
+            )
+            assertUtbetalingtilstander(
+                februarutbetaling.utbetalingId,
+                NY,
+                IKKE_UTBETALT,
+                OVERFØRT,
+                UTBETALT
+            )
+            assertUtbetalingtilstander(
+                marsutbetaling.utbetalingId,
+                NY,
+                IKKE_UTBETALT,
+                OVERFØRT,
+                UTBETALT
+            )
+            assertUtbetalingtilstander(
+                annulleringAvMars.utbetalingId,
+                NY,
+                IKKE_UTBETALT,
+                OVERFØRT,
+                ANNULLERT
+            )
             assertUtbetalingtilstander(
                 revurderingAvFebruar.utbetalingId,
                 NY,
@@ -315,7 +417,13 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
                 OVERFØRT,
                 UTBETALT
             )
-            assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+            assertUtbetalingtilstander(
+                revurderingAvMars.utbetalingId,
+                NY,
+                IKKE_UTBETALT,
+                OVERFØRT,
+                UTBETALT
+            )
 
             assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertNotEquals(februarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
@@ -325,7 +433,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(1, annulleringAvMars.arbeidsgiverOppdrag.size)
             assertEquals(0, annulleringAvMars.personOppdrag.size)
-            assertEquals(Endringskode.ENDR, annulleringAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.ENDR,
+                annulleringAvMars.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             annulleringAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(19.mars, linje.fom)
                 assertEquals(30.mars, linje.tom)
@@ -335,7 +446,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(1, revurderingAvFebruar.arbeidsgiverOppdrag.size)
             assertEquals(0, revurderingAvFebruar.personOppdrag.size)
-            assertEquals(Endringskode.ENDR, revurderingAvFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.ENDR,
+                revurderingAvFebruar.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             revurderingAvFebruar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(19.januar, linje.fom)
                 assertEquals(28.februar, linje.tom)
@@ -344,7 +458,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(2, revurderingAvMars.arbeidsgiverOppdrag.size)
             assertEquals(0, revurderingAvMars.personOppdrag.size)
-            assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.ENDR,
+                revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(19.januar, linje.fom)
                 assertEquals(28.februar, linje.tom)
@@ -375,7 +492,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(juni, inspektør.periode(1.vedtaksperiode))
             assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
-            assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS",
+                inspektør.sykdomstidslinje.toShortString()
+            )
 
             val juniutbetaling = inspektør.utbetaling(0)
             val augustutbetaling = inspektør.utbetaling(1)
@@ -388,7 +508,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(2, revurderingaugust.arbeidsgiverOppdrag.size)
             assertEquals(0, revurderingaugust.personOppdrag.size)
-            assertEquals(Endringskode.ENDR, revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.ENDR,
+                revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             revurderingaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(17.juni, linje.fom)
                 assertEquals(29.juni, linje.tom)
@@ -425,7 +548,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(juni, inspektør.periode(1.vedtaksperiode))
             assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
-            assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSFF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "SHH SSSSSHH SSSSSHH SSSSSHH SSSSSFF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS",
+                inspektør.sykdomstidslinje.toShortString()
+            )
 
             val juniutbetaling = inspektør.utbetaling(0)
             val augustutbetaling = inspektør.utbetaling(1)
@@ -440,7 +566,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(1, annulleringaugust.arbeidsgiverOppdrag.size)
             assertEquals(0, annulleringaugust.personOppdrag.size)
-            assertEquals(Endringskode.ENDR, annulleringaugust.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.ENDR,
+                annulleringaugust.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             annulleringaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(17.august, linje.fom)
                 assertEquals(31.august, linje.tom)
@@ -451,7 +580,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(1, revurderingjuni.arbeidsgiverOppdrag.size)
             assertEquals(0, revurderingjuni.personOppdrag.size)
-            assertEquals(Endringskode.UEND, revurderingjuni.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.UEND,
+                revurderingjuni.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             revurderingjuni.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(17.juni, linje.fom)
                 assertEquals(29.juni, linje.tom)
@@ -460,7 +592,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertEquals(2, revurderingaugust.arbeidsgiverOppdrag.size)
             assertEquals(0, revurderingaugust.personOppdrag.size)
-            assertEquals(Endringskode.ENDR, revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.ENDR,
+                revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             revurderingaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(17.juni, linje.fom)
                 assertEquals(29.juni, linje.tom)
@@ -526,7 +661,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         observatør.utbetaltEndretEventer
             .filter { it.utbetalingId == utbetalingId }
             .also { events ->
-                assertEquals(status.map(Utbetalingstatus::name).toList(), events.map { it.forrigeStatus }.plus(events.last().gjeldendeStatus))
+                assertEquals(
+                    status.map(Utbetalingstatus::name).toList(),
+                    events.map { it.forrigeStatus }.plus(events.last().gjeldendeStatus)
+                )
             }
     }
 }

@@ -22,6 +22,9 @@ internal class VedtaksperiodeOpprettetTest : AbstractDslTest() {
 
         assertEquals(2, observatør.vedtaksperiodeOpprettetEventer.size)
         assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.first().skjæringstidspunkt)
-        assertEquals(10.oktober, observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt)
+        assertEquals(
+            10.oktober,
+            observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt
+        )
     }
 }

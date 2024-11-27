@@ -26,6 +26,7 @@ sealed class Utbetalingsperiode(
         // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
         fun inntekt(inntekt: Inntekt, grad: Prosentdel) = Inntekt.fraGradert(inntekt, grad)
     }
+
     override fun sykdomstidslinje(kilde: SykdomshistorikkHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)
     }
@@ -37,7 +38,10 @@ sealed class Utbetalingsperiode(
 
     private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         val økonomi = Økonomi.sykdomsgrad(grad)
-        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, `6G` = INGEN, refusjonsbeløp = INGEN))
+        if (dato.erHelg()) return builder.addHelg(
+            dato,
+            økonomi.inntekt(INGEN, `6G` = INGEN, refusjonsbeløp = INGEN)
+        )
         builder.addNAVdag(dato, økonomi.inntekt(inntekt, `6G` = INGEN, refusjonsbeløp = INGEN))
     }
 
@@ -50,7 +54,13 @@ sealed class Utbetalingsperiode(
     }
 }
 
-class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
+class ArbeidsgiverUtbetalingsperiode(
+    orgnr: String,
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel,
+    inntekt: Inntekt
+) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
 
     internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
@@ -74,7 +84,13 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
     }
 }
 
-class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
+class PersonUtbetalingsperiode(
+    orgnr: String,
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel,
+    inntekt: Inntekt
+) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
 
     internal fun dto() = InfotrygdPersonutbetalingsperiodeUtDto(

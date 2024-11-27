@@ -13,7 +13,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
+internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
 
     @Test
     fun `periode i avventer blokkerende som venter på inntektsmelding fra annen arbeidsgiver bør ha samme timeout som avventer inntektsmelding`() {

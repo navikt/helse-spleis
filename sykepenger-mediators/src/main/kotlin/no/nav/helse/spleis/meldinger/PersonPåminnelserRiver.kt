@@ -18,8 +18,10 @@ internal class PersonPåminnelserRiver(
         message.requireKey("fødselsnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = PersonPåminnelseMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = PersonPåminnelseMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 }

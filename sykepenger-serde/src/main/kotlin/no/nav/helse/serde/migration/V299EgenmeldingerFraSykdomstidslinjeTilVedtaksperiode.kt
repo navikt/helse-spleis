@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 
-internal class V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode: JsonMigration(version = 299) {
+internal class V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode :
+    JsonMigration(version = 299) {
     override val description = "lagrer egenmeldingsdager på vedtaksperiode"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -29,8 +30,7 @@ internal class V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode: JsonMigrat
                     serdeObjectMapper.createObjectNode()
                         .put("fom", dag["fom"].asText())
                         .put("tom", dag["tom"].asText())
-                }
-                else {
+                } else {
                     serdeObjectMapper.createObjectNode()
                         .put("fom", dag["dato"].asText())
                         .put("tom", dag["dato"].asText())
@@ -42,7 +42,6 @@ internal class V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode: JsonMigrat
         val egenmeldingsperioder = vedtaksperiode.path("egenmeldingsperioder") as ArrayNode
         egenmeldingsperioder.removeAll()
         egenmeldingsperioder.addAll(egenmeldingsperioderFraSykdomstidslinjen)
-
 
 
     }

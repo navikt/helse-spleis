@@ -18,9 +18,9 @@ data class SammenslåttDag(
      */
     fun sammeGrunnlag(other: SammenslåttDag) =
         this.dagen == other.dagen
-                && this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype
-                && this.kilde == other.kilde
-                && this.grad == grad
+            && this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype
+            && this.kilde == other.kilde
+            && this.grad == grad
 }
 
 enum class SykdomstidslinjedagType {

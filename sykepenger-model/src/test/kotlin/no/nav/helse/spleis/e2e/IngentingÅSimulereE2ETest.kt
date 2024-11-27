@@ -30,16 +30,28 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         håndterSøknad(20.januar til 21.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
     }
 
     @Test
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg`() {
-        nyttVedtak(1.januar til  18.januar)
+        nyttVedtak(1.januar til 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
         håndterSøknad(20.januar til 21.januar)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
     }
 
 

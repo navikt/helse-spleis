@@ -40,48 +40,104 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - første fraværsdag kant-i-kant`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar)
+        val inntektsmelding = inntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 21.januar
+        )
         håndterInntektsmelding(inntektsmelding)
-        assertEquals(listOf(21.januar), inspektør.inntektInspektør.inntektsdatoer) // Lagrer alltid på oppgitt inntektsdato
+        assertEquals(
+            listOf(21.januar),
+            inspektør.inntektInspektør.inntektsdatoer
+        ) // Lagrer alltid på oppgitt inntektsdato
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        assertEquals(listOf(1.januar, 21.januar), inspektør.inntektInspektør.inntektsdatoer) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
+        assertEquals(
+            listOf(1.januar, 21.januar),
+            inspektør.inntektInspektør.inntektsdatoer
+        ) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE
+        )
     }
 
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - gap til første fraværsdag`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
+        val inntektsmelding = inntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 25.januar
+        )
         håndterInntektsmelding(inntektsmelding)
-        assertEquals(listOf(25.januar), inspektør.inntektInspektør.inntektsdatoer) // lagrer alltid på inntektsdato i IM
+        assertEquals(
+            listOf(25.januar),
+            inspektør.inntektInspektør.inntektsdatoer
+        ) // lagrer alltid på inntektsdato i IM
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.inntektsdatoer)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE
+        )
     }
 
     @Test
     fun `Når arbeidsgiver bommer med første fraværsdag, og IM kommer før søknad er vi avhengig av replay-sjekk mot første fraværsdag for å gå videre når søknaden kommer`() {
         nyttVedtak(januar)
-        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 13.februar)
+        val inntektsmelding = inntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 13.februar
+        )
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
 
-        assertEquals(listOf(12.februar, 13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer) // Lagrer nå på alternativ inntektsdato nå som vi har søknad
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(
+            listOf(12.februar, 13.februar, 1.januar),
+            inspektør.inntektInspektør.inntektsdatoer
+        ) // Lagrer nå på alternativ inntektsdato nå som vi har søknad
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING
+        )
     }
 
     @Test
     fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() {
         nyttVedtak(mars)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT + 500.daglig, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            beregnetInntekt = INNTEKT + 500.daglig,
+            avsendersystem = ALTINN
+        )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
+        håndterSkjønnsmessigFastsettelse(
+            1.mars,
+            listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig))
+        )
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
@@ -111,7 +167,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size) // fra førstegangsbehandling, korrigert IM, skjønnsmessig fastsatt & periode out-of-order på nytt skjæringstidspunkt
+        assertEquals(
+            4,
+            inspektør.vilkårsgrunnlagHistorikkInnslag().size
+        ) // fra førstegangsbehandling, korrigert IM, skjønnsmessig fastsatt & periode out-of-order på nytt skjæringstidspunkt
     }
 
 }

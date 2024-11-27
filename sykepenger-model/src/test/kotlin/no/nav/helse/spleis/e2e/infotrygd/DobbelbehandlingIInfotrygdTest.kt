@@ -50,7 +50,12 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = inntektshistorikk1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING
+        )
         assertVarsel(RV_IT_3)
     }
 
@@ -60,7 +65,13 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
 
         val historie1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 26.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(
+                ORGNUMMER,
+                17.januar,
+                26.januar,
+                100.prosent,
+                1000.daglig
+            )
         )
         val inntektshistorikk1 = listOf(Inntektsopplysning(ORGNUMMER, 3.januar, INNTEKT, true))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -73,7 +84,10 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.also { utbetalingInspektør ->
-            assertEquals(Endringskode.UEND, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(
+                Endringskode.UEND,
+                utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode
+            )
             assertEquals(0, utbetalingInspektør.personOppdrag.inspektør.antallLinjer())
         }
     }

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
+internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
 
     @Test
     fun `mottak av vedtak fattet fungerer på samme måte som godkjenningsbehov med tommel opp`() {
@@ -55,7 +55,16 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterVedtakFattet(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(UTBETALT, inspektør.utbetalingtilstand(0))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT * 1.1,
+                        forklaring = "forklaring"
+                    )
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -74,14 +83,26 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterVedtakFattet(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(UTBETALT, inspektør.utbetalingtilstand(0))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT * 1.1,
+                        forklaring = "forklaring"
+                    )
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-            assertInfo("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck", 1.vedtaksperiode.filter())
+            assertInfo(
+                "Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck",
+                1.vedtaksperiode.filter()
+            )
         }
     }
 
@@ -92,7 +113,16 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterVedtakFattet(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(UTBETALT, inspektør.utbetalingtilstand(0))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT * 1.1,
+                        forklaring = "forklaring"
+                    )
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)

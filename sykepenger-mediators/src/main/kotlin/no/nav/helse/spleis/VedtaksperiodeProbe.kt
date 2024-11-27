@@ -29,14 +29,21 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        påminnelse: Påminnelse
+    ) {
         log.debug(
             "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
             keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("tilstand", påminnelse.tilstand().name),
-            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
+            keyValue(
+                "tilstandsendringstidspunkt",
+                påminnelse.tilstandsendringstidspunkt().toString()
+            ),
             keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
         )
     }

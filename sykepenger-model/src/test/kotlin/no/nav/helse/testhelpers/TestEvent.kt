@@ -15,7 +15,11 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
         val testkilde = TestHendelse(LocalDateTime.now()).kilde
     }
 
-    val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class.simpleName ?: "Ukjent", UUID.randomUUID(), opprettet)
+    val kilde = SykdomshistorikkHendelse.Hendelseskilde(
+        this::class.simpleName ?: "Ukjent",
+        UUID.randomUUID(),
+        opprettet
+    )
 
     // Objects impersonating real-life sources of sickness timeline days
     class Inntektsmelding(opprettet: LocalDateTime) : TestEvent(opprettet)

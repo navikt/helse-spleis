@@ -91,8 +91,8 @@ internal class TestPersonTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-               AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
@@ -130,7 +130,14 @@ internal class TestPersonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE
             )
         }
-        a1.assertTilstander(1.vedtaksperiode(a1), START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        a1.assertTilstander(
+            1.vedtaksperiode(a1),
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING
+        )
     }
 
     @Test

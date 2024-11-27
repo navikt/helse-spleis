@@ -21,11 +21,13 @@ import org.junit.jupiter.api.assertThrows
 
 internal class GrunnbeløpTest {
 
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     @Test
     fun dagsats() {
@@ -94,12 +96,12 @@ internal class GrunnbeløpTest {
         // 67-åring blir behandlet som under 67 år
         assertMinsteinntektOk(
             skjæringstidspunkt = 26.mai(2019),
-            inntekt =  halvG2018,
+            inntekt = halvG2018,
             alder = akkurat67(26.mai(2019)),
         )
         assertMinimumInntektAvslag(
             skjæringstidspunkt = 27.mai(2019),
-            inntekt =  halvG2018,
+            inntekt = halvG2018,
             alder = akkurat67(27.mai(2019)),
         )
         assertMinsteinntektOk(
@@ -152,7 +154,11 @@ internal class GrunnbeløpTest {
     @Test
     fun `kaster exception for beløp som ikke er gyldig Grunnbeløp`() {
         val ikkeGyldigGrunnbeløp = 123123.årlig
-        assertThrows<IllegalArgumentException> { Grunnbeløp.virkningstidspunktFor(ikkeGyldigGrunnbeløp)}
+        assertThrows<IllegalArgumentException> {
+            Grunnbeløp.virkningstidspunktFor(
+                ikkeGyldigGrunnbeløp
+            )
+        }
     }
 
     private fun assertMinsteinntektOk(
@@ -188,40 +194,52 @@ internal class GrunnbeløpTest {
         alder: Alder
     ) = assertEquals(
         Begrunnelse.MinimumInntekt, Grunnbeløp.validerMinsteInntekt(
-            skjæringstidspunkt = skjæringstidspunkt,
-            inntekt = inntekt,
-            alder = alder,
-            subsumsjonslogg = jurist
-        )
+        skjæringstidspunkt = skjæringstidspunkt,
+        inntekt = inntekt,
+        alder = alder,
+        subsumsjonslogg = jurist
+    )
     )
 
     private fun under67() = LocalDate.now().minusYears(66).alder
-    private fun over67(skjæringstidspunkt: LocalDate) = skjæringstidspunkt.minusYears(67).minusDays(1).alder
+    private fun over67(skjæringstidspunkt: LocalDate) =
+        skjæringstidspunkt.minusYears(67).minusDays(1).alder
+
     private fun akkurat67(skjæringstidspunkt: LocalDate) = skjæringstidspunkt.minusYears(67).alder
 
     private fun Grunnbeløp.oppfyllerMinsteInntekt(dato: LocalDate, inntekt: Inntekt) =
         inntekt >= minsteinntekt(dato)
-    private fun Grunnbeløp.Companion.validerMinsteInntekt(skjæringstidspunkt: LocalDate, inntekt: Inntekt, alder: Alder, subsumsjonslogg: Subsumsjonslogg): Begrunnelse? {
-        val gjeldendeGrense = if(alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
+
+    private fun Grunnbeløp.Companion.validerMinsteInntekt(
+        skjæringstidspunkt: LocalDate,
+        inntekt: Inntekt,
+        alder: Alder,
+        subsumsjonslogg: Subsumsjonslogg
+    ): Begrunnelse? {
+        val gjeldendeGrense = if (alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
         val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
 
         if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
-            subsumsjonslogg.logg(`§ 8-51 ledd 2`(
-                oppfylt = oppfylt,
-                skjæringstidspunkt = skjæringstidspunkt,
-                alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                beregningsgrunnlagÅrlig = inntekt.årlig,
-                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
-            ))
+            subsumsjonslogg.logg(
+                `§ 8-51 ledd 2`(
+                    oppfylt = oppfylt,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
+                    beregningsgrunnlagÅrlig = inntekt.årlig,
+                    minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
+                )
+            )
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }
-        subsumsjonslogg.logg(`§ 8-3 ledd 2 punktum 1`(
-            oppfylt = oppfylt,
-            skjæringstidspunkt = skjæringstidspunkt,
-            beregningsgrunnlagÅrlig = inntekt.årlig,
-            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
-        ))
+        subsumsjonslogg.logg(
+            `§ 8-3 ledd 2 punktum 1`(
+                oppfylt = oppfylt,
+                skjæringstidspunkt = skjæringstidspunkt,
+                beregningsgrunnlagÅrlig = inntekt.årlig,
+                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
+            )
+        )
         if (oppfylt) return null
         return Begrunnelse.MinimumInntekt
     }

@@ -1,14 +1,17 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.AnnullerUtbetaling
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class AnnulleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class AnnulleringMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : HendelseMessage(packet) {
 
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val utbetalingId = packet["utbetalingId"].asText().trim().toUUID()

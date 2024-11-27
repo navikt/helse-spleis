@@ -24,7 +24,8 @@ fun tidslinjeOf(
     skjæringstidspunkter: List<LocalDate> = listOf(startDato),
     `6G`: Inntekt = 561804.årlig
 ) = Utbetalingstidslinje.Builder().apply {
-    val finnSkjæringstidspunktFor = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
+    val finnSkjæringstidspunktFor =
+        { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
     utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
         var dato = startDato
         val antallDager = antallDagerFun(startDato)
@@ -57,10 +58,24 @@ fun Int.NAP(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
 )
 
 val Int.NAV get() = this.NAV(1200)
-fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
-fun Int.NAV(dekningsgrunnlag: Inntekt, grad: Number = 100.0, refusjonsbeløp: Inntekt = dekningsgrunnlag) = NAV({ this }, dekningsgrunnlag, grad, refusjonsbeløp)
+fun Int.NAV(
+    dekningsgrunnlag: Number,
+    grad: Number = 100.0,
+    refusjonsbeløp: Number = dekningsgrunnlag
+) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
 
-private fun NAV(antallDager: (LocalDate) -> Int, dekningsgrunnlag: Inntekt, grad: Number = 100.0, refusjonsbeløp: Inntekt = dekningsgrunnlag) = Utbetalingsdager(
+fun Int.NAV(
+    dekningsgrunnlag: Inntekt,
+    grad: Number = 100.0,
+    refusjonsbeløp: Inntekt = dekningsgrunnlag
+) = NAV({ this }, dekningsgrunnlag, grad, refusjonsbeløp)
+
+private fun NAV(
+    antallDager: (LocalDate) -> Int,
+    dekningsgrunnlag: Inntekt,
+    grad: Number = 100.0,
+    refusjonsbeløp: Inntekt = dekningsgrunnlag
+) = Utbetalingsdager(
     antallDager = antallDager,
     addDagFun = Utbetalingstidslinje.Builder::addNAVdag,
     addHelgFun = Utbetalingstidslinje.Builder::addHelg,
@@ -78,8 +93,17 @@ fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
 )
 
 val Int.NAVDAGER get() = this.NAVDAGER(1200)
-fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) =
-    NAV({ ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt() }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
+fun Int.NAVDAGER(
+    dekningsgrunnlag: Number,
+    grad: Number = 100.0,
+    refusjonsbeløp: Number = dekningsgrunnlag
+) =
+    NAV(
+        { ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt() },
+        dekningsgrunnlag.daglig,
+        grad,
+        refusjonsbeløp.daglig
+    )
 
 val Int.ARB get() = this.ARB(1200)
 fun Int.ARB(dekningsgrunnlag: Int) = Utbetalingsdager(
@@ -104,17 +128,22 @@ fun Int.FOR(dekningsgrunnlag: Int) = Utbetalingsdager(
 )
 
 val Int.AVV get() = this.AVV(1200)
-fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0, begrunnelse: Begrunnelse = Begrunnelse.SykepengedagerOppbrukt) = Utbetalingsdager(
+fun Int.AVV(
+    dekningsgrunnlag: Int,
+    grad: Number = 0,
+    begrunnelse: Begrunnelse = Begrunnelse.SykepengedagerOppbrukt
+) = Utbetalingsdager(
     antallDager = { this },
     addDagFun = { dato, økonomi -> addAvvistDag(dato, økonomi, begrunnelse) },
     dekningsgrunnlag = dekningsgrunnlag.daglig,
     grad = grad
 )
 
-val Int.UKJ get() = Utbetalingsdager(
-    antallDager = { this },
-    addDagFun = { dato, _  -> addUkjentDag(dato) }
-)
+val Int.UKJ
+    get() = Utbetalingsdager(
+        antallDager = { this },
+        addDagFun = { dato, _ -> addUkjentDag(dato) }
+    )
 
 val Int.UTELATE
     get() = Utbetalingsdager(
@@ -123,7 +152,11 @@ val Int.UTELATE
         dekningsgrunnlag = INGEN
     )
 
-private fun Utbetalingstidslinje.Builder.addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) =
+private fun Utbetalingstidslinje.Builder.addAvvistDag(
+    dato: LocalDate,
+    økonomi: Økonomi,
+    begrunnelse: Begrunnelse
+) =
     this.addAvvistDag(dato, økonomi, listOf(begrunnelse))
 
 data class Utbetalingsdager(
@@ -134,12 +167,13 @@ data class Utbetalingsdager(
     val grad: Number = 0.0,
     val arbeidsgiverbeløp: Inntekt = dekningsgrunnlag
 ) {
-    fun copyWith(beløp: Number? = null, grad: Number? = null, arbeidsgiverbeløp: Number? = null) = Utbetalingsdager(
-        antallDager = this.antallDager,
-        addDagFun = addDagFun,
-        addHelgFun = addHelgFun,
-        dekningsgrunnlag = beløp?.daglig ?: this.dekningsgrunnlag,
-        arbeidsgiverbeløp = arbeidsgiverbeløp?.daglig ?: beløp?.daglig ?: this.dekningsgrunnlag,
-        grad = grad ?: this.grad
-    )
+    fun copyWith(beløp: Number? = null, grad: Number? = null, arbeidsgiverbeløp: Number? = null) =
+        Utbetalingsdager(
+            antallDager = this.antallDager,
+            addDagFun = addDagFun,
+            addHelgFun = addHelgFun,
+            dekningsgrunnlag = beløp?.daglig ?: this.dekningsgrunnlag,
+            arbeidsgiverbeløp = arbeidsgiverbeløp?.daglig ?: beløp?.daglig ?: this.dekningsgrunnlag,
+            grad = grad ?: this.grad
+        )
 }

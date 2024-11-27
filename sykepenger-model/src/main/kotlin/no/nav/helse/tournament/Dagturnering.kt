@@ -9,7 +9,8 @@ internal class Dagturnering private constructor(private val source: String) {
         internal val TURNERING = Dagturnering("/dagturnering.csv")
     }
 
-    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
+    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> =
+        readStrategies()
 
     fun beste(venstre: Dag, høyre: Dag): Dag {
         val leftKey = Turneringsnøkkel.fraDag(venstre)
@@ -33,7 +34,11 @@ internal class Dagturnering private constructor(private val source: String) {
                 enumValueOf<Turneringsnøkkel>(key) to columnHeaders
                     .zip(row)
                     .filter { (_, cell) -> cell.isNotBlank() }
-                    .associate { (columnHeader, cell) -> enumValueOf<Turneringsnøkkel>(columnHeader) to strategyFor(cell) }
+                    .associate { (columnHeader, cell) ->
+                        enumValueOf<Turneringsnøkkel>(columnHeader) to strategyFor(
+                            cell
+                        )
+                    }
             }
     }
 
@@ -75,8 +80,20 @@ internal object Latest : Strategy() {
 
 internal object Impossible : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
-        throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
+        throw RuntimeException(
+            "Nøklene ${Turneringsnøkkel.fraDag(row)} + ${
+                Turneringsnøkkel.fraDag(
+                    column
+                )
+            } er en ugyldig sammenligning"
+        )
 
     override fun decideInverse(row: Dag, column: Dag) =
-        throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
+        throw RuntimeException(
+            "Nøklene ${Turneringsnøkkel.fraDag(row)} + ${
+                Turneringsnøkkel.fraDag(
+                    column
+                )
+            } er en ugyldig sammenligning"
+        )
 }

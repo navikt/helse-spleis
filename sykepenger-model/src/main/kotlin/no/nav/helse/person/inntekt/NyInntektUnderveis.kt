@@ -8,8 +8,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import kotlin.collections.filterNot
-import kotlin.collections.plus
 
 data class NyInntektUnderveis(
     val orgnummer: String,
@@ -19,6 +17,7 @@ data class NyInntektUnderveis(
         orgnummer = orgnummer,
         beløpstidslinje = beløpstidslinje.dto()
     )
+
     companion object {
         internal fun List<NyInntektUnderveis>.finnEndringsdato(
             tidligere: List<NyInntektUnderveis>
@@ -32,13 +31,17 @@ data class NyInntektUnderveis(
 
         private fun List<NyInntektUnderveis>.førsteEndring(others: List<NyInntektUnderveis>): LocalDate? {
             val datoer = mapNotNull { nyInntektUnderveis ->
-                    val other = others.find { it.orgnummer == nyInntektUnderveis.orgnummer } ?: return@mapNotNull null
-                    nyInntektUnderveis.beløpstidslinje.førsteEndring(other.beløpstidslinje)
-                }
+                val other = others.find { it.orgnummer == nyInntektUnderveis.orgnummer }
+                    ?: return@mapNotNull null
+                nyInntektUnderveis.beløpstidslinje.førsteEndring(other.beløpstidslinje)
+            }
             return datoer.minOrNull()
         }
 
-        internal fun List<NyInntektUnderveis>.erRelevantForOverstyring(skjæringstidspunkt: LocalDate, periode: Periode): Boolean {
+        internal fun List<NyInntektUnderveis>.erRelevantForOverstyring(
+            skjæringstidspunkt: LocalDate,
+            periode: Periode
+        ): Boolean {
             if (periode.start <= skjæringstidspunkt) return false
             val førsteDag = minOfOrNull { it.beløpstidslinje.first().dato } ?: return false
             val sisteDag = maxOfOrNull { it.beløpstidslinje.last().dato } ?: return false
@@ -52,24 +55,35 @@ data class NyInntektUnderveis(
 
         internal fun List<NyInntektUnderveis>.merge(nyeInntekter: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
             if (nyeInntekter.isEmpty()) return this
-            val periode = nyeInntekter.minOf { it.beløpstidslinje.first().dato } til nyeInntekter.maxOf { it.beløpstidslinje.last().dato }
+            val periode =
+                nyeInntekter.minOf { it.beløpstidslinje.first().dato } til nyeInntekter.maxOf { it.beløpstidslinje.last().dato }
             return merge(periode, nyeInntekter)
         }
 
-        fun List<NyInntektUnderveis>.merge(periode: Periode, nyeInntekter: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
+        fun List<NyInntektUnderveis>.merge(
+            periode: Periode,
+            nyeInntekter: List<NyInntektUnderveis>
+        ): List<NyInntektUnderveis> {
             val tingViHar = overskrivTilkommetInntekterForPeriode(periode, nyeInntekter)
             val kjenteOrgnumreFraFør = map { it.orgnummer }
             val nyeTing = nyeInntekter.filter { it.orgnummer !in kjenteOrgnumreFraFør }
             return (tingViHar + nyeTing).filterNot { it.beløpstidslinje.isEmpty() }
         }
 
-        private fun List<NyInntektUnderveis>.overskrivTilkommetInntekterForPeriode(periode: Periode, nyeInntekter: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
+        private fun List<NyInntektUnderveis>.overskrivTilkommetInntekterForPeriode(
+            periode: Periode,
+            nyeInntekter: List<NyInntektUnderveis>
+        ): List<NyInntektUnderveis> {
             return map { tilkommetInntekt ->
                 // tom liste/null som resultat tolkes som av søknaden har fjernet inntekten i den angitte perioden
-                val nyTidslinje = nyeInntekter.firstOrNull { it.orgnummer == tilkommetInntekt.orgnummer }?.beløpstidslinje ?: Beløpstidslinje()
+                val nyTidslinje =
+                    nyeInntekter.firstOrNull { it.orgnummer == tilkommetInntekt.orgnummer }?.beløpstidslinje
+                        ?: Beløpstidslinje()
 
-                val tidslinjeFørPerioden = tilkommetInntekt.beløpstidslinje.tilOgMed(periode.start.forrigeDag)
-                val tidslinjeEtterPerioden = tilkommetInntekt.beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag)
+                val tidslinjeFørPerioden =
+                    tilkommetInntekt.beløpstidslinje.tilOgMed(periode.start.forrigeDag)
+                val tidslinjeEtterPerioden =
+                    tilkommetInntekt.beløpstidslinje.fraOgMed(periode.endInclusive.nesteDag)
                 tilkommetInntekt.copy(beløpstidslinje = tidslinjeFørPerioden + nyTidslinje + tidslinjeEtterPerioden)
             }
         }

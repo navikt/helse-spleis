@@ -59,7 +59,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+            ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -80,7 +81,13 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            orgnummer = a1
+        )
     }
 
     @Test
@@ -116,7 +123,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+            ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -136,7 +144,13 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            orgnummer = a1
+        )
     }
 
     private fun tilOverstyring(
@@ -148,7 +162,11 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), beregnetInntekt = beregnetInntekt, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            beregnetInntekt = beregnetInntekt,
+            orgnummer = a1
+        )
 
         val inntektForSykepengegrunnlag = sykepengegrunnlag.keys.map { orgnummer ->
             grunnlag(orgnummer, fom, sykepengegrunnlag[orgnummer]!!.repeat(3))

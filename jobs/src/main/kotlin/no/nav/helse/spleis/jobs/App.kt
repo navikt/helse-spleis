@@ -8,6 +8,10 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.system.measureTimeMillis
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotliquery.Session
@@ -21,10 +25,6 @@ import no.nav.helse.serde.tilSerialisertPerson
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
-import kotlin.system.measureTimeMillis
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
 
 val log = LoggerFactory.getLogger("no.nav.helse.spleis.gc.App")
 val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -39,7 +39,8 @@ fun main(cliArgs: Array<String>) {
         )
     }
 
-    val args = cliArgs.takeIf(Array<*>::isNotEmpty)?.toList() ?: System.getenv("RUNTIME_OPTS").split(" ")
+    val args =
+        cliArgs.takeIf(Array<*>::isNotEmpty)?.toList() ?: System.getenv("RUNTIME_OPTS").split(" ")
     if (args.isEmpty()) return log.error("Provide a task name as CLI argument")
 
     val factory by lazy { ConsumerProducerFactory(AivenConfig.default) }
@@ -87,11 +88,18 @@ private fun migrateV2Task(arbeidId: String) {
                     val dto = SerialisertPerson(data).tilPersonDto()
                     val gjenopprettetPerson = Person.gjenopprett(EmptyLog, dto)
                     val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
-                    check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
-                        "skjemaversjon" to resultat.skjemaVersjon,
-                        "data" to resultat.json,
-                        "ident" to fnr
-                    )).asUpdate))
+                    check(
+                        1 == txSession.run(
+                            queryOf(
+                                "UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident",
+                                mapOf(
+                                    "skjemaversjon" to resultat.skjemaVersjon,
+                                    "data" to resultat.json,
+                                    "ident" to fnr
+                                )
+                            ).asUpdate
+                        )
+                    )
                 }
                 log.info("[$migreringCounter] Utført på $time ms")
             }
@@ -116,26 +124,36 @@ private fun fyllArbeidstabell(session: Session, arbeidId: String) {
     """
     session.run(queryOf(query, arbeidId).asExecute)
 }
+
 private fun hentArbeid(session: Session, arbeidId: String, size: Int = 500): List<Long> {
     @Language("PostgreSQL")
     val query = """
     select fnr from arbeidstabell where arbeid_startet IS NULL and arbeid_id = ? limit $size for update skip locked; 
     """
+
     @Language("PostgreSQL")
     val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr IN(%s)"
     return session.transaction { txSession ->
         txSession.run(queryOf(query, arbeidId).map { it.long("fnr") }.asList).also { personer ->
             if (personer.isNotEmpty()) {
-                txSession.run(queryOf(String.format(oppdater, personer.joinToString { "?" }), arbeidId, *personer.toTypedArray()).asUpdate)
+                txSession.run(
+                    queryOf(
+                        String.format(oppdater, personer.joinToString { "?" }),
+                        arbeidId,
+                        *personer.toTypedArray()
+                    ).asUpdate
+                )
             }
         }
     }
 }
+
 private fun arbeidFullført(session: Session, arbeidId: String, fnr: Long) {
     @Language("PostgreSQL")
     val query = "update arbeidstabell set arbeid_ferdig=now() where arbeid_id=? and fnr=?"
     session.run(queryOf(query, arbeidId, fnr).asUpdate)
 }
+
 private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
     @Language("PostgreSQL")
     val query = "SELECT COUNT(1) as antall FROM arbeidstabell where arbeid_id=?"
@@ -156,7 +174,11 @@ private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: 
     }
 }
 
-fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
+fun opprettOgUtførArbeid(
+    arbeidId: String,
+    size: Int = 1,
+    arbeider: (session: Session, fnr: Long) -> Unit
+) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(maximumPoolSize = 1).use { ds ->
         sessionOf(ds).use { session ->
             klargjørEllerVentPåTilgjengeligArbeid(session, arbeidId)
@@ -273,12 +295,18 @@ private fun lagAvstemming(fnr: String) = """
 private class DataSourceConfiguration(dbUsername: DbUser) {
     private val env = System.getenv()
 
-    private val gcpProjectId = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
-    private val databaseRegion = requireNotNull(env["DATABASE_REGION"]) { "database region must be set" }
-    private val databaseInstance = requireNotNull(env["DATABASE_INSTANCE"]) { "database instance must be set" }
-    private val databaseUsername = requireNotNull(env["${dbUsername}_USERNAME"]) { "database username must be set" }
-    private val databasePassword = requireNotNull(env["${dbUsername}_PASSWORD"]) { "database password must be set"}
-    private val databaseName = requireNotNull(env["${dbUsername}_DATABASE"]) { "database name must be set"}
+    private val gcpProjectId =
+        requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
+    private val databaseRegion =
+        requireNotNull(env["DATABASE_REGION"]) { "database region must be set" }
+    private val databaseInstance =
+        requireNotNull(env["DATABASE_INSTANCE"]) { "database instance must be set" }
+    private val databaseUsername =
+        requireNotNull(env["${dbUsername}_USERNAME"]) { "database username must be set" }
+    private val databasePassword =
+        requireNotNull(env["${dbUsername}_PASSWORD"]) { "database password must be set" }
+    private val databaseName =
+        requireNotNull(env["${dbUsername}_DATABASE"]) { "database name must be set" }
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = String.format(

@@ -22,7 +22,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Test
 
-internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
+internal class AvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
     /*
         Hvis vi har en kort periode som har endt opp i AVSLUTTET_UTEN_UTBETALING vil alle etterkommende perioder
         bli stuck med å vente på den korte perioden. Da vil de aldri komme seg videre og til slutt time ut
@@ -70,7 +70,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
-        håndterSøknad(3.januar  til 10.januar)
+        håndterSøknad(3.januar til 10.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -81,12 +81,27 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars))
         håndterSøknad(3.mars til 7.mars)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
 
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
-        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(Periode(3.mars, 18.mars)),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVSLUTTET_UTEN_UTBETALING
+        )
 
         håndterSøknad(8.mars til 26.mars)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
@@ -116,9 +131,25 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSøknad(13.januar til 19.januar)
         håndterSøknad(20.januar til 1.februar)
 
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
         assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
         nullstillTilstandsendringer()
@@ -135,7 +166,12 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             8.januar,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING
+        )
         assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
     }
 }

@@ -127,7 +127,12 @@ fun `§ 8-3 ledd 1 punktum 2`(
  * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
  * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
  */
-fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) =
+fun `§ 8-3 ledd 2 punktum 1`(
+    oppfylt: Boolean,
+    skjæringstidspunkt: LocalDate,
+    beregningsgrunnlagÅrlig: Double,
+    minimumInntektÅrlig: Double
+) =
     Subsumsjon.enkelSubsumsjon(
         utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
         lovverk = "folketrygdloven",
@@ -153,7 +158,11 @@ fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, 
  * @param utlandsperioder perioden burker har oppgitt å ha vært i utlandet
  * @param søknadsperioder perioder i søknaden som ligger til grunn
  */
-fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<LocalDate>>, søknadsperioder: List<Map<String, Serializable>>) =
+fun `§ 8-9 ledd 1`(
+    oppfylt: Boolean,
+    utlandsperioder: Collection<ClosedRange<LocalDate>>,
+    søknadsperioder: List<Map<String, Serializable>>
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = utlandsperioder,
         lovverk = "folketrygdloven",
@@ -161,7 +170,7 @@ fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<Lo
         versjon = LocalDate.of(2021, 6, 1),
         paragraf = PARAGRAF_8_9,
         ledd = LEDD_1,
-        input = mapOf( "soknadsPerioder" to søknadsperioder),
+        input = mapOf("soknadsPerioder" to søknadsperioder),
         kontekster = emptyList()
     )
 
@@ -226,7 +235,10 @@ fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) =
  *
  * @param dato dagen vilkåret ikke er oppfylt for
  */
-fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<ClosedRange<LocalDate>>) =
+fun `§ 8-11 ledd 1`(
+    vedtaksperiode: ClosedRange<LocalDate>,
+    dato: Collection<ClosedRange<LocalDate>>
+) =
     Subsumsjon.periodisertSubsumsjon(
         lovverk = "folketrygdloven",
         perioder = dato,
@@ -234,7 +246,12 @@ fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<Cl
         ledd = 1.ledd,
         utfall = VILKAR_IKKE_OPPFYLT,
         versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-        input = mapOf("periode" to mapOf( "fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive)),
+        input = mapOf(
+            "periode" to mapOf(
+                "fom" to vedtaksperiode.start,
+                "tom" to vedtaksperiode.endInclusive
+            )
+        ),
         kontekster = emptyList()
     )
 
@@ -267,32 +284,44 @@ fun `§ 8-12 ledd 1 punktum 1`(
         .partition { it <= maksdato }
 
     fun lagSubsumsjon(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) =
-            Subsumsjon.enkelSubsumsjon(
-                utfall = utfall,
-                lovverk = "folketrygdloven",
-                versjon = LocalDate.of(2021, 5, 21),
-                paragraf = PARAGRAF_8_12,
-                ledd = 1.ledd,
-                punktum = 1.punktum,
-                input = mapOf(
-                    "fom" to periode.start,
-                    "tom" to periode.endInclusive,
-                    "utfallFom" to utfallFom,
-                    "utfallTom" to utfallTom,
-                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
-                    "beregnetTidslinje" to beregnetTidslinje.dager(periode)
-                ),
-                output = mapOf(
-                    "gjenståendeSykedager" to gjenståendeSykedager,
-                    "forbrukteSykedager" to forbrukteSykedager,
-                    "maksdato" to maksdato,
-                ),
-                kontekster = emptyList()
-            )
+        Subsumsjon.enkelSubsumsjon(
+            utfall = utfall,
+            lovverk = "folketrygdloven",
+            versjon = LocalDate.of(2021, 5, 21),
+            paragraf = PARAGRAF_8_12,
+            ledd = 1.ledd,
+            punktum = 1.punktum,
+            input = mapOf(
+                "fom" to periode.start,
+                "tom" to periode.endInclusive,
+                "utfallFom" to utfallFom,
+                "utfallTom" to utfallTom,
+                "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
+                "beregnetTidslinje" to beregnetTidslinje.dager(periode)
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to gjenståendeSykedager,
+                "forbrukteSykedager" to forbrukteSykedager,
+                "maksdato" to maksdato,
+            ),
+            kontekster = emptyList()
+        )
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
-    if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
-    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
+    if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(
+        lagSubsumsjon(
+            VILKAR_OPPFYLT,
+            dagerOppfylt.first(),
+            dagerOppfylt.last()
+        )
+    )
+    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(
+        lagSubsumsjon(
+            VILKAR_IKKE_OPPFYLT,
+            dagerIkkeOppfylt.first(),
+            dagerIkkeOppfylt.last()
+        )
+    )
     return subsumsjoner
 }
 
@@ -343,7 +372,11 @@ fun `§ 8-12 ledd 2`(
  * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
  * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
  */
-fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>): List<Subsumsjon> {
+fun `§ 8-13 ledd 1`(
+    periode: ClosedRange<LocalDate>,
+    avvisteDager: Collection<ClosedRange<LocalDate>>,
+    tidslinjer: List<List<Tidslinjedag>>
+): List<Subsumsjon> {
     fun lagSubsumsjon(utfall: Utfall, dager: Collection<ClosedRange<LocalDate>>) =
         Subsumsjon.periodisertSubsumsjon(
             perioder = dager,
@@ -361,7 +394,12 @@ fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<C
     val subsumsjoner = mutableListOf<Subsumsjon>()
     val oppfylteDager = avvisteDager.trim(periode)
     if (oppfylteDager.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, oppfylteDager))
-    if (avvisteDager.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, avvisteDager))
+    if (avvisteDager.isNotEmpty()) subsumsjoner.add(
+        lagSubsumsjon(
+            VILKAR_IKKE_OPPFYLT,
+            avvisteDager
+        )
+    )
     return subsumsjoner
 }
 
@@ -375,7 +413,12 @@ fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<C
  * @param grense grense brukt til å vurdere [dagerUnderGrensen]
  * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
  */
-fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: Collection<ClosedRange<LocalDate>>): Subsumsjon {
+fun `§ 8-13 ledd 2`(
+    periode: ClosedRange<LocalDate>,
+    tidslinjer: List<List<Tidslinjedag>>,
+    grense: Double,
+    dagerUnderGrensen: Collection<ClosedRange<LocalDate>>
+): Subsumsjon {
     val tidslinjegrunnlag = tidslinjer.map { it.dager(periode) }
     val dagerUnderGrensenMap = dagerUnderGrensen.map {
         mapOf(
@@ -412,7 +455,13 @@ fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tids
  * @param forklaring saksbehandler sin forklaring for overstyring av arbeidsforhold
  * @param oppfylt **true** dersom [organisasjonsnummer] har avbrudd mer enn 14 dager
  */
-fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntekterSisteTreMåneder: List<Inntektsubsumsjon>, forklaring: String, oppfylt: Boolean) =
+fun `§ 8-15`(
+    skjæringstidspunkt: LocalDate,
+    organisasjonsnummer: String,
+    inntekterSisteTreMåneder: List<Inntektsubsumsjon>,
+    forklaring: String,
+    oppfylt: Boolean
+) =
     Subsumsjon.enkelSubsumsjon(
         utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
         lovverk = "folketrygdloven",
@@ -445,7 +494,12 @@ fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, innte
  * @param inntekt inntekt for aktuell arbeidsgiver
  * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
  */
-fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) =
+fun `§ 8-16 ledd 1`(
+    dato: Collection<ClosedRange<LocalDate>>,
+    dekningsgrad: Double,
+    inntekt: Double,
+    dekningsgrunnlag: Double
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dato,
         lovverk = "folketrygdloven",
@@ -466,7 +520,11 @@ fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Dou
  * @param oppfylt **true** dersom [dagen] er etter arbeidsgiverperioden
  * @param dagen aktuelle dagen for vurdering
  */
-fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+fun `§ 8-17 ledd 1 bokstav a`(
+    oppfylt: Boolean,
+    dagen: Collection<ClosedRange<LocalDate>>,
+    sykdomstidslinje: List<Tidslinjedag>
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dagen,
         utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -518,7 +576,10 @@ fun `§ 8-17 ledd 1`(
  *
  * @param dato dagen vilkåret blir vurdert for
  */
-fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+fun `§ 8-17 ledd 2`(
+    dato: Collection<ClosedRange<LocalDate>>,
+    sykdomstidslinje: List<Tidslinjedag>
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dato,
         lovverk = "folketrygdloven",
@@ -564,7 +625,10 @@ fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag
  * @param dato for en dag som anses som en agp-dag
  * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
  */
-fun `§ 8-19 andre ledd`(dato: Collection<ClosedRange<LocalDate>>, beregnetTidslinje: List<Tidslinjedag>) =
+fun `§ 8-19 andre ledd`(
+    dato: Collection<ClosedRange<LocalDate>>,
+    beregnetTidslinje: List<Tidslinjedag>
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dato,
         lovverk = "folketrygdloven",
@@ -803,7 +867,7 @@ fun `§ 8-29`(
     grunnlagForSykepengegrunnlagÅrlig: Double,
     inntektsopplysninger: List<Inntektsubsumsjon>,
     organisasjonsnummer: String
-) =             Subsumsjon.enkelSubsumsjon(
+) = Subsumsjon.enkelSubsumsjon(
     utfall = VILKAR_BEREGNET,
     lovverk = "folketrygdloven",
     versjon = LocalDate.of(2019, 1, 1),
@@ -822,7 +886,14 @@ fun `§ 8-29`(
 
 fun `§ 8-33 ledd 1`() {}
 
-fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {}
+fun `§ 8-33 ledd 3`(
+    grunnlagForFeriepenger: Int,
+    opptjeningsår: Year,
+    prosentsats: Double,
+    alder: Int,
+    feriepenger: Double
+) {
+}
 
 /**
  * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
@@ -946,9 +1017,22 @@ fun `§ 8-51 ledd 3`(
             ),
             kontekster = emptyList()
         )
+
     val subsumsjoner = mutableListOf<Subsumsjon>()
-    if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
-    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
+    if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(
+        lagSubsumsjon(
+            VILKAR_OPPFYLT,
+            dagerOppfylt.first(),
+            dagerOppfylt.last()
+        )
+    )
+    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(
+        lagSubsumsjon(
+            VILKAR_IKKE_OPPFYLT,
+            dagerIkkeOppfylt.first(),
+            dagerIkkeOppfylt.last()
+        )
+    )
     return subsumsjoner
 }
 
@@ -995,7 +1079,10 @@ fun `fvl § 35 ledd 1`() =
  *
  * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-48)
  */
-fun `§ 8-48 ledd 2 punktum 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+fun `§ 8-48 ledd 2 punktum 2`(
+    dato: Collection<ClosedRange<LocalDate>>,
+    sykdomstidslinje: List<Tidslinjedag>
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dato,
         utfall = VILKAR_IKKE_OPPFYLT,
@@ -1013,7 +1100,10 @@ fun `§ 8-48 ledd 2 punktum 2`(dato: Collection<ClosedRange<LocalDate>>, sykdoms
  *
  *  Lovdata: [lenke](https://lovdata.no/dokument/TRR/avgjorelse/trr-2006-4023)
  */
-fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+fun `Trygderettens kjennelse 2006-4023`(
+    dato: Collection<ClosedRange<LocalDate>>,
+    sykdomstidslinje: List<Tidslinjedag>
+) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dato,
         utfall = VILKAR_IKKE_OPPFYLT,
@@ -1025,12 +1115,15 @@ fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>
         kontekster = emptyList()
     )
 
-internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {
+internal class RangeIterator(start: LocalDate, private val end: LocalDate) : Iterator<LocalDate> {
     private var currentDate = start
+
     constructor(range: ClosedRange<LocalDate>) : this(range.start, range.endInclusive)
+
     fun subsetFom(fom: LocalDate) = apply {
         currentDate = maxOf(currentDate, fom)
     }
+
     override fun hasNext() = end >= currentDate
     override fun next(): LocalDate {
         check(hasNext())
@@ -1053,7 +1146,13 @@ private fun ClosedRange<LocalDate>.trim(periodeSomSkalTrimmesBort: ClosedRange<L
     // <periodeSomSkalTrimmesBort> kan nå enten trimme bort hale, snuten eller midten av <this>. i sistnevnte
     // situasjon så vil resultatet være to perioder.
     val result = mutableListOf<ClosedRange<LocalDate>>()
-    if (this.start < periodeSomSkalTrimmesBort.start) result.add(this.start..periodeSomSkalTrimmesBort.start.minusDays(1))
-    if (this.endInclusive > periodeSomSkalTrimmesBort.endInclusive) result.add(periodeSomSkalTrimmesBort.endInclusive.plusDays(1)..this.endInclusive)
+    if (this.start < periodeSomSkalTrimmesBort.start) result.add(
+        this.start..periodeSomSkalTrimmesBort.start.minusDays(
+            1
+        )
+    )
+    if (this.endInclusive > periodeSomSkalTrimmesBort.endInclusive) result.add(
+        periodeSomSkalTrimmesBort.endInclusive.plusDays(1)..this.endInclusive
+    )
     return result
 }

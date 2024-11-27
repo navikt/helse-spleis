@@ -59,14 +59,31 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar), orgnummer = a2)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 20000.månedlig,
+            orgnummer = a2
+        )
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             orgnummer = a2,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 20000.månedlig, a2 to 20000.månedlig), 1.januar),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to 20000.månedlig,
+                    a2 to 20000.månedlig
+                ), 1.januar
+            ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    1.januar(2017),
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    1.januar(2017),
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
@@ -81,7 +98,11 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
 
-        håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = 20000.månedlig, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(2.januar til 17.januar),
+            beregnetInntekt = 20000.månedlig,
+            orgnummer = a1
+        )
 
         assertIngenFunksjonelleFeil()
 
@@ -97,7 +118,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         forlengVedtak(februar, a2, a1)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a2)
+        håndterOverstyrTidslinje(
+            (20.januar til 22.januar).map { manuellFeriedag(it) },
+            orgnummer = a2
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
@@ -113,16 +137,46 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
             assertIngenFunksjonelleFeil()
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
             assertIngenFunksjonelleFeil()
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -139,10 +193,24 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+        håndterOverstyrTidslinje(
+            (29.januar til 29.januar).map { manuellFeriedag(it) },
+            orgnummer = a1
+        )
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1
+        )
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            orgnummer = a2
+        )
     }
 
     @Test
@@ -151,11 +219,20 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         forlengVedtak(februar, a2, a1)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+        håndterOverstyrTidslinje(
+            (20.januar til 22.januar).map { manuellFeriedag(it) },
+            orgnummer = a1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertIngenFunksjonelleFeil()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
@@ -181,7 +258,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         assertPeriode(17.januar til 31.januar, a1, 1081.daglig)
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
 
-        håndterOverstyrTidslinje((17.januar til 21.januar).map { ManuellOverskrivingDag(it, Feriedag) }, orgnummer = a1)
+        håndterOverstyrTidslinje((17.januar til 21.januar).map {
+            ManuellOverskrivingDag(
+                it,
+                Feriedag
+            )
+        }, orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -197,14 +279,25 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
     }
 
-    private fun assertDag(dato: LocalDate, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+    private fun assertDag(
+        dato: LocalDate,
+        orgnummer: String,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt
+    ) {
         inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
             if (it is NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }
     }
-    private fun assertPeriode(periode: Periode, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN) =
+
+    private fun assertPeriode(
+        periode: Periode,
+        orgnummer: String,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = INGEN
+    ) =
         periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
 
 }

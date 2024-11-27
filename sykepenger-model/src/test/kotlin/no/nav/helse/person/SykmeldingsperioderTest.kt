@@ -25,7 +25,14 @@ internal class SykmeldingsperioderTest {
     )
 
     private fun Sykmeldingsperioder.lagre(periode: Periode) =
-        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
+        lagre(
+            hendelsefabrikk.lagSykmelding(
+                Sykmeldingsperiode(
+                    periode.start,
+                    periode.endInclusive
+                )
+            ), Aktivitetslogg()
+        )
 
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {
@@ -63,7 +70,10 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 10.januar)
         sykmeldingsperioder.lagre(15.januar til 25.januar)
-        assertEquals(listOf(1.januar til 10.januar, 15.januar til 25.januar), sykmeldingsperioder.perioder())
+        assertEquals(
+            listOf(1.januar til 10.januar, 15.januar til 25.januar),
+            sykmeldingsperioder.perioder()
+        )
 
         sykmeldingsperioder.lagre(9.januar til 15.januar)
         assertEquals(listOf(1.januar til 25.januar), sykmeldingsperioder.perioder())
@@ -74,7 +84,10 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(15.januar til 25.januar)
         sykmeldingsperioder.lagre(5.januar til 10.januar)
-        assertEquals(listOf(5.januar til 10.januar, 15.januar til 25.januar), sykmeldingsperioder.perioder())
+        assertEquals(
+            listOf(5.januar til 10.januar, 15.januar til 25.januar),
+            sykmeldingsperioder.perioder()
+        )
     }
 
     @Test
@@ -162,7 +175,10 @@ internal class SykmeldingsperioderTest {
         sykmeldingsperioder.lagre(1.februar til 25.februar)
         sykmeldingsperioder.lagre(1.mars til 25.mars)
         sykmeldingsperioder.fjern(5.januar til 24.februar)
-        assertEquals(listOf(25.februar til 25.februar, 1.mars til 25.mars), sykmeldingsperioder.perioder())
+        assertEquals(
+            listOf(25.februar til 25.februar, 1.mars til 25.mars),
+            sykmeldingsperioder.perioder()
+        )
     }
 
     @Test
@@ -187,9 +203,33 @@ internal class SykmeldingsperioderTest {
         sykmeldingsperioder.lagre(1.januar til 15.januar)
         sykmeldingsperioder.lagre(1.mars til 28.mars)
 
-        assertEquals(listOf(1.januar til 15.januar), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar).dager()))
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar).dager()))
-        assertEquals(listOf(1.mars til 16.mars), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars).dager()))
+        assertEquals(
+            listOf(1.januar til 15.januar),
+            sykmeldingsperioder.overlappendePerioder(
+                inntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    1.januar
+                ).dager()
+            )
+        )
+        assertEquals(
+            emptyList<Periode>(),
+            sykmeldingsperioder.overlappendePerioder(
+                inntektsmelding(
+                    listOf(1.februar til 16.februar),
+                    1.februar
+                ).dager()
+            )
+        )
+        assertEquals(
+            listOf(1.mars til 16.mars),
+            sykmeldingsperioder.overlappendePerioder(
+                inntektsmelding(
+                    listOf(1.mars til 16.mars),
+                    1.mars
+                ).dager()
+            )
+        )
     }
 
     @Test
@@ -197,7 +237,15 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(januar)
 
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar).dager()))
+        assertEquals(
+            emptyList<Periode>(),
+            sykmeldingsperioder.overlappendePerioder(
+                inntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    førsteFraværsdag = 2.februar
+                ).dager()
+            )
+        )
     }
 
     @Test
@@ -228,7 +276,7 @@ internal class SykmeldingsperioderTest {
         harOpphørAvNaturalytelser = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
     ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
+        it.valider(object : Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, Aktivitetslogg())

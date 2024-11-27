@@ -6,7 +6,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 
 internal class NyeFrilansSøknaderRiver(
     rapidsConnection: RapidsConnection,
@@ -22,8 +21,10 @@ internal class NyeFrilansSøknaderRiver(
         message.forbid("arbeidsgiver.orgnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = NyFrilansSøknadMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = NyFrilansSøknadMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fnr"].asText()
-    ))
+    )
+    )
 }

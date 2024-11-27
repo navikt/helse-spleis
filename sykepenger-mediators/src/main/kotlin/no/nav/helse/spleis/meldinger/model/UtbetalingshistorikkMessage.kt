@@ -23,10 +23,15 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class UtbetalingshistorikkMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : BehovMessage(packet) {
 
     companion object {
-        internal fun JsonMessage.harStatslønn() = this["@løsning.${Sykepengehistorikk.name}"].any { it["statslønn"].asBoolean() }
+        internal fun JsonMessage.harStatslønn() =
+            this["@løsning.${Sykepengehistorikk.name}"].any { it["statslønn"].asBoolean() }
+
         internal fun JsonMessage.utbetalinger() = this["@løsning.${Sykepengehistorikk.name}"]
             .flatMap { it.path("utbetalteSykeperioder") }
             .filter(::erGyldigPeriode)
@@ -36,16 +41,20 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
                 when (utbetaling["typeKode"].asText()) {
                     "0", "1" -> {
                         val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                        val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
+                        val inntekt =
+                            Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
                         val orgnummer = utbetaling["orgnummer"].asText()
                         PersonUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }
+
                     "5", "6" -> {
                         val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                        val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
+                        val inntekt =
+                            Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
                         val orgnummer = utbetaling["orgnummer"].asText()
                         ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }
+
                     "9" -> Friperiode(fom, tom)
                     else -> null
                 }
@@ -62,7 +71,8 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
             return utbetalingsGrad > 0
         }
 
-        private fun erUtbetalingsperiode(node: JsonNode) = node["typeKode"].asText() in listOf("0", "1", "5", "6")
+        private fun erUtbetalingsperiode(node: JsonNode) =
+            node["typeKode"].asText() in listOf("0", "1", "5", "6")
 
         private fun harGyldigTidsintervall(node: JsonNode): Boolean {
             val fom = node["fom"].asOptionalLocalDate()
@@ -70,14 +80,15 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
             return fom != null && tom != null && tom >= fom
         }
 
-        internal fun JsonMessage.arbeidskategorikoder() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { element ->
-                element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
-                    utbetaling["fom"].asOptionalLocalDate()?.let {
-                        element.path("arbeidsKategoriKode").asText() to it
+        internal fun JsonMessage.arbeidskategorikoder() =
+            this["@løsning.${Sykepengehistorikk.name}"]
+                .flatMap { element ->
+                    element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
+                        utbetaling["fom"].asOptionalLocalDate()?.let {
+                            element.path("arbeidsKategoriKode").asText() to it
+                        }
                     }
-                }
-            }.sortedBy { (_, dato) -> dato }.toMap()
+                }.sortedBy { (_, dato) -> dato }.toMap()
 
         internal fun JsonMessage.inntektshistorikk() = this["@løsning.${Sykepengehistorikk.name}"]
             .flatMap { it.path("inntektsopplysninger") }

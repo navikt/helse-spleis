@@ -39,7 +39,8 @@ internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdom
 
     internal companion object {
         fun gjenopprett(dto: MinimumSykdomsgradVurderingInnDto) = MinimumSykdomsgradsvurdering(
-            perioderMedMinimumSykdomsgradVurdertOK = dto.perioder.map { Periode.gjenopprett(it) }.toMutableSet()
+            perioderMedMinimumSykdomsgradVurdertOK = dto.perioder.map { Periode.gjenopprett(it) }
+                .toMutableSet()
         )
     }
 }
