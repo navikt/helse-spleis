@@ -1152,15 +1152,17 @@ internal class Vedtaksperiode private constructor(
         return (nabolagFør.asReversed() + nabolagEtter)
     }
 
-    private fun eksisterendeRefusjonsopplysninger(): Beløpstidslinje {
+    private fun eksisterendeRefusjonsopplysningerForTmpMigrering(): Beløpstidslinje {
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
-        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
+        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinjeForTmpMigrering(this)
         return (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
     }
 
     private fun videreførEksisterendeRefusjonsopplysninger(hendelse: Hendelse? = null, aktivitetslogg: IAktivitetslogg) {
         if (refusjonstidslinje.isNotEmpty()) return
-        val benyttetRefusjonstidslinje = eksisterendeRefusjonsopplysninger()
+        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
+        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
+        val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
     }
@@ -2994,7 +2996,7 @@ internal class Vedtaksperiode private constructor(
             orgnummer: String,
             vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
         ) {
-            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, it::eksisterendeRefusjonsopplysninger, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
+            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, it::eksisterendeRefusjonsopplysningerForTmpMigrering, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
         }
 
         // Fredet funksjonsnavn

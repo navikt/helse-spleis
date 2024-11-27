@@ -332,9 +332,49 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
         }
     }
 
+    private fun setup13og14() {
+        a1 {
+            nyPeriode(januar)
+            nyPeriode(februar)
+        }
+        a2 {
+            nyPeriode(januar)
+            nyPeriode(februar)
+        }
+        a1 {
+            tillatUgyldigSituasjon {
+                håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar))
+            }
+        }
+    }
+
+    @Test
+    @Order(13)
+    fun `flere arbeidsgivere med bare en inntektsmelding- med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            setup13og14()
+            forrigeRefusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
+        }
+    }
+
+    @Test
+    @Order(14)
+    fun `flere arbeidsgivere med bare en inntektsmelding- uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
+        a1 {
+            setup13og14()
+            migrerRefusjonsopplysningerPåBehandlinger()
+            val faktiskBeløpstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+            faktiskBeløpstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
+            faktiskBeløpstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
+        }
+    }
+
     private fun Beløpstidslinje.assertBeløpstidslinje(vararg forventetBeløp: Pair<Periode, Inntekt>) {
         forventetBeløp.forEach { (periode, inntekt) ->
             val subset = subset(periode)
+            assertEquals(periode, subset.perioderMedBeløp.singleOrNull()) {"Vi har ikke beløp i hele $periode"}
             assertTrue(subset.all { it.beløp == inntekt }) {"Vi forventet at inntekten skulle være ${inntekt.dagligInt} i $periode, men var: ${subset.map { it.beløp.dagligInt }}"}
         }
     }
