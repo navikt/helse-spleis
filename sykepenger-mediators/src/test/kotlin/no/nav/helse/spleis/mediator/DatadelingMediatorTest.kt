@@ -25,9 +25,11 @@ internal class DatadelingMediatorTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
-    private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-        it.requireKey("@event_name")
-    }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
+    private val eksempelmelding =
+        MigrateMessage(
+            JsonMessage.newMessage("testevent", emptyMap()).also { it.requireKey("@event_name") },
+            Meldingsporing(UUID.randomUUID(), fødselsnummer),
+        )
 
     @BeforeEach
     fun beforeEach() {
@@ -54,9 +56,7 @@ internal class DatadelingMediatorTest {
         assertEquals("INFO", info["nivå"].asText())
         assertEquals("Dette er en infomelding", info["melding"].asText())
         assertNotNull(info["tidsstempel"].asText())
-        assertDoesNotThrow {
-            LocalDateTime.parse(info["tidsstempel"].asText())
-        }
+        assertDoesNotThrow { LocalDateTime.parse(info["tidsstempel"].asText()) }
         assertEquals("Person", info["kontekster"][0]["konteksttype"].asText())
     }
 
@@ -88,7 +88,9 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        try { aktivitetslogg.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
+        try {
+            aktivitetslogg.logiskFeil("Dette er en infomelding")
+        } catch (_: Exception) {}
         datadelingMediator.ferdigstill(testRapid)
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
@@ -98,10 +100,8 @@ internal class DatadelingMediatorTest {
         assertEquals("LOGISK_FEIL", info[3]["nivå"].asText())
     }
 
-    private class TestKontekst(
-        private val type: String,
-        private val melding: String
-    ): Aktivitetskontekst {
+    private class TestKontekst(private val type: String, private val melding: String) :
+        Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

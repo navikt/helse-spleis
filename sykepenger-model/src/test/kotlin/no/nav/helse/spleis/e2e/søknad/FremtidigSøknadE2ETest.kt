@@ -61,7 +61,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
         val arbeidsgiverOppdrag = inspektør.utbetaling(0).arbeidsgiverOppdrag
         val oppdragInspektør = arbeidsgiverOppdrag.inspektør
@@ -69,5 +69,4 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
         assertEquals(tom, oppdragInspektør.periode?.endInclusive)
     }
-
 }

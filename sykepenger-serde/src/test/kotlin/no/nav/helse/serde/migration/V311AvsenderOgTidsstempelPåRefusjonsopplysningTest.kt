@@ -7,10 +7,18 @@ import no.nav.helse.serde.migration.V311AvsenderOgTidsstempelPåRefusjonsopplysn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V311AvsenderOgTidsstempelPåRefusjonsopplysningTest : MigrationTest(V311AvsenderOgTidsstempelPåRefusjonsopplysning()) {
+internal class V311AvsenderOgTidsstempelPåRefusjonsopplysningTest :
+    MigrationTest(V311AvsenderOgTidsstempelPåRefusjonsopplysning()) {
 
     override fun meldingerSupplier() = MeldingerSupplier {
-        mapOf(UUID.fromString("75d708d5-e2b1-4ff4-9426-976921505925") to Hendelse("75d708d5-e2b1-4ff4-9426-976921505925".uuid, "INNTEKTSMELDING", LocalDateTime.parse("2024-11-15T12:47:09.829616")))
+        mapOf(
+            UUID.fromString("75d708d5-e2b1-4ff4-9426-976921505925") to
+                Hendelse(
+                    "75d708d5-e2b1-4ff4-9426-976921505925".uuid,
+                    "INNTEKTSMELDING",
+                    LocalDateTime.parse("2024-11-15T12:47:09.829616"),
+                )
+        )
     }
 
     @Test

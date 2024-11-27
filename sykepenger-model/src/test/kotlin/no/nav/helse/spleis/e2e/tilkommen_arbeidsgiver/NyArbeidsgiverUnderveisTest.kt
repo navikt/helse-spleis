@@ -34,9 +34,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
 
     @Test
     fun `Ny arbeidsgiver underveis`() {
-        a1 {
-            nyttVedtak(januar)
-        }
+        a1 { nyttVedtak(januar) }
         a2 {
             håndterSøknad(februar)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -49,30 +47,53 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 10000.månedlig), 1.januar),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
-                ), orgnummer = a1
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag =
+                    lagStandardSykepengegrunnlag(
+                        listOf(a1 to INNTEKT, a2 to 10000.månedlig),
+                        1.januar,
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
+                    ),
+                orgnummer = a1,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
-        a1 {
-            håndterSøknad(februar)
-        }
+        a1 { håndterSøknad(februar) }
         a2 {
             håndterSøknad(februar)
-            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }
-                assertInstanceOf(SkattSykepengegrunnlag::class.java, inntektA2.inspektør.inntektsopplysning)
-                assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder )
-            }
+            håndterInntektsmelding(
+                listOf(1.februar til 16.februar),
+                beregnetInntekt = 10000.månedlig,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            )
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør
+                .inntektsgrunnlag
+                .inspektør
+                .also { sykepengegrunnlagInspektør ->
+                    assertEquals(
+                        2,
+                        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size,
+                    )
+                    val inntektA2 =
+                        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single {
+                            it.gjelder(a2)
+                        }
+                    assertInstanceOf(
+                        SkattSykepengegrunnlag::class.java,
+                        inntektA2.inspektør.inntektsopplysning,
+                    )
+                    assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder)
+                }
         }
     }
 
@@ -83,16 +104,17 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                inntektsvurderingForSykepengegrunnlag =
+                    lagStandardSykepengegrunnlag(
+                        listOf(a1 to INNTEKT, a2 to 10000.månedlig),
+                        1.januar,
+                    ),
+                arbeidsforhold =
                     listOf(
-                        a1 to INNTEKT,
-                        a2 to 10000.månedlig
-                    ), 1.januar
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
-                ), orgnummer = a1
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
+                    ),
+                orgnummer = a1,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -113,7 +135,12 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     fun `Omgjøring av overlappende periode med nytt skjæringstidspunkt`() {
         a1 {
             nyttVedtak(januar)
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag),
+                    ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag),
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -123,7 +150,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterInntektsmelding(
+                listOf(31.januar til 15.februar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
@@ -134,27 +164,36 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
 
     @Test
     fun `saksbehandler flytter arbeidsgiver på skjæringstidspunktet som tilkommen`() {
-        a1 {
-            håndterSøknad(januar)
-        }
+        a1 { håndterSøknad(januar) }
         a2 {
             håndterSøknad(Sykdom(10.januar, 31.januar, 50.prosent))
             håndterInntektsmelding(listOf(10.januar til 25.januar), 5000.månedlig)
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar, type = ORDINÆRT)
-                )
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag =
+                    lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar),
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar, type = ORDINÆRT),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a2, 5000.månedlig, gjelder = 10.januar til LocalDate.MAX, forklaring = "arbeidsgiveren er tilkommen etter skjæringstidspunktet")
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a2,
+                        5000.månedlig,
+                        gjelder = 10.januar til LocalDate.MAX,
+                        forklaring = "arbeidsgiveren er tilkommen etter skjæringstidspunktet",
+                    )
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -166,8 +205,12 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                     assertEquals(83, dag.økonomi.inspektør.totalGrad)
                 }
             }
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør ->
-                assertEquals(INNTEKT, vilkårsgrunnlagInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør
+                ->
+                assertEquals(
+                    INNTEKT,
+                    vilkårsgrunnlagInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag,
+                )
             }
         }
     }

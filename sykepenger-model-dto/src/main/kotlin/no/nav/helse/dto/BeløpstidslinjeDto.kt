@@ -6,11 +6,21 @@ import java.util.UUID
 
 data class BeløpstidslinjeDto(val perioder: List<BeløpstidslinjeperiodeDto>) {
 
-    data class BeløpstidslinjeperiodeDto(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val kilde: BeløpstidslinjedagKildeDto) {
+    data class BeløpstidslinjeperiodeDto(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagligBeløp: Double,
+        val kilde: BeløpstidslinjedagKildeDto,
+    ) {
         fun kanUtvidesAv(other: BeløpstidslinjeperiodeDto) =
             this.tom.plusDays(1) == other.fom &&
-                    this.kilde == other.kilde &&
-                    this.dagligBeløp == other.dagligBeløp
+                this.kilde == other.kilde &&
+                this.dagligBeløp == other.dagligBeløp
     }
-    data class BeløpstidslinjedagKildeDto(val meldingsreferanseId: UUID, val avsender: AvsenderDto, val tidsstempel: LocalDateTime)
+
+    data class BeløpstidslinjedagKildeDto(
+        val meldingsreferanseId: UUID,
+        val avsender: AvsenderDto,
+        val tidsstempel: LocalDateTime,
+    )
 }

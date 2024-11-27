@@ -26,26 +26,27 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private var sendTilGosys: Boolean = false
     private var søknadstype = Søknad.Søknadstype.Arbeidstaker
 
-    internal fun build(meldingsporing: Meldingsporing) = Søknad(
-        meldingsreferanseId = meldingsporing.id,
-        orgnummer = organisasjonsnummer,
-        perioder = perioder,
-        andreInntektskilder = harAndreInntektskilder,
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
-        sendtTilNAVEllerArbeidsgiver = innsendt!!,
-        permittert = permittert,
-        merknaderFraSykmelding = merkander,
-        sykmeldingSkrevet = sykmeldingSkrevet,
-        opprinneligSendt = opprinneligSendt,
-        utenlandskSykmelding = utenlandskSykmelding,
-        arbeidUtenforNorge = arbeidUtenforNorge,
-        sendTilGosys = sendTilGosys,
-        yrkesskade = yrkesskade,
-        egenmeldinger = egenmeldinger,
-        registrert = registrert,
-        søknadstype = søknadstype,
-        tilkomneInntekter = tilkomneInntekter
-    )
+    internal fun build(meldingsporing: Meldingsporing) =
+        Søknad(
+            meldingsreferanseId = meldingsporing.id,
+            orgnummer = organisasjonsnummer,
+            perioder = perioder,
+            andreInntektskilder = harAndreInntektskilder,
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
+            sendtTilNAVEllerArbeidsgiver = innsendt!!,
+            permittert = permittert,
+            merknaderFraSykmelding = merkander,
+            sykmeldingSkrevet = sykmeldingSkrevet,
+            opprinneligSendt = opprinneligSendt,
+            utenlandskSykmelding = utenlandskSykmelding,
+            arbeidUtenforNorge = arbeidUtenforNorge,
+            sendTilGosys = sendTilGosys,
+            yrkesskade = yrkesskade,
+            egenmeldinger = egenmeldinger,
+            registrert = registrert,
+            søknadstype = søknadstype,
+            tilkomneInntekter = tilkomneInntekter,
+        )
 
     fun arbeidsledigsøknad() {
         søknadstype = Søknad.Søknadstype.Arbeidsledig
@@ -55,24 +56,23 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         harAndreInntektskilder = andreInntektskilder
     }
 
-    internal fun ikkeJobbetIDetSisteFraAnnetArbeidsforhold(ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean) = apply {
+    internal fun ikkeJobbetIDetSisteFraAnnetArbeidsforhold(
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean
+    ) = apply {
         this.ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold
     }
 
     override fun utenlandskSykmelding(utenlandsk: Boolean) = apply {
         utenlandskSykmelding = utenlandsk
     }
-    override fun sendTilGosys(tilGosys: Boolean) = apply {
-        sendTilGosys = tilGosys
-    }
+
+    override fun sendTilGosys(tilGosys: Boolean) = apply { sendTilGosys = tilGosys }
 
     override fun permisjon(fom: LocalDate, tom: LocalDate) = apply {
         perioder.add(Permisjon(fom, tom))
     }
 
-    override fun ferie(fom: LocalDate, tom: LocalDate) = apply {
-        perioder.add(Ferie(fom, tom))
-    }
+    override fun ferie(fom: LocalDate, tom: LocalDate) = apply { perioder.add(Ferie(fom, tom)) }
 
     override fun utlandsopphold(fom: LocalDate, tom: LocalDate) = apply {
         perioder.add(Utlandsopphold(fom, tom))
@@ -96,7 +96,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
                 fom = fom,
                 tom = tom,
                 sykmeldingsgrad = grad.prosent,
-                arbeidshelse = arbeidshelse?.prosent
+                arbeidshelse = arbeidshelse?.prosent,
             )
         )
     }
@@ -107,12 +107,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     fun tilkommenInntekt(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int?) {
         tilkomneInntekter.add(
-            TilkommenInntekt(
-                fom = fom,
-                tom = tom,
-                orgnummer = orgnummer,
-                råttBeløp = beløp,
-            )
+            TilkommenInntekt(fom = fom, tom = tom, orgnummer = orgnummer, råttBeløp = beløp)
         )
     }
 }

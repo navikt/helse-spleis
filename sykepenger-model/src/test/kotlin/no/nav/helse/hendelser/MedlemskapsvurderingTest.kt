@@ -18,15 +18,15 @@ internal class MedlemskapsvurderingTest {
     @Test
     fun `bruker er medlem`() {
         assertTrue(
-            Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
-                .valider(aktivitetslogg)
+            Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja).valider(aktivitetslogg)
         )
     }
 
     @Test
     fun `bruker er kanskje medlem`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.VetIkke)
-            .valider(aktivitetslogg).also {
+            .valider(aktivitetslogg)
+            .also {
                 assertFalse(aktivitetslogg.harVarslerEllerVerre())
                 assertTrue(it)
             }
@@ -35,7 +35,8 @@ internal class MedlemskapsvurderingTest {
     @Test
     fun `får varsel ved status UavklartMedBrukerspørsmål`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål)
-            .valider(aktivitetslogg).also {
+            .valider(aktivitetslogg)
+            .also {
                 assertTrue(aktivitetslogg.harVarslerEllerVerre())
                 assertTrue(it)
             }
@@ -44,8 +45,7 @@ internal class MedlemskapsvurderingTest {
     @Test
     fun `bruker er ikke medlem`() {
         assertFalse(
-            Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
-                .valider(aktivitetslogg)
+            Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei).valider(aktivitetslogg)
         )
     }
 }

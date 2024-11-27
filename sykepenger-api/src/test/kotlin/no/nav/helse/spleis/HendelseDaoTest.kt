@@ -34,17 +34,18 @@ internal class HendelseDaoTest {
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         fødselsnummer: String = UNG_PERSON_FNR,
-        data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
+        data: String = """{ "@opprettet": "${LocalDateTime.now()}" }""",
     ) {
         sessionOf(this).use {
             it.run(
                 queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(),
-                    meldingsReferanse.toString(),
-                    meldingstype.toString(),
-                    data
-                ).asExecute
+                        "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                        fødselsnummer.toLong(),
+                        meldingsReferanse.toString(),
+                        meldingstype.toString(),
+                        data,
+                    )
+                    .asExecute
             )
         }
     }

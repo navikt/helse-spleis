@@ -1,5 +1,3 @@
 package no.nav.helse.dto.serialisering
 
-data class UtbetalingstidslinjeUtDto(
-    val dager: List<UtbetalingsdagUtDto>
-)
+data class UtbetalingstidslinjeUtDto(val dager: List<UtbetalingsdagUtDto>)

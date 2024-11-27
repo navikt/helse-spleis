@@ -56,7 +56,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
+internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere første periode - flere ag - ag 1`() {
@@ -64,16 +64,35 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(17.januar, Feriedag)),
+            orgnummer = a1,
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a1,
+        )
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a2,
+        )
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
     }
@@ -84,9 +103,18 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a1)
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(5.februar, Feriedag)),
+            orgnummer = a1,
+        )
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1,
+        )
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
@@ -102,7 +130,13 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1,
+        )
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
@@ -115,7 +149,13 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)), orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1,
+        )
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
@@ -129,9 +169,18 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a2)
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(5.februar, Feriedag)),
+            orgnummer = a2,
+        )
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1,
+        )
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
@@ -147,7 +196,13 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1,
+        )
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
@@ -165,9 +220,20 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 100)), a1)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            orgnummer = a1,
+        )
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, orgnummer = a2)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_REVURDERING,
+            orgnummer = a2,
+        )
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
     }
 
@@ -187,7 +253,13 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING,
+            orgnummer = a2,
+        )
     }
 
     @Test
@@ -226,7 +298,12 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
@@ -245,7 +322,14 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
 
@@ -281,7 +365,12 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         inspektør(a3) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
         }
 
         nullstillTilstandsendringer()
@@ -299,7 +388,14 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         inspektør(a3) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -318,13 +414,27 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterUtbetalt()
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
 
         inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
@@ -332,12 +442,12 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt for ag 1 mens senere periode for ag 1 er til utbetaling`() {
         /* Rekkefølge ting burde skje i:
-        * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
-        * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
-        * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
-        * */
+         * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
+         * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
+         * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
+         * */
         nyttVedtak(januar, orgnummer = a1)
-        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null )
+        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
@@ -349,21 +459,22 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         }
 
-        inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        }
+        inspektør(a2) { assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
 
         håndterUtbetalt(orgnummer = a1)
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
             assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
         }
 
-        inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        }
+        inspektør(a2) { assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
     }
 
     @Test
@@ -381,9 +492,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         }
 
-        inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        }
+        inspektør(a2) { assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
 
         inspektør(a3) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -393,14 +502,17 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
             assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
         }
 
-        inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        }
+        inspektør(a2) { assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
 
         inspektør(a3) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -449,7 +561,12 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
@@ -464,7 +581,11 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
+        håndterYtelser(
+            1.vedtaksperiode,
+            foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            orgnummer = a1,
+        )
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter(a1))
         assertIngenVarsel(RV_AY_5, 1.vedtaksperiode.filter(a2))
     }
@@ -476,7 +597,11 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         forlengVedtak(mars, a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.mars til 31.mars, 100)), orgnummer = a1)
+        håndterYtelser(
+            1.vedtaksperiode,
+            foreldrepenger = listOf(GradertPeriode(20.mars til 31.mars, 100)),
+            orgnummer = a1,
+        )
         assertIngenVarsel(RV_AY_5)
     }
 
@@ -485,15 +610,16 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(17.januar, Feriedag),
-            ManuellOverskrivingDag(18.januar, Feriedag)
-        ), a1)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(17.januar, Feriedag),
+                ManuellOverskrivingDag(18.januar, Feriedag),
+            ),
+            a1,
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(18.januar, Sykedag, 100)
-        ), a1)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Sykedag, 100)), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -510,7 +636,16 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         }
         inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
             assertEquals(3, utbetalinger.size)
-            assertEquals(100, utbetalinger.last().inspektør.utbetalingstidslinje[18.januar].økonomi.inspektør.totalGrad)
+            assertEquals(
+                100,
+                utbetalinger
+                    .last()
+                    .inspektør
+                    .utbetalingstidslinje[18.januar]
+                    .økonomi
+                    .inspektør
+                    .totalGrad,
+            )
         }
         inspektør(a2).utbetalinger(2.vedtaksperiode).also { utbetalinger ->
             assertEquals(1, utbetalinger.size)
@@ -521,8 +656,14 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     fun `Varsel på perioder hos begge AG dersom grad er under 20 prosent`() {
         nyeVedtak(januar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a1)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a2)
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)),
+            orgnummer = a1,
+        )
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)),
+            orgnummer = a2,
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
@@ -537,7 +678,10 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyPeriode(1.februar til 18.februar, a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(17.januar, Feriedag)),
+            orgnummer = a1,
+        )
 
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -565,6 +709,11 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertNull(linje.statuskode)
         }
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            orgnummer = a1,
+        )
     }
 }

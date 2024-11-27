@@ -13,5 +13,5 @@ data class ØkonomiUtDto(
     val grunnbeløpgrense: InntektDto?,
     val arbeidsgiverbeløp: InntektDto?,
     val personbeløp: InntektDto?,
-    val er6GBegrenset: Boolean?
+    val er6GBegrenset: Boolean?,
 )

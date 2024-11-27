@@ -10,5 +10,5 @@ data class InfotrygdInntektsopplysningUtDto(
     val inntekt: InntektDto,
     val refusjonTilArbeidsgiver: Boolean,
     val refusjonTom: LocalDate?,
-    val lagret: LocalDateTime?
+    val lagret: LocalDateTime?,
 )

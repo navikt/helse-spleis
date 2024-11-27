@@ -19,7 +19,7 @@ sealed class InntektsopplysningInnDto {
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
-        override val tidsstempel: LocalDateTime
+        override val tidsstempel: LocalDateTime,
     ) : InntektsopplysningInnDto() {
         override val beløp: InntektbeløpDto.MånedligDouble? = null
     }
@@ -29,7 +29,7 @@ sealed class InntektsopplysningInnDto {
         override val hendelseId: UUID,
         override val dato: LocalDate,
         override val beløp: InntektbeløpDto.MånedligDouble,
-        override val tidsstempel: LocalDateTime
+        override val tidsstempel: LocalDateTime,
     ) : InntektsopplysningInnDto()
 
     data class SaksbehandlerDto(
@@ -58,20 +58,21 @@ sealed class InntektsopplysningInnDto {
         override val dato: LocalDate,
         override val beløp: InntektbeløpDto.MånedligDouble,
         override val tidsstempel: LocalDateTime,
-        val kilde: KildeDto
+        val kilde: KildeDto,
     ) : InntektsopplysningInnDto() {
         enum class KildeDto {
             Arbeidsgiver,
-            AOrdningen
+            AOrdningen,
         }
     }
+
     data class SkattSykepengegrunnlagDto(
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
         override val tidsstempel: LocalDateTime,
         val inntektsopplysninger: List<SkatteopplysningDto>,
-        val ansattPerioder: List<AnsattPeriodeDto>
+        val ansattPerioder: List<AnsattPeriodeDto>,
     ) : InntektsopplysningInnDto() {
         override val beløp: InntektbeløpDto.MånedligDouble? = null
     }

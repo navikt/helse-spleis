@@ -20,18 +20,20 @@ class OverstyrArbeidsgiveropplysninger(
     internal val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime,
-    private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
+    private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>,
 ) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = Avsender.SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = false
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = Avsender.SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = false,
+        )
 
-    override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
+    override fun erRelevant(skjæringstidspunkt: LocalDate) =
+        this.skjæringstidspunkt == skjæringstidspunkt
 
     internal fun overstyr(builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
@@ -39,16 +41,24 @@ class OverstyrArbeidsgiveropplysninger(
 
     internal fun overstyr(nyInntektUnderveis: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
         val kilde = Kilde(metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, metadata.registrert)
-        return arbeidsgiveropplysninger.overstyrTilkommendeInntekter(nyInntektUnderveis, skjæringstidspunkt, kilde)
+        return arbeidsgiveropplysninger.overstyrTilkommendeInntekter(
+            nyInntektUnderveis,
+            skjæringstidspunkt,
+            kilde,
+        )
     }
 
-    internal fun arbeidsgiveropplysningerKorrigert(person: Person, orgnummer: String, hendelseId: UUID) {
+    internal fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        orgnummer: String,
+        hendelseId: UUID,
+    ) {
         if (arbeidsgiveropplysninger.any { it.gjelder(orgnummer) }) {
             person.arbeidsgiveropplysningerKorrigert(
                 PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                     korrigertInntektsmeldingId = hendelseId,
                     korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                    korrigerendeInntektsopplysningId = metadata.meldingsreferanseId
+                    korrigerendeInntektsopplysningId = metadata.meldingsreferanseId,
                 )
             )
         }
@@ -57,13 +67,21 @@ class OverstyrArbeidsgiveropplysninger(
     internal fun refusjonsservitør(
         startdatoer: Collection<LocalDate>,
         orgnummer: String,
-        eksisterendeRefusjonstidslinje: Beløpstidslinje
+        eksisterendeRefusjonstidslinje: Beløpstidslinje,
     ): Refusjonsservitør? {
-        val (refusjonstidslinjeFraOverstyring, strekkbar) = refusjonstidslinjer[orgnummer] ?: return null
+        val (refusjonstidslinjeFraOverstyring, strekkbar) =
+            refusjonstidslinjer[orgnummer] ?: return null
         if (refusjonstidslinjeFraOverstyring.isEmpty()) return null
         val refusjonstidslinje =
             if (strekkbar) refusjonstidslinjeFraOverstyring
-            else refusjonstidslinjeFraOverstyring + eksisterendeRefusjonstidslinje.fraOgMed(refusjonstidslinjeFraOverstyring.last().dato.nesteDag)
-        return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = refusjonstidslinje)
+            else
+                refusjonstidslinjeFraOverstyring +
+                    eksisterendeRefusjonstidslinje.fraOgMed(
+                        refusjonstidslinjeFraOverstyring.last().dato.nesteDag
+                    )
+        return Refusjonsservitør.fra(
+            startdatoer = startdatoer,
+            refusjonstidslinje = refusjonstidslinje,
+        )
     }
 }

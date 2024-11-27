@@ -6,8 +6,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon: JsonMigration(281) {
-    override val description = "forkaster vedtaksperioder som er Avsluttet, men som har én generasjon som er UBEREGNET med forkastet utbetaling"
+internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon : JsonMigration(281) {
+    override val description =
+        "forkaster vedtaksperioder som er Avsluttet, men som har én generasjon som er UBEREGNET med forkastet utbetaling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         migrer(jsonNode, jsonNode.path("aktørId").asText())
@@ -28,19 +29,30 @@ internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon: JsonMigrati
             }
 
             val vedtaksperioder = arbeidsgiver.path("vedtaksperioder") as ArrayNode
-            vedtaksperioder.onEach { periode -> migrerVedtaksperiode(aktørId, periode, ::nyForkasting) }
+            vedtaksperioder.onEach { periode ->
+                migrerVedtaksperiode(aktørId, periode, ::nyForkasting)
+            }
 
             forkastinger.forEach { periode ->
-                val forkastetPeriode = serdeObjectMapper.createObjectNode().apply {
-                    set<ObjectNode>("vedtaksperiode", periode)
-                }
+                val forkastetPeriode =
+                    serdeObjectMapper.createObjectNode().apply {
+                        set<ObjectNode>("vedtaksperiode", periode)
+                    }
                 forkastede.add(forkastetPeriode)
-                val indeks = vedtaksperioder.indexOfFirst { vedtaksperiode -> vedtaksperiode.path("id").asText().uuid == periode.path("id").asText().uuid }
+                val indeks =
+                    vedtaksperioder.indexOfFirst { vedtaksperiode ->
+                        vedtaksperiode.path("id").asText().uuid == periode.path("id").asText().uuid
+                    }
                 vedtaksperioder.remove(indeks)
             }
         }
     }
-    private fun migrerVedtaksperiode(aktørId: String, periode: JsonNode, leggTilForkastet: (JsonNode) -> Unit) {
+
+    private fun migrerVedtaksperiode(
+        aktørId: String,
+        periode: JsonNode,
+        leggTilForkastet: (JsonNode) -> Unit,
+    ) {
         val tilstandForVedtaksperiode = periode.path("tilstand").asText()
         if (tilstandForVedtaksperiode != "AVSLUTTET") return
         val generasjoner = periode.path("generasjoner") as ArrayNode
@@ -48,14 +60,19 @@ internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon: JsonMigrati
         val tilstandForSisteGenerasjon = sisteGenerasjon.path("tilstand").asText()
         if (tilstandForSisteGenerasjon != "UBEREGNET") return
 
-        val sisteIverksettingIndex = generasjoner.indexOfLast { it.path("tilstand").asText() == "VEDTAK_IVERKSATT" }
+        val sisteIverksettingIndex =
+            generasjoner.indexOfLast { it.path("tilstand").asText() == "VEDTAK_IVERKSATT" }
         val sisteIverksetting: JsonNode? = generasjoner.get(sisteIverksettingIndex)
         if (sisteIverksetting is ObjectNode) {
-            sikkerlogg.info("[V281] $aktørId Har UBEREGNET generasjon etter en VEDTAK_IVERKSATT ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) og vedtaksperioden er $tilstandForVedtaksperiode")
+            sikkerlogg.info(
+                "[V281] $aktørId Har UBEREGNET generasjon etter en VEDTAK_IVERKSATT ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) og vedtaksperioden er $tilstandForVedtaksperiode"
+            )
             return
         }
 
-        sikkerlogg.info("[V281] $aktørId Forkaster vedtaksperiode som er i AVSLUTTET, men med FORKASTET utbetaling og er UBEREGNET ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()})")
+        sikkerlogg.info(
+            "[V281] $aktørId Forkaster vedtaksperiode som er i AVSLUTTET, men med FORKASTET utbetaling og er UBEREGNET ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()})"
+        )
         leggTilForkastet(periode)
     }
 

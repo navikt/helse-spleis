@@ -10,7 +10,7 @@ data class OppdragDetaljer(
     val stønadsdager: Int,
     val fom: LocalDate,
     val tom: LocalDate,
-    val linjer: List<LinjeDetaljer>
+    val linjer: List<LinjeDetaljer>,
 ) {
     data class LinjeDetaljer(
         val fom: LocalDate,
@@ -19,6 +19,6 @@ data class OppdragDetaljer(
         val grad: Double?,
         val stønadsdager: Int,
         val totalbeløp: Int,
-        val statuskode: String?
+        val statuskode: String?,
     )
 }

@@ -15,8 +15,14 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak iverksatt`() {
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar,
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -30,8 +36,12 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         val behandlingAvsluttet = testRapid.inspektør.meldinger("avsluttet_med_vedtak").single()
         val behandlingAvsluttetIndeks = testRapid.inspektør.indeksFor(behandlingAvsluttet)
 
-        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
-        assertTrue(behandlingLukketIndeks < behandlingAvsluttetIndeks) { "behandling_lukket bør sendes før behandling avsluttes" }
+        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) {
+            "behandling_opprettet må sendes først"
+        }
+        assertTrue(behandlingLukketIndeks < behandlingAvsluttetIndeks) {
+            "behandling_lukket bør sendes før behandling avsluttes"
+        }
 
         verifiserBehandlingOpprettetKontrakt(behandlingOpprettet)
         verifiserBehandlingLukketKontrakt(behandlingLukket)
@@ -39,8 +49,14 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak fattet`() {
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar,
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -52,14 +68,19 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         val behandlingLukketIndeks = testRapid.inspektør.indeksFor(behandlingLukket)
         val behandlingAvsluttet = testRapid.inspektør.meldinger("avsluttet_med_vedtak")
 
-        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
+        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) {
+            "behandling_opprettet må sendes først"
+        }
         assertEquals(emptyList<Any>(), behandlingAvsluttet)
         verifiserBehandlingLukketKontrakt(behandlingLukket)
     }
 
     @Test
     fun `avsluttet uten utbetaling`() {
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100))
+        )
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet").single()
         val behandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet)
@@ -68,29 +89,42 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         val behandlingAvsluttet = testRapid.inspektør.meldinger("avsluttet_uten_vedtak").single()
         val behandlingAvsluttetIndeks = testRapid.inspektør.indeksFor(behandlingAvsluttet)
 
-        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
-        assertTrue(behandlingLukketIndeks < behandlingAvsluttetIndeks) { "behandling_lukket bør sendes før behandling avsluttes" }
+        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) {
+            "behandling_opprettet må sendes først"
+        }
+        assertTrue(behandlingLukketIndeks < behandlingAvsluttetIndeks) {
+            "behandling_lukket bør sendes før behandling avsluttes"
+        }
         verifiserBehandlingLukketKontrakt(behandlingLukket)
     }
 
     @Test
     fun `vedtak annulleres`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
+        val utbetalingId =
+            testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
         sendAnnullering(utbetalingId)
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet")
-        val førsteBehandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet.first())
-        val sisteBehandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet.last())
+        val førsteBehandlingOpprettetIndeks =
+            testRapid.inspektør.indeksFor(behandlingOpprettet.first())
+        val sisteBehandlingOpprettetIndeks =
+            testRapid.inspektør.indeksFor(behandlingOpprettet.last())
         val behandlingLukket = testRapid.inspektør.meldinger("behandling_lukket").single()
         val behandlingLukketIndeks = testRapid.inspektør.indeksFor(behandlingLukket)
         val behandlingForkastet = testRapid.inspektør.meldinger("behandling_forkastet").single()
         val behandlingForkastetIndeks = testRapid.inspektør.indeksFor(behandlingForkastet)
 
         assertEquals(2, behandlingOpprettet.size) { "forventer to behandlinger" }
-        assertTrue(førsteBehandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
-        assertTrue(sisteBehandlingOpprettetIndeks > behandlingLukketIndeks) { "det skal ikke sendes behandling_lukket for forkastede behandlinger" }
-        assertTrue(sisteBehandlingOpprettetIndeks < behandlingForkastetIndeks) { "behandling_forkastet må sendes etter behandling_opprettet" }
+        assertTrue(førsteBehandlingOpprettetIndeks < behandlingLukketIndeks) {
+            "behandling_opprettet må sendes først"
+        }
+        assertTrue(sisteBehandlingOpprettetIndeks > behandlingLukketIndeks) {
+            "det skal ikke sendes behandling_lukket for forkastede behandlinger"
+        }
+        assertTrue(sisteBehandlingOpprettetIndeks < behandlingForkastetIndeks) {
+            "behandling_forkastet må sendes etter behandling_opprettet"
+        }
         verifiserBehandlingForkastetKontrakt(behandlingForkastet)
     }
 

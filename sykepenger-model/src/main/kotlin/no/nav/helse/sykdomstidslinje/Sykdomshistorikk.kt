@@ -10,12 +10,11 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
 
-internal class Sykdomshistorikk private constructor(
-    private val elementer: MutableList<Element>
-) {
+internal class Sykdomshistorikk private constructor(private val elementer: MutableList<Element>) {
     internal constructor() : this(mutableListOf())
 
-    internal val size get() = elementer.size
+    internal val size
+        get() = elementer.size
 
     internal fun isEmpty() = elementer.isEmpty()
 
@@ -25,14 +24,19 @@ internal class Sykdomshistorikk private constructor(
 
     fun view() = SykdomshistorikkView(elementer = elementer.map { it.view() })
 
-    internal fun håndter(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
+    internal fun håndter(
+        hendelse: SykdomshistorikkHendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Sykdomstidslinje {
         val s = hendelse.sykdomstidslinje()
         if (s.count() == 0) return sykdomstidslinje()
 
         val m = s.first().kilde.meldingsreferanseId()
 
         val nyttElement = Element.opprett(m, s)
-        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse, aktivitetslogg) ?: return sykdomstidslinje()
+        val uhåndtertSykdomstidslinje =
+            elementer.uhåndtertSykdomstidslinje(hendelse, aktivitetslogg)
+                ?: return sykdomstidslinje()
         elementer.add(0, nyttElement.merge(this, uhåndtertSykdomstidslinje))
         return sykdomstidslinje()
     }
@@ -45,7 +49,8 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprettReset(this, perioder))
     }
 
-    class Element private constructor(
+    class Element
+    private constructor(
         val id: UUID = UUID.randomUUID(),
         val hendelseId: UUID? = null,
         val tidsstempel: LocalDateTime = LocalDateTime.now(),
@@ -53,47 +58,67 @@ internal class Sykdomshistorikk private constructor(
         val beregnetSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
     ) : Comparable<Element> {
 
-        internal fun merge(historikk: Sykdomshistorikk, uhåndtertSykdomstidslinje: Sykdomstidslinje): Element {
-            val beregnetSykdomstidslinje = mergeTidslinje(historikk.elementer.firstOrNull(), uhåndtertSykdomstidslinje)
+        internal fun merge(
+            historikk: Sykdomshistorikk,
+            uhåndtertSykdomstidslinje: Sykdomstidslinje,
+        ): Element {
+            val beregnetSykdomstidslinje =
+                mergeTidslinje(historikk.elementer.firstOrNull(), uhåndtertSykdomstidslinje)
             return Element(
                 id = this.id,
                 hendelseId = this.hendelseId,
                 tidsstempel = this.tidsstempel,
                 hendelseSykdomstidslinje = uhåndtertSykdomstidslinje,
-                beregnetSykdomstidslinje = beregnetSykdomstidslinje
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje,
             )
         }
 
         private fun mergeTidslinje(forrige: Element?, uhåndtertSykdomstidslinje: Sykdomstidslinje) =
-            forrige?.beregnetSykdomstidslinje?.merge(uhåndtertSykdomstidslinje, Dagturnering.TURNERING::beste) ?: uhåndtertSykdomstidslinje
+            forrige
+                ?.beregnetSykdomstidslinje
+                ?.merge(uhåndtertSykdomstidslinje, Dagturnering.TURNERING::beste)
+                ?: uhåndtertSykdomstidslinje
 
         override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)
 
         override fun toString() = beregnetSykdomstidslinje.toString()
 
-        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) = hendelseId == hendelse.sykdomstidslinje().first().kilde.meldingsreferanseId()
+        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) =
+            hendelseId == hendelse.sykdomstidslinje().first().kilde.meldingsreferanseId()
 
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
         companion object {
-            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg) : Sykdomstidslinje? {
-                if (hendelse.sykdomstidslinje().periode() == null) return null // tom sykdomstidslinje
-                val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
-                val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
-                    tidligereHåndtert + element.hendelseSykdomstidslinje
-                }
-                val uhåndtertSykdomstidslinje = hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
-                if (uhåndtertSykdomstidslinje.periode() == null) return null // Tom sykdomstidslinje, ikke noe nytt
+            internal fun List<Element>.uhåndtertSykdomstidslinje(
+                hendelse: SykdomshistorikkHendelse,
+                aktivitetslogg: IAktivitetslogg,
+            ): Sykdomstidslinje? {
+                if (hendelse.sykdomstidslinje().periode() == null)
+                    return null // tom sykdomstidslinje
+                val tidligere =
+                    filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() }
+                        ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
+                val alleredeHåndtertSykdomstidslinje =
+                    tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
+                        tidligereHåndtert + element.hendelseSykdomstidslinje
+                    }
+                val uhåndtertSykdomstidslinje =
+                    hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
+                if (uhåndtertSykdomstidslinje.periode() == null)
+                    return null // Tom sykdomstidslinje, ikke noe nytt
                 return uhåndtertSykdomstidslinje.also {
-                    aktivitetslogg.info("Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken")
+                    aktivitetslogg.info(
+                        "Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken"
+                    )
                 }
             }
 
-            internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+            internal fun sykdomstidslinje(elementer: List<Element>) =
+                elementer.first().beregnetSykdomstidslinje
 
             internal fun opprett(
                 meldingsreferanseId: UUID,
-                hendelseSykdomstidslinje: Sykdomstidslinje
+                hendelseSykdomstidslinje: Sykdomstidslinje,
             ): Element {
                 return Element(
                     hendelseId = meldingsreferanseId,
@@ -103,9 +128,11 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,
-                perioder: List<Periode>
+                perioder: List<Periode>,
             ): Element {
-                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder))
+                return Element(
+                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder)
+                )
             }
 
             internal fun gjenopprett(dto: SykdomshistorikkElementDto): Element {
@@ -113,32 +140,35 @@ internal class Sykdomshistorikk private constructor(
                     id = dto.id,
                     hendelseId = dto.hendelseId,
                     tidsstempel = dto.tidsstempel,
-                    hendelseSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.hendelseSykdomstidslinje),
-                    beregnetSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.beregnetSykdomstidslinje)
+                    hendelseSykdomstidslinje =
+                        Sykdomstidslinje.gjenopprett(dto.hendelseSykdomstidslinje),
+                    beregnetSykdomstidslinje =
+                        Sykdomstidslinje.gjenopprett(dto.beregnetSykdomstidslinje),
                 )
             }
         }
 
-        internal fun view() = SykdomshistorikkElementView(
-            id = id,
-            hendelseId = hendelseId,
-            tidsstempel = tidsstempel,
-            hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-            beregnetSykdomstidslinje = beregnetSykdomstidslinje
-        )
+        internal fun view() =
+            SykdomshistorikkElementView(
+                id = id,
+                hendelseId = hendelseId,
+                tidsstempel = tidsstempel,
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje,
+            )
 
-        internal fun dto() = SykdomshistorikkElementDto(
-            id = id,
-            hendelseId = hendelseId,
-            tidsstempel = tidsstempel,
-            hendelseSykdomstidslinje = hendelseSykdomstidslinje.dto(),
-            beregnetSykdomstidslinje = beregnetSykdomstidslinje.dto(),
-        )
+        internal fun dto() =
+            SykdomshistorikkElementDto(
+                id = id,
+                hendelseId = hendelseId,
+                tidsstempel = tidsstempel,
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje.dto(),
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje.dto(),
+            )
     }
 
-    internal fun dto() = SykdomshistorikkDto(
-        elementer = elementer.map { it.dto() }
-    )
+    internal fun dto() = SykdomshistorikkDto(elementer = elementer.map { it.dto() })
+
     internal companion object {
 
         internal fun gjenopprett(dto: SykdomshistorikkDto): Sykdomshistorikk {
@@ -150,10 +180,11 @@ internal class Sykdomshistorikk private constructor(
 }
 
 internal data class SykdomshistorikkView(val elementer: List<SykdomshistorikkElementView>)
+
 internal data class SykdomshistorikkElementView(
     val id: UUID,
     val hendelseId: UUID?,
     val tidsstempel: LocalDateTime,
     val hendelseSykdomstidslinje: Sykdomstidslinje,
-    val beregnetSykdomstidslinje: Sykdomstidslinje
+    val beregnetSykdomstidslinje: Sykdomstidslinje,
 )

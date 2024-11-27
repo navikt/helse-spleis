@@ -2,7 +2,8 @@ package no.nav.helse.serde.migration
 
 import org.junit.jupiter.api.Test
 
-internal class V298EgenmeldingsdagerPåVedtaksperiodeTest: MigrationTest(V298EgenmeldingsdagerPåVedtaksperiode()) {
+internal class V298EgenmeldingsdagerPåVedtaksperiodeTest :
+    MigrationTest(V298EgenmeldingsdagerPåVedtaksperiode()) {
 
     @Test
     fun `migrerer skjæringstidspunkt på behandlinger`() {

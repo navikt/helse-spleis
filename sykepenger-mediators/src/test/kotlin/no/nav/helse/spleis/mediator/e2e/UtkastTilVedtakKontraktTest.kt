@@ -9,7 +9,8 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `utkast til vedtak`() {
         @Language("JSON")
-        val forventet = """
+        val forventet =
+            """
         {
             "@event_name": "utkast_til_vedtak",
             "vedtaksperiodeId": "<uuid>",
@@ -31,5 +32,3 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         testRapid.assertUtgåendeMelding(forventet)
     }
 }
-
-

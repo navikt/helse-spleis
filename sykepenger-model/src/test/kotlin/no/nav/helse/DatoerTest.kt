@@ -130,7 +130,9 @@ internal class DatoerTest {
         assertFalse(31.desember(2017).erRettFør(tirsdag)) { "søndag er ikke rett før tirsdag" }
         assertTrue(30.desember(2017).erRettFør(mandag)) { "lørdag er rett før mandag" }
         assertTrue(29.desember(2017).erRettFør(mandag)) { "fredag er rett før mandag" }
-        assertFalse(28.desember(2017).erRettFør(mandag)) { "forrige torsdag er ikke rett før mandag" }
+        assertFalse(28.desember(2017).erRettFør(mandag)) {
+            "forrige torsdag er ikke rett før mandag"
+        }
         assertFalse(mandag.erRettFør(mandag)) { "mandag er ikke rett før seg selv" }
 
         assertFalse(søndag.erRettFør(tirsdag)) { "søndag er ikke rett før tirsdag" }
@@ -173,11 +175,12 @@ internal class DatoerTest {
     fun `forskjell mellom ukedager-impl`() {
         val periode = 1.februar(2016) til 31.desember(2020)
         val times = 1000
-        val alternative1 = {
-            (1.februar(2016) til 31.desember(2020)).ukedager()
-        }
+        val alternative1 = { (1.februar(2016) til 31.desember(2020)).ukedager() }
         val alternative2 = {
-            periode.start.datesUntil(periode.endInclusive).filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }.count()
+            periode.start
+                .datesUntil(periode.endInclusive)
+                .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
+                .count()
         }
 
         tournament(times, alternative1, alternative2)

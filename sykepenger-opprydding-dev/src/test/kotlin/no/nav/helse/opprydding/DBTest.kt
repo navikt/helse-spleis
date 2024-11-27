@@ -9,13 +9,17 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 internal abstract class DBTest {
     protected lateinit var dataSource: DataSource
+
     companion object {
-        private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:15").apply {
-            withCreateContainerCmdModifier { command -> command.withName("spleis-opprydding-dev") }
-            withReuse(true)
-            withLabel("app-navn", "spleis-opprydding-dev")
-            start()
-        }
+        private val psqlContainer =
+            PostgreSQLContainer<Nothing>("postgres:15").apply {
+                withCreateContainerCmdModifier { command ->
+                    command.withName("spleis-opprydding-dev")
+                }
+                withReuse(true)
+                withLabel("app-navn", "spleis-opprydding-dev")
+                start()
+            }
     }
 
     @BeforeEach
@@ -34,7 +38,6 @@ internal abstract class DBTest {
             .migrate()
         return dataSource
     }
-
 
     private fun createHikariConfig(psql: PostgreSQLContainer<Nothing>) =
         HikariConfig().apply {

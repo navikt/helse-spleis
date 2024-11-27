@@ -10,25 +10,24 @@ fun serializePersonForSpeil(person: Person, pølsepakke: SpekematDTO): PersonDTO
     return jsonBuilder.build()
 }
 
-data class SpekematDTO(
-    val pakker: List<PølsepakkeDTO>
-) {
+data class SpekematDTO(val pakker: List<PølsepakkeDTO>) {
     data class PølsepakkeDTO(
         val yrkesaktivitetidentifikator: String,
-        val rader: List<PølseradDTO>
+        val rader: List<PølseradDTO>,
     ) {
-        data class PølseradDTO(
-            val pølser: List<PølseDTO>,
-            val kildeTilRad: UUID
-        ) {
+        data class PølseradDTO(val pølser: List<PølseDTO>, val kildeTilRad: UUID) {
             data class PølseDTO(
                 val vedtaksperiodeId: UUID,
                 val behandlingId: UUID,
                 val status: PølsestatusDTO,
                 // tingen som gjorde at generasjonen ble opprettet
-                val kilde: UUID
+                val kilde: UUID,
             ) {
-                enum class PølsestatusDTO { ÅPEN, LUKKET, FORKASTET }
+                enum class PølsestatusDTO {
+                    ÅPEN,
+                    LUKKET,
+                    FORKASTET,
+                }
             }
         }
     }
@@ -47,4 +46,3 @@ internal class SpeilBuilder(person: Person, private val pølsepakke: SpekematDTO
 
     fun build() = personBuilder.build()
 }
-

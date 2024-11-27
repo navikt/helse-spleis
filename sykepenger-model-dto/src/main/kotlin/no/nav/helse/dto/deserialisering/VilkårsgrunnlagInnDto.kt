@@ -16,11 +16,12 @@ sealed class VilkårsgrunnlagInnDto {
         val opptjening: OpptjeningInnDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
-        val meldingsreferanseId: UUID?
+        val meldingsreferanseId: UUID?,
     ) : VilkårsgrunnlagInnDto()
+
     data class Infotrygd(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
-        override val inntektsgrunnlag: InntektsgrunnlagInnDto
+        override val inntektsgrunnlag: InntektsgrunnlagInnDto,
     ) : VilkårsgrunnlagInnDto()
 }

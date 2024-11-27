@@ -10,5 +10,5 @@ data class PersonInnDto(
     val arbeidsgivere: List<ArbeidsgiverInnDto>,
     val infotrygdhistorikk: InfotrygdhistorikkInnDto,
     val vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkInnDto,
-    val minimumSykdomsgradVurdering: MinimumSykdomsgradVurderingInnDto
+    val minimumSykdomsgradVurdering: MinimumSykdomsgradVurderingInnDto,
 )

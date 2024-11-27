@@ -15,5 +15,5 @@ data class InntektsgrunnlagUtDto(
     val er6GBegrenset: Boolean,
     val forhøyetInntektskrav: Boolean,
     val minsteinntekt: InntektDto,
-    val oppfyllerMinsteinntektskrav: Boolean
+    val oppfyllerMinsteinntektskrav: Boolean,
 )

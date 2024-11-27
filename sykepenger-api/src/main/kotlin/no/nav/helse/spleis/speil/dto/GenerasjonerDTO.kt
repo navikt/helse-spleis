@@ -12,7 +12,7 @@ import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling
 data class SpeilGenerasjonDTO(
     val id: UUID, // Runtime
     val perioder: List<SpeilTidslinjeperiode>,
-    val kildeTilGenerasjon: UUID
+    val kildeTilGenerasjon: UUID,
 ) {
     val size = perioder.size
 }
@@ -31,13 +31,13 @@ enum class Periodetilstand {
     AvventerInntektsopplysninger,
     TilGodkjenning,
     IngenUtbetaling,
-    TilInfotrygd;
+    TilInfotrygd,
 }
 
 data class Utbetalingsinfo(
     val personbeløp: Int? = null,
     val arbeidsgiverbeløp: Int? = null,
-    val totalGrad: Int // Speil vises grad i heltall
+    val totalGrad: Int, // Speil vises grad i heltall
 ) {
     fun harUtbetaling() = personbeløp != null || arbeidsgiverbeløp != null
 }
@@ -46,7 +46,7 @@ enum class Tidslinjeperiodetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
     OVERGANG_FRA_IT,
-    INFOTRYGDFORLENGELSE;
+    INFOTRYGDFORLENGELSE,
 }
 
 sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
@@ -65,13 +65,17 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: Set<UUID>
 
-    internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
+    internal open fun registrerBruk(
+        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
+        organisasjonsnummer: String,
+    ): SpeilTidslinjeperiode {
         return this
     }
 
     internal abstract fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode
 
     override fun compareTo(other: SpeilTidslinjeperiode) = tom.compareTo(other.tom)
+
     internal open fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? = null
 
     internal companion object {
@@ -81,8 +85,12 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
             sykefraværstilfeller.forEach { (_, perioder) ->
                 out.add(perioder.first().medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING))
                 perioder.zipWithNext { forrige, nåværende ->
-                    if (forrige is BeregnetPeriode) out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FORLENGELSE))
-                    else out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING))
+                    if (forrige is BeregnetPeriode)
+                        out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FORLENGELSE))
+                    else
+                        out.add(
+                            nåværende.medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING)
+                        )
                 }
             }
             return out.sortedByDescending { it.fom }
@@ -91,6 +99,7 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
 }
 
 private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
 private fun LocalDate.format() = format(formatter)
 
 data class UberegnetPeriode(
@@ -100,14 +109,16 @@ data class UberegnetPeriode(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val sammenslåttTidslinje: List<SammenslåttDag>,
-    override val periodetype: Tidslinjeperiodetype, // feltet gir ikke mening for uberegnede perioder
-    override val inntektskilde: UtbetalingInntektskilde, // feltet gir ikke mening for uberegnede perioder
+    override val periodetype:
+        Tidslinjeperiodetype, // feltet gir ikke mening for uberegnede perioder
+    override val inntektskilde:
+        UtbetalingInntektskilde, // feltet gir ikke mening for uberegnede perioder
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: Set<UUID>
+    override val hendelser: Set<UUID>,
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
@@ -118,12 +129,14 @@ data class UberegnetPeriode(
     }
 
     override fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? {
-        // kopierer bare -like- generasjoner; om en periode er strukket tilbake så bevarer vi generasjonen
+        // kopierer bare -like- generasjoner; om en periode er strukket tilbake så bevarer vi
+        // generasjonen
         if (this.fom != other.fom) return null
-        if (this.periodetilstand == IngenUtbetaling && other.periodetilstand != IngenUtbetaling) return null
+        if (this.periodetilstand == IngenUtbetaling && other.periodetilstand != IngenUtbetaling)
+            return null
         return this.copy(
             hendelser = this.hendelser + other.hendelser,
-            sammenslåttTidslinje = other.sammenslåttTidslinje
+            sammenslåttTidslinje = other.sammenslåttTidslinje,
         )
     }
 }
@@ -138,7 +151,8 @@ data class BeregnetPeriode(
     override val sammenslåttTidslinje: List<SammenslåttDag>,
     override val erForkastet: Boolean, // feltet trengs ikke i speil
     override val periodetype: Tidslinjeperiodetype,
-    override val inntektskilde: UtbetalingInntektskilde, // verdien av dette feltet brukes bare for å sjekke !=null i speil
+    override val inntektskilde:
+        UtbetalingInntektskilde, // verdien av dette feltet brukes bare for å sjekke !=null i speil
     override val opprettet: LocalDateTime,
     val behandlingOpprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
@@ -150,9 +164,12 @@ data class BeregnetPeriode(
     val beregningId: UUID,
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
-    val vilkårsgrunnlagId: UUID
+    val vilkårsgrunnlagId: UUID,
 ) : SpeilTidslinjeperiode() {
-    override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
+    override fun registrerBruk(
+        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
+        organisasjonsnummer: String,
+    ): BeregnetPeriode {
         val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) }
         if (vilkårsgrunnlag !is ISpleisGrunnlag) return this
         return this.copy(hendelser = this.hendelser + vilkårsgrunnlag.overstyringer)
@@ -166,23 +183,17 @@ data class BeregnetPeriode(
         return "${fom.format()}-${tom.format()} - $periodetilstand - ${utbetaling.type}"
     }
 
-    data class Vilkår(
-        val sykepengedager: Sykepengedager,
-        val alder: Alder
-    )
+    data class Vilkår(val sykepengedager: Sykepengedager, val alder: Alder)
 
     data class Sykepengedager(
         val skjæringstidspunkt: LocalDate,
         val maksdato: LocalDate,
         val forbrukteSykedager: Int?,
         val gjenståendeDager: Int?,
-        val oppfylt: Boolean
+        val oppfylt: Boolean,
     )
 
-    data class Alder(
-        val alderSisteSykedag: Int,
-        val oppfylt: Boolean
-    )
+    data class Alder(val alderSisteSykedag: Int, val oppfylt: Boolean)
 }
 
 data class AnnullertPeriode(
@@ -201,14 +212,17 @@ data class AnnullertPeriode(
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
-    val utbetaling: Utbetaling
+    val utbetaling: Utbetaling,
 ) : SpeilTidslinjeperiode() {
-    override val sammenslåttTidslinje: List<SammenslåttDag> = emptyList() // feltet gir ikke mening for annullert periode
+    override val sammenslåttTidslinje: List<SammenslåttDag> =
+        emptyList() // feltet gir ikke mening for annullert periode
     override val erForkastet = true
     override val skjæringstidspunkt = fom // feltet gir ikke mening for annullert periode
     override val periodetype =
         Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
-    override val inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
+    override val inntektskilde =
+        UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
+
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this
     }
@@ -220,15 +234,15 @@ internal class AnnullertUtbetaling(
     internal val annulleringstidspunkt: LocalDateTime,
     internal val arbeidsgiverFagsystemId: String,
     internal val personFagsystemId: String,
-    internal val utbetalingstatus: Utbetalingstatus
+    internal val utbetalingstatus: Utbetalingstatus,
 ) {
-    val periodetilstand = when (utbetalingstatus) {
-        Utbetalingstatus.Annullert -> Periodetilstand.Annullert
-        else -> Periodetilstand.TilAnnullering
-    }
+    val periodetilstand =
+        when (utbetalingstatus) {
+            Utbetalingstatus.Annullert -> Periodetilstand.Annullert
+            else -> Periodetilstand.TilAnnullering
+        }
 
     fun annullerer(korrelasjonsId: UUID) = this.korrelasjonsId == korrelasjonsId
-
 }
 
 data class SpeilOppdrag(
@@ -236,17 +250,14 @@ data class SpeilOppdrag(
     val tidsstempel: LocalDateTime,
     val nettobeløp: Int,
     val simulering: Simulering?,
-    val utbetalingslinjer: List<Utbetalingslinje>
+    val utbetalingslinjer: List<Utbetalingslinje>,
 ) {
-    data class Simulering(
-        val totalbeløp: Int,
-        val perioder: List<Simuleringsperiode>
-    )
+    data class Simulering(val totalbeløp: Int, val perioder: List<Simuleringsperiode>)
 
     data class Simuleringsperiode(
         val fom: LocalDate,
         val tom: LocalDate,
-        val utbetalinger: List<Simuleringsutbetaling>
+        val utbetalinger: List<Simuleringsutbetaling>,
     )
 
     data class Simuleringsutbetaling(
@@ -254,7 +265,7 @@ data class SpeilOppdrag(
         val mottakerNavn: String,
         val forfall: LocalDate,
         val feilkonto: Boolean,
-        val detaljer: List<Simuleringsdetaljer>
+        val detaljer: List<Simuleringsdetaljer>,
     )
 
     data class Simuleringsdetaljer(
@@ -270,7 +281,7 @@ data class SpeilOppdrag(
         val klassekode: String,
         val klassekodeBeskrivelse: String,
         val utbetalingstype: String,
-        val refunderesOrgNr: String
+        val refunderesOrgNr: String,
     )
 
     data class Utbetalingslinje(
@@ -278,7 +289,7 @@ data class SpeilOppdrag(
         val tom: LocalDate,
         val dagsats: Int,
         val grad: Int,
-        val endringskode: EndringskodeDTO
+        val endringskode: EndringskodeDTO,
     )
 }
 
@@ -289,7 +300,7 @@ enum class Utbetalingstatus {
     IkkeGodkjent,
     Overført,
     Ubetalt,
-    Utbetalt
+    Utbetalt,
 }
 
 enum class Utbetalingtype {
@@ -297,7 +308,7 @@ enum class Utbetalingtype {
     ETTERUTBETALING,
     ANNULLERING,
     REVURDERING,
-    FERIEPENGER
+    FERIEPENGER,
 }
 
 class Utbetaling(
@@ -313,13 +324,13 @@ class Utbetaling(
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val oppdrag: Map<String, SpeilOppdrag>,
-    val vurdering: Vurdering?
+    val vurdering: Vurdering?,
 ) {
     data class Vurdering(
         val godkjent: Boolean,
         val tidsstempel: LocalDateTime,
         val automatisk: Boolean,
-        val ident: String
+        val ident: String,
     )
 }
 
@@ -330,13 +341,7 @@ data class Refusjon(
     val sisteRefusjonsdag: LocalDate?,
     val beløp: Double?,
 ) {
-    data class Periode(
-        val fom: LocalDate,
-        val tom: LocalDate
-    )
+    data class Periode(val fom: LocalDate, val tom: LocalDate)
 
-    data class Endring(
-        val beløp: Double,
-        val dato: LocalDate
-    )
+    data class Endring(val beløp: Double, val dato: LocalDate)
 }

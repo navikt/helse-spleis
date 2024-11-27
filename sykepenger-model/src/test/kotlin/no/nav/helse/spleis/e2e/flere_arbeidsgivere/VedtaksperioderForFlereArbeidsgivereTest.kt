@@ -51,38 +51,66 @@ import org.junit.jupiter.api.Test
 
 internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
-    private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
-    private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
-    private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
-    private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
+    private val a1Inspektør
+        get() = TestArbeidsgiverInspektør(person, a1)
+
+    private val a2Inspektør
+        get() = TestArbeidsgiverInspektør(person, a2)
+
+    private val a3Inspektør
+        get() = TestArbeidsgiverInspektør(person, a3)
+
+    private val a4Inspektør
+        get() = TestArbeidsgiverInspektør(person, a4)
 
     @Test
     fun `Inntekter fra flere arbeidsgivere`() {
-        nyPeriode(
-            periode = januar,
-            orgnummer = a1,
-            inntekt = 16000.månedlig,
-        )
+        nyPeriode(periode = januar, orgnummer = a1, inntekt = 16000.månedlig)
         assertIngenFunksjonelleFeil()
 
         vilkårsgrunnlag(
-            1.vedtaksperiode,
-            skjæringstidspunkt = 1.januar,
-            orgnummer = a1,
-            inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 15000
-                    a3 inntekt 4750
-                    a4 inntekt 2250
-                }
-            },
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                1.vedtaksperiode,
+                skjæringstidspunkt = 1.januar,
+                orgnummer = a1,
+                inntekterForSykepengegrunnlag =
+                    inntektperioderForSykepengegrunnlag {
+                        1.oktober(2017) til
+                            1.desember(2017) inntekter
+                            {
+                                a1 inntekt 15000
+                                a3 inntekt 4750
+                                a4 inntekt 2250
+                            }
+                    },
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            a1,
+                            LocalDate.EPOCH,
+                            null,
+                            Arbeidsforholdtype.ORDINÆRT,
+                        ),
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            a2,
+                            LocalDate.EPOCH,
+                            null,
+                            Arbeidsforholdtype.ORDINÆRT,
+                        ),
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            a3,
+                            LocalDate.EPOCH,
+                            null,
+                            Arbeidsforholdtype.ORDINÆRT,
+                        ),
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            a4,
+                            LocalDate.EPOCH,
+                            null,
+                            Arbeidsforholdtype.ORDINÆRT,
+                        ),
+                    ),
             )
-        ).håndter(Person::håndter)
+            .håndter(Person::håndter)
 
         assertIngenFunksjonelleFeil()
 
@@ -95,59 +123,108 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
     @Test
     fun `Lagrer ikke inntekter fra infotrygd`() {
         val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-            1.oktober(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 23500.månedlig
-                a2 inntekt 4900.månedlig
-            }
+            1.oktober(2017) til
+                1.desember(2017) inntekter
+                {
+                    a1 inntekt 23500.månedlig
+                    a2 inntekt 4900.månedlig
+                }
         }
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
         nyPeriode(januar, a1, 25000.månedlig)
 
         vilkårsgrunnlag(
-            1.vedtaksperiode,
-            skjæringstidspunkt = 1.januar,
-            orgnummer = a1,
-            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
-        ).håndter(Person::håndter)
+                1.vedtaksperiode,
+                skjæringstidspunkt = 1.januar,
+                orgnummer = a1,
+                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+                arbeidsforhold = arbeidsforhold,
+            )
+            .håndter(Person::håndter)
 
-        ytelser(
-            1.vedtaksperiode, orgnummer = a1
-        ).håndter(Person::håndter)
+        ytelser(1.vedtaksperiode, orgnummer = a1).håndter(Person::håndter)
 
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
 
-        assertEquals(25000.månedlig, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.beløp)
-        assertEquals(4900.månedlig, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(
+            25000.månedlig,
+            vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør
+                .arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                .getValue(a1)
+                .inspektør
+                .inntektsopplysning
+                .inspektør
+                .beløp,
+        )
+        assertEquals(
+            4900.månedlig,
+            vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør
+                .arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                .getValue(a2)
+                .inspektør
+                .inntektsopplysning
+                .inspektør
+                .beløp,
+        )
     }
 
     @Test
     fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
         val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-            1.oktober(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 15000
-                a2 inntekt 21000
-            }
+            1.oktober(2017) til
+                1.desember(2017) inntekter
+                {
+                    a1 inntekt 15000
+                    a2 inntekt 21000
+                }
         }
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
         nyPeriode(januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
-            1.vedtaksperiode,
-            skjæringstidspunkt = 1.januar,
-            orgnummer = a1,
-            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
-        ).håndter(Person::håndter)
+                1.vedtaksperiode,
+                skjæringstidspunkt = 1.januar,
+                orgnummer = a1,
+                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+                arbeidsforhold = arbeidsforhold,
+            )
+            .håndter(Person::håndter)
 
-        val grunnlagsdataInspektør = person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
-        assertEquals(552000.årlig, grunnlagsdataInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
+        val grunnlagsdataInspektør =
+            person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
+        assertEquals(
+            552000.årlig,
+            grunnlagsdataInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag,
+        )
     }
 
     @Test
@@ -156,8 +233,16 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a2,
+        )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -191,31 +276,32 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         assertEquals(1080, inspektør(a1).utbetaling(1).arbeidsgiverOppdrag[1].beløp)
 
         assertNotEquals(utbetalingslinje1, utbetalingslinje2)
-        assertNotEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
+        assertNotEquals(
+            utbetalingslinje1.linjerUtenOpphør().last().beløp,
+            utbetalingslinje2.linjerUtenOpphør().last().beløp,
+        )
         assertEquals(utbetalingslinje1.fagsystemId, utbetalingslinje2.fagsystemId)
     }
 
-    private fun nyPeriode(
-        periode: Periode,
-        orgnummer: String,
-        inntekt: Inntekt
-    ) {
+    private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt) {
         utbetalingshistorikkEtterInfotrygdEndring().håndter(Person::håndter)
         sykmelding(
-            UUID.randomUUID(),
-            Sykmeldingsperiode(periode.start, periode.endInclusive),
-            orgnummer = orgnummer,
-            mottatt = periode.endInclusive.atStartOfDay()
-        ).håndter(Person::håndter)
+                UUID.randomUUID(),
+                Sykmeldingsperiode(periode.start, periode.endInclusive),
+                orgnummer = orgnummer,
+                mottatt = periode.endInclusive.atStartOfDay(),
+            )
+            .håndter(Person::håndter)
         søknad(
-            UUID.randomUUID(),
-            Sykdom(periode.start, periode.endInclusive, 100.prosent),
-            orgnummer = orgnummer
-        ).håndter(Person::håndter)
+                UUID.randomUUID(),
+                Sykdom(periode.start, periode.endInclusive, 100.prosent),
+                orgnummer = orgnummer,
+            )
+            .håndter(Person::håndter)
         håndterInntektsmeldingPortal(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = inntekt,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
         )
     }
 
@@ -223,11 +309,13 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         vedtaksperiodeIdInnhenter: IdInnhenter,
         skjæringstidspunkt: LocalDate,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus =
+            Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         meldingsreferanseId: UUID = UUID.randomUUID(),
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, skjæringstidspunkt)
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering =
+            lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, skjæringstidspunkt),
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = meldingsreferanseId,
@@ -235,13 +323,18 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = orgnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterForSykepengegrunnlag
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(inntekter = inntekterForSykepengegrunnlag),
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-            arbeidsforhold = arbeidsforhold ?: listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold =
+                arbeidsforhold
+                    ?: listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            orgnummer,
+                            1.januar(2017),
+                            type = Arbeidsforholdtype.ORDINÆRT,
+                        )
+                    ),
         )
     }
 }

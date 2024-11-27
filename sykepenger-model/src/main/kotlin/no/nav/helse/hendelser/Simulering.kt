@@ -15,20 +15,19 @@ class Simulering(
     override val simuleringOK: Boolean,
     override val melding: String,
     override val simuleringsResultat: SimuleringResultatDto?,
-    override val utbetalingId: UUID
+    override val utbetalingId: UUID,
 ) : Hendelse, SimuleringHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = orgnummer
-    )
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
-    }
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(organisasjonsnummer = orgnummer)
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true,
+            )
+        }
 
     override val fagområde = Fagområde.from(fagområde)
 }

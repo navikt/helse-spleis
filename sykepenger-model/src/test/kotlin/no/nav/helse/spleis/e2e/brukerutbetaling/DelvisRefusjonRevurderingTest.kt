@@ -39,7 +39,11 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`() {
-        nyttVedtak(januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
+        nyttVedtak(
+            januar,
+            100.prosent,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+        )
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
@@ -51,7 +55,10 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
         håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = skjæringstidspunkt)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        håndterSkjønnsmessigFastsettelse(skjæringstidspunkt, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
+        håndterSkjønnsmessigFastsettelse(
+            skjæringstidspunkt,
+            listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)),
+        )
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -64,24 +71,47 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyring av inntekt med økning av inntekt uten nytt refusjonsbeløp`() {
-        nyttVedtak(januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
+        nyttVedtak(
+            januar,
+            100.prosent,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+        )
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(50000.månedlig, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        håndterOverstyrInntekt(
+            50000.månedlig,
+            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
+        )
         håndterYtelser(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+        )
     }
 
     @Test
     fun `overstyring av inntekt med nedjustering av inntekt uten nytt refusjonsbeløp`() {
-        nyttVedtak(januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
+        nyttVedtak(
+            januar,
+            100.prosent,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+        )
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        håndterOverstyrInntekt(
+            INNTEKT / 2,
+            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
+        )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
+        håndterSkjønnsmessigFastsettelse(
+            1.januar,
+            listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)),
+        )
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -119,12 +149,22 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), a1Inntekt.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), a2Inntekt.repeat(3))
-                )
-            )
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(
+                                a1,
+                                finnSkjæringstidspunkt(a1, 1.vedtaksperiode),
+                                a1Inntekt.repeat(3),
+                            ),
+                            grunnlag(
+                                a2,
+                                finnSkjæringstidspunkt(a1, 1.vedtaksperiode),
+                                a2Inntekt.repeat(3),
+                            ),
+                        )
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -139,28 +179,28 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             forventetArbeidsgiverbeløp = 0,
             forventetArbeidsgiverRefusjonsbeløp = 2308,
             subset = 1.januar til 16.januar,
-            orgnummer = a1
+            orgnummer = a1,
         )
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 2161,
             forventetArbeidsgiverRefusjonsbeløp = 2308,
             subset = 17.januar til 31.januar,
-            orgnummer = a1
+            orgnummer = a1,
         )
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
             forventetArbeidsgiverRefusjonsbeløp = 0,
             subset = 1.januar til 16.januar,
-            orgnummer = a2
+            orgnummer = a2,
         )
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
             forventetArbeidsgiverRefusjonsbeløp = 0,
             subset = 17.januar til 31.januar,
-            orgnummer = a2
+            orgnummer = a2,
         )
 
         håndterInntektsmelding(
@@ -172,10 +212,14 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(
             inntekt = a1Inntekt / 2,
             skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, orgnummer = a1, tilstand = AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            tilstand = AVVENTER_SIMULERING_REVURDERING,
+        )
         assertSisteTilstand(1.vedtaksperiode, orgnummer = a2, tilstand = AVVENTER_REVURDERING)
     }
 }

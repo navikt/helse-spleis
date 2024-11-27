@@ -39,5 +39,6 @@ internal class ValidationTest {
     }
 
     private fun Validation.successBlock() = valider { true }
+
     private fun Validation.failureBlock() = valider { false }
 }

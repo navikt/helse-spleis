@@ -14,15 +14,19 @@ internal interface BehandlingObserver {
         behandlingId: UUID,
         tidsstempel: LocalDateTime,
         periode: Periode,
-        dokumentsporing: Set<UUID>
+        dokumentsporing: Set<UUID>,
     )
+
     fun vedtakIverksatt(
         aktivitetslogg: IAktivitetslogg,
         vedtakFattetTidspunkt: LocalDateTime,
-        behandling: Behandlinger.Behandling
+        behandling: Behandlinger.Behandling,
     )
+
     fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
+
     fun behandlingLukket(behandlingId: UUID)
+
     fun behandlingForkastet(behandlingId: UUID, hendelse: Hendelse)
 
     fun nyBehandling(
@@ -33,10 +37,8 @@ internal interface BehandlingObserver {
         registert: LocalDateTime,
         avsender: Avsender,
         type: PersonObserver.BehandlingOpprettetEvent.Type,
-        søknadIder: Set<UUID>
+        søknadIder: Set<UUID>,
     )
 
-    fun utkastTilVedtak(
-        utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent
-    )
+    fun utkastTilVedtak(utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent)
 }

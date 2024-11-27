@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 
 class KodetAktivitetTest {
 
-
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var person: TestKontekst
 
@@ -25,15 +24,13 @@ class KodetAktivitetTest {
         val hendelse1 = aktivitetslogg.barn()
         hendelse1.kontekst(person)
         hendelse1.varsel(Varselkode.RV_SØ_1)
-        Assertions.assertTrue(
-            aktivitetslogg.harVarslerEllerVerre()
-        ) { "Expected $aktivitetslogg to contain varsel" }
+        Assertions.assertTrue(aktivitetslogg.harVarslerEllerVerre()) {
+            "Expected $aktivitetslogg to contain varsel"
+        }
     }
 
-    private class TestKontekst(
-        private val type: String,
-        private val melding: String
-    ): Aktivitetskontekst {
+    private class TestKontekst(private val type: String, private val melding: String) :
+        Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

@@ -50,12 +50,12 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -65,7 +65,10 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.januar til 31.januar))
+        håndterYtelser(
+            1.vedtaksperiode,
+            institusjonsoppholdsperioder = listOf(1.januar til 31.januar),
+        )
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -73,9 +76,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -85,7 +88,10 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.desember(2017) til 1.januar))
+        håndterYtelser(
+            1.vedtaksperiode,
+            institusjonsoppholdsperioder = listOf(1.desember(2017) til 1.januar),
+        )
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -93,9 +99,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -105,7 +111,10 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar til 14.februar))
+        håndterYtelser(
+            1.vedtaksperiode,
+            institusjonsoppholdsperioder = listOf(31.januar til 14.februar),
+        )
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -113,9 +122,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -127,10 +136,8 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
-            institusjonsoppholdsperioder = listOf(
-                1.desember(2017) til 31.desember(2017),
-                1.februar til 28.februar
-            )
+            institusjonsoppholdsperioder =
+                listOf(1.desember(2017) til 31.desember(2017), 1.februar til 28.februar),
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -142,12 +149,12 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -168,12 +175,12 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -191,9 +198,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -203,7 +210,10 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.desember(2017) til null))
+        håndterYtelser(
+            1.vedtaksperiode,
+            institusjonsoppholdsperioder = listOf(31.desember(2017) til null),
+        )
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -211,9 +221,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 

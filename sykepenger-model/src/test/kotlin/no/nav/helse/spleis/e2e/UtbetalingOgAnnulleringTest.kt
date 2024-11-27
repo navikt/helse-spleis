@@ -79,7 +79,11 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     @Test
     fun `periode med syk nav strekkes tilbake med foreldrepenger - opphører tidligere utbetaling`() {
         håndterSøknad(1.februar til 2.februar)
-        håndterInntektsmelding(emptyList(), 1.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterInntektsmelding(
+            emptyList(),
+            1.februar,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)
@@ -88,7 +92,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(
             (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
-            listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
+                listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
         )
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)
@@ -125,7 +129,11 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 20.mars))
         håndterSøknad(20.februar til 20.mars)
-        håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(Periode(20.februar, 7.mars)),
+            førsteFraværsdag = 20.februar,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -149,7 +157,11 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 25.mars))
         håndterSøknad(20.februar til 25.mars)
-        håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(Periode(20.februar, 7.mars)),
+            førsteFraværsdag = 20.februar,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
         val utbetalingId = inspektør.sisteUtbetaling().utbetalingId
@@ -168,7 +180,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
 
         assertForkastetPeriodeTilstander(
@@ -178,7 +190,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -195,7 +207,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
         håndterSøknad(3.mars til 26.mars)
-        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(Periode(3.mars, 18.mars)),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -247,7 +262,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
     }
@@ -273,7 +288,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
     }
@@ -300,7 +315,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
     }
@@ -325,7 +340,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
     }
 
@@ -354,7 +369,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -380,7 +395,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -394,17 +409,26 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)) // Stale
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
+        håndterAnnullerUtbetaling(
+            utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
+        ) // Stale
+        håndterAnnullerUtbetaling(
+            utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode),
+            opprettet = LocalDateTime.now().plusHours(3),
+        )
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
         assertTrue(inspektør.sisteUtbetaling().erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
-        assertEquals(2,
+        assertEquals(
+            2,
             person.personLogg.behov
-                .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+                .filter {
+                    it.detaljer()["fagsystemId"] ==
+                        inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode)
+                }
                 .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
-                .size
+                .size,
         )
         assertEquals(2, inspektør.antallUtbetalinger)
     }
@@ -423,8 +447,14 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling_utbetalt tar med begrunnelse på avviste dager`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), Sykmeldingsperiode(21.januar, 30.januar))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Sykdom(21.januar, 30.januar, 15.prosent))
+        håndterSykmelding(
+            Sykmeldingsperiode(1.januar, 20.januar),
+            Sykmeldingsperiode(21.januar, 30.januar),
+        )
+        håndterSøknad(
+            Sykdom(1.januar, 20.januar, 100.prosent),
+            Sykdom(21.januar, 30.januar, 15.prosent),
+        )
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -432,13 +462,24 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val avvisteDager =
+            observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter {
+                it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag
+            }
+        val ikkeAvvisteDager =
+            observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter {
+                it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag
+            }
 
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(7, avvisteDager.size)
         assertEquals(23, ikkeAvvisteDager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
+        assertTrue(
+            avvisteDager.all {
+                it.begrunnelser ==
+                    listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad)
+            }
+        )
         assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
     }
 }

@@ -20,7 +20,8 @@ internal class VedtaksperiodeDataTest {
         val id = UUID.fromString("a79fd48e-f30e-4aeb-b2a3-a196167810ad")
 
         @Language("JSON")
-        val json = """{
+        val json =
+            """{
           "id": "$id",
           "tilstand": "AVVENTER_INNTEKTSMELDING",
           "skjæringstidspunkt": "2018-01-01",
@@ -34,20 +35,26 @@ internal class VedtaksperiodeDataTest {
         }"""
 
         val actual = serdeObjectMapper.readValue<VedtaksperiodeData>(json)
-        val expected = VedtaksperiodeData(
-            id = id,
-            tilstand = TilstandTypeData.AVVENTER_INNTEKTSMELDING,
-            skjæringstidspunkt = LocalDate.of(2018, 1, 1),
-            behandlinger = emptyList(),
-            egenmeldingsperioder = listOf(
-                PeriodeData(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2)),
-                PeriodeData(LocalDate.of(2018, 1, 4), LocalDate.of(2018, 1, 7))
-            ),
-            opprettet = LocalDateTime.of(2018, 1, 1, 1, 0, 1),
-            oppdatert = LocalDateTime.of(2018, 1, 1, 1, 0, 1)
-        )
+        val expected =
+            VedtaksperiodeData(
+                id = id,
+                tilstand = TilstandTypeData.AVVENTER_INNTEKTSMELDING,
+                skjæringstidspunkt = LocalDate.of(2018, 1, 1),
+                behandlinger = emptyList(),
+                egenmeldingsperioder =
+                    listOf(
+                        PeriodeData(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2)),
+                        PeriodeData(LocalDate.of(2018, 1, 4), LocalDate.of(2018, 1, 7)),
+                    ),
+                opprettet = LocalDateTime.of(2018, 1, 1, 1, 0, 1),
+                oppdatert = LocalDateTime.of(2018, 1, 1, 1, 0, 1),
+            )
 
         assertEquals(expected, actual)
-        JSONAssert.assertEquals(json, serdeObjectMapper.writeValueAsString(actual), JSONCompareMode.NON_EXTENSIBLE)
+        JSONAssert.assertEquals(
+            json,
+            serdeObjectMapper.writeValueAsString(actual),
+            JSONCompareMode.NON_EXTENSIBLE,
+        )
     }
 }

@@ -8,14 +8,21 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediatorTest() {
+internal class FjerneGodkjenningsbehovOgVedtakFattetTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `avsluttet uten vedtak`() {
-        val søknadId = sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100)))
+        val søknadId =
+            sendSøknad(
+                perioder =
+                    listOf(
+                        SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100)
+                    )
+            )
 
         @Language("JSON")
-        val forventetAvsluttetUtenVedtak = """
+        val forventetAvsluttetUtenVedtak =
+            """
         {
             "@event_name": "avsluttet_uten_vedtak",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",

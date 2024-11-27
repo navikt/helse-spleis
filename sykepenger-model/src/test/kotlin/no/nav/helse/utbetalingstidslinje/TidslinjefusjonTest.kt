@@ -46,7 +46,8 @@ internal class TidslinjefusjonTest {
     @Test
     fun `overskriver ikke dager`() {
         // den siste tidslinjen består av to mindre dager.
-        // når utbetalingstidslinjen legges sammen så vil den siste tidslinjen utvides med to dager, og de to siste dagene er en helg
+        // når utbetalingstidslinjen legges sammen så vil den siste tidslinjen utvides med to dager,
+        // og de to siste dagene er en helg
         val inspektør = (tidslinjeOf(5.NAV, 2.ARB) + tidslinjeOf(5.FRI)).inspektør
         assertEquals(7, inspektør.size)
         assertEquals(5, inspektør.navDagTeller)
@@ -55,10 +56,11 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `bli med i flere utbetalingstidslinjer`() {
-        val inspektør = (tidslinjeOf(15.NAV) +
-            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
-            tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV)
-            ).inspektør
+        val inspektør =
+            (tidslinjeOf(15.NAV) +
+                    tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
+                    tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV))
+                .inspektør
         assertEquals(59, inspektør.size)
         assertEquals(33, inspektør.navDagTeller)
         assertEquals(12, inspektør.navHelgDagTeller)
@@ -67,7 +69,8 @@ internal class TidslinjefusjonTest {
         assertEquals(4, inspektør.fridagTeller)
     }
 
-    // The following tests handle overlapping Utbetalingstidslinjer. This should only be for multiple arbeitsgivere
+    // The following tests handle overlapping Utbetalingstidslinjer. This should only be for
+    // multiple arbeitsgivere
 
     @Test
     fun `NAV-utbetalinger har prioritet`() {
@@ -80,10 +83,8 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `NAV-utbetalinger for flere arbeidsgivere`() {
-        val inspektør = (tidslinjeOf(
-            15.NAV,
-            15.ARB
-        ) + tidslinjeOf(10.ARB, 10.NAV, 10.ARB, 10.NAV)).inspektør
+        val inspektør =
+            (tidslinjeOf(15.NAV, 15.ARB) + tidslinjeOf(10.ARB, 10.NAV, 10.ARB, 10.NAV)).inspektør
         assertEquals(40, inspektør.size)
         assertEquals(23, inspektør.navDagTeller)
         assertEquals(7, inspektør.navHelgDagTeller)
@@ -99,40 +100,13 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `dagens forrang`() {
-        val inspektør = (tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
-            tidslinjeOf(
-                1.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            ) +
-            tidslinjeOf(
-                2.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            ) +
-            tidslinjeOf(
-                3.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            ) +
-            tidslinjeOf(
-                4.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            )
-            ).inspektør
+        val inspektør =
+            (tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+                    tidslinjeOf(1.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+                    tidslinjeOf(2.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+                    tidslinjeOf(3.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+                    tidslinjeOf(4.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV))
+                .inspektør
         assertEquals(9, inspektør.size)
         assertEquals(3, inspektør.navDagTeller)
         assertEquals(3, inspektør.navHelgDagTeller)
@@ -162,5 +136,4 @@ internal class TidslinjefusjonTest {
         val inspektør = (tidslinjeOf() + tidslinjeOf()).inspektør
         assertEquals(0, inspektør.size)
     }
-
 }

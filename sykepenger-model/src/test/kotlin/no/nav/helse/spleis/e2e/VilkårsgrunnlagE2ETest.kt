@@ -36,27 +36,50 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar), orgnummer = a2)
         håndterSøknad(6.februar til 28.februar, orgnummer = a2)
-        håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterInntektsmelding(
+            listOf(21.januar til 21.januar, 6.februar til 20.februar),
             orgnummer = a2,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    ArbeidsgiverInntekt(a1, listOf(
-                        desember(2017).lønnsinntekt(),
-                        november(2017).lønnsinntekt(),
-                        oktober(2017).lønnsinntekt()
-                    )),
-                    ArbeidsgiverInntekt(a2, listOf(
-                        desember(2017).lønnsinntekt(),
-                        november(2017).lønnsinntekt(),
-                        oktober(2017).lønnsinntekt(),
-                    )),
-                )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+        )
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a2,
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            ArbeidsgiverInntekt(
+                                a1,
+                                listOf(
+                                    desember(2017).lønnsinntekt(),
+                                    november(2017).lønnsinntekt(),
+                                    oktober(2017).lønnsinntekt(),
+                                ),
+                            ),
+                            ArbeidsgiverInntekt(
+                                a2,
+                                listOf(
+                                    desember(2017).lønnsinntekt(),
+                                    november(2017).lønnsinntekt(),
+                                    oktober(2017).lønnsinntekt(),
+                                ),
+                            ),
+                        )
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        1.januar(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        1.januar(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
@@ -67,25 +90,45 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    ArbeidsgiverInntekt(a1, listOf(
-                        desember(2017).lønnsinntekt(INNTEKT),
-                        november(2017).lønnsinntekt(INNTEKT),
-                        oktober(2017).lønnsinntekt(INNTEKT)
-                    )),
-                    ArbeidsgiverInntekt(a2, listOf(
-                        desember(2017).lønnsinntekt(2500.månedlig),
-                        november(2017).lønnsinntekt((-3000).månedlig),
-                    )),
-                )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            ArbeidsgiverInntekt(
+                                a1,
+                                listOf(
+                                    desember(2017).lønnsinntekt(INNTEKT),
+                                    november(2017).lønnsinntekt(INNTEKT),
+                                    oktober(2017).lønnsinntekt(INNTEKT),
+                                ),
+                            ),
+                            ArbeidsgiverInntekt(
+                                a2,
+                                listOf(
+                                    desember(2017).lønnsinntekt(2500.månedlig),
+                                    november(2017).lønnsinntekt((-3000).månedlig),
+                                ),
+                            ),
+                        )
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        1.januar(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        1.januar(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
@@ -96,9 +139,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
         håndterSøknad(1.januar til 17.januar)
 
-        val arbeidsgiverperioder = listOf(
-            1.januar til 16.januar
-        )
+        val arbeidsgiverperioder = listOf(1.januar til 16.januar)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -118,17 +159,13 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
         )
 
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE
-        )
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
     }
-    
+
     @Test
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
@@ -148,8 +185,17 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `nytt og eneste arbeidsforhold på skjæringstidspunkt`() {
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
-        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+        )
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
+                ),
+        )
         assertVarsel(Varselkode.RV_VV_1)
     }
 
@@ -162,7 +208,11 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertVilkårsgrunnlagFraSpleisFor(vararg skjæringstidspunkt: LocalDate) {
-        assertEquals(skjæringstidspunkt.toSet(), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
+        assertEquals(
+            skjæringstidspunkt.toSet(),
+            person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt,
+        )
     }
+
     private fun assertIngenVilkårsgrunnlagFraSpleis() = assertVilkårsgrunnlagFraSpleisFor()
 }

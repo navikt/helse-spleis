@@ -24,13 +24,13 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.Personidentifikator
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.LokalePayload
 import no.nav.helse.spleis.SpekematClient
@@ -51,7 +51,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @Test
     fun `hente person som ikke finnes`() = spleisApiTestApplication {
-        val query = """
+        val query =
+            """
             {
                 person(fnr: \"40440440440\") {
                     arbeidsgivere {
@@ -63,11 +64,13 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     }
                 }
             }
-        """.trimIndent()
+        """
+                .trimIndent()
 
         request("""{"query": "$query"}""") {
             @Language("JSON")
-            val forventet = """
+            val forventet =
+                """
                 {
                   "data": {
                     "person": null
@@ -80,9 +83,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @Test
     fun `response på introspection`() = spleisApiTestApplication {
-        request(IntrospectionQuery) {
-            assertHeltLike("/graphql-schema.json".readResource(), this)
-        }
+        request(IntrospectionQuery) { assertHeltLike("/graphql-schema.json".readResource(), this) }
     }
 
     @Test
@@ -92,14 +93,21 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         person.addObserver(spekemat)
 
         val spekematClient = mockk<SpekematClient>()
-        spleisApiTestApplication(spekematClient = spekematClient, testdata = opprettTestdata(person)) {
+        spleisApiTestApplication(
+            spekematClient = spekematClient,
+            testdata = opprettTestdata(person),
+        ) {
             every { spekematClient.hentSpekemat(UNG_PERSON_FNR, any()) } returns spekemat.resultat()
             val query =
-                URI("https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql").toURL()
+                URI(
+                        "https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql"
+                    )
+                    .toURL()
                     .readText()
 
             @Language("JSON")
-            val requestBody = """
+            val requestBody =
+                """
                 {
                     "query": "$query",
                     "variables": {
@@ -116,29 +124,35 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     private companion object {
-        private val UUIDRegex = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b".toRegex()
+        private val UUIDRegex =
+            "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b".toRegex()
         private val NullUUID = "00000000-0000-0000-0000-000000000000"
         private val LocalDateTimeRegex = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".toRegex()
-        private val LocalDateTimePrecisionRegex = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+".toRegex()
+        private val LocalDateTimePrecisionRegex =
+            "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+".toRegex()
         private val LocalDateTimeMandagsfrø = "2018-01-01T00:00:00"
-        private val TidsstempelRegex = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}".toRegex()
+        private val TidsstempelRegex =
+            "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}".toRegex()
         private val TidsstempelMandagsfrø = "2018-01-01 00:00:00.000"
         private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
         private val FagsystemId = "ZZZZZZZZZZZZZZZZZZZZZZZZZZ"
         private val String.utenVariableVerdier
-            get() = replace(UUIDRegex, NullUUID)
-                .replace(LocalDateTimeRegex, LocalDateTimeMandagsfrø)
-                .replace(LocalDateTimePrecisionRegex, LocalDateTimeMandagsfrø)
-                .replace(TidsstempelRegex, TidsstempelMandagsfrø)
-                .replace(FagsystemIdRegex, FagsystemId)
+            get() =
+                replace(UUIDRegex, NullUUID)
+                    .replace(LocalDateTimeRegex, LocalDateTimeMandagsfrø)
+                    .replace(LocalDateTimePrecisionRegex, LocalDateTimeMandagsfrø)
+                    .replace(TidsstempelRegex, TidsstempelMandagsfrø)
+                    .replace(FagsystemIdRegex, FagsystemId)
 
         @Language("JSON")
-        private const val IntrospectionQuery = """
+        private const val IntrospectionQuery =
+            """
         {"query":"\n    query IntrospectionQuery {\n      __schema {\n        queryType { name }\n        mutationType { name }\n        subscriptionType { name }\n        types {\n          ...FullType\n        }\n        directives {\n          name\n          description\n          locations\n          args {\n            ...InputValue\n          }\n        }\n      }\n    }\n    fragment FullType on __Type {\n      kind\n      name\n      description\n      fields(includeDeprecated: true) {\n        name\n        description\n        args {\n          ...InputValue\n        }\n        type {\n          ...TypeRef\n        }\n        isDeprecated\n        deprecationReason\n      }\n      inputFields {\n        ...InputValue\n      }\n      interfaces {\n        ...TypeRef\n      }\n      enumValues(includeDeprecated: true) {\n        name\n        description\n        isDeprecated\n        deprecationReason\n      }\n      possibleTypes {\n        ...TypeRef\n      }\n    }\n    fragment InputValue on __InputValue {\n      name\n      description\n      type { ...TypeRef }\n      defaultValue\n    }\n    fragment TypeRef on __Type {\n      kind\n      name\n      ofType {\n        kind\n        name\n        ofType {\n          kind\n          name\n          ofType {\n            kind\n            name\n            ofType {\n              kind\n              name\n              ofType {\n                kind\n                name\n                ofType {\n                  kind\n                  name\n                  ofType {\n                    kind\n                    name\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n    ","operationName":"IntrospectionQuery"}
         """
 
         @Language("JSON")
-        private val detSpesialistFaktiskForventer = """
+        private val detSpesialistFaktiskForventer =
+            """
 {
   "data": {
     "person": {
@@ -759,31 +773,52 @@ internal class GraphQLApiTest : AbstractObservableTest() {
   }
 }
         """
+
         private fun assertHeltLike(forventet: String, faktisk: String) =
             JSONAssert.assertEquals(forventet, faktisk, STRICT)
 
         private fun assertIngenFærreFelt(forventet: String, faktisk: String) =
             JSONAssert.assertEquals(forventet, faktisk, STRICT_ORDER)
+
         private fun String.readResource() =
-            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
+            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8)
+                ?: throw RuntimeException("Fant ikke filen på $this")
 
-        private fun speedClient() = mockk<SpeedClient> {
-            every { hentFødselsnummerOgAktørId(any(), any()) } returns IdentResponse(
-                fødselsnummer = UNG_PERSON_FNR,
-                aktørId = "ikke_kult",
-                npid = null,
-                kilde = IdentResponse.KildeResponse.PDL
-            ).ok()
-        }
+        private fun speedClient() =
+            mockk<SpeedClient> {
+                every { hentFødselsnummerOgAktørId(any(), any()) } returns
+                    IdentResponse(
+                            fødselsnummer = UNG_PERSON_FNR,
+                            aktørId = "ikke_kult",
+                            npid = null,
+                            kilde = IdentResponse.KildeResponse.PDL,
+                        )
+                        .ok()
+            }
 
-        private fun spleisApiTestApplication(speedClient: SpeedClient = speedClient(), spekematClient: SpekematClient = mockk<SpekematClient>(), testdata: (TestDataSource) -> Unit = { }, testblokk: suspend TestContext.() -> Unit) {
+        private fun spleisApiTestApplication(
+            speedClient: SpeedClient = speedClient(),
+            spekematClient: SpekematClient = mockk<SpekematClient>(),
+            testdata: (TestDataSource) -> Unit = {},
+            testblokk: suspend TestContext.() -> Unit,
+        ) {
             val testDataSource = databaseContainer.nyTilkobling()
             testdata(testDataSource)
-            lagTestapplikasjon(speedClient = speedClient, spekematClient = spekematClient, testDataSource = testDataSource, testblokk)
+            lagTestapplikasjon(
+                speedClient = speedClient,
+                spekematClient = spekematClient,
+                testDataSource = testDataSource,
+                testblokk,
+            )
             databaseContainer.droppTilkobling(testDataSource)
         }
 
-        private fun lagTestapplikasjon(speedClient: SpeedClient, spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {
+        private fun lagTestapplikasjon(
+            speedClient: SpeedClient,
+            spekematClient: SpekematClient,
+            testDataSource: TestDataSource,
+            testblokk: suspend TestContext.() -> Unit,
+        ) {
             val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
             naisfulTestApp(
                 testApplicationModule = {
@@ -792,7 +827,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         // uavhengig om requesten inneholder bearer eller ei
                         provider {
                             authenticate { context ->
-                                context.principal(JWTPrincipal(LokalePayload(mapOf("azp_name" to "spesialist"))))
+                                context.principal(
+                                    JWTPrincipal(LokalePayload(mapOf("azp_name" to "spesialist")))
+                                )
                             }
                         }
                     }
@@ -801,7 +838,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 },
                 objectMapper = objectMapper,
                 meterRegistry = meterRegistry,
-                testblokk = testblokk
+                testblokk = testblokk,
             )
         }
     }
@@ -809,19 +846,17 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     suspend fun TestContext.request(
         body: String,
         forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
-        assertBlock: String.() -> Unit = {}
+        assertBlock: String.() -> Unit = {},
     ): String {
         return client
             .post("/graphql") { setBody(body) }
-            .also { response ->
-                assertEquals(forventetHttpStatusCode, response.status)
-            }
+            .also { response -> assertEquals(forventetHttpStatusCode, response.status) }
             .bodyAsText()
             .also(assertBlock)
     }
 
     private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {
-        return fun (testDataSource: TestDataSource) {
+        return fun(testDataSource: TestDataSource) {
             observatør = TestObservatør().also { person.addObserver(it) }
             person.håndter(sykmelding(), Aktivitetslogg())
             person.håndter(utbetalinghistorikk(), Aktivitetslogg())
@@ -836,9 +871,19 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
             val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
             val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
-            person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
+            person.håndter(
+                simulering(
+                    utbetalingId = utbetalingId,
+                    fagsystemId = fagsystemId,
+                    fagområde = fagområde,
+                ),
+                Aktivitetslogg(),
+            )
             person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
-            person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
+            person.håndter(
+                utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId),
+                Aktivitetslogg(),
+            )
 
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
             lagreSykmelding(
@@ -854,14 +899,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 meldingsReferanse = SØKNAD_ID,
                 fom = FOM,
                 tom = TOM,
-                sendtNav = TOM.plusDays(1).atStartOfDay()
+                sendtNav = TOM.plusDays(1).atStartOfDay(),
             )
             lagreInntektsmelding(
                 dataSource = testDataSource.ds,
                 fødselsnummer = UNG_PERSON_FNR,
                 meldingsReferanse = INNTEKTSMELDING_ID,
                 beregnetInntekt = INNTEKT,
-                førsteFraværsdag = FOM
+                førsteFraværsdag = FOM,
             )
         }
     }
@@ -869,11 +914,24 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     private fun lagrePerson(dataSource: DataSource, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(dataSource, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
-            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
-                fødselsnummer.toLong(), personId!!).asExecute)
-
+            val personId =
+                it.run(
+                    queryOf(
+                            "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                            fødselsnummer.toLong(),
+                            serialisertPerson.skjemaVersjon,
+                            serialisertPerson.json,
+                        )
+                        .asUpdateAndReturnGeneratedKey
+                )
+            it.run(
+                queryOf(
+                        "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
+                        fødselsnummer.toLong(),
+                        personId!!,
+                    )
+                    .asExecute
+            )
         }
     }
 
@@ -882,28 +940,36 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         fødselsnummer: String,
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
-        data: String = "{}"
+        data: String = "{}",
     ) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(),
-                    meldingsReferanse.toString(),
-                    meldingstype.toString(),
-                    data
-                ).asExecute
+                        "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                        fødselsnummer.toLong(),
+                        meldingsReferanse.toString(),
+                        meldingstype.toString(),
+                        data,
+                    )
+                    .asExecute
             )
         }
     }
 
-    private fun lagreInntektsmelding(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, beregnetInntekt: Inntekt, førsteFraværsdag: LocalDate) {
+    private fun lagreInntektsmelding(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate,
+    ) {
         lagreHendelse(
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
             meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
-            data = """
+            data =
+                """
                 {
                     "beregnetInntekt": "$beregnetInntekt",
                     "mottattDato": "${LocalDateTime.now()}",
@@ -911,34 +977,51 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     "foersteFravaersdag": "$førsteFraværsdag",
                     "@id": "$meldingsReferanse"
                 }
-            """.trimIndent()
+            """
+                    .trimIndent(),
         )
     }
 
-    private fun lagreSykmelding(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, fom: LocalDate, tom: LocalDate) {
+    private fun lagreSykmelding(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+    ) {
         lagreHendelse(
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
             meldingstype = HendelseDao.Meldingstype.NY_SØKNAD,
-            data = """
+            data =
+                """
                 {
                     "@opprettet": "${LocalDateTime.now()}",
                     "@id": "$meldingsReferanse",
                     "fom": "$fom",
                     "tom": "$tom"
                 }
-            """.trimIndent()
+            """
+                    .trimIndent(),
         )
     }
 
-    private fun lagreSøknadNav(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, fom: LocalDate, tom: LocalDate, sendtNav: LocalDateTime) {
+    private fun lagreSøknadNav(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        sendtNav: LocalDateTime,
+    ) {
         lagreHendelse(
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
             meldingstype = HendelseDao.Meldingstype.SENDT_SØKNAD_NAV,
-            data = """
+            data =
+                """
                 {
                     "@opprettet": "${LocalDateTime.now()}",
                     "@id": "$meldingsReferanse",
@@ -946,8 +1029,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     "tom": "$tom",
                     "sendtNav": "$sendtNav"
                 }
-            """.trimIndent()
+            """
+                    .trimIndent(),
         )
     }
 }
-

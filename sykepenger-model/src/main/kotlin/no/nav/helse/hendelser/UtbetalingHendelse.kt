@@ -13,19 +13,17 @@ class UtbetalingHendelse(
     override val status: Oppdragstatus,
     override val melding: String,
     override val avstemmingsnøkkel: Long,
-    override val overføringstidspunkt: LocalDateTime
+    override val overføringstidspunkt: LocalDateTime,
 ) : Hendelse, UtbetalingmodulHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = orgnummer
-    )
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
-    }
-
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(organisasjonsnummer = orgnummer)
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true,
+            )
+        }
 }

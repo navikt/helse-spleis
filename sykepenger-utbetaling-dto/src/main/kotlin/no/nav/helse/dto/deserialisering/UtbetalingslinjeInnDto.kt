@@ -16,5 +16,5 @@ data class UtbetalingslinjeInnDto(
     val refDelytelseId: Int?,
     val endringskode: EndringskodeDto,
     val klassekode: KlassekodeDto,
-    val datoStatusFom: LocalDate?
+    val datoStatusFom: LocalDate?,
 )

@@ -12,20 +12,25 @@ class OverstyrArbeidsforhold(
     meldingsreferanseId: UUID,
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
-    opprettet: LocalDateTime
+    opprettet: LocalDateTime,
 ) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = false
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = false,
+        )
 
-    override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
+    override fun erRelevant(skjæringstidspunkt: LocalDate) =
+        this.skjæringstidspunkt == skjæringstidspunkt
 
-    internal fun overstyr(inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+    internal fun overstyr(
+        inntektsgrunnlag: Inntektsgrunnlag,
+        subsumsjonslogg: Subsumsjonslogg,
+    ): Inntektsgrunnlag {
         return overstyrteArbeidsforhold.fold(inntektsgrunnlag) { acc, overstyring ->
             overstyring.overstyr(acc, subsumsjonslogg)
         }
@@ -40,16 +45,21 @@ class OverstyrArbeidsforhold(
     class ArbeidsforholdOverstyrt(
         internal val orgnummer: String,
         private val deaktivert: Boolean,
-        private val forklaring: String
+        private val forklaring: String,
     ) {
-        internal fun overstyr(inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg) = when (deaktivert) {
-            true -> inntektsgrunnlag.deaktiver(orgnummer, forklaring, subsumsjonslogg)
-            else -> inntektsgrunnlag.aktiver(orgnummer, forklaring, subsumsjonslogg)
-        }
+        internal fun overstyr(
+            inntektsgrunnlag: Inntektsgrunnlag,
+            subsumsjonslogg: Subsumsjonslogg,
+        ) =
+            when (deaktivert) {
+                true -> inntektsgrunnlag.deaktiver(orgnummer, forklaring, subsumsjonslogg)
+                else -> inntektsgrunnlag.aktiver(orgnummer, forklaring, subsumsjonslogg)
+            }
 
-        internal fun overstyr(opptjening: Opptjening) = when (deaktivert) {
-            true -> opptjening.deaktiver(orgnummer)
-            else -> opptjening.aktiver(orgnummer)
-        }
+        internal fun overstyr(opptjening: Opptjening) =
+            when (deaktivert) {
+                true -> opptjening.deaktiver(orgnummer)
+                else -> opptjening.aktiver(orgnummer)
+            }
     }
 }

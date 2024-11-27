@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import kotlin.properties.Delegates
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -9,9 +10,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
-import kotlin.properties.Delegates
 
-class Økonomi private constructor(
+class Økonomi
+private constructor(
     val grad: Prosentdel,
     val totalGrad: Prosentdel = grad,
     val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
@@ -29,13 +30,9 @@ class Økonomi private constructor(
         private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        fun sykdomsgrad(grad: Prosentdel) =
-            Økonomi(grad)
+        fun sykdomsgrad(grad: Prosentdel) = Økonomi(grad)
 
-        fun ikkeBetalt() = Økonomi(
-            grad = 0.prosent,
-            tilstand = Tilstand.IkkeBetalt
-        )
+        fun ikkeBetalt() = Økonomi(grad = 0.prosent, tilstand = Tilstand.IkkeBetalt)
 
         fun List<Økonomi>.totalSykdomsgrad(): Prosentdel {
             val økonomiList = totalSykdomsgrad(this)
@@ -43,33 +40,47 @@ class Økonomi private constructor(
         }
 
         private fun List<Økonomi>.beregningsgrunnlag() = map { it.beregningsgrunnlag }.summer()
-        private fun List<Økonomi>.tilkommet() = filter { it.beregningsgrunnlag == INGEN }.map { it.aktuellDagsinntekt }.summer()
 
-        private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
+        private fun List<Økonomi>.tilkommet() =
+            filter { it.beregningsgrunnlag == INGEN }.map { it.aktuellDagsinntekt }.summer()
+
+        private fun totalSykdomsgrad(
+            økonomiList: List<Økonomi>,
+            gradStrategi: (Økonomi) -> Prosentdel,
+        ): Prosentdel {
             val beregningsgrunnlag = økonomiList.beregningsgrunnlag()
             if (beregningsgrunnlag == INGEN) {
-                return (økonomiList.sumOf { gradStrategi(it).times(100.0) } / økonomiList.size).prosent
+                return (økonomiList.sumOf { gradStrategi(it).times(100.0) } / økonomiList.size)
+                    .prosent
             }
-            val tilkommet = økonomiList.firstNotNullOfOrNull { it.grunnbeløpgrense }?.let { grunnbeløp ->
-                // Er det litt rart at vi må justerte den tilkomne inntekten med grunnbeløpet?
-                val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
-                val ratio = (sykepengegrunnlagBegrenset6G ratio beregningsgrunnlag)
-                if (ratio > 0.prosent) økonomiList.tilkommet() * ratio.resiprok() else INGEN
-            } ?: INGEN
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.beregningsgrunnlag }, tilkommet, beregningsgrunnlag)
+            val tilkommet =
+                økonomiList
+                    .firstNotNullOfOrNull { it.grunnbeløpgrense }
+                    ?.let { grunnbeløp ->
+                        // Er det litt rart at vi må justerte den tilkomne inntekten med
+                        // grunnbeløpet?
+                        val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
+                        val ratio = (sykepengegrunnlagBegrenset6G ratio beregningsgrunnlag)
+                        if (ratio > 0.prosent) økonomiList.tilkommet() * ratio.resiprok() else INGEN
+                    } ?: INGEN
+            val totalgrad =
+                Inntekt.vektlagtGjennomsnitt(
+                    økonomiList.map { gradStrategi(it) to it.beregningsgrunnlag },
+                    tilkommet,
+                    beregningsgrunnlag,
+                )
             return totalgrad
         }
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
             val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::sykdomsgrad)
-            return økonomiList.map { økonomi: Økonomi ->
-                økonomi.kopierMed(totalgrad = totalgrad)
-            }
+            return økonomiList.map { økonomi: Økonomi -> økonomi.kopierMed(totalgrad = totalgrad) }
         }
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalGrad.erUnderGrensen() }
 
-        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
+        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
+            totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
 
         fun betal(økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
@@ -79,60 +90,93 @@ class Økonomi private constructor(
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.betal() }
 
-        private fun fordelBeløp(økonomiList: List<Økonomi>, utbetalingsgrad: Prosentdel): List<Økonomi> {
+        private fun fordelBeløp(
+            økonomiList: List<Økonomi>,
+            utbetalingsgrad: Prosentdel,
+        ): List<Økonomi> {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             val total = totalArbeidsgiver + totalPerson
-            if (total == INGEN) return økonomiList.map { økonomi -> økonomi.kopierMed(er6GBegrenset = false) }
+            if (total == INGEN)
+                return økonomiList.map { økonomi -> økonomi.kopierMed(er6GBegrenset = false) }
 
-            // todo: trenger ikke vite 6G hvis inntektene er redusert ihht. 6G når de settes på Økonomi
+            // todo: trenger ikke vite 6G hvis inntektene er redusert ihht. 6G når de settes på
+            // Økonomi
             val grunnbeløp = økonomiList.firstNotNullOf { it.grunnbeløpgrense }
             val beregningsgrunnlag = økonomiList.beregningsgrunnlag()
             val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
             val er6GBegrenset = beregningsgrunnlag > grunnbeløp
 
-            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
-            val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
+            val inntektstapSomSkalDekkesAvNAV =
+                maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
+            val fordelingRefusjon =
+                fordel(
+                    økonomiList,
+                    totalArbeidsgiver,
+                    inntektstapSomSkalDekkesAvNAV,
+                    { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) },
+                    arbeidsgiverBeløp,
+                )
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
-            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) }, personBeløp)
+            val fordelingPerson =
+                fordel(
+                    fordelingRefusjon,
+                    total - totalArbeidsgiverrefusjon,
+                    inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon,
+                    { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) },
+                    personBeløp,
+                )
             val totalPersonbeløp = totalPerson(fordelingPerson)
-            val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
+            val restbeløp =
+                inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
             val restfordeling = restfordeling(fordelingPerson, restbeløp)
             return restfordeling.map { økonomi -> økonomi.kopierMed(er6GBegrenset = er6GBegrenset) }
         }
 
         private fun restfordeling(økonomiList: List<Økonomi>, grense: Inntekt): List<Økonomi> {
-            // På grunn av ulike avrundinger mellom arbeidsgiverrefusjon og sykepengegrunnlag kan det oppstå
+            // På grunn av ulike avrundinger mellom arbeidsgiverrefusjon og sykepengegrunnlag kan
+            // det oppstå
             // differanse på 1 krone som da ville vært dumt å fordele på personbeløp
             // TODO: Finn en måte å fordele denne ene kronen på arbeidsgivere
-            if (grense == 1.daglig) return økonomiList.also {
-                sikkerlogg.info("Restbeløp på 1 krone")
-            }
+            if (grense == 1.daglig)
+                return økonomiList.also { sikkerlogg.info("Restbeløp på 1 krone") }
             var budsjett = grense
             var list = økonomiList
-            // Fordeler 1 krone per arbeidsforhold som skal ha en utbetaling uansett frem til hele potten er fordelt
+            // Fordeler 1 krone per arbeidsforhold som skal ha en utbetaling uansett frem til hele
+            // potten er fordelt
             while (budsjett > INGEN) {
-                list = list.map {
-                    val personbeløp = personBeløp(it)
-                    if (budsjett > INGEN && (arbeidsgiverBeløp(it) > INGEN || personbeløp > INGEN)) {
-                        budsjett -= 1.daglig
-                        it.kopierMed(personbeløp = personbeløp + 1.daglig)
-                    } else {
-                        it
+                list =
+                    list.map {
+                        val personbeløp = personBeløp(it)
+                        if (
+                            budsjett > INGEN &&
+                                (arbeidsgiverBeløp(it) > INGEN || personbeløp > INGEN)
+                        ) {
+                            budsjett -= 1.daglig
+                            it.kopierMed(personbeløp = personbeløp + 1.daglig)
+                        } else {
+                            it
+                        }
                     }
-                }
             }
             return list
-
         }
 
-        private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
-            return økonomiList
-                .reduserOver6G(grense, total, getter)
-                .fordel1Kr(grense, total, setter)
+        private fun fordel(
+            økonomiList: List<Økonomi>,
+            total: Inntekt,
+            grense: Inntekt,
+            setter: (Økonomi, Inntekt) -> Økonomi,
+            getter: (Økonomi) -> Inntekt,
+        ): List<Økonomi> {
+            return økonomiList.reduserOver6G(grense, total, getter).fordel1Kr(grense, total, setter)
         }
 
-        private fun List<Økonomi>.reduserOver6G(grense: Inntekt, total: Inntekt, getter: (Økonomi) -> Inntekt): List<Triple<Økonomi, Inntekt, Double>> {
+        private fun List<Økonomi>.reduserOver6G(
+            grense: Inntekt,
+            total: Inntekt,
+            getter: (Økonomi) -> Inntekt,
+        ): List<Triple<Økonomi, Inntekt, Double>> {
             val ratio = reduksjon(grense, total)
             return map {
                 val redusertBeløp = getter(it).times(ratio)
@@ -143,12 +187,17 @@ class Økonomi private constructor(
         }
 
         // fordeler 1 kr til hver av arbeidsgiverne som har mest i differanse i beløp
-        private fun List<Triple<Økonomi, Inntekt, Double>>.fordel1Kr(grense: Inntekt, total: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi): List<Økonomi> {
+        private fun List<Triple<Økonomi, Inntekt, Double>>.fordel1Kr(
+            grense: Inntekt,
+            total: Inntekt,
+            setter: (Økonomi, Inntekt) -> Økonomi,
+        ): List<Økonomi> {
             val maksimalt = total.coerceAtMost(grense)
             val rest = (maksimalt - map { it.second }.summer()).dagligInt
             val sortertEtterTap = sortedByDescending { (_, _, differanse) -> differanse }.take(rest)
             return map { (økonomi, beløp) ->
-                val ekstra = if (sortertEtterTap.any { (other) -> other === økonomi }) 1.daglig else INGEN
+                val ekstra =
+                    if (sortertEtterTap.any { (other) -> other === økonomi }) 1.daglig else INGEN
                 setter(økonomi, beløp + ekstra)
             }
         }
@@ -161,7 +210,8 @@ class Økonomi private constructor(
         private fun total(økonomiList: List<Økonomi>, strategi: (Økonomi) -> Inntekt): Inntekt =
             økonomiList.map { strategi(it) }.summer()
 
-        private fun totalArbeidsgiver(økonomiList: List<Økonomi>) = total(økonomiList, arbeidsgiverBeløp)
+        private fun totalArbeidsgiver(økonomiList: List<Økonomi>) =
+            total(økonomiList, arbeidsgiverBeløp)
 
         private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList, personBeløp)
 
@@ -180,12 +230,13 @@ class Økonomi private constructor(
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
                 er6GBegrenset = dto.er6GBegrenset,
-                tilstand = when {
-                    dto.arbeidsgiverbeløp == null && erAvvistDag -> Økonomi.Tilstand.Låst
-                    dto.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
-                    erAvvistDag -> Økonomi.Tilstand.LåstMedBeløp
-                    else -> Økonomi.Tilstand.HarBeløp
-                }
+                tilstand =
+                    when {
+                        dto.arbeidsgiverbeløp == null && erAvvistDag -> Økonomi.Tilstand.Låst
+                        dto.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
+                        erAvvistDag -> Økonomi.Tilstand.LåstMedBeløp
+                        else -> Økonomi.Tilstand.HarBeløp
+                    },
             )
         }
     }
@@ -194,14 +245,20 @@ class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, beregningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt, refusjonsbeløp: Inntekt): Økonomi =
+    fun inntekt(
+        aktuellDagsinntekt: Inntekt,
+        dekningsgrunnlag: Inntekt = aktuellDagsinntekt,
+        beregningsgrunnlag: Inntekt = aktuellDagsinntekt,
+        `6G`: Inntekt,
+        refusjonsbeløp: Inntekt,
+    ): Økonomi =
         tilstand.inntekt(
             økonomi = this,
             aktuellDagsinntekt = aktuellDagsinntekt,
             beregningsgrunnlag = beregningsgrunnlag,
             refusjonsbeløp = refusjonsbeløp,
             dekningsgrunnlag = dekningsgrunnlag,
-            `6G` = `6G`
+            `6G` = `6G`,
         )
 
     fun lås() = tilstand.lås(this)
@@ -216,7 +273,8 @@ class Økonomi private constructor(
     }
 
     private fun _build(builder: ØkonomiBuilder) {
-        builder.grad(grad.toDouble())
+        builder
+            .grad(grad.toDouble())
             .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp.daglig)
             .dekningsgrunnlag(dekningsgrunnlag.daglig)
             .totalGrad(totalGrad.toDouble())
@@ -229,12 +287,16 @@ class Økonomi private constructor(
             .tilstand(tilstand)
     }
 
-    // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre personen mer syk"
+    // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre
+    // personen mer syk"
     fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.toDouble().toInt())
-    // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
+
+    // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 %
+    // (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
 
     private fun utbetalingsgrad() = tilstand.utbetalingsgrad(this)
+
     private fun sykdomsgrad() = tilstand.sykdomsgrad(this)
 
     private fun betal() = tilstand.betal(this)
@@ -243,21 +305,23 @@ class Økonomi private constructor(
 
     private fun _betal(): Økonomi {
         val total = (dekningsgrunnlag * utbetalingsgrad()).rundTilDaglig()
-        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * utbetalingsgrad()).rundTilDaglig()
+        val gradertArbeidsgiverRefusjonsbeløp =
+            (arbeidsgiverRefusjonsbeløp * utbetalingsgrad()).rundTilDaglig()
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return kopierMed(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = (total - arbeidsgiverbeløp).coerceAtLeast(INGEN),
-            tilstand = Tilstand.HarBeløp
+            tilstand = Tilstand.HarBeløp,
         )
     }
 
     fun ikkeBetalt() = kopierMed(tilstand = Tilstand.IkkeBetalt)
 
-    internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when(område) {
-        Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.daglig?.toInt()
-        Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
-    }
+    internal fun dagligBeløpForFagområde(område: Fagområde): Int? =
+        when (område) {
+            Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.daglig?.toInt()
+            Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
+        }
 
     private fun kopierMed(
         grad: Prosentdel = this.grad,
@@ -271,23 +335,25 @@ class Økonomi private constructor(
         personbeløp: Inntekt? = this.personbeløp,
         er6GBegrenset: Boolean? = this.er6GBegrenset,
         tilstand: Tilstand = this.tilstand,
-    ) = Økonomi(
-        grad = grad,
-        totalGrad = totalgrad,
-        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
-        aktuellDagsinntekt = aktuellDagsinntekt,
-        beregningsgrunnlag = beregningsgrunnlag,
-        dekningsgrunnlag = dekningsgrunnlag,
-        grunnbeløpgrense = grunnbeløpgrense,
-        arbeidsgiverbeløp = arbeidsgiverbeløp,
-        personbeløp = personbeløp,
-        er6GBegrenset = er6GBegrenset,
-        tilstand = tilstand
-    )
+    ) =
+        Økonomi(
+            grad = grad,
+            totalGrad = totalgrad,
+            arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
+            aktuellDagsinntekt = aktuellDagsinntekt,
+            beregningsgrunnlag = beregningsgrunnlag,
+            dekningsgrunnlag = dekningsgrunnlag,
+            grunnbeløpgrense = grunnbeløpgrense,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+            er6GBegrenset = er6GBegrenset,
+            tilstand = tilstand,
+        )
 
     sealed class Tilstand {
 
         internal open fun utbetalingsgrad(økonomi: Økonomi) = sykdomsgrad(økonomi)
+
         internal open fun sykdomsgrad(økonomi: Økonomi) = økonomi.grad
 
         internal open fun builder(økonomi: Økonomi, builder: ØkonomiBuilder) {
@@ -300,13 +366,17 @@ class Økonomi private constructor(
             beregningsgrunnlag: Inntekt,
             refusjonsbeløp: Inntekt,
             dekningsgrunnlag: Inntekt,
-            `6G`: Inntekt
+            `6G`: Inntekt,
         ): Økonomi {
-            throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
+            throw IllegalStateException(
+                "Kan ikke sette inntekt i tilstand ${this::class.simpleName}"
+            )
         }
 
         internal open fun betal(økonomi: Økonomi): Økonomi {
-            throw IllegalStateException("Kan ikke beregne utbetaling i tilstand ${this::class.simpleName}")
+            throw IllegalStateException(
+                "Kan ikke beregne utbetaling i tilstand ${this::class.simpleName}"
+            )
         }
 
         internal open fun er6GBegrenset(økonomi: Økonomi): Boolean {
@@ -314,7 +384,9 @@ class Økonomi private constructor(
         }
 
         internal open fun lås(økonomi: Økonomi): Økonomi {
-            throw IllegalStateException("Kan ikke låse Økonomi i tilstand ${this::class.simpleName}")
+            throw IllegalStateException(
+                "Kan ikke låse Økonomi i tilstand ${this::class.simpleName}"
+            )
         }
 
         internal object KunGrad : Tilstand() {
@@ -323,7 +395,8 @@ class Økonomi private constructor(
                 økonomi._buildKunGrad(builder)
             }
 
-            override fun utbetalingsgrad(økonomi: Økonomi) = throw IllegalStateException("ingen utbetalingsgrad i KunGrad")
+            override fun utbetalingsgrad(økonomi: Økonomi) =
+                throw IllegalStateException("ingen utbetalingsgrad i KunGrad")
 
             override fun inntekt(
                 økonomi: Økonomi,
@@ -331,17 +404,18 @@ class Økonomi private constructor(
                 beregningsgrunnlag: Inntekt,
                 refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
-                `6G`: Inntekt
-            ) = økonomi.kopierMed(
-                grad = økonomi.grad,
-                totalgrad = økonomi.totalGrad,
-                arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
-                aktuellDagsinntekt = aktuellDagsinntekt,
-                beregningsgrunnlag = beregningsgrunnlag,
-                dekningsgrunnlag = dekningsgrunnlag,
-                grunnbeløpgrense = `6G`,
-                tilstand = HarInntekt
-            )
+                `6G`: Inntekt,
+            ) =
+                økonomi.kopierMed(
+                    grad = økonomi.grad,
+                    totalgrad = økonomi.totalGrad,
+                    arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
+                    aktuellDagsinntekt = aktuellDagsinntekt,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    dekningsgrunnlag = dekningsgrunnlag,
+                    grunnbeløpgrense = `6G`,
+                    tilstand = HarInntekt,
+                )
         }
 
         internal object IkkeBetalt : Tilstand() {
@@ -356,100 +430,110 @@ class Økonomi private constructor(
                 beregningsgrunnlag: Inntekt,
                 refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
-                `6G`: Inntekt
-            ) = økonomi.kopierMed(
-                grad = økonomi.grad,
-                totalgrad = økonomi.totalGrad,
-                arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
-                aktuellDagsinntekt = aktuellDagsinntekt,
-                beregningsgrunnlag = beregningsgrunnlag,
-                dekningsgrunnlag = dekningsgrunnlag,
-                grunnbeløpgrense = `6G`,
-                tilstand = HarInntektIkkeBetalt
-            )
+                `6G`: Inntekt,
+            ) =
+                økonomi.kopierMed(
+                    grad = økonomi.grad,
+                    totalgrad = økonomi.totalGrad,
+                    arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
+                    aktuellDagsinntekt = aktuellDagsinntekt,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    dekningsgrunnlag = dekningsgrunnlag,
+                    grunnbeløpgrense = `6G`,
+                    tilstand = HarInntektIkkeBetalt,
+                )
 
-            override fun betal(økonomi: Økonomi) = økonomi.kopierMed(
-                arbeidsgiverbeløp = INGEN,
-                personbeløp = INGEN,
-                tilstand = HarBeløp
-            )
+            override fun betal(økonomi: Økonomi) =
+                økonomi.kopierMed(
+                    arbeidsgiverbeløp = INGEN,
+                    personbeløp = INGEN,
+                    tilstand = HarBeløp,
+                )
         }
 
         object HarInntektIkkeBetalt : Tilstand() {
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
+
             override fun lås(økonomi: Økonomi) = økonomi.kopierMed(tilstand = Låst)
+
             override fun betal(økonomi: Økonomi) = økonomi._betal()
         }
 
         object HarInntekt : Tilstand() {
             override fun lås(økonomi: Økonomi) = økonomi.kopierMed(tilstand = Låst)
+
             override fun betal(økonomi: Økonomi) = økonomi._betal()
         }
 
         object HarBeløp : Tilstand() {
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
-
         }
 
         object Låst : Tilstand() {
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
+
             override fun lås(økonomi: Økonomi) = økonomi
-            override fun betal(økonomi: Økonomi) = økonomi.kopierMed(
-                arbeidsgiverbeløp = INGEN,
-                personbeløp = INGEN,
-                tilstand = LåstMedBeløp
-            )
+
+            override fun betal(økonomi: Økonomi) =
+                økonomi.kopierMed(
+                    arbeidsgiverbeløp = INGEN,
+                    personbeløp = INGEN,
+                    tilstand = LåstMedBeløp,
+                )
         }
 
         object LåstMedBeløp : Tilstand() {
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
+
             override fun lås(økonomi: Økonomi) = økonomi
+
             override fun er6GBegrenset(økonomi: Økonomi) = false
         }
     }
 
     class Builder : ØkonomiBuilder() {
-        fun build() = when (tilstand) {
-            is Tilstand.KunGrad -> Økonomi(grad.prosent)
-            else -> Økonomi(
-                grad.prosent,
-                totalGrad?.prosent!!,
-                arbeidsgiverRefusjonsbeløp?.daglig!!,
-                aktuellDagsinntekt?.daglig!!,
-                beregningsgrunnlag?.daglig!!,
-                dekningsgrunnlag?.daglig!!,
-                grunnbeløpgrense?.årlig,
-                arbeidsgiverbeløp?.daglig,
-                personbeløp?.daglig,
-                er6GBegrenset,
-                tilstand!!
-            )
-        }
+        fun build() =
+            when (tilstand) {
+                is Tilstand.KunGrad -> Økonomi(grad.prosent)
+                else ->
+                    Økonomi(
+                        grad.prosent,
+                        totalGrad?.prosent!!,
+                        arbeidsgiverRefusjonsbeløp?.daglig!!,
+                        aktuellDagsinntekt?.daglig!!,
+                        beregningsgrunnlag?.daglig!!,
+                        dekningsgrunnlag?.daglig!!,
+                        grunnbeløpgrense?.årlig,
+                        arbeidsgiverbeløp?.daglig,
+                        personbeløp?.daglig,
+                        er6GBegrenset,
+                        tilstand!!,
+                    )
+            }
     }
 
-    fun subsumsjonsdata() = Dekningsgrunnlagsubsumsjon(
-        årligInntekt = aktuellDagsinntekt.årlig,
-        årligDekningsgrunnlag = dekningsgrunnlag.årlig
-    )
+    fun subsumsjonsdata() =
+        Dekningsgrunnlagsubsumsjon(
+            årligInntekt = aktuellDagsinntekt.årlig,
+            årligDekningsgrunnlag = dekningsgrunnlag.årlig,
+        )
 
-    fun dto() = ØkonomiUtDto(
-        grad = grad.dto(),
-        totalGrad = totalGrad.dto(),
-        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dto(),
-        aktuellDagsinntekt = aktuellDagsinntekt.dto(),
-        beregningsgrunnlag = beregningsgrunnlag.dto(),
-        dekningsgrunnlag = dekningsgrunnlag.dto(),
-        grunnbeløpgrense = grunnbeløpgrense?.dto(),
-        arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
-        personbeløp = personbeløp?.dto(),
-        er6GBegrenset = er6GBegrenset
-    )
+    fun dto() =
+        ØkonomiUtDto(
+            grad = grad.dto(),
+            totalGrad = totalGrad.dto(),
+            arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dto(),
+            aktuellDagsinntekt = aktuellDagsinntekt.dto(),
+            beregningsgrunnlag = beregningsgrunnlag.dto(),
+            dekningsgrunnlag = dekningsgrunnlag.dto(),
+            grunnbeløpgrense = grunnbeløpgrense?.dto(),
+            arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
+            personbeløp = personbeløp?.dto(),
+            er6GBegrenset = er6GBegrenset,
+        )
 }
 
-data class Dekningsgrunnlagsubsumsjon(
-    val årligInntekt: Double,
-    val årligDekningsgrunnlag: Double
-)
+data class Dekningsgrunnlagsubsumsjon(val årligInntekt: Double, val årligDekningsgrunnlag: Double)
 
 abstract class ØkonomiBuilder {
     protected var grad by Delegates.notNull<Double>()
@@ -464,14 +548,9 @@ abstract class ØkonomiBuilder {
     protected var grunnbeløpgrense: Double? = null
     protected var tilstand: Økonomi.Tilstand? = null
 
+    fun grad(grad: Double): ØkonomiBuilder = apply { this.grad = grad }
 
-    fun grad(grad: Double): ØkonomiBuilder = apply {
-        this.grad = grad
-    }
-
-    fun tilstand(tilstand: Økonomi.Tilstand): ØkonomiBuilder = apply {
-        this.tilstand = tilstand
-    }
+    fun tilstand(tilstand: Økonomi.Tilstand): ØkonomiBuilder = apply { this.tilstand = tilstand }
 
     fun grunnbeløpsgrense(grunnbeløpgrense: Double?) = apply {
         this.grunnbeløpgrense = grunnbeløpgrense
@@ -485,9 +564,7 @@ abstract class ØkonomiBuilder {
         this.dekningsgrunnlag = dekningsgrunnlag
     }
 
-    fun totalGrad(totalGrad: Double?) = apply {
-        this.totalGrad = totalGrad
-    }
+    fun totalGrad(totalGrad: Double?) = apply { this.totalGrad = totalGrad }
 
     fun aktuellDagsinntekt(aktuellDagsinntekt: Double?) = apply {
         this.aktuellDagsinntekt = aktuellDagsinntekt
@@ -501,13 +578,9 @@ abstract class ØkonomiBuilder {
         this.arbeidsgiverbeløp = arbeidsgiverbeløp
     }
 
-    fun personbeløp(personbeløp: Double?) = apply {
-        this.personbeløp = personbeløp
-    }
+    fun personbeløp(personbeløp: Double?) = apply { this.personbeløp = personbeløp }
 
-    fun er6GBegrenset(er6GBegrenset: Boolean?) = apply {
-        this.er6GBegrenset = er6GBegrenset
-    }
+    fun er6GBegrenset(er6GBegrenset: Boolean?) = apply { this.er6GBegrenset = er6GBegrenset }
 }
 
 fun List<Økonomi>.betal() = Økonomi.betal(this)

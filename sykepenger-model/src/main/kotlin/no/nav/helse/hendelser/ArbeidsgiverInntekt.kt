@@ -11,15 +11,15 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.som
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
-    private val inntekter: List<MånedligInntekt>
+    private val inntekter: List<MånedligInntekt>,
 ) {
     internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         SkattSykepengegrunnlag(
@@ -27,20 +27,25 @@ class ArbeidsgiverInntekt(
             dato = skjæringstidspunkt,
             inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
             ansattPerioder = emptyList(),
-            tidsstempel = LocalDateTime.now()
+            tidsstempel = LocalDateTime.now(),
         )
 
     internal fun somInntektsmelding(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         Inntektsmelding(
             dato = skjæringstidspunkt,
             hendelseId = meldingsreferanseId,
-            beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }),
-            kilde = Inntektsmelding.Kilde.AOrdningen
+            beløp =
+                Skatteopplysning.omregnetÅrsinntekt(
+                    inntekter.map { it.somInntekt(meldingsreferanseId) }
+                ),
+            kilde = Inntektsmelding.Kilde.AOrdningen,
         )
 
     internal fun somEksterneSkatteinntekter() = inntekter.somEksterneSkatteinntekter()
 
-    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).årlig
+    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) =
+        Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) })
+            .årlig
 
     internal companion object {
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
@@ -49,16 +54,23 @@ class ArbeidsgiverInntekt(
             rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
             skjæringstidspunkt: LocalDate,
             meldingsreferanseId: UUID,
-            subsumsjonslogg: Subsumsjonslogg
+            subsumsjonslogg: Subsumsjonslogg,
         ): Inntektsgrunnlag {
-            val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
-            // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
-            val inntekterMedOpptjening = rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
+            val rapporterteInntekter =
+                this.associateBy({ it.arbeidsgiver }) {
+                    it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId)
+                }
+            // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert
+            // arbeidsforhold
+            val inntekterMedOpptjening =
+                rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) ->
+                    ikkeRapportert + rapporterteInntekter[orgnummer]
+                }
             return person.avklarSykepengegrunnlag(
                 aktivitetslogg,
                 skjæringstidspunkt,
                 inntekterMedOpptjening,
-                subsumsjonslogg
+                subsumsjonslogg,
             )
         }
 
@@ -77,23 +89,29 @@ class ArbeidsgiverInntekt(
         private val inntekt: Inntekt,
         private val type: Inntekttype,
         private val fordel: String,
-        private val beskrivelse: String
+        private val beskrivelse: String,
     ) {
-        internal fun somInntekt(meldingsreferanseId: UUID) = Skatteopplysning(
-            meldingsreferanseId,
-            inntekt,
-            yearMonth,
-            enumValueOf(type.name),
-            fordel,
-            beskrivelse
-        )
+        internal fun somInntekt(meldingsreferanseId: UUID) =
+            Skatteopplysning(
+                meldingsreferanseId,
+                inntekt,
+                yearMonth,
+                enumValueOf(type.name),
+                fordel,
+                beskrivelse,
+            )
 
         companion object {
-            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) =
+                this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN }
 
-            internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
+            internal fun List<MånedligInntekt>.somEksterneSkatteinntekter():
+                List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
                 return map {
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.månedlig)
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(
+                        it.yearMonth,
+                        it.inntekt.månedlig,
+                    )
                 }
             }
 
@@ -103,6 +121,7 @@ class ArbeidsgiverInntekt(
             }
 
             private fun List<MånedligInntekt>.minMonth() = minOfOrNull { it.yearMonth }
+
             private fun List<MånedligInntekt>.maxMonth() = maxOfOrNull { it.yearMonth }
         }
 
@@ -110,8 +129,7 @@ class ArbeidsgiverInntekt(
             LØNNSINNTEKT,
             NÆRINGSINNTEKT,
             PENSJON_ELLER_TRYGD,
-            YTELSE_FRA_OFFENTLIGE
+            YTELSE_FRA_OFFENTLIGE,
         }
     }
 }
-

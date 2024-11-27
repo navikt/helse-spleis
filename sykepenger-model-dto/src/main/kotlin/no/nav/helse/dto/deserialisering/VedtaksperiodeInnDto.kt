@@ -11,5 +11,5 @@ data class VedtaksperiodeInnDto(
     val behandlinger: BehandlingerInnDto,
     val egenmeldingsperioder: List<PeriodeDto>,
     val opprettet: LocalDateTime,
-    var oppdatert: LocalDateTime
+    var oppdatert: LocalDateTime,
 )

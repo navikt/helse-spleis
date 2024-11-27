@@ -12,5 +12,5 @@ data class RefusjonsopplysningInnDto(
     val tom: LocalDate?,
     val beløp: InntektbeløpDto.MånedligDouble,
     val avsender: AvsenderDto,
-    val tidsstempel: LocalDateTime
+    val tidsstempel: LocalDateTime,
 )

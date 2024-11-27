@@ -24,10 +24,15 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `Utbetaling endret får rett organisasjonsnummer ved overlappende sykemelding`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ANNET_ORGNUMMER, 1.januar(2016), 31.januar(2016), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ANNET_ORGNUMMER, 1.januar(2016), 1000.daglig, true)
-            )
+            ArbeidsgiverUtbetalingsperiode(
+                ANNET_ORGNUMMER,
+                1.januar(2016),
+                31.januar(2016),
+                100.prosent,
+                1000.daglig,
+            ),
+            inntektshistorikk =
+                listOf(Inntektsopplysning(ANNET_ORGNUMMER, 1.januar(2016), 1000.daglig, true)),
         )
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -60,19 +65,28 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
-        håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
+        håndterSøknad(
+            Sykdom(4.januar, 22.januar, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(20.januar, 22.januar),
+        )
         håndterInntektsmelding(listOf(4.januar til 19.januar))
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar))
         håndterSøknad(23.januar til 31.januar)
 
         assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(4.januar til 22.januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(4.januar til 19.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode),
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertEquals(4.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(23.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
-        assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(
+            listOf(4.januar til 19.januar),
+            inspektør.arbeidsgiverperiode(2.vedtaksperiode),
+        )
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -91,17 +105,29 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.desember, 31.desember, 10.prosent))
 
-        håndterInntektsmelding(listOf(13.november til 14.november, 1.desember til 14.desember), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(13.november til 14.november, 1.desember til 14.desember),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         // Arbeidsgiverperioden blir beregnet riktig
-        assertEquals(listOf(1.januar til 16.januar), inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode))
-        assertEquals(listOf(1.desember til 16.desember), inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode),
+        )
+        assertEquals(
+            listOf(1.desember til 16.desember),
+            inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode),
+        )
 
         assertEquals(2, inspektør(ORGNUMMER).antallUtbetalinger)
         assertEquals(1.januar til 31.januar, inspektør(ORGNUMMER).utbetaling(0).periode)
         assertEquals(13.november til 31.desember, inspektør(ORGNUMMER).utbetaling(1).periode)
-        assertNotEquals(inspektør(ORGNUMMER).utbetaling(0).korrelasjonsId, inspektør(ORGNUMMER).utbetaling(1).korrelasjonsId)
+        assertNotEquals(
+            inspektør(ORGNUMMER).utbetaling(0).korrelasjonsId,
+            inspektør(ORGNUMMER).utbetaling(1).korrelasjonsId,
+        )
     }
 }

@@ -42,14 +42,25 @@ internal class EnkelSubsumsjonTest {
         bokstav: Bokstav? = null,
         input: Map<String, Any> = emptyMap(),
         output: Map<String, Any> = emptyMap(),
-        kontekster: List<Subsumsjonskontekst> = listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeId")
-        )
+        kontekster: List<Subsumsjonskontekst> =
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeId"),
+            ),
     ) {
-        Subsumsjon.enkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
-            vurderinger.add(it)
-        }
+        Subsumsjon.enkelSubsumsjon(
+                utfall,
+                lovverk,
+                versjon,
+                paragraf,
+                ledd,
+                punktum,
+                bokstav,
+                input,
+                output,
+                kontekster,
+            )
+            .also { vurderinger.add(it) }
     }
 }

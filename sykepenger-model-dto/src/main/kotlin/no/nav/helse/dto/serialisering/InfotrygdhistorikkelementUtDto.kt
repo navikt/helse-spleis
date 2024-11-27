@@ -14,5 +14,5 @@ data class InfotrygdhistorikkelementUtDto(
     val personutbetalingsperioder: List<InfotrygdPersonutbetalingsperiodeUtDto>,
     val inntekter: List<InfotrygdInntektsopplysningUtDto>,
     val arbeidskategorikoder: Map<String, LocalDate>,
-    val oppdatert: LocalDateTime
+    val oppdatert: LocalDateTime,
 )

@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
+internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
@@ -99,7 +99,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode),
+        )
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
@@ -110,40 +113,66 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-        assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-            it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-        })
-        assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
+        val utbetalingstidslinje =
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
+        assertTrue(
+            utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN &&
+                    it is Utbetalingsdag.ArbeidsgiverperiodeDag
+            }
+        )
+        assertEquals(
+            1431.daglig,
+            utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp,
+        )
 
         assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
-        assertEquals("USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals("USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString())
+        assertEquals(
+            "USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
+        assertEquals(
+            "USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString(),
+        )
     }
 
     @Test
     fun `Korrigerende inntektsmelding med lik agp skal ikke ha varsel`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(1.januar til 16.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode),
+        )
         assertIngenVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-        assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-            it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-        })
-        assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
+        val utbetalingstidslinje =
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
+        assertTrue(
+            utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN &&
+                    it is Utbetalingsdag.ArbeidsgiverperiodeDag
+            }
+        )
+        assertEquals(
+            1431.daglig,
+            utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp,
+        )
     }
 
     @Test
     fun `Korrigerende inntektsmelding som strekker agp fremover`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
-        assertEquals(listOf(2.januar til 17.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(
+            listOf(2.januar til 17.januar),
+            inspektør.arbeidsgiverperiode(1.vedtaksperiode),
+        )
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -152,26 +181,42 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
+        val utbetalingstidslinje =
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje[1.januar] is Utbetalingsdag.Arbeidsdag)
         assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
-        assertTrue(utbetalingstidslinje.subset(2.januar til 17.januar).all {
-            it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-        })
-        assertEquals(1431.daglig, utbetalingstidslinje[18.januar].økonomi.inspektør.arbeidsgiverbeløp)
+        assertTrue(
+            utbetalingstidslinje.subset(2.januar til 17.januar).all {
+                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN &&
+                    it is Utbetalingsdag.ArbeidsgiverperiodeDag
+            }
+        )
+        assertEquals(
+            1431.daglig,
+            utbetalingstidslinje[18.januar].økonomi.inspektør.arbeidsgiverbeløp,
+        )
 
         assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
-        assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString())
+        assertEquals(
+            "ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
+        assertEquals(
+            "ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString(),
+        )
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`()  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars), avsendersystem = LPS)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -182,12 +227,15 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`()  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`() {
         nyttVedtak(10.januar til 31.januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
         håndterInntektsmelding(listOf(1.februar til 16.februar), avsendersystem = ALTINN)
-        assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -209,8 +257,14 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
+        assertEquals(
+            "SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
@@ -218,11 +272,22 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     @Test
     fun `her er det et gap mellom første og andre vedtaksperiode og mer enn 10 dager mellom agps, men mindre enn 16 dager mellom periodene`() {
         nyttVedtak(10.januar til 29.januar)
-        nyttVedtak(10.februar til 26.februar, arbeidsgiverperiode = listOf(10.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(
+            10.februar til 26.februar,
+            arbeidsgiverperiode = listOf(10.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(10.februar til 26.februar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        val inntektsmeldingId =
+            håndterInntektsmelding(
+                listOf(10.februar til 26.februar),
+                vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            )
+        assertEquals(
+            "SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
@@ -234,7 +299,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         forlengVedtak(31.januar til 31.januar)
         forlengVedtak(februar)
         håndterInntektsmelding(listOf(1.februar til 16.februar), avsendersystem = LPS)
-        assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -260,7 +328,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         val revurdering1Vedtaksperiode = inspektør.utbetaling(3)
         revurdering1Vedtaksperiode.also { utbetalingInspektør ->
-            assertEquals(revurdering1Vedtaksperiode.korrelasjonsId, utbetalingFebruar.korrelasjonsId)
+            assertEquals(
+                revurdering1Vedtaksperiode.korrelasjonsId,
+                utbetalingFebruar.korrelasjonsId,
+            )
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
             utbetalingInspektør.arbeidsgiverOppdrag.inspektør.also { oppdragInspektør ->
@@ -271,15 +342,24 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         }
         val revurdering2Vedtaksperiode = inspektør.utbetaling(4)
         revurdering2Vedtaksperiode.also { utbetalingInspektør ->
-            assertNotEquals(revurdering2Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
+            assertNotEquals(
+                revurdering2Vedtaksperiode.korrelasjonsId,
+                revurdering1Vedtaksperiode.korrelasjonsId,
+            )
             assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
         }
         val revurdering3Vedtaksperiode = inspektør.utbetaling(5)
         revurdering3Vedtaksperiode.also { utbetalingInspektør ->
-            assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
-            assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering2Vedtaksperiode.korrelasjonsId)
+            assertNotEquals(
+                revurdering3Vedtaksperiode.korrelasjonsId,
+                revurdering1Vedtaksperiode.korrelasjonsId,
+            )
+            assertNotEquals(
+                revurdering3Vedtaksperiode.korrelasjonsId,
+                revurdering2Vedtaksperiode.korrelasjonsId,
+            )
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             utbetalingInspektør.arbeidsgiverOppdrag[0].inspektør.also { linjeInspektør ->
@@ -301,7 +381,15 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-        assertEquals(INNTEKT * 1.1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.omregnetÅrsinntekt)
+        assertEquals(
+            INNTEKT * 1.1,
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør
+                .inntektsgrunnlag
+                .inspektør
+                .omregnetÅrsinntekt,
+        )
     }
 
     @Test
@@ -314,7 +402,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-        assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"), overstyringerIgangsatt)
+        assertEquals(
+            listOf("KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"),
+            overstyringerIgangsatt,
+        )
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
     }
 
@@ -323,11 +414,20 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar til 31.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         val agpFør = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
-        håndterInntektsmelding(listOf(12.januar til 28.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(12.januar til 28.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         val agpEtter = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
 
-        assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 10.januar til 26.januar)), agpFør)
-        assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 12.januar til 28.januar)), agpEtter)
+        assertEquals(
+            Arbeidsgiverperiode(listOf(1.januar til 5.januar, 10.januar til 26.januar)),
+            agpFør,
+        )
+        assertEquals(
+            Arbeidsgiverperiode(listOf(1.januar til 5.januar, 12.januar til 28.januar)),
+            agpEtter,
+        )
 
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
 
@@ -343,15 +443,24 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     fun `arbeidsgiver korrigerer AGP ved å stykke den opp`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(1.januar til 15.januar, 20.januar.somPeriode()))
-        assertEquals("SSSSSHH SSSSSHH SAAAAHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "SSSSSHH SSSSSHH SAAAAHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `arbeidsgiver korrigerer AGP men første og siste dag er lik`() {
-        nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar))
+        nyttVedtak(
+            januar,
+            arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar),
+        )
         håndterInntektsmelding(listOf(1.januar til 8.januar, 13.januar til 21.januar))
-        assertEquals("SSSSSHH SAAAAGG SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "SSSSSHH SAAAAGG SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
     }
 
@@ -362,7 +471,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(5.januar til 20.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-        assertEquals("AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
     }
 
     @Test
@@ -374,7 +486,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
 
-        assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
@@ -388,7 +503,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterInntektsmelding(listOf(1.februar til 16.februar), avsendersystem = ALTINN)
 
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(
+            "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())

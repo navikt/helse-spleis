@@ -25,13 +25,23 @@ internal class MessageMediatorTest {
 
     @Test
     fun søknader() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100)))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))
+        )
         assertTrue(hendelseMediator.lestNySøknad)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadArbeidsgiver(listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSøknadArbeidsgiver(
+                listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))
+            )
+        )
         assertTrue(hendelseMediator.lestSendtSøknadArbeidsgiver)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder = listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSøknadNav(
+                perioder = listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))
+            )
+        )
         assertTrue(hendelseMediator.lestSendtSøknad)
     }
 
@@ -39,9 +49,10 @@ internal class MessageMediatorTest {
     fun inntektsmeldinger() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagInntektsmelding(
-            listOf(Periode(LocalDate.now(), LocalDate.now())),
-            LocalDate.now()
-        ))
+                listOf(Periode(LocalDate.now(), LocalDate.now())),
+                LocalDate.now(),
+            )
+        )
         assertTrue(hendelseMediator.lestInntektsmelding)
     }
 
@@ -53,7 +64,9 @@ internal class MessageMediatorTest {
 
     @Test
     fun påminnelser() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagPåminnelse(UUID.randomUUID(), TilstandType.START))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagPåminnelse(UUID.randomUUID(), TilstandType.START)
+        )
         assertTrue(hendelseMediator.lestPåminnelse)
     }
 
@@ -77,34 +90,69 @@ internal class MessageMediatorTest {
 
     @Test
     fun utbetalingpåminnelse() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingpåminnelse(UUID.randomUUID(), Utbetalingstatus.IKKE_UTBETALT))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingpåminnelse(
+                UUID.randomUUID(),
+                Utbetalingstatus.IKKE_UTBETALT,
+            )
+        )
         assertTrue(hendelseMediator.lestutbetalingpåminnelse)
     }
 
     @Test
     fun simuleringer() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, SimuleringMessage.Simuleringstatus.OK, UUID.randomUUID()))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(
+                UUID.randomUUID(),
+                TilstandType.START,
+                SimuleringMessage.Simuleringstatus.OK,
+                UUID.randomUUID(),
+            )
+        )
         assertTrue(hendelseMediator.lestSimulering) { "Skal lese OK simulering" }
         hendelseMediator.reset()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL, UUID.randomUUID()))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(
+                UUID.randomUUID(),
+                TilstandType.START,
+                SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL,
+                UUID.randomUUID(),
+            )
+        )
         assertTrue(hendelseMediator.lestSimulering) { "Skal lese simulering med feil" }
         hendelseMediator.reset()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT, UUID.randomUUID()))
-        assertTrue(hendelseMediator.lestSimulering) { "Kan lese simuleringhendelse når Oppdrag/UR er stengt" }
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(
+                UUID.randomUUID(),
+                TilstandType.START,
+                SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT,
+                UUID.randomUUID(),
+            )
+        )
+        assertTrue(hendelseMediator.lestSimulering) {
+            "Kan lese simuleringhendelse når Oppdrag/UR er stengt"
+        }
         hendelseMediator.reset()
     }
 
     @Test
     fun utbetalingshistorikk() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), TilstandType.START))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), TilstandType.START)
+        )
         assertTrue(hendelseMediator.lestUtbetalingshistorikk)
     }
 
     @Test
     fun `ignorerer gammel utbetalingshistorikk`() {
-        val message = meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), TilstandType.START, besvart = LocalDateTime.now().minusHours(2))
+        val message =
+            meldingsfabrikk.lagUtbetalingshistorikk(
+                UUID.randomUUID(),
+                TilstandType.START,
+                besvart = LocalDateTime.now().minusHours(2),
+            )
         testRapid.sendTestMessage(message)
         assertFalse(hendelseMediator.lestUtbetalingshistorikk)
     }
@@ -117,17 +165,21 @@ internal class MessageMediatorTest {
                 skjæringstidspunkt = 1.januar,
                 tilstand = TilstandType.START,
                 inntekterForSykepengegrunnlag = emptyList(),
-                inntekterForOpptjeningsvurdering = listOf(
-                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
-                        måned = YearMonth.of(2017, 12),
-                        inntekter = listOf(
-                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
-                                AbstractEndToEndMediatorTest.ORGNUMMER
-                            ))
-                    )),
+                inntekterForOpptjeningsvurdering =
+                    listOf(
+                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                            måned = YearMonth.of(2017, 12),
+                            inntekter =
+                                listOf(
+                                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning
+                                        .Inntekt(32000.0, AbstractEndToEndMediatorTest.ORGNUMMER)
+                                ),
+                        )
+                    ),
                 arbeidsforhold = emptyList(),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
-            ))
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            )
+        )
         assertTrue(hendelseMediator.lestVilkårsgrunnlag)
     }
 
@@ -141,16 +193,17 @@ internal class MessageMediatorTest {
     fun utbetalingsgodkjenning() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingsgodkjenning(
-            vedtaksperiodeId = UUID.randomUUID(),
-            utbetalingId = UUID.randomUUID(),
-            tilstand = TilstandType.START,
-            utbetalingGodkjent = true,
-            saksbehandlerIdent = "en_saksbehandler",
-            saksbehandlerEpost = "en_saksbehandler@ikke.no",
-            automatiskBehandling = false,
-            makstidOppnådd = false,
-            godkjenttidspunkt = LocalDateTime.now()
-        ))
+                vedtaksperiodeId = UUID.randomUUID(),
+                utbetalingId = UUID.randomUUID(),
+                tilstand = TilstandType.START,
+                utbetalingGodkjent = true,
+                saksbehandlerIdent = "en_saksbehandler",
+                saksbehandlerEpost = "en_saksbehandler@ikke.no",
+                automatiskBehandling = false,
+                makstidOppnådd = false,
+                godkjenttidspunkt = LocalDateTime.now(),
+            )
+        )
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
     }
 
@@ -158,10 +211,11 @@ internal class MessageMediatorTest {
     fun utbetaling() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
-            fagsystemId = "qwer1234",
-            utbetalingId = UUID.randomUUID().toString(),
-            utbetalingOK = true
-        ))
+                fagsystemId = "qwer1234",
+                utbetalingId = UUID.randomUUID().toString(),
+                utbetalingOK = true,
+            )
+        )
         assertTrue(hendelseMediator.lestUtbetaling)
     }
 
@@ -190,7 +244,8 @@ internal class MessageMediatorTest {
     }
 
     private companion object {
-        private val meldingsfabrikk = TestMessageFactory("12121278911", "orgnr", 31000.0, 12.desember(1912))
+        private val meldingsfabrikk =
+            TestMessageFactory("12121278911", "orgnr", 31000.0, 12.desember(1912))
         private val testRapid = TestRapid()
         private val hendelseMediator = TestHendelseMediator()
 
@@ -198,7 +253,7 @@ internal class MessageMediatorTest {
             MessageMediator(
                 rapidsConnection = testRapid,
                 hendelseRepository = mockk(relaxed = true),
-                hendelseMediator = hendelseMediator
+                hendelseMediator = hendelseMediator,
             )
         }
     }

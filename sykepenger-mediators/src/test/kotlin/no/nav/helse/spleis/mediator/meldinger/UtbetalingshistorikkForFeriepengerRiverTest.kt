@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import java.time.LocalDateTime
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
 
 internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
@@ -14,11 +14,12 @@ internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
-         assertNoErrors(json)
+        assertNoErrors(json)
     }
 
     @Language("JSON")
-    private val json = """
+    private val json =
+        """
     {
       "@event_name": "behov",
       "@id": "4FA6DAC0-7EB1-42F8-A208-E89DB61D6A79",

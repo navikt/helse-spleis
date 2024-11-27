@@ -59,18 +59,18 @@ internal abstract class AbstractObservableTest {
     protected lateinit var person: Person
     internal lateinit var observatør: TestObservatør
 
-    private val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this.vedtaksperiode(orgnummer) }
-    private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
+    private val Int.vedtaksperiode: IdInnhenter
+        get() = IdInnhenter { orgnummer -> this.vedtaksperiode(orgnummer) }
+
+    private fun Int.vedtaksperiode(orgnummer: String) =
+        observatør.vedtaksperiode(orgnummer, this - 1)
 
     protected fun sykmelding(
         id: UUID = SYKMELDING_ID,
         sykeperioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(FOM, TOM)),
-        orgnummer: String = ORGNUMMER
-    ): Sykmelding = Sykmelding(
-        meldingsreferanseId = id,
-        orgnummer = orgnummer,
-        sykeperioder = sykeperioder
-    )
+        orgnummer: String = ORGNUMMER,
+    ): Sykmelding =
+        Sykmelding(meldingsreferanseId = id, orgnummer = orgnummer, sykeperioder = sykeperioder)
 
     protected fun søknad(
         id: UUID = SØKNAD_ID,
@@ -79,87 +79,118 @@ internal abstract class AbstractObservableTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate = TOM.plusDays(1),
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
-        egenmeldinger: List<Periode> = emptyList()
-    ): Søknad = Søknad(
-        meldingsreferanseId = id,
-        orgnummer = orgnummer,
-        perioder = listOf(*perioder),
-        andreInntektskilder = andreInntektskilder,
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false,
-        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
-        permittert = false,
-        merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = sykmeldingSkrevet,
-        opprinneligSendt = null,
-        utenlandskSykmelding = false,
-        arbeidUtenforNorge = false,
-        sendTilGosys = false,
-        yrkesskade = false,
-        egenmeldinger = egenmeldinger,
-        søknadstype = Søknad.Søknadstype.Arbeidstaker,
-        registrert = LocalDateTime.now(),
-        tilkomneInntekter = emptyList()
-    )
+        egenmeldinger: List<Periode> = emptyList(),
+    ): Søknad =
+        Søknad(
+            meldingsreferanseId = id,
+            orgnummer = orgnummer,
+            perioder = listOf(*perioder),
+            andreInntektskilder = andreInntektskilder,
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false,
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
+            permittert = false,
+            merknaderFraSykmelding = emptyList(),
+            sykmeldingSkrevet = sykmeldingSkrevet,
+            opprinneligSendt = null,
+            utenlandskSykmelding = false,
+            arbeidUtenforNorge = false,
+            sendTilGosys = false,
+            yrkesskade = false,
+            egenmeldinger = egenmeldinger,
+            søknadstype = Søknad.Søknadstype.Arbeidstaker,
+            registrert = LocalDateTime.now(),
+            tilkomneInntekter = emptyList(),
+        )
 
-    protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(
-        UUID.randomUUID(),
-        InfotrygdhistorikkElement.opprett(
-            oppdatert = LocalDateTime.now(),
-            hendelseId = UUID.randomUUID(),
-            perioder = emptyList(),
-            inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap()
-        ),
-        besvart = LocalDateTime.now()
-    )
+    protected fun utbetalinghistorikk() =
+        UtbetalingshistorikkEtterInfotrygdendring(
+            UUID.randomUUID(),
+            InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+            ),
+            besvart = LocalDateTime.now(),
+        )
 
     protected fun inntektsmelding(
         id: UUID = INNTEKTSMELDING_ID,
         arbeidsgiverperioder: List<Periode> = listOf(Periode(FOM, TOM)),
         beregnetInntekt: Inntekt = INNTEKT,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        førsteFraværsdag: LocalDate =
+            arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
+        refusjon: Inntektsmelding.Refusjon =
+            Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
         harFlereInntektsmeldinger: Boolean = false,
-    ): Inntektsmelding = Inntektsmelding(
-        meldingsreferanseId = id,
-        refusjon = refusjon,
-        orgnummer = orgnummer,
-        beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
-        mottatt = LocalDateTime.now()
-    )
+    ): Inntektsmelding =
+        Inntektsmelding(
+            meldingsreferanseId = id,
+            refusjon = refusjon,
+            orgnummer = orgnummer,
+            beregnetInntekt = beregnetInntekt,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
+            mottatt = LocalDateTime.now(),
+        )
 
     protected fun vilkårsgrunnlag(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus =
+            Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1), type = Arbeidsforholdtype.ORDINÆRT)),
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = inntektperioderForSykepengegrunnlag {
-                        Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
-                            ORGNUMMER inntekt INNTEKT
-                        }
-                    }),
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(listOf(
-            ArbeidsgiverInntekt(ORGNUMMER, listOf(ArbeidsgiverInntekt.MånedligInntekt(YearMonth.from(FOM.minusMonths(1)),
-                INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "kontantytelse", "fastloenn")))
-        ))
-    ): Vilkårsgrunnlag = Vilkårsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        skjæringstidspunkt = FOM,
-        orgnummer = orgnummer,
-        medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
-        inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-        arbeidsforhold = arbeidsforhold
-    )
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer,
+                    FOM.minusYears(1),
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                )
+            ),
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag =
+            InntektForSykepengegrunnlag(
+                inntekter =
+                    inntektperioderForSykepengegrunnlag {
+                        Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter
+                            {
+                                ORGNUMMER inntekt INNTEKT
+                            }
+                    }
+            ),
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering =
+            InntekterForOpptjeningsvurdering(
+                listOf(
+                    ArbeidsgiverInntekt(
+                        ORGNUMMER,
+                        listOf(
+                            ArbeidsgiverInntekt.MånedligInntekt(
+                                YearMonth.from(FOM.minusMonths(1)),
+                                INNTEKT,
+                                ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                                "kontantytelse",
+                                "fastloenn",
+                            )
+                        ),
+                    )
+                )
+            ),
+    ): Vilkårsgrunnlag =
+        Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+            skjæringstidspunkt = FOM,
+            orgnummer = orgnummer,
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
+            arbeidsforhold = arbeidsforhold,
+        )
 
     protected fun ytelser(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
@@ -168,10 +199,11 @@ internal abstract class AbstractObservableTest {
         pleiepenger: List<GradertPeriode> = emptyList(),
         omsorgspenger: List<GradertPeriode> = emptyList(),
         opplæringspenger: List<GradertPeriode> = emptyList(),
-        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> =
+            emptyList(),
         orgnummer: String = ORGNUMMER,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList()
+        dagpenger: List<Periode> = emptyList(),
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -180,20 +212,12 @@ internal abstract class AbstractObservableTest {
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
             svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapspenger),
-            pleiepenger = Pleiepenger(
-                perioder = pleiepenger
-            ),
-            omsorgspenger = Omsorgspenger(
-                perioder = omsorgspenger
-            ),
-            opplæringspenger = Opplæringspenger(
-                perioder = opplæringspenger
-            ),
-            institusjonsopphold = Institusjonsopphold(
-                perioder = institusjonsoppholdsperioder
-            ),
+            pleiepenger = Pleiepenger(perioder = pleiepenger),
+            omsorgspenger = Omsorgspenger(perioder = omsorgspenger),
+            opplæringspenger = Opplæringspenger(perioder = opplæringspenger),
+            institusjonsopphold = Institusjonsopphold(perioder = institusjonsoppholdsperioder),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-            dagpenger = Dagpenger(dagpenger)
+            dagpenger = Dagpenger(dagpenger),
         )
     }
 
@@ -205,7 +229,7 @@ internal abstract class AbstractObservableTest {
         tom: LocalDate = TOM,
         fagsystemId: String,
         fagområde: String,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
@@ -216,46 +240,54 @@ internal abstract class AbstractObservableTest {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringsResultat = SimuleringResultatDto(
-                totalbeløp = 2000,
-                perioder = listOf(
-                    SimuleringResultatDto.SimulertPeriode(
-                        fom = fom,
-                        tom = tom,
-                        utbetalinger = listOf(
-                            SimuleringResultatDto.SimulertUtbetaling(
-                                forfallsdato = tom.plusDays(1),
-                                utbetalesTil = SimuleringResultatDto.Mottaker(
-                                    id = orgnummer,
-                                    navn = "Org Orgesen AS"
-                                ),
-                                feilkonto = false,
-                                detaljer = listOf(
-                                    SimuleringResultatDto.Detaljer(
-                                        fom = fom,
-                                        tom = tom,
-                                        konto = "81549300",
-                                        beløp = 2000,
-                                        klassekode = SimuleringResultatDto.Klassekode(
-                                            kode = "SPREFAG-IOP",
-                                            beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
-                                        ),
-                                        uføregrad = 100,
-                                        utbetalingstype = "YTEL",
-                                        tilbakeføring = false,
-                                        sats = SimuleringResultatDto.Sats(
-                                            sats = 1000.0,
-                                            antall = 2,
-                                            type = "DAG"
-                                        ),
-                                        refunderesOrgnummer = orgnummer
-                                    )
-                                )
+            simuleringsResultat =
+                SimuleringResultatDto(
+                    totalbeløp = 2000,
+                    perioder =
+                        listOf(
+                            SimuleringResultatDto.SimulertPeriode(
+                                fom = fom,
+                                tom = tom,
+                                utbetalinger =
+                                    listOf(
+                                        SimuleringResultatDto.SimulertUtbetaling(
+                                            forfallsdato = tom.plusDays(1),
+                                            utbetalesTil =
+                                                SimuleringResultatDto.Mottaker(
+                                                    id = orgnummer,
+                                                    navn = "Org Orgesen AS",
+                                                ),
+                                            feilkonto = false,
+                                            detaljer =
+                                                listOf(
+                                                    SimuleringResultatDto.Detaljer(
+                                                        fom = fom,
+                                                        tom = tom,
+                                                        konto = "81549300",
+                                                        beløp = 2000,
+                                                        klassekode =
+                                                            SimuleringResultatDto.Klassekode(
+                                                                kode = "SPREFAG-IOP",
+                                                                beskrivelse =
+                                                                    "Sykepenger, Refusjon arbeidsgiver",
+                                                            ),
+                                                        uføregrad = 100,
+                                                        utbetalingstype = "YTEL",
+                                                        tilbakeføring = false,
+                                                        sats =
+                                                            SimuleringResultatDto.Sats(
+                                                                sats = 1000.0,
+                                                                antall = 2,
+                                                                type = "DAG",
+                                                            ),
+                                                        refunderesOrgnummer = orgnummer,
+                                                    )
+                                                ),
+                                        )
+                                    ),
                             )
-                        )
-                    )
-                )
-            )
+                        ),
+                ),
         )
 
     protected fun utbetalingsgodkjenning(
@@ -263,25 +295,26 @@ internal abstract class AbstractObservableTest {
         utbetalingGodkjent: Boolean = true,
         orgnummer: String = ORGNUMMER,
         automatiskBehandling: Boolean = false,
-        utbetalingId: UUID
-    ) = Utbetalingsgodkjenning(
-        meldingsreferanseId = UUID.randomUUID(),
-        organisasjonsnummer = orgnummer,
-        utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        saksbehandler = "Ola Nordmann",
-        saksbehandlerEpost = "ola.nordmann@nav.no",
-        utbetalingGodkjent = utbetalingGodkjent,
-        godkjenttidspunkt = LocalDateTime.now(),
-        automatiskBehandling = automatiskBehandling,
-    )
+        utbetalingId: UUID,
+    ) =
+        Utbetalingsgodkjenning(
+            meldingsreferanseId = UUID.randomUUID(),
+            organisasjonsnummer = orgnummer,
+            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+            saksbehandler = "Ola Nordmann",
+            saksbehandlerEpost = "ola.nordmann@nav.no",
+            utbetalingGodkjent = utbetalingGodkjent,
+            godkjenttidspunkt = LocalDateTime.now(),
+            automatiskBehandling = automatiskBehandling,
+        )
 
     protected fun utbetaling(
         fagsystemId: String,
         status: Oppdragstatus = AKSEPTERT,
         orgnummer: String = ORGNUMMER,
         meldingsreferanseId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = meldingsreferanseId,
@@ -291,11 +324,10 @@ internal abstract class AbstractObservableTest {
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
+            overføringstidspunkt = LocalDateTime.now(),
         )
 }
 
 internal fun interface IdInnhenter {
     fun id(orgnummer: String): UUID
 }
-

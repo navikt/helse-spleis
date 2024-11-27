@@ -15,7 +15,7 @@ interface UtbetalingObserver {
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String,
-        arbeidsgiverFagsystemId: String
+        arbeidsgiverFagsystemId: String,
     )
 
     fun utbetalingUtbetalt(
@@ -33,9 +33,8 @@ interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        ident: String
-    ) {
-    }
+        ident: String,
+    ) {}
 
     fun utbetalingUtenUtbetaling(
         id: UUID,
@@ -52,9 +51,8 @@ interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        epost: String
-    ) {
-    }
+        epost: String,
+    ) {}
 
     fun utbetalingEndret(
         id: UUID,
@@ -63,9 +61,8 @@ interface UtbetalingObserver {
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetalingstatus,
         nesteTilstand: Utbetalingstatus,
-        korrelasjonsId: UUID
-    ) {
-    }
+        korrelasjonsId: UUID,
+    ) {}
 
     fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {}
 }

@@ -21,7 +21,9 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `hensyntar tidligere arbeidsgivere fra IT`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT)
+        )
         nyPeriode(mars, a1)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -38,7 +40,9 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `hensyntar ikke senere arbeidsgivere fra IT`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT)
+        )
         nyPeriode(mars, a1)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -65,9 +69,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         // oppretter forlengelse fom 182 dager etter maksdato: denne blir kastet til Infotrygd
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
         val nestSiste = observatør.sisteVedtaksperiode()
-        assertSisteTilstand(nestSiste, TIL_INFOTRYGD) {
-            "Disse periodene skal kastes ut pr nå"
-        }
+        assertSisteTilstand(nestSiste, TIL_INFOTRYGD) { "Disse periodene skal kastes ut pr nå" }
         forrigePeriode = nyPeriode(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
         assertNotEquals(nestSiste, siste)
@@ -87,9 +89,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
         assertFunksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato", siste.filter())
-        assertSisteTilstand(siste, TIL_INFOTRYGD) {
-            "Disse periodene skal kastes ut pr nå"
-        }
+        assertSisteTilstand(siste, TIL_INFOTRYGD) { "Disse periodene skal kastes ut pr nå" }
     }
 
     private fun nyPeriode(forrigePeriode: Periode): Periode {

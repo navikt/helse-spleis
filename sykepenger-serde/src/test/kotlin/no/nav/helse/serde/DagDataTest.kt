@@ -18,7 +18,8 @@ internal class DagDataTest {
     @Test
     fun `deserialisere og serialisere enkeltdag`() {
         @Language("JSON")
-        val json = """{
+        val json =
+            """{
           "dato": "2018-01-01",
           "fom": null,
           "tom": null,
@@ -34,28 +35,36 @@ internal class DagDataTest {
         }"""
 
         val actual = serdeObjectMapper.readValue<DagData>(json)
-        val expected = DagData(
-            type = JsonDagType.SYKEDAG,
-            kilde = KildeData(
-                type = "Søknad",
-                id = UUID.fromString("9d46a9e9-1e40-4f0f-be22-f6d7ef8f427e"),
-                tidsstempel = LocalDateTime.parse("2018-01-01T01:00:00.123")
-            ),
-            grad = 100.0,
-            other = null,
-            melding = null,
-            dato = LocalDate.of(2018, 1, 1),
-            fom = null,
-            tom = null
-        )
+        val expected =
+            DagData(
+                type = JsonDagType.SYKEDAG,
+                kilde =
+                    KildeData(
+                        type = "Søknad",
+                        id = UUID.fromString("9d46a9e9-1e40-4f0f-be22-f6d7ef8f427e"),
+                        tidsstempel = LocalDateTime.parse("2018-01-01T01:00:00.123"),
+                    ),
+                grad = 100.0,
+                other = null,
+                melding = null,
+                dato = LocalDate.of(2018, 1, 1),
+                fom = null,
+                tom = null,
+            )
 
         assertEquals(expected, actual)
-        JSONAssert.assertEquals(json, serdeObjectMapper.writeValueAsString(actual), JSONCompareMode.NON_EXTENSIBLE)
+        JSONAssert.assertEquals(
+            json,
+            serdeObjectMapper.writeValueAsString(actual),
+            JSONCompareMode.NON_EXTENSIBLE,
+        )
     }
+
     @Test
     fun `deserialisere og serialisere flere dager`() {
         @Language("JSON")
-        val json = """{
+        val json =
+            """{
           "fom": "2018-01-01",
           "tom": "2018-01-10",
           "dato": null,
@@ -71,22 +80,28 @@ internal class DagDataTest {
         }"""
 
         val actual = serdeObjectMapper.readValue<DagData>(json)
-        val expected = DagData(
-            type = JsonDagType.SYKEDAG,
-            kilde = KildeData(
-                type = "Søknad",
-                id = UUID.fromString("9d46a9e9-1e40-4f0f-be22-f6d7ef8f427e"),
-                tidsstempel = LocalDateTime.parse("2018-01-01T01:00:00.123")
-            ),
-            grad = 100.0,
-            other = null,
-            melding = null,
-            dato = null,
-            fom = LocalDate.of(2018, 1, 1),
-            tom = LocalDate.of(2018, 1, 10)
-        )
+        val expected =
+            DagData(
+                type = JsonDagType.SYKEDAG,
+                kilde =
+                    KildeData(
+                        type = "Søknad",
+                        id = UUID.fromString("9d46a9e9-1e40-4f0f-be22-f6d7ef8f427e"),
+                        tidsstempel = LocalDateTime.parse("2018-01-01T01:00:00.123"),
+                    ),
+                grad = 100.0,
+                other = null,
+                melding = null,
+                dato = null,
+                fom = LocalDate.of(2018, 1, 1),
+                tom = LocalDate.of(2018, 1, 10),
+            )
 
         assertEquals(expected, actual)
-        JSONAssert.assertEquals(json, serdeObjectMapper.writeValueAsString(actual), JSONCompareMode.NON_EXTENSIBLE)
+        JSONAssert.assertEquals(
+            json,
+            serdeObjectMapper.writeValueAsString(actual),
+            JSONCompareMode.NON_EXTENSIBLE,
+        )
     }
 }

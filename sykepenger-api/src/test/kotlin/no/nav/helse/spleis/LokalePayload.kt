@@ -7,6 +7,7 @@ import java.util.Date
 
 class LokalePayload(claims: Map<String, String>) : Payload {
     private val claims = claims.mapValues { LokaleClaim(it.value) }
+
     override fun getIssuer(): String {
         return "lokal utsteder"
     }
@@ -46,17 +47,28 @@ class LokalePayload(claims: Map<String, String>) : Payload {
 
 private class LokaleClaim(private val verdi: String) : Claim {
     override fun isNull() = false
+
     override fun isMissing() = false
+
     override fun asBoolean() = true
+
     override fun asInt() = 0
+
     override fun asLong() = 0L
+
     override fun asDouble() = 0.0
+
     override fun asString() = verdi
+
     override fun asDate() = Date.from(Instant.EPOCH)
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any?> asArray(clazz: Class<T>?) = emptyArray<Any>() as Array<T>
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any?> asList(clazz: Class<T>?) = emptyList<Any>() as List<T>
+
     override fun asMap() = emptyMap<String, Any>()
+
     override fun <T : Any?> `as`(clazz: Class<T>?) = throw NotImplementedError()
 }

@@ -9,7 +9,7 @@ data class PersonDTO(
     val arbeidsgivere: List<ArbeidsgiverDTO>,
     val dødsdato: LocalDate?,
     val versjon: Int,
-    val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
+    val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
 )
 
 data class AlderDTO(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {

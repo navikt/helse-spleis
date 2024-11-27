@@ -1,11 +1,9 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -37,8 +35,22 @@ internal class UtbetalingsperiodeTest {
     @Test
     fun `like perioder`() {
         val ferie = Friperiode(1.januar, 31.januar)
-        val utbetalingAG1 = ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
-        val utbetalingAG2 = ArbeidsgiverUtbetalingsperiode("ag2", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
+        val utbetalingAG1 =
+            ArbeidsgiverUtbetalingsperiode(
+                "ag1",
+                1.februar,
+                28.februar,
+                100.prosent,
+                25000.månedlig,
+            )
+        val utbetalingAG2 =
+            ArbeidsgiverUtbetalingsperiode(
+                "ag2",
+                1.februar,
+                28.februar,
+                100.prosent,
+                25000.månedlig,
+            )
         assertEquals(ferie, ferie)
         assertNotEquals(ferie, utbetalingAG1)
         assertNotEquals(ferie.hashCode(), utbetalingAG1.hashCode())
@@ -53,12 +65,13 @@ internal class UtbetalingsperiodeTest {
         val prosent = 30.prosent
         val inntekt1 = Utbetalingsperiode.inntekt(505.daglig, prosent)
         val inntekt2 = inntekt1.månedlig.månedlig
-        val periode1 = ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt1)
-        val periode2 = ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt2)
+        val periode1 =
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt1)
+        val periode2 =
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt2)
         assertEquals(inntekt1, inntekt2)
         assertEquals(periode1, periode2)
     }
-
 
     @Test
     fun `lik periode - avrunding - bruker`() {
@@ -75,6 +88,7 @@ internal class UtbetalingsperiodeTest {
         assertTrue(one.funksjoneltLik(two))
         assertTrue(two.funksjoneltLik(one))
     }
+
     private fun assertNotEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
         assertFalse(one.funksjoneltLik(two))
         assertFalse(two.funksjoneltLik(one))
@@ -88,7 +102,8 @@ internal class UtbetalingsperiodeTest {
 
     @Test
     fun `utbetalingstidslinje - utbetaling`() {
-        val utbetaling = ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
+        val utbetaling =
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
         val inspektør = utbetaling.utbetalingstidslinje().inspektør
         assertEquals(8, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
@@ -104,7 +119,8 @@ internal class UtbetalingsperiodeTest {
 
     @Test
     fun `sykdomstidslinje - utbetaling`() {
-        val periode = ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
+        val periode =
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
         val inspektør = periode.sykdomstidslinje(kilde).inspektør
         assertTrue(inspektør.dager.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
         assertEquals(10, inspektør.dager.size)

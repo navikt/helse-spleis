@@ -22,13 +22,13 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
             FLERE_IKKE_SAMMENHENGENDE_INNSLAG,
             HAR_VEDTAKSPERIODE_RETT_ETTER,
             IKKE_I_HALEN_AV_VEDTAKSPERIODE,
-            FLYTTER_SKJÆRINGSTIDSPUNKT
+            FLYTTER_SKJÆRINGSTIDSPUNKT,
         }
 
         internal fun List<GradertPeriode>.skalOppdatereHistorikkIHalen(
             vedtaksperiode: Periode,
             skjæringstidspunkt: LocalDate,
-            vedtaksperiodeRettEtter: Periode?
+            vedtaksperiodeRettEtter: Periode?,
         ): Pair<Boolean, HvorforIkkeOppdatereHistorikk?> {
             if (this.isEmpty()) return false to INGEN_YTELSE
             if (vedtaksperiodeRettEtter != null) return false to HAR_VEDTAKSPERIODE_RETT_ETTER
@@ -36,10 +36,17 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
             if (sammenhengendePerioder.size > 1) return false to FLERE_IKKE_SAMMENHENGENDE_INNSLAG
             val ytelseperiode = sammenhengendePerioder.single()
             val fullstendigOverlapp = ytelseperiode == vedtaksperiode
-            val ytelseIHalen = vedtaksperiode.overlapperMed(ytelseperiode) && ytelseperiode.slutterEtter(vedtaksperiode.endInclusive)
-            if (!fullstendigOverlapp && !ytelseIHalen) return false to IKKE_I_HALEN_AV_VEDTAKSPERIODE
+            val ytelseIHalen =
+                vedtaksperiode.overlapperMed(ytelseperiode) &&
+                    ytelseperiode.slutterEtter(vedtaksperiode.endInclusive)
+            if (!fullstendigOverlapp && !ytelseIHalen)
+                return false to IKKE_I_HALEN_AV_VEDTAKSPERIODE
             if (this.any { it.grad != 100 }) return false to GRADERT_YTELSE
-            if (skjæringstidspunkt > vedtaksperiode.start && skjæringstidspunkt > ytelseperiode.start) return false to FLYTTER_SKJÆRINGSTIDSPUNKT
+            if (
+                skjæringstidspunkt > vedtaksperiode.start &&
+                    skjæringstidspunkt > ytelseperiode.start
+            )
+                return false to FLYTTER_SKJÆRINGSTIDSPUNKT
             return true to null
         }
     }
@@ -49,18 +56,35 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
         ytelse: AnnenYtelseSomKanOppdatereHistorikk,
         vedtaksperiode: Periode,
         skjæringstidspunkt: LocalDate,
-        vedtaksperiodeRettEtter: Periode?
+        vedtaksperiodeRettEtter: Periode?,
     ): Boolean {
-        val (skalOppdatereHistorikk, hvorforIkke) = ytelse.skalOppdatereHistorikk(vedtaksperiode, skjæringstidspunkt, vedtaksperiodeRettEtter)
+        val (skalOppdatereHistorikk, hvorforIkke) =
+            ytelse.skalOppdatereHistorikk(
+                vedtaksperiode,
+                skjæringstidspunkt,
+                vedtaksperiodeRettEtter,
+            )
         if (hvorforIkke !in listOf(null, INGEN_YTELSE)) {
-            aktivitetslogg.info("Legger ikke til ${ytelse.javaClass.simpleName.lowercase()} i historikken fordi $hvorforIkke")
+            aktivitetslogg.info(
+                "Legger ikke til ${ytelse.javaClass.simpleName.lowercase()} i historikken fordi $hvorforIkke"
+            )
         }
         return skalOppdatereHistorikk.also {
-            if (it) aktivitetslogg.info("Legger til ${ytelse.javaClass.simpleName.lowercase()} i historikken")
+            if (it)
+                aktivitetslogg.info(
+                    "Legger til ${ytelse.javaClass.simpleName.lowercase()} i historikken"
+                )
         }
     }
 
-    internal abstract fun skalOppdatereHistorikk(vedtaksperiode: Periode, skjæringstidspunkt: LocalDate, vedtaksperiodeRettEtter: Periode? = null): Pair<Boolean, HvorforIkkeOppdatereHistorikk?>
-    internal abstract fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje
+    internal abstract fun skalOppdatereHistorikk(
+        vedtaksperiode: Periode,
+        skjæringstidspunkt: LocalDate,
+        vedtaksperiodeRettEtter: Periode? = null,
+    ): Pair<Boolean, HvorforIkkeOppdatereHistorikk?>
 
+    internal abstract fun sykdomstidslinje(
+        meldingsreferanseId: UUID,
+        registrert: LocalDateTime,
+    ): Sykdomstidslinje
 }

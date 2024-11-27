@@ -26,5 +26,5 @@ data class UtbetalingUtDto(
     val overføringstidspunkt: LocalDateTime?,
     val avstemmingsnøkkel: Long?,
     val avsluttet: LocalDateTime?,
-    val oppdatert: LocalDateTime
+    val oppdatert: LocalDateTime,
 )

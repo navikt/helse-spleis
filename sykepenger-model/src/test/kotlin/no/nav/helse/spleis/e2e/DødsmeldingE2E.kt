@@ -27,7 +27,15 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(9, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
+        assertEquals(
+            9,
+            inspektør
+                .vedtaksperioder(1.vedtaksperiode)
+                .inspektør
+                .utbetalingstidslinje
+                .inspektør
+                .avvistDagTeller,
+        )
     }
 
     @Test
@@ -37,7 +45,15 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(0, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
+        assertEquals(
+            0,
+            inspektør
+                .vedtaksperioder(1.vedtaksperiode)
+                .inspektør
+                .utbetalingstidslinje
+                .inspektør
+                .avvistDagTeller,
+        )
     }
 
     @Test

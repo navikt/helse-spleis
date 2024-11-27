@@ -2,14 +2,12 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.dto.SykmeldingsperioderDto
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-internal class Sykmeldingsperioder(
-    private var perioder: List<Periode> = listOf()
-) {
+internal class Sykmeldingsperioder(private var perioder: List<Periode> = listOf()) {
 
     fun view() = SykmeldingsperioderView(perioder)
 
@@ -35,9 +33,7 @@ internal class Sykmeldingsperioder(
 
     internal companion object {
         fun gjenopprett(dto: SykmeldingsperioderDto): Sykmeldingsperioder {
-            return Sykmeldingsperioder(
-                perioder = dto.perioder.map { Periode.gjenopprett(it) }
-            )
+            return Sykmeldingsperioder(perioder = dto.perioder.map { Periode.gjenopprett(it) })
         }
     }
 }

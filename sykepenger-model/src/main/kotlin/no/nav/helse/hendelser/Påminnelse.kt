@@ -19,59 +19,68 @@ class Påminnelse(
     private val nestePåminnelsestidspunkt: LocalDateTime,
     private val ønskerReberegning: Boolean = false,
     private val nå: LocalDateTime = LocalDateTime.now(),
-    opprettet: LocalDateTime
+    opprettet: LocalDateTime,
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer
-    )
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SYSTEM,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = true
-    )
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = true,
+        )
 
     fun antallGangerPåminnet() = antallGangerPåminnet
+
     fun tilstand() = tilstand
+
     fun tilstandsendringstidspunkt() = tilstandsendringstidspunkt
+
     fun påminnelsestidspunkt() = påminnelsestidspunkt
+
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
 
     internal fun nåddMakstid(beregnetMakstid: (LocalDateTime) -> LocalDateTime): Boolean {
         return nå >= beregnetMakstid(tilstandsendringstidspunkt)
     }
 
-    internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
+    internal fun erRelevant(vedtaksperiodeId: UUID) =
+        vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
     internal fun skalReberegnes() = ønskerReberegning
 
-    internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
-        if (!it) {
-            aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+    internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) =
+        (tilstandType == tilstand).also {
+            if (!it) {
+                aktivitetslogg.info(
+                    "Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}"
+                )
+            }
         }
-    }
 
-    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >=  tilstandsendringstidspunkt
+    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >= tilstandsendringstidspunkt
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(
             PersonObserver.VedtaksperiodeIkkeFunnetEvent(
                 organisasjonsnummer = behandlingsporing.organisasjonsnummer,
-                vedtaksperiodeId = UUID.fromString(vedtaksperiodeId)
+                vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
             )
         )
     }
 
-    fun toOutgoingMessage() = mapOf(
-        "organisasjonsnummer" to behandlingsporing.organisasjonsnummer,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "tilstand" to tilstand,
-        "antallGangerPåminnet" to antallGangerPåminnet,
-        "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
-        "påminnelsestidspunkt" to påminnelsestidspunkt,
-        "nestePåminnelsestidspunkt" to nestePåminnelsestidspunkt
-    )
+    fun toOutgoingMessage() =
+        mapOf(
+            "organisasjonsnummer" to behandlingsporing.organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "tilstand" to tilstand,
+            "antallGangerPåminnet" to antallGangerPåminnet,
+            "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
+            "påminnelsestidspunkt" to påminnelsestidspunkt,
+            "nestePåminnelsestidspunkt" to nestePåminnelsestidspunkt,
+        )
 
     fun eventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? {
         if (!skalReberegnes()) return null

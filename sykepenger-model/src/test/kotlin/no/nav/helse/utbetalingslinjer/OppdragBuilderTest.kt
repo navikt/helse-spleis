@@ -7,8 +7,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -67,16 +65,20 @@ internal class OppdragBuilderTest {
         assertEquals(20.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
     }
 
-    private val femhundreKronerIRefusjon: Økonomi = Økonomi.gjenopprett(ØkonomiInnDto(
-        grad = ProsentdelDto(100.0),
-        totalGrad = ProsentdelDto(100.0),
-        arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
-        aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
-        beregningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
-        dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
-        grunnbeløpgrense = null,
-        arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
-        personbeløp = InntektbeløpDto.DagligDouble(0.0),
-        er6GBegrenset = false
-    ), erAvvistDag = false)
+    private val femhundreKronerIRefusjon: Økonomi =
+        Økonomi.gjenopprett(
+            ØkonomiInnDto(
+                grad = ProsentdelDto(100.0),
+                totalGrad = ProsentdelDto(100.0),
+                arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
+                aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
+                beregningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+                dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+                grunnbeløpgrense = null,
+                arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
+                personbeløp = InntektbeløpDto.DagligDouble(0.0),
+                er6GBegrenset = false,
+            ),
+            erAvvistDag = false,
+        )
 }

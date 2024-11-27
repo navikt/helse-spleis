@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import kotlin.reflect.KClass
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -14,9 +15,9 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
-import kotlin.reflect.KClass
 
-val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
+val Utbetalingstidslinje.inspektør
+    get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for an Utbetalingstidslinje
 class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje) {
@@ -47,15 +48,16 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     private val økonomi = mutableMapOf<LocalDate, Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingsdag>>()
 
-    val size get() =
-        arbeidsdagTeller +
-            arbeidsgiverperiodeDagTeller +
-            avvistDagTeller +
-            fridagTeller +
-            navDagTeller +
-            navHelgDagTeller +
-            foreldetDagTeller +
-            ukjentDagTeller +
+    val size
+        get() =
+            arbeidsdagTeller +
+                arbeidsgiverperiodeDagTeller +
+                avvistDagTeller +
+                fridagTeller +
+                navDagTeller +
+                navHelgDagTeller +
+                foreldetDagTeller +
+                ukjentDagTeller +
                 arbeidsgiverperiodedagNavTeller
 
     init {
@@ -122,12 +124,12 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     }
 
     fun grad(dag: LocalDate) = økonomi.getValue(dag).brukAvrundetGrad { grad -> grad }
+
     fun arbeidsgiverbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.arbeidsgiverbeløp
 
     fun totalUtbetaling() = totalUtbetaling
 
-    fun begrunnelse(dato: LocalDate) =
-        begrunnelser[dato] ?: emptyList()
+    fun begrunnelse(dato: LocalDate) = begrunnelser[dato] ?: emptyList()
 
     fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 

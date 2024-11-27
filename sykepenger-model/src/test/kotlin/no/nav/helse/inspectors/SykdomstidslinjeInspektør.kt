@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import kotlin.reflect.KClass
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -16,9 +17,9 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Økonomi
-import kotlin.reflect.KClass
 
-internal val Sykdomstidslinje.inspektør get() = SykdomstidslinjeInspektør(this)
+internal val Sykdomstidslinje.inspektør
+    get() = SykdomstidslinjeInspektør(this)
 
 internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
     internal val dager = mutableMapOf<LocalDate, Dag>()
@@ -27,8 +28,11 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
     internal val problemdagmeldinger = mutableMapOf<LocalDate, String>()
     internal val låstePerioder = tidslinje.låstePerioder
     internal val dagteller = mutableMapOf<KClass<out Dag>, Int>()
-    internal val førsteIkkeUkjenteDag get() = dager.filterNot { (_, b) -> b is UkjentDag }.keys.minOrNull()
-    internal val antallDager get() = dager.size
+    internal val førsteIkkeUkjenteDag
+        get() = dager.filterNot { (_, b) -> b is UkjentDag }.keys.minOrNull()
+
+    internal val antallDager
+        get() = dager.size
 
     init {
         tidslinje.forEach { dag ->
@@ -51,10 +55,11 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
         }
     }
 
-    internal operator fun get(dato: LocalDate) = dager[dato]
-        ?: throw IllegalArgumentException("No dag for $dato")
+    internal operator fun get(dato: LocalDate) =
+        dager[dato] ?: throw IllegalArgumentException("No dag for $dato")
 
-    internal val size get() = dager.size
+    internal val size
+        get() = dager.size
 
     private fun set(dag: Dag, dato: LocalDate, kilde: Hendelseskilde) {
         dager[dato] = dag

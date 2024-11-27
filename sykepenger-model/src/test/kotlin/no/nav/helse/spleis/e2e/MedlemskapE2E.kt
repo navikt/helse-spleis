@@ -45,9 +45,28 @@ internal class MedlemskapE2E : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            val forventetAvvisteDager = setOf(17.januar, 18.januar, 19.januar, 22.januar, 23.januar, 24.januar, 25.januar, 26.januar, 29.januar, 30.januar, 31.januar)
-            val forventetAvvisteUtbetalingsdager = inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
-            assertEquals(forventetAvvisteDager, forventetAvvisteUtbetalingsdager.map { it.dato }.toSet())
+            val forventetAvvisteDager =
+                setOf(
+                    17.januar,
+                    18.januar,
+                    19.januar,
+                    22.januar,
+                    23.januar,
+                    24.januar,
+                    25.januar,
+                    26.januar,
+                    29.januar,
+                    30.januar,
+                    31.januar,
+                )
+            val forventetAvvisteUtbetalingsdager =
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot {
+                    it.dato.erHelg()
+                }
+            assertEquals(
+                forventetAvvisteDager,
+                forventetAvvisteUtbetalingsdager.map { it.dato }.toSet(),
+            )
 
             forventetAvvisteUtbetalingsdager.forEach { utbetalingsdag ->
                 assertTrue(utbetalingsdag is AvvistDag)

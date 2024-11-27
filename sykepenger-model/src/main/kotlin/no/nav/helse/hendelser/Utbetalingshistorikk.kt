@@ -12,22 +12,28 @@ class Utbetalingshistorikk(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val element: InfotrygdhistorikkElement,
-    besvart: LocalDateTime
+    besvart: LocalDateTime,
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer
-    )
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SYSTEM,
-        innsendt = besvart,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = true
-    )
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = besvart,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = true,
+        )
 
-    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, historikk: Infotrygdhistorikk): Boolean {
+    internal fun oppdaterHistorikk(
+        aktivitetslogg: IAktivitetslogg,
+        historikk: Infotrygdhistorikk,
+    ): Boolean {
         aktivitetslogg.info("Oppdaterer Infotrygdhistorikk")
-        if (!historikk.oppdaterHistorikk(element)) return false.also { aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer") }
+        if (!historikk.oppdaterHistorikk(element))
+            return false.also {
+                aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
+            }
         aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret")
         return true
     }

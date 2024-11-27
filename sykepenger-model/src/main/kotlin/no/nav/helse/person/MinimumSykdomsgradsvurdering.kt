@@ -5,10 +5,12 @@ import no.nav.helse.dto.serialisering.MinimumSykdomsgradVurderingUtDto
 import no.nav.helse.hendelser.Periode
 
 /**
- * Perioder saksbehandler har vurdert dithet at bruker har tapt nok arbeidstid til å ha rett på sykepenger,
- * tross < 20% tapt inntekt
+ * Perioder saksbehandler har vurdert dithet at bruker har tapt nok arbeidstid til å ha rett på
+ * sykepenger, tross < 20% tapt inntekt
  */
-internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdomsgradVurdertOK: MutableSet<Periode> = mutableSetOf()) {
+internal class MinimumSykdomsgradsvurdering(
+    private val perioderMedMinimumSykdomsgradVurdertOK: MutableSet<Periode> = mutableSetOf()
+) {
     internal fun leggTil(nyePerioder: Set<Periode>) {
         val ny = perioderMedMinimumSykdomsgradVurdertOK.fjernPerioder(nyePerioder) + nyePerioder
         perioderMedMinimumSykdomsgradVurdertOK.clear()
@@ -31,15 +33,16 @@ internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdom
     internal fun fjernDagerSomSkalUtbetalesLikevel(tentativtAvslåtteDager: List<Periode>) =
         tentativtAvslåtteDager.fjernPerioder(perioderMedMinimumSykdomsgradVurdertOK)
 
-    internal fun dto() = MinimumSykdomsgradVurderingUtDto(
-        perioder = perioderMedMinimumSykdomsgradVurdertOK.map {
-            it.dto()
-        }
-    )
+    internal fun dto() =
+        MinimumSykdomsgradVurderingUtDto(
+            perioder = perioderMedMinimumSykdomsgradVurdertOK.map { it.dto() }
+        )
 
     internal companion object {
-        fun gjenopprett(dto: MinimumSykdomsgradVurderingInnDto) = MinimumSykdomsgradsvurdering(
-            perioderMedMinimumSykdomsgradVurdertOK = dto.perioder.map { Periode.gjenopprett(it) }.toMutableSet()
-        )
+        fun gjenopprett(dto: MinimumSykdomsgradVurderingInnDto) =
+            MinimumSykdomsgradsvurdering(
+                perioderMedMinimumSykdomsgradVurdertOK =
+                    dto.perioder.map { Periode.gjenopprett(it) }.toMutableSet()
+            )
     }
 }

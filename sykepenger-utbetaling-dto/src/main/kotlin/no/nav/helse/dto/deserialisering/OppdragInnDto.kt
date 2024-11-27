@@ -18,5 +18,5 @@ data class OppdragInnDto(
     val status: OppdragstatusDto?,
     val tidsstempel: LocalDateTime,
     val erSimulert: Boolean,
-    val simuleringsResultat: SimuleringResultatDto?
+    val simuleringsResultat: SimuleringResultatDto?,
 )

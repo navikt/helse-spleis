@@ -13,14 +13,14 @@ data class SammenslåttDag(
     val begrunnelser: List<BegrunnelseDTO>? = null,
 ) {
     /*
-        sammenligner ikke utbetalingsinfo (siden endring av beløp dekkes av sjekk på vilkårsgrunnlagId),
-        ei heller utbetalingstidslinjedagtypen siden den reflekterer både endring av sykdomstidslinje+vilkårsgrunnlag (og dekkes dermed fra før)
-     */
+       sammenligner ikke utbetalingsinfo (siden endring av beløp dekkes av sjekk på vilkårsgrunnlagId),
+       ei heller utbetalingstidslinjedagtypen siden den reflekterer både endring av sykdomstidslinje+vilkårsgrunnlag (og dekkes dermed fra før)
+    */
     fun sammeGrunnlag(other: SammenslåttDag) =
-        this.dagen == other.dagen
-                && this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype
-                && this.kilde == other.kilde
-                && this.grad == grad
+        this.dagen == other.dagen &&
+            this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype &&
+            this.kilde == other.kilde &&
+            this.grad == grad
 }
 
 enum class SykdomstidslinjedagType {
@@ -49,31 +49,28 @@ enum class SykdomstidslinjedagKildetype {
     Søknad,
     Sykmelding,
     Saksbehandler,
-    Ukjent
+    Ukjent,
 }
 
 data class Sykdomstidslinjedag(
     val dagen: LocalDate,
     val type: SykdomstidslinjedagType,
     val kilde: SykdomstidslinjedagKilde,
-    val grad: Int? = null
+    val grad: Int? = null,
 ) {
-    data class SykdomstidslinjedagKilde(
-        val type: SykdomstidslinjedagKildetype,
-        val id: UUID
-    )
+    data class SykdomstidslinjedagKilde(val type: SykdomstidslinjedagKildetype, val id: UUID)
 }
 
 enum class UtbetalingstidslinjedagType {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
-    Helgedag,   // SpeilBuilder only code breakout of Fridag
+    Helgedag, // SpeilBuilder only code breakout of Fridag
     Arbeidsdag,
-    Feriedag,   // SpeilBuilder only code breakout of Fridag
+    Feriedag, // SpeilBuilder only code breakout of Fridag
     AvvistDag,
     UkjentDag,
-    ForeldetDag
+    ForeldetDag,
 }
 
 interface Utbetalingstidslinjedag {
@@ -88,7 +85,7 @@ data class UtbetalingsdagDTO(
     override val dato: LocalDate,
     val personbeløp: Int,
     val arbeidsgiverbeløp: Int,
-    val totalGrad: Int
+    val totalGrad: Int,
 ) : Utbetalingstidslinjedag {
     override fun utbetalingsinfo() = Utbetalingsinfo(personbeløp, arbeidsgiverbeløp, totalGrad)
 }
@@ -97,12 +94,12 @@ data class AvvistDag(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.AvvistDag,
     override val dato: LocalDate,
     val begrunnelser: List<BegrunnelseDTO>,
-    val totalGrad: Int
+    val totalGrad: Int,
 ) : Utbetalingstidslinjedag {
     override fun utbetalingsinfo() = Utbetalingsinfo(null, null, totalGrad)
 }
 
 data class UtbetalingstidslinjedagUtenGrad(
     override val type: UtbetalingstidslinjedagType,
-    override val dato: LocalDate
+    override val dato: LocalDate,
 ) : Utbetalingstidslinjedag

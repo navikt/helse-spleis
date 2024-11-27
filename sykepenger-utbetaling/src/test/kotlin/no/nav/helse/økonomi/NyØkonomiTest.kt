@@ -1,6 +1,5 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.mai
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -26,16 +25,15 @@ class NyØkonomiTest {
     @Test
     fun `to arbeidsgivere med tilkommet inntekt`() {
         val `6G` = 744168.årlig
-        val actual = listOf(
-            UberegnetØkonomi(45000.månedlig, 45000.månedlig, 100.prosent),
-            UberegnetØkonomi(45000.månedlig, 45000.månedlig, 100.prosent)
-        )
+        val actual =
+            listOf(
+                UberegnetØkonomi(45000.månedlig, 45000.månedlig, 100.prosent),
+                UberegnetØkonomi(45000.månedlig, 45000.månedlig, 100.prosent),
+            )
         val tilkommet = 40451.månedlig
         val result = actual.beregn(`6G`, tilkommet)
-        val expected = listOf(
-            BeregnetØkonomi(498.daglig, INGEN),
-            BeregnetØkonomi(498.daglig, INGEN)
-        )
+        val expected =
+            listOf(BeregnetØkonomi(498.daglig, INGEN), BeregnetØkonomi(498.daglig, INGEN))
         assertEquals(expected, result)
     }
 }
@@ -43,30 +41,43 @@ class NyØkonomiTest {
 data class UberegnetØkonomi(
     val inntektPåSkjæringstidspunktet: Inntekt,
     val ønsketRefusjon: Inntekt,
-    val grad: Prosentdel
+    val grad: Prosentdel,
 ) {
     fun beregn(`6G`: Inntekt, tilkommet: Inntekt): BeregnetØkonomi {
         return listOf(this).beregn(`6G`, tilkommet).single()
     }
 
-    fun begrensTil6G(inntektavkorting: Prosentdel, refusjonavkorting: Prosentdel, delAvTilkommet: Inntekt): `6GBegrensetØkonomi` {
+    fun begrensTil6G(
+        inntektavkorting: Prosentdel,
+        refusjonavkorting: Prosentdel,
+        delAvTilkommet: Inntekt,
+    ): `6GBegrensetØkonomi` {
         return `6GBegrensetØkonomi`(
             økonomi = this,
             inntektandel = this.inntektPåSkjæringstidspunktet * inntektavkorting,
             refusjonandel = this.ønsketRefusjon * refusjonavkorting,
-            delAvTilkommet = delAvTilkommet
+            delAvTilkommet = delAvTilkommet,
         )
     }
 
     companion object {
-        fun List<UberegnetØkonomi>.beregn(`6G`: Inntekt, tilkommet: Inntekt): List<BeregnetØkonomi> {
-            val inntektsgrunnlagavkorting = begrensTil6G(`6G`, UberegnetØkonomi::inntektPåSkjæringstidspunktet)
+        fun List<UberegnetØkonomi>.beregn(
+            `6G`: Inntekt,
+            tilkommet: Inntekt,
+        ): List<BeregnetØkonomi> {
+            val inntektsgrunnlagavkorting =
+                begrensTil6G(`6G`, UberegnetØkonomi::inntektPåSkjæringstidspunktet)
             val refusjonsgrunnlagavkorting = begrensTil6G(`6G`, UberegnetØkonomi::ønsketRefusjon)
 
             val tilkommetPerArbeidsgiver = tilkommet / size
 
-            return this
-                .map { it.begrensTil6G(inntektsgrunnlagavkorting, refusjonsgrunnlagavkorting, tilkommetPerArbeidsgiver) }
+            return this.map {
+                    it.begrensTil6G(
+                        inntektsgrunnlagavkorting,
+                        refusjonsgrunnlagavkorting,
+                        tilkommetPerArbeidsgiver,
+                    )
+                }
                 .fordel()
         }
 
@@ -75,42 +86,60 @@ data class UberegnetØkonomi(
             val totalGradertPersonbeløp = map { it.gradertPersonutbetaling }.summer()
             val totalTaptInntekt = map { it.taptInntekt }.summer()
 
-            return this
-                .fordelRefusjon(totalTaptInntekt, totalGradertRefusjon)
+            return this.fordelRefusjon(totalTaptInntekt, totalGradertRefusjon)
                 .fordelPerson(totalTaptInntekt, totalGradertPersonbeløp)
         }
 
-        private fun List<`6GBegrensetØkonomi`>.fordelRefusjon(totalTaptInntekt: Inntekt, totalGradertRefusjon: Inntekt): List<FordeltRefusjon> {
+        private fun List<`6GBegrensetØkonomi`>.fordelRefusjon(
+            totalTaptInntekt: Inntekt,
+            totalGradertRefusjon: Inntekt,
+        ): List<FordeltRefusjon> {
             // fordeler refusjonsbeløpene
-            val fordeltRefusjon = fordel(totalGradertRefusjon, totalTaptInntekt, `6GBegrensetØkonomi`::fordelRefusjon)
+            val fordeltRefusjon =
+                fordel(totalGradertRefusjon, totalTaptInntekt, `6GBegrensetØkonomi`::fordelRefusjon)
 
             // TODO: <her må vi legge inn tildeling av 1kr pga øreavrunding-differanse-tingen>
 
             return fordeltRefusjon
         }
 
-        private fun List<FordeltRefusjon>.fordelPerson(totalTaptInntekt: Inntekt, totalGradertPersonbeløp: Inntekt): List<BeregnetØkonomi> {
+        private fun List<FordeltRefusjon>.fordelPerson(
+            totalTaptInntekt: Inntekt,
+            totalGradertPersonbeløp: Inntekt,
+        ): List<BeregnetØkonomi> {
             val totalFordeltRefusjon = map { it.refusjonsbeløp }.summer()
             // pga avrunding så kjører vi først en runde hvor vi fordeler ut refusjon,
             // og så ser vi summen av avrundet refusjon etterpå
             val totalFordeltPersonbeløp = maxOf(INGEN, totalTaptInntekt - totalFordeltRefusjon)
 
             // fordeler personbeløpene
-            return fordel(totalGradertPersonbeløp, totalFordeltPersonbeløp, FordeltRefusjon::fordelPersonutbetaling)
+            return fordel(
+                totalGradertPersonbeløp,
+                totalFordeltPersonbeløp,
+                FordeltRefusjon::fordelPersonutbetaling,
+            )
         }
 
-        private fun <T, R> List<T>.fordel(budsjett: Inntekt, total: Inntekt, strategi: T.(Prosentdel) -> R): List<R> {
-            val ratio = when {
-                budsjett == INGEN -> 0.prosent
-                total > budsjett -> 100.prosent
-                else -> total ratio budsjett
-            }
+        private fun <T, R> List<T>.fordel(
+            budsjett: Inntekt,
+            total: Inntekt,
+            strategi: T.(Prosentdel) -> R,
+        ): List<R> {
+            val ratio =
+                when {
+                    budsjett == INGEN -> 0.prosent
+                    total > budsjett -> 100.prosent
+                    else -> total ratio budsjett
+                }
 
             // fordeler personbeløpene
             return map { it.strategi(ratio) }
         }
 
-        private fun List<UberegnetØkonomi>.begrensTil6G(`6G`: Inntekt, strategi: (UberegnetØkonomi) -> Inntekt): Prosentdel {
+        private fun List<UberegnetØkonomi>.begrensTil6G(
+            `6G`: Inntekt,
+            strategi: (UberegnetØkonomi) -> Inntekt,
+        ): Prosentdel {
             val total = map { strategi(it) }.summer()
             return minOf(`6G`, total) ratio total
         }
@@ -121,7 +150,7 @@ data class `6GBegrensetØkonomi`(
     val økonomi: UberegnetØkonomi,
     val inntektandel: Inntekt,
     val refusjonandel: Inntekt,
-    val delAvTilkommet: Inntekt
+    val delAvTilkommet: Inntekt,
 ) {
     val gradertInntekt = inntektandel * økonomi.grad
     val taptInntekt = maxOf(INGEN, gradertInntekt - delAvTilkommet)
@@ -132,12 +161,13 @@ data class `6GBegrensetØkonomi`(
     fun fordelRefusjon(refusjonavkorting: Prosentdel): FordeltRefusjon {
         return FordeltRefusjon(
             refusjonsbeløp = (gradertRefusjon * refusjonavkorting).rundTilDaglig(),
-            ufordeltPersonbeløp = this.gradertPersonutbetaling
+            ufordeltPersonbeløp = this.gradertPersonutbetaling,
         )
     }
 
     companion object {
-        // total sykdomgrad regnes ut ved å se på summen av gradert inntekt delt på summen av inntekter.
+        // total sykdomgrad regnes ut ved å se på summen av gradert inntekt delt på summen av
+        // inntekter.
         // inntekt kan enten være begrenset av 6G eller ikke, graden blir lik uansett.
         // dvs. regnestykket:
         //      sumOf { it.inntektPåSkjæringstidspunktet * grad } / totalInntekt
@@ -148,18 +178,12 @@ data class `6GBegrensetØkonomi`(
     }
 }
 
-data class FordeltRefusjon(
-    val refusjonsbeløp: Inntekt,
-    val ufordeltPersonbeløp: Inntekt
-) {
+data class FordeltRefusjon(val refusjonsbeløp: Inntekt, val ufordeltPersonbeløp: Inntekt) {
     fun fordelPersonutbetaling(personavkortingratio: Prosentdel) =
         BeregnetØkonomi(
             refusjonsbeløp = this.refusjonsbeløp,
-            personbeløp = (ufordeltPersonbeløp * personavkortingratio).rundTilDaglig()
+            personbeløp = (ufordeltPersonbeløp * personavkortingratio).rundTilDaglig(),
         )
 }
 
-data class BeregnetØkonomi(
-    val refusjonsbeløp: Inntekt,
-    val personbeløp: Inntekt
-)
+data class BeregnetØkonomi(val refusjonsbeløp: Inntekt, val personbeløp: Inntekt)

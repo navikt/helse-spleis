@@ -1,5 +1,3 @@
 package no.nav.helse.dto.serialisering
 
-data class InfotrygdhistorikkUtDto(
-    val elementer: List<InfotrygdhistorikkelementUtDto>
-)
+data class InfotrygdhistorikkUtDto(val elementer: List<InfotrygdhistorikkelementUtDto>)

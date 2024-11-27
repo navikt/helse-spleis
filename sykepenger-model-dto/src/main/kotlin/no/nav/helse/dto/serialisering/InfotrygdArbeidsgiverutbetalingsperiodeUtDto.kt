@@ -8,5 +8,5 @@ data class InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
     val orgnr: String,
     val periode: PeriodeDto,
     val grad: ProsentdelDto,
-    val inntekt: InntektDto
+    val inntekt: InntektDto,
 )

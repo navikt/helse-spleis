@@ -13,7 +13,7 @@ import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessa
 
 internal class SykepengegrunnlagForArbeidsgiverRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(InntekterForSykepengegrunnlagForArbeidsgiver)
 
@@ -21,19 +21,34 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
-        message.require("${InntekterForSykepengegrunnlagForArbeidsgiver.name}.skjæringstidspunkt", JsonNode::asLocalDate)
+        message.require(
+            "${InntekterForSykepengegrunnlagForArbeidsgiver.name}.skjæringstidspunkt",
+            JsonNode::asLocalDate,
+        )
         message.requireArray("@løsning.${InntekterForSykepengegrunnlagForArbeidsgiver.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {
                 requireKey("beløp")
-                requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
+                requireAny(
+                    "inntektstype",
+                    listOf(
+                        "LOENNSINNTEKT",
+                        "NAERINGSINNTEKT",
+                        "PENSJON_ELLER_TRYGD",
+                        "YTELSE_FRA_OFFENTLIGE",
+                    ),
+                )
                 interestedIn("orgnummer", "fødselsnummer", "fordel", "beskrivelse")
             }
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = SykepengegrunnlagForArbeidsgiverMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        SykepengegrunnlagForArbeidsgiverMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

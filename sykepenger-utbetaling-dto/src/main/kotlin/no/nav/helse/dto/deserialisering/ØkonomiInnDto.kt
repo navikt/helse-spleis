@@ -13,5 +13,5 @@ data class ØkonomiInnDto(
     val grunnbeløpgrense: InntektbeløpDto.Årlig?,
     val arbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
     val personbeløp: InntektbeløpDto.DagligDouble?,
-    val er6GBegrenset: Boolean?
+    val er6GBegrenset: Boolean?,
 )

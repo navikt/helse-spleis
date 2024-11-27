@@ -19,5 +19,5 @@ data class VedtaksperiodeUtDto(
     val venteårsak: LazyVedtaksperiodeVenterDto,
     val egenmeldingsperioder: List<PeriodeDto>,
     val opprettet: LocalDateTime,
-    var oppdatert: LocalDateTime
+    var oppdatert: LocalDateTime,
 )

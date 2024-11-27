@@ -40,7 +40,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
-        assertThrows<Aktivitetslogg.AktivitetException> { håndterAnnullerUtbetaling(orgnummer = a2) }
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterAnnullerUtbetaling(orgnummer = a2)
+        }
         assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
     }
 
@@ -48,9 +50,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `avvis hvis vi ikke finner fagsystemId`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(utbetalingId = UUID.randomUUID())
-        inspektør.also {
-            assertEquals(AVSLUTTET, it.sisteTilstand(1.vedtaksperiode))
-        }
+        inspektør.also { assertEquals(AVSLUTTET, it.sisteTilstand(1.vedtaksperiode)) }
     }
 
     @Test
@@ -59,22 +59,40 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(mai, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterAnnullerUtbetaling()
         assertEquals(1, observatør.forkastedePerioder())
-        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(
+            AVSLUTTET,
+            observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand,
+        )
     }
 
     @Test
     fun `forkaster senere perioder ved annullering`() {
         nyttVedtak(januar)
         forlengVedtak(februar) // forlengelse
-        nyttVedtak(10.mars til 31.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode) // førstegangsbehandling, men med samme agp
+        nyttVedtak(
+            10.mars til 31.mars,
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode,
+        ) // førstegangsbehandling, men med samme agp
         håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai)) // førstegangsbehandling, ny agp
         håndterSøknad(1.mai til 20.mai)
         håndterAnnullerUtbetaling()
         assertEquals(4, observatør.forkastedePerioder())
-        assertEquals(AVSLUTTET, observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVVENTER_INNTEKTSMELDING, observatør.forkastet(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(
+            AVSLUTTET,
+            observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand,
+        )
+        assertEquals(
+            AVSLUTTET,
+            observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand,
+        )
+        assertEquals(
+            AVSLUTTET,
+            observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand,
+        )
+        assertEquals(
+            AVVENTER_INNTEKTSMELDING,
+            observatør.forkastet(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand,
+        )
     }
 
     @Test
@@ -85,7 +103,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil()
         val behov = person.personLogg.sisteBehov(Behovtype.Utbetaling)
         @Suppress("UNCHECKED_CAST")
-        val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
+        val statusForUtbetaling =
+            (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
         assertEquals("OPPH", statusForUtbetaling)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
@@ -118,7 +137,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     private fun sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: IdInnhenter) {
         person.personLogg.behov.last().also {
             assertEquals(Behovtype.Utbetaling, it.type)
-            assertEquals(inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter), it.detaljer()["fagsystemId"])
+            assertEquals(
+                inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter),
+                it.detaljer()["fagsystemId"],
+            )
             assertEquals("OPPH", it.hentLinjer()[0]["statuskode"])
         }
     }
@@ -127,11 +149,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertFalse(
             person.personLogg.behov
                 .filter { it.type == Behovtype.Utbetaling }
-                .any {
-                    it.hentLinjer().any { linje ->
-                        linje["statuskode"] == "OPPH"
-                    }
-                }
+                .any { it.hentLinjer().any { linje -> linje["statuskode"] == "OPPH" } }
         )
     }
 
@@ -163,9 +181,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     private fun Aktivitet.Behov.hentLinjer() =
-        @Suppress("UNCHECKED_CAST")
-        (detaljer()["linjer"] as List<Map<String, Any>>)
-
+        @Suppress("UNCHECKED_CAST") (detaljer()["linjer"] as List<Map<String, Any>>)
 
     @Test
     fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {
@@ -192,9 +208,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `En enkel periode som er avsluttet som blir annullert blir også satt i tilstand TilAnnullering`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
-        inspektør.also {
-            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
-        }
+        inspektør.also { assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode)) }
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
         inspektør.also {
@@ -235,7 +249,12 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `Annullering av én periode fører kun til at sammehengende utbetalte perioder blir forkastet og værende i Avsluttet`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
         forlengVedtak(27.januar til 30.januar, 100.prosent)
-        nyttVedtak(1.mars til 20.mars, 100.prosent, 1.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        nyttVedtak(
+            1.mars til 20.mars,
+            100.prosent,
+            1.mars,
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode,
+        )
         val behovTeller = person.personLogg.behov.size
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling()
@@ -250,16 +269,20 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `publiserer et event ved annullering av full refusjon`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        håndterUtbetalt(
-            status = Oppdragstatus.AKSEPTERT
-        )
+        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
         val annullering = observatør.annulleringer.lastOrNull()
         assertNotNull(annullering)
 
         val utbetalingInspektør = inspektør.utbetaling(0)
-        assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-        assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), annullering.personFagsystemId)
+        assertEquals(
+            utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+            annullering.arbeidsgiverFagsystemId,
+        )
+        assertEquals(
+            utbetalingInspektør.personOppdrag.inspektør.fagsystemId(),
+            annullering.personFagsystemId,
+        )
 
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
         assertEquals(3.januar, annullering.fom)
@@ -273,9 +296,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vedtaksperiodeTeller)
 
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
-        håndterUtbetalt(
-            status = Oppdragstatus.AKSEPTERT
-        )
+        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(2.vedtaksperiode))
@@ -286,8 +307,14 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertNotNull(annullering)
 
         val utbetalingInspektør = inspektør.utbetaling(0)
-        assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-        assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), annullering.personFagsystemId)
+        assertEquals(
+            utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+            annullering.arbeidsgiverFagsystemId,
+        )
+        assertEquals(
+            utbetalingInspektør.personOppdrag.inspektør.fagsystemId(),
+            annullering.personFagsystemId,
+        )
         assertEquals(3.januar, annullering.fom)
         assertEquals(20.februar, annullering.tom)
 
@@ -302,9 +329,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode)
 
         håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
-        håndterUtbetalt(
-            status = Oppdragstatus.AKSEPTERT
-        )
+        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
         val annulleringer = observatør.annulleringer
         assertEquals(1, annulleringer.size)
@@ -315,7 +340,12 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `kan ikke annullere utbetalingsreferanser som ikke er siste`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
-        nyttVedtak(3.mars til 26.mars, 100.prosent, 3.mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(
+            3.mars til 26.mars,
+            100.prosent,
+            3.mars,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
 
         val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
         håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
@@ -346,7 +376,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`(){
+    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
@@ -378,7 +408,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `skal kunne annullere tidligere utbetaling dersom siste utbetaling er uten utbetaling`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
-        håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
+        håndterSøknad(
+            Sykdom(1.mars, 20.mars, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(17.mars, 20.mars),
+        )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
@@ -390,8 +423,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `annullering av periode medfører at låser på sykdomstidslinje blir forkastet`() {
         nyttVedtak(januar)
         håndterAnnullerUtbetaling()
-        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(0, it.size)
-        }
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also { assertEquals(0, it.size) }
     }
 }

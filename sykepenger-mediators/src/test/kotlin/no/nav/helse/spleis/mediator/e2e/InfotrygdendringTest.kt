@@ -20,7 +20,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     fun `sender infotrygdendring`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendInfotrygdendring()
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall()-1)
+        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertBehov(behov)
         assertSykepengehistorikkdetaljer(behov)
     }
@@ -34,7 +34,10 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `utgående melding om overlappende infotrygdutbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInfotrygdendring()
         sendUtbetalingshistorikkEtterInfotrygdendring(
             listOf(
@@ -42,33 +45,46 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
                     fom = 3.januar,
                     tom = 26.januar,
                     arbeidskategorikode = "01",
-                    utbetalteSykeperioder = listOf(
-                        UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
-                            fom = 3.januar,
-                            tom = 26.januar,
-                            dagsats = 1400.0,
-                            typekode = "0",
-                            utbetalingsgrad = "100",
-                            organisasjonsnummer = ORGNUMMER
-                        )
-                    ),
-                    inntektsopplysninger = emptyList()
+                    utbetalteSykeperioder =
+                        listOf(
+                            UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                                fom = 3.januar,
+                                tom = 26.januar,
+                                dagsats = 1400.0,
+                                typekode = "0",
+                                utbetalingsgrad = "100",
+                                organisasjonsnummer = ORGNUMMER,
+                            )
+                        ),
+                    inntektsopplysninger = emptyList(),
                 )
             )
         )
-        val overlappendeInfotrygdperiodeEtterInfotrygdendringEvent = testRapid.inspektør.siste("overlappende_infotrygdperioder")
+        val overlappendeInfotrygdperiodeEtterInfotrygdendringEvent =
+            testRapid.inspektør.siste("overlappende_infotrygdperioder")
         assertNotNull(overlappendeInfotrygdperiodeEtterInfotrygdendringEvent)
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name).path("historikkFom").asText())
-        assertDato(behov.path(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name).path("historikkTom").asText())
+        assertDato(
+            behov
+                .path(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name)
+                .path("historikkFom")
+                .asText()
+        )
+        assertDato(
+            behov
+                .path(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name)
+                .path("historikkTom")
+                .asText()
+        )
     }
 
     private fun assertDato(tekst: String) {
         assertTrue(tekst.isNotEmpty())
         Assertions.assertDoesNotThrow { LocalDate.parse(tekst) }
     }
+
     private fun assertDatotid(tekst: String) {
         assertTrue(tekst.isNotEmpty())
         Assertions.assertDoesNotThrow { LocalDateTime.parse(tekst) }
@@ -82,7 +98,9 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())
         Assertions.assertDoesNotThrow { UUID.fromString(id) }
-        assertEquals(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name, behov.path("@behov").firstOrNull()?.asText())
+        assertEquals(
+            Aktivitet.Behov.Behovtype.Sykepengehistorikk.name,
+            behov.path("@behov").firstOrNull()?.asText(),
+        )
     }
-
 }
