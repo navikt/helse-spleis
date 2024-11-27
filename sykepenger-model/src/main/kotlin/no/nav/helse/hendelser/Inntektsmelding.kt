@@ -342,8 +342,13 @@ class Inntektsmelding(
     private data class SelvbestemtPortalinntektsmelding(private val minimalVedtaksperiode: Valideringsgrunnlag.ForenkletVedtaksperiode, private val inntektsdato: LocalDate) : PortalInntektsmeldings(minimalVedtaksperiode, inntektsdato) {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
             if (!minimalVedtaksperiode.erForlengelse()) return true
+            sikkerlogg.info("Håndterer ikke selvbestemt inntektsmelding siden den traff en forlengelse. InntektsmeldingId: ${inntektsmelding.metadata.meldingsreferanseId}")
             inntektsmeldingIkkeHåndtert()
             return false
+        }
+
+        private companion object {
+            private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         }
     }
 }
