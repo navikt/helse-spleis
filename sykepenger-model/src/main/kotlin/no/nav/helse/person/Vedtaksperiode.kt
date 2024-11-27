@@ -2989,8 +2989,12 @@ internal class Vedtaksperiode private constructor(
             return lastOrNull { it.vilkårsgrunnlag != null }
         }
 
-        internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
-            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, it::eksisterendeRefusjonsopplysninger) }
+        internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(
+            aktivitetslogg: IAktivitetslogg,
+            orgnummer: String,
+            vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
+        ) {
+            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, it::eksisterendeRefusjonsopplysninger, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
         }
 
         // Fredet funksjonsnavn

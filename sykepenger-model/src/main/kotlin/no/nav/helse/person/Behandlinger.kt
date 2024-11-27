@@ -219,8 +219,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
-    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String, vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje) =
-        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, vedManglendeInntektsgrunnlagPåSisteEndring) }
+    internal fun migrerRefusjonsopplysninger(
+        aktivitetslogg: IAktivitetslogg,
+        orgnummer: String,
+        vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje,
+        vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagElement?
+    ) =
+        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, vedManglendeInntektsgrunnlagPåSisteEndring, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
 
     fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
         this.behandlinger.last().vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
@@ -829,10 +834,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.forkastVedtaksperiode(this, arbeidsgiver, hendelse, aktivitetslogg)
         }
 
-        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String, vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje) {
+        internal fun migrerRefusjonsopplysninger(
+            aktivitetslogg: IAktivitetslogg,
+            orgnummer: String,
+            vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje,
+            vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagElement?
+        ) {
             val sisteEndringId = endringer.last().id
             endringer.forEach { endring ->
-                val vilkårsgrunnlag = endring.grunnlagsdata
+                val vilkårsgrunnlag = endring.grunnlagsdata ?: vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet(skjæringstidspunkt)
                 val refusjonstidslinje = when {
                     vilkårsgrunnlag == null && endring.id == sisteEndringId -> vedManglendeInntektsgrunnlagPåSisteEndring().also {
                         if (this.tilstand !is Tilstand.AvsluttetUtenVedtak) {

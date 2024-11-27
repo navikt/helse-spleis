@@ -6,7 +6,6 @@ import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
 import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
 import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -247,15 +246,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
             setup9og10()
             migrerRefusjonsopplysningerPåBehandlinger()
             forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 10.februar to INNTEKT, 11.februar til 28.februar to INGEN)
-            assertForventetFeil(
-                forklaring = "Nabolagskoden fungerer ikke på uberegnede perioder",
-                nå = {
-                    inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT)
-                },
-                ønsket = {
-                    inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.assertBeløpstidslinje(1.februar til 10.februar to INNTEKT, 11.februar til 28.februar to INGEN)
-                }
-            )
+            inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.assertBeløpstidslinje(1.februar til 10.februar to INNTEKT, 11.februar til 28.februar to INGEN)
         }
     }
 
@@ -335,17 +326,9 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
                 inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje +
                 inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
                 inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
-            assertForventetFeil(
-                forklaring = "Nabolagskoden fungerer ikke på uberegnede perioder",
-                nå = {
-                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.mars to INNTEKT*1.25)
-                },
-                ønsket = {
-                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT*1.25)
-                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT*1.5)
-                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT*1.75)
-                }
-            )
+            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT*1.25)
+            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT*1.5)
+            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT*1.75)
         }
     }
 

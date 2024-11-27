@@ -178,8 +178,11 @@ internal class Arbeidsgiver private constructor(
             forEach { arbeidsgiver -> arbeidsgiver.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, sisteUtbetalteDagIInfotrygd) }
         }
 
-        internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
-            forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg) }
+        internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(
+            aktivitetslogg: IAktivitetslogg,
+            vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
+        ) {
+            forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
@@ -327,7 +330,10 @@ internal class Arbeidsgiver private constructor(
         refusjonsservitørFraSisteInntektsgrunnlag.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 
-    private fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) = vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer)
+    private fun migrerRefusjonsopplysningerPåBehandlinger(
+        aktivitetslogg: IAktivitetslogg,
+        vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
+    ) = vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet)
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
 
