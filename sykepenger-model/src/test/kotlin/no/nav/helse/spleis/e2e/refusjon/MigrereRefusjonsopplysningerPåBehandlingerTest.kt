@@ -371,6 +371,21 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
         }
     }
 
+    @Test
+    @Order(15)
+    fun `flere arbeidsgivere med bare en inntektsmelding - med toggle alltid på`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            setup13og14()
+            forrigeRefusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
+            migrerRefusjonsopplysningerPåBehandlinger()
+            val faktiskBeløpstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+            faktiskBeløpstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
+            faktiskBeløpstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
+        }
+    }
+
     private fun Beløpstidslinje.assertBeløpstidslinje(vararg forventetBeløp: Pair<Periode, Inntekt>) {
         forventetBeløp.forEach { (periode, inntekt) ->
             val subset = subset(periode)
