@@ -6,18 +6,25 @@ import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
 import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
 import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
@@ -26,7 +33,7 @@ import org.junit.jupiter.api.TestMethodOrder
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
+internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest() {
 
     private lateinit var forrigeRefusjonstidslinje: Beløpstidslinje
     private val meldingsreferanseId1 = UUID.randomUUID()
@@ -190,6 +197,162 @@ internal class MigrereRefusjonsopplysningerPåBehandlinger : AbstractDslTest() {
             migrerUbrukteRefusjonsopplysninger()
             migrerRefusjonsopplysningerPåBehandlinger()
             assertEquals(forrigeRefusjonstidslinje, inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje)
+        }
+    }
+
+    private fun setup9og10() {
+        a1 {
+            val vedtaksperiode = nyPeriode(januar)
+            tillatUgyldigSituasjon {
+                håndterInntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    id = meldingsreferanseId1,
+                    mottatt = mottatt1
+                )
+            }
+            tillatUgyldigSituasjon { håndterVilkårsgrunnlag(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterYtelser(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalt() }
+
+            tillatUgyldigSituasjon { håndterSøknad(februar) }
+            tillatUgyldigSituasjon {
+                håndterInntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    refusjon = Inntektsmelding.Refusjon(INNTEKT, 10.februar),
+                    id = meldingsreferanseId2,
+                    mottatt = mottatt2
+                )
+            }
+            tillatUgyldigSituasjon { håndterYtelser(vedtaksperiode) }
+            assertSisteTilstand(vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
+        }
+    }
+
+    @Test
+    @Order(9)
+    fun `uberegnet forlengelse når det mottas informasjon om opphør - med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            setup9og10()
+            forrigeRefusjonstidslinje = inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+        }
+    }
+
+    @Test
+    @Order(10)
+    fun `uberegnet forlengelse når det mottas informasjon om opphør - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
+        a1 {
+            setup9og10()
+            migrerRefusjonsopplysningerPåBehandlinger()
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 10.februar to INNTEKT, 11.februar til 28.februar to INGEN)
+            assertForventetFeil(
+                forklaring = "Nabolagskoden fungerer ikke på uberegnede perioder",
+                nå = {
+                    inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT)
+                },
+                ønsket = {
+                    inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.assertBeløpstidslinje(1.februar til 10.februar to INNTEKT, 11.februar til 28.februar to INGEN)
+                }
+            )
+        }
+    }
+
+    private fun setup11og12() {
+        a1 {
+            nyPeriode(januar)
+            tillatUgyldigSituasjon {
+                håndterInntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    id = meldingsreferanseId1,
+                    mottatt = mottatt1
+                )
+            }
+            tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalt() }
+
+            tillatUgyldigSituasjon { håndterSøknad(februar) }
+            tillatUgyldigSituasjon { håndterYtelser(2.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(2.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(2.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalt() }
+
+            tillatUgyldigSituasjon { håndterSøknad(mars) }
+            tillatUgyldigSituasjon { håndterYtelser(3.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(3.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(3.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalt() }
+
+            tillatUgyldigSituasjon { håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        forklaring = "foo",
+                        subsumsjon = null,
+                        refusjonsopplysninger = listOf(
+                            Triple(1.januar, 31.januar, INNTEKT * 1.25),
+                            Triple(1.februar, 28.februar, INNTEKT * 1.5),
+                            Triple(1.mars, null, INNTEKT * 1.75)
+                        )
+                    )
+                ),
+            ) }
+            tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
+        }
+    }
+
+    @Test
+    @Order(11)
+    fun `uberegnet forlengelse i revurdering når det mottas informasjon om opphør - med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            setup11og12()
+            forrigeRefusjonstidslinje =
+                inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje +
+                inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
+                inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
+        }
+    }
+
+    @Test
+    @Order(12)
+    fun `uberegnet forlengelse i revurdering når det mottas informasjon om opphør - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
+        a1 {
+            setup11og12()
+            migrerRefusjonsopplysningerPåBehandlinger()
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT*1.25)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT*1.5)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT*1.75)
+            val faktiskRefusjonstidslinje =
+                inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje +
+                inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
+                inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
+            assertForventetFeil(
+                forklaring = "Nabolagskoden fungerer ikke på uberegnede perioder",
+                nå = {
+                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.mars to INNTEKT*1.25)
+                },
+                ønsket = {
+                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT*1.25)
+                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT*1.5)
+                    faktiskRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT*1.75)
+                }
+            )
+        }
+    }
+
+    private fun Beløpstidslinje.assertBeløpstidslinje(vararg forventetBeløp: Pair<Periode, Inntekt>) {
+        forventetBeløp.forEach { (periode, inntekt) ->
+            val subset = subset(periode)
+            assertTrue(subset.all { it.beløp == inntekt }) {"Vi forventet at inntekten skulle være ${inntekt.dagligInt} i $periode, men var: ${subset.map { it.beløp.dagligInt }}"}
         }
     }
 }
