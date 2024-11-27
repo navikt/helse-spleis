@@ -13,52 +13,75 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
-    private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt"].asBoolean()
+internal class UtbetalingshistorikkForFeriepengerMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : BehovMessage(packet) {
+    private val skalBeregnesManuelt =
+        packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt"].asBoolean()
 
-    private val utbetalinger = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger"]
-        .filter(::erGyldigPeriode)
-        .mapNotNull { utbetaling ->
-            val fom = utbetaling["fom"].asLocalDate()
-            val tom = utbetaling["tom"].asLocalDate()
-            when (utbetaling["typeKode"].asText()) {
-                "0", "1" -> {
-                    val beløp = utbetaling["dagsats"].asInt()
-                    val orgnummer = utbetaling["orgnummer"].asText()
-                    val utbetalt = utbetaling["utbetalt"].asLocalDate()
-                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(orgnummer, fom, tom, beløp, utbetalt)
+    private val utbetalinger =
+        packet["@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger"]
+            .filter(::erGyldigPeriode)
+            .mapNotNull { utbetaling ->
+                val fom = utbetaling["fom"].asLocalDate()
+                val tom = utbetaling["tom"].asLocalDate()
+                when (utbetaling["typeKode"].asText()) {
+                    "0", "1" -> {
+                        val beløp = utbetaling["dagsats"].asInt()
+                        val orgnummer = utbetaling["orgnummer"].asText()
+                        val utbetalt = utbetaling["utbetalt"].asLocalDate()
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
+                            orgnummer,
+                            fom,
+                            tom,
+                            beløp,
+                            utbetalt
+                        )
+                    }
+
+                    "5", "6" -> {
+                        val beløp = utbetaling["dagsats"].asInt()
+                        val orgnummer = utbetaling["orgnummer"].asText()
+                        val utbetalt = utbetaling["utbetalt"].asLocalDate()
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                            orgnummer,
+                            fom,
+                            tom,
+                            beløp,
+                            utbetalt
+                        )
+                    }
+
+                    else -> null
                 }
-                "5", "6" -> {
-                    val beløp = utbetaling["dagsats"].asInt()
-                    val orgnummer = utbetaling["orgnummer"].asText()
-                    val utbetalt = utbetaling["utbetalt"].asLocalDate()
-                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(orgnummer, fom, tom, beløp, utbetalt)
-                }
-                else -> null
             }
-        }
 
-    private val feriepengehistorikk = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengehistorikk"]
-        .map { feriepenge ->
-            UtbetalingshistorikkForFeriepenger.Feriepenger(
-                orgnummer = feriepenge["orgnummer"].asText(),
-                beløp = feriepenge["beløp"].asInt(),
-                fom = feriepenge["fom"].asLocalDate(),
-                tom = feriepenge["tom"].asLocalDate()
-            )
-        }
+    private val feriepengehistorikk =
+        packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengehistorikk"]
+            .map { feriepenge ->
+                UtbetalingshistorikkForFeriepenger.Feriepenger(
+                    orgnummer = feriepenge["orgnummer"].asText(),
+                    beløp = feriepenge["beløp"].asInt(),
+                    fom = feriepenge["fom"].asLocalDate(),
+                    tom = feriepenge["tom"].asLocalDate()
+                )
+            }
 
-    private val arbeidskategorikoder = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder"]
-        .map {
-            val fom = it["fom"].asLocalDate()
-            val tom = it["tom"].asLocalDate()
-            val kode = it["kode"].asText()
-            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
-                periode = Periode(fom, tom),
-                arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.finn(kode)
-            )
-        }
-        .let(UtbetalingshistorikkForFeriepenger::Arbeidskategorikoder)
+    private val arbeidskategorikoder =
+        packet["@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder"]
+            .map {
+                val fom = it["fom"].asLocalDate()
+                val tom = it["tom"].asLocalDate()
+                val kode = it["kode"].asText()
+                UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                    periode = Periode(fom, tom),
+                    arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.finn(
+                        kode
+                    )
+                )
+            }
+            .let(UtbetalingshistorikkForFeriepenger::Arbeidskategorikoder)
 
     private val opptjeningsår = packet["${SykepengehistorikkForFeriepenger.name}.historikkFom"]
         .asLocalDate()

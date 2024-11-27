@@ -34,7 +34,9 @@ internal class AktivitetsloggTest {
         hendelse1.kontekst(person)
         hendelse1.info(infomelding)
         val expected = "$infomelding (Person Person: Person 1)"
-        assertTrue(aktivitetslogg.toString().contains(expected)) { "Expected $aktivitetslogg to contain <$expected>" }
+        assertTrue(
+            aktivitetslogg.toString().contains(expected)
+        ) { "Expected $aktivitetslogg to contain <$expected>" }
     }
 
     @Test
@@ -79,7 +81,12 @@ internal class AktivitetsloggTest {
         val aktivitet = aktivitetslogg.aktiviteter.first()
         assertEquals(3, aktivitet.kontekster.size)
         assertEquals(1, aktivitet.kontekster.filter { it.kontekstType == "Vedtaksperiode" }.size)
-        assertEquals("Vedtaksperiode 2", aktivitet.kontekster.first { it.kontekstType == "Vedtaksperiode" }.kontekstMap.getValue("Vedtaksperiode"))
+        assertEquals(
+            "Vedtaksperiode 2",
+            aktivitet.kontekster.first { it.kontekstType == "Vedtaksperiode" }.kontekstMap.getValue(
+                "Vedtaksperiode"
+            )
+        )
     }
 
     @Test
@@ -96,7 +103,11 @@ internal class AktivitetsloggTest {
         hendelse.info("Hei på deg")
         assertEquals(1, aktivitetslogg.aktiviteter.size)
         val aktivitet = aktivitetslogg.aktiviteter.first()
-        assertEquals("Person 1, Arbeidsgiver 2", aktivitet.kontekster.joinToString { it.kontekstMap[it.kontekstType] ?: it.kontekstType })
+        assertEquals(
+            "Person 1, Arbeidsgiver 2",
+            aktivitet.kontekster.joinToString {
+                it.kontekstMap[it.kontekstType] ?: it.kontekstType
+            })
     }
 
     @Test
@@ -115,7 +126,7 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `Melding sendt til forelder`(){
+    fun `Melding sendt til forelder`() {
         val hendelse = aktivitetslogg.barn()
         "info message".also {
             hendelse.info(it)
@@ -128,7 +139,7 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `Melding sendt fra barnebarn til forelder`(){
+    fun `Melding sendt fra barnebarn til forelder`() {
         val hendelse = aktivitetslogg.barn()
         hendelse.kontekst(person)
         val arbeidsgiver = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -162,7 +173,7 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `Vis bare arbeidsgiveraktivitet`(){
+    fun `Vis bare arbeidsgiveraktivitet`() {
         val hendelse1 = aktivitetslogg.barn()
         hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -194,7 +205,8 @@ internal class AktivitetsloggTest {
             Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
             "param1" to param1,
             "param2" to param2
-        ))
+        )
+        )
 
         assertEquals(1, aktivitetslogg.behov.size)
         assertEquals(1, aktivitetslogg.behov.first().kontekst().size)
@@ -213,32 +225,52 @@ internal class AktivitetsloggTest {
         assertVarsel(RV_SØ_1)
     }
 
-    private fun assertInfo(message: String, forventetKonteksttyper: List<String>? = null, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        val aktivitet = aktivitetslogg.aktiviteter.filter { it is Aktivitet.Info && message in it.toString() }
+    private fun assertInfo(
+        message: String,
+        forventetKonteksttyper: List<String>? = null,
+        aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
+    ) {
+        val aktivitet =
+            aktivitetslogg.aktiviteter.filter { it is Aktivitet.Info && message in it.toString() }
         assertEquals(1, aktivitet.size)
         if (forventetKonteksttyper != null) {
-            assertEquals(forventetKonteksttyper, aktivitet.single().kontekster.map { it.kontekstType })
+            assertEquals(
+                forventetKonteksttyper,
+                aktivitet.single().kontekster.map { it.kontekstType })
         }
     }
 
-    private fun assertVarsel(forventetKode: Varselkode, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
+    private fun assertVarsel(
+        forventetKode: Varselkode,
+        aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
+    ) {
         val aktivitet = aktivitetslogg.aktiviteter.filterIsInstance<Aktivitet.Varsel>()
         assertEquals(1, aktivitet.size)
         assertEquals(forventetKode, aktivitet.single().kode)
     }
 
-    private fun assertFunksjonellFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        assertEquals(1, aktivitetslogg.aktiviteter.count { it is Aktivitet.FunksjonellFeil && message in it.toString() })
+    private fun assertFunksjonellFeil(
+        message: String,
+        aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
+    ) {
+        assertEquals(
+            1,
+            aktivitetslogg.aktiviteter.count { it is Aktivitet.FunksjonellFeil && message in it.toString() })
     }
 
-    private fun assertLogiskFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        assertEquals(1, aktivitetslogg.aktiviteter.count { it is Aktivitet.LogiskFeil && message in it.toString() })
+    private fun assertLogiskFeil(
+        message: String,
+        aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
+    ) {
+        assertEquals(
+            1,
+            aktivitetslogg.aktiviteter.count { it is Aktivitet.LogiskFeil && message in it.toString() })
     }
 
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

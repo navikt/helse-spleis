@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 private val fnr = Personidentifikator("01011012345")
+
 internal class HendelseRepositoryTest {
     private lateinit var dataSource: TestDataSource
 
@@ -27,6 +28,7 @@ internal class HendelseRepositoryTest {
     internal fun setup() {
         dataSource = databaseContainer.nyTilkobling()
     }
+
     @AfterEach
     internal fun tearDown() {
         databaseContainer.droppTilkobling(dataSource)
@@ -74,7 +76,13 @@ private object TestMessages {
         """
 
         val packet = json.somPacket { packet ->
-            packet.requireKey("@id", "@event_name", "@opprettet", "fødselsnummer", "skjæringstidspunkt")
+            packet.requireKey(
+                "@id",
+                "@event_name",
+                "@opprettet",
+                "fødselsnummer",
+                "skjæringstidspunkt"
+            )
             packet.requireArbeidsgiveropplysninger()
         }
 

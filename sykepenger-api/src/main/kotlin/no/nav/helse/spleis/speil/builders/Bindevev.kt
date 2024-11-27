@@ -64,7 +64,8 @@ internal data class IOmregnetÅrsinntekt(
             kilde = kilde.toDTO(),
             beløp = beløp,
             månedsbeløp = månedsbeløp,
-            inntekterFraAOrdningen = inntekterFraAOrdningen?.sortedBy { it.måned }?.map { it.toDTO() }
+            inntekterFraAOrdningen = inntekterFraAOrdningen?.sortedBy { it.måned }
+                ?.map { it.toDTO() }
         )
     }
 }

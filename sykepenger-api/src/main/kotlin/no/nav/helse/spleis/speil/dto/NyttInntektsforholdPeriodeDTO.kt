@@ -13,12 +13,20 @@ data class NyttInntektsforholdPeriodeDTO(
     val månedligBeløp: Double,
     val skjæringstidspunkt: LocalDate
 ) {
-    internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = brytOpp(this, fom, tom, tidslinjeperiode, NyttInntektsforholdPeriodeDTO::til, NyttInntektsforholdPeriodeDTO::fra)
+    internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = brytOpp(
+        this,
+        fom,
+        tom,
+        tidslinjeperiode,
+        NyttInntektsforholdPeriodeDTO::til,
+        NyttInntektsforholdPeriodeDTO::fra
+    )
 
     internal fun til(other: ClosedRange<LocalDate>) = copy(
         id = UUID.randomUUID(),
         tom = other.start.forrigeDag
     )
+
     internal fun fra(other: ClosedRange<LocalDate>) = copy(
         id = UUID.randomUUID(),
         fom = other.endInclusive.nesteDag

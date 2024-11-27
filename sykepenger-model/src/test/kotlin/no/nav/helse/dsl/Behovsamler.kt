@@ -39,7 +39,10 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
-    internal fun <R> fangInntektsmeldingReplay(block: () -> R, behandleReplays: (Set<Forespørsel>) -> Unit): R {
+    internal fun <R> fangInntektsmeldingReplay(
+        block: () -> R,
+        behandleReplays: (Set<Forespørsel>) -> Unit
+    ): R {
         val før = replays.toSet()
         val retval = block()
         behandleReplays(replays.toSet() - før)
@@ -47,25 +50,41 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     internal fun bekreftBehovOppfylt() {
-        val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
+        val ubesvarte =
+            behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() }
+                ?: return
         log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
     }
 
     internal fun harBedtOmReplay(vedtaksperiodeId: UUID) =
         replays.any { it.vedtaksperiodeId == vedtaksperiodeId }
+
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
-        assertTrue(replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}"}
+        assertTrue(replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) {
+            "Vedtaksperioden har ikke bedt om replay. Den står i ${
+                tilstander.getValue(
+                    vedtaksperiodeId
+                )
+            }"
+        }
     }
 
     internal fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
-        bekreftBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper) { "Vedtaksperioden står i ${tilstander.getValue(vedtaksperiodeId)}"}
+        bekreftBehov(
+            vedtaksperiodebehov(vedtaksperiodeId),
+            *behovtyper
+        ) { "Vedtaksperioden står i ${tilstander.getValue(vedtaksperiodeId)}" }
     }
 
     internal fun bekreftBehov(orgnummer: String, vararg behovtyper: Behovtype) {
         bekreftBehov(orgnummerbehov(orgnummer), *behovtyper)
     }
 
-    private fun bekreftBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype, melding: () -> String = { "" }) {
+    private fun bekreftBehov(
+        filter: (Behov) -> Boolean,
+        vararg behovtyper: Behovtype,
+        melding: () -> String = { "" }
+    ) {
         assertTrue(harBehov(filter, *behovtyper)) {
             val behover = behov.filter(filter)
             "Forventer at [${behovtyper.joinToString { it.toString() }}] skal være etterspurt. Fant bare: [${behover.joinToString { it.type.toString() }}]. ${melding()}"
@@ -74,6 +93,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
 
     internal fun detaljerFor(orgnummer: String, behovtype: Behovtype) =
         detaljerFor(orgnummerbehov(orgnummer), behovtype)
+
     internal fun detaljerFor(vedtaksperiodeId: UUID, behovtype: Behovtype) =
         detaljerFor(vedtaksperiodebehov(vedtaksperiodeId), behovtype)
 
@@ -81,7 +101,9 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.kontekst() }
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
-        val vedtaksperiodebehov = behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() } ?: return
+        val vedtaksperiodebehov =
+            behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() }
+                ?: return
         log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
         behov.removeAll { behov -> vedtaksperiodeId == behov.vedtaksperiodeId }
         log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
@@ -109,20 +131,41 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         trengerArbeidsgiverperiode: Boolean,
         erPotensiellForespørsel: Boolean
     ) {
-        replays.add(Forespørsel(
-            fnr = personidentifikator.toString(),
-            orgnr = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
-            sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-            egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-            harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
-            erPotensiellForespørsel = erPotensiellForespørsel
-        ))
+        replays.add(
+            Forespørsel(
+                fnr = personidentifikator.toString(),
+                orgnr = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                førsteFraværsdager = førsteFraværsdager.map {
+                    no.nav.helse.spill_av_im.FørsteFraværsdag(
+                        it.organisasjonsnummer,
+                        it.førsteFraværsdag
+                    )
+                },
+                sykmeldingsperioder = sykmeldingsperioder.map {
+                    no.nav.helse.spill_av_im.Periode(
+                        it.start,
+                        it.endInclusive
+                    )
+                },
+                egenmeldinger = egenmeldingsperioder.map {
+                    no.nav.helse.spill_av_im.Periode(
+                        it.start,
+                        it.endInclusive
+                    )
+                },
+                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
+                erPotensiellForespørsel = erPotensiellForespørsel
+            )
+        )
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    override fun inntektsmeldingHåndtert(
+        inntektsmeldingId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String
+    ) {
         hånderteInntektsmeldinger.add(inntektsmeldingId)
     }
 
@@ -134,13 +177,17 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     private companion object {
-        private val Behov.utbetalingId get() =
-            kontekst()["utbetalingId"]?.let { UUID.fromString(it) }
-        private val Behov.vedtaksperiodeId get() =
-            kontekst()["vedtaksperiodeId"]?.let { UUID.fromString(it) }
+        private val Behov.utbetalingId
+            get() =
+                kontekst()["utbetalingId"]?.let { UUID.fromString(it) }
+        private val Behov.vedtaksperiodeId
+            get() =
+                kontekst()["vedtaksperiodeId"]?.let { UUID.fromString(it) }
         private val Behov.orgnummer get() = kontekst()["organisasjonsnummer"]
 
-        private val vedtaksperiodebehov = { vedtaksperiodeId: UUID -> { behov: Behov -> behov.vedtaksperiodeId == vedtaksperiodeId } }
-        private val orgnummerbehov = { orgnummer: String -> { behov: Behov -> behov.orgnummer == orgnummer } }
+        private val vedtaksperiodebehov =
+            { vedtaksperiodeId: UUID -> { behov: Behov -> behov.vedtaksperiodeId == vedtaksperiodeId } }
+        private val orgnummerbehov =
+            { orgnummer: String -> { behov: Behov -> behov.orgnummer == orgnummer } }
     }
 }

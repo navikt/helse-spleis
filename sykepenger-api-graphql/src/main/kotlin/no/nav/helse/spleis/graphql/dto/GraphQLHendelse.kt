@@ -16,7 +16,11 @@ enum class GraphQLHendelsetype {
     Ukjent
 }
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "__typename"
+)
 interface GraphQLHendelse {
     val id: String
     val eksternDokumentId: String
@@ -61,6 +65,7 @@ data class GraphQLSoknadFrilans(
 ) : GraphQLHendelse {
     override val type = GraphQLHendelsetype.SendtSoknadFrilans
 }
+
 data class GraphQLSoknadSelvstendig(
     override val id: String,
     override val eksternDokumentId: String,
@@ -71,6 +76,7 @@ data class GraphQLSoknadSelvstendig(
 ) : GraphQLHendelse {
     override val type = GraphQLHendelsetype.SendtSoknadSelvstendig
 }
+
 data class GraphQLSoknadArbeidsledig(
     override val id: String,
     override val eksternDokumentId: String,

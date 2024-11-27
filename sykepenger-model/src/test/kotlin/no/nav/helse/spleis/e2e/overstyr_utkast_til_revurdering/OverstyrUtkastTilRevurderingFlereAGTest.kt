@@ -38,11 +38,17 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(februar, AG1, AG2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (29.januar til 29.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (30.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
@@ -59,23 +65,81 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         inspektør(AG1) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50)
+            assertUtbetalingsdag(
+                utbetalingstidslinje[29.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[30.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[31.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
             assertIngenFunksjonelleFeil()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
         }
 
         inspektør(AG2) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
             assertIngenFunksjonelleFeil()
-            assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50)
+            assertUtbetalingsdag(
+                utbetalingstidslinje[29.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[30.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[31.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
         }
     }
 
@@ -85,11 +149,17 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(februar, AG1, AG2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (29.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (30.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
 
         inspektør(AG1) {
             assertIngenFunksjonelleFeil()
@@ -119,30 +189,71 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(februar, AG1, AG2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (29.januar til 29.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje(
+            (30.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG2
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
         inspektør(AG1) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50)
+            assertUtbetalingsdag(
+                utbetalingstidslinje[29.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[30.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[31.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
             assertIngenFunksjonelleFeil()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
 
         inspektør(AG2) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50)
+            assertUtbetalingsdag(
+                utbetalingstidslinje[29.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[30.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[31.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
             assertIngenFunksjonelleFeil()
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -155,28 +266,65 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(februar, AG1, AG2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (29.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje(
+            (1.februar til 2.februar).map { manuellFeriedag(it) },
+            orgnummer = AG2
+        )
 
         inspektør(AG1) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50)
+            assertUtbetalingsdag(
+                utbetalingstidslinje[29.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[30.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[31.januar],
+                expectedDagtype = Fridag::class,
+                50
+            )
 
             assertIngenFunksjonelleFeil()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
 
         inspektør(AG2) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50)
-            assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50)
+            assertUtbetalingsdag(
+                utbetalingstidslinje[29.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[30.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
+            assertUtbetalingsdag(
+                utbetalingstidslinje[31.januar],
+                expectedDagtype = NavDag::class,
+                50
+            )
 
             assertIngenFunksjonelleFeil()
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -190,13 +338,19 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(februar, AG1, AG2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (29.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalt(orgnummer = AG1)
 
-        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje(
+            (1.februar til 2.februar).map { manuellFeriedag(it) },
+            orgnummer = AG2
+        )
         inspektør(AG1) {
             assertTilstander(
                 1.vedtaksperiode,
@@ -211,7 +365,12 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
         inspektør(AG2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
@@ -222,19 +381,39 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(februar, AG1, AG2)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (29.januar til 31.januar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalt(orgnummer = AG1)
 
-        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje(
+            (1.februar til 2.februar).map { manuellFeriedag(it) },
+            orgnummer = AG1
+        )
         inspektør(AG1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
         inspektør(AG2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)

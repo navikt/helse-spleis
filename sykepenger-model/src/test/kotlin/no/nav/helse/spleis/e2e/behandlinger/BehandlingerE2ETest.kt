@@ -63,8 +63,16 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
     fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
-        nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
-        val korrigertIm = håndterInntektsmelding(arbeidsgiverperioder = listOf(), førsteFraværsdag = 10.januar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        nyttVedtak(
+            januar,
+            arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar)
+        )
+        val korrigertIm = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(),
+            førsteFraværsdag = 10.januar,
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null)
+        )
 
         // Per i dag blir det en revurdering uten endring og varsel om flere IM'er
         håndterYtelser(1.vedtaksperiode)
@@ -73,17 +81,23 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("IngenUtbetaling"))
         assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
 
-        val dagensRefusjonsopplysninger = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
-        val dagensRefusjonsopplysningerPeriode = dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
+        val dagensRefusjonsopplysninger =
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
+        val dagensRefusjonsopplysningerPeriode =
+            dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
         assertEquals(16.januar til LocalDate.MAX, dagensRefusjonsopplysningerPeriode)
         assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INNTEKT })
 
         // Med nye refusjonsopplysnigner vil det tolkes som 0,- i refusjon
-        val nyeRefusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
+        val nyeRefusjonsopplysninger =
+            inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
         val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.perioderMedBeløp.single()
         assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode)
-        assertTrue(nyeRefusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
-        assertTrue(nyeRefusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
+        assertTrue(
+            nyeRefusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
+        assertTrue(
+            nyeRefusjonsopplysninger.subset(10.januar til 31.januar)
+                .all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
     }
 
     @Test
@@ -91,8 +105,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent))
             nullstillTilstandsendringer()
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            val inntektsmeldingId =
+                håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVSLUTTET_UTEN_UTBETALING
+            )
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
                 assertEquals(2, it.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, it[0].tilstand)
@@ -108,11 +128,23 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             val registrert = LocalDateTime.now()
             val innsendt = registrert.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                søknadId = søknadId,
+                sendtTilNAVEllerArbeidsgiver = innsendt,
+                registrert = registrert
+            )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(2, behandlinger.single().endringer.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = registrert, avsender = Avsender.SYKMELDT), behandlinger.single().kilde)
+                assertEquals(
+                    Behandlingkilde(
+                        meldingsreferanseId = søknadId,
+                        innsendt = innsendt,
+                        registert = registrert,
+                        avsender = Avsender.SYKMELDT
+                    ), behandlinger.single().kilde
+                )
             }
         }
     }
@@ -129,7 +161,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER), behandlinger.last().kilde)
+                assertEquals(
+                    Behandlingkilde(
+                        meldingsreferanseId = inntektsmeldingId,
+                        innsendt = mottatt,
+                        registert = mottatt,
+                        avsender = Avsender.ARBEIDSGIVER
+                    ), behandlinger.last().kilde
+                )
             }
         }
     }
@@ -151,7 +190,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
         val korrigerendeImA1 = UUID.randomUUID()
         val mottatt = LocalDateTime.now()
-        val forventetKilde = Behandlingkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER)
+        val forventetKilde = Behandlingkilde(
+            meldingsreferanseId = korrigerendeImA1,
+            innsendt = mottatt,
+            registert = mottatt,
+            avsender = Avsender.ARBEIDSGIVER
+        )
 
         a1 {
             håndterInntektsmelding(
@@ -193,6 +237,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere iverksatt vedtak`() {
         a1 {
@@ -217,6 +262,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere flere iverksatte vedtak`() {
         a1 {
@@ -315,7 +361,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, reberegning = true)
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING_REVURDERING,
+                reberegning = true
+            )
             assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).tilstand)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
@@ -344,7 +394,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             val id = UUID.randomUUID()
-            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)), id = id)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                utbetalinger = listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)
+                ), id = id
+            )
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
@@ -359,11 +413,17 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     @Test
     fun `ny periode som starter med egenmeldinger påvirker ikke sykmeldingsperiode`() {
         a1 {
-            håndterSøknad(Sykdom(3.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+            håndterSøknad(
+                Sykdom(3.januar, 17.januar, 100.prosent),
+                egenmeldinger = listOf(1.januar til 2.januar)
+            )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(3, behandlinger.single().endringer.size)
-                assertEquals(3.januar til 17.januar, behandlinger.first().endringer.first().sykmeldingsperiode)
+                assertEquals(
+                    3.januar til 17.januar,
+                    behandlinger.first().endringer.first().sykmeldingsperiode
+                )
                 assertEquals(3.januar, behandlinger.last().endringer.last().skjæringstidspunkt)
             }
         }
@@ -374,11 +434,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
             val søknad2 = UUID.randomUUID()
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                Ferie(19.januar, 20.januar),
+                søknadId = søknad2
+            )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(3, behandlinger.single().endringer.size)
-                assertEquals(Dokumentsporing.søknad(søknad2), behandlinger.single().endringer.last().dokumentsporing)
+                assertEquals(
+                    Dokumentsporing.søknad(søknad2),
+                    behandlinger.single().endringer.last().dokumentsporing
+                )
             }
         }
     }
@@ -411,26 +478,54 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             val vedtakFattetTidspunkt = LocalDateTime.now()
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjenttidspunkt = vedtakFattetTidspunkt)
+            håndterUtbetalingsgodkjenning(
+                1.vedtaksperiode,
+                godkjenttidspunkt = vedtakFattetTidspunkt
+            )
             val søknad2 = UUID.randomUUID()
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                Ferie(19.januar, 20.januar),
+                søknadId = søknad2
+            )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
                     assertEquals(6, behandling.endringer.size)
-                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[0].dokumentsporing)
-                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[1].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer[2].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingRefusjon(im), behandling.endringer[3].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[4].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[5].dokumentsporing)
+                    assertEquals(
+                        Dokumentsporing.søknad(søknad1),
+                        behandling.endringer[0].dokumentsporing
+                    )
+                    assertEquals(
+                        Dokumentsporing.søknad(søknad1),
+                        behandling.endringer[1].dokumentsporing
+                    )
+                    assertEquals(
+                        Dokumentsporing.inntektsmeldingDager(im),
+                        behandling.endringer[2].dokumentsporing
+                    )
+                    assertEquals(
+                        Dokumentsporing.inntektsmeldingRefusjon(im),
+                        behandling.endringer[3].dokumentsporing
+                    )
+                    assertEquals(
+                        Dokumentsporing.inntektsmeldingInntekt(im),
+                        behandling.endringer[4].dokumentsporing
+                    )
+                    assertEquals(
+                        Dokumentsporing.inntektsmeldingInntekt(im),
+                        behandling.endringer[5].dokumentsporing
+                    )
                     assertEquals(VEDTAK_FATTET, behandling.tilstand)
                     assertEquals(vedtakFattetTidspunkt, behandling.vedtakFattet)
                     assertNull(behandling.avsluttet)
                 }
                 behandlinger[1].also { behandling ->
                     assertEquals(1, behandling.endringer.size)
-                    assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer.last().dokumentsporing)
+                    assertEquals(
+                        Dokumentsporing.søknad(søknad2),
+                        behandling.endringer.last().dokumentsporing
+                    )
                     assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
                 }
             }
@@ -502,7 +597,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+            val inntektsmeldingId =
+                håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
             assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
             assertFalse(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -513,7 +609,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(2, behandlinger.size)
                 val sisteBehandling = behandlinger.last()
                 assertEquals(inntektsmeldingId, sisteBehandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer.single().dokumentsporing)
+                assertEquals(
+                    Dokumentsporing.inntektsmeldingDager(inntektsmeldingId),
+                    sisteBehandling.endringer.single().dokumentsporing
+                )
                 assertEquals(UBEREGNET_REVURDERING, sisteBehandling.tilstand)
             }
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -528,16 +627,24 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val søknad2 = UUID.randomUUID()
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), søknadId = søknad1)
             håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent), søknadId = søknad2)
-            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
-                assertEquals(søknad1, behandling.kilde.meldingsreferanseId)
-                assertEquals(2, behandling.endringer.size)
-                assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer.last().dokumentsporing)
-                assertEquals(3.januar, behandling.endringer.last().skjæringstidspunkt)
-            }
-            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
-                assertEquals(søknad2, behandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer.single().dokumentsporing)
-            }
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single()
+                .also { behandling ->
+                    assertEquals(søknad1, behandling.kilde.meldingsreferanseId)
+                    assertEquals(2, behandling.endringer.size)
+                    assertEquals(
+                        Dokumentsporing.søknad(søknad1),
+                        behandling.endringer.last().dokumentsporing
+                    )
+                    assertEquals(3.januar, behandling.endringer.last().skjæringstidspunkt)
+                }
+            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single()
+                .also { behandling ->
+                    assertEquals(søknad2, behandling.kilde.meldingsreferanseId)
+                    assertEquals(
+                        Dokumentsporing.søknad(søknad2),
+                        behandling.endringer.single().dokumentsporing
+                    )
+                }
         }
     }
 
@@ -551,11 +658,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
             assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
-                assertEquals(overlappende, behandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
-            }
-            assertFunksjonellFeil(Varselkode.`Mottatt søknad som delvis overlapper`, 1.vedtaksperiode.filter())
+            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last()
+                .also { behandling ->
+                    assertEquals(overlappende, behandling.kilde.meldingsreferanseId)
+                    assertEquals(
+                        Dokumentsporing.søknad(overlappende),
+                        behandling.endringer.single().dokumentsporing
+                    )
+                }
+            assertFunksjonellFeil(
+                Varselkode.`Mottatt søknad som delvis overlapper`,
+                1.vedtaksperiode.filter()
+            )
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
@@ -569,13 +683,26 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         }
         a2 {
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 2.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeOpptjening")
+            håndterInntektsmelding(
+                emptyList(),
+                førsteFraværsdag = 2.januar,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeOpptjening"
+            )
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-                arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT), Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT))
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(
+                        a1 to INNTEKT,
+                        a2 to INNTEKT
+                    ), 1.januar
+                ),
+                arbeidsforhold = listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
+                    Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT)
+                )
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -611,7 +738,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyPeriode(1.januar til 5.januar)
             nyPeriode(6.januar til 8.januar)
             nyPeriode(9.januar til 15.januar)
-            nyttVedtak(16.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            nyttVedtak(
+                16.januar til 25.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar)
+            )
             håndterSøknad(Sykdom(6.januar, 8.januar, 100.prosent, 10.prosent))
 
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -643,13 +773,26 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterInntektsmelding(
+                emptyList(),
+                førsteFraværsdag = 1.januar,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
+            håndterOverstyrTidslinje((1.januar til 15.januar).map {
+                ManuellOverskrivingDag(
+                    it,
+                    Dagtype.Permisjonsdag
+                )
+            })
 
-            håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
+            håndterSøknad(
+                Sykdom(1.januar, 15.januar, 100.prosent),
+                Permisjon(1.januar, 10.januar),
+                Permisjon(14.januar, 15.januar)
+            )
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -710,9 +853,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            ))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                )
+            )
 
             nyttVedtak(mars)
             forlengVedtak(april)
@@ -808,12 +953,17 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar til 25.januar)
             forlengVedtak(26.januar til 10.februar)
-            nyttVedtak(14.februar til 20.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar)) // samme agp, men nytt skjæringstidspunkt
+            nyttVedtak(
+                14.februar til 20.februar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar)
+            ) // samme agp, men nytt skjæringstidspunkt
 
             nyttVedtak(15.mars til 10.april)
             nyttVedtak(august)
 
-            håndterAnnullering(inspektør.utbetalinger(3.vedtaksperiode).single().inspektør.utbetalingId)
+            håndterAnnullering(
+                inspektør.utbetalinger(3.vedtaksperiode).single().inspektør.utbetalingId
+            )
 
             assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
             assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())
@@ -834,9 +984,16 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `korrigert inntektsmelding med funksjonell feil`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar), førsteFraværsdag = 15.januar)
+            nyttVedtak(
+                15.januar til 25.januar,
+                arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar),
+                førsteFraværsdag = 15.januar
+            )
 
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 21.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+            val inntektsmeldingId = håndterInntektsmelding(
+                listOf(1.januar til 10.januar, 15.januar til 21.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn"
+            )
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

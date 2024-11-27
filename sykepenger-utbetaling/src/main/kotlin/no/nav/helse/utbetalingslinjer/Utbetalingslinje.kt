@@ -44,7 +44,10 @@ class Utbetalingslinje(
             linje.kopier(refFagsystemId = fagsystemId)
         }
 
-        internal fun normaliserLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
+        internal fun normaliserLinjer(
+            fagsystemId: String,
+            linjer: List<Utbetalingslinje>
+        ): List<Utbetalingslinje> {
             val linjerMedBeløp = fjernLinjerUtenUtbetalingsdager(linjer)
             val nyeLinjerSkalPekePåFagsystemId = nyeLinjer(fagsystemId, linjerMedBeløp)
             val ferdigeLinjer = sisteLinjeSkalIkkeTrekkesIHelg(nyeLinjerSkalPekePåFagsystemId)
@@ -59,16 +62,22 @@ class Utbetalingslinje(
 
         // alle nye linjer skal peke på fagsystemId, foruten linje nr 1
         private fun nyeLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>) =
-            linjer.take(1).map { it.kopier(refFagsystemId = null) } + linjer.drop(1).map { it.kopier(refFagsystemId = fagsystemId) }
+            linjer.take(1).map { it.kopier(refFagsystemId = null) } + linjer.drop(1)
+                .map { it.kopier(refFagsystemId = fagsystemId) }
 
         // linjer med beløp 0 kr er ugyldige/ikke ønsket å sende OS
         private fun fjernLinjerUtenUtbetalingsdager(linjer: List<Utbetalingslinje>) =
             linjer.filterNot { it.beløp == null || it.beløp == 0 }
 
         // oppdraget utgjør på sett og vis en linket liste hvor hver linje har et nummer, og peker tilbake på forrige linje
-        internal fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>, koblingslinje: Utbetalingslinje? = null): List<Utbetalingslinje> {
+        internal fun kjedeSammenLinjer(
+            linjer: List<Utbetalingslinje>,
+            koblingslinje: Utbetalingslinje? = null
+        ): List<Utbetalingslinje> {
             if (linjer.isEmpty()) return emptyList()
-            val førstelinje = linjer.first().let { førstelinje -> koblingslinje?.let { førstelinje.kobleTil(it) } ?: førstelinje }
+            val førstelinje = linjer.first().let { førstelinje ->
+                koblingslinje?.let { førstelinje.kobleTil(it) } ?: førstelinje
+            }
             var forrige = førstelinje
             val result = mutableListOf(forrige)
             linjer.drop(1).forEach { linje ->
@@ -104,7 +113,8 @@ class Utbetalingslinje(
 
     override operator fun iterator() = periode.iterator()
 
-    override fun toString() = "$fom til $tom $endringskode $grad ${datoStatusFom?.let { "opphører fom $it" }}"
+    override fun toString() =
+        "$fom til $tom $endringskode $grad ${datoStatusFom?.let { "opphører fom $it" }}"
 
     internal fun detaljer() =
         OppdragDetaljer.LinjeDetaljer(
@@ -170,28 +180,34 @@ class Utbetalingslinje(
 
     private fun equals(other: Utbetalingslinje) =
         this.fom == other.fom &&
-                this.tom == other.tom &&
-                this.beløp == other.beløp &&
-                this.grad == other.grad &&
-                this.datoStatusFom == other.datoStatusFom
+            this.tom == other.tom &&
+            this.beløp == other.beløp &&
+            this.grad == other.grad &&
+            this.datoStatusFom == other.datoStatusFom
 
-    fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+    fun kanEndreEksisterendeLinje(
+        other: Utbetalingslinje,
+        sisteLinjeITidligereOppdrag: Utbetalingslinje
+    ) =
         other == sisteLinjeITidligereOppdrag &&
-                this.fom == other.fom &&
-                this.beløp == other.beløp &&
-                this.grad == other.grad &&
-                this.datoStatusFom == other.datoStatusFom
+            this.fom == other.fom &&
+            this.beløp == other.beløp &&
+            this.grad == other.grad &&
+            this.datoStatusFom == other.datoStatusFom
 
-    fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+    fun skalOpphøreOgErstatte(
+        other: Utbetalingslinje,
+        sisteLinjeITidligereOppdrag: Utbetalingslinje
+    ) =
         other == sisteLinjeITidligereOppdrag && (this.fom > other.fom)
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
-                tom.hashCode() * 17 +
-                beløp.hashCode() * 41 +
-                grad.hashCode() * 61 +
-                endringskode.name.hashCode() * 59 +
-                datoStatusFom.hashCode() * 23
+            tom.hashCode() * 17 +
+            beløp.hashCode() * 41 +
+            grad.hashCode() * 61 +
+            endringskode.name.hashCode() * 59 +
+            datoStatusFom.hashCode() * 23
     }
 
     fun markerUendret(tidligere: Utbetalingslinje) = kopier(
@@ -216,7 +232,9 @@ class Utbetalingslinje(
     internal fun begrensTil(sisteDato: LocalDate) = kopier(tom = sisteDato).kuttHelg()
 
     fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje): Utbetalingslinje? {
-        if (this.beløp != førsteLinjeIForrige.beløp || this.grad != førsteLinjeIForrige.grad || !this.tom.erRettFør(førsteLinjeIForrige.fom)) return null
+        if (this.beløp != førsteLinjeIForrige.beløp || this.grad != førsteLinjeIForrige.grad || !this.tom.erRettFør(
+                førsteLinjeIForrige.fom
+            )) return null
         return kopier(tom = førsteLinjeIForrige.tom)
     }
 
@@ -226,8 +244,12 @@ class Utbetalingslinje(
 
     internal fun kuttHelg(): Utbetalingslinje? {
         return when (tom.dayOfWeek) {
-            DayOfWeek.SUNDAY -> tom.minusDays(2).takeUnless { it < fom}?.let { nyTom -> kopier(tom = nyTom) }
-            DayOfWeek.SATURDAY -> tom.forrigeDag.takeUnless { it < fom}?.let { nyTom -> kopier(tom = nyTom) }
+            DayOfWeek.SUNDAY -> tom.minusDays(2).takeUnless { it < fom }
+                ?.let { nyTom -> kopier(tom = nyTom) }
+
+            DayOfWeek.SATURDAY -> tom.forrigeDag.takeUnless { it < fom }
+                ?.let { nyTom -> kopier(tom = nyTom) }
+
             else -> this
         }
     }

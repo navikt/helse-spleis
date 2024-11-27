@@ -35,7 +35,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(1.januar til 10.januar, 1.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
+        assertEquals(
+            1.januar til 10.januar,
+            1.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode
+        )
     }
 
     @Test
@@ -61,7 +64,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden med bare ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
-        val søknadId = håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
+        val søknadId =
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(0, inspektør.antallUtbetalinger)
@@ -69,8 +73,14 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(
+            setOf(søknadId),
+            1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder
+        )
+        assertEquals(
+            setOf(søknadId, inntektsmeldingId),
+            1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder
+        )
     }
 
     @Test
@@ -103,8 +113,16 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar(2020) til 16.januar(2020)),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar(2020) til 16.januar(2020)),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a2
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -117,8 +135,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
@@ -151,7 +171,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
+        håndterSkjønnsmessigFastsettelse(
+            1.januar(2020),
+            listOf(
+                OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig),
+                OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)
+            )
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -163,8 +189,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
@@ -190,7 +218,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`(){
+    fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`() {
         val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val inntektsmeldingId = håndterInntektsmelding(
@@ -202,7 +230,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val liste = (1..16).map{
+        val liste = (1..16).map {
             ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
         }
         val overstyringId = UUID.randomUUID()
@@ -212,8 +240,14 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(
+            setOf(søknadId),
+            1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder
+        )
+        assertEquals(
+            setOf(søknadId, inntektsmeldingId, overstyringId),
+            1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder
+        )
     }
 
 
@@ -225,7 +259,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         2.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(10.februar til 28.februar, 2.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
+        assertEquals(
+            10.februar til 28.februar,
+            2.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode
+        )
     }
 
     @Test
@@ -247,18 +284,36 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     fun `sender med tidligere dokumenter etter revurdering`() {
         nyttVedtak(januar)
         val overstyringId = UUID.randomUUID()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), meldingsreferanseId = overstyringId)
+        håndterOverstyrTidslinje(
+            listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)),
+            meldingsreferanseId = overstyringId
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)
-        val tidligereVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
+        assertEquals(
+            1,
+            observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size
+        )
+        val tidligereVedtak =
+            observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalt()
-        assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)
+        assertEquals(
+            2,
+            observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size
+        )
         val nyttVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(tidligereVedtak.hendelseIder.plus(overstyringId), nyttVedtak.hendelseIder)
     }
 
-    private val IdInnhenter.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(id(ORGNUMMER))
-    private fun IdInnhenter.assertIngenVedtakFattet() = assertEquals(emptyList<PersonObserver.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[id(ORGNUMMER)] ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>())
+    private val IdInnhenter.avsluttetUtenVedtakEventer
+        get() = observatør.avsluttetUtenVedtakEventer.getValue(
+            id(ORGNUMMER)
+        )
+
+    private fun IdInnhenter.assertIngenVedtakFattet() = assertEquals(
+        emptyList<PersonObserver.AvsluttetMedVedtakEvent>(),
+        observatør.avsluttetMedVedtakEventer[id(ORGNUMMER)]
+            ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>()
+    )
 }

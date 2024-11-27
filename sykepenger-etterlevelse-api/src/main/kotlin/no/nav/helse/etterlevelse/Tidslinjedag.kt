@@ -7,7 +7,8 @@ class Tidslinjedag(
     private val dagtype: String,
     private val grad: Int?
 ) {
-    private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype, grad)
+    private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) =
+        tidslinjeperiode.hørerTil(dato, dagtype, grad)
 
     fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
 
@@ -16,17 +17,28 @@ class Tidslinjedag(
     companion object {
         fun List<Tidslinjedag>.dager(periode: ClosedRange<LocalDate>? = null): List<Map<String, Any?>> {
             return this
-                .filter { it.dato >= (periode?.start ?: LocalDate.MIN) && it.dato <= (periode?.endInclusive ?: LocalDate.MAX) }
+                .filter {
+                    it.dato >= (periode?.start
+                        ?: LocalDate.MIN) && it.dato <= (periode?.endInclusive ?: LocalDate.MAX)
+                }
                 .sortedBy { it.dato }
                 .fold(mutableListOf<Tidslinjeperiode>()) { acc, nesteDag ->
                     if (acc.isNotEmpty() && nesteDag.hørerTil(acc.last())) {
                         acc.last().utvid(nesteDag.dato)
                     } else {
-                        acc.add(Tidslinjeperiode(nesteDag.dato, nesteDag.dato, nesteDag.dagtype, nesteDag.grad))
+                        acc.add(
+                            Tidslinjeperiode(
+                                nesteDag.dato,
+                                nesteDag.dato,
+                                nesteDag.dagtype,
+                                nesteDag.grad
+                            )
+                        )
                     }
                     acc
                 }.dager()
         }
+
         private fun List<Tidslinjeperiode>.dager() = map {
             mapOf(
                 "fom" to it.fom,
@@ -47,7 +59,8 @@ class Tidslinjedag(
             this.tom = dato
         }
 
-        fun hørerTil(dato: LocalDate, dagtype: String, grad: Int?) = tom.plusDays(1) == dato && this.dagtype == dagtype && this.grad == grad
+        fun hørerTil(dato: LocalDate, dagtype: String, grad: Int?) =
+            tom.plusDays(1) == dato && this.dagtype == dagtype && this.grad == grad
     }
 
 }

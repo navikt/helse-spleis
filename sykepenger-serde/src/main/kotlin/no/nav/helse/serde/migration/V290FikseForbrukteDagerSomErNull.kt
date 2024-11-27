@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V290FikseForbrukteDagerSomErNull: JsonMigration(version = 290) {
-    override val description = "fikser historiske utbetalinger som har forbrukteSykedager og gjenståendeSykedager satt til NULL"
+internal class V290FikseForbrukteDagerSomErNull : JsonMigration(version = 290) {
+    override val description =
+        "fikser historiske utbetalinger som har forbrukteSykedager og gjenståendeSykedager satt til NULL"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktørId = jsonNode.path("aktørId").asText()
@@ -16,10 +17,20 @@ internal class V290FikseForbrukteDagerSomErNull: JsonMigration(version = 290) {
                 MDC.putCloseable("orgnr", orgnr).use {
                     arbeidsgiver.path("utbetalinger")
                         .filter { utbetaling -> utbetaling.path("type").asText() == "UTBETALING" }
-                        .filter { utbetaling -> !utbetaling.hasNonNull("forbrukteSykedager") || !utbetaling.hasNonNull("gjenståendeSykedager") }
+                        .filter { utbetaling ->
+                            !utbetaling.hasNonNull("forbrukteSykedager") || !utbetaling.hasNonNull(
+                                "gjenståendeSykedager"
+                            )
+                        }
                         .forEach { utbetaling ->
                             utbetaling as ObjectNode
-                            sikkerLogg.info("migrerer forbrukteSykedager/gjenståendeSykedager for ${utbetaling.path("id").asText()}")
+                            sikkerLogg.info(
+                                "migrerer forbrukteSykedager/gjenståendeSykedager for ${
+                                    utbetaling.path(
+                                        "id"
+                                    ).asText()
+                                }"
+                            )
                             if (!utbetaling.hasNonNull("forbrukeSykedager"))
                                 utbetaling.put("forbrukteSykedager", 0)
                             if (!utbetaling.hasNonNull("gjenståendeSykedager"))

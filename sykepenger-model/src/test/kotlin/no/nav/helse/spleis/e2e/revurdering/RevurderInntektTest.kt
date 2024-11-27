@@ -154,7 +154,12 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(januar, 100.prosent)
         nullstillTilstandsendringer()
-        assertThrows<IllegalStateException> { håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar) }
+        assertThrows<IllegalStateException> {
+            håndterOverstyrInntekt(
+                inntekt = 32000.månedlig,
+                skjæringstidspunkt = 2.januar
+            )
+        }
         assertIngenFunksjonelleFeil(AktivitetsloggFilter.person())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.antallUtbetalinger)
@@ -252,11 +257,20 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
+        håndterOverstyrInntekt(
+            46000.årlig,
+            skjæringstidspunkt = 1.januar
+        ) // da havner vi under greia
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(), -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+        assertEquals(
+            inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId,
+            inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId
+        )
+        assertEquals(
+            inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(),
+            -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp()
+        )
     }
 
     @Test
@@ -301,7 +315,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             skalHaEndringskode(Endringskode.ENDR)
             assertEquals(opprinneligFagsystemId, fagsystemId)
             assertEquals(1, size)
-            first().assertUtbetalingslinje(Endringskode.ENDR, 1, null, null, ønsketDatoStatusFom = 17.januar)
+            first().assertUtbetalingslinje(
+                Endringskode.ENDR,
+                1,
+                null,
+                null,
+                ønsketDatoStatusFom = 17.januar
+            )
         }
         inspektør.utbetaling(2).arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.ENDR)
@@ -449,7 +469,12 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }
@@ -460,14 +485,19 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            TIL_UTBETALING,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
         assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling - utbetalingen feiler`() {
         tilGodkjent(januar, 100.prosent, 1.januar)
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = 1.januar)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
@@ -479,7 +509,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengTilGodkjentVedtak(februar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = 1.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,

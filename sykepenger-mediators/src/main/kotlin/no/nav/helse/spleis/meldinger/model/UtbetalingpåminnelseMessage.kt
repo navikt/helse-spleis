@@ -1,16 +1,19 @@
 package no.nav.helse.spleis.meldinger.model
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.Utbetalingpåminnelse
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 
 // Understands a JSON message representing a UtbetalingpPåminnelse
-internal class UtbetalingpåminnelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class UtbetalingpåminnelseMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : HendelseMessage(packet) {
 
     private val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()

@@ -15,7 +15,13 @@ internal class HendelsekildeTest {
             TestEvent.Sykmelding(1.januar.atStartOfDay()),
             TestEvent.Sykmelding(3.januar.atStartOfDay())
         ).map { it.kilde }
-        assertEquals(2.januar.atStartOfDay(), SykdomshistorikkHendelse.Hendelseskilde.tidligsteTidspunktFor(kilder, TestEvent.Sykmelding::class))
+        assertEquals(
+            2.januar.atStartOfDay(),
+            SykdomshistorikkHendelse.Hendelseskilde.tidligsteTidspunktFor(
+                kilder,
+                TestEvent.Sykmelding::class
+            )
+        )
     }
 
     @Test
@@ -25,6 +31,11 @@ internal class HendelsekildeTest {
             TestEvent.Søknad(1.januar.atStartOfDay()),
             TestEvent.Sykmelding(3.januar.atStartOfDay())
         ).map { it.kilde }
-        assertThrows<IllegalStateException> { SykdomshistorikkHendelse.Hendelseskilde.tidligsteTidspunktFor(kilder, TestEvent.Sykmelding::class) }
+        assertThrows<IllegalStateException> {
+            SykdomshistorikkHendelse.Hendelseskilde.tidligsteTidspunktFor(
+                kilder,
+                TestEvent.Sykmelding::class
+            )
+        }
     }
 }

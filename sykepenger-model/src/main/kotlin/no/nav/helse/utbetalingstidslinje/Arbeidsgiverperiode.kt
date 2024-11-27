@@ -14,7 +14,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.ukedager
 
-internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
+internal class Arbeidsgiverperiode private constructor(
+    private val perioder: List<Periode>,
+    førsteUtbetalingsdag: LocalDate?
+) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
 
     private val kjenteDager = mutableListOf<Periode>()
@@ -29,8 +32,18 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     private val arbeidsgiverperioden get() = perioder.first().start til perioder.last().endInclusive
-    private val førsteKjente get() = listOfNotNull(perioder.firstOrNull()?.start, utbetalingsdager.firstOrNull()?.start, kjenteDager.firstOrNull()?.start).minOf { it }
-    private val sisteKjente get() = listOfNotNull(perioder.lastOrNull()?.endInclusive, utbetalingsdager.lastOrNull()?.endInclusive, kjenteDager.lastOrNull()?.endInclusive).maxOf { it }
+    private val førsteKjente
+        get() = listOfNotNull(
+            perioder.firstOrNull()?.start,
+            utbetalingsdager.firstOrNull()?.start,
+            kjenteDager.firstOrNull()?.start
+        ).minOf { it }
+    private val sisteKjente
+        get() = listOfNotNull(
+            perioder.lastOrNull()?.endInclusive,
+            utbetalingsdager.lastOrNull()?.endInclusive,
+            kjenteDager.lastOrNull()?.endInclusive
+        ).maxOf { it }
     private val innflytelseperioden get() = førsteKjente til sisteKjente
 
     internal fun fiktiv() = perioder.isEmpty() // Arbeidsperioden er gjennomført i Infotrygd
@@ -80,13 +93,19 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         val mellomliggendePeriode = checkNotNull(a.periodeMellom(b.start)) {
             "forventer at det skal være dager mellom to utbetalingsperioder, enten pga. helg eller andre oppholdsdager"
         }
-        return oppholdsdager.any { oppholdsperiode -> oppholdsperiode.overlapperMed(mellomliggendePeriode) }
+        return oppholdsdager.any { oppholdsperiode ->
+            oppholdsperiode.overlapperMed(
+                mellomliggendePeriode
+            )
+        }
     }
 
     internal fun dekkesAvArbeidsgiver(periode: Periode): Boolean {
         if (fiktiv()) return false
         val arbeidsgiversAnsvar = dagerSomarbeidsgiverUtbetaler() ?: return false
-        return (periode.overlapperMed(arbeidsgiversAnsvar) && arbeidsgiversAnsvar.slutterEtter(periode.endInclusive))
+        return (periode.overlapperMed(arbeidsgiversAnsvar) && arbeidsgiversAnsvar.slutterEtter(
+            periode.endInclusive
+        ))
     }
 
     private fun dagerSomarbeidsgiverUtbetaler(): Periode? {
@@ -101,19 +120,26 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun sammenlign(other: List<Periode>): Boolean {
         if (fiktiv()) return true
         val thisSiste = this.perioder.last().endInclusive
-        val otherSiste = other.lastOrNull()?.endInclusive?.coerceAtMost(this.sisteKjente) ?: return false
-        return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
+        val otherSiste =
+            other.lastOrNull()?.endInclusive?.coerceAtMost(this.sisteKjente) ?: return false
+        return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(
+            otherSiste
+        ))
     }
 
     internal fun erFørsteUtbetalingsdagFørEllerLik(periode: Periode): Boolean {
         // forventer inntekt dersom vi overlapper med en utbetalingsperiode…
         if (utbetalingsdager.any { periode.overlapperMed(it) }) return true
         // …eller dersom det ikke har vært gap siden forrige utbetaling
-        val forrigeUtbetaling = utbetalingsdager.lastOrNull { other -> other.endInclusive < periode.endInclusive } ?: return false
+        val forrigeUtbetaling =
+            utbetalingsdager.lastOrNull { other -> other.endInclusive < periode.endInclusive }
+                ?: return false
         return oppholdsdager.none { it.overlapperMed(forrigeUtbetaling.endInclusive til periode.endInclusive) }
     }
 
-    override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente
+    override fun equals(other: Any?) =
+        other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente
+
     override fun hashCode() = førsteKjente.hashCode()
 
     override fun iterator(): Iterator<LocalDate> {
@@ -151,7 +177,10 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return false
     }
 
-    internal fun validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode: Periode, aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
+    internal fun validerFeilaktigNyArbeidsgiverperiode(
+        vedtaksperiode: Periode,
+        aktivitetslogg: IAktivitetslogg
+    ): IAktivitetslogg {
         val sisteDagAgp = perioder.lastOrNull()?.endInclusive ?: return aktivitetslogg
         // Om det er én eller fler ukedager mellom beregnet AGP og vedtaksperioden som overlapper med dager fra inntektsmeldingen
         // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
@@ -159,17 +188,20 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return aktivitetslogg
     }
 
-    private fun utbetalingsdagerI(periode: Periode) = periode.filter { dag -> utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
+    private fun utbetalingsdagerI(periode: Periode) =
+        periode.filter { dag -> utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode } }
 
     internal companion object {
-        internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
+        internal fun fiktiv(førsteUtbetalingsdag: LocalDate) =
+            Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
         internal fun forventerInntekt(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
             arbeidsgiverperiode?.forventerInntekt(periode) ?: false
 
-        internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
-            periode in arbeidsgiverperiode
-        }
+        internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) =
+            lastOrNull { arbeidsgiverperiode ->
+                periode in arbeidsgiverperiode
+            }
 
         private fun Periode.justerForHelg() = when (endInclusive.dayOfWeek) {
             DayOfWeek.SATURDAY -> start til endInclusive.plusDays(1)
@@ -185,21 +217,69 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
             }
         }
 
-        private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, sisteOppholdsdagFørUtbetalingsdager: () -> LocalDate?): Boolean {
+        private fun harNødvendigeRefusjonsopplysninger(
+            skjæringstidspunkt: LocalDate,
+            periode: Periode,
+            refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
+            arbeidsgiverperiode: Arbeidsgiverperiode,
+            aktivitetslogg: IAktivitetslogg,
+            organisasjonsnummer: String,
+            sisteOppholdsdagFørUtbetalingsdager: () -> LocalDate?
+        ): Boolean {
             val utbetalingsdager = arbeidsgiverperiode.utbetalingsdagerI(periode)
             if (utbetalingsdager.isEmpty()) return true
-            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager(), aktivitetslogg, organisasjonsnummer)
+            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(
+                skjæringstidspunkt,
+                utbetalingsdager,
+                sisteOppholdsdagFørUtbetalingsdager(),
+                aktivitetslogg,
+                organisasjonsnummer
+            )
         }
 
-        internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) {
-                arbeidsgiverperiode.oppholdsdager.flatten().lastOrNull { oppholdsdag -> oppholdsdag < periode.start } ?: arbeidsgiverperiode.firstOrNull()?.forrigeDag
+        internal fun harNødvendigeRefusjonsopplysninger(
+            skjæringstidspunkt: LocalDate,
+            periode: Periode,
+            refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
+            arbeidsgiverperiode: Arbeidsgiverperiode,
+            aktivitetslogg: IAktivitetslogg,
+            organisasjonsnummer: String
+        ) =
+            harNødvendigeRefusjonsopplysninger(
+                skjæringstidspunkt,
+                periode,
+                refusjonsopplysninger,
+                arbeidsgiverperiode,
+                aktivitetslogg,
+                organisasjonsnummer
+            ) {
+                arbeidsgiverperiode.oppholdsdager.flatten()
+                    .lastOrNull { oppholdsdag -> oppholdsdag < periode.start }
+                    ?: arbeidsgiverperiode.firstOrNull()?.forrigeDag
             }
 
-        internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
+        internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
+            skjæringstidspunkt: LocalDate,
+            periode: Periode,
+            refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
+            arbeidsgiverperiode: Arbeidsgiverperiode,
+            aktivitetslogg: IAktivitetslogg,
+            organisasjonsnummer: String
+        ) =
+            harNødvendigeRefusjonsopplysninger(
+                skjæringstidspunkt,
+                periode,
+                refusjonsopplysninger,
+                arbeidsgiverperiode,
+                aktivitetslogg,
+                organisasjonsnummer
+            ) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
 
-        internal fun utbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate, periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode) =
+        internal fun utbetalingsdagerFørSkjæringstidspunkt(
+            skjæringstidspunkt: LocalDate,
+            periode: Periode,
+            arbeidsgiverperiode: Arbeidsgiverperiode
+        ) =
             arbeidsgiverperiode.utbetalingsdagerI(periode).filter { it < skjæringstidspunkt }
     }
 }

@@ -9,7 +9,7 @@ internal interface Sjekk {
     fun skalSjekke(nå: LocalDateTime): Boolean
 }
 
-internal class RegelmessigAvstemming(private val manglerAvstemming: () -> Int): Sjekk {
+internal class RegelmessigAvstemming(private val manglerAvstemming: () -> Int) : Sjekk {
     override fun sjekk(): Pair<Level, String>? {
         val mangler = manglerAvstemming()
         if (mangler == 0) return null

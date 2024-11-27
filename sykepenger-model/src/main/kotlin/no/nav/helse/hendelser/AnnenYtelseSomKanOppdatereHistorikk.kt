@@ -36,7 +36,10 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
             if (sammenhengendePerioder.size > 1) return false to FLERE_IKKE_SAMMENHENGENDE_INNSLAG
             val ytelseperiode = sammenhengendePerioder.single()
             val fullstendigOverlapp = ytelseperiode == vedtaksperiode
-            val ytelseIHalen = vedtaksperiode.overlapperMed(ytelseperiode) && ytelseperiode.slutterEtter(vedtaksperiode.endInclusive)
+            val ytelseIHalen =
+                vedtaksperiode.overlapperMed(ytelseperiode) && ytelseperiode.slutterEtter(
+                    vedtaksperiode.endInclusive
+                )
             if (!fullstendigOverlapp && !ytelseIHalen) return false to IKKE_I_HALEN_AV_VEDTAKSPERIODE
             if (this.any { it.grad != 100 }) return false to GRADERT_YTELSE
             if (skjæringstidspunkt > vedtaksperiode.start && skjæringstidspunkt > ytelseperiode.start) return false to FLYTTER_SKJÆRINGSTIDSPUNKT
@@ -51,7 +54,11 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
         skjæringstidspunkt: LocalDate,
         vedtaksperiodeRettEtter: Periode?
     ): Boolean {
-        val (skalOppdatereHistorikk, hvorforIkke) = ytelse.skalOppdatereHistorikk(vedtaksperiode, skjæringstidspunkt, vedtaksperiodeRettEtter)
+        val (skalOppdatereHistorikk, hvorforIkke) = ytelse.skalOppdatereHistorikk(
+            vedtaksperiode,
+            skjæringstidspunkt,
+            vedtaksperiodeRettEtter
+        )
         if (hvorforIkke !in listOf(null, INGEN_YTELSE)) {
             aktivitetslogg.info("Legger ikke til ${ytelse.javaClass.simpleName.lowercase()} i historikken fordi $hvorforIkke")
         }
@@ -60,7 +67,15 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
         }
     }
 
-    internal abstract fun skalOppdatereHistorikk(vedtaksperiode: Periode, skjæringstidspunkt: LocalDate, vedtaksperiodeRettEtter: Periode? = null): Pair<Boolean, HvorforIkkeOppdatereHistorikk?>
-    internal abstract fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje
+    internal abstract fun skalOppdatereHistorikk(
+        vedtaksperiode: Periode,
+        skjæringstidspunkt: LocalDate,
+        vedtaksperiodeRettEtter: Periode? = null
+    ): Pair<Boolean, HvorforIkkeOppdatereHistorikk?>
+
+    internal abstract fun sykdomstidslinje(
+        meldingsreferanseId: UUID,
+        registrert: LocalDateTime
+    ): Sykdomstidslinje
 
 }

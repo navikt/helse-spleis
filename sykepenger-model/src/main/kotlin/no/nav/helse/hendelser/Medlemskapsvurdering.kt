@@ -13,14 +13,17 @@ class Medlemskapsvurdering(
                 aktivitetslogg.info("Bruker er medlem av Folketrygden")
                 true
             }
+
             Medlemskapstatus.Nei -> {
                 aktivitetslogg.varsel(RV_MV_2)
                 false
             }
+
             Medlemskapstatus.UavklartMedBrukerspørsmål -> {
                 aktivitetslogg.varsel(RV_MV_1)
                 true
             }
+
             Medlemskapstatus.VetIkke -> {
                 aktivitetslogg.info("Bruker er VetIkke-medlem av Folketrygden")
                 true

@@ -23,12 +23,14 @@ internal class ArbeidsavklaringspengerTest {
 
     @Test
     fun `AAP eldre enn 6 måneder`() {
-        assertFalse(undersøke(
-            Periode(
-            fom = skjæringstidspunkt.minusMonths(8),
-            tom = skjæringstidspunkt.minusMonths(6).minusDays(1)
+        assertFalse(
+            undersøke(
+                Periode(
+                    fom = skjæringstidspunkt.minusMonths(8),
+                    tom = skjæringstidspunkt.minusMonths(6).minusDays(1)
+                )
+            )
         )
-        ))
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -48,6 +50,7 @@ internal class ArbeidsavklaringspengerTest {
     private fun undersøke(vararg AAPperioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val aap = Arbeidsavklaringspenger(AAPperioder.toList())
-        return aap.valider(aktivitetslogg, skjæringstidspunkt, periode).harFunksjonelleFeilEllerVerre()
+        return aap.valider(aktivitetslogg, skjæringstidspunkt, periode)
+            .harFunksjonelleFeilEllerVerre()
     }
 }

@@ -22,7 +22,14 @@ internal class BegrunnelseDtoTest {
     @Test
     fun `MinimumSykdomsgrad avviser ikke helg`() {
         assertTrue(Begrunnelse.MinimumSykdomsgrad.skalAvvises(NavDag(1.januar, økonomi)))
-        assertTrue(Begrunnelse.MinimumSykdomsgrad.skalAvvises(ArbeidsgiverperiodedagNav(1.januar, økonomi)))
+        assertTrue(
+            Begrunnelse.MinimumSykdomsgrad.skalAvvises(
+                ArbeidsgiverperiodedagNav(
+                    1.januar,
+                    økonomi
+                )
+            )
+        )
         assertFalse(Begrunnelse.MinimumSykdomsgrad.skalAvvises(NavHelgDag(1.januar, økonomi)))
     }
 
@@ -35,6 +42,14 @@ internal class BegrunnelseDtoTest {
     @Test
     fun `avviser med flere begrunnelser`() {
         val dag = NavDag(1.januar, økonomi)
-        assertEquals(2, dag.avvis(listOf(Begrunnelse.MinimumSykdomsgrad, Begrunnelse.MinimumInntekt))?.begrunnelser?.size ?: 0)
+        assertEquals(
+            2,
+            dag.avvis(
+                listOf(
+                    Begrunnelse.MinimumSykdomsgrad,
+                    Begrunnelse.MinimumInntekt
+                )
+            )?.begrunnelser?.size ?: 0
+        )
     }
 }

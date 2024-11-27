@@ -16,5 +16,6 @@ internal class Personopplysninger internal constructor(
         dødsdato: LocalDate?
     ) : this(personidentifikator, Alder(fødselsdato, dødsdato))
 
-    fun person(subsumsjonslogg: Subsumsjonslogg) = Person(personidentifikator, alder, subsumsjonslogg)
+    fun person(subsumsjonslogg: Subsumsjonslogg) =
+        Person(personidentifikator, alder, subsumsjonslogg)
 }

@@ -18,12 +18,16 @@ import java.time.LocalDateTime
 interface Subsumsjonproducer {
     fun send(fnr: String, melding: String)
 
-    class KafkaSubsumsjonproducer(private val topic: String, private val producer: KafkaProducer<String, String>) : Subsumsjonproducer {
+    class KafkaSubsumsjonproducer(
+        private val topic: String,
+        private val producer: KafkaProducer<String, String>
+    ) : Subsumsjonproducer {
         override fun send(fnr: String, melding: String) {
             producer.send(ProducerRecord(topic, fnr, melding))
         }
     }
 }
+
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,
     private val versjonAvKode: String
@@ -51,7 +55,8 @@ internal class SubsumsjonMediator(
             input = subsumsjon.input,
             output = subsumsjon.output,
             utfall = subsumsjon.utfall.name
-        ))
+        )
+        )
     }
 
     private fun bekreftAtSubsumsjonerHarKnytningTilBehandling(subsumsjon: Subsumsjon) {
@@ -59,12 +64,20 @@ internal class SubsumsjonMediator(
         check(kritiskeTyper.all { kritiskType ->
             subsumsjon.kontekster.count { it.type == kritiskType } == 1
         }) {
-            "en av $kritiskeTyper mangler/har duplikat:\n${subsumsjon.kontekster.joinToString(separator = "\n")}"
+            "en av $kritiskeTyper mangler/har duplikat:\n${
+                subsumsjon.kontekster.joinToString(
+                    separator = "\n"
+                )
+            }"
         }
         // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
         // alt kan subsummeres i kontekst av en behandling.
         check(subsumsjon.kontekster.count { it.type == KontekstType.Vedtaksperiode } <= 1) {
-            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${subsumsjon.kontekster.joinToString(separator = "\n")}"
+            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${
+                subsumsjon.kontekster.joinToString(
+                    separator = "\n"
+                )
+            }"
         }
     }
 
@@ -102,14 +115,20 @@ internal class SubsumsjonMediator(
                 this["input"] = event.input
                 this["output"] = event.output
                 this["utfall"] = event.utfall
-                if (event.ledd != null) { this["ledd"] = event.ledd }
-                if (event.punktum != null) { this["punktum"] = event.punktum }
-                if (event.bokstav != null) { this["bokstav"] = event.bokstav }
+                if (event.ledd != null) {
+                    this["ledd"] = event.ledd
+                }
+                if (event.punktum != null) {
+                    this["punktum"] = event.punktum
+                }
+                if (event.bokstav != null) {
+                    this["bokstav"] = event.bokstav
+                }
             }
         ))
     }
 
-    private fun KontekstType.tilEkstern() = when(this) {
+    private fun KontekstType.tilEkstern() = when (this) {
         KontekstType.Fødselsnummer -> "fodselsnummer"
         KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
         KontekstType.Vedtaksperiode -> "vedtaksperiode"

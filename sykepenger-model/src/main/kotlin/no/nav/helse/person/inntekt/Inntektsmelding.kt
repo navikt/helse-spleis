@@ -24,9 +24,16 @@ class Inntektsmelding internal constructor(
     tidsstempel: LocalDateTime,
     private val kilde: Kilde
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-    internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde = Kilde.Arbeidsgiver, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
+    internal constructor(
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        kilde: Kilde = Kilde.Arbeidsgiver,
+        tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) =
+        beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) } ?: this
 
     internal fun view() = InntektsmeldingView(
         id = id,
@@ -51,11 +58,13 @@ class Inntektsmelding internal constructor(
         return this
     }
 
-    internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId || this.dato != other.dato
+    internal fun kanLagres(other: Inntektsmelding) =
+        this.hendelseId != other.hendelseId || this.dato != other.dato
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
     }
+
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         inntektsmelding: no.nav.helse.hendelser.Inntektsmelding
@@ -68,6 +77,7 @@ class Inntektsmelding internal constructor(
             )
         )
     }
+
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         orgnummer: String,
@@ -111,7 +121,7 @@ class Inntektsmelding internal constructor(
         Arbeidsgiver,
         AOrdningen;
 
-        fun dto() = when(this) {
+        fun dto() = when (this) {
             Arbeidsgiver -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
             AOrdningen -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen
         }
@@ -136,14 +146,24 @@ class Inntektsmelding internal constructor(
             )
         }
 
-        internal fun List<Inntektsmelding>.finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsmelding? {
-            val inntektsmeldinger = this.filter { it.dato == skjæringstidspunkt || it.dato == førsteFraværsdag }
+        internal fun List<Inntektsmelding>.finnInntektsmeldingForSkjæringstidspunkt(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?
+        ): Inntektsmelding? {
+            val inntektsmeldinger =
+                this.filter { it.dato == skjæringstidspunkt || it.dato == førsteFraværsdag }
             return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.tidsstempel }
         }
 
-        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? {
-            val inntektsmelding = finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
-            val skatt = skattSykepengegrunnlag?.takeIf { it.kanBrukes(skjæringstidspunkt) }?.somSykepengegrunnlag() ?: return inntektsmelding
+        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?,
+            skattSykepengegrunnlag: SkattSykepengegrunnlag?
+        ): Inntektsopplysning? {
+            val inntektsmelding =
+                finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
+            val skatt = skattSykepengegrunnlag?.takeIf { it.kanBrukes(skjæringstidspunkt) }
+                ?.somSykepengegrunnlag() ?: return inntektsmelding
             return inntektsmelding?.avklarSykepengegrunnlag(skatt) ?: skatt
         }
     }

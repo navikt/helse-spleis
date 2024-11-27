@@ -1,15 +1,16 @@
 package no.nav.helse.spleis.meldinger.model
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
 // Understands a JSON message representing a Påminnelse
-internal class PåminnelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class PåminnelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) :
+    HendelseMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
@@ -18,7 +19,8 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val tilstandsendringstidspunkt = packet["tilstandsendringstidspunkt"].asLocalDateTime()
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
-    private val ønskerReberegning = packet["ønskerReberegning"].takeIf { it.isBoolean }?.booleanValue() ?: false
+    private val ønskerReberegning =
+        packet["ønskerReberegning"].takeIf { it.isBoolean }?.booleanValue() ?: false
 
     private val påminnelse
         get() = Påminnelse(

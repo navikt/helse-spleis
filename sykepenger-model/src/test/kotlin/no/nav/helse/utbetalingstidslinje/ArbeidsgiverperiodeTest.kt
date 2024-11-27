@@ -47,7 +47,8 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `arbeidsgiverperiode anses som like om de slutter på samme dag`() {
         assertTrue(agp(1.januar til 16.januar).sammenlign(listOf(16.januar til 16.januar)))
-        assertFalse(agp(1.januar til 16.januar).apply { kjentDag(17.januar) }.sammenlign(listOf(16.januar til 17.januar)))
+        assertFalse(agp(1.januar til 16.januar).apply { kjentDag(17.januar) }
+            .sammenlign(listOf(16.januar til 17.januar)))
         assertFalse(agp(1.januar til 16.januar).sammenlign(listOf(15.januar til 15.januar)))
     }
 
@@ -55,7 +56,8 @@ internal class ArbeidsgiverperiodeTest {
     fun `arbeidsgiverperiode anses som like om de slutter på fredag eller helg`() {
         assertTrue(agp(12.januar til 27.januar).sammenlign(listOf(11.januar til 26.januar)))
         assertTrue(agp(12.januar til 27.januar).sammenlign(listOf(13.januar til 28.januar)))
-        assertFalse(agp(12.januar til 27.januar).apply { kjentDag(29.januar) }.sammenlign(listOf(14.januar til 29.januar)))
+        assertFalse(agp(12.januar til 27.januar).apply { kjentDag(29.januar) }
+            .sammenlign(listOf(14.januar til 29.januar)))
         assertTrue(agp(12.januar til 27.januar).sammenlign(listOf(14.januar til 29.januar)))
 
         assertTrue(agp(11.januar til 26.januar).sammenlign(listOf(12.januar til 27.januar)))
@@ -72,15 +74,30 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `har betalt`() {
         assertFalse(agp(1.januar til 16.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 18.januar))
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(18.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar))
+        assertTrue(
+            agp(1.januar til 16.januar).utbetalingsdag(17.januar)
+                .erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar)
+        )
+        assertTrue(
+            agp(1.januar til 16.januar).utbetalingsdag(17.januar)
+                .erFørsteUtbetalingsdagFørEllerLik(1.januar til 18.januar)
+        )
+        assertFalse(
+            agp(1.januar til 16.januar).utbetalingsdag(18.januar)
+                .erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar)
+        )
     }
 
     @Test
     fun `helg regnes ikke som betalt`() {
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar))
-        assertFalse(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar))
+        assertFalse(
+            agp(1.januar til 16.januar).utbetalingsdag(20.januar)
+                .erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar)
+        )
+        assertFalse(
+            Arbeidsgiverperiode.fiktiv(20.januar)
+                .erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar)
+        )
     }
 
     @Test
@@ -97,37 +114,41 @@ internal class ArbeidsgiverperiodeTest {
 
     @Test
     fun `forventer opplysninger fra arbeidsgiver etter periode med opphold`() {
-        agp(1.januar til 16.januar).utbetalingsdag(17.januar).oppholdsdag(18.januar).utbetalingsdag(fredag den 19.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
-            assertFalse(agp.forventerOpplysninger(18.januar.somPeriode()))
-            assertTrue(agp.forventerOpplysninger(17.januar.somPeriode()))
-            assertTrue(agp.forventerOpplysninger(18.januar til 19.januar))
-            assertTrue(agp.forventerOpplysninger(19.januar til 20.januar))
-            assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
-            assertFalse(agp.forventerOpplysninger(mandag den 22.januar til 23.januar))
-        }
+        agp(1.januar til 16.januar).utbetalingsdag(17.januar).oppholdsdag(18.januar)
+            .utbetalingsdag(fredag den 19.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
+                assertFalse(agp.forventerOpplysninger(18.januar.somPeriode()))
+                assertTrue(agp.forventerOpplysninger(17.januar.somPeriode()))
+                assertTrue(agp.forventerOpplysninger(18.januar til 19.januar))
+                assertTrue(agp.forventerOpplysninger(19.januar til 20.januar))
+                assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
+                assertFalse(agp.forventerOpplysninger(mandag den 22.januar til 23.januar))
+            }
     }
 
     @Test
     fun `forventer opplysninger fra arbeidsgiver etter periode med opphold i helg`() {
-        agp(1.januar til 16.januar).utbetalingsdag(17.januar).utbetalingsdag(18.januar).utbetalingsdag(fredag den 19.januar).oppholdsdag(lørdag den 20.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
-            assertTrue(agp.forventerOpplysninger(17.januar til 20.januar))
-            assertFalse(agp.forventerInntekt(20.januar til 21.januar))
-            assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
-            assertTrue(agp.forventerOpplysninger(22.januar til 23.januar))
-        }
+        agp(1.januar til 16.januar).utbetalingsdag(17.januar).utbetalingsdag(18.januar)
+            .utbetalingsdag(fredag den 19.januar).oppholdsdag(lørdag den 20.januar)
+            .utbetalingsdag(mandag den 22.januar).also { agp ->
+                assertTrue(agp.forventerOpplysninger(17.januar til 20.januar))
+                assertFalse(agp.forventerInntekt(20.januar til 21.januar))
+                assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
+                assertTrue(agp.forventerOpplysninger(22.januar til 23.januar))
+            }
     }
 
     @Test
     fun `forventer ikke opplysninger fra arbeidsgiver etter periode med kun helg`() {
-        agp(1.januar til 16.januar).utbetalingsdag(17.januar).utbetalingsdag(18.januar).utbetalingsdag(fredag den 19.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
-            assertTrue(agp.forventerOpplysninger(17.januar til 20.januar))
-            assertTrue(agp.forventerInntekt(lørdag den 20.januar til (søndag den 21.januar)))
-            assertFalse(agp.forventerOpplysninger(lørdag den 20.januar til (søndag den 21.januar)))
-            assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
-            assertFalse(agp.forventerOpplysninger(22.januar til 23.januar))
-            assertFalse(agp.forventerOpplysninger(lørdag den 20.januar til (mandag den 22.januar)))
-            assertFalse(agp.forventerOpplysninger(fredag den 19.januar til (mandag den 22.januar)))
-        }
+        agp(1.januar til 16.januar).utbetalingsdag(17.januar).utbetalingsdag(18.januar)
+            .utbetalingsdag(fredag den 19.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
+                assertTrue(agp.forventerOpplysninger(17.januar til 20.januar))
+                assertTrue(agp.forventerInntekt(lørdag den 20.januar til (søndag den 21.januar)))
+                assertFalse(agp.forventerOpplysninger(lørdag den 20.januar til (søndag den 21.januar)))
+                assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
+                assertFalse(agp.forventerOpplysninger(22.januar til 23.januar))
+                assertFalse(agp.forventerOpplysninger(lørdag den 20.januar til (mandag den 22.januar)))
+                assertFalse(agp.forventerOpplysninger(fredag den 19.januar til (mandag den 22.januar)))
+            }
     }
 
     @Test

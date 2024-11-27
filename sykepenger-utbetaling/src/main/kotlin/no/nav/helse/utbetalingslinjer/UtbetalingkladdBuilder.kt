@@ -42,20 +42,39 @@ class UtbetalingkladdBuilder(
                     arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
                     personoppdragBuilder.ikkeBetalingsdag()
                 }
+
                 is ArbeidsgiverperiodedagNav,
                 is NavDag -> {
-                    arbeidsgiveroppdragBuilder.betalingsdag(økonomi = dag.økonomi, dato = dag.dato, grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
-                    personoppdragBuilder.betalingsdag(økonomi = dag.økonomi, dato = dag.dato, grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
+                    arbeidsgiveroppdragBuilder.betalingsdag(
+                        økonomi = dag.økonomi,
+                        dato = dag.dato,
+                        grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
+                    personoppdragBuilder.betalingsdag(
+                        økonomi = dag.økonomi,
+                        dato = dag.dato,
+                        grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
                 }
+
                 is NavHelgDag -> {
-                    arbeidsgiveroppdragBuilder.betalingshelgedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
-                    personoppdragBuilder.betalingshelgedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
+                    arbeidsgiveroppdragBuilder.betalingshelgedag(
+                        dag.dato,
+                        dag.økonomi.brukAvrundetGrad { grad -> grad })
+                    personoppdragBuilder.betalingshelgedag(
+                        dag.dato,
+                        dag.økonomi.brukAvrundetGrad { grad -> grad })
                 }
+
                 is Utbetalingsdag.ArbeidsgiverperiodeDag,
-                is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */ }
+                is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */
+                }
             }
         }
     }
 
-    fun build() = Utbetalingkladd(periode, arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build(), tidslinje)
+    fun build() = Utbetalingkladd(
+        periode,
+        arbeidsgiveroppdragBuilder.build(),
+        personoppdragBuilder.build(),
+        tidslinje
+    )
 }

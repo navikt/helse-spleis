@@ -75,37 +75,59 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
+            }
     }
 
     @Test
     fun `overstyre ghostinntekt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                    }
                 }
-            }
-        ), arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT)
-        ), orgnummer = a1)
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    1.desember(2017),
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
+            ),
+            orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(a2, 500.daglig, "retter opp ikke-rapportert-inntekt", null, emptyList())
-        ))
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                a2,
+                500.daglig,
+                "retter opp ikke-rapportert-inntekt",
+                null,
+                emptyList()
+            )
+        )
+        )
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        val a2Opplysninger = sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a2)?.inspektør ?: fail { "må ha inntekt for a2" }
+        val a2Opplysninger =
+            sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a2)?.inspektør
+                ?: fail { "må ha inntekt for a2" }
         assertEquals(500.daglig, a2Opplysninger.inntektsopplysning.inspektør.beløp)
         assertEquals(Saksbehandler::class, a2Opplysninger.inntektsopplysning::class)
-        val overstyrtInntekt = a2Opplysninger.inntektsopplysning.inspektør.forrigeInntekt ?: fail { "forventet overstyrt inntekt" }
+        val overstyrtInntekt = a2Opplysninger.inntektsopplysning.inspektør.forrigeInntekt
+            ?: fail { "forventet overstyrt inntekt" }
         assertEquals(IkkeRapportert::class, overstyrtInntekt::class)
     }
 
@@ -113,7 +135,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     fun `skal ikke hente registerdata for vilkårsprøving på nytt ved overstyring av inntekt`() {
         tilGodkjenning(januar, ORGNUMMER)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = ORGNUMMER, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(
+            inntekt = 19000.månedlig,
+            orgnummer = ORGNUMMER,
+            skjæringstidspunkt = 1.januar
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(

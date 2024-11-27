@@ -18,6 +18,7 @@ sealed class VilkårsgrunnlagInnDto {
         val vurdertOk: Boolean,
         val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagInnDto()
+
     data class Infotrygd(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,

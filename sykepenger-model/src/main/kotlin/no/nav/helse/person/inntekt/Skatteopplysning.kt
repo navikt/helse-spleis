@@ -25,6 +25,7 @@ data class Skatteopplysning(
         NÆRINGSINNTEKT,
         PENSJON_ELLER_TRYGD,
         YTELSE_FRA_OFFENTLIGE;
+
         fun somStreng() = when (this) {
             LØNNSINNTEKT -> "LØNNSINNTEKT"
             NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
@@ -34,7 +35,11 @@ data class Skatteopplysning(
     }
 
     companion object {
-        fun sisteMåneder(dato: LocalDate, antallMåneder: Int, inntektsopplysninger: List<Skatteopplysning>) =
+        fun sisteMåneder(
+            dato: LocalDate,
+            antallMåneder: Int,
+            inntektsopplysninger: List<Skatteopplysning>
+        ) =
             inntektsopplysninger.filter { it.måned.isWithinRangeOf(dato, antallMåneder.toLong()) }
 
         fun sisteTreMåneder(dato: LocalDate, inntektsopplysninger: List<Skatteopplysning>) =

@@ -50,7 +50,10 @@ data class Arbeidsgiverperioderesultat(
     /**
      * subsummerer arbeidsgiverperioden, men bare dersom dagene overlapper med vedtaksperioden
      */
-    internal fun subsummering(subsumsjonslogg: Subsumsjonslogg, sykdomstidslinje: Sykdomstidslinje) {
+    internal fun subsummering(
+        subsumsjonslogg: Subsumsjonslogg,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {
         if (arbeidsgiverperiode.isEmpty()) return // subsummerer ikke Infotrygd-ting
 
         val vedtaksperiode = sykdomstidslinje.periode() ?: return
@@ -66,11 +69,23 @@ data class Arbeidsgiverperioderesultat(
 
         // siste 16. agp-dag skal subsummeres med § 8-19 første ledd
         if (fullstendig && arbeidsgiverperiode.last().endInclusive in vedtaksperiode)
-            subsumsjonslogg.logg(`§ 8-19 første ledd`(arbeidsgiverperiode.last().endInclusive, sykdomstidslinjesubsumsjon))
+            subsumsjonslogg.logg(
+                `§ 8-19 første ledd`(
+                    arbeidsgiverperiode.last().endInclusive,
+                    sykdomstidslinjesubsumsjon
+                )
+            )
 
         // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
-        utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
-            subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), sykdomstidslinjesubsumsjon))
+        utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }
+            ?.takeIf { it in vedtaksperiode }?.also {
+            subsumsjonslogg.logg(
+                `§ 8-17 ledd 1 bokstav a`(
+                    oppfylt = true,
+                    dagen = listOf(it.rangeTo(it)),
+                    sykdomstidslinjesubsumsjon
+                )
+            )
         }
 
         // siste oppholdsdag som medfører at agp avbrytes subsummeres med § 8-19 fjerde ledd
@@ -104,8 +119,10 @@ data class Arbeidsgiverperioderesultat(
             // dagen utvider siste periode
             else -> dropLast(1) + listOf(last().oppdaterTom(dato))
         }
-        internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
-            periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
-        }
+
+        internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) =
+            lastOrNull { arbeidsgiverperiode ->
+                periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
+            }
     }
 }

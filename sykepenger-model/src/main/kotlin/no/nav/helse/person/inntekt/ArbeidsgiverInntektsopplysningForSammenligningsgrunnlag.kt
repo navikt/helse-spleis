@@ -21,7 +21,11 @@ internal data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto): ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag {
             return ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                 orgnummer = dto.orgnummer,
-                inntektsopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
+                inntektsopplysninger = dto.inntektsopplysninger.map {
+                    Skatteopplysning.gjenopprett(
+                        it
+                    )
+                }
             )
         }
     }

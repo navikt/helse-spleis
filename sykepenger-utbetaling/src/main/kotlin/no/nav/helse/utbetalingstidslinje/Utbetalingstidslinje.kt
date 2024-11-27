@@ -26,16 +26,19 @@ import no.nav.helse.økonomi.Økonomi
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
  */
 
-class Utbetalingstidslinje private constructor(private val utbetalingsdager: SortedMap<LocalDate, Utbetalingsdag>): Collection<Utbetalingsdag> by utbetalingsdager.values {
+class Utbetalingstidslinje private constructor(private val utbetalingsdager: SortedMap<LocalDate, Utbetalingsdag>) :
+    Collection<Utbetalingsdag> by utbetalingsdager.values {
 
     private val førsteDato get() = utbetalingsdager.firstKey()
     private val sisteDato get() = utbetalingsdager.lastKey()
 
-    constructor(utbetalingsdager: Collection<Utbetalingsdag>) : this(utbetalingsdager.associateBy { it.dato }.toSortedMap()) {
+    constructor(utbetalingsdager: Collection<Utbetalingsdag>) : this(utbetalingsdager.associateBy { it.dato }
+        .toSortedMap()) {
         check(utbetalingsdager.distinctBy { it.dato }.size == utbetalingsdager.size) {
             "Utbetalingstidslinjen består av minst én dato som pekes på av mer enn én Utbetalingsdag"
         }
     }
+
     constructor() : this(mutableListOf())
 
     companion object {
@@ -65,7 +68,10 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             return beregnDagForDag(tidslinjer, Økonomi::totalSykdomsgrad)
         }
 
-        fun beregnDagForDag(tidslinjer: List<Utbetalingstidslinje>, operasjon: (List<Økonomi>) -> List<Økonomi>): List<Utbetalingstidslinje> {
+        fun beregnDagForDag(
+            tidslinjer: List<Utbetalingstidslinje>,
+            operasjon: (List<Økonomi>) -> List<Økonomi>
+        ): List<Utbetalingstidslinje> {
             /**
              * beregn dag-for-dag, lagre resultatet tilbake i listen
              */
@@ -100,10 +106,14 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
         }
     }
 
-    private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>): Utbetalingstidslinje {
+    private fun avvis(
+        avvistePerioder: List<Periode>,
+        begrunnelser: List<Begrunnelse>
+    ): Utbetalingstidslinje {
         if (begrunnelser.isEmpty()) return this
         return Utbetalingstidslinje(utbetalingsdager.map { (dato, utbetalingsdag) ->
-            val avvistDag = if (dato in avvistePerioder) utbetalingsdag.avvis(begrunnelser) else null
+            val avvistDag =
+                if (dato in avvistePerioder) utbetalingsdag.avvis(begrunnelser) else null
             avvistDag ?: utbetalingsdag
         })
     }
@@ -121,6 +131,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
                     true -> Fridag(dag, Økonomi.ikkeBetalt())
                     false -> Arbeidsdag(dag, Økonomi.ikkeBetalt())
                 }
+
                 venstre == null -> høyre!!
                 høyre == null -> venstre
                 else -> maxOf(venstre, høyre)
@@ -155,7 +166,8 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
     }
 
     fun fraOgMed(fom: LocalDate) = Utbetalingstidslinje(utbetalingsdager.tailMap(fom).toSortedMap())
-    fun fremTilOgMed(sisteDato: LocalDate) = Utbetalingstidslinje(utbetalingsdager.headMap(sisteDato.nesteDag).toSortedMap())
+    fun fremTilOgMed(sisteDato: LocalDate) =
+        Utbetalingstidslinje(utbetalingsdager.headMap(sisteDato.nesteDag).toSortedMap())
 
     operator fun get(dato: LocalDate) =
         utbetalingsdager[dato] ?: UkjentDag(dato, Økonomi.ikkeBetalt())
@@ -229,7 +241,8 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
     private val Utbetalingsdag.avslag get() = this is AvvistDag || this is ForeldetDag
     fun behandlingsresultat(periode: Periode): String {
         val relevantUtbetalingstidslinje = this.subset(periode)
-        val relevanteDager = relevantUtbetalingstidslinje.utbetalingsdager.values.filter { it is NavDag || it.avslag }
+        val relevanteDager =
+            relevantUtbetalingstidslinje.utbetalingsdager.values.filter { it is NavDag || it.avslag }
         return when {
             relevanteDager.isEmpty() -> "Avslag"
             relevanteDager.all { it.avslag } -> "Avslag"
@@ -242,7 +255,8 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
 
 sealed class Begrunnelse {
 
-    open fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+    open fun skalAvvises(utbetalingsdag: Utbetalingsdag) =
+        utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
 
     fun dto() = when (this) {
         AndreYtelserAap -> BegrunnelseDto.AndreYtelserAap
@@ -270,16 +284,18 @@ sealed class Begrunnelse {
     object MinimumInntekt : Begrunnelse()
     object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
-    object AndreYtelserForeldrepenger: Begrunnelse()
-    object AndreYtelserAap: Begrunnelse()
-    object AndreYtelserOmsorgspenger: Begrunnelse()
-    object AndreYtelserPleiepenger: Begrunnelse()
-    object AndreYtelserSvangerskapspenger: Begrunnelse()
-    object AndreYtelserOpplaringspenger: Begrunnelse()
-    object AndreYtelserDagpenger: Begrunnelse()
+    object AndreYtelserForeldrepenger : Begrunnelse()
+    object AndreYtelserAap : Begrunnelse()
+    object AndreYtelserOmsorgspenger : Begrunnelse()
+    object AndreYtelserPleiepenger : Begrunnelse()
+    object AndreYtelserSvangerskapspenger : Begrunnelse()
+    object AndreYtelserOpplaringspenger : Begrunnelse()
+    object AndreYtelserDagpenger : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse() {
-        override fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+        override fun skalAvvises(utbetalingsdag: Utbetalingsdag) =
+            utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
     }
+
     object EtterDødsdato : Begrunnelse()
     object Over70 : Begrunnelse()
     object ManglerOpptjening : Begrunnelse()
@@ -312,5 +328,8 @@ sealed class Begrunnelse {
     }
 }
 
-fun List<Utbetalingstidslinje>.avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) =
+fun List<Utbetalingstidslinje>.avvis(
+    avvistePerioder: List<Periode>,
+    begrunnelser: List<Begrunnelse>
+) =
     Utbetalingstidslinje.avvis(this, avvistePerioder, begrunnelser)

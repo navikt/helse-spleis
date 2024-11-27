@@ -46,7 +46,10 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar)
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(a1 to INNTEKT),
+                    1.januar
+                )
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -64,13 +67,24 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(a1 to INNTEKT),
+                    1.januar
+                ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        1.oktober(2017),
+                        31.oktober(2017),
+                        Arbeidsforholdtype.FRILANSER
+                    ),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
                 )
             )
-            assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(
+                "Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene",
+                1.vedtaksperiode.filter()
+            )
             assertForkastetPeriodeTilstander(
                 1.vedtaksperiode,
                 START,
@@ -91,7 +105,10 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar)
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(a1 to INNTEKT),
+                    1.januar
+                )
             )
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
             assertTilstander(
@@ -111,12 +128,27 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
-            val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.januar,
+                beregnetInntekt = INNTEKT
+            )
+            val arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
+            )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 1000.månedlig), 1.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(
+                        a1 to INNTEKT,
+                        a2 to 1000.månedlig
+                    ), 1.januar
+                ),
                 arbeidsforhold = arbeidsforhold
             )
             håndterYtelser(1.vedtaksperiode)
@@ -140,13 +172,28 @@ internal class FrilanserTest : AbstractDslTest() {
                 beregnetInntekt = 10000.månedlig
             )
             val arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = 1.februar, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = 1.februar,
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 10000.månedlig, a2 to 100.månedlig), 1.mars),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(
+                        a1 to 10000.månedlig,
+                        a2 to 100.månedlig
+                    ), 1.mars
+                ),
                 arbeidsforhold = arbeidsforhold
             )
             håndterYtelser(1.vedtaksperiode)

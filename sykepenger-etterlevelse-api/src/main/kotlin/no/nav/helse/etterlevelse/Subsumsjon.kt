@@ -22,6 +22,7 @@ data class Subsumsjon(
         punktum = punktum,
         bokstav = bokstav
     )
+
     companion object {
         fun enkelSubsumsjon(
             utfall: Utfall,
@@ -49,6 +50,7 @@ data class Subsumsjon(
                 kontekster = kontekster
             )
         }
+
         fun periodisertSubsumsjon(
             perioder: Collection<ClosedRange<LocalDate>>,
             lovverk: String,
@@ -89,6 +91,7 @@ data class Subsumsjon(
     enum class Subsumsjonstype {
         ENKEL, PERIODISERT
     }
+
     enum class Utfall {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
     }
@@ -100,14 +103,32 @@ data class Subsumsjon(
     }
 }
 
-data class Lovreferanse(val lovverk: String, val paragraf: Paragraf?, val ledd: Ledd?, val punktum: Punktum?, val bokstav: Bokstav?) {
+data class Lovreferanse(
+    val lovverk: String,
+    val paragraf: Paragraf?,
+    val ledd: Ledd?,
+    val punktum: Punktum?,
+    val bokstav: Bokstav?
+) {
     override fun toString(): String {
-        val parts = listOfNotNull(lovverk, paragraf?.toString(), ledd?.toString(), punktum?.toString(), bokstav?.toString())
+        val parts = listOfNotNull(
+            lovverk,
+            paragraf?.toString(),
+            ledd?.toString(),
+            punktum?.toString(),
+            bokstav?.toString()
+        )
         return parts.joinToString(separator = " ")
     }
 }
 
-val folketrygdloven = Lovreferanse(lovverk = "folketrygdloven", paragraf = null, ledd = null, punktum = null, bokstav = null)
+val folketrygdloven = Lovreferanse(
+    lovverk = "folketrygdloven",
+    paragraf = null,
+    ledd = null,
+    punktum = null,
+    bokstav = null
+)
 
 fun Lovreferanse.paragraf(paragraf: Paragraf) = copy(paragraf = paragraf)
 

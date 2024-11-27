@@ -2,7 +2,8 @@ package no.nav.helse.serde.migration
 
 import org.junit.jupiter.api.Test
 
-internal class V303KopiereMaksdatoFraUtbetalingTilBehandlingTest : MigrationTest(V303KopiereMaksdatoFraUtbetalingTilBehandling()) {
+internal class V303KopiereMaksdatoFraUtbetalingTilBehandlingTest :
+    MigrationTest(V303KopiereMaksdatoFraUtbetalingTilBehandling()) {
 
     @Test
     fun `migrerer maksdato`() {

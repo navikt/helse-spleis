@@ -2,7 +2,10 @@ package no.nav.helse.inspectors
 
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 
-internal val Refusjonsopplysning.Refusjonsopplysninger.inspektør get() = RefusjonsopplysningerInspektør(this)
+internal val Refusjonsopplysning.Refusjonsopplysninger.inspektør
+    get() = RefusjonsopplysningerInspektør(
+        this
+    )
 
 internal class RefusjonsopplysningerInspektør(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {
     val refusjonsopplysninger = refusjonsopplysninger.validerteRefusjonsopplysninger

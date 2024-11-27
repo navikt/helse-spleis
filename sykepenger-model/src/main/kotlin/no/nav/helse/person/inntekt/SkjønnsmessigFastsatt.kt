@@ -15,13 +15,21 @@ class SkjønnsmessigFastsatt internal constructor(
     val overstyrtInntekt: Inntektsopplysning?,
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, null, tidsstempel)
+    constructor(
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) : this(UUID.randomUUID(), dato, hendelseId, beløp, null, tidsstempel)
 
     override fun omregnetÅrsinntekt(): Inntektsopplysning {
         return checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.omregnetÅrsinntekt()
     }
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) =
+        checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(
+            beløp
+        )
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
@@ -38,6 +46,7 @@ class SkjønnsmessigFastsatt internal constructor(
 
     override fun erSamme(other: Inntektsopplysning) =
         other is SkjønnsmessigFastsatt && this.dato == other.dato && this.beløp == other.beløp
+
     override fun dto() =
         InntektsopplysningUtDto.SkjønnsmessigFastsattDto(
             id = id,
@@ -49,7 +58,10 @@ class SkjønnsmessigFastsatt internal constructor(
         )
 
     internal companion object {
-        fun gjenopprett(dto: InntektsopplysningInnDto.SkjønnsmessigFastsattDto, inntekter: Map<UUID, Inntektsopplysning>) =
+        fun gjenopprett(
+            dto: InntektsopplysningInnDto.SkjønnsmessigFastsattDto,
+            inntekter: Map<UUID, Inntektsopplysning>
+        ) =
             SkjønnsmessigFastsatt(
                 id = dto.id,
                 hendelseId = dto.hendelseId,

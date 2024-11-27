@@ -43,21 +43,38 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
+        assertEquals(
+            INNTEKT, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
             null
-        )?.inspektør?.beløp)
+        )?.inspektør?.beløp
+        )
     }
 
     @Test
     fun `Inntekt fra andre inntektsmelding overskriver inntekt fra første, gitt samme første fraværsdag`() {
-        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, EmptyLog)
-        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, EmptyLog)
+        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(
+            historikk,
+            EmptyLog
+        )
+        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(
+            historikk,
+            EmptyLog
+        )
         resetSeed(1.februar)
-        inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, EmptyLog)
-        assertEquals(29000.månedlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
-        assertEquals(31000.månedlig, historikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
+        inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(
+            historikk,
+            EmptyLog
+        )
+        assertEquals(
+            29000.månedlig,
+            historikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp
+        )
+        assertEquals(
+            31000.månedlig,
+            historikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp
+        )
     }
 
     @Test
@@ -70,7 +87,10 @@ internal class InntektshistorikkTest {
     @Test
     fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
-        inntektsmelding(førsteFraværsdag = 2.januar, arbeidsgiverperioder = listOf(2.januar til 17.januar)).addInntekt(
+        inntektsmelding(
+            førsteFraværsdag = 2.januar,
+            arbeidsgiverperioder = listOf(2.januar til 17.januar)
+        ).addInntekt(
             historikk,
             EmptyLog
         )
@@ -88,7 +108,7 @@ internal class InntektshistorikkTest {
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
     ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
+        it.valider(object : Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, Aktivitetslogg())

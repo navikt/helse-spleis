@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
+internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `hele perioden avvises`() {
@@ -36,7 +36,10 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         nyPeriode(5.februar til 9.februar, a2, 10.prosent)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         inspektør(a1).utbetaling(1).also {
-            assertEquals(listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar), it.utbetalingstidslinje.inspektør.avvistedatoer)
+            assertEquals(
+                listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar),
+                it.utbetalingstidslinje.inspektør.avvistedatoer
+            )
         }
     }
 
@@ -100,7 +103,14 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
     @Test
     fun `opprinnelig søknad med 100 prosent arbeidshelse blir korrigert slik at sykdomsgraden blir 100 prosent `() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent, 100.prosent)) // 100 prosent arbeidshelse => 0 prosent syk
+        håndterSøknad(
+            Sykdom(
+                1.januar,
+                20.januar,
+                100.prosent,
+                100.prosent
+            )
+        ) // 100 prosent arbeidshelse => 0 prosent syk
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -145,7 +155,10 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
         håndterSøknad(1.mars til 20.mars)
-        håndterInntektsmelding(listOf(Periode(1.mars, 16.mars)), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(Periode(1.mars, 16.mars)),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

@@ -37,7 +37,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
+internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
     fun `over 6G -- revurder inntekt ned på a1 når begge er i Avsluttet`() {
@@ -83,30 +83,73 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
 
     }
+
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker ikke utbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
-        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
-        a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+        a1 {
+            assertDag(
+                17.januar,
+                1081.0.daglig,
+                aktuellDagsinntekt = 32000.månedlig,
+                personbeløp = INGEN
+            )
+        }
+        a2 {
+            assertDag(
+                17.januar,
+                1080.0.daglig,
+                aktuellDagsinntekt = 32000.månedlig,
+                personbeløp = INGEN
+            )
+        }
 
         a1 {
             håndterOverstyrInntekt(1.januar, 33000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 33000.månedlig, personbeløp = INGEN)
+            assertDag(
+                17.januar,
+                1081.0.daglig,
+                aktuellDagsinntekt = 33000.månedlig,
+                personbeløp = INGEN
+            )
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertDag(
+                17.januar,
+                1080.0.daglig,
+                aktuellDagsinntekt = 32000.månedlig,
+                personbeløp = INGEN
+            )
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person()
+            )
         }
     }
+
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker utbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
-        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
-        a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+        a1 {
+            assertDag(
+                17.januar,
+                1081.0.daglig,
+                aktuellDagsinntekt = 32000.månedlig,
+                personbeløp = INGEN
+            )
+        }
+        a2 {
+            assertDag(
+                17.januar,
+                1080.0.daglig,
+                aktuellDagsinntekt = 32000.månedlig,
+                personbeløp = INGEN
+            )
+        }
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 33000.månedlig)
@@ -115,15 +158,28 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertDag(17.januar, 1097.0.daglig, aktuellDagsinntekt = 33000.månedlig, personbeløp = INGEN)
+            assertDag(
+                17.januar,
+                1097.0.daglig,
+                aktuellDagsinntekt = 33000.månedlig,
+                personbeløp = INGEN
+            )
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertDag(17.januar, 1064.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertDag(
+                17.januar,
+                1064.0.daglig,
+                aktuellDagsinntekt = 32000.månedlig,
+                personbeløp = INGEN
+            )
+            assertInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person()
+            )
         }
     }
 
@@ -147,13 +203,24 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person()
+            )
         }
     }
+
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir brukerutbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
-        (a1 og a2) { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+        (a1 og a2) {
+            assertDag(
+                17.januar,
+                692.0.daglig,
+                aktuellDagsinntekt = 15000.månedlig,
+                personbeløp = INGEN
+            )
+        }
 
         a1 {
             håndterOverstyrInntekt(1.januar, 16500.månedlig)
@@ -161,19 +228,40 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 16500.månedlig, personbeløp = 70.daglig)
+            assertDag(
+                17.januar,
+                692.0.daglig,
+                aktuellDagsinntekt = 16500.månedlig,
+                personbeløp = 70.daglig
+            )
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertDag(
+                17.januar,
+                692.0.daglig,
+                aktuellDagsinntekt = 15000.månedlig,
+                personbeløp = INGEN
+            )
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person()
+            )
         }
     }
+
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir økt arbeidsgiverutbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
-        (a1 og a2) { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+        (a1 og a2) {
+            assertDag(
+                17.januar,
+                692.0.daglig,
+                aktuellDagsinntekt = 15000.månedlig,
+                personbeløp = INGEN
+            )
+        }
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 16500.månedlig)
@@ -182,13 +270,26 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertDag(17.januar, 762.0.daglig, aktuellDagsinntekt = 16500.månedlig, personbeløp = INGEN)
+            assertDag(
+                17.januar,
+                762.0.daglig,
+                aktuellDagsinntekt = 16500.månedlig,
+                personbeløp = INGEN
+            )
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertDag(
+                17.januar,
+                692.0.daglig,
+                aktuellDagsinntekt = 15000.månedlig,
+                personbeløp = INGEN
+            )
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person()
+            )
         }
     }
 
@@ -253,8 +354,18 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     )
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -374,8 +485,18 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     )
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -421,6 +542,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
+
     @Test
     fun `revurder inntekt når a1 står i AvventerSimuleringRevurdering`() {
         (a1 og a2).nyeVedtak(januar)
@@ -450,6 +572,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
+
     @Test
     fun `revurder inntekt når a1 står i AvventerGodkjenningRevurdering`() {
         (a1 og a2).nyeVedtak(januar)
@@ -508,6 +631,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
+
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
         a2 {
@@ -525,8 +649,18 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     )
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    )
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -548,7 +682,12 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
+    private fun TestPerson.TestArbeidsgiver.assertDag(
+        dato: LocalDate,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = INGEN,
+        aktuellDagsinntekt: Inntekt = INGEN
+    ) {
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)

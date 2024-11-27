@@ -48,7 +48,18 @@ internal class EnkelSubsumsjonTest {
             Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeId")
         )
     ) {
-        Subsumsjon.enkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
+        Subsumsjon.enkelSubsumsjon(
+            utfall,
+            lovverk,
+            versjon,
+            paragraf,
+            ledd,
+            punktum,
+            bokstav,
+            input,
+            output,
+            kontekster
+        ).also {
             vurderinger.add(it)
         }
     }

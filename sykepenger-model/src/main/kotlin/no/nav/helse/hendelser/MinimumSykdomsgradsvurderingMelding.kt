@@ -46,13 +46,16 @@ class MinimumSykdomsgradsvurderingMelding(
 
 
     internal fun periodeForEndring(): Periode {
-        val alle = perioderMedMinimumSykdomsgradVurdertOK + perioderMedMinimumSykdomsgradVurdertIkkeOK
+        val alle =
+            perioderMedMinimumSykdomsgradVurdertOK + perioderMedMinimumSykdomsgradVurdertIkkeOK
         return Periode(alle.minOf { it.start }, alle.maxOf { it.endInclusive })
     }
 
     fun valider(): Boolean {
         if (perioderMedMinimumSykdomsgradVurdertOK.isEmpty() && perioderMedMinimumSykdomsgradVurdertIkkeOK.isEmpty()) return false
-        if (perioderMedMinimumSykdomsgradVurdertOK.containsAll(perioderMedMinimumSykdomsgradVurdertIkkeOK) && perioderMedMinimumSykdomsgradVurdertIkkeOK.containsAll(
+        if (perioderMedMinimumSykdomsgradVurdertOK.containsAll(
+                perioderMedMinimumSykdomsgradVurdertIkkeOK
+            ) && perioderMedMinimumSykdomsgradVurdertIkkeOK.containsAll(
                 perioderMedMinimumSykdomsgradVurdertOK
             )
         ) return false

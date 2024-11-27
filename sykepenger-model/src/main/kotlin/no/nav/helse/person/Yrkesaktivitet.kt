@@ -41,9 +41,14 @@ internal sealed interface Yrkesaktivitet {
 
     fun jurist(other: BehandlingSubsumsjonslogg): BehandlingSubsumsjonslogg =
         other.medOrganisasjonsnummer(this.toString())
+
     fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean
 
-    fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
+    fun håndter(
+        sykmelding: Sykmelding,
+        aktivitetslogg: IAktivitetslogg,
+        sykmeldingsperioder: Sykmeldingsperioder
+    ) {
         sykmeldingsperioder.lagre(sykmelding, aktivitetslogg)
     }
 
@@ -57,7 +62,11 @@ internal sealed interface Yrkesaktivitet {
             refusjonshistorikk: Refusjonshistorikk,
             aktivitetslogg: IAktivitetslogg?
         ): ArbeidsgiverInntektsopplysning? {
-            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
+            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(
+                skjæringstidspunkt,
+                førsteFraværsdag,
+                skattSykepengegrunnlag
+            ) ?: return null
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = organisasjonsnummer,
                 gjelder = skjæringstidspunkt til LocalDate.MAX,
@@ -79,6 +88,7 @@ internal sealed interface Yrkesaktivitet {
         override fun identifikator() = organisasjonsnummer
         override fun toString() = identifikator()
     }
+
     class Frilans : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
@@ -97,6 +107,7 @@ internal sealed interface Yrkesaktivitet {
         override fun identifikator() = Frilans
         override fun toString() = identifikator()
     }
+
     class Selvstendig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
@@ -111,16 +122,22 @@ internal sealed interface Yrkesaktivitet {
             if (this === other) return true
             return other is Selvstendig
         }
+
         override fun identifikator() = Selvstendig
         override fun toString() = identifikator()
     }
+
     class Arbeidsledig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
 
-        override fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
+        override fun håndter(
+            sykmelding: Sykmelding,
+            aktivitetslogg: IAktivitetslogg,
+            sykmeldingsperioder: Sykmeldingsperioder
+        ) {
             aktivitetslogg.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
         }
 
@@ -132,8 +149,19 @@ internal sealed interface Yrkesaktivitet {
             refusjonshistorikk: Refusjonshistorikk,
             aktivitetslogg: IAktivitetslogg?
         ): ArbeidsgiverInntektsopplysning? {
-            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
-            return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
+            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(
+                skjæringstidspunkt,
+                førsteFraværsdag,
+                skattSykepengegrunnlag
+            ) ?: return null
+            return super.avklarSykepengegrunnlag(
+                skjæringstidspunkt,
+                førsteFraværsdag,
+                inntektshistorikk,
+                skattSykepengegrunnlag,
+                refusjonshistorikk,
+                aktivitetslogg
+            )
         }
 
         override fun hashCode(): Int {
@@ -144,6 +172,7 @@ internal sealed interface Yrkesaktivitet {
             if (this === other) return true
             return other is Arbeidsledig
         }
+
         override fun identifikator() = Arbeidsledig
         override fun toString() = identifikator()
     }

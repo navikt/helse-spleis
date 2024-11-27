@@ -30,11 +30,11 @@ internal class InntektForInntektsgrunnlagTest {
             ),
             ArbeidsgiverInntekt(
                 "orgnummer2", (1..2).map {
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        YearMonth.of(2017, it),
-                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
-                    )
-                }
+                ArbeidsgiverInntekt.MånedligInntekt(
+                    YearMonth.of(2017, it),
+                    31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                )
+            }
             )
         )
         assertEquals(3, inntekter.antallMåneder())
@@ -75,8 +75,18 @@ internal class InntektForInntektsgrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
-        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 28.februar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
-        arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
+        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold(
+            "orgnummer",
+            1.januar(2017),
+            28.februar(2017),
+            Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER
+        )
+        arbeidsforhold.validerFrilans(
+            aktivitetslogg,
+            1.februar(2017),
+            emptyList(),
+            inntektForSykepengegrunnlag
+        )
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -95,8 +105,18 @@ internal class InntektForInntektsgrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
-        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.februar(2017), 28.februar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
-        arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
+        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold(
+            "orgnummer",
+            1.februar(2017),
+            28.februar(2017),
+            Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER
+        )
+        arbeidsforhold.validerFrilans(
+            aktivitetslogg,
+            1.februar(2017),
+            emptyList(),
+            inntektForSykepengegrunnlag
+        )
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -116,8 +136,18 @@ internal class InntektForInntektsgrunnlagTest {
         )
 
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
-        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer2", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
-        arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
+        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold(
+            "orgnummer2",
+            1.januar(2017),
+            31.januar(2017),
+            Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER
+        )
+        arbeidsforhold.validerFrilans(
+            aktivitetslogg,
+            1.februar(2017),
+            emptyList(),
+            inntektForSykepengegrunnlag
+        )
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -135,9 +165,19 @@ internal class InntektForInntektsgrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
-        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
+        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold(
+            "orgnummer",
+            1.januar(2017),
+            31.januar(2017),
+            Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER
+        )
         val aktivitetslogg = Aktivitetslogg()
-        arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
+        arbeidsforhold.validerFrilans(
+            aktivitetslogg,
+            1.april(2017),
+            emptyList(),
+            inntektForSykepengegrunnlag
+        )
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -155,9 +195,19 @@ internal class InntektForInntektsgrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
-        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer2", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
+        val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold(
+            "orgnummer2",
+            1.januar(2017),
+            31.januar(2017),
+            Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER
+        )
         val aktivitetslogg = Aktivitetslogg()
-        arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
+        arbeidsforhold.validerFrilans(
+            aktivitetslogg,
+            1.april(2017),
+            emptyList(),
+            inntektForSykepengegrunnlag
+        )
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 

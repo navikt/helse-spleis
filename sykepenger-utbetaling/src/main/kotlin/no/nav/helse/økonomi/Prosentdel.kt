@@ -2,11 +2,11 @@ package no.nav.helse.økonomi
 
 import java.math.BigDecimal
 import java.math.MathContext
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.dto.ProsentdelDto
 import kotlin.math.roundToInt
+import no.nav.helse.dto.ProsentdelDto
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 
-class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
+class Prosentdel private constructor(private val brøkdel: BigDecimal) : Comparable<Prosentdel> {
     init {
         require(brøkdel.toDouble() in 0.0..1.0) {
             "Må være prosent mellom 0 og 100"
@@ -21,26 +21,42 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         private val EPSILON = BigDecimal("0.00001")
 
         internal fun ratio(a: Double, b: Double) =
-            Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
+            Prosentdel(
+                if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK
+            )
 
         fun subsumsjon(subsumsjonslogg: Subsumsjonslogg, block: Subsumsjonslogg.(Double) -> Unit) {
             subsumsjonslogg.block(GRENSE.toDouble())
         }
 
-        internal fun Collection<Pair<Prosentdel, Double>>.average(tilkommet: Double, total: Double): Prosentdel {
-            return map { it.first to it.second.toBigDecimal(mc) }.average(tilkommet.toBigDecimal(mc), total.toBigDecimal(mc))
+        internal fun Collection<Pair<Prosentdel, Double>>.average(
+            tilkommet: Double,
+            total: Double
+        ): Prosentdel {
+            return map { it.first to it.second.toBigDecimal(mc) }.average(
+                tilkommet.toBigDecimal(mc),
+                total.toBigDecimal(mc)
+            )
         }
 
-        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(tilkommet: BigDecimal, total: BigDecimal): Prosentdel {
+        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(
+            tilkommet: BigDecimal,
+            total: BigDecimal
+        ): Prosentdel {
             require(total > BigDecimal.ZERO) {
                 "Kan ikke dele på 0"
             }
-            val teller = maxOf(BigDecimal.ZERO, this.sumOf { it.first.brøkdel.multiply(it.second, mc) } - tilkommet)
+            val teller = maxOf(
+                BigDecimal.ZERO,
+                this.sumOf { it.first.brøkdel.multiply(it.second, mc) } - tilkommet)
             val totalInntektstapGrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
             return Prosentdel(totalInntektstapGrad)
         }
 
-        val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
+        val Number.prosent
+            get() = Prosentdel(
+                this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc)
+            )
 
         fun gjenopprett(dto: ProsentdelDto) = dto.prosent.prosent
     }
@@ -53,15 +69,18 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
 
     operator fun not() = Prosentdel(SIKKER_BRØK - this.brøkdel)
 
-    internal operator fun div(other: Prosentdel) = Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
+    internal operator fun div(other: Prosentdel) =
+        Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
 
-    override fun compareTo(other: Prosentdel) = if(this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
+    override fun compareTo(other: Prosentdel) =
+        if (this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String {
         return "${(toDouble())} %"
     }
 
-    internal fun gradér(beløp: Double) = beløp.toBigDecimal(mc).divide(this.brøkdel, mc).toDouble().roundToInt().toDouble()
+    internal fun gradér(beløp: Double) =
+        beløp.toBigDecimal(mc).divide(this.brøkdel, mc).toDouble().roundToInt().toDouble()
 
     internal fun resiprok() = BigDecimal.ONE.divide(this.brøkdel, mc).toDouble()
 

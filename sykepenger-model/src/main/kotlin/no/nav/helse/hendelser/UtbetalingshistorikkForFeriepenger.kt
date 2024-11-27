@@ -37,21 +37,32 @@ class UtbetalingshistorikkForFeriepenger(
     internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
         feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
 
-    internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.harRettPåFeriepenger(dato, orgnummer)
+    internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) =
+        arbeidskategorikoder.harRettPåFeriepenger(dato, orgnummer)
 
     internal fun sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver: (String) -> Unit) {
         utbetalinger.forEach { it.sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver) }
     }
 
-    private fun erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd: LocalDate, utbetalt: LocalDate) = sisteKjøringIInfotrygd <= utbetalt
+    private fun erUtbetaltEtterFeriepengekjøringIT(
+        sisteKjøringIInfotrygd: LocalDate,
+        utbetalt: LocalDate
+    ) = sisteKjøringIInfotrygd <= utbetalt
 
     internal fun grunnlagForFeriepenger(sisteKjøringIInfotrygd: LocalDate): List<Arbeidsgiverferiepengegrunnlag> {
         return utbetalinger
-            .filterNot { dag -> erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd, dag.utbetalt) }
+            .filterNot { dag ->
+                erUtbetaltEtterFeriepengekjøringIT(
+                    sisteKjøringIInfotrygd,
+                    dag.utbetalt
+                )
+            }
             .groupBy { it.orgnr }
             .map { (arbeidsgiver, dager) ->
-                val arbeidsgiverdager = dager.filterIsInstance<Utbetalingsperiode.Arbeidsgiverutbetalingsperiode>()
-                val persondager = dager.filterIsInstance<Utbetalingsperiode.Personutbetalingsperiode>()
+                val arbeidsgiverdager =
+                    dager.filterIsInstance<Utbetalingsperiode.Arbeidsgiverutbetalingsperiode>()
+                val persondager =
+                    dager.filterIsInstance<Utbetalingsperiode.Personutbetalingsperiode>()
 
                 val grunnlag = Feriepengegrunnlag(
                     arbeidsgiverUtbetalteDager = arbeidsgiverdager.flatMap { periode ->
@@ -86,10 +97,21 @@ class UtbetalingshistorikkForFeriepenger(
     ) {
         internal companion object {
             internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) =
-                filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
+                filter { it.orgnummer.all('0'::equals) }.filter {
+                    Year.from(it.fom) == opptjeningsår.plusYears(
+                        1
+                    )
+                }.map { it.beløp }
 
-            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(orgnummer: String, opptjeningsår: Year) =
-                filter { it.orgnummer == orgnummer }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
+            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(
+                orgnummer: String,
+                opptjeningsår: Year
+            ) =
+                filter { it.orgnummer == orgnummer }.filter {
+                    Year.from(it.fom) == opptjeningsår.plusYears(
+                        1
+                    )
+                }.map { it.beløp }
         }
     }
 
@@ -126,7 +148,8 @@ class UtbetalingshistorikkForFeriepenger(
     class Arbeidskategorikoder(
         private val arbeidskategorikoder: List<KodePeriode>
     ) {
-        internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger(orgnummer)
+        internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) =
+            arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger(orgnummer)
 
         class KodePeriode(
             private val periode: Periode,
@@ -138,7 +161,10 @@ class UtbetalingshistorikkForFeriepenger(
             }
         }
 
-        enum class Arbeidskategorikode(private val kode: String, internal val girRettTilFeriepenger: (String) -> Boolean) {
+        enum class Arbeidskategorikode(
+            private val kode: String,
+            internal val girRettTilFeriepenger: (String) -> Boolean
+        ) {
             Arbeidstaker("01", { true }),
             ArbeidstakerSelvstendig("03", { it != "0" }),
             Sjømenn("04", { true }),
@@ -173,7 +199,8 @@ class UtbetalingshistorikkForFeriepenger(
             Tom("", { false });
 
             companion object {
-                fun finn(kode: String) = entries.firstOrNull { it.kode.trim() == kode.trim() } ?: Tom
+                fun finn(kode: String) =
+                    entries.firstOrNull { it.kode.trim() == kode.trim() } ?: Tom
             }
         }
     }

@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.time.LocalDateTime
 import java.util.UUID
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkEtterInfotrygdendringRiver
 import org.intellij.lang.annotations.Language

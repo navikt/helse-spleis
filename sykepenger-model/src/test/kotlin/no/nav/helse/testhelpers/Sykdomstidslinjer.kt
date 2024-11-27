@@ -33,7 +33,10 @@ internal fun resetSeed(frøDato: LocalDate = 1.januar) {
     dagensDato = frøDato
 }
 
-internal fun resetSeed(frøDato: LocalDate = 1.januar, tidslinjegenerator: () -> Sykdomstidslinje): Sykdomstidslinje {
+internal fun resetSeed(
+    frøDato: LocalDate = 1.januar,
+    tidslinjegenerator: () -> Sykdomstidslinje
+): Sykdomstidslinje {
     resetSeed(frøDato)
     return tidslinjegenerator()
 }
@@ -54,14 +57,16 @@ internal val Int.N
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.S(melding: Melding) = this.S(Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now()))
+internal fun Int.S(melding: Melding) =
+    this.S(Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now()))
 
-internal fun Int.S(hendelseskilde: Hendelseskilde, grad: Prosentdel = 100.prosent) = Sykdomstidslinje.sykedager(
-    dagensDato,
-    dagensDato.plusDays(this.toLong() - 1),
-    grad,
-    hendelseskilde
-).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+internal fun Int.S(hendelseskilde: Hendelseskilde, grad: Prosentdel = 100.prosent) =
+    Sykdomstidslinje.sykedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        grad,
+        hendelseskilde
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.U
     get() = Sykdomstidslinje.arbeidsgiverdager(
@@ -71,12 +76,13 @@ internal val Int.U
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.U(meldingsreferanseId: UUID = UUID.randomUUID()) = Sykdomstidslinje.arbeidsgiverdager(
-    dagensDato,
-    dagensDato.plusDays(this.toLong() - 1),
-    100.prosent,
-    Hendelseskilde(SykdomshistorikkHendelse::class, meldingsreferanseId, LocalDateTime.now())
-).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+internal fun Int.U(meldingsreferanseId: UUID = UUID.randomUUID()) =
+    Sykdomstidslinje.arbeidsgiverdager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        100.prosent,
+        Hendelseskilde(SykdomshistorikkHendelse::class, meldingsreferanseId, LocalDateTime.now())
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.K
     get() = Sykdomstidslinje.sykedager(
@@ -115,14 +121,16 @@ internal val Int.AIG
 internal val Int.YF
     get() = YF(Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
 
-internal fun Int.YF(ytelse: Dag.AndreYtelser.AnnenYtelse, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.andreYtelsedager(
-    dagensDato,
-    dagensDato.plusDays(this.toLong() - 1),
-    kilde,
-    ytelse
-).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+internal fun Int.YF(ytelse: Dag.AndreYtelser.AnnenYtelse, kilde: Hendelseskilde = INGEN) =
+    Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        kilde,
+        ytelse
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun unikKilde() = UUID.randomUUID().let { Hendelseskilde(it.toString(), it, LocalDateTime.now()) }
+internal fun unikKilde() =
+    UUID.randomUUID().let { Hendelseskilde(it.toString(), it, LocalDateTime.now()) }
 
 internal val Int.YD
     get() = Sykdomstidslinje.andreYtelsedager(
@@ -175,19 +183,31 @@ internal val Int.YOL
 internal val Int.H
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) }))
+            .collect(
+                Collectors.toMap<LocalDate, LocalDate, Dag>(
+                    { it },
+                    { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) })
+            )
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.P
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, INGEN) }))
+            .collect(
+                Collectors.toMap<LocalDate, LocalDate, Dag>(
+                    { it },
+                    { Permisjonsdag(it, INGEN) })
+            )
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.R
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { FriskHelgedag(it, INGEN) }))
+            .collect(
+                Collectors.toMap<LocalDate, LocalDate, Dag>(
+                    { it },
+                    { FriskHelgedag(it, INGEN) })
+            )
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.UK
@@ -199,17 +219,26 @@ internal val Int.UK
 internal val Int.PROBLEM get() = PROBLEM("Problemdag", INGEN)
 internal fun Int.PROBLEM(melding: String, kilde: Hendelseskilde) = Sykdomstidslinje(
     dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-        .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+        .collect(
+            Collectors.toMap<LocalDate, LocalDate, Dag>(
+                { it },
+                { ProblemDag(it, kilde, melding) })
+        )
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.FORELDET
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Dag.ForeldetSykedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) }))
+            .collect(
+                Collectors.toMap<LocalDate, LocalDate, Dag>(
+                    { it },
+                    { Dag.ForeldetSykedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) })
+            )
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 
-internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) : SykdomshistorikkHendelse {
+internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) :
+    SykdomshistorikkHendelse {
     override fun oppdaterFom(other: Periode) = other
     override fun sykdomstidslinje() = tidslinje
 }

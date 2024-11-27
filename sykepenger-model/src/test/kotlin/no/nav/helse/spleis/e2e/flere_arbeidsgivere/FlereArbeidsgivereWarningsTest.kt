@@ -41,7 +41,10 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
     @Test
     fun `overlapper med kort arbeidsgiverperiodesøknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent),
+            orgnummer = a1
+        )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a2)
         assertIngenVarsler(1.vedtaksperiode.filter(orgnummer = a2))
     }
@@ -50,8 +53,18 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
     fun `En arbeidsgiver og sykepenger fra Nav - får ingen warnings da dette ikke er en reell arbeidsgiver`() {
         val periode = januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(
+                periode.start,
+                periode.endInclusive,
+                100.prosent
+            ), orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -65,8 +78,18 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
     fun `Første arbeidsgiver har blitt sendt til godkjenning før vi mottar sykmelding på neste arbeidsgiver`() {
         val periode = januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(
+                periode.start,
+                periode.endInclusive,
+                100.prosent
+            ), orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -77,8 +100,18 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -87,7 +120,13 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         assertVarsel(RV_VV_2, AktivitetsloggFilter.person())
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(
+                periode.start,
+                periode.endInclusive,
+                100.prosent
+            ), orgnummer = a2
+        )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
@@ -101,7 +140,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,

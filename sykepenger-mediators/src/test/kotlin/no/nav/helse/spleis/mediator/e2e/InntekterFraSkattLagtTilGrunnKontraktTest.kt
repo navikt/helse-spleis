@@ -26,15 +26,26 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
         }
         """
 
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
         sendSykepengegrunnlagForArbeidsgiver(
             vedtaksperiodeIndeks = 0,
             skjæringstidspunkt = 1.januar,
             orgnummer = ORGNUMMER,
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, ORGNUMMER),
-                )
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(
+                    INNTEKT,
+                    ORGNUMMER
+                ),
+            )
             )
         )
         testRapid.assertUtgåendeMelding(forventet)

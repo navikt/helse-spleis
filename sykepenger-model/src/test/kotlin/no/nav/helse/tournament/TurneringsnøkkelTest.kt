@@ -48,10 +48,19 @@ internal class TurneringsnøkkelTest {
         assertEquals(Arbeidsdag_SØ, fraDag(Arbeidsdag(enDag, søknad)))
         assertEquals(Arbeidsgiverdag_IM, fraDag(Arbeidsgiverdag(enDag, økonomi, inntektsmelding)))
         assertEquals(Arbeidsgiverdag_SØ, fraDag(Arbeidsgiverdag(enDag, økonomi, søknad)))
-        assertEquals(ArbeidsgiverHelgedag_IM, fraDag(ArbeidsgiverHelgedag(enDag, økonomi, inntektsmelding)))
+        assertEquals(
+            ArbeidsgiverHelgedag_IM,
+            fraDag(ArbeidsgiverHelgedag(enDag, økonomi, inntektsmelding))
+        )
         assertEquals(ArbeidsgiverHelgedag_SØ, fraDag(ArbeidsgiverHelgedag(enDag, økonomi, søknad)))
-        assertEquals(Turneringsnøkkel.ForeldetSykedag, fraDag(Dag.ForeldetSykedag(enDag, økonomi, inntektsmelding)))
-        assertEquals(Turneringsnøkkel.ForeldetSykedag, fraDag(Dag.ForeldetSykedag(enDag, økonomi, søknad)))
+        assertEquals(
+            Turneringsnøkkel.ForeldetSykedag,
+            fraDag(Dag.ForeldetSykedag(enDag, økonomi, inntektsmelding))
+        )
+        assertEquals(
+            Turneringsnøkkel.ForeldetSykedag,
+            fraDag(Dag.ForeldetSykedag(enDag, økonomi, søknad))
+        )
         assertEquals(Feriedag_IM, fraDag(Feriedag(enDag, inntektsmelding)))
         assertEquals(Feriedag_SØ, fraDag(Feriedag(enDag, søknad)))
         assertEquals(Feriedag_IM, fraDag(FriskHelgedag(enDag, inntektsmelding)))
@@ -69,7 +78,8 @@ internal class TurneringsnøkkelTest {
             val inntektsmelding = Inntektsmelding.kilde
         }
 
-        val kilde: Hendelseskilde = Hendelseskilde(this::class, UUID.randomUUID(), LocalDateTime.now())
+        val kilde: Hendelseskilde =
+            Hendelseskilde(this::class, UUID.randomUUID(), LocalDateTime.now())
 
         // Objects impersonating real-life sources of sickness timeline days
         object Inntektsmelding : TestHendelse()

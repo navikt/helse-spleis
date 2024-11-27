@@ -57,15 +57,19 @@ internal class WarningsTest {
             "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"
         )
 
-        val nyeWarningerSomManglerEksplisittTest = ikkeTestedeWarnings.minus(warningerSomManglerEksplisittTest)
-        val warningerSomNåTestesEkplisitt = warningerSomManglerEksplisittTest.minus(ikkeTestedeWarnings)
+        val nyeWarningerSomManglerEksplisittTest =
+            ikkeTestedeWarnings.minus(warningerSomManglerEksplisittTest)
+        val warningerSomNåTestesEkplisitt =
+            warningerSomManglerEksplisittTest.minus(ikkeTestedeWarnings)
 
         assertForventetFeil(
             forklaring = "Ikke alle warnings testes eksplisitt",
             ønsket = { assertEquals(emptySet<String>(), ikkeTestedeWarnings) },
-            nå = { assertEquals(emptySet<String>(), nyeWarningerSomManglerEksplisittTest) {
-                "Legg til eksplisitt test for nye warnings! _ikke_ legg den i listen av warnings som mangler eksplisitt test."
-            }}
+            nå = {
+                assertEquals(emptySet<String>(), nyeWarningerSomManglerEksplisittTest) {
+                    "Legg til eksplisitt test for nye warnings! _ikke_ legg den i listen av warnings som mangler eksplisitt test."
+                }
+            }
         )
 
         assertEquals(emptySet<String>(), warningerSomNåTestesEkplisitt) {
@@ -74,22 +78,29 @@ internal class WarningsTest {
     }
 
     private companion object {
-        private fun warningEquals(warningDefinisjon: String, warningBruk: String) = when (warningDefinisjon) {
-            "Utbetalingen ble gjennomført, men med advarsel: \$melding" ->
-                warningBruk.startsWith("Utbetalingen ble gjennomført, men med advarsel: ")
-            "Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene." ->
-                warningBruk == "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene."
-            else -> warningDefinisjon == warningBruk
-        }
+        private fun warningEquals(warningDefinisjon: String, warningBruk: String) =
+            when (warningDefinisjon) {
+                "Utbetalingen ble gjennomført, men med advarsel: \$melding" ->
+                    warningBruk.startsWith("Utbetalingen ble gjennomført, men med advarsel: ")
 
-        private fun String.inneholderEnAv(vararg innhold: String) = let { string -> innhold.firstOrNull { string.contains(it) } != null }
-        private fun Path.slutterPåEnAv(vararg suffix: String) = let { path -> suffix.firstOrNull { path.endsWith(it) } != null }
+                "Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene." ->
+                    warningBruk == "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene."
+
+                else -> warningDefinisjon == warningBruk
+            }
+
+        private fun String.inneholderEnAv(vararg innhold: String) =
+            let { string -> innhold.firstOrNull { string.contains(it) } != null }
+
+        private fun Path.slutterPåEnAv(vararg suffix: String) =
+            let { path -> suffix.firstOrNull { path.endsWith(it) } != null }
 
         private fun finn(
             scope: String,
             regex: Regex,
             ignorePath: (path: Path) -> Boolean = { false },
-            ignoreLinje: (linje: String) -> Boolean = { false }) =
+            ignoreLinje: (linje: String) -> Boolean = { false }
+        ) =
             Files.walk(Paths.get("../")).use { paths ->
                 paths
                     .filter(Files::isRegularFile)
@@ -129,7 +140,10 @@ internal class WarningsTest {
         private val tekstRegex = "\"(.*?)\"".toRegex()
 
         private fun finnAlleTeksterITester() = finn("test", tekstRegex, ignorePath = { path ->
-            path.slutterPåEnAv("${WarningsTest::class.simpleName}.kt", "${this::class.simpleName}.kt")
+            path.slutterPåEnAv(
+                "${WarningsTest::class.simpleName}.kt",
+                "${this::class.simpleName}.kt"
+            )
         })
     }
 }

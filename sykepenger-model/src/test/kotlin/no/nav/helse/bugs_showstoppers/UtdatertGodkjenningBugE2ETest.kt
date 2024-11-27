@@ -23,7 +23,7 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
+internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Håndterer løsning på godkjenningsbehov der utbetalingid på løsningen matcher med periodens gjeldende utbetaling`() {

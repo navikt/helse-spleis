@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.util.UUID
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
 import org.junit.jupiter.api.fail
@@ -41,7 +41,12 @@ internal class TestRapid : RapidsConnection() {
 
     fun sendTestMessage(message: String) {
         log.info("sending message:\n\t$message")
-        notifyMessage(message, this, MessageMetadata("", -1, -1, null, emptyMap()), SimpleMeterRegistry())
+        notifyMessage(
+            message,
+            this,
+            MessageMetadata("", -1, -1, null, emptyMap()),
+            SimpleMeterRegistry()
+        )
     }
 
     override fun publish(message: String) {
@@ -144,19 +149,23 @@ internal class TestRapid : RapidsConnection() {
                 }
             }
 
-        private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
-            val message = melding(indeks)
-            if (name == message.path("@event_name").asText()) onEach(message)
-        }
+        private fun events(name: String, onEach: (JsonNode) -> Unit) =
+            messages.forEachIndexed { indeks, _ ->
+                val message = melding(indeks)
+                if (name == message.path("@event_name").asText()) onEach(message)
+            }
 
         internal fun behovtypeSisteMelding(behovtype: Aktivitet.Behov.Behovtype) =
             melding(antall() - 1)["@behov"][0].asText() == behovtype.toString()
 
         val vedtaksperiodeteller get() = vedtaksperiodeIder.size
 
-        fun melding(indeks: Int) = jsonmeldinger.getOrPut(indeks) { objectMapper.readTree(messages[indeks].second) }
+        fun melding(indeks: Int) =
+            jsonmeldinger.getOrPut(indeks) { objectMapper.readTree(messages[indeks].second) }
+
         fun antall() = messages.size
-        fun indeksFor(melding: JsonNode) = jsonmeldinger.entries.firstOrNull { (_, other) -> other == melding }?.key ?: -1
+        fun indeksFor(melding: JsonNode) =
+            jsonmeldinger.entries.firstOrNull { (_, other) -> other == melding }?.key ?: -1
 
         fun siste(name: String) = meldinger(name).last()
 
@@ -168,15 +177,22 @@ internal class TestRapid : RapidsConnection() {
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtilstander[utbetalingId]?.toList()
             } ?: emptyList()
+
         fun utbetalingtype(utbetalingIndeks: Int) =
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtyper[utbetalingId]
             } ?: fail { "Finner ikke utbetaling" }
+
         fun utbetalingId(utbetalingIndeks: Int) = utbetalinger.elementAt(utbetalingIndeks)
 
-        fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
-        fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
-        fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
+        fun tilstander(vedtaksperiodeId: UUID) =
+            tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
+
+        fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) =
+            tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
+
+        fun forkastedeTilstander(vedtaksperiodeId: UUID) =
+            forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
         fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
             behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
@@ -187,10 +203,16 @@ internal class TestRapid : RapidsConnection() {
         fun alleEtterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
             behovmeldinger.filter { it.first == behovtype }.map { it.second }
 
-        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
-            behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).last { it.first == behovtype }.second
+        fun tilstandForEtterspurteBehov(
+            vedtaksperiodeIndeks: Int,
+            behovtype: Aktivitet.Behov.Behovtype
+        ) =
+            behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks))
+                .last { it.first == behovtype }.second
 
-        fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)
+        fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) =
+            varsler.finn(vedtaksperiodeId, varselkode)
+
         fun varsler() = varsler
         fun varsler(vedtaksperiodeId: UUID) = varsler.finn(vedtaksperiodeId)
     }

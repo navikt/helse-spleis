@@ -32,7 +32,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         private set
 
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
-    internal val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
+    internal val søknader =
+        mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, InnsendtInntektsmelding>()
     internal val inntekter = mutableMapOf<UUID, Inntekt>()
 
@@ -54,7 +55,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     internal val ikkeBesvarteBehov = mutableListOf<EtterspurtBehov>()
 
-    internal fun TestArbeidsgiverInspektør.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType) {
+    internal fun TestArbeidsgiverInspektør.assertTilstander(
+        vedtaksperiodeIdInnhenter: IdInnhenter,
+        vararg tilstander: TilstandType
+    ) {
         assertTilstander(
             vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
             tilstander = tilstander,
@@ -63,18 +67,20 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     }
 
-    inner class Hendelser(private val hendelser:()->Unit) {
+    inner class Hendelser(private val hendelser: () -> Unit) {
         infix fun førerTil(postCondition: TilstandType) = førerTil(listOf(postCondition))
-        infix fun førerTil(postCondition: List<TilstandType>):Hendelser {
+        infix fun førerTil(postCondition: List<TilstandType>): Hendelser {
             hendelser()
             postCondition.forEachIndexed { index, tilstand ->
-                assertTilstand((index+1).vedtaksperiode, tilstand)
+                assertTilstand((index + 1).vedtaksperiode, tilstand)
             }
             return this
         }
-        infix fun somEtterfulgtAv(f: ()->Unit) = Hendelser(f)
+
+        infix fun somEtterfulgtAv(f: () -> Unit) = Hendelser(f)
     }
-    fun hendelsene(f:()->Unit) = Hendelser(f)
+
+    fun hendelsene(f: () -> Unit) = Hendelser(f)
 
     data class InnsendtInntektsmelding(
         val tidspunkt: LocalDateTime,

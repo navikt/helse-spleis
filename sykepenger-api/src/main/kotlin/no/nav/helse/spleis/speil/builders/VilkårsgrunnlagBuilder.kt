@@ -31,7 +31,9 @@ internal abstract class IVilkårsgrunnlag(
     val id: UUID
 ) {
     abstract fun toDTO(): Vilkårsgrunnlag
-    fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
+    fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
+        inntekter.none { it.arbeidsgiver == organisasjonsnummer }
+
     open fun potensiellGhostperiode(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
@@ -39,7 +41,9 @@ internal abstract class IVilkårsgrunnlag(
         if (inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null) return null
-        val sisteDag = minOf(inntekten.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
+        val sisteDag = minOf(
+            inntekten.tom,
+            sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
         return GhostPeriodeDTO(
             id = UUID.randomUUID(),
             fom = inntekten.fom,
@@ -68,7 +72,15 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, nyeInntekterUnderveis, id) {
+) : IVilkårsgrunnlag(
+    skjæringstidspunkt,
+    beregningsgrunnlag,
+    sykepengegrunnlag,
+    inntekter,
+    refusjonsopplysningerPerArbeidsgiver,
+    nyeInntekterUnderveis,
+    id
+) {
 
     override fun toDTO(): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
@@ -113,7 +125,15 @@ internal class IInfotrygdGrunnlag(
     refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     sykepengegrunnlag: Double,
     id: UUID
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, emptyList(), id) {
+) : IVilkårsgrunnlag(
+    skjæringstidspunkt,
+    beregningsgrunnlag,
+    sykepengegrunnlag,
+    inntekter,
+    refusjonsopplysningerPerArbeidsgiver,
+    emptyList(),
+    id
+) {
 
     override fun toDTO(): Vilkårsgrunnlag {
         return InfotrygdVilkårsgrunnlag(
@@ -125,7 +145,10 @@ internal class IInfotrygdGrunnlag(
         )
     }
 
-    override fun potensiellGhostperiode(organisasjonsnummer: String, sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>) = null
+    override fun potensiellGhostperiode(
+        organisasjonsnummer: String,
+        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
+    ) = null
 }
 
 internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: List<Map<UUID, IVilkårsgrunnlag>>) {
@@ -149,6 +172,7 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
                     )
                 }
         } ?: emptyList()
+
     internal fun potensielleGhostsperioder(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
@@ -195,17 +219,19 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             MedlemskapsvurderingDto.VetIkke -> null
         }
 
-        val begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.inntektsgrunnlag.`6G`)
-        val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.mapNotNull {
-            when (it.inntektsopplysning) {
-                is InntektsopplysningUtDto.IkkeRapportertDto -> null
-                is InntektsopplysningUtDto.InfotrygdDto -> null
-                is InntektsopplysningUtDto.InntektsmeldingDto -> null
-                is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.hendelseId
-                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
-                is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> it.inntektsopplysning.hendelseId
-            }
-        }.toSet()
+        val begrensning =
+            SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.inntektsgrunnlag.`6G`)
+        val overstyringer =
+            grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.mapNotNull {
+                when (it.inntektsopplysning) {
+                    is InntektsopplysningUtDto.IkkeRapportertDto -> null
+                    is InntektsopplysningUtDto.InfotrygdDto -> null
+                    is InntektsopplysningUtDto.InntektsmeldingDto -> null
+                    is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.hendelseId
+                    is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
+                    is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> it.inntektsopplysning.hendelseId
+                }
+            }.toSet()
 
         return ISpleisGrunnlag(
             skjæringstidspunkt = grunnlagsdata.skjæringstidspunkt,
@@ -238,19 +264,52 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     }
 
     private fun inntekter(dto: InntektsgrunnlagUtDto): List<IArbeidsgiverinntekt> {
-        return dto.arbeidsgiverInntektsopplysninger.map { mapInntekt(it) } + dto.deaktiverteArbeidsforhold.map { mapInntekt(it, true) }
+        return dto.arbeidsgiverInntektsopplysninger.map { mapInntekt(it) } + dto.deaktiverteArbeidsforhold.map {
+            mapInntekt(
+                it,
+                true
+            )
+        }
     }
 
-    private fun mapInntekt(dto: ArbeidsgiverInntektsopplysningUtDto, deaktivert: Boolean = false): IArbeidsgiverinntekt {
-        return mapInntekt(dto.orgnummer, dto.gjelder.fom, dto.gjelder.tom, dto.inntektsopplysning, deaktivert)
+    private fun mapInntekt(
+        dto: ArbeidsgiverInntektsopplysningUtDto,
+        deaktivert: Boolean = false
+    ): IArbeidsgiverinntekt {
+        return mapInntekt(
+            dto.orgnummer,
+            dto.gjelder.fom,
+            dto.gjelder.tom,
+            dto.inntektsopplysning,
+            deaktivert
+        )
     }
 
-    private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, deaktivert: Boolean): IArbeidsgiverinntekt {
+    private fun mapInntekt(
+        orgnummer: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        io: InntektsopplysningUtDto,
+        deaktivert: Boolean
+    ): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = when (io) {
-            is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(IInntektkilde.IkkeRapportert, 0.0, 0.0, null)
-            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(
+                IInntektkilde.IkkeRapportert,
+                0.0,
+                0.0,
+                null
+            )
+
+            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(
+                IInntektkilde.Infotrygd,
+                io.beløp.årlig.beløp,
+                io.beløp.månedligDouble.beløp,
+                null
+            )
+
             is InntektsopplysningUtDto.InntektsmeldingDto -> {
-                val kilde = if (io.kilde == InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
+                val kilde =
+                    if (io.kilde == InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
                 IOmregnetÅrsinntekt(
                     kilde,
                     io.beløp.årlig.beløp,
@@ -258,18 +317,29 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     null
                 )
             }
-            is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
-                IInntektkilde.AOrdningen, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
-                .groupBy { it.måned }
-                .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
-                .map { (måned, månedligSum) ->
-                    IInntekterFraAOrdningen(
-                        måned = måned,
-                        sum = månedligSum
-                    )
-                }
+
+            is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(
+                IInntektkilde.Saksbehandler,
+                io.beløp.årlig.beløp,
+                io.beløp.månedligDouble.beløp,
+                null
             )
+
+            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
+                IInntektkilde.AOrdningen,
+                io.beløp.årlig.beløp,
+                io.beløp.månedligDouble.beløp,
+                io.inntektsopplysninger
+                    .groupBy { it.måned }
+                    .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
+                    .map { (måned, månedligSum) ->
+                        IInntekterFraAOrdningen(
+                            måned = måned,
+                            sum = månedligSum
+                        )
+                    }
+            )
+
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
         }.also {
             inntekter[io.id] = it
@@ -284,6 +354,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     årlig = io.beløp.årlig.beløp,
                     månedlig = io.beløp.månedligDouble.beløp
                 )
+
                 else -> null
             },
             deaktivert = deaktivert

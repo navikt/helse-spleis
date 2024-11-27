@@ -17,18 +17,26 @@ data class ArbeidsgiverDTO(
         fun List<ArbeidsgiverDTO>.sykefraværstilfeller() = this
             .flatMap { arbeidsgiver ->
                 arbeidsgiver.generasjoner.firstOrNull()?.perioder?.map { periode ->
-                    periode.skjæringstidspunkt to (periode.fom .. periode.tom)
+                    periode.skjæringstidspunkt to (periode.fom..periode.tom)
                 } ?: emptyList()
             }.groupBy({ it.first }) { it.second }
     }
-    internal fun erTom(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ghostPerioder.isEmpty()
+
+    internal fun erTom(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) =
+        ghostPerioder.isEmpty()
             && nyeInntektsforhold.isEmpty()
             && generasjoner.isEmpty()
             && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
 
-    internal fun medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
+    internal fun medGhostperioderOgNyeInntektsforholdperioder(
+        vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
+        arbeidsgivere: List<ArbeidsgiverDTO>
+    ): ArbeidsgiverDTO {
         val sykefraværstilfeller = arbeidsgivere.sykefraværstilfeller()
-        val potensielleGhostperioder = vilkårsgrunnlagHistorikk.potensielleGhostsperioder(organisasjonsnummer, sykefraværstilfeller)
+        val potensielleGhostperioder = vilkårsgrunnlagHistorikk.potensielleGhostsperioder(
+            organisasjonsnummer,
+            sykefraværstilfeller
+        )
 
         val ghostsperioder = fjernHelgepølser(potensielleGhostperioder.flatMap { ghostperiode ->
             fjernDagerMedSykdom(ghostperiode, GhostPeriodeDTO::brytOpp)
@@ -40,18 +48,23 @@ data class ArbeidsgiverDTO(
         )
     }
 
-    private fun <Ting> fjernDagerMedSykdom(ghostperiode: Ting, oppbrytningsfunksjon: Ting.(ClosedRange<LocalDate>) -> List<Ting>): List<Ting> {
+    private fun <Ting> fjernDagerMedSykdom(
+        ghostperiode: Ting,
+        oppbrytningsfunksjon: Ting.(ClosedRange<LocalDate>) -> List<Ting>
+    ): List<Ting> {
         if (generasjoner.isEmpty()) return listOf(ghostperiode)
         val tidslinjeperioderFraNyesteGenerasjon = generasjoner
             .first()
             .perioder
             .sortedBy { it.fom }
-        val oppslittetPølser = tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
-            val tidligereGhostperioder = resultat.dropLast(1)
-            val sisteGhostperiode = resultat.lastOrNull()
-            val tidslinjeperiode = vedtaksperiode.fom..vedtaksperiode.tom
-            tidligereGhostperioder + (sisteGhostperiode?.oppbrytningsfunksjon(tidslinjeperiode) ?: emptyList())
-        }
+        val oppslittetPølser =
+            tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
+                val tidligereGhostperioder = resultat.dropLast(1)
+                val sisteGhostperiode = resultat.lastOrNull()
+                val tidslinjeperiode = vedtaksperiode.fom..vedtaksperiode.tom
+                tidligereGhostperioder + (sisteGhostperiode?.oppbrytningsfunksjon(tidslinjeperiode)
+                    ?: emptyList())
+            }
         return oppslittetPølser
     }
 

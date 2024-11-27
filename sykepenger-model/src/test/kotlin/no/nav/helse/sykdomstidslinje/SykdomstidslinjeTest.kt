@@ -58,7 +58,8 @@ internal class SykdomstidslinjeTest {
         resetSeed()
         val sykdomstidslinje2 = 5.S(kilde2)
         resetSeed()
-        val sykdomstidslinje3 = 5.S(Hendelseskilde(SykdomshistorikkHendelse::class, UUID.randomUUID(), nå))
+        val sykdomstidslinje3 =
+            5.S(Hendelseskilde(SykdomshistorikkHendelse::class, UUID.randomUUID(), nå))
         assertEquals(sykdomstidslinje1, sykdomstidslinje2)
         assertNotEquals(sykdomstidslinje1, sykdomstidslinje3)
     }
@@ -116,7 +117,7 @@ internal class SykdomstidslinjeTest {
     @Test
     fun `unik dagtype short string `() {
         assertEquals("Tom tidslinje", Sykdomstidslinje().toUnikDagtypeShortString())
-        val tidslinje = 5.S + 5.F+ 5.UK + 5.P
+        val tidslinje = 5.S + 5.F + 5.UK + 5.P
         assertEquals("SSSSSFF FFF???? ?PPPPP", tidslinje.toShortString())
         assertEquals("?FPS", tidslinje.toUnikDagtypeShortString())
     }
@@ -151,7 +152,7 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    fun `er rett før for andre ytelser`(){
+    fun `er rett før for andre ytelser`() {
         assertTrue(1.S.erRettFør(1.YF))
         assertTrue(1.YF.erRettFør(1.YF))
         assertTrue(1.YF.erRettFør(1.YF + 1.S))
@@ -198,8 +199,10 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
-        val tidslinje1 = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.prosent, TestEvent.søknad)
-        val tidslinje2 = Sykdomstidslinje.sykedager(1.fredag, 2.mandag, 100.prosent, TestEvent.søknad)
+        val tidslinje1 =
+            Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.prosent, TestEvent.søknad)
+        val tidslinje2 =
+            Sykdomstidslinje.sykedager(1.fredag, 2.mandag, 100.prosent, TestEvent.søknad)
 
         val tidslinje = tidslinje2 + tidslinje1
 
@@ -211,22 +214,32 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `kutter frem til og med`() {
-        val tidslinje = Sykdomstidslinje.sykedager(1.februar, 1.mars, 100.prosent, TestEvent.testkilde)
+        val tidslinje =
+            Sykdomstidslinje.sykedager(1.februar, 1.mars, 100.prosent, TestEvent.testkilde)
         assertEquals(14.februar, tidslinje.fremTilOgMed(14.februar).sisteDag())
         assertEquals(1.mars, tidslinje.fremTilOgMed(1.mars).sisteDag())
         assertEquals(1.mars, tidslinje.fremTilOgMed(1.april).sisteDag())
         assertEquals(1.februar, tidslinje.fremTilOgMed(1.februar).sisteDag())
-        assertEquals(1.februar, Sykdomstidslinje.sykedager(1.februar, 1.februar, 100.prosent, TestEvent.testkilde)
-            .fremTilOgMed(1.februar)
-            .sisteDag())
+        assertEquals(
+            1.februar,
+            Sykdomstidslinje.sykedager(1.februar, 1.februar, 100.prosent, TestEvent.testkilde)
+                .fremTilOgMed(1.februar)
+                .sisteDag()
+        )
         assertEquals(0, tidslinje.fremTilOgMed(tidslinje.førsteDag().minusDays(1)).count())
         assertEquals(0, Sykdomstidslinje().fremTilOgMed(1.januar).count())
     }
 
     @Test
     fun `overskriving av tidslinje`() {
-        val tidslinje1 = (Sykdomstidslinje.problemdager(1.mandag, 1.onsdag, TestEvent.sykmelding, "Yes")
-            + Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.prosent, TestEvent.sykmelding))
+        val tidslinje1 =
+            (Sykdomstidslinje.problemdager(1.mandag, 1.onsdag, TestEvent.sykmelding, "Yes")
+                + Sykdomstidslinje.sykedager(
+                1.torsdag,
+                1.fredag,
+                100.prosent,
+                TestEvent.sykmelding
+            ))
         val tidslinje2 = (Sykdomstidslinje.arbeidsdager(1.mandag, 1.onsdag, TestEvent.testkilde))
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
@@ -269,8 +282,11 @@ internal class SykdomstidslinjeTest {
         resetSeed(2.januar)
         val tidslinje2 = 29.S // mangler 1.januar og 31.januar
         val resultat = tidslinje1 - tidslinje2
-        assertEquals(setOf(1.januar, 31.januar), resultat.inspektør.dager.filterValues { it !is Dag.UkjentDag }.keys)
-        assertEquals(tidslinje1,tidslinje2 + resultat)
+        assertEquals(
+            setOf(1.januar, 31.januar),
+            resultat.inspektør.dager.filterValues { it !is Dag.UkjentDag }.keys
+        )
+        assertEquals(tidslinje1, tidslinje2 + resultat)
         assertEquals(Sykdomstidslinje(), tidslinje2 - tidslinje1)
     }
 

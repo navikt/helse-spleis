@@ -20,9 +20,18 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
     fun `eventyr`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -31,7 +40,13 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.februar,
+                    tom = 28.februar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)

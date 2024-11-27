@@ -67,16 +67,18 @@ internal class OppdragBuilderTest {
         assertEquals(20.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
     }
 
-    private val femhundreKronerIRefusjon: Økonomi = Økonomi.gjenopprett(ØkonomiInnDto(
-        grad = ProsentdelDto(100.0),
-        totalGrad = ProsentdelDto(100.0),
-        arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
-        aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
-        beregningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
-        dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
-        grunnbeløpgrense = null,
-        arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
-        personbeløp = InntektbeløpDto.DagligDouble(0.0),
-        er6GBegrenset = false
-    ), erAvvistDag = false)
+    private val femhundreKronerIRefusjon: Økonomi = Økonomi.gjenopprett(
+        ØkonomiInnDto(
+            grad = ProsentdelDto(100.0),
+            totalGrad = ProsentdelDto(100.0),
+            arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
+            aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
+            beregningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+            dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+            grunnbeløpgrense = null,
+            arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
+            personbeløp = InntektbeløpDto.DagligDouble(0.0),
+            er6GBegrenset = false
+        ), erAvvistDag = false
+    )
 }

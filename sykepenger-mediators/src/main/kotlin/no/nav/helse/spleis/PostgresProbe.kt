@@ -9,6 +9,6 @@ object PostgresProbe {
         .register(meterRegistry)
 
     fun hendelseSkrevetTilDb() {
-            counter.increment()
+        counter.increment()
     }
 }

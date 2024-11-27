@@ -10,9 +10,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
-import kotlin.collections.flatMap
 
-internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(version = 303) {
+internal class V303KopiereMaksdatoFraUtbetalingTilBehandling : JsonMigration(version = 303) {
     override val description = "lagrer maksdatoresultat på behandling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -23,12 +22,18 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
 
         val infotrygdbetalteDager = jsonNode.path("infotrygdhistorikk").map { element ->
             val tidligsteTidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
-            val arbeidsgiverutbetalinger = element.path("arbeidsgiverutbetalingsperioder").map { periode ->
-                LocalDate.parse(periode.path("fom").asText())..LocalDate.parse(periode.path("tom").asText())
-            }
-            val personutbetalinger = element.path("arbeidsgiverutbetalingsperioder").map { periode ->
-                LocalDate.parse(periode.path("fom").asText())..LocalDate.parse(periode.path("tom").asText())
-            }
+            val arbeidsgiverutbetalinger =
+                element.path("arbeidsgiverutbetalingsperioder").map { periode ->
+                    LocalDate.parse(
+                        periode.path("fom").asText()
+                    )..LocalDate.parse(periode.path("tom").asText())
+                }
+            val personutbetalinger =
+                element.path("arbeidsgiverutbetalingsperioder").map { periode ->
+                    LocalDate.parse(
+                        periode.path("fom").asText()
+                    )..LocalDate.parse(periode.path("tom").asText())
+                }
             Infotrygdutbetalinger(
                 tidspunkt = tidligsteTidspunkt,
                 betalteDager = (arbeidsgiverutbetalinger + personutbetalinger)
@@ -64,7 +69,8 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
                         }
                         .map { dag ->
                             val årsaker = dag.path("begrunnelser").map { it.asText() }
-                            val maksdatobegrunnelse = Maksdatobegrunnelse.entries.first { it.name in årsaker }
+                            val maksdatobegrunnelse =
+                                Maksdatobegrunnelse.entries.first { it.name in årsaker }
                             val periode = dag.somPeriode()
                             maksdatobegrunnelse to periode
                         }
@@ -86,71 +92,75 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
             arbeidsgiver.path("organisasjonsnummer").asText() to utbetalinger
         }
 
-        val maksdatoresultater = utbetalingerPerArbeidsgiver.flatMap { (arbeidsgiver, utbetalinger) ->
-            utbetalinger.map { utbetaling ->
-                // kanskje er det dager utbetalt i Infotrygd?
-                // eller på andre arbeidsgivere?
-                // Vi må danne oss et totalbilde av alt som er forbrukt før utbetalingen ble beregnet
-                val sisteInfotrygdelementFørBeregning = infotrygdbetalteDager
-                    .firstOrNull { it.tidspunkt < utbetaling.beregningstidspunkt }
-                    ?.betalteDager
-                    ?.flatMap { it.datoer() }
-                    ?.toSet()
-                    ?: emptySet()
+        val maksdatoresultater =
+            utbetalingerPerArbeidsgiver.flatMap { (arbeidsgiver, utbetalinger) ->
+                utbetalinger.map { utbetaling ->
+                    // kanskje er det dager utbetalt i Infotrygd?
+                    // eller på andre arbeidsgivere?
+                    // Vi må danne oss et totalbilde av alt som er forbrukt før utbetalingen ble beregnet
+                    val sisteInfotrygdelementFørBeregning = infotrygdbetalteDager
+                        .firstOrNull { it.tidspunkt < utbetaling.beregningstidspunkt }
+                        ?.betalteDager
+                        ?.flatMap { it.datoer() }
+                        ?.toSet()
+                        ?: emptySet()
 
-                val forbrukteDagerAndreArbeidsgivere = utbetalingerPerArbeidsgiver
-                    .flatMap { (_, andreUtbetalinger) ->
-                        andreUtbetalinger
-                            .filterNot { it.korrelasjonsId == utbetaling.korrelasjonsId }
-                            .groupBy { it.korrelasjonsId }
-                            .flatMap { (_, utbetalinger) ->
-                                utbetalinger
-                                    .filter { it.beregningstidspunkt < utbetaling.beregningstidspunkt }
-                                    .sortedByDescending { it.beregningstidspunkt }
-                                    .takeLast(1)
-                                    .flatMap { it.forbrukteDager.flatMap { it.datoer() } }
-                            }
+                    val forbrukteDagerAndreArbeidsgivere = utbetalingerPerArbeidsgiver
+                        .flatMap { (_, andreUtbetalinger) ->
+                            andreUtbetalinger
+                                .filterNot { it.korrelasjonsId == utbetaling.korrelasjonsId }
+                                .groupBy { it.korrelasjonsId }
+                                .flatMap { (_, utbetalinger) ->
+                                    utbetalinger
+                                        .filter { it.beregningstidspunkt < utbetaling.beregningstidspunkt }
+                                        .sortedByDescending { it.beregningstidspunkt }
+                                        .takeLast(1)
+                                        .flatMap { it.forbrukteDager.flatMap { it.datoer() } }
+                                }
+                        }
+                        .toSet()
+
+                    val forbrukteDager = utbetaling.forbrukteDager.flatMap { it.datoer() }.toSet()
+                    val totalbildeForbrukteDager =
+                        sisteInfotrygdelementFørBeregning + forbrukteDagerAndreArbeidsgivere + forbrukteDager
+
+                    val faktiskForbrukte = totalbildeForbrukteDager
+                        .filter { it <= utbetaling.utbetalingTom }
+                        .sortedDescending()
+                        .take(utbetaling.antallForbrukteDager)
+
+                    val begrunnelerForUtbetalingen = utbetaling.avslåtteDager.keys
+                    val bestemmelse = when {
+                        // bruker først evt. avslagsbegrunnelser som utgangspunkt for å bestemme rettighetsbestemmelsen
+                        Maksdatobegrunnelse.Over70 in begrunnelerForUtbetalingen -> Maksdatobestemmelse.SYTTI_ÅR
+                        Maksdatobegrunnelse.SykepengedagerOppbruktOver67 in begrunnelerForUtbetalingen -> Maksdatobestemmelse.BEGRENSET_RETT
+                        Maksdatobegrunnelse.SykepengedagerOppbrukt in begrunnelerForUtbetalingen -> Maksdatobestemmelse.ORDINÆR_RETT
+                        // hvis maksdato er syttiårsdagen, da er det avgjort!
+                        utbetaling.maksdato == maksdatoSyttiåring -> Maksdatobestemmelse.SYTTI_ÅR
+                        // hvis bruker ikke har gått til maks, men totalt antall sykepengedager er under 248, da må det være snakk om begrenset
+                        (utbetaling.antallGjenståendeDager + utbetaling.antallForbrukteDager) < 248 -> Maksdatobestemmelse.BEGRENSET_RETT
+                        else -> Maksdatobestemmelse.ORDINÆR_RETT
                     }
-                    .toSet()
 
-                val forbrukteDager = utbetaling.forbrukteDager.flatMap { it.datoer() }.toSet()
-                val totalbildeForbrukteDager = sisteInfotrygdelementFørBeregning + forbrukteDagerAndreArbeidsgivere + forbrukteDager
-
-                val faktiskForbrukte = totalbildeForbrukteDager
-                    .filter { it <= utbetaling.utbetalingTom }
-                    .sortedDescending()
-                    .take(utbetaling.antallForbrukteDager)
-
-                val begrunnelerForUtbetalingen = utbetaling.avslåtteDager.keys
-                val bestemmelse = when {
-                    // bruker først evt. avslagsbegrunnelser som utgangspunkt for å bestemme rettighetsbestemmelsen
-                    Maksdatobegrunnelse.Over70 in begrunnelerForUtbetalingen -> Maksdatobestemmelse.SYTTI_ÅR
-                    Maksdatobegrunnelse.SykepengedagerOppbruktOver67 in begrunnelerForUtbetalingen -> Maksdatobestemmelse.BEGRENSET_RETT
-                    Maksdatobegrunnelse.SykepengedagerOppbrukt in begrunnelerForUtbetalingen -> Maksdatobestemmelse.ORDINÆR_RETT
-                    // hvis maksdato er syttiårsdagen, da er det avgjort!
-                    utbetaling.maksdato == maksdatoSyttiåring -> Maksdatobestemmelse.SYTTI_ÅR
-                    // hvis bruker ikke har gått til maks, men totalt antall sykepengedager er under 248, da må det være snakk om begrenset
-                    (utbetaling.antallGjenståendeDager + utbetaling.antallForbrukteDager) < 248 -> Maksdatobestemmelse.BEGRENSET_RETT
-                    else -> Maksdatobestemmelse.ORDINÆR_RETT
+                    utbetaling.utbetalingId to Maksdatoresultat(
+                        vurdertTilOgMed = utbetaling.utbetalingTom,
+                        bestemmelse = bestemmelse,
+                        startdatoTreårsvindu = forbrukteDager.firstOrNull()?.minusYears(3)
+                            ?: LocalDate.MIN,
+                        startdatoSykepengerettighet = forbrukteDager.firstOrNull(),
+                        antallForbrukteDager = utbetaling.antallForbrukteDager,
+                        forbrukteDager = faktiskForbrukte.merge()
+                            .map { Datoperiode(it.start, it.endInclusive) },
+                        oppholdsdager = emptyList(),
+                        avslåtteDager = utbetaling.avslåtteDager
+                            .flatMap { (_, dager) -> dager.flatMap { it.datoer() } }
+                            .merge()
+                            .map { Datoperiode(it.start, it.endInclusive) },
+                        maksdato = utbetaling.maksdato,
+                        gjenståendeDager = utbetaling.antallGjenståendeDager
+                    )
                 }
-
-                utbetaling.utbetalingId to Maksdatoresultat(
-                    vurdertTilOgMed = utbetaling.utbetalingTom,
-                    bestemmelse = bestemmelse,
-                    startdatoTreårsvindu = forbrukteDager.firstOrNull()?.minusYears(3) ?: LocalDate.MIN,
-                    startdatoSykepengerettighet = forbrukteDager.firstOrNull(),
-                    antallForbrukteDager = utbetaling.antallForbrukteDager,
-                    forbrukteDager = faktiskForbrukte.merge().map { Datoperiode(it.start, it.endInclusive) },
-                    oppholdsdager = emptyList(),
-                    avslåtteDager = utbetaling.avslåtteDager
-                        .flatMap { (_, dager) -> dager.flatMap { it.datoer() } }
-                        .merge()
-                        .map { Datoperiode(it.start, it.endInclusive) },
-                    maksdato = utbetaling.maksdato,
-                    gjenståendeDager = utbetaling.antallGjenståendeDager
-                )
-            }
-        }.toMap()
+            }.toMap()
 
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
@@ -163,7 +173,11 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
         }
     }
 
-    private fun migrerVedtaksperiode(aktørId: String, maksdatoresultater: Map<UUID, Maksdatoresultat>, vedtaksperiode: JsonNode) {
+    private fun migrerVedtaksperiode(
+        aktørId: String,
+        maksdatoresultater: Map<UUID, Maksdatoresultat>,
+        vedtaksperiode: JsonNode
+    ) {
         val vedtaksperiodeId = vedtaksperiode.path("id").asText()
         vedtaksperiode.path("behandlinger").forEach { behandling ->
             behandling.path("endringer").forEach { endring ->
@@ -172,17 +186,29 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
         }
     }
 
-    private fun migrerEndring(aktørId: String, vedtaksperiodeId: String, maksdatoresultater: Map<UUID, Maksdatoresultat>, endring: ObjectNode) {
+    private fun migrerEndring(
+        aktørId: String,
+        vedtaksperiodeId: String,
+        maksdatoresultater: Map<UUID, Maksdatoresultat>,
+        endring: ObjectNode
+    ) {
         if (!endring.hasNonNull("utbetalingId")) return
         if (endring.path("maksdatoresultat").path("bestemmelse").asText() != "IKKE_VURDERT") return
 
         val utbetalingId = UUID.fromString(endring.path("utbetalingId").asText())
-        val resultat = maksdatoresultater[utbetalingId] ?:
-            return sikkerlogg.info("[V303] Fant ikke maksdatoresultat for utbetaling. KorrelasjonsIDen har muligens blitt annullert", kv("aktørId", aktørId), kv("vedtaksperiodeId", vedtaksperiodeId))
+        val resultat = maksdatoresultater[utbetalingId] ?: return sikkerlogg.info(
+            "[V303] Fant ikke maksdatoresultat for utbetaling. KorrelasjonsIDen har muligens blitt annullert",
+            kv("aktørId", aktørId),
+            kv("vedtaksperiodeId", vedtaksperiodeId)
+        )
 
         /* vurdering av kvaliteten */
         if (resultat.antallForbrukteDager > 0 && resultat.forbrukteDager.isEmpty())
-            return sikkerlogg.info("[V303] Fant ingen forbrukte dager, men det skulle vært ${resultat.antallForbrukteDager}", kv("aktørId", aktørId), kv("vedtaksperiodeId", vedtaksperiodeId))
+            return sikkerlogg.info(
+                "[V303] Fant ingen forbrukte dager, men det skulle vært ${resultat.antallForbrukteDager}",
+                kv("aktørId", aktørId),
+                kv("vedtaksperiodeId", vedtaksperiodeId)
+            )
 
         val vurdertTilOgMed = endring.path("tom").asText()
 
@@ -279,7 +305,9 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
             if (this.hasNonNull("dato"))
                 LocalDate.parse(this.path("dato").asText()).let { it..it }
             else
-                LocalDate.parse(this.path("fom").asText())..LocalDate.parse(this.path("tom").asText())
+                LocalDate.parse(this.path("fom").asText())..LocalDate.parse(
+                    this.path("tom").asText()
+                )
 
         private fun ClosedRange<LocalDate>.datoer() =
             start.datesUntil(endInclusive.plusDays(1)).toList().toSet()
@@ -294,17 +322,20 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
                     // dagen dekkes av tidligere intervall
                     last.endInclusive == dagen -> resultat
                     // dagen utvider forrige intervall
-                    last.endInclusive.plusDays(1) == dagen -> resultat.dropLast(1).plusElement(last.start..dagen)
+                    last.endInclusive.plusDays(1) == dagen -> resultat.dropLast(1)
+                        .plusElement(last.start..dagen)
                     // dagen er starten på et nytt intervall
                     else -> resultat.plusElement(dagen..dagen)
                 }
             }
         }
 
-        private fun LocalDate.forrigeVirkedagFør() = minusDays(when (dayOfWeek) {
-            SUNDAY -> 2
-            MONDAY -> 3
-            else -> 1
-        })
+        private fun LocalDate.forrigeVirkedagFør() = minusDays(
+            when (dayOfWeek) {
+                SUNDAY -> 2
+                MONDAY -> 3
+                else -> 1
+            }
+        )
     }
 }

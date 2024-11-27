@@ -1,20 +1,21 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import java.util.UUID
+import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf
 
-internal class SimuleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class SimuleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) :
+    BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
@@ -23,7 +24,8 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
     private val fagområde = packet["Simulering.fagområde"].asText()
     private val status = valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
     private val simuleringOK = status == OK
-    private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText() + " (status=$status)"
+    private val melding =
+        packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText() + " (status=$status)"
     private val simuleringResultat =
         packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
             ?.let {
@@ -49,12 +51,16 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
                                             beløp = detalj.path("belop").asInt(),
                                             klassekode = SimuleringResultatDto.Klassekode(
                                                 kode = detalj.path("klassekode").asText(),
-                                                beskrivelse = detalj.path("klassekodeBeskrivelse").asText()
+                                                beskrivelse = detalj.path("klassekodeBeskrivelse")
+                                                    .asText()
                                             ),
                                             uføregrad = detalj.path("uforegrad").asInt(),
-                                            utbetalingstype = detalj.path("utbetalingsType").asText(),
-                                            refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
-                                            tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
+                                            utbetalingstype = detalj.path("utbetalingsType")
+                                                .asText(),
+                                            refunderesOrgnummer = detalj.path("refunderesOrgNr")
+                                                .asText(),
+                                            tilbakeføring = detalj.path("tilbakeforing")
+                                                .asBoolean(),
                                             sats = SimuleringResultatDto.Sats(
                                                 sats = detalj.path("sats").asDouble(),
                                                 antall = detalj.path("antallSats").asInt(),

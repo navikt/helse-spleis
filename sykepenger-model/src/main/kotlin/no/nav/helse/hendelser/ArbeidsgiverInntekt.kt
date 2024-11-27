@@ -34,13 +34,18 @@ class ArbeidsgiverInntekt(
         Inntektsmelding(
             dato = skjæringstidspunkt,
             hendelseId = meldingsreferanseId,
-            beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }),
+            beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map {
+                it.somInntekt(
+                    meldingsreferanseId
+                )
+            }),
             kilde = Inntektsmelding.Kilde.AOrdningen
         )
 
     internal fun somEksterneSkatteinntekter() = inntekter.somEksterneSkatteinntekter()
 
-    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).årlig
+    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) =
+        Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).årlig
 
     internal companion object {
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
@@ -51,9 +56,15 @@ class ArbeidsgiverInntekt(
             meldingsreferanseId: UUID,
             subsumsjonslogg: Subsumsjonslogg
         ): Inntektsgrunnlag {
-            val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
+            val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) {
+                it.tilSykepengegrunnlag(
+                    skjæringstidspunkt,
+                    meldingsreferanseId
+                )
+            }
             // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
-            val inntekterMedOpptjening = rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
+            val inntekterMedOpptjening =
+                rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
             return person.avklarSykepengegrunnlag(
                 aktivitetslogg,
                 skjæringstidspunkt,
@@ -89,11 +100,15 @@ class ArbeidsgiverInntekt(
         )
 
         companion object {
-            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) =
+                this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN }
 
             internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
                 return map {
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.månedlig)
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(
+                        it.yearMonth,
+                        it.inntekt.månedlig
+                    )
                 }
             }
 

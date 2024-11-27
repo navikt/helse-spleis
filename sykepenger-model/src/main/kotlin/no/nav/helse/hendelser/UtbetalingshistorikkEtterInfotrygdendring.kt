@@ -21,7 +21,10 @@ class UtbetalingshistorikkEtterInfotrygdendring(
         automatiskBehandling = true
     )
 
-    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, historikk: Infotrygdhistorikk): Boolean {
+    internal fun oppdaterHistorikk(
+        aktivitetslogg: IAktivitetslogg,
+        historikk: Infotrygdhistorikk
+    ): Boolean {
         aktivitetslogg.info("Oppdaterer Infotrygdhistorikk etter infotrygendring")
         if (!historikk.oppdaterHistorikk(element)) return false.also { aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer etter infotrygdendring") }
         aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret etter infotrygdendring")

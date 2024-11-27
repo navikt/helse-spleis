@@ -137,8 +137,9 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
                     arbeidsstedOrgnummer = "4",
                     opplysningspliktigOrgnummer = "5",
                     harJobbet = true
-                    )
-            ))
+                )
+            )
+        )
 
         assertNoErrors(søknad)
     }
@@ -180,15 +181,26 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     fun `parser søknad med permitteringer`() {
         assertNoErrors(validSøknad().copy(permitteringer = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(permitteringer = null).toJson())
-        assertNoErrors(validSøknad().copy(permitteringer = listOf(PeriodeDTO(1.januar, 31.januar))).toJson())
-        assertNoErrors(validSøknad().copy(permitteringer = listOf(PeriodeDTO(1.januar, null))).toJson())
+        assertNoErrors(
+            validSøknad().copy(permitteringer = listOf(PeriodeDTO(1.januar, 31.januar))).toJson()
+        )
+        assertNoErrors(
+            validSøknad().copy(permitteringer = listOf(PeriodeDTO(1.januar, null))).toJson()
+        )
     }
 
     @Test
     fun `parser søknad med egenmeldingsdager`() {
         assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = null).toJson())
-        assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = listOf(1.januar, 2.januar)).toJson())
+        assertNoErrors(
+            validSøknad().copy(
+                egenmeldingsdagerFraSykmelding = listOf(
+                    1.januar,
+                    2.januar
+                )
+            ).toJson()
+        )
         assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = listOf()).toJson())
         assertIgnored(søknadMedRareEgenmeldinger)
     }
@@ -197,10 +209,31 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     fun `parser søknad med merknader (fra sykmelding)`() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = null).toJson())
-        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
-        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
+        assertNoErrors(
+            validSøknad().copy(
+                merknaderFraSykmelding = listOf(
+                    MerknadDTO(
+                        "UGYLDIG_TILBAKEDATERING",
+                        null
+                    )
+                )
+            ).toJson()
+        )
+        assertNoErrors(
+            validSøknad().copy(
+                merknaderFraSykmelding = listOf(
+                    MerknadDTO(
+                        "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER",
+                        "En beskrivelse"
+                    )
+                )
+            ).toJson()
+        )
     }
-    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
+
+    private fun SykepengesoknadDTO.toJson(): String =
+        asObjectNode().medFelterFraSpedisjon().toString()
+
     private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
     private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato")
 }
@@ -209,11 +242,12 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
-    put("@id", UUID.randomUUID().toString())
-    put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
-    put("@opprettet", LocalDateTime.now().toString())
-}
+private fun SykepengesoknadDTO.asObjectNode(): ObjectNode =
+    objectMapper.valueToTree<ObjectNode>(this).apply {
+        put("@id", UUID.randomUUID().toString())
+        put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
+        put("@opprettet", LocalDateTime.now().toString())
+    }
 
 @Language("JSON")
 private val søknadMedRareEgenmeldinger = """

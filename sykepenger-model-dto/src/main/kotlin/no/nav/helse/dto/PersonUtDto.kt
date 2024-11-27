@@ -33,30 +33,84 @@ sealed class SykdomstidslinjeDagDto {
     abstract val dato: LocalDate
     abstract val kilde: HendelseskildeDto
 
-    data class UkjentDagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class ArbeidsdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class ArbeidsgiverdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
-    data class FeriedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class ArbeidIkkeGjenopptattDagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class FriskHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class ArbeidsgiverHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
-    data class SykedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
-    data class SykHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
-    data class SykedagNavDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
-    data class ForeldetSykedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
-    data class PermisjonsdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
+    data class UkjentDagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) :
+        SykdomstidslinjeDagDto()
+
+    data class ArbeidsdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) :
+        SykdomstidslinjeDagDto()
+
+    data class ArbeidsgiverdagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class FeriedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) :
+        SykdomstidslinjeDagDto()
+
+    data class ArbeidIkkeGjenopptattDagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class FriskHelgedagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class ArbeidsgiverHelgedagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class SykedagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class SykHelgedagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class SykedagNavDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class ForeldetSykedagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto
+    ) : SykdomstidslinjeDagDto()
+
+    data class PermisjonsdagDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto
+    ) : SykdomstidslinjeDagDto()
+
     data class ProblemDagDto(
         override val dato: LocalDate,
         override val kilde: HendelseskildeDto,
         val other: HendelseskildeDto,
         val melding: String
     ) : SykdomstidslinjeDagDto()
-    data class AndreYtelserDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val ytelse: YtelseDto) : SykdomstidslinjeDagDto() {
+
+    data class AndreYtelserDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val ytelse: YtelseDto
+    ) : SykdomstidslinjeDagDto() {
         enum class YtelseDto {
             Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger
         }
     }
 }
+
 data class HendelseskildeDto(
     val type: String,
     val meldingsreferanseId: UUID,
@@ -145,6 +199,7 @@ data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
     val orgnummer: String,
     val inntektsopplysninger: List<SkatteopplysningDto>
 )
+
 data class SkatteopplysningDto(
     val hendelseId: UUID,
     val beløp: InntektbeløpDto.MånedligDouble,
@@ -154,6 +209,7 @@ data class SkatteopplysningDto(
     val beskrivelse: String,
     val tidsstempel: LocalDateTime
 )
+
 sealed class InntekttypeDto {
     data object LØNNSINNTEKT : InntekttypeDto()
     data object NÆRINGSINNTEKT : InntekttypeDto()
@@ -177,6 +233,7 @@ data class FeriepengeberegnerDto(
     val utbetalteDager: List<UtbetaltDagDto>,
     val feriepengedager: List<UtbetaltDagDto>
 )
+
 sealed class UtbetaltDagDto {
     abstract val orgnummer: String
     abstract val dato: LocalDate
@@ -187,16 +244,19 @@ sealed class UtbetaltDagDto {
         override val dato: LocalDate,
         override val beløp: Int
     ) : UtbetaltDagDto()
+
     data class InfotrygdPerson(
         override val orgnummer: String,
         override val dato: LocalDate,
         override val beløp: Int
     ) : UtbetaltDagDto()
+
     data class SpleisArbeidsgiver(
         override val orgnummer: String,
         override val dato: LocalDate,
         override val beløp: Int
     ) : UtbetaltDagDto()
+
     data class SpleisPerson(
         override val orgnummer: String,
         override val dato: LocalDate,

@@ -42,17 +42,19 @@ class Påminnelse(
         return nå >= beregnetMakstid(tilstandsendringstidspunkt)
     }
 
-    internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
+    internal fun erRelevant(vedtaksperiodeId: UUID) =
+        vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
     internal fun skalReberegnes() = ønskerReberegning
 
-    internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
-        if (!it) {
-            aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+    internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) =
+        (tilstandType == tilstand).also {
+            if (!it) {
+                aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+            }
         }
-    }
 
-    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >=  tilstandsendringstidspunkt
+    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >= tilstandsendringstidspunkt
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(

@@ -26,7 +26,12 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             val registrert = LocalDateTime.now()
             val innsendt = registrert.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                søknadId = søknadId,
+                sendtTilNAVEllerArbeidsgiver = innsendt,
+                registrert = registrert
+            )
             val behandlingOpprettetEvent = observatør.behandlingOpprettetEventer.last()
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 val behandlingId = behandlinger.single().id
@@ -68,7 +73,10 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
     fun omgjøring() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            håndterInntektsmelding(listOf(25.desember(2017) til 10.januar), beregnetInntekt = INNTEKT)
+            håndterInntektsmelding(
+                listOf(25.desember(2017) til 10.januar),
+                beregnetInntekt = INNTEKT
+            )
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()
@@ -86,10 +94,22 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(4, behandlingOpprettetEventer.size)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[0].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[1].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering, behandlingOpprettetEventer[2].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering, behandlingOpprettetEventer[3].type)
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
+                behandlingOpprettetEventer[0].type
+            )
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
+                behandlingOpprettetEventer[1].type
+            )
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Revurdering,
+                behandlingOpprettetEventer[2].type
+            )
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Revurdering,
+                behandlingOpprettetEventer[3].type
+            )
 
             val vedtaksperiodeForkastetEventer = observatør.behandlingForkastetEventer
             assertEquals(2, vedtaksperiodeForkastetEventer.size)
@@ -103,7 +123,10 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
             val behandlingOpprettet = observatør.behandlingOpprettetEventer.single()
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet.type)
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
+                behandlingOpprettet.type
+            )
         }
     }
 
@@ -111,11 +134,27 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
     fun `anmoder en periode om forkasting`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(
+                        a1,
+                        1.januar,
+                        10.januar,
+                        100.prosent,
+                        500.daglig
+                    )
+                )
+            )
             val behandlingOpprettet = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettet.size)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet[0].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring, behandlingOpprettet[1].type)
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
+                behandlingOpprettet[0].type
+            )
+            assertEquals(
+                PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring,
+                behandlingOpprettet[1].type
+            )
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             assertEquals(1.vedtaksperiode, behandlingForkastetEvent.vedtaksperiodeId)
         }

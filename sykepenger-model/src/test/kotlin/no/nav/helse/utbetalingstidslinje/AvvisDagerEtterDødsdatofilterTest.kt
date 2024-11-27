@@ -89,9 +89,18 @@ internal class AvvisDagerEtterDødsdatofilterTest {
         assertEquals(3, resultat.last().inspektør.avvistDagTeller)
     }
 
-    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode): List<Utbetalingstidslinje> {
+    private fun undersøke(
+        tidslinjer: List<Utbetalingstidslinje>,
+        dødsdato: LocalDate?,
+        periode: Periode
+    ): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(tidslinjer, periode, aktivitetslogg, EmptyLog)
+        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(
+            tidslinjer,
+            periode,
+            aktivitetslogg,
+            EmptyLog
+        )
         inspektør = resultat.first().inspektør
         return resultat
     }

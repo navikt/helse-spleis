@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
-import io.ktor.http.*
-import io.ktor.http.content.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.OutgoingContent
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
@@ -9,7 +9,7 @@ import io.ktor.server.plugins.callid.callId
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.ApplicationSendPipeline
-import io.ktor.util.*
+import io.ktor.util.toMap
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
@@ -27,7 +27,10 @@ internal fun Application.requestResponseTracing(logger: Logger, registry: MeterR
                 .map { (key, values) ->
                     keyValue("req_header_$key", values.joinToString(separator = ";"))
                 }.toTypedArray()
-            logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}", *headers)
+            logger.info(
+                "incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}",
+                *headers
+            )
 
             val timer = Timer.start(registry)
             try {

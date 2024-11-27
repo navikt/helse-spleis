@@ -19,7 +19,10 @@ internal class VarseloppsamlerTest {
     fun `Samler opp varsler fra aktivitetslogg_ny_aktivitet`() {
         val varsel1 = UUID.randomUUID()
         val varsel2 = UUID.randomUUID()
-        val varsler = listOf(aktivietsloggNyAktivitet(varsel1, RV_IM_4), aktivietsloggNyAktivitet(varsel2, RV_IM_3)).varsler
+        val varsler = listOf(
+            aktivietsloggNyAktivitet(varsel1, RV_IM_4),
+            aktivietsloggNyAktivitet(varsel2, RV_IM_3)
+        ).varsler
 
         val forventetVarsel1 = Varsel(
             id = varsel1,
@@ -45,8 +48,14 @@ internal class VarseloppsamlerTest {
         )
 
         assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
-        assertEquals(forventetVarsel1, varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_4))
-        assertEquals(forventetVarsel2, varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_3))
+        assertEquals(
+            forventetVarsel1,
+            varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_4)
+        )
+        assertEquals(
+            forventetVarsel2,
+            varsler.finn(UUID.fromString("fa51fb29-c9ca-4def-95fd-d93b0d8e5e0d"), RV_IM_3)
+        )
     }
 
     internal companion object {
@@ -54,11 +63,13 @@ internal class VarseloppsamlerTest {
         internal data class Varsel(
             private val id: UUID,
             private val varselkode: Varselkode,
-            private val kontekster: Map<String, String>) {
+            private val kontekster: Map<String, String>
+        ) {
             internal companion object {
                 internal val List<Varsel>.unike get() = distinctBy { it.id }
                 internal fun List<Varsel>.finn(vedtaksperiodeId: UUID, varselkode: Varselkode) =
                     firstOrNull { it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } && it.varselkode == varselkode }
+
                 internal fun List<Varsel>.finn(vedtaksperiodeId: UUID) =
                     filter { it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } }
             }
@@ -66,17 +77,20 @@ internal class VarseloppsamlerTest {
 
         internal val List<JsonNode>.varsler get() = flatMap { it.varsler }.unike
 
-        private val JsonNode.varsler get() = path("aktiviteter")
-            .filter { aktivitet -> aktivitet.path("nivå").asText() == "VARSEL" }
-            .map { varsel ->
-                val id = UUID.fromString(varsel.path("id").asText())
-                val varselkode = Varselkode.valueOf(varsel.path("varselkode").asText())
-                val kontekster = varsel.path("kontekster")
-                    .map { it.path("kontekstmap") as ObjectNode }
-                    .flatMap { kontekstmap -> kontekstmap.properties().map { it.key to it.value.asText() } }
-                    .toMap()
-                Varsel(id, varselkode, kontekster)
-            }
+        private val JsonNode.varsler
+            get() = path("aktiviteter")
+                .filter { aktivitet -> aktivitet.path("nivå").asText() == "VARSEL" }
+                .map { varsel ->
+                    val id = UUID.fromString(varsel.path("id").asText())
+                    val varselkode = Varselkode.valueOf(varsel.path("varselkode").asText())
+                    val kontekster = varsel.path("kontekster")
+                        .map { it.path("kontekstmap") as ObjectNode }
+                        .flatMap { kontekstmap ->
+                            kontekstmap.properties().map { it.key to it.value.asText() }
+                        }
+                        .toMap()
+                    Varsel(id, varselkode, kontekster)
+                }
 
         @Language("JSON")
         private val aktivitetsloggNyAktivitetTemplate = """

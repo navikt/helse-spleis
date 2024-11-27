@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class ForkasteAuuTest: AbstractDslTest() {
+internal class ForkasteAuuTest : AbstractDslTest() {
 
     @Test
     fun `En auu vegg i vegg til neste periode forkastes`() {
@@ -33,8 +33,16 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             nyPeriode(17.januar til 31.januar)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                TIL_INFOTRYGD
+            )
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD
+            )
         }
     }
 
@@ -45,8 +53,16 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             nyPeriode(18.januar til 31.januar)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                TIL_INFOTRYGD
+            )
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD
+            )
         }
     }
 
@@ -76,9 +92,25 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             nyPeriode(2.januar til 16.januar)
             nyPeriode(17.januar til 31.januar)
 
-            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)))
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                utbetalinger = listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)
+                )
+            )
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVSLUTTET_UTEN_UTBETALING,
+                TIL_INFOTRYGD
+            )
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD
+            )
         }
     }
 }

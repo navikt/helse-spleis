@@ -6,8 +6,14 @@ import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 
-internal class TestPersonAssertions(private val personInspektør: PersonInspektør, private val jurist: SubsumsjonsListLog) {
-    internal fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
+internal class TestPersonAssertions(
+    private val personInspektør: PersonInspektør,
+    private val jurist: SubsumsjonsListLog
+) {
+    internal fun assertArbeidsgivereISykepengegrunnlag(
+        skjæringstidspunkt: LocalDate,
+        vararg arbeidsgivere: String
+    ) {
         assertEquals(
             arbeidsgivere.toSet(),
             personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.keys

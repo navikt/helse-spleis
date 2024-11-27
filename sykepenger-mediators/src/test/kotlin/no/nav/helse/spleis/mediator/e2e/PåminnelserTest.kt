@@ -25,7 +25,13 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun `påminnelse når vedtaksperiode ikke finnes`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         val id = sendNyPåminnelse()
         val melding = testRapid.inspektør.meldinger("vedtaksperiode_ikke_funnet").single()
@@ -38,12 +44,25 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun `påminnelse for feil tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         sendNyPåminnelse(0)
-        val vedtaksperiodeIkkePåminnet = testRapid.inspektør.meldinger("vedtaksperiode_ikke_påminnet").single()
-        assertEquals("vedtaksperiode_ikke_påminnet", vedtaksperiodeIkkePåminnet.path("@event_name").asText())
-        assertEquals("AVVENTER_INNTEKTSMELDING", vedtaksperiodeIkkePåminnet.path("tilstand").asText())
+        val vedtaksperiodeIkkePåminnet =
+            testRapid.inspektør.meldinger("vedtaksperiode_ikke_påminnet").single()
+        assertEquals(
+            "vedtaksperiode_ikke_påminnet",
+            vedtaksperiodeIkkePåminnet.path("@event_name").asText()
+        )
+        assertEquals(
+            "AVVENTER_INNTEKTSMELDING",
+            vedtaksperiodeIkkePåminnet.path("tilstand").asText()
+        )
         assertVedtaksperiodeIkkePåminnet(vedtaksperiodeIkkePåminnet)
     }
 
@@ -51,10 +70,17 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun `påminnelse for riktig tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         sendNyPåminnelse(0, tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING)
-        val vedtaksperiodePåminnet = testRapid.inspektør.meldinger("vedtaksperiode_påminnet").single()
+        val vedtaksperiodePåminnet =
+            testRapid.inspektør.meldinger("vedtaksperiode_påminnet").single()
         assertEquals("vedtaksperiode_påminnet", vedtaksperiodePåminnet.path("@event_name").asText())
         assertEquals("AVVENTER_INNTEKTSMELDING", vedtaksperiodePåminnet.path("tilstand").asText())
         assertVedtaksperiodePåminnet(vedtaksperiodePåminnet)
@@ -64,16 +90,30 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun utbetalingpåminnelse() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendNyUtbetalingpåminnelse(0, Utbetalingstatus.OVERFØRT)
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT")
-        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
+        assertEquals(
+            2,
+            (0 until testRapid.inspektør.antall()).filter {
+                "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText)
+            }.size
+        )
     }
 
     private fun assertVedtaksperiodePåminnet(melding: JsonNode) {

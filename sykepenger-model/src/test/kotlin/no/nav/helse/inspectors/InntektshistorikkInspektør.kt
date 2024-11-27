@@ -7,7 +7,8 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class InntektshistorikkInspektør(inntektshistorikk: InntektshistorikkView) {
 
-    private val inntektsopplysninger = inntektshistorikk.inntekter.map { Opplysning(it.dato, it.beløp) }
+    private val inntektsopplysninger =
+        inntektshistorikk.inntekter.map { Opplysning(it.dato, it.beløp) }
     internal val size get() = inntektsopplysninger.size
     internal val inntektsdatoer get() = inntektsopplysninger.map { it.dato }
 
@@ -16,5 +17,6 @@ internal class InntektshistorikkInspektør(inntektshistorikk: InntektshistorikkV
         val sykepengegrunnlag: Inntekt,
     )
 
-    internal fun omregnetÅrsinntekt(dato: LocalDate) = inntektsopplysninger.firstOrNull { it.dato == dato }
+    internal fun omregnetÅrsinntekt(dato: LocalDate) =
+        inntektsopplysninger.firstOrNull { it.dato == dato }
 }

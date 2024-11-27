@@ -24,7 +24,8 @@ class AnnullerUtbetaling(
         automatiskBehandling = erAutomatisk()
     )
 
-    override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
+    override val vurdering: Utbetaling.Vurdering =
+        Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
 
     fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
 }

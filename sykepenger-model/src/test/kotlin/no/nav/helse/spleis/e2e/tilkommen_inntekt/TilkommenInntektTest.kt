@@ -42,12 +42,25 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        orgnummer = a2,
+                        råttBeløp = 4000
+                    )
+                )
+            )
             håndterYtelser(2.vedtaksperiode)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1231, 1431, subset = 1.februar til 28.februar)
 
             // Korrigerende søknad som angrer den tilkomne inntekten
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = emptyList())
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = emptyList()
+            )
             håndterYtelser(2.vedtaksperiode)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 28.februar)
         }
@@ -57,7 +70,17 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     fun `forlengelse uten tilkommet inntekt - etter periode med tilkommet inntekt`() {
         a1 {
             nyttVedtak(januar)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        orgnummer = a2,
+                        råttBeløp = 4000
+                    )
+                )
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -83,7 +106,14 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        orgnummer = a2,
+                        råttBeløp = 4000
+                    )
+                )
             )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -95,7 +125,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(1, tilkommendeInntekter.size)
                 assertEquals(a2, tilkommendeInntekter.single().orgnummer)
                 assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+                assertEquals(
+                    200.daglig,
+                    tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp
+                )
             }
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
@@ -117,7 +150,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(1, tilkommendeInntekter.size)
                 assertEquals(a2, tilkommendeInntekter.single().orgnummer)
                 assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(250.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+                assertEquals(
+                    250.daglig,
+                    tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp
+                )
             }
         }
     }
@@ -128,7 +164,14 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        orgnummer = a2,
+                        råttBeløp = 4000
+                    )
+                )
             )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -136,7 +179,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalt()
             håndterSøknad(
                 Sykdom(1.mars, 31.mars, 100.prosent),
-                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
                 )
             )
             håndterYtelser(3.vedtaksperiode)
@@ -147,9 +191,15 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(1, tilkommendeInntekter.size)
                 assertEquals(a2, tilkommendeInntekter.single().orgnummer)
                 assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+                assertEquals(
+                    200.daglig,
+                    tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp
+                )
                 assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.mars])
-                assertEquals(363.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
+                assertEquals(
+                    363.daglig,
+                    tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp
+                )
             }
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
@@ -169,9 +219,15 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(1, tilkommendeInntekter.size)
                 assertEquals(a2, tilkommendeInntekter.single().orgnummer)
                 assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
+                assertEquals(
+                    200.daglig,
+                    tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp
+                )
                 assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.mars])
-                assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
+                assertEquals(
+                    400.daglig,
+                    tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp
+                )
             }
         }
     }
@@ -202,7 +258,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
                         assertEquals(1, tilkommendeInntekter.size)
                         assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                        assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[5.januar].beløp)
+                        assertEquals(
+                            400.daglig,
+                            tilkommendeInntekter.single().beløpstidslinje[5.januar].beløp
+                        )
                     }
                 }
             )
@@ -234,7 +293,17 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a3, råttBeløp = 4000)))
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        orgnummer = a3,
+                        råttBeløp = 4000
+                    )
+                )
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -518,7 +587,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar,"a3", 100)))
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100))
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)
@@ -546,7 +618,12 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         listOf(a1).nyeVedtak(
             periode = januar,
             inntekt = 20000.månedlig,
-            sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(listOf(a1 to 20000.månedlig, a2 to 20000.månedlig), 1.januar),
+            sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to 20000.månedlig,
+                    a2 to 20000.månedlig
+                ), 1.januar
+            ),
             arbeidsforhold = listOf(
                 Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
                 Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
@@ -556,7 +633,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar,"a3", 100)))
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100))
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)
@@ -579,7 +659,12 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         }
     }
 
-    private fun tags(vedtaksperiode: UUID) = observatør.utkastTilVedtakEventer.last { it.vedtaksperiodeId == vedtaksperiode }.tags
-    private fun assertIkkeTilkommenInntektTag(vedtaksperiode: UUID) = assertFalse(tags(vedtaksperiode).contains("TilkommenInntekt"))
-    private fun assertTilkommenInntektTag(vedtaksperiode: UUID) = assertTrue(tags(vedtaksperiode).contains("TilkommenInntekt"))
+    private fun tags(vedtaksperiode: UUID) =
+        observatør.utkastTilVedtakEventer.last { it.vedtaksperiodeId == vedtaksperiode }.tags
+
+    private fun assertIkkeTilkommenInntektTag(vedtaksperiode: UUID) =
+        assertFalse(tags(vedtaksperiode).contains("TilkommenInntekt"))
+
+    private fun assertTilkommenInntektTag(vedtaksperiode: UUID) =
+        assertTrue(tags(vedtaksperiode).contains("TilkommenInntekt"))
 }

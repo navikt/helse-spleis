@@ -20,6 +20,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
                     visit(dag.dato, "FRIDAG", dag.økonomi)
                 else null
             }
+
             is Utbetalingsdag.NavDag -> visit(dag.dato, "NAVDAG", dag.økonomi)
             is Utbetalingsdag.NavHelgDag -> {
                 if (forrigeDag?.erAvvistDag() == true)
@@ -27,6 +28,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
                 else
                     visit(dag.dato, "NAVDAG", dag.økonomi)
             }
+
             is Utbetalingsdag.UkjentDag -> null
         }.also { forrigeDag = it }
     }
@@ -39,8 +41,11 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
     }
 
     companion object {
-        internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
-        internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> = map { it.subsumsjonsformat() }
-            .filter { it.isNotEmpty() }
+        internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> =
+            UtbetalingstidslinjeBuilder(this).dager()
+
+        internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> =
+            map { it.subsumsjonsformat() }
+                .filter { it.isNotEmpty() }
     }
 }

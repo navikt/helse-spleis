@@ -178,7 +178,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(3.januar til 26.januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
-            refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))),
+            refusjon = Refusjon(
+                INNTEKT,
+                null,
+                listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))
+            ),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -252,54 +256,83 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - avventer simulering revurdering`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING
+        )
     }
 
     @Test
     fun `forkaster ikke revurderinger - avventer godkjenning revurdering`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
     }
 
     @Test
     fun `forkaster ikke revurderinger - til utbetaling`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING
+        )
     }
 
     @Test
     fun `forkaster ikke revurderinger - revurdering feilet`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
@@ -308,6 +341,14 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            REVURDERING_FEILET
+        )
     }
 }

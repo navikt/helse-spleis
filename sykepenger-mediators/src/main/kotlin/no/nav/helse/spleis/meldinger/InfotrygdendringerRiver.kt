@@ -8,10 +8,10 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 
-internal class InfotrygdendringerRiver (
+internal class InfotrygdendringerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-    ) : HendelseRiver(rapidsConnection, messageMediator) {
+) : HendelseRiver(rapidsConnection, messageMediator) {
 
     override val eventName = "infotrygdendring"
     override val riverName = "Infotrygdendring"
@@ -22,10 +22,12 @@ internal class InfotrygdendringerRiver (
         message.require("endringsmeldingId", ::requireLong)
     }
 
-    override fun createMessage(packet: JsonMessage) = InfotrygdendringMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = InfotrygdendringMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 
     private fun requireLong(node: JsonNode) {
         require(node.asLong() > 0)

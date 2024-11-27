@@ -27,11 +27,21 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved en enkel førstegangsbehandling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 2.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             egenmeldingerFraSykmelding = listOf(1.januar)
         )
-        Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
-        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(
+            1,
+            testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size
+        )
+        val trengerOpplysningerEvent =
+            testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
             "@event_name",
@@ -44,45 +54,69 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "fødselsnummer"
         )
 
-        JSONAssert.assertEquals(forventetResultatTrengerInntekt, faktiskResultat, JSONCompareMode.STRICT)
+        JSONAssert.assertEquals(
+            forventetResultatTrengerInntekt,
+            faktiskResultat,
+            JSONCompareMode.STRICT
+        )
     }
 
     @Test
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved to arbeidsgivere og gap kun hos den ene`() {
-            val a1 = "ag1"
-            val a2 = "ag2"
-            nyeVedtakForJanuar(a1, a2)
-            forlengMedFebruar(a1)
+        val a1 = "ag1"
+        val a2 = "ag2"
+        nyeVedtakForJanuar(a1, a2)
+        forlengMedFebruar(a1)
 
-            sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), orgnummer = a2)
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
-                orgnummer = a2
-            )
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100),
+            orgnummer = a2
+        )
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sykmeldingsgrad = 100
+                )
+            ),
+            orgnummer = a2
+        )
 
-            val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
-            Assertions.assertEquals(5, meldinger.size)
-            val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+        val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(5, meldinger.size)
+        val trengerOpplysningerEvent =
+            testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-            val faktiskResultat = trengerOpplysningerEvent.json(
-                "@event_name",
-                "organisasjonsnummer",
-                "skjæringstidspunkt",
-                "førsteFraværsdager",
-                "sykmeldingsperioder",
-                "egenmeldingsperioder",
-                "forespurteOpplysninger",
-                "fødselsnummer"
-            )
+        val faktiskResultat = trengerOpplysningerEvent.json(
+            "@event_name",
+            "organisasjonsnummer",
+            "skjæringstidspunkt",
+            "førsteFraværsdager",
+            "sykmeldingsperioder",
+            "egenmeldingsperioder",
+            "forespurteOpplysninger",
+            "fødselsnummer"
+        )
 
-            JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
-        }
+        JSONAssert.assertEquals(
+            forventetResultatFastsattInntekt,
+            faktiskResultat,
+            JSONCompareMode.STRICT
+        )
+    }
 
     @Test
     fun `sender med inntekt fra forrige skjæringstidspunkt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 2.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             egenmeldingerFraSykmelding = listOf(1.januar)
         )
         sendInntektsmelding(
@@ -97,7 +131,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sykmeldingsgrad = 100
+                )
+            ),
             egenmeldingerFraSykmelding = emptyList()
         )
         sendInntektsmelding(
@@ -109,8 +149,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(1)
         sendUtbetaling()
-        Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
-        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(
+            2,
+            testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size
+        )
+        val trengerOpplysningerEvent =
+            testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
             "@event_name",
@@ -123,16 +167,29 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "fødselsnummer"
         )
 
-        JSONAssert.assertEquals(forventetResultatMedInntektFraForrigeSkjæringstidpunkt, faktiskResultat, JSONCompareMode.STRICT)
+        JSONAssert.assertEquals(
+            forventetResultatMedInntektFraForrigeSkjæringstidpunkt,
+            faktiskResultat,
+            JSONCompareMode.STRICT
+        )
     }
 
     @Test
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved førstegangsbehandling med kort gap til forrige`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -141,12 +198,19 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 10.februar,
+                    tom = 10.mars,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
 
         val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
         Assertions.assertEquals(2, meldinger.size)
-        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+        val trengerOpplysningerEvent =
+            testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
             "@event_name",
@@ -165,7 +229,15 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Sender med forrige refusjonsopplysninger i forespørsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
         sendInntektsmelding(
             arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
             1.januar,
@@ -178,8 +250,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         )
 
-        Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
-        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(
+            2,
+            testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size
+        )
+        val trengerOpplysningerEvent =
+            testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
             "@event_name",
@@ -192,19 +268,43 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "fødselsnummer"
         )
 
-        JSONAssert.assertEquals(forventetResultatOpphørAvRefusjon, faktiskResultat, JSONCompareMode.STRICT)
+        JSONAssert.assertEquals(
+            forventetResultatOpphørAvRefusjon,
+            faktiskResultat,
+            JSONCompareMode.STRICT
+        )
     }
 
     @Test
     fun `sender ut trenger_ikke_opplysninger_fra_arbeidsgiver ved out-of-order som fører til at vi ikke trenger opplysninger på siste periode`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.februar,
+                    tom = 28.februar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
+        )
 
-        Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_ikke_opplysninger_fra_arbeidsgiver").size)
-        val trengerIkkeOpplysningerEvent = testRapid.inspektør.siste("trenger_ikke_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(
+            1,
+            testRapid.inspektør.meldinger("trenger_ikke_opplysninger_fra_arbeidsgiver").size
+        )
+        val trengerIkkeOpplysningerEvent =
+            testRapid.inspektør.siste("trenger_ikke_opplysninger_fra_arbeidsgiver")
         assertDoesNotThrow { UUID.fromString(trengerIkkeOpplysningerEvent["vedtaksperiodeId"].asText()) }
         assertTrue(trengerIkkeOpplysningerEvent["organisasjonsnummer"].asText().isNotBlank())
     }
@@ -441,9 +541,18 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         }"""
 
     private fun forlengMedFebruar(a1: String) {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100),
+            orgnummer = a1
+        )
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.februar,
+                    tom = 28.februar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             orgnummer = a1
         )
         sendYtelser(0, orgnummer = a1)
@@ -453,15 +562,33 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun nyeVedtakForJanuar(a1: String, a2: String) {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100),
+            orgnummer = a1
+        )
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             orgnummer = a1
         )
 
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100),
+            orgnummer = a2
+        )
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             orgnummer = a2
         )
 
@@ -480,14 +607,24 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
             arbeidsforhold = listOf(
-                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                TestMessageFactory.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                TestMessageFactory.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                )
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
-                )
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
+            )
             )
         )
         sendYtelser(0, orgnummer = a1)

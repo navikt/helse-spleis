@@ -77,10 +77,30 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
                 }
             },
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a1,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a2,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a3,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    a4,
+                    LocalDate.EPOCH,
+                    null,
+                    Arbeidsforholdtype.ORDINÆRT
+                )
             )
         ).håndter(Person::håndter)
 
@@ -119,10 +139,21 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             1.vedtaksperiode, orgnummer = a1
         ).håndter(Person::håndter)
 
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
 
-        assertEquals(25000.månedlig, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.beløp)
-        assertEquals(4900.månedlig, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(
+            25000.månedlig,
+            vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(
+                a1
+            ).inspektør.inntektsopplysning.inspektør.beløp
+        )
+        assertEquals(
+            4900.månedlig,
+            vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(
+                a2
+            ).inspektør.inntektsopplysning.inspektør.beløp
+        )
     }
 
     @Test
@@ -146,8 +177,12 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        val grunnlagsdataInspektør = person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
-        assertEquals(552000.årlig, grunnlagsdataInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
+        val grunnlagsdataInspektør =
+            person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
+        assertEquals(
+            552000.årlig,
+            grunnlagsdataInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag
+        )
     }
 
     @Test
@@ -156,8 +191,16 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a2
+        )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -191,7 +234,10 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         assertEquals(1080, inspektør(a1).utbetaling(1).arbeidsgiverOppdrag[1].beløp)
 
         assertNotEquals(utbetalingslinje1, utbetalingslinje2)
-        assertNotEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
+        assertNotEquals(
+            utbetalingslinje1.linjerUtenOpphør().last().beløp,
+            utbetalingslinje2.linjerUtenOpphør().last().beløp
+        )
         assertEquals(utbetalingslinje1.fagsystemId, utbetalingslinje2.fagsystemId)
     }
 
@@ -227,7 +273,11 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         orgnummer: String = ORGNUMMER,
         meldingsreferanseId: UUID = UUID.randomUUID(),
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, skjæringstidspunkt)
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(
+            ORGNUMMER,
+            INNTEKT,
+            skjæringstidspunkt
+        )
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = meldingsreferanseId,
@@ -240,7 +290,11 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
             ),
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold ?: listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer,
+                    1.januar(2017),
+                    type = Arbeidsforholdtype.ORDINÆRT
+                )
             )
         )
     }

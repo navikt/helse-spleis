@@ -27,7 +27,7 @@ val juli: Periode = 1.juli til 31.juli
 val august: Periode = 1.august til 31.august
 val september: Periode = 1.september til 30.september
 val oktober: Periode = 1.oktober til 31.oktober
-val  november: Periode = 1.november til 30.november
+val november: Periode = 1.november til 30.november
 val desember: Periode = 1.desember til 31.desember
 
 val Int.mandag get() = mandagsfrø.plusWeeks(this.toLong() - 1)
@@ -81,17 +81,20 @@ private fun DayOfWeek.checkDayOfWeek(dato: LocalDate) = dato.also {
 sealed interface Ukedag {
     // mandag den 1.januar
     infix fun den(dato: LocalDate) = dato.also {
-        check(it.dayOfWeek == when (this) {
-            mandag -> MONDAY
-            tirsdag -> TUESDAY
-            onsdag -> WEDNESDAY
-            torsdag -> THURSDAY
-            fredag -> FRIDAY
-            lørdag -> SATURDAY
-            søndag -> SUNDAY
-        }) { "Forventet at $dato skulle være $this, men var ${dato.dayOfWeek}" }
+        check(
+            it.dayOfWeek == when (this) {
+                mandag -> MONDAY
+                tirsdag -> TUESDAY
+                onsdag -> WEDNESDAY
+                torsdag -> THURSDAY
+                fredag -> FRIDAY
+                lørdag -> SATURDAY
+                søndag -> SUNDAY
+            }
+        ) { "Forventet at $dato skulle være $this, men var ${dato.dayOfWeek}" }
     }
 }
+
 object mandag : Ukedag
 object tirsdag : Ukedag
 object onsdag : Ukedag

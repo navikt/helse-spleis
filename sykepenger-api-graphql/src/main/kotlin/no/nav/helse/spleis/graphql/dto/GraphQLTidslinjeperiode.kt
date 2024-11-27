@@ -99,9 +99,11 @@ enum class GraphQLUtbetalingstatus {
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
     Overfort,
+
     @Deprecated("skal slettes")
     Sendt,
     Ubetalt,
+
     @Deprecated("skal slettes")
     UtbetalingFeilet,
     Utbetalt
@@ -175,7 +177,11 @@ data class GraphQLDag(
     val begrunnelser: List<GraphQLBegrunnelse>?
 )
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "__typename"
+)
 interface GraphQLTidslinjeperiode {
     val behandlingId: UUID
     val kilde: UUID
@@ -206,7 +212,7 @@ data class GraphQLUberegnetPeriode(
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>
-    ) : GraphQLTidslinjeperiode
+) : GraphQLTidslinjeperiode
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,

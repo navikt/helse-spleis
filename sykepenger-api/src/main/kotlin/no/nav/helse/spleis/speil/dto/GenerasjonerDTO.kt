@@ -65,7 +65,10 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: Set<UUID>
 
-    internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
+    internal open fun registrerBruk(
+        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
+        organisasjonsnummer: String
+    ): SpeilTidslinjeperiode {
         return this
     }
 
@@ -81,7 +84,11 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
             sykefraværstilfeller.forEach { (_, perioder) ->
                 out.add(perioder.first().medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING))
                 perioder.zipWithNext { forrige, nåværende ->
-                    if (forrige is BeregnetPeriode) out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FORLENGELSE))
+                    if (forrige is BeregnetPeriode) out.add(
+                        nåværende.medPeriodetype(
+                            Tidslinjeperiodetype.FORLENGELSE
+                        )
+                    )
                     else out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING))
                 }
             }
@@ -152,7 +159,10 @@ data class BeregnetPeriode(
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID
 ) : SpeilTidslinjeperiode() {
-    override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
+    override fun registrerBruk(
+        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
+        organisasjonsnummer: String
+    ): BeregnetPeriode {
         val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) }
         if (vilkårsgrunnlag !is ISpleisGrunnlag) return this
         return this.copy(hendelser = this.hendelser + vilkårsgrunnlag.overstyringer)
@@ -203,12 +213,15 @@ data class AnnullertPeriode(
     val beregningId: UUID,
     val utbetaling: Utbetaling
 ) : SpeilTidslinjeperiode() {
-    override val sammenslåttTidslinje: List<SammenslåttDag> = emptyList() // feltet gir ikke mening for annullert periode
+    override val sammenslåttTidslinje: List<SammenslåttDag> =
+        emptyList() // feltet gir ikke mening for annullert periode
     override val erForkastet = true
     override val skjæringstidspunkt = fom // feltet gir ikke mening for annullert periode
     override val periodetype =
         Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
-    override val inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
+    override val inntektskilde =
+        UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
+
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this
     }

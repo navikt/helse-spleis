@@ -10,11 +10,22 @@ internal class ArbeidsgiverBuilder(
     private val pølsepakke: SpekematDTO.PølsepakkeDTO?
 ) {
 
-    internal fun build(alder: AlderDTO, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
+    internal fun build(
+        alder: AlderDTO,
+        vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
+    ): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             id = arbeidsgiverUtDto.id,
             organisasjonsnummer = arbeidsgiverUtDto.organisasjonsnummer,
-            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(arbeidsgiverUtDto.organisasjonsnummer, alder, arbeidsgiverUtDto, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
+            generasjoner = pølsepakke?.let {
+                SpeilGenerasjonerBuilder(
+                    arbeidsgiverUtDto.organisasjonsnummer,
+                    alder,
+                    arbeidsgiverUtDto,
+                    vilkårsgrunnlagHistorikk,
+                    pølsepakke
+                ).build()
+            } ?: emptyList()
         )
     }
 
@@ -23,9 +34,10 @@ internal class ArbeidsgiverBuilder(
             // rader hvor alle pølser er kopiert fra forrige rad - eller blir kopiert til neste rad - kan i praksis fjernes
             // det betyr at vi bare behøver vurdere pølsepakker med minst tre rader siden den vi skal vurdere én rad mot to andre
             if (size <= 2) return this
-            val pølseFinnesIRad = { rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, pølse: SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO ->
-                rad.pølser.any { it.behandlingId == pølse.behandlingId }
-            }
+            val pølseFinnesIRad =
+                { rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, pølse: SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO ->
+                    rad.pølser.any { it.behandlingId == pølse.behandlingId }
+                }
 
             val iterator = this.asReversed().iterator()
             var forrige = iterator.next()

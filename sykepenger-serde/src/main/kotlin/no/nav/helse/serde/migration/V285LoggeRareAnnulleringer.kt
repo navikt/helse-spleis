@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 internal class V285LoggeRareAnnulleringer(
     private val forkast: Set<String> = setOf("ec293bc9-73ce-4c5f-b7a8-18451f5f623c"),
     val forkastetTidspunkt: () -> LocalDateTime = { LocalDateTime.now() }
-): JsonMigration(version = 285) {
+) : JsonMigration(version = 285) {
     override val description = "Logger rare utbetalinger"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -19,7 +19,10 @@ internal class V285LoggeRareAnnulleringer(
             val utbetalteKorrelasjonsIder = arbeidsgiver.path("utbetalinger")
                 .groupBy { it.path("korrelasjonsId").asText() }
                 .mapValues { (_, utbetalinger) ->
-                    utbetalinger.filter { it.path("type").asText() == "UTBETALING" && it.path("status").asText() == "UTBETALT" }
+                    utbetalinger.filter {
+                        it.path("type").asText() == "UTBETALING" && it.path("status")
+                            .asText() == "UTBETALT"
+                    }
                 }.filterValues { it.isNotEmpty() }
                 .keys
 
@@ -41,12 +44,13 @@ internal class V285LoggeRareAnnulleringer(
                 .forEach { manglerOverføring ->
                     val id = manglerOverføring.path("id").asText()
                     val nåværendeStatus = manglerOverføring.path("status").asText()
-                    val oppdatert = LocalDateTime.parse(manglerOverføring.path("oppdatert").asText())
+                    val oppdatert =
+                        LocalDateTime.parse(manglerOverføring.path("oppdatert").asText())
                     sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon4)")
                     if (id in forkast) {
                         sikkerLogg.info("Setter status på Utbetaling $id til FORKASTET og setter nytt oppdatert-tidspunkt")
                         manglerOverføring as ObjectNode
-                        manglerOverføring.put("status","FORKASTET")
+                        manglerOverføring.put("status", "FORKASTET")
                         manglerOverføring.put("oppdatert", "${forkastetTidspunkt()}")
                     }
                 }
@@ -55,24 +59,27 @@ internal class V285LoggeRareAnnulleringer(
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val JsonNode.oppdragManglerOverføring get(): Boolean {
-            if (path("linjer").isEmpty) return false
-            if (path("endringskode").asText() == "UEND") return false
-            return path("status").isNull
-        }
+        private val JsonNode.oppdragManglerOverføring
+            get(): Boolean {
+                if (path("linjer").isEmpty) return false
+                if (path("endringskode").asText() == "UEND") return false
+                return path("status").isNull
+            }
 
-        private val JsonNode.akseptertAnnullering get(): Boolean {
-            if (path("type").asText() != "ANNULLERING") return false
-            if (path("status").asText() != "ANNULLERT") return false
-            val arbeidsgiverOppdrag = path("arbeidsgiverOppdrag")
-            val personOppdrag = path("personOppdrag")
-            return arbeidsgiverOppdrag.akseptertOppdrag && personOppdrag.akseptertOppdrag
-        }
+        private val JsonNode.akseptertAnnullering
+            get(): Boolean {
+                if (path("type").asText() != "ANNULLERING") return false
+                if (path("status").asText() != "ANNULLERT") return false
+                val arbeidsgiverOppdrag = path("arbeidsgiverOppdrag")
+                val personOppdrag = path("personOppdrag")
+                return arbeidsgiverOppdrag.akseptertOppdrag && personOppdrag.akseptertOppdrag
+            }
 
-        private val JsonNode.akseptertOppdrag get(): Boolean {
-            if (path("linjer").isEmpty) return true
-            if (path("endringskode").asText() == "UEND") return true
-            return path("status").asText() == "AKSEPTERT"
-        }
+        private val JsonNode.akseptertOppdrag
+            get(): Boolean {
+                if (path("linjer").isEmpty) return true
+                if (path("endringskode").asText() == "UEND") return true
+                return path("status").asText() == "AKSEPTERT"
+            }
     }
 }

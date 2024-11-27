@@ -11,7 +11,7 @@ import io.mockk.mockk
 import java.net.http.HttpClient
 import java.time.LocalDateTime
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class SpekematClientTest {
@@ -22,11 +22,20 @@ class SpekematClientTest {
         }
     }
     private var httpClientMock = mockk<HttpClient>()
-    private val client = SpekematClient(httpClientMock, azureTokenProvider, "scope-til-spekemat", jacksonObjectMapper())
+    private val client = SpekematClient(
+        httpClientMock,
+        azureTokenProvider,
+        "scope-til-spekemat",
+        jacksonObjectMapper()
+    )
 
     @Test
     fun `tolker response fra spekemat`() {
-        every { httpClientMock.send<String>(any(), any()) } returns MockHttpResponse(responsFraSpekemat, 200, mapOf("callId" to "liksom call id"))
+        every { httpClientMock.send<String>(any(), any()) } returns MockHttpResponse(
+            responsFraSpekemat,
+            200,
+            mapOf("callId" to "liksom call id")
+        )
         val result = client.hentSpekemat("fnr", "callId")
         assertEquals(1, result.pakker.size)
         assertEquals(1, result.pakker.single().rader.size)

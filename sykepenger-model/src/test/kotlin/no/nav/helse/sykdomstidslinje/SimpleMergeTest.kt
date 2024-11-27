@@ -121,7 +121,7 @@ internal class SimpleMergeTest {
 
         count = 0
         for (dag: Dag in sykdomstidslinje) {
-             count++
+            count++
         }
         assertEquals(expected, count)
     }

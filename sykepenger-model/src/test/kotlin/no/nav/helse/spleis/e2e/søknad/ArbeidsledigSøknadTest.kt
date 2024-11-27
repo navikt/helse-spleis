@@ -17,7 +17,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class ArbeidsledigSøknadTest: AbstractDslTest() {
+internal class ArbeidsledigSøknadTest : AbstractDslTest() {
 
     @Test
     fun `støtter arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt`() {
@@ -28,10 +28,14 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
             assertVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())
         }
     }
+
     @Test
     fun `trenger ikke varsel ved forlengelse hvis det ikke er refusjon`() {
         a1 {
-            nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
+            nyttVedtak(
+                januar,
+                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList())
+            )
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
             assertIngenVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())
@@ -43,7 +47,10 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`, 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(
+                `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`,
+                1.vedtaksperiode.filter()
+            )
         }
     }
 
@@ -52,7 +59,12 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK
+            )
         }
     }
 }

@@ -19,13 +19,30 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
     fun `vedtaksperiode_forkastet`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
         val søknadId2 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 27.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
 
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "TIL_INFOTRYGD")
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "TIL_INFOTRYGD"
+        )
         assertTilstander(1, "TIL_INFOTRYGD")
 
         testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 2)
@@ -74,16 +91,28 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
     fun `historiskeFolkeregisteridenter test`() {
         val historiskFnr = "123"
         val nyttFnr = "111"
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), fnr = historiskFnr)
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100),
+            fnr = historiskFnr
+        )
         sendSøknad(
             historiskFnr,
             listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             historiskeFolkeregisteridenter = emptyList()
         )
 
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), fnr = nyttFnr)
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100),
+            fnr = nyttFnr
+        )
         val søknadId2 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sykmeldingsgrad = 100
+                )
+            ),
             historiskeFolkeregisteridenter = listOf(historiskFnr),
             fnr = nyttFnr
         )
@@ -115,13 +144,25 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
     fun `vedtaksperide_forkastet sender med flagg om den forkastede vedtaksperiode skal be om arbeidsgiveropplysninger`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         val søknadId1 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             sendTilGosys = true
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         val søknadId2 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 1.februar,
+                    tom = 28.februar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             sendTilGosys = true
         )
 

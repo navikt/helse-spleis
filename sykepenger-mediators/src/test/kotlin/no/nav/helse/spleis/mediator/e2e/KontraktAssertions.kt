@@ -44,32 +44,44 @@ internal object KontraktAssertions {
         assertOgFjern("system_participating_services") { check(it.isArray) }
     }
 
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernTemplates(template: String, assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit) {
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernTemplates(
+        template: String,
+        assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit
+    ) {
         val (faktiskJson, forventetJson) = this
-        val uuidTemplates = forventetJson.properties().filter { it.value.asText() == template }.map { it.key }
+        val uuidTemplates =
+            forventetJson.properties().filter { it.value.asText() == template }.map { it.key }
         uuidTemplates.forEach {
             forventetJson.remove(it)
             assertOgFjern(faktiskJson, it)
         }
     }
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() = assertOgFjernTemplates("<uuid>") { faktiskJson, key ->
-        faktiskJson.assertOgFjernUUID(key)
-    }
 
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernLocalDateTimeTemplates() = assertOgFjernTemplates("<timestamp>") { faktiskJson, key ->
-        faktiskJson.assertOgFjernLocalDateTime(key)
-    }
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() =
+        assertOgFjernTemplates("<uuid>") { faktiskJson, key ->
+            faktiskJson.assertOgFjernUUID(key)
+        }
 
-    private fun ObjectNode.assertOgFjernUUID(key: String) = assertOgFjern(key) { UUID.fromString(it.asText()) }
-    private fun ObjectNode.assertOgFjernLocalDateTime(key: String) = assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
-    internal fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernLocalDateTimeTemplates() =
+        assertOgFjernTemplates("<timestamp>") { faktiskJson, key ->
+            faktiskJson.assertOgFjernLocalDateTime(key)
+        }
+
+    private fun ObjectNode.assertOgFjernUUID(key: String) =
+        assertOgFjern(key) { UUID.fromString(it.asText()) }
+
+    private fun ObjectNode.assertOgFjernLocalDateTime(key: String) =
+        assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
+
+    internal fun ObjectNode.assertOgFjern(key: String, validation: (value: JsonNode) -> Unit) {
         if (!key.contains(".")) {
-            assertDoesNotThrow({ validation(path(key))}, "$key er ikke på forventet format!")
+            assertDoesNotThrow({ validation(path(key)) }, "$key er ikke på forventet format!")
             remove(key)
             return
         }
         val sisteKey = key.split(".").last()
-        val objekt = key.substringBeforeLast(".").split(".").fold(this as JsonNode) { result, nestedKey -> result.path(nestedKey) } as ObjectNode
+        val objekt = key.substringBeforeLast(".").split(".")
+            .fold(this as JsonNode) { result, nestedKey -> result.path(nestedKey) } as ObjectNode
         assertDoesNotThrow { validation(objekt.path(sisteKey)) }
         objekt.remove(sisteKey)
     }

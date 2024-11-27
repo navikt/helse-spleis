@@ -30,7 +30,11 @@ object BeløpstidslinjeDsl {
     infix fun Kilde.oppgir(inntekt: Inntekt) = this to inntekt
     infix fun Pair<Kilde, Inntekt>.fra(fra: LocalDate) = Triple(first, second, fra)
     infix fun Pair<Kilde, Inntekt>.kun(kun: LocalDate) = fra(kun) til kun
-    infix fun Pair<Kilde, Inntekt>.hele(periode: Periode) = fra(periode.start) til periode.endInclusive
-    infix fun Triple<Kilde, Inntekt, LocalDate>.til(til: LocalDate) = Beløpstidslinje((third til til).map { Beløpsdag(it, second, first) })
+    infix fun Pair<Kilde, Inntekt>.hele(periode: Periode) =
+        fra(periode.start) til periode.endInclusive
+
+    infix fun Triple<Kilde, Inntekt, LocalDate>.til(til: LocalDate) =
+        Beløpstidslinje((third til til).map { Beløpsdag(it, second, first) })
+
     infix fun Beløpstidslinje.og(other: Beløpstidslinje) = this + other
 }

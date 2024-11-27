@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.util.UUID
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "__typename"
+)
 interface GraphQLVilkarsgrunnlag {
     val id: UUID
     val skjaeringstidspunkt: LocalDate
@@ -29,7 +33,9 @@ data class GraphQLSpleisVilkarsgrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
 ) : GraphQLVilkarsgrunnlag {
-    val skjonnsmessigFastsattAarlig: Double? = inntekter.filter{ it.deaktivert != true }.mapNotNull { it.skjonnsmessigFastsatt }.takeIf(List<*>::isNotEmpty)?.sumOf { it.belop }
+    val skjonnsmessigFastsattAarlig: Double? =
+        inntekter.filter { it.deaktivert != true }.mapNotNull { it.skjonnsmessigFastsatt }
+            .takeIf(List<*>::isNotEmpty)?.sumOf { it.belop }
 }
 
 data class GraphQLInfotrygdVilkarsgrunnlag(

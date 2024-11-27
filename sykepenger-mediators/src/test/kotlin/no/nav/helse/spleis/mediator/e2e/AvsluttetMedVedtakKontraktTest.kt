@@ -19,9 +19,22 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtak med utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        val (inntektsmeldingId,_) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        val (inntektsmeldingId, _) = sendInntektsmelding(
+            listOf(
+                Periode(
+                    fom = 3.januar,
+                    tom = 18.januar
+                )
+            ), førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -63,17 +76,38 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
+
     @Test
     fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        val (inntektsmeldingId,_) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, beregnetInntekt = 45000.00)
+        val (inntektsmeldingId, _) = sendInntektsmelding(
+            listOf(
+                Periode(
+                    fom = 3.januar,
+                    tom = 18.januar
+                )
+            ), førsteFraværsdag = 3.januar, beregnetInntekt = 45000.00
+        )
         sendVilkårsgrunnlag(0)
-        val (skjønnsmessigFastsettelseId, _) = sendSkjønnsmessigFastsettelse(3.januar, listOf(TestMessageFactory.SkjønnsmessigFastsatt(ORGNUMMER, 47500.00 * 12)))
+        val (skjønnsmessigFastsettelseId, _) = sendSkjønnsmessigFastsettelse(
+            3.januar,
+            listOf(TestMessageFactory.SkjønnsmessigFastsatt(ORGNUMMER, 47500.00 * 12))
+        )
         sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP", "SPREF"))
+        sendSimulering(
+            0,
+            SimuleringMessage.Simuleringstatus.OK,
+            forventedeFagområder = setOf("SP", "SPREF")
+        )
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         @Language("JSON")
@@ -119,7 +153,13 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtak uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
 
@@ -149,9 +189,18 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtak med utbetaling uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    sykmeldingsgrad = 100
+                )
+            )
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -160,7 +209,13 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = 27.januar,
+                    tom = 31.januar,
+                    sykmeldingsgrad = 100
+                )
+            ),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
         )
         sendYtelser(1)
@@ -205,7 +260,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertVedtakFattet(forventetMelding: String, forventetUtbetalingEventNavn: String) {
         val vedtakFattet = testRapid.assertUtgåendeMelding(forventetMelding)
         val vedtakFattetUtbetalingId = vedtakFattet.path("utbetalingId").asText()
-        val utbetalingEventUtbetalingId = testRapid.inspektør.siste(forventetUtbetalingEventNavn).path("utbetalingId").asText()
+        val utbetalingEventUtbetalingId =
+            testRapid.inspektør.siste(forventetUtbetalingEventNavn).path("utbetalingId").asText()
         assertEquals(vedtakFattetUtbetalingId, utbetalingEventUtbetalingId)
     }
 }

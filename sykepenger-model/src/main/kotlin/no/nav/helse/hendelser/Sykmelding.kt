@@ -25,7 +25,8 @@ class Sykmelding(
         )
     }
 
-    private val opprinneligPeriode = checkNotNull(Sykmeldingsperiode.periode(sykeperioder)) { "må ha minst én periode" }
+    private val opprinneligPeriode =
+        checkNotNull(Sykmeldingsperiode.periode(sykeperioder)) { "må ha minst én periode" }
     private var sykmeldingsperiode: Periode? = opprinneligPeriode
 
     internal fun periode() = opprinneligPeriode
@@ -34,7 +35,10 @@ class Sykmelding(
         sykmeldingsperiode = sykmeldingsperiode?.beholdDagerEtter(dato)
     }
 
-    internal fun oppdaterSykmeldingsperioder(aktivitetslogg: IAktivitetslogg, perioder: List<Periode>): List<Periode> {
+    internal fun oppdaterSykmeldingsperioder(
+        aktivitetslogg: IAktivitetslogg,
+        perioder: List<Periode>
+    ): List<Periode> {
         val periode = sykmeldingsperiode
         if (periode == null) {
             aktivitetslogg.info("Sykmeldingsperiode har allerede blitt tidligere håndtert, mistenker korrigert sykmelding")
@@ -49,7 +53,9 @@ class Sykmelding(
 
 class Sykmeldingsperiode(fom: LocalDate, tom: LocalDate) {
     private val periode = fom til tom
+
     internal companion object {
-        internal fun periode(perioder: List<Sykmeldingsperiode>) = perioder.map { it.periode }.periode()
+        internal fun periode(perioder: List<Sykmeldingsperiode>) =
+            perioder.map { it.periode }.periode()
     }
 }

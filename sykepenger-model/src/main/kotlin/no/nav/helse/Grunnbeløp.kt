@@ -13,9 +13,13 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
         124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
         118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
         111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
-        106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021) ),
-        101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020), gyldigSomMinsteinntektKrav = 21.september(2020) ),
-        99858.årlig.gyldigFra(1.mai(2019), gyldigSomMinsteinntektKrav = 27. mai(2019)),
+        106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021)),
+        101351.årlig.gyldigFra(
+            1.mai(2020),
+            virkningsdato = 21.september(2020),
+            gyldigSomMinsteinntektKrav = 21.september(2020)
+        ),
+        99858.årlig.gyldigFra(1.mai(2019), gyldigSomMinsteinntektKrav = 27.mai(2019)),
         96883.årlig.gyldigFra(1.mai(2018)),
         93634.årlig.gyldigFra(1.mai(2017)),
         92576.årlig.gyldigFra(1.mai(2016)),
@@ -102,8 +106,9 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
      * kan settes til et tidspunkt etter virkningstidspunktet for for grunnbeløpet øvrig.
      * https://lovdata.no/forskrift/2021-05-21-1568/§6
     **/
-    fun minsteinntekt(dato: LocalDate) = HistoriskGrunnbeløp.gjeldendeMinsteinntektGrunnbeløp(grunnbeløp, dato)
-        .beløp(multiplier)
+    fun minsteinntekt(dato: LocalDate) =
+        HistoriskGrunnbeløp.gjeldendeMinsteinntektGrunnbeløp(grunnbeløp, dato)
+            .beløp(multiplier)
 
     companion object {
         val `6G` = Grunnbeløp(6.0)
@@ -113,10 +118,15 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
         val `2G` = Grunnbeløp(2.0)
         val `1G` = Grunnbeløp(1.0)
 
-        private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra, gyldigSomMinsteinntektKrav: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
+        private fun Inntekt.gyldigFra(
+            gyldigFra: LocalDate,
+            virkningsdato: LocalDate = gyldigFra,
+            gyldigSomMinsteinntektKrav: LocalDate = gyldigFra
+        ) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
 
         fun virkningstidspunktFor(beløp: Inntekt): LocalDate {
-            return `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt() ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
+            return `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt()
+                ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
         }
     }
 
@@ -143,7 +153,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
             val periode = 1.januar(år) til 31.desember(år)
             if (!gyldighetsperiode.overlapperMed(periode)) return INGEN
             val antallMånederSomDekkesAvGrunnbeløpet = gyldighetsperiode.subset(periode)
-                .let { it.endInclusive.monthValue - it.start.monthValue + 1}
+                .let { it.endInclusive.monthValue - it.start.monthValue + 1 }
             return beløp(antallMånederSomDekkesAvGrunnbeløpet.toDouble())
                 .månedlig
                 .årlig
@@ -151,7 +161,11 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
 
         companion object {
             // TODO: Innføre startegy pattern
-            fun gjeldendeGrunnbeløp(grunnbeløper: List<HistoriskGrunnbeløp>, dato: LocalDate, virkningFra: LocalDate): HistoriskGrunnbeløp {
+            fun gjeldendeGrunnbeløp(
+                grunnbeløper: List<HistoriskGrunnbeløp>,
+                dato: LocalDate,
+                virkningFra: LocalDate
+            ): HistoriskGrunnbeløp {
                 val virkningsdato = maxOf(dato, virkningFra)
                 return grunnbeløper
                     .filter { virkningsdato >= it.virkningsdato && dato >= it.gyldigFra }
@@ -159,7 +173,10 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
             }
 
-            fun gjeldendeMinsteinntektGrunnbeløp(grunnbeløper: List<HistoriskGrunnbeløp>, dato: LocalDate): HistoriskGrunnbeløp {
+            fun gjeldendeMinsteinntektGrunnbeløp(
+                grunnbeløper: List<HistoriskGrunnbeløp>,
+                dato: LocalDate
+            ): HistoriskGrunnbeløp {
                 return grunnbeløper
                     .filter { dato >= it.gyldigMinsteinntektKrav }
                     .maxByOrNull { it.gyldigMinsteinntektKrav }
