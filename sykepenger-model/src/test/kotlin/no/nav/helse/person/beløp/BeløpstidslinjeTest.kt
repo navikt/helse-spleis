@@ -24,6 +24,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -45,6 +46,18 @@ internal class BeløpstidslinjeTest {
 
         val forventet = (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig fra 1.mars til 1.april) + (Systemet oppgir 3000.daglig fra 2.april til 30.april)
         assertEquals(forventet, fylt)
+    }
+
+    @Test
+    fun `equals`() {
+        val beløpstidslinje1 = (Arbeidsgiver oppgir 1000.daglig hele januar)
+        val beløpstidslinje2 = (Arbeidsgiver oppgir 1000.daglig hele januar)
+        val beløpstidslinje3 = (Saksbehandler oppgir 1000.daglig hele januar)
+        val beløpstidslinje4 = (Saksbehandler oppgir 1000.daglig hele januar) og (Saksbehandler oppgir 2000.daglig hele mars)
+        val beløpstidslinje5 = (Saksbehandler oppgir 1000.daglig hele januar) og (Saksbehandler oppgir 2000.daglig hele mars)
+        assertEquals(beløpstidslinje1, beløpstidslinje2)
+        assertNotEquals(beløpstidslinje1, beløpstidslinje3)
+        assertEquals(beløpstidslinje4, beløpstidslinje5)
     }
 
     @Test

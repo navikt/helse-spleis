@@ -856,6 +856,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     vilkårsgrunnlag == null -> Beløpstidslinje()
                     else -> vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
                 }
+                if (endring.refusjonstidslinje != refusjonstidslinje) {
+                    aktivitetslogg.info("Nå ble det etter migrering en ny refusjonstidslinje på endring ${endring.id}")
+                }
                 endring.refusjonstidslinje = refusjonstidslinje
             }
         }
