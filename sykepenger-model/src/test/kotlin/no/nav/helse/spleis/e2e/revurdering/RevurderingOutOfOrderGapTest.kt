@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -87,9 +86,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
-
     @Test
     fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
@@ -192,7 +191,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         }
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+        )
         assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
     }
 
@@ -253,7 +258,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 5.februar til 10.februar
+            subset = 5.februar til 10.februar,
         )
     }
 
@@ -271,7 +276,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val antallSykedagerIFebruar2018 = 20
         val nettoBeløpForFebruarMedStandardInntektUtenAgp = 1431 * antallSykedagerIFebruar2018
         val revurdering = inspektør.sisteUtbetaling()
-        assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp -nettoBeløpForFebruarMedStandardInntektOgAgp, revurdering.nettobeløp)
+        assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp - nettoBeløpForFebruarMedStandardInntektOgAgp, revurdering.nettobeløp)
     }
 
     @Test
@@ -443,7 +448,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         assertEquals(3, inspektør.antallUtbetalinger)
@@ -523,16 +528,20 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.november(2017) til 1.januar(2018) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
-            )
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntektperioderForSykepengegrunnlag {
+                        1.november(2017) til 1.januar(2018) inntekter {
+                            a1 inntekt INNTEKT
+                            a2 inntekt INNTEKT
+                        }
+                    },
+                ),
+            arbeidsforhold =
+                listOf(
+                    Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -596,30 +605,31 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
         val inntekt = 20000.månedlig
         håndterInntektsmelding(listOf(1.april til 16.april), beregnetInntekt = inntekt, orgnummer = a1)
-        val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            listOf(
-                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
+        val sykepengegrunnlag =
+            InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                ),
             )
-        )
-        val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
-
 
         nyPeriode(februar, a2)
         nyPeriode(februar, a3)
@@ -630,23 +640,25 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a3)
 
-        val sykepengegrunnlag2 = InntektForSykepengegrunnlag(
-            listOf(
-                grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3))
+        val sykepengegrunnlag2 =
+            InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
+                ),
             )
-        )
-        val arbeidsforhold2 = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold2 =
+            listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag2,
             arbeidsforhold = arbeidsforhold2,
-            orgnummer = a2
+            orgnummer = a2,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -670,23 +682,25 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val inntekt = 20000.månedlig
         håndterInntektsmelding(listOf(1.april til 16.april), beregnetInntekt = inntekt, orgnummer = a1)
 
-        val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            listOf(
-                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
+        val sykepengegrunnlag =
+            InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                ),
             )
-        )
-        val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -703,23 +717,25 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a3)
 
-        val sykepengegrunnlag2 = InntektForSykepengegrunnlag(
-            listOf(
-                grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
-                grunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3))
+        val sykepengegrunnlag2 =
+            InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
+                    grunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
+                ),
             )
-        )
-        val arbeidsforhold2 = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold2 =
+            listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag2,
             arbeidsforhold = arbeidsforhold2,
-            orgnummer = a2
+            orgnummer = a2,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -772,9 +788,24 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET,
+        )
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(
+            3.vedtaksperiode,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
         assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }
 
@@ -810,9 +841,15 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET,
+        )
     }
 
     @Test
@@ -908,7 +945,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars til 26.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        //Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
+        // Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
         assertEquals(0, inspektør.sisteMaksdato(3.vedtaksperiode).gjenståendeDager)
         assertEquals(0, inspektør.utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
         assertEquals(6, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistDagTeller)
@@ -1016,16 +1053,18 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    listOf(
+                        grunnlag(a1, 1.mars, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.mars, INNTEKT.repeat(3)),
+                    ),
+                ),
+            arbeidsforhold =
                 listOf(
-                    grunnlag(a1, 1.mars, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.mars, INNTEKT.repeat(3))
-                )
-            ),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1041,7 +1080,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         // siden perioden slutter på en fredag starter ikke oppholdstelling i arbeidsgiverperioden før mandagen.
         // 10.februar-2.mars hører derfor til samme arbeidsgiverperioden som 20.mars-4.april, ettersom avstanden mellom
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
-        assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_VILKÅRSPRØVING") { nyPeriode(10.februar til 2.mars, a2) }
+        assertUgyldigSituasjon(
+            "Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_VILKÅRSPRØVING",
+        ) { nyPeriode(10.februar til 2.mars, a2) }
         // Her gjenlagres ikke refusjonsopplysninger når vi tar i bruk nye refusjonsopplysninger så vil denne saken bli stående i AvventerInntektsmelding
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, a2)
@@ -1068,7 +1109,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(marsId)
         assertSisteTilstand(marsId, AVVENTER_GODKJENNING_REVURDERING)
         assertSisteTilstand(februarId, AVSLUTTET)
-
 
         nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -1112,13 +1152,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             januarId,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 17.januar til 31.januar
+            subset = 17.januar til 31.januar,
         )
         assertUtbetalingsbeløp(
             februarId,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = februar
+            subset = februar,
         )
     }
 
@@ -1163,23 +1203,35 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             januarId,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 17.januar til 31.januar
+            subset = 17.januar til 31.januar,
         )
         assertUtbetalingsbeløp(
             februarId,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = februar
+            subset = februar,
         )
     }
 
-    private fun håndterVilkårsgrunnlagMedGhost(vedtaksperiode: IdInnhenter, skjæringstidspunkt: LocalDate, arbeidsgiver: String, ghost: String) {
-        håndterVilkårsgrunnlag(vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(arbeidsgiver to INNTEKT, ghost to INNTEKT),skjæringstidspunkt),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(arbeidsgiver, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(ghost, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = arbeidsgiver
+    private fun håndterVilkårsgrunnlagMedGhost(
+        vedtaksperiode: IdInnhenter,
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiver: String,
+        ghost: String,
+    ) {
+        håndterVilkårsgrunnlag(
+            vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag =
+                lagStandardSykepengegrunnlag(
+                    listOf(arbeidsgiver to INNTEKT, ghost to INNTEKT),
+                    skjæringstidspunkt,
+                ),
+            arbeidsforhold =
+                listOf(
+                    Arbeidsforhold(arbeidsgiver, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(ghost, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
+            orgnummer = arbeidsgiver,
         )
     }
 }

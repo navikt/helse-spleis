@@ -14,7 +14,7 @@ class Subsumsjon(
             Subsumsjon(
                 paragraf = dto.paragraf,
                 ledd = dto.ledd,
-                bokstav = dto.bokstav
+                bokstav = dto.bokstav,
             )
     }
 }

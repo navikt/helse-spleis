@@ -36,13 +36,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ForkastingTest : AbstractEndToEndTest() {
-
     @Test
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = emptyList()
+            inntektshistorikk = emptyList(),
         )
         håndterSøknad(1.februar til 23.februar)
         assertEquals(0, inspektør.antallUtbetalinger)
@@ -71,13 +70,13 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -125,14 +124,14 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -141,12 +140,12 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar))
         håndterSøknad(
             Sykdom(1.februar, 28.februar, 100.prosent),
-            Papirsykmelding(1.januar, 20.januar)
+            Papirsykmelding(1.januar, 20.januar),
         )
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -168,7 +167,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
+            AVVENTER_SIMULERING,
         )
     }
 
@@ -190,7 +189,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
+            AVVENTER_SIMULERING,
         )
     }
 
@@ -218,7 +217,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -244,7 +243,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -252,9 +251,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - avventer simulering revurdering`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+            ),
+        )
         håndterYtelser(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
@@ -266,40 +267,61 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - avventer godkjenning revurdering`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+            ),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+        )
     }
 
     @Test
     fun `forkaster ikke revurderinger - til utbetaling`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+            ),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+        )
     }
 
     @Test
     fun `forkaster ikke revurderinger - revurdering feilet`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+            ),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
@@ -308,6 +330,14 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            REVURDERING_FEILET,
+        )
     }
 }

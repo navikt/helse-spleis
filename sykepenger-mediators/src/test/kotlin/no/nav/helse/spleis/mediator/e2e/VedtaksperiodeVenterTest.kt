@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
-
     @Test
-    fun `sender ut vedtaksperiode venter`(){
+    fun `sender ut vedtaksperiode venter`() {
         assertAntallOgSisteÅrsak(0)
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(0)
@@ -33,7 +32,7 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `unngår å sende unødvendig vedtaksperiode venter når replay treffer`(){
+    fun `unngår å sende unødvendig vedtaksperiode venter når replay treffer`() {
         sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 2.januar)
         sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 3.januar)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
@@ -45,7 +44,7 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `replay som bommer på person som allerede har Infotrygdhistorikk`(){
+    fun `replay som bommer på person som allerede har Infotrygdhistorikk`() {
         nyttVedtakJanuar()
         val antallVedtaksperiodeVenter = vedtaksperiodeVenter.size
         sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 1.februar)
@@ -76,15 +75,28 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
     }
-    private val vedtaksperiodeVenter get() = testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
-        node.path("vedtaksperioder")
-    }
-    private fun assertAntallOgSisteÅrsak(forventetAntall: Int, forventetÅrsak: String? = null) {
+
+    private val vedtaksperiodeVenter get() =
+        testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
+            node.path("vedtaksperioder")
+        }
+
+    private fun assertAntallOgSisteÅrsak(
+        forventetAntall: Int,
+        forventetÅrsak: String? = null,
+    ) {
         val vedtaksperiodeVenter = vedtaksperiodeVenter
         assertEquals(forventetAntall, vedtaksperiodeVenter.size)
         forventetÅrsak?.let {
-            assertEquals(it, vedtaksperiodeVenter.last().path("venterPå").path("venteårsak").path("hva").asText())
+            assertEquals(
+                it,
+                vedtaksperiodeVenter
+                    .last()
+                    .path("venterPå")
+                    .path("venteårsak")
+                    .path("hva")
+                    .asText(),
+            )
         }
     }
-
 }

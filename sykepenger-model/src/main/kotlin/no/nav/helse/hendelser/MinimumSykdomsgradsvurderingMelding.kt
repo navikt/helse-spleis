@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.MinimumSykdomsgradsvurdering
+import java.time.LocalDateTime
+import java.util.UUID
 
 /**
  * Melding om perioder saksbehandler har vurdert dithet at bruker har tapt nok arbeidstid til å ha rett på sykepenger,
@@ -12,23 +12,23 @@ import no.nav.helse.person.MinimumSykdomsgradsvurdering
 class MinimumSykdomsgradsvurderingMelding(
     private val perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     private val perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode>,
-    meldingsreferanseId: UUID
+    meldingsreferanseId: UUID,
 ) : Hendelse {
-
     init {
         sjekkForOverlapp()
     }
 
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
-    }
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true,
+            )
+        }
 
     internal fun oppdater(vurdering: MinimumSykdomsgradsvurdering) {
         vurdering.leggTil(perioderMedMinimumSykdomsgradVurdertOK)
@@ -44,7 +44,6 @@ class MinimumSykdomsgradsvurderingMelding(
         }
     }
 
-
     internal fun periodeForEndring(): Periode {
         val alle = perioderMedMinimumSykdomsgradVurdertOK + perioderMedMinimumSykdomsgradVurdertIkkeOK
         return Periode(alle.minOf { it.start }, alle.maxOf { it.endInclusive })
@@ -52,11 +51,13 @@ class MinimumSykdomsgradsvurderingMelding(
 
     fun valider(): Boolean {
         if (perioderMedMinimumSykdomsgradVurdertOK.isEmpty() && perioderMedMinimumSykdomsgradVurdertIkkeOK.isEmpty()) return false
-        if (perioderMedMinimumSykdomsgradVurdertOK.containsAll(perioderMedMinimumSykdomsgradVurdertIkkeOK) && perioderMedMinimumSykdomsgradVurdertIkkeOK.containsAll(
-                perioderMedMinimumSykdomsgradVurdertOK
+        if (perioderMedMinimumSykdomsgradVurdertOK.containsAll(perioderMedMinimumSykdomsgradVurdertIkkeOK) &&
+            perioderMedMinimumSykdomsgradVurdertIkkeOK.containsAll(
+                perioderMedMinimumSykdomsgradVurdertOK,
             )
-        ) return false
+        ) {
+            return false
+        }
         return true
     }
-
 }

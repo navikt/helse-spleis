@@ -15,7 +15,7 @@ data class GraphQLSimuleringsdetaljer(
     val klassekode: String,
     val klassekodeBeskrivelse: String,
     val utbetalingstype: String,
-    val refunderesOrgNr: String
+    val refunderesOrgNr: String,
 )
 
 data class GraphQLSimuleringsutbetaling(
@@ -23,16 +23,16 @@ data class GraphQLSimuleringsutbetaling(
     val utbetalesTilNavn: String,
     val forfall: LocalDate,
     val feilkonto: Boolean,
-    val detaljer: List<GraphQLSimuleringsdetaljer>
+    val detaljer: List<GraphQLSimuleringsdetaljer>,
 )
 
 data class GraphQLSimuleringsperiode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val utbetalinger: List<GraphQLSimuleringsutbetaling>
+    val utbetalinger: List<GraphQLSimuleringsutbetaling>,
 )
 
 data class GraphQLSimulering(
     val totalbelop: Int,
-    val perioder: List<GraphQLSimuleringsperiode>
+    val perioder: List<GraphQLSimuleringsperiode>,
 )

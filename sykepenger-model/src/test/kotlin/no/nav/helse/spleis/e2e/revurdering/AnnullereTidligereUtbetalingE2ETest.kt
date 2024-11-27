@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
-
     @Test
     fun `annullere tidligere utbetaling på samme arbeidsgiver`() {
         a1 {

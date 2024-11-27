@@ -1,11 +1,13 @@
 package no.nav.helse.opprydding
 
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import javax.sql.DataSource
 
-internal class PersonRepository(private val dataSource: DataSource) {
+internal class PersonRepository(
+    private val dataSource: DataSource,
+) {
     internal fun slett(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
             session.transaction {

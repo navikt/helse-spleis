@@ -8,7 +8,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-
 internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     private companion object {
         private const val FNR1 = "12029240045"
@@ -19,8 +18,16 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     fun `person får nytt fnr - behandling fortsetter på samme personjson`() {
         val meldingsfabrikkFNR2 = TestMessageFactory(FNR2, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
-        sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
+        sendSøknad(
+            fnr = FNR2,
+            perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            historiskeFolkeregisteridenter = listOf(FNR1),
+        )
+        sendSøknad(
+            fnr = FNR2,
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
+            historiskeFolkeregisteridenter = listOf(FNR1),
+        )
 
         meldingsfabrikkFNR2.lagInntektsmelding(listOf(Periode(3.januar, 18.januar)), 3.januar).also { (_, melding) ->
             testRapid.sendTestMessage(melding)
@@ -37,7 +44,13 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(FNR2, meldinger[4].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[5].path("fødselsnummer").asText())
 
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+        )
         assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
@@ -46,7 +59,11 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)))
 
-        sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
+        sendSøknad(
+            fnr = FNR2,
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
+            historiskeFolkeregisteridenter = listOf(FNR1),
+        )
 
         assertEquals(2, antallPersoner())
         assertEquals(2, antallPersonalias())
@@ -64,7 +81,11 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         }
 
         testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet").also { melding ->
-            val error = melding.path("aktiviteter").first { it.path("melding").asText() == "Personen har blitt behandlet på en tidligere ident" }
+            val error =
+                melding.path("aktiviteter").first {
+                    it.path("melding").asText() ==
+                        "Personen har blitt behandlet på en tidligere ident"
+                }
             assertEquals("FUNKSJONELL_FEIL", error.path("nivå").asText())
         }
     }

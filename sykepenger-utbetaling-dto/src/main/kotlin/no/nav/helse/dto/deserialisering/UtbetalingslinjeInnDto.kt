@@ -1,9 +1,9 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.SatstypeDto
+import java.time.LocalDate
 
 data class UtbetalingslinjeInnDto(
     val fom: LocalDate,
@@ -16,5 +16,5 @@ data class UtbetalingslinjeInnDto(
     val refDelytelseId: Int?,
     val endringskode: EndringskodeDto,
     val klassekode: KlassekodeDto,
-    val datoStatusFom: LocalDate?
+    val datoStatusFom: LocalDate?,
 )

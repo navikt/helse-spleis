@@ -9,12 +9,12 @@ enum class GraphQLInntektskilde {
     Inntektsmelding,
     Infotrygd,
     AOrdningen,
-    IkkeRapportert
+    IkkeRapportert,
 }
 
 data class GraphQLInntekterFraAOrdningen(
     val maned: YearMonth,
-    val sum: Double
+    val sum: Double,
 )
 
 data class GraphQLSkjonnsmessigFastsatt(
@@ -26,7 +26,7 @@ data class GraphQLOmregnetArsinntekt(
     val kilde: GraphQLInntektskilde,
     val belop: Double,
     val manedsbelop: Double,
-    val inntekterFraAOrdningen: List<GraphQLInntekterFraAOrdningen>?
+    val inntekterFraAOrdningen: List<GraphQLInntekterFraAOrdningen>?,
 )
 
 data class GraphQLArbeidsgiverinntekt(
@@ -41,12 +41,12 @@ data class GraphQLArbeidsgiverinntekt(
 
 data class GraphQLArbeidsgiverrefusjon(
     val arbeidsgiver: String,
-    val refusjonsopplysninger: List<GraphQLRefusjonselement>
+    val refusjonsopplysninger: List<GraphQLRefusjonselement>,
 )
 
 data class GraphQLRefusjonselement(
     val fom: LocalDate,
     val tom: LocalDate?,
     val belop: Double,
-    val meldingsreferanseId: UUID
+    val meldingsreferanseId: UUID,
 )

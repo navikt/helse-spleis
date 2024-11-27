@@ -1,12 +1,12 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class BehandlingendringInnDto(
     val id: UUID,
@@ -21,5 +21,5 @@ data class BehandlingendringInnDto(
     val refusjonstidslinje: BeløpstidslinjeDto,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgiverperiode: List<PeriodeDto>,
-    val maksdatoresultat: MaksdatoresultatInnDto
+    val maksdatoresultat: MaksdatoresultatInnDto,
 )

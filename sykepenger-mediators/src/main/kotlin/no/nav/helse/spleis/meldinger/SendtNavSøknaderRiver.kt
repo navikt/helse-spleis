@@ -12,7 +12,7 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 
 internal class SendtNavSøknaderRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventName = "sendt_søknad_nav"
     override val riverName = "Sendt søknad Nav"
@@ -38,11 +38,24 @@ internal class SendtNavSøknaderRiver(
                 require("tom") { JsonNode::asLocalDate }
             }
         }
-        message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
+        message.interestedIn(
+            "sporsmal",
+            "arbeidGjenopptatt",
+            "andreInntektskilder",
+            "permitteringer",
+            "merknaderFraSykmelding",
+            "opprinneligSendt",
+            "utenlandskSykmelding",
+            "sendTilGosys",
+        )
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        SendtSøknadNavMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fnr"].asText(),
+            ),
+        )
 }

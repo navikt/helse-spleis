@@ -1,6 +1,8 @@
 package no.nav.helse
 
-class Toggle private constructor(enabled: Boolean) {
+class Toggle private constructor(
+    enabled: Boolean,
+) {
     private val states = ThreadLocal.withInitial { mutableListOf(enabled) }
     val enabled get() = states.get().last()
     val disabled get() = !enabled
@@ -46,7 +48,10 @@ class Toggle private constructor(enabled: Boolean) {
         val LagreUbrukteRefusjonsopplysninger = Toggle(true)
         val LagreRefusjonsopplysningerPåBehandling = Toggle(true)
 
-        fun fraEnv(navn: String, defaultValue: Boolean) = Toggle(System.getenv(navn)?.lowercase()?.toBooleanStrictOrNull() ?: defaultValue)
+        fun fraEnv(
+            navn: String,
+            defaultValue: Boolean,
+        ) = Toggle(System.getenv(navn)?.lowercase()?.toBooleanStrictOrNull() ?: defaultValue)
 
         fun Iterable<Toggle>.enable(block: () -> Unit) {
             forEach(Toggle::enable)

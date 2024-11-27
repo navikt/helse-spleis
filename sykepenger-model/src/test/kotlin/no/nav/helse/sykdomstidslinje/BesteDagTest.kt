@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BesteDagTest {
-
     companion object {
         private val ukjentDag = Dag.UkjentDag(1.januar, TestEvent.søknad)
         private val arbeidsdagFraSøknad = Dag.Arbeidsdag(1.januar, TestEvent.søknad)
@@ -18,7 +17,12 @@ internal class BesteDagTest {
         private val ferieFraInntektsmelding = Dag.Feriedag(1.januar, TestEvent.inntektsmelding)
         private val friskHelgFraInntektsmelding = Dag.FriskHelgedag(1.januar, TestEvent.inntektsmelding)
         private val arbeidIkkeGjenopptattDag = Dag.ArbeidIkkeGjenopptattDag(1.januar, TestEvent.saksbehandler)
-        private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
+        private val arbeidsgiverdagFraInntektsmelding =
+            Dag.Arbeidsgiverdag(
+                1.januar,
+                Økonomi.sykdomsgrad(100.prosent),
+                TestEvent.inntektsmelding,
+            )
         private val ferieFraSøknad = Dag.Feriedag(1.januar, TestEvent.søknad)
         private val ferieFraSaksbehandler = Dag.Feriedag(1.januar, TestEvent.saksbehandler)
         private val permisjonFraSøknad = Dag.Permisjonsdag(1.januar, TestEvent.søknad)
@@ -26,7 +30,12 @@ internal class BesteDagTest {
         private val sykHelgedagFraSøknad = Dag.SykHelgedag(6.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
         private val permisjonHelgedagFraSøknad = Dag.Permisjonsdag(6.januar, TestEvent.søknad)
         private val sykedagFraSaksbehandler = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
-        private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val egenmeldingsdagFraSaksbehandler =
+            Dag.Arbeidsgiverdag(
+                1.januar,
+                Økonomi.sykdomsgrad(100.prosent),
+                TestEvent.saksbehandler,
+            )
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
         private val sykedagNavFraSaksbehandler = Dag.SykedagNav(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val andreYtelser = Dag.AndreYtelser(1.januar, TestEvent.testkilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
@@ -153,7 +162,7 @@ internal class BesteDagTest {
         dag1: Dag,
         dag2: Dag,
         expectedWinner: Dag,
-        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste
+        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste,
     ) {
         val winner = turnering(dag1, dag2)
         assertEquals(expectedWinner, winner)
@@ -163,15 +172,19 @@ internal class BesteDagTest {
         dag1: Dag,
         dag2: Dag,
         expectedWinner: Dag,
-        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste
+        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste,
     ) {
         assertWinner(dag1, dag2, expectedWinner, turnering)
         assertWinner(dag2, dag1, expectedWinner, turnering)
     }
 
     private infix fun Dag.slår(taper: Dag) = Pair(Dagturnering.TURNERING::beste, this) slår taper
+
     private infix fun Pair<BesteStrategy, Dag>.slår(taper: Dag) = assertWinnerBidirectional(this.second, taper, this.second, this.first)
+
     private infix fun Dag.mot(høyre: Dag) = Pair(this, høyre)
+
     private infix fun Pair<Dag, Dag>.gir(vinner: Dag) = assertWinner(this.first, this.second, vinner)
+
     private infix fun BesteStrategy.betyr_at(dag: Dag) = Pair(this, dag)
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.dto.serialisering
 
-import java.util.UUID
 import no.nav.helse.dto.FeriepengeberegnerDto
+import java.util.UUID
 
 data class FeriepengeUtDto(
     val feriepengeberegner: FeriepengeberegnerDto,

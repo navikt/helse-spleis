@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
@@ -31,6 +29,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class ArbeidsgiverperiodesubsumsjonTest {
     @Test
@@ -153,7 +153,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(2, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
-
     }
 
     @Test
@@ -182,7 +181,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(4, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
-
     }
 
     private lateinit var jurist: Subsumsjonobservatør
@@ -196,25 +194,36 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
     }
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
+    private fun undersøke(
+        tidslinje: Sykdomstidslinje,
+        infotrygdBetalteDager: List<Periode> = emptyList(),
+    ) {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager)
         arbeidsgiverperioder.forEach {
             it.subsummering(jurist, tidslinje)
         }
 
-        val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
-            faktaavklarteInntekter = ArbeidsgiverFaktaavklartInntekt(
-                skjæringstidspunkt = 1.januar,
-                `6G` = Grunnbeløp.`6G`.beløp(1.januar),
-                fastsattÅrsinntekt = 31000.månedlig,
-                gjelder = 1.januar til LocalDate.MAX,
-                refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
-            ),
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
-            refusjonstidslinje = Beløpstidslinje()
-        )
+        val builder =
+            UtbetalingstidslinjeBuilderVedtaksperiode(
+                faktaavklarteInntekter =
+                    ArbeidsgiverFaktaavklartInntekt(
+                        skjæringstidspunkt = 1.januar,
+                        `6G` = Grunnbeløp.`6G`.beløp(1.januar),
+                        fastsattÅrsinntekt = 31000.månedlig,
+                        gjelder = 1.januar til LocalDate.MAX,
+                        refusjonsopplysninger =
+                            Refusjonsopplysning(
+                                UUID.randomUUID(),
+                                1.januar,
+                                null,
+                                31000.månedlig,
+                            ).refusjonsopplysninger,
+                    ),
+                regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+                arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
+                refusjonstidslinje = Beløpstidslinje(),
+            )
 
         val utbetalingstidslinje = builder.result(tidslinje)
 
@@ -230,7 +239,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var `§ 8-17 første ledd bokstav a - oppfylt` = 0
         var `§ 8-17 ledd 2` = 0
         var `§ 8-11 første ledd` = 0
-        var `§ 8-19 første ledd - beregning`= 0
+        var `§ 8-19 første ledd - beregning` = 0
         var `§ 8-19 andre ledd - beregning` = 0
         var `§ 8-19 tredje ledd - beregning` = 0
         var `§ 8-19 fjerde ledd - beregning` = 0
@@ -239,16 +248,19 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         private val beregningAvArbeidsgiverperiode = folketrygdloven.paragraf(Paragraf.PARAGRAF_8_19)
 
         private fun ClosedRange<LocalDate>.antallDager() = start.datesUntil(endInclusive.nesteDag).count().toInt()
+
         private fun Collection<ClosedRange<LocalDate>>.antallDager() = sumOf { it.antallDager() }
-        private val Subsumsjon.perioder get() = output["perioder"]
-            ?.let { it as List<*> }
-            ?.map { it as Map<*, *> }
-            ?.mapNotNull {
-                val fom = it["fom"] as? LocalDate
-                val tom = it["tom"] as? LocalDate
-                if (fom != null && tom != null) fom..tom else null
-            }
-            ?: emptyList()
+
+        private val Subsumsjon.perioder get() =
+            output["perioder"]
+                ?.let { it as List<*> }
+                ?.map { it as Map<*, *> }
+                ?.mapNotNull {
+                    val fom = it["fom"] as? LocalDate
+                    val tom = it["tom"] as? LocalDate
+                    if (fom != null && tom != null) fom..tom else null
+                }
+                ?: emptyList()
 
         override fun logg(subsumsjon: Subsumsjon) {
             when {
@@ -258,8 +270,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                 }
                 subsumsjon.er(sykepengerFraTrygden.førsteLedd.bokstavA) -> {
                     subsumsjoner += 1
-                    if (subsumsjon.utfall == Utfall.VILKAR_OPPFYLT) `§ 8-17 første ledd bokstav a - oppfylt` += subsumsjon.perioder.antallDager()
-                    else `§ 8-17 første ledd bokstav a - ikke oppfylt` += subsumsjon.perioder.antallDager()
+                    if (subsumsjon.utfall ==
+                        Utfall.VILKAR_OPPFYLT
+                    ) {
+                        `§ 8-17 første ledd bokstav a - oppfylt` += subsumsjon.perioder.antallDager()
+                    } else {
+                        `§ 8-17 første ledd bokstav a - ikke oppfylt` += subsumsjon.perioder.antallDager()
+                    }
                 }
                 subsumsjon.er(sykepengerFraTrygden.annetLedd) -> {
                     subsumsjoner += 1
@@ -285,7 +302,9 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         }
     }
 
-    private class Dagobservatør(utbetalingstidslinje: Utbetalingstidslinje) {
+    private class Dagobservatør(
+        utbetalingstidslinje: Utbetalingstidslinje,
+    ) {
         val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager
         var fridager = 0
         var arbeidsdager = 0

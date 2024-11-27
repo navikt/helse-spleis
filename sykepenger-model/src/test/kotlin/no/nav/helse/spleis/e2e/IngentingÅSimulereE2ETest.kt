@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `forlenger et vedtak med bare helg`() {
         nyttVedtak(1.januar til 19.januar)
@@ -36,12 +35,11 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg`() {
-        nyttVedtak(1.januar til  18.januar)
+        nyttVedtak(1.januar til 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
         håndterSøknad(20.januar til 21.januar)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
-
 
     @Test
     fun `forlenger et vedtak med bare helg og litt ferie`() {
@@ -56,7 +54,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
-            AVSLUTTET
+            AVSLUTTET,
         )
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
     }
@@ -78,7 +76,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
+            AVVENTER_GODKJENNING,
         )
     }
 }

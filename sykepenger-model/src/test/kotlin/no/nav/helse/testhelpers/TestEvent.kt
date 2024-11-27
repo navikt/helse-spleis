@@ -1,12 +1,14 @@
 package no.nav.helse.testhelpers
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import java.time.LocalDateTime
+import java.util.UUID
 
-internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHendelse {
+internal sealed class TestEvent(
+    opprettet: LocalDateTime,
+) : SykdomshistorikkHendelse {
     companion object {
         val søknad = Søknad(LocalDateTime.now()).kilde
         val inntektsmelding = Inntektsmelding(LocalDateTime.now()).kilde
@@ -18,11 +20,25 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
     val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class.simpleName ?: "Ukjent", UUID.randomUUID(), opprettet)
 
     // Objects impersonating real-life sources of sickness timeline days
-    class Inntektsmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
-    class Sykmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
-    class OverstyrTidslinje(opprettet: LocalDateTime) : TestEvent(opprettet)
-    class Søknad(opprettet: LocalDateTime) : TestEvent(opprettet)
-    class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
+    class Inntektsmelding(
+        opprettet: LocalDateTime,
+    ) : TestEvent(opprettet)
+
+    class Sykmelding(
+        opprettet: LocalDateTime,
+    ) : TestEvent(opprettet)
+
+    class OverstyrTidslinje(
+        opprettet: LocalDateTime,
+    ) : TestEvent(opprettet)
+
+    class Søknad(
+        opprettet: LocalDateTime,
+    ) : TestEvent(opprettet)
+
+    class TestHendelse(
+        opprettet: LocalDateTime,
+    ) : TestEvent(opprettet)
 
     override fun oppdaterFom(other: Periode): Periode {
         error("ikke i bruk")

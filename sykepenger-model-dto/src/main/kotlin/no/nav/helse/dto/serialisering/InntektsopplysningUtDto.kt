@@ -1,12 +1,12 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SubsumsjonDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 sealed class InntektsopplysningUtDto {
     abstract val id: UUID
@@ -19,7 +19,7 @@ sealed class InntektsopplysningUtDto {
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
-        override val tidsstempel: LocalDateTime
+        override val tidsstempel: LocalDateTime,
     ) : InntektsopplysningUtDto() {
         override val beløp: InntektDto? = null
     }
@@ -29,7 +29,7 @@ sealed class InntektsopplysningUtDto {
         override val hendelseId: UUID,
         override val dato: LocalDate,
         override val beløp: InntektDto,
-        override val tidsstempel: LocalDateTime
+        override val tidsstempel: LocalDateTime,
     ) : InntektsopplysningUtDto()
 
     data class SaksbehandlerDto(
@@ -58,13 +58,12 @@ sealed class InntektsopplysningUtDto {
         override val dato: LocalDate,
         override val beløp: InntektDto,
         override val tidsstempel: LocalDateTime,
-        val kilde: KildeDto
+        val kilde: KildeDto,
     ) : InntektsopplysningUtDto() {
         enum class KildeDto {
             Arbeidsgiver,
-            AOrdningen
+            AOrdningen,
         }
-
     }
 
     data class SkattSykepengegrunnlagDto(
@@ -74,6 +73,6 @@ sealed class InntektsopplysningUtDto {
         override val beløp: InntektDto,
         override val tidsstempel: LocalDateTime,
         val inntektsopplysninger: List<SkatteopplysningDto>,
-        val ansattPerioder: List<AnsattPeriodeDto>
+        val ansattPerioder: List<AnsattPeriodeDto>,
     ) : InntektsopplysningUtDto()
 }

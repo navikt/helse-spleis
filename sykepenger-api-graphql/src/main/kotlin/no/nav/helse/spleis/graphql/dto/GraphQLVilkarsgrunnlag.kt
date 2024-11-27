@@ -27,9 +27,15 @@ data class GraphQLSpleisVilkarsgrunnlag(
     val opptjeningFra: LocalDate,
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
-    val oppfyllerKravOmMedlemskap: Boolean?
+    val oppfyllerKravOmMedlemskap: Boolean?,
 ) : GraphQLVilkarsgrunnlag {
-    val skjonnsmessigFastsattAarlig: Double? = inntekter.filter{ it.deaktivert != true }.mapNotNull { it.skjonnsmessigFastsatt }.takeIf(List<*>::isNotEmpty)?.sumOf { it.belop }
+    val skjonnsmessigFastsattAarlig: Double? =
+        inntekter
+            .filter {
+                it.deaktivert != true
+            }.mapNotNull { it.skjonnsmessigFastsatt }
+            .takeIf(List<*>::isNotEmpty)
+            ?.sumOf { it.belop }
 }
 
 data class GraphQLInfotrygdVilkarsgrunnlag(
@@ -38,12 +44,12 @@ data class GraphQLInfotrygdVilkarsgrunnlag(
     override val omregnetArsinntekt: Double,
     override val sykepengegrunnlag: Double,
     override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
-    override val inntekter: List<GraphQLArbeidsgiverinntekt>
+    override val inntekter: List<GraphQLArbeidsgiverinntekt>,
 ) : GraphQLVilkarsgrunnlag
 
 data class GraphQLVilkarsgrunnlaghistorikk(
     val id: UUID,
-    val grunnlag: List<GraphQLVilkarsgrunnlag>
+    val grunnlag: List<GraphQLVilkarsgrunnlag>,
 )
 
 data class GraphQLSykepengegrunnlagsgrense(

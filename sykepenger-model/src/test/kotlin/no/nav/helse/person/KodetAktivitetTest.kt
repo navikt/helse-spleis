@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class KodetAktivitetTest {
-
-
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var person: TestKontekst
 
@@ -26,14 +24,14 @@ class KodetAktivitetTest {
         hendelse1.kontekst(person)
         hendelse1.varsel(Varselkode.RV_SØ_1)
         Assertions.assertTrue(
-            aktivitetslogg.harVarslerEllerVerre()
+            aktivitetslogg.harVarslerEllerVerre(),
         ) { "Expected $aktivitetslogg to contain varsel" }
     }
 
     private class TestKontekst(
         private val type: String,
-        private val melding: String
-    ): Aktivitetskontekst {
+        private val melding: String,
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

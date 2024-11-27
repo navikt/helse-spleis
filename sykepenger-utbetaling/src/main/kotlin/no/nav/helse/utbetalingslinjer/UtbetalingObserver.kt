@@ -1,10 +1,10 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 interface UtbetalingObserver {
     fun utbetalingAnnullert(
@@ -15,7 +15,7 @@ interface UtbetalingObserver {
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String,
-        arbeidsgiverFagsystemId: String
+        arbeidsgiverFagsystemId: String,
     )
 
     fun utbetalingUtbetalt(
@@ -33,7 +33,7 @@ interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        ident: String
+        ident: String,
     ) {
     }
 
@@ -52,7 +52,7 @@ interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        epost: String
+        epost: String,
     ) {
     }
 
@@ -63,9 +63,12 @@ interface UtbetalingObserver {
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetalingstatus,
         nesteTilstand: Utbetalingstatus,
-        korrelasjonsId: UUID
+        korrelasjonsId: UUID,
     ) {
     }
 
-    fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {}
+    fun nyVedtaksperiodeUtbetaling(
+        utbetalingId: UUID,
+        vedtaksperiodeId: UUID,
+    ) {}
 }

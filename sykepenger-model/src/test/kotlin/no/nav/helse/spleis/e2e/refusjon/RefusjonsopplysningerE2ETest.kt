@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
-
     @Test
     fun `Trenger nye refusjonsopplysninger ved oppholdsdager på arbeidsgiver`() {
         listOf(a1, a2).nyeVedtak(januar)
@@ -35,7 +34,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden`(){
+    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden`() {
         a1 {
             nyttVedtak(førsteFraværsdag = 17.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar), periode = januar)
             assertIngenInfoSomInneholder("Mangler refusjonsopplysninger på orgnummer")
@@ -43,7 +42,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg`(){
+    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg`() {
         a1 {
             nyttVedtak(førsteFraværsdag = 22.januar, arbeidsgiverperiode = listOf(4.januar til 19.januar), periode = 4.januar til 31.januar)
             assertIngenInfoSomInneholder("Mangler refusjonsopplysninger på orgnummer")
@@ -54,10 +53,19 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
-            nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
+            nyttVedtak(
+                januar,
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                førsteFraværsdag = 1.januar,
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null),
+            )
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null))
+            håndterInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperiode,
+                førsteFraværsdag = 22.januar,
+                refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
+            )
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().let { refusjonsopplysninger ->
                 refusjonsopplysninger.assertRefusjonsbeløp(1.januar til 21.januar, INNTEKT)
@@ -70,14 +78,24 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `Duplikat innhold i ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
-            nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
+            nyttVedtak(
+                januar,
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                førsteFraværsdag = 1.januar,
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null),
+            )
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
+            håndterInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperiode,
+                førsteFraværsdag = 1.januar,
+                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null),
+            )
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
         }
     }
+
     @Test
     fun `Duplikat inntektsmelding`() {
         a1 {
@@ -126,7 +144,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
     }
 
-
     @Test
     fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten take two`() {
         listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017))
@@ -155,7 +172,10 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun List<Refusjonsopplysning>.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
+    private fun List<Refusjonsopplysning>.assertRefusjonsbeløp(
+        periode: Periode,
+        beløp: Inntekt,
+    ) {
         periode.forEach { dag ->
             assertEquals(beløp, singleOrNull { dag in it.periode }?.beløp)
         }

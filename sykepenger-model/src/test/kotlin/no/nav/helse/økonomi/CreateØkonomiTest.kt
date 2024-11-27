@@ -1,6 +1,5 @@
 package no.nav.helse.økonomi
 
-import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -16,9 +15,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.UUID
 
 internal class CreateØkonomiTest {
-
     @Test
     fun `kan ikke betale økonomi med kun grad`() {
         val data = sykdomstidslinjedag(79.5)
@@ -54,8 +53,9 @@ internal class CreateØkonomiTest {
     fun `kan sette arbeidsgiverperiode`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            assertDoesNotThrow { økonomi
-                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
+            assertDoesNotThrow {
+                økonomi
+                    .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
             }
         }
     }
@@ -102,7 +102,7 @@ internal class CreateØkonomiTest {
         arbeidsgiverbeløp: Double? = null,
         personbeløp: Double? = null,
         totalGrad: Double = grad,
-        er6GBegrenset: Boolean = false
+        er6GBegrenset: Boolean = false,
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
         UtbetalingstidslinjeData.TypeData.NavDag,
         aktuellDagsinntekt,
@@ -118,24 +118,27 @@ internal class CreateØkonomiTest {
         er6GBegrenset,
         dato = 1.januar,
         fom = null,
-        tom = null
+        tom = null,
     )
 
-    private fun sykdomstidslinjedag(grad: Double) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
-        grad,
-        null,
-        null,
-        null,
-        null,
-        1.januar
-    )
+    private fun sykdomstidslinjedag(grad: Double) =
+        PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+            PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
+            PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
+            grad,
+            null,
+            null,
+            null,
+            null,
+            1.januar,
+        )
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
-        val dagtype = dagData.tilDto()
-            .map { Utbetalingsdag.gjenopprett(it) }
-            .single()
+        val dagtype =
+            dagData
+                .tilDto()
+                .map { Utbetalingsdag.gjenopprett(it) }
+                .single()
 
         return when (dagtype) {
             is Utbetalingsdag.NavDag -> dagtype.økonomi
@@ -144,9 +147,11 @@ internal class CreateØkonomiTest {
     }
 
     private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
-        val dagtype = dagData.tilDto()
-            .map { Dag.gjenopprett(it) }
-            .single()
+        val dagtype =
+            dagData
+                .tilDto()
+                .map { Dag.gjenopprett(it) }
+                .single()
 
         return when (dagtype) {
             is Dag.Sykedag -> dagtype.økonomi

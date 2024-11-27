@@ -7,14 +7,13 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal class AvvisInngangsvilkårfilter(
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-): UtbetalingstidslinjerFilter {
-
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+) : UtbetalingstidslinjerFilter {
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): List<Utbetalingstidslinje> {
         val beregningsperiode = tidslinjer.map { it.periode() }.periode()!!
         return vilkårsgrunnlagHistorikk.avvis(tidslinjer, beregningsperiode, periode, subsumsjonslogg)

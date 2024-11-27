@@ -14,14 +14,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.økonomi.Prosentdel
 
-internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering) :
-    UtbetalingstidslinjerFilter {
-
+internal class Sykdomsgradfilter(
+    private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering,
+) : UtbetalingstidslinjerFilter {
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): List<Utbetalingstidslinje> {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
 
@@ -40,11 +40,18 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
         }
         val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
-        `§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
+        `§ 8-13 ledd 1`(
+            periode,
+            avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(),
+            tidslinjerForSubsumsjon,
+        ).forEach {
             subsumsjonslogg.logg(it)
         }
-        if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
-        else aktivitetslogg.info("Ingen avviste dager på grunn av 20 % samlet sykdomsgrad-regel for denne perioden")
+        if (harAvvisteDager) {
+            aktivitetslogg.varsel(RV_VV_4)
+        } else {
+            aktivitetslogg.info("Ingen avviste dager på grunn av 20 % samlet sykdomsgrad-regel for denne perioden")
+        }
         return avvisteTidslinjer
     }
 }

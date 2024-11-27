@@ -14,10 +14,10 @@ enum class KontekstType {
     OverstyrArbeidsgiveropplysninger,
     OverstyrArbeidsforhold,
     SkjønnsmessigFastsettelse,
-    AndreYtelser
+    AndreYtelser,
 }
 
 data class Subsumsjonskontekst(
     val type: KontekstType,
-    val verdi: String
+    val verdi: String,
 )

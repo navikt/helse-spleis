@@ -1,7 +1,7 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDateTime
 import no.nav.helse.dto.AlderDto
+import java.time.LocalDateTime
 
 data class PersonUtDto(
     val fødselsnummer: String,
@@ -10,6 +10,5 @@ data class PersonUtDto(
     val arbeidsgivere: List<ArbeidsgiverUtDto>,
     val infotrygdhistorikk: InfotrygdhistorikkUtDto,
     val vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkUtDto,
-    val minimumSykdomsgradVurdering: MinimumSykdomsgradVurderingUtDto
+    val minimumSykdomsgradVurdering: MinimumSykdomsgradVurderingUtDto,
 )
-

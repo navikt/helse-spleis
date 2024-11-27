@@ -7,9 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
@@ -25,40 +22,50 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class BehovMediatorTest {
-
     private companion object {
         private const val fødselsnummer = "01010112345"
 
         private lateinit var behovMediator: BehovMediator
 
-        private val objectMapper = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
+        private val objectMapper =
+            jacksonObjectMapper()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
 
-        private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-            it.requireKey("@event_name")
-        }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
+        private val eksempelmelding =
+            MigrateMessage(
+                JsonMessage.newMessage("testevent", emptyMap()).also {
+                    it.requireKey("@event_name")
+                },
+                Meldingsporing(UUID.randomUUID(), fødselsnummer),
+            )
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
-    private val testRapid = object : RapidsConnection() {
-        override fun publish(message: String) {
-            messages.add(null to message)
-        }
+    private val testRapid =
+        object : RapidsConnection() {
+            override fun publish(message: String) {
+                messages.add(null to message)
+            }
 
-        override fun publish(key: String, message: String) {
-            messages.add(key to message)
-        }
+            override fun publish(
+                key: String,
+                message: String,
+            ) {
+                messages.add(key to message)
+            }
 
-        override fun rapidName(): String {
-            return "Testrapid"
-        }
+            override fun rapidName(): String = "Testrapid"
 
-        override fun start() {}
-        override fun stop() {}
-    }
+            override fun start() {}
+
+            override fun stop() {}
+        }
 
     @BeforeEach
     fun setup() {
@@ -77,9 +84,11 @@ class BehovMediatorTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
-            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            Sykepengehistorikk,
+            "Trenger sykepengehistorikk",
+            mapOf(
+                "historikkFom" to LocalDate.now(),
+            ),
         )
         aktivitetslogg.behov(Foreldrepenger, "Trenger foreldrepengeytelser")
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
@@ -133,14 +142,18 @@ class BehovMediatorTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
-            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            Sykepengehistorikk,
+            "Trenger sykepengehistorikk",
+            mapOf(
+                "historikkFom" to LocalDate.now(),
+            ),
         )
         aktivitetslogg.behov(
-            Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            Foreldrepenger,
+            "Trenger foreldrepengeytelser",
+            mapOf(
+                "historikkFom" to LocalDate.now(),
+            ),
         )
 
         assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -154,14 +167,18 @@ class BehovMediatorTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
-            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            Sykepengehistorikk,
+            "Trenger sykepengehistorikk",
+            mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1),
+            ),
         )
         aktivitetslogg.behov(
-            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            Sykepengehistorikk,
+            "Trenger sykepengehistorikk",
+            mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1),
+            ),
         )
 
         assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -175,14 +192,18 @@ class BehovMediatorTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
-            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            Sykepengehistorikk,
+            "Trenger sykepengehistorikk",
+            mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1),
+            ),
         )
         aktivitetslogg.behov(
-            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(2)
-            )
+            Sykepengehistorikk,
+            "Trenger sykepengehistorikk",
+            mapOf(
+                "historikkFom" to LocalDate.now().minusDays(2),
+            ),
         )
 
         assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -216,7 +237,7 @@ class BehovMediatorTest {
 
     private class TestKontekst(
         private val type: String,
-        private val melding: String
+        private val melding: String,
     ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }

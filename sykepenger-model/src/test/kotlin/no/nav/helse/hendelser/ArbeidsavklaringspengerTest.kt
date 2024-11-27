@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsavklaringspengerTest {
-
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
@@ -23,12 +22,14 @@ internal class ArbeidsavklaringspengerTest {
 
     @Test
     fun `AAP eldre enn 6 måneder`() {
-        assertFalse(undersøke(
-            Periode(
-            fom = skjæringstidspunkt.minusMonths(8),
-            tom = skjæringstidspunkt.minusMonths(6).minusDays(1)
+        assertFalse(
+            undersøke(
+                Periode(
+                    fom = skjæringstidspunkt.minusMonths(8),
+                    tom = skjæringstidspunkt.minusMonths(6).minusDays(1),
+                ),
+            ),
         )
-        ))
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -38,9 +39,9 @@ internal class ArbeidsavklaringspengerTest {
             undersøke(
                 Periode(
                     fom = skjæringstidspunkt.minusMonths(8),
-                    tom = skjæringstidspunkt.minusMonths(6)
-                )
-            )
+                    tom = skjæringstidspunkt.minusMonths(6),
+                ),
+            ),
         )
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }

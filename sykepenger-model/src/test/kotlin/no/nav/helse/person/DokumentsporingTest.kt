@@ -1,11 +1,10 @@
 package no.nav.helse.person
 
-import java.util.UUID
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class DokumentsporingTest {
-
     @Test
     fun `to like sporinger i et set`() {
         val søknad = UUID.randomUUID()

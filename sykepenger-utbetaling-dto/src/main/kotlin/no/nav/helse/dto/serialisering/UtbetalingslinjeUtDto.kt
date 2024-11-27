@@ -1,9 +1,9 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDate
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.SatstypeDto
+import java.time.LocalDate
 
 data class UtbetalingslinjeUtDto(
     val fom: LocalDate,
@@ -19,5 +19,5 @@ data class UtbetalingslinjeUtDto(
     val endringskode: EndringskodeDto,
     val klassekode: KlassekodeDto,
     val datoStatusFom: LocalDate?,
-    val statuskode: String?
+    val statuskode: String?,
 )

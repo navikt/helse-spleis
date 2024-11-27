@@ -1,7 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -17,12 +15,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class SykmeldingsperioderTest {
-
-    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "ORGNUMMER"
-    )
+    private val hendelsefabrikk =
+        ArbeidsgiverHendelsefabrikk(
+            organisasjonsnummer = "ORGNUMMER",
+        )
 
     private fun Sykmeldingsperioder.lagre(periode: Periode) =
         lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
@@ -187,9 +187,18 @@ internal class SykmeldingsperioderTest {
         sykmeldingsperioder.lagre(1.januar til 15.januar)
         sykmeldingsperioder.lagre(1.mars til 28.mars)
 
-        assertEquals(listOf(1.januar til 15.januar), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar).dager()))
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar).dager()))
-        assertEquals(listOf(1.mars til 16.mars), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars).dager()))
+        assertEquals(
+            listOf(1.januar til 15.januar),
+            sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar).dager()),
+        )
+        assertEquals(
+            emptyList<Periode>(),
+            sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar).dager()),
+        )
+        assertEquals(
+            listOf(1.mars til 16.mars),
+            sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars).dager()),
+        )
     }
 
     @Test
@@ -197,7 +206,10 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(januar)
 
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar).dager()))
+        assertEquals(
+            emptyList<Periode>(),
+            sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar).dager()),
+        )
     }
 
     @Test
@@ -211,29 +223,34 @@ internal class SykmeldingsperioderTest {
             sykmeldingsperioder.overlappendePerioder(
                 inntektsmelding(
                     listOf(1.januar til 16.januar),
-                    førsteFraværsdag = 10.februar
-                ).dager()
-            )
+                    førsteFraværsdag = 10.februar,
+                ).dager(),
+            ),
         )
     }
 
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate
-    ): Inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beregnetInntekt = Inntekt.INGEN,
-        førsteFraværsdag = førsteFraværsdag,
-        refusjon = Inntektsmelding.Refusjon(null, null),
-        harOpphørAvNaturalytelser = false,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, Aktivitetslogg())
+        førsteFraværsdag: LocalDate,
+    ): Inntektsmelding =
+        hendelsefabrikk
+            .lagInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = Inntekt.INGEN,
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = Inntektsmelding.Refusjon(null, null),
+                harOpphørAvNaturalytelser = false,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            ).also {
+                it.valider(
+                    object : Inntektsmelding.Valideringsgrunnlag {
+                        override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
 
-    }
+                        override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+                    },
+                    Aktivitetslogg(),
+                )
+            }
 
     fun Sykmeldingsperioder.perioder() = view().perioder
 }

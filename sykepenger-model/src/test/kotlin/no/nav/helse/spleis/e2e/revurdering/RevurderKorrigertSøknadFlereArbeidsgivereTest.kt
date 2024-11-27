@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -37,16 +36,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest() {
-
     @Test
     fun `Korrigerende søknad hos en arbeidsgiver - setter i gang revurdering`() {
         listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
@@ -121,7 +120,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = listOf(a1, a2).lagStandardSykepengegrunnlag(20000.månedlig, periodeAg1.start)
+                inntektsvurderingForSykepengegrunnlag = listOf(a1, a2).lagStandardSykepengegrunnlag(20000.månedlig, periodeAg1.start),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -151,7 +150,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
         a2 {
@@ -159,7 +163,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
-
         }
     }
 
@@ -183,17 +186,21 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
         }
         a1 {
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
-                    )
-                )
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    ),
+                inntektsvurderingForSykepengegrunnlag =
+                    InntektForSykepengegrunnlag(
+                        inntekter =
+                            listOf(
+                                grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                                grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                            ),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -221,15 +228,21 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertEquals(
                 21,
-                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Sykedag::class]
+                inspektør.sykdomstidslinje
+                    .subset(januar)
+                    .inspektør.dagteller[Sykedag::class],
             )
             assertEquals(
                 2,
-                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Feriedag::class]
+                inspektør.sykdomstidslinje
+                    .subset(januar)
+                    .inspektør.dagteller[Feriedag::class],
             )
             assertEquals(
                 8,
-                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[SykHelgedag::class]
+                inspektør.sykdomstidslinje
+                    .subset(januar)
+                    .inspektør.dagteller[SykHelgedag::class],
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -373,7 +386,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -386,7 +404,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    100.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
     }
@@ -483,17 +506,21 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
         }
         a1 {
-            håndterVilkårsgrunnlag(  1.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
-                    )
-                )
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    ),
+                inntektsvurderingForSykepengegrunnlag =
+                    InntektForSykepengegrunnlag(
+                        inntekter =
+                            listOf(
+                                grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                                grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                            ),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -540,7 +567,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.februar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -615,17 +647,21 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
         }
         a1 {
-            håndterVilkårsgrunnlag(  1.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
-                    )
-                )
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    ),
+                inntektsvurderingForSykepengegrunnlag =
+                    InntektForSykepengegrunnlag(
+                        inntekter =
+                            listOf(
+                                grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                                grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                            ),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -667,7 +703,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalt()
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.februar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -706,10 +747,20 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
             (10..28).forEach {
-                assertEquals(100.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+                assertEquals(
+                    100.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(2.vedtaksperiode)[it.februar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
     }
@@ -720,7 +771,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -728,7 +779,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
@@ -743,8 +794,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
             assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
-            (17..29).forEach{
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            (17..29).forEach {
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -759,14 +815,14 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
@@ -781,8 +837,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
             assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
-            (17..29).forEach{
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            (17..29).forEach {
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -797,13 +858,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -814,8 +875,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
             assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
-            (17..29).forEach{
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            (17..29).forEach {
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -840,7 +906,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -850,7 +921,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
     }

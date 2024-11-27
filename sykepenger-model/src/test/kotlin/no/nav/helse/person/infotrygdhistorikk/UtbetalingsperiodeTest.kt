@@ -1,11 +1,9 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -59,7 +57,6 @@ internal class UtbetalingsperiodeTest {
         assertEquals(periode1, periode2)
     }
 
-
     @Test
     fun `lik periode - avrunding - bruker`() {
         val prosent = 30.prosent
@@ -71,11 +68,18 @@ internal class UtbetalingsperiodeTest {
         assertEquals(periode1, periode2)
     }
 
-    private fun assertEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
+    private fun assertEquals(
+        one: Infotrygdperiode,
+        two: Infotrygdperiode,
+    ) {
         assertTrue(one.funksjoneltLik(two))
         assertTrue(two.funksjoneltLik(one))
     }
-    private fun assertNotEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
+
+    private fun assertNotEquals(
+        one: Infotrygdperiode,
+        two: Infotrygdperiode,
+    ) {
         assertFalse(one.funksjoneltLik(two))
         assertFalse(two.funksjoneltLik(one))
     }

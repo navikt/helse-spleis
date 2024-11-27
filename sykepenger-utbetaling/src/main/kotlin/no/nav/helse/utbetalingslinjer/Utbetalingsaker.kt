@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
+import java.time.LocalDate
 
 /**
  * en utbetalingsak er den logiske perioden som binder
@@ -15,10 +15,11 @@ import no.nav.helse.hendelser.Periode.Companion.periode
  */
 data class Utbetalingsak(
     val startperiode: LocalDate,
-    val vedtaksperioder: List<Periode>
+    val vedtaksperioder: List<Periode>,
 ) {
     init {
         check(vedtaksperioder.isNotEmpty())
     }
+
     val omsluttendePeriode = vedtaksperioder.periode()!!.oppdaterFom(startperiode)
 }

@@ -3,7 +3,9 @@ package no.nav.helse
 /**
  * Teller teller telleting
  */
-class Teller(private val grense: Int) {
+class Teller(
+    private val grense: Int,
+) {
     private var observer: Observer = Observer.nullObserver
     private var rest = grense
     private val initiell = if (grense == 0) Ferdig else Initiell
@@ -13,8 +15,13 @@ class Teller(private val grense: Int) {
         require(grense >= 0) { "grense må være større eller lik 0" }
     }
 
-    fun reset() { state(initiell) }
-    fun observer(observer: Observer) { this.observer = observer }
+    fun reset() {
+        state(initiell)
+    }
+
+    fun observer(observer: Observer) {
+        this.observer = observer
+    }
 
     fun ferdig() = state == Ferdig
 
@@ -31,7 +38,9 @@ class Teller(private val grense: Int) {
 
     private interface Telletilstand {
         fun entering(teller: Teller) {}
+
         fun inc(teller: Teller)
+
         fun leaving(teller: Teller) {}
     }
 
@@ -61,8 +70,11 @@ class Teller(private val grense: Int) {
         companion object {
             val nullObserver = object : Observer {}
         }
+
         fun onInc() {}
+
         fun onGrense() {}
+
         fun onReset() {}
     }
 }

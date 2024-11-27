@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -15,6 +13,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dagtype.Pleiepengerdag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -39,14 +38,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
@@ -59,10 +56,11 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import java.time.LocalDate
+import java.util.UUID
 import kotlin.reflect.KClass
 
-internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
-
+internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     @Test
     fun `Stuckiness med helg involvert - da gjenbruker vi tidsnære opplysninger`() {
         a1 { håndterSykmelding(januar) }
@@ -191,7 +189,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
 
-
     @Test
     fun `Først litt gjenbruk av tidsnære opplysninger etterfulgt av overstyring til andre ytelser som gjør at vi ikke trengte dem allikevel`() {
         listOf(a1, a2).nyeVedtak(januar)
@@ -274,9 +271,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             tilGodkjenning(10.januar til 31.januar, beregnetInntekt = 20000.månedlig)
             val vilkårsgrunnlagFørEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
             nullstillTilstandsendringer()
-            håndterOverstyrTidslinje(listOf(
-                ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
-            ))
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100),
+                ),
+            )
 
             assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
 
@@ -288,16 +287,20 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             val vilkårsgrunnlagEtterEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
 
-            assertTidsnærInntektsopplysning(a1, vilkårsgrunnlagFørEndring.inspektør.inntektsgrunnlag, vilkårsgrunnlagEtterEndring.inspektør.inntektsgrunnlag)
-            assertTilstander(1.vedtaksperiode,
+            assertTidsnærInntektsopplysning(
+                a1,
+                vilkårsgrunnlagFørEndring.inspektør.inntektsgrunnlag,
+                vilkårsgrunnlagEtterEndring.inspektør.inntektsgrunnlag,
+            )
+            assertTilstander(
+                1.vedtaksperiode,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
-
     }
 
     @Test
@@ -305,7 +308,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent))
             tilGodkjenning(10.januar til 31.januar, beregnetInntekt = 20000.månedlig, arbeidsgiverperiode = listOf(10.januar til 26.januar)) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
             nullstillTilstandsendringer()
             // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)))
@@ -315,14 +319,22 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
 
             assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
             assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
         }
     }
 
@@ -343,9 +355,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             nullstillTilstandsendringer()
         }
-        val sykepengegrunnlagFør = a2 {
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-        }
+        val sykepengegrunnlagFør =
+            a2 {
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            }
 
         a1 {
             // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
@@ -353,22 +366,28 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
         }
         a2 {
-
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-
         }
-        val sykepengegrunnlagEtter = a2 {
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-        }
+        val sykepengegrunnlagEtter =
+            a2 {
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            }
 
         a2 {
             assertTidsnærInntektsopplysning(a2, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
             assertEquals(10.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
         }
         a1 {
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
@@ -388,15 +407,19 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje(listOf(
-                ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
-                ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
-            ))
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+                    ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+                ),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -408,7 +431,14 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertUtbetalingsdag(18.januar, Utbetalingsdag.ArbeidsgiverperiodeDag::class, Inntekt.INGEN, Inntekt.INGEN)
             assertUtbetalingsdag(19.januar, Utbetalingsdag.NavDag::class, 1431.daglig, Inntekt.INGEN)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
         }
     }
 
@@ -423,15 +453,19 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje(listOf(
-                ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
-                ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
-            ))
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+                    ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+                ),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -447,7 +481,14 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             val revurdering = inspektør.utbetaling(1)
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 
@@ -462,10 +503,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje((1.januar til 16.januar).map { dag ->
-                ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
-            })
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                (1.januar til 16.januar).map { dag ->
+                    ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
+                },
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -475,7 +519,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -494,9 +539,16 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,
-                AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
         }
     }
@@ -512,14 +564,18 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje((1.januar til 10.januar).map { dag ->
-                ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
-            })
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                (1.januar til 10.januar).map { dag ->
+                    ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
+                },
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -547,7 +603,14 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             }
             assertEquals(0, revurdering.personOppdrag.size)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 
@@ -564,14 +627,18 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje((1.mars til 10.mars).map { dag ->
-                ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
-            })
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                (1.mars til 10.mars).map { dag ->
+                    ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
+                },
+            )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -598,7 +665,14 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
                 }
             }
             assertEquals(0, revurdering.personOppdrag.size)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 
@@ -608,10 +682,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(14.februar til 10.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
-                ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
-            })
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                (14.februar til 16.februar).map { dag ->
+                    ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
+                },
+            )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -624,7 +701,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -683,10 +761,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(14.februar til 10.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             nullstillTilstandsendringer()
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
-                ManuellOverskrivingDag(dag, Dagtype.Feriedag, 100)
-            })
+            val sykepengegrunnlagFør =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            håndterOverstyrTidslinje(
+                (14.februar til 16.februar).map { dag ->
+                    ManuellOverskrivingDag(dag, Dagtype.Feriedag, 100)
+                },
+            )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -699,7 +780,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
-            val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+            val sykepengegrunnlagEtter =
+                inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
@@ -884,6 +966,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertIngenVarsel(RV_IV_7)
         }
     }
+
     @Test
     fun `gjenbruker saksbehandlerinntekt`() {
         a1 {
@@ -894,11 +977,17 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
+            val sykepengegrunnlagFør =
+                inspektør
+                    .vilkårsgrunnlag(1.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.inspektør
 
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT))),
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -919,14 +1008,26 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
-            val arbeidsgiverInntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør
+            val sykepengegrunnlag =
+                inspektør
+                    .vilkårsgrunnlag(2.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.inspektør
+            val arbeidsgiverInntektsopplysning =
+                sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                    .getValue(
+                        a1,
+                    ).inspektør.inntektsopplysning.inspektør
             assertEquals(INNTEKT - 50.daglig, arbeidsgiverInntektsopplysning.beløp)
-            val hendelseIdFør = sykepengegrunnlagFør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.hendelseId
+            val hendelseIdFør =
+                sykepengegrunnlagFør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                    .getValue(
+                        a1,
+                    ).inspektør.inntektsopplysning.inspektør.hendelseId
             val hendelseIdEtter = arbeidsgiverInntektsopplysning.hendelseId
             assertEquals(hendelseIdFør, hendelseIdEtter)
         }
     }
+
     @Test
     fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() {
         a1 {
@@ -944,12 +1045,23 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT))),
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
             val andreOverstyring = UUID.randomUUID()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))), meldingsreferanseId = andreOverstyring)
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT))),
+                ),
+                meldingsreferanseId = andreOverstyring,
+            )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
@@ -978,8 +1090,15 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
-            val arbeidsgiverInntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør
+            val sykepengegrunnlag =
+                inspektør
+                    .vilkårsgrunnlag(2.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.inspektør
+            val arbeidsgiverInntektsopplysning =
+                sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                    .getValue(
+                        a1,
+                    ).inspektør.inntektsopplysning.inspektør
             assertEquals(INNTEKT - 500.daglig, arbeidsgiverInntektsopplysning.beløp)
 
             assertEquals(andreOverstyring, inspektør.skjønnsmessigFastsattOverstyrtHendelseId(1.januar))
@@ -1000,7 +1119,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektSkatt)
             assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
             nullstillTilstandsendringer()
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsmessigFastsattInntekt)))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsmessigFastsattInntekt)),
+            )
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
             håndterYtelser(1.vedtaksperiode)
@@ -1029,25 +1151,35 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
+            val sykepengegrunnlag =
+                inspektør
+                    .vilkårsgrunnlag(2.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.inspektør
 
-            val arbeidsgiverInntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør
+            val arbeidsgiverInntektsopplysning =
+                sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                    .getValue(
+                        a1,
+                    ).inspektør.inntektsopplysning.inspektør
             assertEquals(beregnetInntektIM, arbeidsgiverInntektsopplysning.beløp)
 
             assertEquals(inntektsmeldingId, inspektør.skjønnsmessigFastsattOverstyrtHendelseId(1.januar))
             assertEquals(inntektsmeldingId, inspektør.skjønnsmessigFastsattOverstyrtHendelseId(1.februar))
         }
     }
+
     @Test
     fun `ikke varsel når det er hull i agp`() {
         a1 {
             håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
             håndterSøknad(Sykdom(21.januar, 8.februar, 100.prosent))
             håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent))
-            håndterInntektsmelding(listOf(
-                17.januar til 20.januar,
-                2.februar til 13.februar
-            ))
+            håndterInntektsmelding(
+                listOf(
+                    17.januar til 20.januar,
+                    2.februar til 13.februar,
+                ),
+            )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
@@ -1077,7 +1209,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             // Skjønnsmessig fastsetter
             val skjønnsmessigId = UUID.randomUUID()
-            håndterSkjønnsmessigFastsettelse(8.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.25)), meldingsreferanseId = skjønnsmessigId)
+            håndterSkjønnsmessigFastsettelse(
+                8.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.25)),
+                meldingsreferanseId = skjønnsmessigId,
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1121,7 +1257,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             // Overstyrer en gang
             val overstyring1Id = UUID.randomUUID()
             val overstyring1Inntekt = INNTEKT * 1.05
-            håndterOverstyrArbeidsgiveropplysninger(8.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, overstyring1Inntekt, forklaring = "ja takk")), meldingsreferanseId = overstyring1Id)
+            håndterOverstyrArbeidsgiveropplysninger(
+                8.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, overstyring1Inntekt, forklaring = "ja takk")),
+                meldingsreferanseId = overstyring1Id,
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1134,7 +1274,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             // Overstyrer en gang til
             val overstyring2Id = UUID.randomUUID()
             val overstyring2Inntekt = INNTEKT * 1.10
-            håndterOverstyrArbeidsgiveropplysninger(8.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, overstyring2Inntekt, forklaring = "ja takk")), meldingsreferanseId = overstyring2Id)
+            håndterOverstyrArbeidsgiveropplysninger(
+                8.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, overstyring2Inntekt, forklaring = "ja takk")),
+                meldingsreferanseId = overstyring2Id,
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1159,38 +1303,69 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
 
-    private fun assertTidsnærInntektsopplysning(orgnummer: String, inntektsgrunnlagFør: InntektsgrunnlagView, inntektsgrunnlagEtter: InntektsgrunnlagView) {
-        val inntektsopplysningerFørEndring = inntektsgrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
-        val inntektsopplysningerEtterEndring = inntektsgrunnlagEtter.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
+    private fun assertTidsnærInntektsopplysning(
+        orgnummer: String,
+        inntektsgrunnlagFør: InntektsgrunnlagView,
+        inntektsgrunnlagEtter: InntektsgrunnlagView,
+    ) {
+        val inntektsopplysningerFørEndring =
+            inntektsgrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(
+                orgnummer,
+            )
+        val inntektsopplysningerEtterEndring =
+            inntektsgrunnlagEtter.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(
+                orgnummer,
+            )
 
         assertEquals(
             inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.hendelseId,
-            inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.hendelseId
+            inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.hendelseId,
         )
         assertEquals(
             inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.beløp,
-            inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.beløp
+            inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.beløp,
         )
         assertEquals(
             inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.tidsstempel,
-            inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.tidsstempel
+            inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.tidsstempel,
         )
         assertEquals(
             Inntektsmelding::class,
-            inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class
+            inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class,
         )
     }
 
     private fun TestPerson.TestArbeidsgiver.inntektsopplysning(skjæringstidspunkt: LocalDate) =
-        inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.inntektsopplysning ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
+        inspektør
+            .vilkårsgrunnlag(
+                skjæringstidspunkt,
+            )?.inspektør
+            ?.inntektsgrunnlag
+            ?.inspektør
+            ?.arbeidsgiverInntektsopplysninger
+            ?.singleOrNull {
+                it.inspektør.orgnummer ==
+                    this.orgnummer
+            }?.inspektør
+            ?.inntektsopplysning
+            ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
 
-    private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
+    private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(
+        dato: LocalDate,
+        dagtype: KClass<out Dag>,
+        kommerFra: KClass<out SykdomstidslinjeHendelse>,
+    ) {
         val dagen = inspektør.sykdomstidslinje[dato]
         assertEquals(dagtype, dagen::class)
         assertTrue(dagen.kommerFra(kommerFra))
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertUtbetalingsdag(dato: LocalDate, dagtype: KClass<out Utbetalingsdag>, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+    private fun TestPerson.TestArbeidsgiver.assertUtbetalingsdag(
+        dato: LocalDate,
+        dagtype: KClass<out Utbetalingsdag>,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt,
+    ) {
         val sisteUtbetaling = inspektør.sisteUtbetaling()
         val utbetalingstidslinje = sisteUtbetaling.utbetalingstidslinje
         val dagen = utbetalingstidslinje[dato]
@@ -1200,9 +1375,17 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         assertEquals(personbeløp, dagen.økonomi.inspektør.personbeløp)
     }
 
-    private fun TestArbeidsgiverInspektør.skjønnsmessigFastsattOverstyrtHendelseId(skjæringstidspunkt: LocalDate, organisasjonsnummer: String = this.orgnummer) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(organisasjonsnummer) }.inspektør.inntektsopplysning.let {
+    private fun TestArbeidsgiverInspektør.skjønnsmessigFastsattOverstyrtHendelseId(
+        skjæringstidspunkt: LocalDate,
+        organisasjonsnummer: String = this.orgnummer,
+    ) = vilkårsgrunnlag(skjæringstidspunkt)!!
+        .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+        .single {
+            it.gjelder(organisasjonsnummer)
+        }.inspektør.inntektsopplysning
+        .let {
             assertTrue(it is SkjønnsmessigFastsatt) { "Forventet SkjønnmessigFastsatt inntekt, var ${it::class.simpleName}" }
-            it.inspektør.forrigeInntekt!!.inspektør.hendelseId
+            it.inspektør.forrigeInntekt!!
+                .inspektør.hendelseId
         }
 }

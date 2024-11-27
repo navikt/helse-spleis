@@ -5,10 +5,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 
 class Medlemskapsvurdering(
-    internal val medlemskapstatus: Medlemskapstatus
+    internal val medlemskapstatus: Medlemskapstatus,
 ) {
-    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
-        return when (medlemskapstatus) {
+    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean =
+        when (medlemskapstatus) {
             Medlemskapstatus.Ja -> {
                 aktivitetslogg.info("Bruker er medlem av Folketrygden")
                 true
@@ -26,9 +26,11 @@ class Medlemskapsvurdering(
                 true
             }
         }
-    }
 
     enum class Medlemskapstatus {
-        Ja, Nei, VetIkke, UavklartMedBrukerspørsmål
+        Ja,
+        Nei,
+        VetIkke,
+        UavklartMedBrukerspørsmål,
     }
 }

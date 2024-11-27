@@ -4,19 +4,19 @@ import java.time.LocalDate
 
 data class SimuleringResultatDto(
     val totalbeløp: Int,
-    val perioder: List<SimulertPeriode>
+    val perioder: List<SimulertPeriode>,
 ) {
     data class SimulertPeriode(
         val fom: LocalDate,
         val tom: LocalDate,
-        val utbetalinger: List<SimulertUtbetaling>
+        val utbetalinger: List<SimulertUtbetaling>,
     )
 
     data class SimulertUtbetaling(
         val forfallsdato: LocalDate,
         val utbetalesTil: Mottaker,
         val feilkonto: Boolean,
-        val detaljer: List<Detaljer>
+        val detaljer: List<Detaljer>,
     )
 
     data class Detaljer(
@@ -29,22 +29,22 @@ data class SimuleringResultatDto(
         val utbetalingstype: String,
         val tilbakeføring: Boolean,
         val sats: Sats,
-        val refunderesOrgnummer: String
+        val refunderesOrgnummer: String,
     )
 
     data class Sats(
         val sats: Double,
         val antall: Int,
-        val type: String
+        val type: String,
     )
 
     data class Klassekode(
         val kode: String,
-        val beskrivelse: String
+        val beskrivelse: String,
     )
 
     data class Mottaker(
         val id: String,
-        val navn: String
+        val navn: String,
     )
 }

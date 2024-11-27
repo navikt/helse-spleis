@@ -6,11 +6,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
 class Aktivitetslogg(
-    private var forelder: Aktivitetslogg? = null
+    private var forelder: Aktivitetslogg? = null,
 ) : IAktivitetslogg {
     private val _aktiviteter = mutableListOf<Aktivitet>()
     val aktiviteter: List<Aktivitet> get() = _aktiviteter.toList()
-    private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
+    private val kontekster = mutableListOf<Aktivitetskontekst>() // Doesn't need serialization
 
     val behov get() = aktiviteter.filterIsInstance<Aktivitet.Behov>()
     val info get() = aktiviteter.filterIsInstance<Aktivitet.Info>()
@@ -18,7 +18,10 @@ class Aktivitetslogg(
     val funksjonellFeil get() = aktiviteter.filterIsInstance<Aktivitet.FunksjonellFeil>()
     val logiskFeil get() = aktiviteter.filterIsInstance<Aktivitet.LogiskFeil>()
 
-    override fun info(melding: String, vararg params: Any?) {
+    override fun info(
+        melding: String,
+        vararg params: Any?,
+    ) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
         add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), formatertMelding))
     }
@@ -27,7 +30,11 @@ class Aktivitetslogg(
         add(kode.varsel(kontekster.toSpesifikk()))
     }
 
-    override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
+    override fun behov(
+        type: Behov.Behovtype,
+        melding: String,
+        detaljer: Map<String, Any?>,
+    ) {
         add(Behov.opprett(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
@@ -35,7 +42,10 @@ class Aktivitetslogg(
         add(kode.funksjonellFeil(kontekster.toSpesifikk()))
     }
 
-    override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
+    override fun logiskFeil(
+        melding: String,
+        vararg params: Any?,
+    ): Nothing {
         add(Aktivitet.LogiskFeil.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
 
         throw AktivitetException(this)
@@ -68,19 +78,22 @@ class Aktivitetslogg(
         repeat(antall) { kontekster.removeLast() }
     }
 
-    override fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst) {
+    override fun kontekst(
+        parent: Aktivitetslogg,
+        kontekst: Aktivitetskontekst,
+    ) {
         forelder = parent
         kontekst(kontekst)
     }
 
-    class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
-        RuntimeException(aktivitetslogg.toString()) {
-
-        fun kontekst() = aktivitetslogg.kontekster.fold(mutableMapOf<String, String>()) { result, kontekst ->
-            result.apply { putAll(kontekst.toSpesifikkKontekst().kontekstMap) }
-        }
+    class AktivitetException internal constructor(
+        private val aktivitetslogg: Aktivitetslogg,
+    ) : RuntimeException(aktivitetslogg.toString()) {
+        fun kontekst() =
+            aktivitetslogg.kontekster.fold(mutableMapOf<String, String>()) { result, kontekst ->
+                result.apply { putAll(kontekst.toSpesifikkKontekst().kontekstMap) }
+            }
 
         fun aktivitetslogg() = aktivitetslogg
     }
-
 }

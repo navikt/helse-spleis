@@ -1,9 +1,9 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class BehandlingInnDto(
     val id: UUID,

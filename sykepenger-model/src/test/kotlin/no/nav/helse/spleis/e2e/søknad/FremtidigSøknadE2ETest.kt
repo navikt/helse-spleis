@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import java.time.YearMonth
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -30,6 +29,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
     private companion object {
@@ -61,7 +61,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
         val arbeidsgiverOppdrag = inspektør.utbetaling(0).arbeidsgiverOppdrag
         val oppdragInspektør = arbeidsgiverOppdrag.inspektør
@@ -69,5 +69,4 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
         assertEquals(tom, oppdragInspektør.periode?.endInclusive)
     }
-
 }

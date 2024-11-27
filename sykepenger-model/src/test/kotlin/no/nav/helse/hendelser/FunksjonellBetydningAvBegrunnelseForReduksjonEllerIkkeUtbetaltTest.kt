@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT
@@ -12,9 +11,9 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
-
     // Nyttig? = https://github.com/navikt/spinntektsmelding-frontend/commit/a99eaab06bbef83280715528f109118bc9511da5
 
     @Test
@@ -83,7 +82,7 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
     private fun funksjonellBetydning(
         førsteFraværsdag: LocalDate,
         arbeidsgiverperioder: List<Periode>,
-        begrunnelse: String
+        begrunnelse: String,
     ): FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt {
         val antallDagerIOpplystArbeidsgiverperiode = arbeidsgiverperioder.periode()?.count() ?: 0
         val periodeMellom = arbeidsgiverperioder.periode()?.periodeMellom(førsteFraværsdag)
@@ -91,7 +90,7 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         return funksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt(
             antallDagerIOpplystArbeidsgiverperiode,
             førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP,
-            begrunnelse
+            begrunnelse,
         )
     }
 }

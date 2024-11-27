@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsledigTest : AbstractDslTest() {
-
     @Test
     fun `håndterer at sykmelding kommer som arbeidsledig, mens søknaden kommer på arbeidsgiver`() {
         arbeidsledig {
@@ -40,5 +39,4 @@ internal class ArbeidsledigTest : AbstractDslTest() {
             assertTrue(inspektør.sykmeldingsperioder().isEmpty())
         }
     }
-
 }

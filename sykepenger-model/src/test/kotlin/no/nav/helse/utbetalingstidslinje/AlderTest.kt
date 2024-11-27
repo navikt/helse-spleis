@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AlderTest {
-
     private companion object {
         val FYLLER_67_ÅR_1_JANUAR_2018 = 1.januar(1951).alder
         val FYLLER_18_ÅR_2_NOVEMBER_2018 = 2.november(2000).alder

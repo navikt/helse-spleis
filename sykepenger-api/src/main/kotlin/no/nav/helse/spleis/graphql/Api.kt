@@ -30,26 +30,50 @@ internal object Api {
     private val schema = Api::class.java.getResource("/graphql-schema.json")!!.readText()
     private val fraQueryRegex = "person\\(fnr:\"(\\d+)\"\\)".toRegex()
     private val sifferRegex = "\\d+".toRegex()
-    private val String.fnr get() = objectMapper.readTree(this.replace(" ", "").replace("\n", "")).let { body ->
-        val fraVariables = body.path("variables").fields().asSequence().singleOrNull { (_, value) -> value.asText().matches(sifferRegex) }?.value?.asText()
-        fraVariables ?: fraQueryRegex.find(body.path("query").asText())?.groupValues?.lastOrNull()
-    }
-    private data class Response(val data: Data)
-    private data class Data(val person: GraphQLPerson?)
+    private val String.fnr get() =
+        objectMapper.readTree(this.replace(" ", "").replace("\n", "")).let { body ->
+            val fraVariables =
+                body
+                    .path("variables")
+                    .fields()
+                    .asSequence()
+                    .singleOrNull { (_, value) ->
+                        value.asText().matches(sifferRegex)
+                    }?.value
+                    ?.asText()
+            fraVariables ?: fraQueryRegex.find(body.path("query").asText())?.groupValues?.lastOrNull()
+        }
 
-    private val graphQLV2ObjectMapper = nyObjectmapper.also {
-        it.registerSubtypes(NamedType(GraphQLBeregnetPeriode::class.java))
-        it.registerSubtypes(NamedType(GraphQLUberegnetPeriode::class.java))
-        it.registerSubtypes(NamedType(GraphQLInfotrygdVilkarsgrunnlag::class.java))
-        it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
-        it.setMixIns(mapOf(
-            GraphQLArbeidsgiver::class.java to GraphQLArbeidsgiverMixin::class.java,
-            GraphQLUtbetaling::class.java to GraphQLUtbetalingMixin::class.java,
-            GraphQLGhostPeriode::class.java to GraphQLGhostPeriodeMixin::class.java
-        ))
-    }
+    private data class Response(
+        val data: Data,
+    )
 
-    internal fun Application.installGraphQLApi(speedClient: SpeedClient, spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao, meterRegistry: MeterRegistry) {
+    private data class Data(
+        val person: GraphQLPerson?,
+    )
+
+    private val graphQLV2ObjectMapper =
+        nyObjectmapper.also {
+            it.registerSubtypes(NamedType(GraphQLBeregnetPeriode::class.java))
+            it.registerSubtypes(NamedType(GraphQLUberegnetPeriode::class.java))
+            it.registerSubtypes(NamedType(GraphQLInfotrygdVilkarsgrunnlag::class.java))
+            it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
+            it.setMixIns(
+                mapOf(
+                    GraphQLArbeidsgiver::class.java to GraphQLArbeidsgiverMixin::class.java,
+                    GraphQLUtbetaling::class.java to GraphQLUtbetalingMixin::class.java,
+                    GraphQLGhostPeriode::class.java to GraphQLGhostPeriodeMixin::class.java,
+                ),
+            )
+        }
+
+    internal fun Application.installGraphQLApi(
+        speedClient: SpeedClient,
+        spekematClient: SpekematClient,
+        hendelseDao: HendelseDao,
+        personDao: PersonDao,
+        meterRegistry: MeterRegistry,
+    ) {
         routing {
             authenticate(optional = true) {
                 post("/graphql") {
@@ -63,16 +87,25 @@ internal object Api {
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")
-                        sikkerlogger.error("callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.javaClass.simpleName} - ${err.message}", keyValue("fødselsnummer", ident), err)
-                        call.respondText(graphQLV2ObjectMapper.writeValueAsString(mapOf(
-                            "errors" to listOf(
+                        sikkerlogger.error(
+                            "callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.javaClass.simpleName} - ${err.message}",
+                            keyValue("fødselsnummer", ident),
+                            err,
+                        )
+                        call.respondText(
+                            graphQLV2ObjectMapper.writeValueAsString(
                                 mapOf(
-                                    "message" to "Det har skjedd en feil 😵‍💫 Det er logget, og vi er kanskje på saken! 🫡",
-                                    "locations" to emptyList<Any>(),
-                                    "path" to emptyList<Any>()
-                                )
-                            )
-                        )))
+                                    "errors" to
+                                        listOf(
+                                            mapOf(
+                                                "message" to "Det har skjedd en feil 😵‍💫 Det er logget, og vi er kanskje på saken! 🫡",
+                                                "locations" to emptyList<Any>(),
+                                                "path" to emptyList<Any>(),
+                                            ),
+                                        ),
+                                ),
+                            ),
+                        )
                     }
                 }
             }
@@ -81,8 +114,10 @@ internal object Api {
 
     @JsonIgnoreProperties("id")
     private class GraphQLArbeidsgiverMixin
+
     @JsonIgnoreProperties("status", "type")
     private class GraphQLUtbetalingMixin
+
     @JsonIgnoreProperties("organisasjonsnummer")
     private class GraphQLGhostPeriodeMixin
 }

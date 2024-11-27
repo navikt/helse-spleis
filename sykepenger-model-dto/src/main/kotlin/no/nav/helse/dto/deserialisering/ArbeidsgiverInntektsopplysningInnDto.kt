@@ -6,5 +6,5 @@ data class ArbeidsgiverInntektsopplysningInnDto(
     val orgnummer: String,
     val gjelder: PeriodeDto,
     val inntektsopplysning: InntektsopplysningInnDto,
-    val refusjonsopplysninger: RefusjonsopplysningerInnDto
+    val refusjonsopplysninger: RefusjonsopplysningerInnDto,
 )

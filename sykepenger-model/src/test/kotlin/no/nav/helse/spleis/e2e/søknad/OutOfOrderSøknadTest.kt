@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
-
     @Test
     fun `Out of order AUUer- skal beholde perioden som kom først som låst i tillegg til den nye`() {
         håndterSøknad(Sykdom(9.januar, 16.januar, 100.prosent))
@@ -57,7 +56,13 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         tilSimulering(3.mars til 26.mars, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(5.januar, 19.januar, 80.prosent))
-        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertEquals(
+            Utbetalingstatus.FORKASTET,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .single()
+                .inspektør.tilstand,
+        )
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
@@ -70,7 +75,14 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 20000.månedlig)
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+        )
         assertIngenFunksjonellFeil(Varselkode.RV_SV_3)
     }
 
@@ -101,7 +113,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 17.februar til 16.mars
+            subset = 17.februar til 16.mars,
         )
         assertIngenFunksjonelleFeil()
     }

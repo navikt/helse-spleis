@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -27,13 +23,13 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingkilde
-import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView
+import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -58,23 +54,49 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
-
     @Test
     fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
         nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
-        val korrigertIm = håndterInntektsmelding(arbeidsgiverperioder = listOf(), førsteFraværsdag = 10.januar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        val korrigertIm =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(),
+                førsteFraværsdag = 10.januar,
+                beregnetInntekt = INNTEKT,
+                refusjon = Inntektsmelding.Refusjon(INGEN, null),
+            )
 
         // Per i dag blir det en revurdering uten endring og varsel om flere IM'er
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("IngenUtbetaling"))
+        assertTrue(
+            observatør.utkastTilVedtakEventer
+                .last()
+                .tags
+                .contains("IngenUtbetaling"),
+        )
         assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
 
-        val dagensRefusjonsopplysninger = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
-        val dagensRefusjonsopplysningerPeriode = dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
+        val dagensRefusjonsopplysninger =
+            inspektør
+                .vilkårsgrunnlag(
+                    1.vedtaksperiode,
+                )!!
+                .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+                .single()
+                .refusjonsopplysninger
+        val dagensRefusjonsopplysningerPeriode =
+            dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger
+                .first()
+                .periode.start til
+                dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger
+                    .last()
+                    .periode.endInclusive
         assertEquals(16.januar til LocalDate.MAX, dagensRefusjonsopplysningerPeriode)
         assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INNTEKT })
 
@@ -83,7 +105,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.perioderMedBeløp.single()
         assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode)
         assertTrue(nyeRefusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
-        assertTrue(nyeRefusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
+        assertTrue(
+            nyeRefusjonsopplysninger.subset(10.januar til 31.januar).all {
+                it.beløp == INGEN &&
+                    it.kilde.meldingsreferanseId == korrigertIm
+            },
+        )
     }
 
     @Test
@@ -108,11 +135,24 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             val registrert = LocalDateTime.now()
             val innsendt = registrert.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                søknadId = søknadId,
+                sendtTilNAVEllerArbeidsgiver = innsendt,
+                registrert = registrert,
+            )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(2, behandlinger.single().endringer.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = registrert, avsender = Avsender.SYKMELDT), behandlinger.single().kilde)
+                assertEquals(
+                    Behandlingkilde(
+                        meldingsreferanseId = søknadId,
+                        innsendt = innsendt,
+                        registert = registrert,
+                        avsender = Avsender.SYKMELDT,
+                    ),
+                    behandlinger.single().kilde,
+                )
             }
         }
     }
@@ -122,14 +162,23 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val mottatt = LocalDateTime.now()
-            val inntektsmeldingId = håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT * 1.1,
-                mottatt = mottatt
-            )
+            val inntektsmeldingId =
+                håndterInntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    beregnetInntekt = INNTEKT * 1.1,
+                    mottatt = mottatt,
+                )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER), behandlinger.last().kilde)
+                assertEquals(
+                    Behandlingkilde(
+                        meldingsreferanseId = inntektsmeldingId,
+                        innsendt = mottatt,
+                        registert = mottatt,
+                        avsender = Avsender.ARBEIDSGIVER,
+                    ),
+                    behandlinger.last().kilde,
+                )
             }
         }
     }
@@ -151,14 +200,20 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
         val korrigerendeImA1 = UUID.randomUUID()
         val mottatt = LocalDateTime.now()
-        val forventetKilde = Behandlingkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER)
+        val forventetKilde =
+            Behandlingkilde(
+                meldingsreferanseId = korrigerendeImA1,
+                innsendt = mottatt,
+                registert = mottatt,
+                avsender = Avsender.ARBEIDSGIVER,
+            )
 
         a1 {
             håndterInntektsmelding(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT * 1.1,
                 id = korrigerendeImA1,
-                mottatt = mottatt
+                mottatt = mottatt,
             )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -193,6 +248,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere iverksatt vedtak`() {
         a1 {
@@ -217,6 +273,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere flere iverksatte vedtak`() {
         a1 {
@@ -344,7 +401,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             val id = UUID.randomUUID()
-            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)), id = id)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)),
+                id = id,
+            )
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
@@ -363,8 +423,22 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(3, behandlinger.single().endringer.size)
-                assertEquals(3.januar til 17.januar, behandlinger.first().endringer.first().sykmeldingsperiode)
-                assertEquals(3.januar, behandlinger.last().endringer.last().skjæringstidspunkt)
+                assertEquals(
+                    3.januar til 17.januar,
+                    behandlinger
+                        .first()
+                        .endringer
+                        .first()
+                        .sykmeldingsperiode,
+                )
+                assertEquals(
+                    3.januar,
+                    behandlinger
+                        .last()
+                        .endringer
+                        .last()
+                        .skjæringstidspunkt,
+                )
             }
         }
     }
@@ -378,7 +452,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(3, behandlinger.single().endringer.size)
-                assertEquals(Dokumentsporing.søknad(søknad2), behandlinger.single().endringer.last().dokumentsporing)
+                assertEquals(
+                    Dokumentsporing.søknad(søknad2),
+                    behandlinger
+                        .single()
+                        .endringer
+                        .last()
+                        .dokumentsporing,
+                )
             }
         }
     }
@@ -573,9 +654,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-                arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT), Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT))
+                arbeidsforhold =
+                    listOf(
+                        Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT),
+                        Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -710,9 +796,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            ))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
+                ),
+            )
 
             nyttVedtak(mars)
             forlengVedtak(april)
@@ -813,7 +901,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(15.mars til 10.april)
             nyttVedtak(august)
 
-            håndterAnnullering(inspektør.utbetalinger(3.vedtaksperiode).single().inspektør.utbetalingId)
+            håndterAnnullering(
+                inspektør
+                    .utbetalinger(3.vedtaksperiode)
+                    .single()
+                    .inspektør.utbetalingId,
+            )
 
             assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
             assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())
@@ -834,9 +927,17 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `korrigert inntektsmelding med funksjonell feil`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar), førsteFraværsdag = 15.januar)
+            nyttVedtak(
+                15.januar til 25.januar,
+                arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar),
+                førsteFraværsdag = 15.januar,
+            )
 
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 21.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+            val inntektsmeldingId =
+                håndterInntektsmelding(
+                    listOf(1.januar til 10.januar, 15.januar til 21.januar),
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn",
+                )
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

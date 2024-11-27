@@ -7,7 +7,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
-
     @Test
     fun `selvstendigsøknad gir error`() {
         selvstendig {

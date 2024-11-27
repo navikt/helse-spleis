@@ -12,7 +12,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 
 internal open class InntektsmeldingerReplayRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventName = "inntektsmeldinger_replay"
     override val riverName = "Inntektsmeldinger Replay"
@@ -29,7 +29,7 @@ internal open class InntektsmeldingerReplayRiver(
                 "inntektsmelding.arbeidsgivertype",
                 "inntektsmelding.beregnetInntekt",
                 "inntektsmelding.status",
-                "inntektsmelding.arkivreferanse"
+                "inntektsmelding.arkivreferanse",
             )
             requireArray("inntektsmelding.arbeidsgiverperioder") {
                 require("fom", JsonNode::asLocalDate)
@@ -55,13 +55,17 @@ internal open class InntektsmeldingerReplayRiver(
                 "inntektsmelding.harFlereInntektsmeldinger",
                 "inntektsmelding.historiskeFolkeregisteridenter",
                 "inntektsmelding.avsenderSystem",
-                "inntektsmelding.inntektsdato"
+                "inntektsmelding.inntektsdato",
             )
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        InntektsmeldingerReplayMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

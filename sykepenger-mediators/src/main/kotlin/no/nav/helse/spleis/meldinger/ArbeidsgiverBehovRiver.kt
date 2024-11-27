@@ -7,9 +7,8 @@ import no.nav.helse.spleis.IMessageMediator
 
 internal abstract class ArbeidsgiverBehovRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : BehovRiver(rapidsConnection, messageMediator) {
-
     init {
         river.validate(::validateBehov)
     }

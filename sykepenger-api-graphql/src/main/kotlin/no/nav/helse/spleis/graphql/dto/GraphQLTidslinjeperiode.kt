@@ -7,14 +7,14 @@ import java.util.UUID
 
 enum class GraphQLInntektstype {
     EnArbeidsgiver,
-    FlereArbeidsgivere
+    FlereArbeidsgivere,
 }
 
 enum class GraphQLPeriodetype {
     Forstegangsbehandling,
     Forlengelse,
     OvergangFraIt,
-    Infotrygdforlengelse;
+    Infotrygdforlengelse,
 }
 
 enum class GraphQLSykdomsdagtype {
@@ -36,7 +36,7 @@ enum class GraphQLSykdomsdagtype {
     AndreYtelserSvangerskapspenger,
     AndreYtelserOpplaringspenger,
     AndreYtelserDagpenger,
-    Avslatt
+    Avslatt,
 }
 
 enum class GraphQLUtbetalingsdagType {
@@ -48,7 +48,7 @@ enum class GraphQLUtbetalingsdagType {
     Feriedag,
     AvvistDag,
     UkjentDag,
-    ForeldetDag
+    ForeldetDag,
 }
 
 enum class GraphQLSykdomsdagkildetype {
@@ -56,7 +56,7 @@ enum class GraphQLSykdomsdagkildetype {
     Soknad,
     Sykmelding,
     Saksbehandler,
-    Ukjent
+    Ukjent,
 }
 
 enum class GraphQLBegrunnelse {
@@ -70,7 +70,7 @@ enum class GraphQLBegrunnelse {
     EtterDodsdato,
     ManglerMedlemskap,
     ManglerOpptjening,
-    Over70
+    Over70,
 }
 
 enum class GraphQLPeriodetilstand {
@@ -89,7 +89,7 @@ enum class GraphQLPeriodetilstand {
     UtbetaltVenterPaAnnenPeriode,
     AvventerInntektsopplysninger,
     TilSkjonnsfastsettelse,
-    TilGodkjenning;
+    TilGodkjenning,
 }
 
 enum class GraphQLUtbetalingstatus {
@@ -99,17 +99,19 @@ enum class GraphQLUtbetalingstatus {
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
     Overfort,
+
     @Deprecated("skal slettes")
     Sendt,
     Ubetalt,
+
     @Deprecated("skal slettes")
     UtbetalingFeilet,
-    Utbetalt
+    Utbetalt,
 }
 
 data class GraphQLSykdomsdagkilde(
     val id: UUID,
-    val type: GraphQLSykdomsdagkildetype
+    val type: GraphQLSykdomsdagkildetype,
 )
 
 data class GraphQLUtbetalingsinfo(
@@ -118,28 +120,28 @@ data class GraphQLUtbetalingsinfo(
     val personbelop: Int?,
     val arbeidsgiverbelop: Int?,
     val refusjonsbelop: Int?,
-    val totalGrad: Double?
+    val totalGrad: Double?,
 )
 
 data class GraphQLVurdering(
     val godkjent: Boolean,
     val tidsstempel: LocalDateTime,
     val automatisk: Boolean,
-    val ident: String
+    val ident: String,
 )
 
 data class GraphQLUtbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagsats: Int,
-    val grad: Int
+    val grad: Int,
 )
 
 data class GraphQLOppdrag(
     val fagsystemId: String,
     val tidsstempel: LocalDateTime,
     val simulering: GraphQLSimulering?,
-    val utbetalingslinjer: List<GraphQLUtbetalingslinje>
+    val utbetalingslinjer: List<GraphQLUtbetalingslinje>,
 )
 
 data class GraphQLUtbetaling(
@@ -154,7 +156,7 @@ data class GraphQLUtbetaling(
     val personFagsystemId: String,
     val arbeidsgiveroppdrag: GraphQLOppdrag?,
     val personoppdrag: GraphQLOppdrag?,
-    val vurdering: GraphQLVurdering?
+    val vurdering: GraphQLVurdering?,
 )
 
 enum class Utbetalingtype {
@@ -162,7 +164,7 @@ enum class Utbetalingtype {
     ETTERUTBETALING,
     ANNULLERING,
     REVURDERING,
-    FERIEPENGER
+    FERIEPENGER,
 }
 
 data class GraphQLDag(
@@ -172,7 +174,7 @@ data class GraphQLDag(
     val kilde: GraphQLSykdomsdagkilde,
     val grad: Double?,
     val utbetalingsinfo: GraphQLUtbetalingsinfo?,
-    val begrunnelser: List<GraphQLBegrunnelse>?
+    val begrunnelser: List<GraphQLBegrunnelse>?,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
@@ -205,24 +207,24 @@ data class GraphQLUberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
-    override val hendelser: List<GraphQLHendelse>
-    ) : GraphQLTidslinjeperiode
+    override val hendelser: List<GraphQLHendelse>,
+) : GraphQLTidslinjeperiode
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
-    val alder: Alder
+    val alder: Alder,
 ) {
     data class Sykepengedager(
         val skjaeringstidspunkt: LocalDate,
         val maksdato: LocalDate,
         val forbrukteSykedager: Int?,
         val gjenstaendeSykedager: Int?,
-        val oppfylt: Boolean
+        val oppfylt: Boolean,
     )
 
     data class Alder(
         val alderSisteSykedag: Int,
-        val oppfylt: Boolean
+        val oppfylt: Boolean,
     )
 }
 
@@ -246,5 +248,5 @@ data class GraphQLBeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val periodevilkar: GraphQLPeriodevilkar,
-    val vilkarsgrunnlagId: UUID?
+    val vilkarsgrunnlagId: UUID?,
 ) : GraphQLTidslinjeperiode

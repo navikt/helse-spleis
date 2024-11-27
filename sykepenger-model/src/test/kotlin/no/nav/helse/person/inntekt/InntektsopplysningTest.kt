@@ -42,9 +42,18 @@ internal class InntektsopplysningTest {
     fun `opphøre, gjøre om, avvikle, tilbakestille eller kansellere`() {
         val im = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
         val saksbehandler = im.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
-        val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val skjønnsmessigFastsatt3 = skjønnsmessigFastsatt2.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
+        val skjønnsmessigFastsatt1 =
+            im.overstyresAv(
+                SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()),
+            )
+        val skjønnsmessigFastsatt2 =
+            saksbehandler.overstyresAv(
+                SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()),
+            )
+        val skjønnsmessigFastsatt3 =
+            skjønnsmessigFastsatt2.overstyresAv(
+                SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()),
+            )
         val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID(), LocalDateTime.now())
         val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
 
@@ -68,7 +77,6 @@ internal class InntektsopplysningTest {
         assertFalse(im2.kanLagres(im1))
     }
 
-
     @Test
     fun `inntektsmelding-ulikhet`() {
         val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
@@ -90,7 +98,8 @@ internal class InntektsopplysningTest {
     @Test
     fun `turnering - inntektsmelding vs inntektsmelding`() {
         val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now())
-        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
+        val im2 =
+            Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
 
         assertEquals(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
     }
@@ -98,32 +107,44 @@ internal class InntektsopplysningTest {
     @Test
     fun `turnering - skatt vs inntektsmelding`() {
         val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT)
-        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, listOf(
-            Skatteopplysning(
-                hendelseId = UUID.randomUUID(),
-                beløp = 25000.månedlig,
-                måned = 1.januar.yearMonth,
-                type = LØNNSINNTEKT,
-                fordel = "",
-                beskrivelse = "",
-                tidsstempel = LocalDateTime.now()
+        val skatt1 =
+            SkattSykepengegrunnlag(
+                UUID.randomUUID(),
+                1.februar,
+                listOf(
+                    Skatteopplysning(
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        måned = 1.januar.yearMonth,
+                        type = LØNNSINNTEKT,
+                        fordel = "",
+                        beskrivelse = "",
+                        tidsstempel = LocalDateTime.now(),
+                    ),
+                ),
+                listOf(
+                    AnsattPeriode(LocalDate.EPOCH, null),
+                ),
             )
-        ), listOf(
-            AnsattPeriode(LocalDate.EPOCH, null),
-        ))
-        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 31.januar, listOf(
-            Skatteopplysning(
-                hendelseId = UUID.randomUUID(),
-                beløp = 25000.månedlig,
-                måned = 1.desember(2017).yearMonth,
-                type = LØNNSINNTEKT,
-                fordel = "",
-                beskrivelse = "",
-                tidsstempel = LocalDateTime.now()
+        val skatt2 =
+            SkattSykepengegrunnlag(
+                UUID.randomUUID(),
+                31.januar,
+                listOf(
+                    Skatteopplysning(
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        måned = 1.desember(2017).yearMonth,
+                        type = LØNNSINNTEKT,
+                        fordel = "",
+                        beskrivelse = "",
+                        tidsstempel = LocalDateTime.now(),
+                    ),
+                ),
+                listOf(
+                    AnsattPeriode(LocalDate.EPOCH, null),
+                ),
             )
-        ), listOf(
-            AnsattPeriode(LocalDate.EPOCH, null),
-        ))
 
         assertSame(im, listOf(im).avklarSykepengegrunnlag(1.februar, 10.februar, skatt1))
         assertSame(skatt2, listOf(im).avklarSykepengegrunnlag(31.januar, 10.februar, skatt2))

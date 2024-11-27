@@ -9,12 +9,11 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Test
 
 internal class OverstyrArbeidsgiveropplysningerMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `overstyrer både inntekt og refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
         )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendVilkårsgrunnlag(0)
@@ -24,17 +23,23 @@ internal class OverstyrArbeidsgiveropplysningerMediatorTest : AbstractEndToEndMe
         sendUtbetaling()
         sendOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(Arbeidsgiveropplysning(
-                organisasjonsnummer = ORGNUMMER,
-                månedligInntekt = INNTEKT *1.25,
-                forklaring = "forklaring",
-                subsumsjon = null,
-                refusjonsopplysninger = listOf(Refusjonsopplysning(
-                    fom = 1.januar,
-                    tom = null,
-                    beløp = INNTEKT *1.25
-                ))
-            ))
+            arbeidsgiveropplysninger =
+                listOf(
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = ORGNUMMER,
+                        månedligInntekt = INNTEKT * 1.25,
+                        forklaring = "forklaring",
+                        subsumsjon = null,
+                        refusjonsopplysninger =
+                            listOf(
+                                Refusjonsopplysning(
+                                    fom = 1.januar,
+                                    tom = null,
+                                    beløp = INNTEKT * 1.25,
+                                ),
+                            ),
+                    ),
+                ),
         )
         sendYtelser(0)
         assertTilstander(
@@ -50,7 +55,7 @@ internal class OverstyrArbeidsgiveropplysningerMediatorTest : AbstractEndToEndMe
             "AVSLUTTET",
             "AVVENTER_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
-            "AVVENTER_SIMULERING_REVURDERING"
+            "AVVENTER_SIMULERING_REVURDERING",
         )
     }
 }

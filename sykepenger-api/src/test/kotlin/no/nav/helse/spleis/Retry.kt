@@ -1,11 +1,13 @@
 package no.nav.helse.spleis
 
-import java.time.Duration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.time.Duration
 
-
-fun <T> retry(timeout: Duration = Duration.ofSeconds(5), whatToRetry: () -> T): T {
+fun <T> retry(
+    timeout: Duration = Duration.ofSeconds(5),
+    whatToRetry: () -> T,
+): T {
     val starttime = System.currentTimeMillis()
     lateinit var exception: Exception
     do {

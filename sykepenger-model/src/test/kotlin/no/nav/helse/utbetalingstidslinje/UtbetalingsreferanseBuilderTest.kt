@@ -1,13 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.utbetalingslinjer.decodeUtbetalingsreferanse
+import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
-import no.nav.helse.utbetalingslinjer.decodeUtbetalingsreferanse
-import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 internal class UtbetalingsreferanseBuilderTest {
-
     @Test
     fun `encode decode`() {
         val uuid = UUID.randomUUID()

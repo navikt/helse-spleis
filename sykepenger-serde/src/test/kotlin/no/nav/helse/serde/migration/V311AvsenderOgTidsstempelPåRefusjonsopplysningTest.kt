@@ -1,17 +1,24 @@
 package no.nav.helse.serde.migration
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.serde.migration.JsonMigration.Companion.uuid
 import no.nav.helse.serde.migration.V311AvsenderOgTidsstempelPåRefusjonsopplysning.Companion.avsender
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class V311AvsenderOgTidsstempelPåRefusjonsopplysningTest : MigrationTest(V311AvsenderOgTidsstempelPåRefusjonsopplysning()) {
-
-    override fun meldingerSupplier() = MeldingerSupplier {
-        mapOf(UUID.fromString("75d708d5-e2b1-4ff4-9426-976921505925") to Hendelse("75d708d5-e2b1-4ff4-9426-976921505925".uuid, "INNTEKTSMELDING", LocalDateTime.parse("2024-11-15T12:47:09.829616")))
-    }
+    override fun meldingerSupplier() =
+        MeldingerSupplier {
+            mapOf(
+                UUID.fromString("75d708d5-e2b1-4ff4-9426-976921505925") to
+                    Hendelse(
+                        "75d708d5-e2b1-4ff4-9426-976921505925".uuid,
+                        "INNTEKTSMELDING",
+                        LocalDateTime.parse("2024-11-15T12:47:09.829616"),
+                    ),
+            )
+        }
 
     @Test
     fun `migrerer avsender og tidsstempel på refusjonsopplysning`() {

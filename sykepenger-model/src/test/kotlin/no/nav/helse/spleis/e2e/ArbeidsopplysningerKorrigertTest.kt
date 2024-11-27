@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -16,29 +15,32 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
-
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer inntekt og refusjon`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = 31000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null),
-        )
+        val korrigertInntektsmeldingId =
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 31000.månedlig,
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null),
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        val korrigerendeInntektsmeldingId = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = 30000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(29000.månedlig, null),
-        )
+        val korrigerendeInntektsmeldingId =
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 30000.månedlig,
+                refusjon = Inntektsmelding.Refusjon(29000.månedlig, null),
+            )
 
-        val expected = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingId,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsmeldingId,
-            korrigerendeInntektektsopplysningstype = INNTEKTSMELDING
-        )
+        val expected =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingId,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsmeldingId,
+                korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
+            )
         val actual = observatør.arbeidsgiveropplysningerKorrigert.single()
         assertEquals(expected, actual)
     }
@@ -55,11 +57,12 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
         val korrigerendeInntektsmeldingId = håndterInntektsmelding(listOf(2.januar til 17.januar))
 
-        val expected = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingId,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsmeldingId,
-            korrigerendeInntektektsopplysningstype = INNTEKTSMELDING
-        )
+        val expected =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingId,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsmeldingId,
+                korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
+            )
         val actual = observatør.arbeidsgiveropplysningerKorrigert.single()
         assertEquals(expected, actual)
     }
@@ -74,23 +77,27 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        val korrigerendeInntektsopplysningId = håndterOverstyrArbeidsgiveropplysninger(
-            1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    ORGNUMMER,
-                    25000.månedlig,
-                    "forklaring",
-                    null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                ))
-        )
+        val korrigerendeInntektsopplysningId =
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            ORGNUMMER,
+                            25000.månedlig,
+                            "forklaring",
+                            null,
+                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT)),
+                        ),
+                    ),
+            )
 
-        val expected = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingId,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
-            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
-        )
+        val expected =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingId,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+            )
         val actual = observatør.arbeidsgiveropplysningerKorrigert.single()
         assertEquals(expected, actual)
     }
@@ -107,10 +114,11 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(INNTEKT, 1.januar, a1, a2),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -121,35 +129,39 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt()
 
-        val korrigerendeInntektsopplysningId = håndterOverstyrArbeidsgiveropplysninger(
-            1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1,
-                    25000.månedlig,
-                    "forklaring",
-                    null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                ),
-                OverstyrtArbeidsgiveropplysning(
-                    a2,
-                    25000.månedlig,
-                    "forklaring",
-                    null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
+        val korrigerendeInntektsopplysningId =
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            a1,
+                            25000.månedlig,
+                            "forklaring",
+                            null,
+                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT)),
+                        ),
+                        OverstyrtArbeidsgiveropplysning(
+                            a2,
+                            25000.månedlig,
+                            "forklaring",
+                            null,
+                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT)),
+                        ),
+                    ),
             )
-        )
-        val expectedA1 = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingIdA1,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
-            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
-        )
-        val expectedA2 = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingIdA2,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
-            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
-        )
+        val expectedA1 =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingIdA1,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+            )
+        val expectedA2 =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingIdA2,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+            )
         assertEquals(expectedA1, observatør.arbeidsgiveropplysningerKorrigert[0])
         assertEquals(expectedA2, observatør.arbeidsgiveropplysningerKorrigert[1])
         assertEquals(2, observatør.arbeidsgiveropplysningerKorrigert.size)
@@ -167,10 +179,11 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(INNTEKT, 1.januar, a1, a2),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -181,23 +194,26 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt()
 
-        val korrigerendeInntektsopplysningId = håndterOverstyrArbeidsgiveropplysninger(
-            1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1,
-                    25000.månedlig,
-                    "forklaring",
-                    null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
+        val korrigerendeInntektsopplysningId =
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            a1,
+                            25000.månedlig,
+                            "forklaring",
+                            null,
+                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT)),
+                        ),
+                    ),
             )
-        )
-        val expected = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingIdA1,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
-            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
-        )
+        val expected =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingIdA1,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+            )
         assertEquals(expected, observatør.arbeidsgiveropplysningerKorrigert.first())
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
     }
@@ -211,21 +227,23 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        val korrigerendeInntektsopplysningId = håndterOverstyrTidslinje(
-            listOf(
-                ManuellOverskrivingDag(
-                    31.desember(2017),
-                    Dagtype.Egenmeldingsdag
-                )
-            )
-        ).metadata.meldingsreferanseId
+        val korrigerendeInntektsopplysningId =
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(
+                        31.desember(2017),
+                        Dagtype.Egenmeldingsdag,
+                    ),
+                ),
+            ).metadata.meldingsreferanseId
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        val expected = ArbeidsgiveropplysningerKorrigertEvent(
-            korrigertInntektsmeldingId = korrigertInntektsmeldingId,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
-            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
-        )
+        val expected =
+            ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = korrigertInntektsmeldingId,
+                korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+            )
         val actual = observatør.arbeidsgiveropplysningerKorrigert.single()
         assertEquals(expected, actual)
     }
@@ -237,9 +255,9 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             listOf(
                 ManuellOverskrivingDag(
                     10.januar,
-                    Dagtype.Feriedag
-                )
-            )
+                    Dagtype.Feriedag,
+                ),
+            ),
         )
         håndterYtelser(1.vedtaksperiode)
         val actual = observatør.arbeidsgiveropplysningerKorrigert
@@ -262,15 +280,16 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         )
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1,
-                    INNTEKT,
-                    "forklaring",
-                    null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        "forklaring",
+                        null,
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT)),
+                    ),
+                ),
         )
         assertFalse(observatør.arbeidsgiveropplysningerKorrigert.isEmpty())
     }
@@ -280,15 +299,16 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    ORGNUMMER,
-                    40000.månedlig,
-                    "forklaring",
-                    null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        ORGNUMMER,
+                        40000.månedlig,
+                        "forklaring",
+                        null,
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT)),
+                    ),
+                ),
         )
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 41000.månedlig)

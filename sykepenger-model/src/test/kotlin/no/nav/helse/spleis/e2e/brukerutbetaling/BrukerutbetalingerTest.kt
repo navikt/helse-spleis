@@ -20,7 +20,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
 
 internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
-
     @Test
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
         håndterSykmelding(januar)
@@ -60,7 +59,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
     }
 
-
     @Test
     fun `utbetaling med delvis refusjon`() {
         håndterSykmelding(januar)
@@ -68,7 +66,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()

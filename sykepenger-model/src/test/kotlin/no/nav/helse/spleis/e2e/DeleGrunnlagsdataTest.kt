@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
-
     @Test
     fun `vilkårsgrunnlag deles med påfølgende tilstøtende perioder`() {
         håndterSykmelding(januar)
@@ -40,12 +39,17 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterSøknad(mars)
         håndterSøknad(5.april til 30.april)
-        val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val inntektsmelding2Id = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 5.april,
-            vedtaksperiodeIdInnhenter = 4.vedtaksperiode
-        )
+        val inntektsmelding1Id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            )
+        val inntektsmelding2Id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                førsteFraværsdag = 5.april,
+                vedtaksperiodeIdInnhenter = 4.vedtaksperiode,
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -108,7 +112,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(18.januar, 1.februar)),
             førsteFraværsdag = 4.mars,
-            avsendersystem = ALTINN
+            avsendersystem = ALTINN,
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -144,7 +148,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET_UTEN_UTBETALING,
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -153,7 +157,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
+            AVVENTER_SIMULERING,
         )
         assertEquals(2, inspektør.hendelseIder(2.vedtaksperiode).size)
         assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(søknadId, inntektsmeldingId)))

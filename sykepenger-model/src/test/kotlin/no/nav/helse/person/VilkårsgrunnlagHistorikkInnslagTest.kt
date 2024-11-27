@@ -1,8 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
@@ -27,14 +24,21 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    private val jurist =
+        BehandlingSubsumsjonslogg(
+            EmptyLog,
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+            ),
+        )
 
     private companion object {
         private val ALDER = 12.februar(1992).alder
@@ -103,44 +107,63 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         }
     }
 
-    private fun grunnlagsdata(skjæringstidspunkt: LocalDate, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true): VilkårsgrunnlagHistorikk.Grunnlagsdata {
-        val opptjening = if (!harOpptjening) emptyList() else listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("orgnr", listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(skjæringstidspunkt.minusYears(1), null, false)
-            ))
-        )
+    private fun grunnlagsdata(
+        skjæringstidspunkt: LocalDate,
+        harOpptjening: Boolean = true,
+        harMinimumInntekt: Boolean = true,
+        erMedlem: Boolean = true,
+    ): VilkårsgrunnlagHistorikk.Grunnlagsdata {
+        val opptjening =
+            if (!harOpptjening) {
+                emptyList()
+            } else {
+                listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        "orgnr",
+                        listOf(
+                            Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(skjæringstidspunkt.minusYears(1), null, false),
+                        ),
+                    ),
+                )
+            }
         val inntekt = if (!harMinimumInntekt) 2000.månedlig else 25000.månedlig
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            inntektsgrunnlag = Inntektsgrunnlag.opprett(
-                ALDER, listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        "orgnr",
-                        skjæringstidspunkt til LocalDate.MAX,
-                        Saksbehandler(
-                            skjæringstidspunkt,
-                            UUID.randomUUID(),
-                            inntekt,
-                            "",
-                            null,
-                            LocalDateTime.now()
+            inntektsgrunnlag =
+                Inntektsgrunnlag.opprett(
+                    ALDER,
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            "orgnr",
+                            skjæringstidspunkt til LocalDate.MAX,
+                            Saksbehandler(
+                                skjæringstidspunkt,
+                                UUID.randomUUID(),
+                                inntekt,
+                                "",
+                                null,
+                                LocalDateTime.now(),
+                            ),
+                            Refusjonsopplysninger(),
                         ),
-                        Refusjonsopplysninger()
-                    )
-                ), skjæringstidspunkt, jurist
-            ),
+                    ),
+                    skjæringstidspunkt,
+                    jurist,
+                ),
             opptjening = Opptjening.nyOpptjening(opptjening, 1.januar),
-            medlemskapstatus = when (erMedlem) {
-                true -> Medlemskapsvurdering.Medlemskapstatus.Ja
-                false -> Medlemskapsvurdering.Medlemskapstatus.Nei
-            },
+            medlemskapstatus =
+                when (erMedlem) {
+                    true -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                    false -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                },
             vurdertOk = harOpptjening && harMinimumInntekt && erMedlem,
             meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
+            vilkårsgrunnlagId = UUID.randomUUID(),
         )
     }
 
-    private fun avvisteDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingsdag.AvvistDag> {
-        return tidslinjer.flatMap { it.inspektør.avvistedager }
-    }
+    private fun avvisteDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingsdag.AvvistDag> =
+        tidslinjer.flatMap {
+            it.inspektør.avvistedager
+        }
 }

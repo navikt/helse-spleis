@@ -13,10 +13,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
-
+internal class ForkastSykmeldingsperioderTest : AbstractDslTest() {
     @Test
-    fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren kan behandles`(){
+    fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren kan behandles`() {
         a1 {
             håndterSykmelding(januar)
         }
@@ -58,14 +57,13 @@ internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)),
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val sisteVedtaksperiodeventer = observatør.vedtaksperiodeVenter.last()
             assertEquals(1.vedtaksperiode, sisteVedtaksperiodeventer.vedtaksperiodeId)
             assertEquals(1.vedtaksperiode, sisteVedtaksperiodeventer.venterPå.vedtaksperiodeId)
             assertEquals("SØKNAD", sisteVedtaksperiodeventer.venterPå.venteårsak.hva)
-
         }
 
         a2 {

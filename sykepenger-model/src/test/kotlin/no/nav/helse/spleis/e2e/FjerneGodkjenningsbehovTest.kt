@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
-
+internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `mottak av vedtak fattet fungerer på samme måte som godkjenningsbehov med tommel opp`() {
         a1 {
@@ -55,7 +54,10 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterVedtakFattet(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(UTBETALT, inspektør.utbetalingtilstand(0))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -74,14 +76,20 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterVedtakFattet(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(UTBETALT, inspektør.utbetalingtilstand(0))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-            assertInfo("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck", 1.vedtaksperiode.filter())
+            assertInfo(
+                "Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck",
+                1.vedtaksperiode.filter(),
+            )
         }
     }
 
@@ -92,7 +100,10 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterVedtakFattet(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(UTBETALT, inspektør.utbetalingtilstand(0))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "forklaring")),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -112,14 +123,15 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
-            }
+            val nyeFunksjonelleFeil =
+                nyeFunksjonelleFeil {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                }
 
             assertForventetFeil(
                 forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
                 nå = { assertTrue(nyeFunksjonelleFeil) },
-                ønsket = { assertFalse(nyeFunksjonelleFeil) }
+                ønsket = { assertFalse(nyeFunksjonelleFeil) },
             )
         }
     }
@@ -131,14 +143,15 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
             assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
-            }
+            val nyeFunksjonelleFeil =
+                nyeFunksjonelleFeil {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                }
 
             assertForventetFeil(
                 forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
                 nå = { assertTrue(nyeFunksjonelleFeil) },
-                ønsket = { assertFalse(nyeFunksjonelleFeil) }
+                ønsket = { assertFalse(nyeFunksjonelleFeil) },
             )
         }
     }
@@ -152,14 +165,15 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
             assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
-            }
+            val nyeFunksjonelleFeil =
+                nyeFunksjonelleFeil {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
+                }
 
             assertForventetFeil(
                 forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
                 nå = { assertTrue(nyeFunksjonelleFeil) },
-                ønsket = { assertFalse(nyeFunksjonelleFeil) }
+                ønsket = { assertFalse(nyeFunksjonelleFeil) },
             )
         }
     }

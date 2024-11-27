@@ -4,10 +4,13 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Svangerskapspenger(
-    private val svangerskapsytelse: List<GradertPeriode>
+    private val svangerskapsytelse: List<GradertPeriode>,
 ) {
-
-    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
+    internal fun overlapper(
+        aktivitetslogg: IAktivitetslogg,
+        sykdomsperiode: Periode,
+        erForlengelse: Boolean,
+    ): Boolean {
         if (svangerskapsytelse.isEmpty()) {
             aktivitetslogg.info("Bruker har ingen svangerskapsytelser")
             return false
@@ -18,7 +21,5 @@ class Svangerskapspenger(
         }
     }
 
-    internal fun perioder(): List<Periode> {
-        return svangerskapsytelse.map { it.periode }
-    }
+    internal fun perioder(): List<Periode> = svangerskapsytelse.map { it.periode }
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.math.MathContext
 import no.nav.helse.desember
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
@@ -20,9 +19,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.MathContext
 
 internal class UtbetalingstidslinjeTest {
-
     @Test
     fun subsetting() {
         assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).subset(1.januar til 5.januar).periode())
@@ -59,7 +58,12 @@ internal class UtbetalingstidslinjeTest {
 
         input.forEachIndexed { index, input ->
             assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
-            assertEquals(1000, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
+            assertEquals(
+                1000,
+                result[index][1.januar]
+                    .økonomi.inspektør.arbeidsgiverbeløp
+                    ?.dagligInt,
+            )
         }
     }
 
@@ -80,11 +84,16 @@ internal class UtbetalingstidslinjeTest {
     @Test
     fun `samlet periode`() {
         assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))
-        assertEquals(1.desember(2017) til 7.mars, Utbetalingstidslinje.periode(listOf(
-            tidslinjeOf(7.NAV),
-            tidslinjeOf(7.NAV, startDato = 1.mars),
-            tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
-        )))
+        assertEquals(
+            1.desember(2017) til 7.mars,
+            Utbetalingstidslinje.periode(
+                listOf(
+                    tidslinjeOf(7.NAV),
+                    tidslinjeOf(7.NAV, startDato = 1.mars),
+                    tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
+                ),
+            ),
+        )
     }
 
     @Test
@@ -99,7 +108,10 @@ internal class UtbetalingstidslinjeTest {
             val mc = MathContext(15)
             val expected = (100 / 6.0).toBigDecimal(mc)
             result.forEach {
-                val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
+                val actual =
+                    it[dato]
+                        .økonomi.inspektør.totalGrad
+                        .toBigDecimal(mc)
                 assertEquals(expected.toInt(), actual.toInt())
             }
         }
@@ -109,11 +121,15 @@ internal class UtbetalingstidslinjeTest {
             val mc = MathContext(15)
             val expected = (250 / 3.0).toBigDecimal(mc)
             result.forEach {
-                val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
+                val actual =
+                    it[dato]
+                        .økonomi.inspektør.totalGrad
+                        .toBigDecimal(mc)
                 assertEquals(expected.toInt(), actual.toInt())
             }
         }
     }
+
     @Test
     fun `total sykdomsgrad med ukjent dag`() {
         val ag1 = tidslinjeOf(1.NAV(dekningsgrunnlag = 1000, grad = 50))
@@ -128,7 +144,6 @@ internal class UtbetalingstidslinjeTest {
         }
     }
 
-
     @Test
     fun `tar med fridager på slutten av en sykdomsperiode`() {
         val utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAV, 2.FRI)
@@ -138,9 +153,9 @@ internal class UtbetalingstidslinjeTest {
             listOf(
                 mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
                 mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
-                mapOf("fom" to 1.februar, "tom" to 2.februar, "dagtype" to "FRIDAG", "grad" to 0)
+                mapOf("fom" to 1.februar, "tom" to 2.februar, "dagtype" to "FRIDAG", "grad" to 0),
             ),
-            tidslinjedager
+            tidslinjedager,
         )
     }
 
@@ -152,9 +167,9 @@ internal class UtbetalingstidslinjeTest {
         assertEquals(
             listOf(
                 mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
-                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
             ),
-            tidslinjedager
+            tidslinjedager,
         )
     }
 }

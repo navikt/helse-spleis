@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -94,11 +93,11 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
-
     @Test
     fun `bruker avbryter søknad for én arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
@@ -118,12 +117,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         val ghost = a2
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(ghost, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(ghost, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -150,12 +152,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, fredag den 26.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
@@ -176,11 +181,26 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a1)
         assertEquals(1.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
 
-        val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger
+        val ghostRefusjonsopplysinger =
+            inspektør
+                .vilkårsgrunnlag(1.januar)!!
+                .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+                .single {
+                    it.inspektør.orgnummer ==
+                        a2
+                }.inspektør.refusjonsopplysninger
         assertEquals(emptyList<Refusjonsopplysning>(), ghostRefusjonsopplysinger)
 
         assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_INNTEKTSMELDING,
+            orgnummer = a2,
+        )
     }
 
     @Test
@@ -190,28 +210,50 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
 
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 31000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        )
         håndterVilkårsgrunnlagGhost(2.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
 
-        val ghostInntektFørIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
+        val ghostInntektFørIm =
+            inspektør
+                .vilkårsgrunnlag(
+                    1.januar,
+                )!!
+                .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+                .single {
+                    it.gjelder(ghost)
+                }.inspektør.inntektsopplysning
         assertTrue(ghostInntektFørIm is SkattSykepengegrunnlag)
 
         // Inntektsmelding fra Ghost vi egentlig ikke trenger, men de sender den allikevel og opplyser om IkkeFravaer...
         // denne vinner over skatt i inntektsturnering
-        val ghostIM = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = 33000.månedlig,
-            orgnummer = ghost,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer",
-            avsendersystem = ALTINN
-        )
+        val ghostIM =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = 33000.månedlig,
+                orgnummer = ghost,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer",
+                avsendersystem = ALTINN,
+            )
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val ghostInntektEtterIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
+        val ghostInntektEtterIm =
+            inspektør
+                .vilkårsgrunnlag(
+                    1.januar,
+                )!!
+                .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+                .single {
+                    it.gjelder(ghost)
+                }.inspektør.inntektsopplysning
         assertFalse(ghostInntektEtterIm is InntektsmeldingInntekt)
         assertTrue(ghostInntektEtterIm is SkattSykepengegrunnlag)
 
@@ -220,7 +262,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)
-        val ghostInntektEtterImNå = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
+        val ghostInntektEtterImNå =
+            inspektør
+                .vilkårsgrunnlag(
+                    1.januar,
+                )!!
+                .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+                .single {
+                    it.gjelder(ghost)
+                }.inspektør.inntektsopplysning
         assertTrue(ghostInntektEtterImNå is InntektsmeldingInntekt)
         assertFalse(ghostInntektEtterImNå is SkattSykepengegrunnlag)
 
@@ -241,19 +291,29 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
 
         assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, 33000.månedlig, ghostIM)
-        assertEquals(setOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(ghostSøknad),
+                Dokumentsporing.inntektsmeldingDager(ghostIM),
+                Dokumentsporing.inntektsmeldingInntekt(ghostIM),
+            ),
+            inspektør(ghost).hendelser(1.vedtaksperiode),
+        )
     }
 
     @Test
     fun `blir syk fra ghost`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -292,12 +352,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     fun `blir syk fra ghost og inntektsmeldingen kommer først`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -313,18 +376,23 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost sender klassisk inntektsmelding`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile = Subsumsjon("8-28", 3, "b")
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile)))
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile)),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -351,18 +419,23 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile = Subsumsjon("8-28", 3, "b")
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile)))
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile)),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -392,12 +465,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         // Arbeidsgiver har fylt inn inntekt for skjæringstidspunktet 1.januar så da vinner det over skatteopplysningene
-        val inntektsmelding = håndterInntektsmelding(
-            listOf(1.februar til 16.februar),
-            beregnetInntekt = 32000.månedlig,
-            orgnummer = a2,
-            avsendersystem = NAV_NO
-        )
+        val inntektsmelding =
+            håndterInntektsmelding(
+                listOf(1.februar til 16.februar),
+                beregnetInntekt = 32000.månedlig,
+                orgnummer = a2,
+                avsendersystem = NAV_NO,
+            )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -407,25 +481,29 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         assertLikeRefusjonsopplysninger(
-            listOf(Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig, ARBEIDSGIVER), Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig, ARBEIDSGIVER)),
-            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig, ARBEIDSGIVER),
+                Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig, ARBEIDSGIVER),
+            ),
+            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar),
         )
-        val korrigerendeInntektsmelding = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.februar til 16.februar),
-            førsteFraværsdag = 20.februar,
-            beregnetInntekt = 32000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
-            orgnummer = a2,
-            avsendersystem = NAV_NO_SELVBESTEMT
-        )
+        val korrigerendeInntektsmelding =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                førsteFraværsdag = 20.februar,
+                beregnetInntekt = 32000.månedlig,
+                refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
+                orgnummer = a2,
+                avsendersystem = NAV_NO_SELVBESTEMT,
+            )
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         assertLikeRefusjonsopplysninger(
             listOf(
                 Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, 32000.månedlig, ARBEIDSGIVER),
-                Refusjonsopplysning(korrigerendeInntektsmelding, 1.februar, null, 30000.månedlig, ARBEIDSGIVER)
+                Refusjonsopplysning(korrigerendeInntektsmelding, 1.februar, null, 30000.månedlig, ARBEIDSGIVER),
             ),
-            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
+            inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar),
         )
     }
 
@@ -451,26 +529,29 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             førsteFraværsdag = 26.mars,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode), 32000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode), 32000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
-            arbeidsforhold = arbeidsforhold
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
+            arbeidsforhold = arbeidsforhold,
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
@@ -501,29 +582,48 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
-        val inntekter = listOf(
-            grunnlag(
-                a1, finnSkjæringstidspunkt(
-                    a1, 1.vedtaksperiode
-                ), 10000.månedlig.repeat(3)
-            ),
-            grunnlag(
-                a2, finnSkjæringstidspunkt(
-                    a1, 1.vedtaksperiode
-                ), 20000.månedlig.repeat(3)
+        val inntekter =
+            listOf(
+                grunnlag(
+                    a1,
+                    finnSkjæringstidspunkt(
+                        a1,
+                        1.vedtaksperiode,
+                    ),
+                    10000.månedlig.repeat(3),
+                ),
+                grunnlag(
+                    a2,
+                    finnSkjæringstidspunkt(
+                        a1,
+                        1.vedtaksperiode,
+                    ),
+                    20000.månedlig.repeat(3),
+                ),
             )
-        )
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
@@ -532,10 +632,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertIngenVarsel(RV_VV_8, 1.vedtaksperiode.filter(a1))
         assertEquals(
             FLERE_ARBEIDSGIVERE,
-            inspektør(a1).inntektskilde(1.vedtaksperiode)
+            inspektør(a1).inntektskilde(1.vedtaksperiode),
         )
     }
-
 
     @Test
     fun `En førstegangsbehandling og et arbeidsforhold som starter etter skjæringstidspunktet - ghostn't (inaktive arbeidsforholdet) skal ikke påvirke beregningen`() {
@@ -548,22 +647,25 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 2.januar, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 2.januar, null, Arbeidsforholdtype.ORDINÆRT),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -575,7 +677,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1431, a1Linje.beløp)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-
     }
 
     @Test
@@ -589,23 +690,26 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(1))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(1)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017), Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017), Arbeidsforholdtype.ORDINÆRT),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -617,7 +721,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1431, a1Linje.beløp)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-
     }
 
     @Test
@@ -632,23 +735,36 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -677,23 +793,36 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -721,23 +850,36 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -772,20 +914,33 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
-        )
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 31.desember(2017), ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
+            )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = 31.desember(2017),
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
@@ -812,20 +967,28 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
-        )
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 2.januar, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
+            )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 2.januar, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
@@ -855,21 +1018,34 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
-            grunnlag(a2, 1.mars.minusMonths(2), listOf(500.månedlig)),
-        )
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
+                grunnlag(a2, 1.mars.minusMonths(2), listOf(500.månedlig)),
+            )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
@@ -893,7 +1069,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(
             Sykdom(1.mars, 31.mars, 100.prosent),
             andreInntektskilder = true,
-            orgnummer = a1
+            orgnummer = a1,
         )
         assertFunksjonellFeil(RV_SØ_10)
     }
@@ -910,23 +1086,36 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -955,23 +1144,36 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -998,22 +1200,35 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.november(2017), ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = 1.november(2017),
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -1050,26 +1265,42 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.november(2017), ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = 1.november(2017),
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15")))
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15")),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1140,7 +1371,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a2)
 
-
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
@@ -1151,30 +1381,39 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            1.vedtaksperiode,
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        val relevanteOrgnumre1: Iterable<String> = hendelselogg.etterspurtBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+        val relevanteOrgnumre1: Iterable<String> =
+            hendelselogg.etterspurtBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold")
+                ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(
-            OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
-                a2,
-                true,
-                "forklaring"
-            )
-        ))
+        håndterOverstyrArbeidsforhold(
+            skjæringstidspunkt,
+            listOf(
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    a2,
+                    true,
+                    "forklaring",
+                ),
+            ),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
-        val relevanteOrgnumre2: Iterable<String> = hendelselogg.etterspurtBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+        val relevanteOrgnumre2: Iterable<String> =
+            hendelselogg.etterspurtBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold")
+                ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1), relevanteOrgnumre2.toList())
         assertEquals(listOf(a2), sykepengegrunnlagInspektør.deaktiverteArbeidsforhold)
 
@@ -1208,9 +1447,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(16.mars til 31.mars),
             førsteFraværsdag = 16.mars,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             orgnummer = a2,
-            avsendersystem = ALTINN
+            avsendersystem = ALTINN,
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
@@ -1256,10 +1495,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(16.mars til 31.mars),
             førsteFraværsdag = 16.mars,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            avsendersystem = NAV_NO
+            avsendersystem = NAV_NO,
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
@@ -1279,37 +1518,58 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
-            arbeidsforhold = arbeidsforhold
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
+            arbeidsforhold = arbeidsforhold,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val utbetaling1 = inspektør(a1).utbetaling(0)
-        assertEquals(74, utbetaling1.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad)
+        assertEquals(
+            74,
+            utbetaling1.utbetalingstidslinje[1.januar]
+                .økonomi.inspektør.totalGrad,
+        )
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
     }
 
-    private fun assertInntektstype(skjæringstidspunkt: LocalDate, forventet: Map<String, KClass<out Inntektsopplysning>>) {
-        val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+    private fun assertInntektstype(
+        skjæringstidspunkt: LocalDate,
+        forventet: Map<String, KClass<out Inntektsopplysning>>,
+    ) {
+        val arbeidsgiverInntektsopplysninger =
+            inspektør
+                .vilkårsgrunnlag(
+                    skjæringstidspunkt,
+                )!!
+                .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
         forventet.forEach { (organisasjonsnummer, forventetInntektstype) ->
-            val inntektsopplysning = arbeidsgiverInntektsopplysninger.single { it.gjelder(organisasjonsnummer) }.inspektør.inntektsopplysning
+            val inntektsopplysning =
+                arbeidsgiverInntektsopplysninger
+                    .single {
+                        it.gjelder(
+                            organisasjonsnummer,
+                        )
+                    }.inspektør.inntektsopplysning
             assertEquals(forventetInntektstype, inntektsopplysning::class)
         }
     }
@@ -1331,29 +1591,38 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
     }
 
-    private fun håndterVilkårsgrunnlagGhost(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+    private fun håndterVilkårsgrunnlagGhost(
+        vedtaksperiodeIdInnhenter: IdInnhenter,
+        orgnummer: String,
+    ) {
         val skjæringstidspunkt = finnSkjæringstidspunkt(orgnummer, vedtaksperiodeIdInnhenter)
-        val inntekter = listOf(
-            grunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(3)),
-            grunnlag(a2, skjæringstidspunkt, 32000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(3)),
+                grunnlag(a2, skjæringstidspunkt, 32000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
             orgnummer = orgnummer,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
-            arbeidsforhold = arbeidsforhold
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
+            arbeidsforhold = arbeidsforhold,
         )
     }
 
-    private fun assertInfoSomFølgeAv(forventetInfo: String, block: () -> Unit) {
+    private fun assertInfoSomFølgeAv(
+        forventetInfo: String,
+        block: () -> Unit,
+    ) {
         assertIngenInfo(forventetInfo)
         block()
         assertInfo(forventetInfo)

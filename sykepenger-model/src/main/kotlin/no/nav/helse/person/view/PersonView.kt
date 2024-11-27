@@ -12,7 +12,7 @@ import no.nav.helse.utbetalingslinjer.UtbetalingView
 
 internal data class PersonView(
     val arbeidsgivere: List<ArbeidsgiverView>,
-    val vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikkView
+    val vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikkView,
 )
 
 internal data class ArbeidsgiverView(
@@ -25,5 +25,5 @@ internal data class ArbeidsgiverView(
     val ubrukteRefusjonsopplysninger: RefusjonsservitørView,
     val feriepengeutbetalinger: List<FeriepengeutbetalingView>,
     val aktiveVedtaksperioder: List<VedtaksperiodeView>,
-    val forkastetVedtaksperioder: List<VedtaksperiodeView>
+    val forkastetVedtaksperioder: List<VedtaksperiodeView>,
 )

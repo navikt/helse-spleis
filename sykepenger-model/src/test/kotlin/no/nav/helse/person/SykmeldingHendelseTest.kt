@@ -6,11 +6,9 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
-
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
         val aktivitetslogg = Aktivitetslogg()
@@ -34,6 +32,6 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) =
         a1Hendelsefabrikk.lagSykmelding(
-            sykeperioder = sykeperioder
+            sykeperioder = sykeperioder,
         )
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -36,9 +35,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
-
+internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     @Test
     fun `over 6G -- revurder inntekt ned på a1 når begge er i Avsluttet`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
@@ -60,7 +59,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 1063.0.daglig, aktuellDagsinntekt = 31000.månedlig)
         }
@@ -77,12 +76,12 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 1098.0.daglig, aktuellDagsinntekt = 32000.månedlig)
         }
-
     }
+
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker ikke utbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
@@ -99,9 +98,13 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
+
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker utbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
@@ -123,7 +126,10 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertDag(17.januar, 1064.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
 
@@ -134,7 +140,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 15000.månedlig,
-                refusjon = Refusjon(7500.månedlig, opphørsdato = null)
+                refusjon = Refusjon(7500.månedlig, opphørsdato = null),
             )
         }
         a1 {
@@ -147,9 +153,13 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
+
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir brukerutbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
@@ -167,9 +177,13 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
+
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir økt arbeidsgiverutbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
@@ -188,7 +202,10 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
 
@@ -213,7 +230,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 705.0.daglig, aktuellDagsinntekt = 31000.månedlig)
         }
@@ -230,7 +247,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 728.0.daglig, aktuellDagsinntekt = 32000.månedlig)
         }
@@ -246,16 +263,19 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                )
+                inntektsvurderingForSykepengegrunnlag =
+                    InntektForSykepengegrunnlag(
+                        inntekter =
+                            listOf(
+                                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                                grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                            ),
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -283,7 +303,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
         a2 {
@@ -300,7 +320,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -331,7 +351,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
         a2 {
@@ -347,7 +367,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -367,16 +387,19 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                )
+                inntektsvurderingForSykepengegrunnlag =
+                    InntektForSykepengegrunnlag(
+                        inntekter =
+                            listOf(
+                                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                                grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                            ),
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -413,7 +436,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
         }
@@ -421,6 +444,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
+
     @Test
     fun `revurder inntekt når a1 står i AvventerSimuleringRevurdering`() {
         (a1 og a2).nyeVedtak(januar)
@@ -442,7 +466,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
         }
@@ -450,6 +474,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
+
     @Test
     fun `revurder inntekt når a1 står i AvventerGodkjenningRevurdering`() {
         (a1 og a2).nyeVedtak(januar)
@@ -473,7 +498,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
         }
@@ -508,6 +533,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
+
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
         a2 {
@@ -519,15 +545,18 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                )
+                inntektsvurderingForSykepengegrunnlag =
+                    InntektForSykepengegrunnlag(
+                        inntekter =
+                            listOf(
+                                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                            ),
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -548,7 +577,12 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
+    private fun TestPerson.TestArbeidsgiver.assertDag(
+        dato: LocalDate,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = INGEN,
+        aktuellDagsinntekt: Inntekt = INGEN,
+    ) {
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)

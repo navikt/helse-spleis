@@ -5,13 +5,13 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -46,17 +46,31 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
-
     @Test
     fun `Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen`() {
         håndterSøknad(25.juni til 5.juli)
         håndterSøknad(31.juli til 18.august)
-        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 1.august, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(25.juni til 5.juli, 8.juli til 12.juli),
+            førsteFraværsdag = 1.august,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
-        assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(
+            "ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH",
+            inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+        )
 
-        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 7.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering", avsendersystem = ALTINN)
-        assertEquals("ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        håndterInntektsmelding(
+            listOf(25.juni til 5.juli, 8.juli til 12.juli),
+            førsteFraværsdag = 7.august,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+            avsendersystem = ALTINN,
+        )
+        assertEquals(
+            "ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH",
+            inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+        )
         assertEquals(listOf(7.august til 18.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
         assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
@@ -70,16 +84,19 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             nå = {
                 assertEquals(
                     "Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-07-09",
-                    assertThrows<IllegalStateException> { håndterYtelser(2.vedtaksperiode) }.message
+                    assertThrows<IllegalStateException> { håndterYtelser(2.vedtaksperiode) }.message,
                 )
             },
             ønsket = {
                 fail("""¯\_(ツ)_/¯""")
-            }
+            },
         )
 
         håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
-        assertEquals("ARR SSSSSJJ JJJJJJJ JJJJJJJ JJJJJJJ JNSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(
+            "ARR SSSSSJJ JJJJJJJ JJJJJJJ JJJJJJJ JNSSSHH SSSSSH",
+            inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+        )
         assertEquals(listOf(25.juni til 5.juli, 9.juli til 13.juli), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
         assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         håndterYtelser(2.vedtaksperiode)
@@ -87,7 +104,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`(){
+    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`() {
         nyttVedtak(5.desember(2017) til 5.januar)
         val korrelasjonsIdAugust2017 = inspektør.utbetaling(0).korrelasjonsId
 
@@ -104,7 +121,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(5.desember(2017) til 5.januar, inspektør.utbetaling(0).periode)
-        assertEquals(korrelasjonsIdAugust2017,inspektør.utbetaling(0).korrelasjonsId)
+        assertEquals(korrelasjonsIdAugust2017, inspektør.utbetaling(0).korrelasjonsId)
         val korrelasjonsIdFebruar2018 = inspektør.utbetaling(1).korrelasjonsId
         assertEquals(5.februar til 24.februar, inspektør.utbetaling(1).periode)
         assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)
@@ -156,7 +173,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(4.vedtaksperiode))
     }
 
-    private fun utbetalingIder(vedtaksperiode: IdInnhenter) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
+    private fun utbetalingIder(vedtaksperiode: IdInnhenter) =
+        inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap {
+            it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId }
+        }
 
     @Test
     fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`() {
@@ -204,7 +224,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
@@ -218,7 +238,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -244,7 +264,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -280,7 +300,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE
+            AVVENTER_BLOKKERENDE_PERIODE,
         )
     }
 
@@ -339,7 +359,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING
+            AVVENTER_VILKÅRSPRØVING,
         )
     }
 
@@ -492,7 +512,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterPåminnelse(
             1.vedtaksperiode,
             påminnetTilstand = AVVENTER_INNTEKTSMELDING,
-            tilstandsendringstidspunkt = 5.februar.atStartOfDay()
+            tilstandsendringstidspunkt = 5.februar.atStartOfDay(),
         )
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -501,7 +521,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Kort periode med en tidligere kort periode som har lagret inntekt for første fraværsdag`() {
-        /* skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP */
+        // skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar))
 
@@ -588,7 +608,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 10.februar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)),
         )
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar)
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))

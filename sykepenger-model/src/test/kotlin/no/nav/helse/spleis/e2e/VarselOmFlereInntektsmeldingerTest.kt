@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
-
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
         håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021)))
@@ -37,9 +36,11 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
-        assertTrue(person.personLogg.varsel.none { w ->
-            w.toString().contains("Mottatt flere inntektsmeldinger")
-        })
+        assertTrue(
+            person.personLogg.varsel.none { w ->
+                w.toString().contains("Mottatt flere inntektsmeldinger")
+            },
+        )
     }
 
     @Test
@@ -66,8 +67,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
             ønsket = {
                 assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
                 assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-            }
+            },
         )
     }
-
 }

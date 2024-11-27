@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
@@ -13,15 +11,25 @@ import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.fail
+import java.time.LocalDate
+import java.util.UUID
 
 internal typealias InntektsmeldingId = UUID
 internal typealias VedtaksperiodeId = UUID
 
-internal class TestObservatør(person: Person? = null) : PersonObserver {
+internal class TestObservatør(
+    person: Person? = null,
+) : PersonObserver {
     init {
         person?.addObserver(this)
     }
-    internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
+
+    internal val tilstandsendringer =
+        person
+            ?.inspektør
+            ?.sisteVedtaksperiodeTilstander()
+            ?.mapValues { mutableListOf(it.value) }
+            ?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
     val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent>()
@@ -50,9 +58,13 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val sykefraværstilfelleIkkeFunnet = mutableListOf<PersonObserver.SykefraværstilfelleIkkeFunnet>()
 
     private lateinit var sisteVedtaksperiode: UUID
-    private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
-        perioder.map { it.inspektør.id }.toMutableSet()
-    }?.toMutableMap() ?: mutableMapOf()
+    private val vedtaksperioder =
+        person
+            ?.inspektør
+            ?.vedtaksperioder()
+            ?.mapValues { (_, perioder) ->
+                perioder.map { it.inspektør.id }.toMutableSet()
+            }?.toMutableMap() ?: mutableMapOf()
 
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
@@ -67,13 +79,20 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     fun hendelseider(vedtaksperiodeId: UUID) =
-        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
+        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser
+            ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
     fun sisteVedtaksperiode() = IdInnhenter { orgnummer -> vedtaksperioder.getValue(orgnummer).last() }
 
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
+
     fun sisteVedtaksperiodeIdOrNull(orgnummer: String) = vedtaksperioder[orgnummer]?.last()
-    fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+
+    fun vedtaksperiode(
+        orgnummer: String,
+        indeks: Int,
+    ) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+
     fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
     }
@@ -83,6 +102,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     fun forkastedePerioder() = forkastedeEventer.size
+
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
 
     override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
@@ -119,7 +139,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
-       avsluttetUtenVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
+        avsluttetUtenVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
     }
 
     override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
@@ -159,19 +179,35 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
         trengerArbeidsgiverperiode: Boolean,
-        erPotensiellForespørsel: Boolean
+        erPotensiellForespørsel: Boolean,
     ) {
-        inntektsmeldingReplayEventer.add(Forespørsel(
-            fnr = personidentifikator.toString(),
-            orgnr = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
-            sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-            egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-            harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
-            erPotensiellForespørsel = erPotensiellForespørsel
-        ))
+        inntektsmeldingReplayEventer.add(
+            Forespørsel(
+                fnr = personidentifikator.toString(),
+                orgnr = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                førsteFraværsdager =
+                    førsteFraværsdager.map {
+                        no.nav.helse.spill_av_im.FørsteFraværsdag(
+                            it.organisasjonsnummer,
+                            it.førsteFraværsdag,
+                        )
+                    },
+                sykmeldingsperioder =
+                    sykmeldingsperioder.map {
+                        no.nav.helse.spill_av_im
+                            .Periode(it.start, it.endInclusive)
+                    },
+                egenmeldinger =
+                    egenmeldingsperioder.map {
+                        no.nav.helse.spill_av_im
+                            .Periode(it.start, it.endInclusive)
+                    },
+                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
+                erPotensiellForespørsel = erPotensiellForespørsel,
+            ),
+        )
     }
 
     override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
@@ -182,9 +218,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         forkastedeEventer[event.vedtaksperiodeId] = event
     }
 
-    override fun overstyringIgangsatt(
-        event: PersonObserver.OverstyringIgangsatt
-    ) {
+    override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
         overstyringIgangsatt.add(event)
     }
 
@@ -196,11 +230,19 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingFørSøknad.add(event)
     }
 
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
+    override fun inntektsmeldingIkkeHåndtert(
+        inntektsmeldingId: UUID,
+        organisasjonsnummer: String,
+        harPeriodeInnenfor16Dager: Boolean,
+    ) {
         inntektsmeldingIkkeHåndtert.add(inntektsmeldingId)
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    override fun inntektsmeldingHåndtert(
+        inntektsmeldingId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ) {
         inntektsmeldingHåndtert.add(inntektsmeldingId to vedtaksperiodeId)
     }
 
@@ -208,7 +250,11 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         skatteinntekterLagtTilGrunnEventer.add(event)
     }
 
-    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    override fun søknadHåndtert(
+        søknadId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ) {
         søknadHåndtert.add(søknadId to vedtaksperiodeId)
     }
 

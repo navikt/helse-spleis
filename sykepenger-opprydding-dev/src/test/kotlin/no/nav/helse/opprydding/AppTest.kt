@@ -1,18 +1,18 @@
 package no.nav.helse.opprydding
 
-import java.time.LocalDateTime
-import java.util.UUID
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AppTest: DBTest() {
+internal class AppTest : DBTest() {
     private lateinit var testRapid: TestRapid
 
     private lateinit var personRepository: PersonRepository
@@ -53,7 +53,8 @@ internal class AppTest: DBTest() {
         assertEquals("123", kvittering["fødselsnummer"].asText())
     }
 
-    private fun slettemelding(fødselsnummer: String) = JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
+    private fun slettemelding(fødselsnummer: String) =
+        JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
 
     private fun opprettPerson(fødselsnummer: String) {
         opprettDummyPerson(fødselsnummer)
@@ -61,17 +62,15 @@ internal class AppTest: DBTest() {
         assertEquals(1, finnMelding(fødselsnummer))
     }
 
-    private fun finnPerson(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
+    private fun finnPerson(fødselsnummer: String): Int =
+        sessionOf(dataSource).use { session ->
             session.run(queryOf("SELECT COUNT(1) FROM person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
         } ?: 0
-    }
 
-    private fun finnMelding(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
+    private fun finnMelding(fødselsnummer: String): Int =
+        sessionOf(dataSource).use { session ->
             session.run(queryOf("SELECT COUNT(1) FROM melding WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
         } ?: 0
-    }
 
     private fun opprettDummyPerson(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
@@ -79,17 +78,15 @@ internal class AppTest: DBTest() {
                 val opprettMelding =
                     "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(?, ?, ?, ?::json, ?)"
                 it.run(
-                    queryOf(opprettMelding, fødselsnummer.toLong(), UUID.randomUUID(), "melding", "{}", LocalDateTime.now()).asUpdate
+                    queryOf(opprettMelding, fødselsnummer.toLong(), UUID.randomUUID(), "melding", "{}", LocalDateTime.now()).asUpdate,
                 )
 
                 val opprettPerson =
                     "INSERT INTO person(skjema_versjon, fnr, data) VALUES(?, ?, ?::json)"
                 it.run(
-                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), "{}").asUpdate
+                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), "{}").asUpdate,
                 )
             }
         }
     }
-
-
 }

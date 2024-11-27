@@ -1,6 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.hendelser.Periode
@@ -11,9 +10,10 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.LocalDate
 
 internal class Infotrygdhistorikk private constructor(
-    private val _elementer: MutableList<InfotrygdhistorikkElement>
+    private val _elementer: MutableList<InfotrygdhistorikkElement>,
 ) {
     val elementer get() = _elementer.toList()
     val siste get() = _elementer.first()
@@ -21,31 +21,35 @@ internal class Infotrygdhistorikk private constructor(
     constructor() : this(mutableListOf())
 
     internal companion object {
-        private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
-            tidligsteDato.minusYears(4) til LocalDate.now()
+        private fun oppfriskningsperiode(tidligsteDato: LocalDate) = tidligsteDato.minusYears(4) til LocalDate.now()
 
-        internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk {
-            return Infotrygdhistorikk(
-                _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
+        internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk =
+            Infotrygdhistorikk(
+                _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList(),
             )
-        }
     }
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
-        orgnummer: String
+        orgnummer: String,
     ): Boolean {
         if (!harHistorikk()) return true
         return siste.valider(aktivitetslogg, periode, orgnummer)
     }
 
-    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+    internal fun oppfriskNødvendig(
+        aktivitetslogg: IAktivitetslogg,
+        tidligsteDato: LocalDate,
+    ) {
         oppfrisk(aktivitetslogg, tidligsteDato)
     }
 
-    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+    internal fun oppfrisk(
+        aktivitetslogg: IAktivitetslogg,
+        tidligsteDato: LocalDate,
+    ) {
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
 
@@ -54,9 +58,8 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje()
     }
 
-    internal fun skjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>): Skjæringstidspunkt {
-        return Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
-    }
+    internal fun skjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>): Skjæringstidspunkt =
+        Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
 
     internal fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
@@ -76,9 +79,10 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         if (!harHistorikk()) return false
-        val sisteElementSomFantesFørUtbetaling = _elementer.firstOrNull{
-            it.erEldreEnn(utbetaling)
-        } ?: return siste.erNyopprettet()
+        val sisteElementSomFantesFørUtbetaling =
+            _elementer.firstOrNull {
+                it.erEldreEnn(utbetaling)
+            } ?: return siste.erNyopprettet()
         return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)
     }
 
@@ -89,10 +93,10 @@ internal class Infotrygdhistorikk private constructor(
         _elementer.add(nyeste)
     }
 
-    internal fun betaltePerioder(orgnummer: String? = null) =
-        if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
+    internal fun betaltePerioder(orgnummer: String? = null) = if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
 
     internal fun harHistorikk() = _elementer.isNotEmpty()
+
     internal fun harUtbetaltI(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harUtbetaltI(periode)
@@ -108,7 +112,8 @@ internal class Infotrygdhistorikk private constructor(
         return siste.perioder.maxOfOrNull { it.periode.endInclusive }
     }
 
-    internal fun dto() = InfotrygdhistorikkUtDto(
-        elementer = this._elementer.map { it.dto() }
-    )
+    internal fun dto() =
+        InfotrygdhistorikkUtDto(
+            elementer = this._elementer.map { it.dto() },
+        )
 }

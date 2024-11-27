@@ -9,7 +9,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 internal class AzureTokenStub(
-    private val issuer: Issuer
+    private val issuer: Issuer,
 ) {
     private val randomPort = ServerSocket(0).use { it.localPort }
     private val wireMockServer: WireMockServer = WireMockServer(randomPort)
@@ -17,28 +17,29 @@ internal class AzureTokenStub(
 
     fun wellKnownEndpoint() = URI("http://localhost:$randomPort$jwksPath")
 
-    suspend fun startServer(): Boolean {
-        return suspendCoroutine { continuation ->
-            //Stub ID provider (for authentication of REST endpoints)
+    suspend fun startServer(): Boolean =
+        suspendCoroutine { continuation ->
+            // Stub ID provider (for authentication of REST endpoints)
             wireMockServer.start()
             ventPåServeroppstart()
             wireMockServer.stubFor(
-                WireMock.get(WireMock.urlPathEqualTo(jwksPath)).willReturn(WireMock.okJson(issuer.jwks))
+                WireMock.get(WireMock.urlPathEqualTo(jwksPath)).willReturn(WireMock.okJson(issuer.jwks)),
             )
             continuation.resume(true) // returnerer true bare for å ha en verdi
         }
-    }
 
-    suspend fun stopServer() = suspendCoroutine {
-        wireMockServer.stop()
-        it.resume(true) // returnerer true bare for å ha en verdi
-    }
-
-    private fun ventPåServeroppstart() = retry {
-        try {
-            Socket("localhost", wireMockServer.port()).use { it.isConnected }
-        } catch (err: Exception) {
-            false
+    suspend fun stopServer() =
+        suspendCoroutine {
+            wireMockServer.stop()
+            it.resume(true) // returnerer true bare for å ha en verdi
         }
-    }
+
+    private fun ventPåServeroppstart() =
+        retry {
+            try {
+                Socket("localhost", wireMockServer.port()).use { it.isConnected }
+            } catch (err: Exception) {
+                false
+            }
+        }
 }

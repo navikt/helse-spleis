@@ -7,12 +7,17 @@ private val regex = "^$varselkodeformat$".toRegex()
 enum class Varselkode(
     val varseltekst: String,
     val funksjonellFeilTekst: String = varseltekst,
-    val avviklet: Boolean = false
+    val avviklet: Boolean = false,
 ) {
-
     RV_SY_1("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", avviklet = true),
-    RV_SY_2("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer", avviklet = true),
-    RV_SY_3("Mottatt flere sykmeldinger for perioden - den første sykmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt", avviklet = true),
+    RV_SY_2(
+        "Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer",
+        avviklet = true,
+    ),
+    RV_SY_3(
+        "Mottatt flere sykmeldinger for perioden - den første sykmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt",
+        avviklet = true,
+    ),
 
     // SØ: Søknad
     RV_SØ_1("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger"),
@@ -38,7 +43,10 @@ enum class Varselkode(
     RV_SØ_21("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier", avviklet = true),
     RV_SØ_22("Søknaden inneholder en Papirsykmeldingsperiode"),
     RV_SØ_23("Korrigert søknad er mottatt med nye opplysninger - kontroller dagene i sykmeldingsperioden", avviklet = true),
-    RV_SØ_24("Mottatt flere søknade for perioden - den første søknaden som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt", avviklet = true),
+    RV_SØ_24(
+        "Mottatt flere søknade for perioden - den første søknaden som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt",
+        avviklet = true,
+    ),
     RV_SØ_25("Permisjon oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden", avviklet = true),
     RV_SØ_26("Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for", avviklet = true),
     RV_SØ_27("Mottatt søknad out of order innenfor 18 dager til neste"),
@@ -69,10 +77,20 @@ enum class Varselkode(
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", avviklet = true),
 
     // IM: Inntektsmelding
-    RV_IM_1("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", avviklet = true),
-    RV_IM_2("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", avviklet = true),
-    RV_IM_3("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."),
-    RV_IM_4("Det er mottatt flere inntektsmeldinger på samme skjæringstidspunkt. Undersøk at arbeidsgiverperioden, sykepengegrunnlaget og refusjonsopplysningene er riktige"),
+    RV_IM_1(
+        "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+        avviklet = true,
+    ),
+    RV_IM_2(
+        "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
+        avviklet = true,
+    ),
+    RV_IM_3(
+        "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.",
+    ),
+    RV_IM_4(
+        "Det er mottatt flere inntektsmeldinger på samme skjæringstidspunkt. Undersøk at arbeidsgiverperioden, sykepengegrunnlaget og refusjonsopplysningene er riktige",
+    ),
     RV_IM_5("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", avviklet = true),
     RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt", avviklet = true),
     RV_IM_7("Brukeren har opphold i naturalytelser"),
@@ -80,16 +98,34 @@ enum class Varselkode(
     RV_IM_9("ArbeidsforholdsID fra inntektsmeldingen er utfylt", avviklet = true),
     RV_IM_10("Første fraværsdag i inntektsmeldingen er forskjellig fra foregående tilstøtende periode", avviklet = true),
     RV_IM_11("Første fraværsdag i inntektsmeldingen er ulik første fraværsdag i sykdomsperioden", avviklet = true),
-    RV_IM_12("Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode", avviklet = true),
+    RV_IM_12(
+        "Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode",
+        avviklet = true,
+    ),
     RV_IM_13("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden", avviklet = true),
-    RV_IM_14("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt", avviklet = true),
-    RV_IM_15("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.", avviklet = true),
+    RV_IM_14(
+        "Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt",
+        avviklet = true,
+    ),
+    RV_IM_15(
+        "Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.",
+        avviklet = true,
+    ),
     RV_IM_16("Inntektsmelding inneholder ikke arbeidsgiverperiode", avviklet = true),
     RV_IM_17("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig", avviklet = true),
-    RV_IM_18("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode", avviklet = true),
-    RV_IM_19("Mottatt flere inntektsmeldinger - den andre inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", avviklet = true),
+    RV_IM_18(
+        "Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode",
+        avviklet = true,
+    ),
+    RV_IM_19(
+        "Mottatt flere inntektsmeldinger - den andre inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+        avviklet = true,
+    ),
     RV_IM_20("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling", avviklet = true),
-    RV_IM_21("Inntektsmeldingen mangler ikke arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode", avviklet = true),
+    RV_IM_21(
+        "Inntektsmeldingen mangler ikke arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode",
+        avviklet = true,
+    ),
     RV_IM_22("Det er mottatt flere inntektsmeldinger på kort tid for samme arbeidsgiver"),
     RV_IM_23("Arbeidsgiver har oppgitt hullete arbeidsgiverperiode og begrunnelse for redusert utbetaling i arbeidsgiverperiode"),
     RV_IM_24("Det har kommet ny inntektsmelding, vurder om arbeidsgiverperiode er riktig"),
@@ -104,7 +140,10 @@ enum class Varselkode(
     RV_RE_2("Mangler refusjonsopplysninger", avviklet = true),
 
     // IT: Infotrygd
-    RV_IT_1("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", funksjonellFeilTekst = "Det er utbetalt en nyere periode i Infotrygd"),
+    RV_IT_1(
+        "Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
+        funksjonellFeilTekst = "Det er utbetalt en nyere periode i Infotrygd",
+    ),
     RV_IT_2("Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.", avviklet = true),
     RV_IT_3("Utbetaling i Infotrygd overlapper med vedtaksperioden"), // funksjonellFeil
     RV_IT_4("Det er registrert utbetaling på nødnummer", avviklet = true), // funksjonellFeil
@@ -124,18 +163,36 @@ enum class Varselkode(
     RV_IT_18("Avslutter perioden fordi tilstøtende, eller nyere periode, gikk til Infotrygd", avviklet = true),
     RV_IT_19("Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd.", avviklet = true),
     RV_IT_20("Det er en utbetalingsperiode som er lagt inn i Infotrygd uten at inntektsopplysninger er registrert.", avviklet = true),
-    RV_IT_21("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato, den seneste er lagt til grunn. Kontroller sykepengegrunnlaget.", avviklet = true),
+    RV_IT_21(
+        "Det er lagt inn flere inntekter i Infotrygd med samme fom-dato, den seneste er lagt til grunn. Kontroller sykepengegrunnlaget.",
+        avviklet = true,
+    ),
     RV_IT_22("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.", avviklet = true),
-    RV_IT_23("Direkte overgang fra Infotrygd. Dagsatsen har endret seg minst én gang i Infotrygd. Kontroller at sykepengegrunnlaget er riktig.", avviklet = true),
+    RV_IT_23(
+        "Direkte overgang fra Infotrygd. Dagsatsen har endret seg minst én gang i Infotrygd. Kontroller at sykepengegrunnlaget er riktig.",
+        avviklet = true,
+    ),
     RV_IT_24("Forkaster perioden fordi vi har oppdaget utbetalinger i Infotrygd", avviklet = true),
     RV_IT_25("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag", avviklet = true),
     RV_IT_26("Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode", avviklet = true),
-    RV_IT_27("Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.", avviklet = true),
+    RV_IT_27(
+        "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
+        avviklet = true,
+    ),
     RV_IT_28("Perioden er en direkte overgang fra periode i Infotrygd", avviklet = true),
-    RV_IT_29("Perioden er lagt inn i Infotrygd - men mangler inntektsopplysninger. Fjern perioden fra SP UB hvis du utbetaler via speil.", avviklet = true),
+    RV_IT_29(
+        "Perioden er lagt inn i Infotrygd - men mangler inntektsopplysninger. Fjern perioden fra SP UB hvis du utbetaler via speil.",
+        avviklet = true,
+    ),
     RV_IT_30("Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.", avviklet = true),
-    RV_IT_31("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
-    RV_IT_32("Perioden forlenger en behandling i ny løsning, og har historikk i Infotrygd også: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
+    RV_IT_31(
+        "Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.",
+        avviklet = true,
+    ),
+    RV_IT_32(
+        "Perioden forlenger en behandling i ny løsning, og har historikk i Infotrygd også: Undersøk at antall dager igjen er beregnet riktig.",
+        avviklet = true,
+    ),
     RV_IT_33("Skjæringstidspunktet har endret seg som følge av historikk fra Infotrygd"),
     RV_IT_34("Avslutter perioden fordi tidligere periode gikk til Infotrygd", avviklet = true),
     RV_IT_35("Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato", avviklet = true),
@@ -149,15 +206,23 @@ enum class Varselkode(
     RV_VV_3("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.", avviklet = true),
     RV_VV_4("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd"),
     RV_VV_5("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", avviklet = true),
-    RV_VV_8("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."),
+    RV_VV_8(
+        "Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.",
+    ),
     RV_VV_9("Bruker er fortsatt syk 26 uker etter maksdato"),
     RV_VV_10("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler."),
     RV_VV_11("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.", avviklet = true),
     RV_VV_12("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag", avviklet = true),
     RV_VV_13("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt", avviklet = true),
-    RV_VV_14("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.", avviklet = true),
+    RV_VV_14(
+        "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.",
+        avviklet = true,
+    ),
     RV_VV_15("Maks antall sykepengedager er nådd i perioden", avviklet = true),
-    RV_VV_16("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig", avviklet = true),
+    RV_VV_16(
+        "Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig",
+        avviklet = true,
+    ),
     RV_VV_17("Det er beregnet utbetaling under 20% total sykdomsgrad"),
 
     // VV: Opptjeningsvurdering
@@ -172,12 +237,19 @@ enum class Varselkode(
 
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", avviklet = true),
+
     @Deprecated("Denne skal ikke være i bruk i Spleis mer, brukes av spinnvill")
-    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", funksjonellFeilTekst = "Har mer enn 25 % avvik"),
+    RV_IV_2(
+        "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
+        funksjonellFeilTekst = "Har mer enn 25 % avvik",
+    ),
     RV_IV_3("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene"),
     RV_IV_4("Finnes inntekter fra flere virksomheter siste tre måneder", avviklet = true),
     RV_IV_5("Har inntekt på flere arbeidsgivere med forskjellig fom dato", avviklet = true),
-    RV_IV_6("Inntekter fra mer enn én arbeidsgiver i A-ordningen siste tre måneder. Kontroller om brukeren har flere arbeidsforhold på sykmeldingstidspunktet. Flere arbeidsforhold støttes ikke av systemet.", avviklet = true),
+    RV_IV_6(
+        "Inntekter fra mer enn én arbeidsgiver i A-ordningen siste tre måneder. Kontroller om brukeren har flere arbeidsforhold på sykmeldingstidspunktet. Flere arbeidsforhold støttes ikke av systemet.",
+        avviklet = true,
+    ),
     RV_IV_7("Det er gjenbrukt inntektsopplysninger "),
     RV_IV_8("Perioden har flere skjæringstidspunkter og det er dager hvor inntekten derfor er satt til 0 kr", avviklet = true),
     RV_IV_9("Tilkommen inntekt som ikke er støttet"),
@@ -188,12 +260,17 @@ enum class Varselkode(
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
     RV_SV_2("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget"),
     RV_SV_3("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg", avviklet = true),
-    RV_SV_4("Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen.", avviklet = true),
+    RV_SV_4(
+        "Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen.",
+        avviklet = true,
+    ),
     RV_SV_5("Det har tilkommet nye inntekter"),
 
     // AY: Andre ytelser
     RV_AY_3("Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet. Kontroller at brukeren har rett til sykepenger"),
-    RV_AY_4("Bruker har mottatt dagpenger innenfor 4 uker før skjæringstidspunktet. Kontroller om bruker er dagpengemottaker. Kombinerte ytelser støttes foreløpig ikke av systemet"),
+    RV_AY_4(
+        "Bruker har mottatt dagpenger innenfor 4 uker før skjæringstidspunktet. Kontroller om bruker er dagpengemottaker. Kombinerte ytelser støttes foreløpig ikke av systemet",
+    ),
     RV_AY_5("Det er utbetalt foreldrepenger i samme periode."),
     RV_AY_6("Det er utbetalt pleiepenger i samme periode."),
     RV_AY_7("Det er utbetalt omsorgspenger i samme periode."),
@@ -236,7 +313,9 @@ enum class Varselkode(
     RV_UT_21("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen"),
     RV_UT_22("Annullering ble ikke gjennomført", avviklet = true),
     RV_UT_23("Den nye beregningen vil trekke penger i sykefraværstilfellet"),
-    RV_UT_24("Utbetalingen er avvist, men perioden kan ikke forkastes. Overstyr perioden, eller annuller sykefraværstilfellet om nødvendig"),
+    RV_UT_24(
+        "Utbetalingen er avvist, men perioden kan ikke forkastes. Overstyr perioden, eller annuller sykefraværstilfellet om nødvendig",
+    ),
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.", avviklet = true),
@@ -246,10 +325,13 @@ enum class Varselkode(
     // RV: Revurdering
     RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"),
     RV_RV_2("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger."),
-    RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", avviklet= true),
+    RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", avviklet = true),
     RV_RV_4("Revurdering er igangsatt og må fullføres", avviklet = true),
     RV_RV_5("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres", avviklet = true),
-    RV_RV_6("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", avviklet = true),
+    RV_RV_6(
+        "Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.",
+        avviklet = true,
+    ),
     RV_RV_7("En tidligere periode er annullert. Den må være utbetalt i Infotrygd før denne perioden kan behandles."),
 
     // VT: Vedtaksperiodetilstand
@@ -263,7 +345,7 @@ enum class Varselkode(
 
     RV_AG_1("Finner ikke arbeidsgiver"),
 
-    //AN: Annet
+    // AN: Annet
     RV_AN_1("Avslutter perioden på grunn av tilbakestilling", avviklet = true),
     RV_AN_2("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD", avviklet = true),
     RV_AN_3("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_GAP", avviklet = true),
@@ -271,15 +353,15 @@ enum class Varselkode(
     RV_AN_5("Personen har blitt behandlet på en tidligere ident"),
 
     // YS: Yrkesskade
-    RV_YS_1("Yrkesskade oppgitt i søknaden")
+    RV_YS_1("Yrkesskade oppgitt i søknaden"),
     ;
 
     init {
-        require(this.name.matches(regex)) {"Ugyldig varselkode-format: ${this.name}"}
+        require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel =
-        Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
+    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel = Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
+
     internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil =
         Aktivitet.FunksjonellFeil.opprett(kontekster, this, funksjonellFeilTekst)
 
@@ -296,12 +378,14 @@ enum class Varselkode(
         val `Overlapper med svangerskapspenger` = RV_AY_11
         val `Forlenger foreldrepenger med mer enn 14 dager` = RV_AY_12
 
-
         val `Støtter ikke søknadstypen` = RV_SØ_39
         val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
-        val `Arbeidsledigsøknad er lagt til grunn` =  RV_SØ_43
+        val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
 
-        fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
+        fun IAktivitetslogg.varsel(
+            varselkode: Varselkode,
+            detaljer: String,
+        ) {
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")
         }

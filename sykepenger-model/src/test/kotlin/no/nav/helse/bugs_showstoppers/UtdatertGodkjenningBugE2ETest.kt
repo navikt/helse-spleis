@@ -1,6 +1,5 @@
 package no.nav.helse.bugs_showstoppers
 
-import java.util.UUID
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -22,9 +21,9 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
-internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
-
+internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Håndterer løsning på godkjenningsbehov der utbetalingid på løsningen matcher med periodens gjeldende utbetaling`() {
         tilGodkjenning(januar, 100.prosent, 1.januar)
@@ -39,7 +38,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
     }
 
@@ -63,7 +62,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
+            AVVENTER_GODKJENNING,
         )
     }
 
@@ -82,7 +81,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
     }
 }

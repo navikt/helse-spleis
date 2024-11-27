@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 class InntektTest {
-
     @Test
     fun `Like beløp, men ulike`() {
         val daglig = 2833.103538461539.daglig

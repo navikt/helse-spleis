@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.til
@@ -12,9 +10,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
-internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
-
+internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
     @Test
     fun `periode i avventer blokkerende som venter på inntektsmelding fra annen arbeidsgiver bør ha samme timeout som avventer inntektsmelding`() {
         a1 {
@@ -113,5 +112,8 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     }
 
     private fun venterTil(vedtaksperiodeId: UUID) =
-        observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterTil.toLocalDate()
+        observatør.vedtaksperiodeVenter
+            .last { it.vedtaksperiodeId == vedtaksperiodeId }
+            .venterTil
+            .toLocalDate()
 }

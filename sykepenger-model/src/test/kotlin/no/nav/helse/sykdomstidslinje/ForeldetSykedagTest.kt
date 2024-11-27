@@ -1,16 +1,15 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
+import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -18,16 +17,17 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class ForeldetSykedagTest {
-
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
-        private val hendelefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER
-        )
+        private val hendelefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = ORGNUMMER,
+            )
     }
 
     @Test fun `omgående innsending`() {
@@ -66,10 +66,11 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    private fun søknad(sendtTilNAV: LocalDate) = hendelefabrikk.lagSøknad(
-        perioder = arrayOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
-        sendtTilNAVEllerArbeidsgiver = sendtTilNAV
-    )
+    private fun søknad(sendtTilNAV: LocalDate) =
+        hendelefabrikk.lagSøknad(
+            perioder = arrayOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAV,
+        )
 
     private fun undersøke(søknad: SykdomstidslinjeHendelse) = søknad.sykdomstidslinje().inspektør
 }

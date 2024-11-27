@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.testhelpers.ferieTil
-import no.nav.helse.januar
 import no.nav.helse.testhelpers.jobbTil
 import no.nav.helse.testhelpers.merge
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -59,13 +59,15 @@ internal class LåstePerioderTest {
 
     @Test
     fun `låse opp overlappende låste dagperioder`() {
-        val initial = (1.januar jobbTil 25.januar).lås(Periode(2.januar, 11.januar)).lås(Periode(4.januar, 15.januar))
-            .merge(1.januar ferieTil 25.januar)
+        val initial =
+            (1.januar jobbTil 25.januar)
+                .lås(Periode(2.januar, 11.januar))
+                .lås(Periode(4.januar, 15.januar))
+                .merge(1.januar ferieTil 25.januar)
 
         assertEquals(1 + 10, initial.filterIsInstance<ProblemDag>().size)
 
         val actual = initial.låsOpp(Periode(2.januar, 11.januar)).merge(1.januar ferieTil 25.januar)
         assertEquals(3 + 10, actual.filterIsInstance<ProblemDag>().size)
     }
-
 }

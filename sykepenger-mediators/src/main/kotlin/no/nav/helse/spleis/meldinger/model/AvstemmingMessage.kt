@@ -6,9 +6,14 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class AvstemmingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+internal class AvstemmingMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: MessageContext,
+    ) {
         mediator.behandle(this, Personidentifikator(meldingsporing.fødselsnummer), context)
     }
 }

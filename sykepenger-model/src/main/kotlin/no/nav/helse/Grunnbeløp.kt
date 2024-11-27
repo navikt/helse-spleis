@@ -1,109 +1,121 @@
 package no.nav.helse
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import java.time.LocalDate
 import kotlin.math.roundToInt
 
-class Grunnbeløp private constructor(private val multiplier: Double) {
-    private val grunnbeløp = listOf(
-        124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
-        118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
-        111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
-        106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021) ),
-        101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020), gyldigSomMinsteinntektKrav = 21.september(2020) ),
-        99858.årlig.gyldigFra(1.mai(2019), gyldigSomMinsteinntektKrav = 27. mai(2019)),
-        96883.årlig.gyldigFra(1.mai(2018)),
-        93634.årlig.gyldigFra(1.mai(2017)),
-        92576.årlig.gyldigFra(1.mai(2016)),
-        90068.årlig.gyldigFra(1.mai(2015)),
-        88370.årlig.gyldigFra(1.mai(2014)),
-        85245.årlig.gyldigFra(1.mai(2013)),
-        82122.årlig.gyldigFra(1.mai(2012)),
-        79216.årlig.gyldigFra(1.mai(2011)),
-        75641.årlig.gyldigFra(1.mai(2010)),
-        72881.årlig.gyldigFra(1.mai(2009)),
-        70256.årlig.gyldigFra(1.mai(2008)),
-        66812.årlig.gyldigFra(1.mai(2007)),
-        62892.årlig.gyldigFra(1.mai(2006)),
-        60699.årlig.gyldigFra(1.mai(2005)),
-        58778.årlig.gyldigFra(1.mai(2004)),
-        56861.årlig.gyldigFra(1.mai(2003)),
-        54170.årlig.gyldigFra(1.mai(2002)),
-        51360.årlig.gyldigFra(1.mai(2001)),
-        49090.årlig.gyldigFra(1.mai(2000)),
-        46950.årlig.gyldigFra(1.mai(1999)),
-        45370.årlig.gyldigFra(1.mai(1998)),
-        42500.årlig.gyldigFra(1.mai(1997)),
-        41000.årlig.gyldigFra(1.mai(1996)),
-        39230.årlig.gyldigFra(1.mai(1995)),
-        38080.årlig.gyldigFra(1.mai(1994)),
-        37300.årlig.gyldigFra(1.mai(1993)),
-        36500.årlig.gyldigFra(1.mai(1992)),
-        35500.årlig.gyldigFra(1.mai(1991)),
-        34100.årlig.gyldigFra(1.desember(1990)),
-        34000.årlig.gyldigFra(1.mai(1990)),
-        32700.årlig.gyldigFra(1.april(1989)),
-        31000.årlig.gyldigFra(1.april(1988)),
-        30400.årlig.gyldigFra(1.januar(1988)),
-        29900.årlig.gyldigFra(1.mai(1987)),
-        28000.årlig.gyldigFra(1.mai(1986)),
-        26300.årlig.gyldigFra(1.januar(1986)),
-        25900.årlig.gyldigFra(1.mai(1985)),
-        24200.årlig.gyldigFra(1.mai(1984)),
-        22600.årlig.gyldigFra(1.mai(1983)),
-        21800.årlig.gyldigFra(1.januar(1983)),
-        21200.årlig.gyldigFra(1.mai(1982)),
-        19600.årlig.gyldigFra(1.oktober(1981)),
-        19100.årlig.gyldigFra(1.mai(1981)),
-        17400.årlig.gyldigFra(1.januar(1981)),
-        16900.årlig.gyldigFra(1.mai(1980)),
-        16100.årlig.gyldigFra(1.januar(1980)),
-        15200.årlig.gyldigFra(1.januar(1979)),
-        14700.årlig.gyldigFra(1.juli(1978)),
-        14400.årlig.gyldigFra(1.desember(1977)),
-        13400.årlig.gyldigFra(1.mai(1977)),
-        13100.årlig.gyldigFra(1.januar(1977)),
-        12100.årlig.gyldigFra(1.mai(1976)),
-        11800.årlig.gyldigFra(1.januar(1976)),
-        11000.årlig.gyldigFra(1.mai(1975)),
-        10400.årlig.gyldigFra(1.januar(1975)),
-        9700.årlig.gyldigFra(1.mai(1974)),
-        9200.årlig.gyldigFra(1.januar(1974)),
-        8500.årlig.gyldigFra(1.januar(1973)),
-        7900.årlig.gyldigFra(1.januar(1972)),
-        7500.årlig.gyldigFra(1.mai(1971)),
-        7200.årlig.gyldigFra(1.januar(1971)),
-        6800.årlig.gyldigFra(1.januar(1970)),
-        6400.årlig.gyldigFra(1.januar(1969)),
-        5900.årlig.gyldigFra(1.januar(1968)),
-        5400.årlig.gyldigFra(1.januar(1967)),
-    )
+class Grunnbeløp private constructor(
+    private val multiplier: Double,
+) {
+    private val grunnbeløp =
+        listOf(
+            124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
+            118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
+            111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
+            106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021)),
+            101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020), gyldigSomMinsteinntektKrav = 21.september(2020)),
+            99858.årlig.gyldigFra(1.mai(2019), gyldigSomMinsteinntektKrav = 27.mai(2019)),
+            96883.årlig.gyldigFra(1.mai(2018)),
+            93634.årlig.gyldigFra(1.mai(2017)),
+            92576.årlig.gyldigFra(1.mai(2016)),
+            90068.årlig.gyldigFra(1.mai(2015)),
+            88370.årlig.gyldigFra(1.mai(2014)),
+            85245.årlig.gyldigFra(1.mai(2013)),
+            82122.årlig.gyldigFra(1.mai(2012)),
+            79216.årlig.gyldigFra(1.mai(2011)),
+            75641.årlig.gyldigFra(1.mai(2010)),
+            72881.årlig.gyldigFra(1.mai(2009)),
+            70256.årlig.gyldigFra(1.mai(2008)),
+            66812.årlig.gyldigFra(1.mai(2007)),
+            62892.årlig.gyldigFra(1.mai(2006)),
+            60699.årlig.gyldigFra(1.mai(2005)),
+            58778.årlig.gyldigFra(1.mai(2004)),
+            56861.årlig.gyldigFra(1.mai(2003)),
+            54170.årlig.gyldigFra(1.mai(2002)),
+            51360.årlig.gyldigFra(1.mai(2001)),
+            49090.årlig.gyldigFra(1.mai(2000)),
+            46950.årlig.gyldigFra(1.mai(1999)),
+            45370.årlig.gyldigFra(1.mai(1998)),
+            42500.årlig.gyldigFra(1.mai(1997)),
+            41000.årlig.gyldigFra(1.mai(1996)),
+            39230.årlig.gyldigFra(1.mai(1995)),
+            38080.årlig.gyldigFra(1.mai(1994)),
+            37300.årlig.gyldigFra(1.mai(1993)),
+            36500.årlig.gyldigFra(1.mai(1992)),
+            35500.årlig.gyldigFra(1.mai(1991)),
+            34100.årlig.gyldigFra(1.desember(1990)),
+            34000.årlig.gyldigFra(1.mai(1990)),
+            32700.årlig.gyldigFra(1.april(1989)),
+            31000.årlig.gyldigFra(1.april(1988)),
+            30400.årlig.gyldigFra(1.januar(1988)),
+            29900.årlig.gyldigFra(1.mai(1987)),
+            28000.årlig.gyldigFra(1.mai(1986)),
+            26300.årlig.gyldigFra(1.januar(1986)),
+            25900.årlig.gyldigFra(1.mai(1985)),
+            24200.årlig.gyldigFra(1.mai(1984)),
+            22600.årlig.gyldigFra(1.mai(1983)),
+            21800.årlig.gyldigFra(1.januar(1983)),
+            21200.årlig.gyldigFra(1.mai(1982)),
+            19600.årlig.gyldigFra(1.oktober(1981)),
+            19100.årlig.gyldigFra(1.mai(1981)),
+            17400.årlig.gyldigFra(1.januar(1981)),
+            16900.årlig.gyldigFra(1.mai(1980)),
+            16100.årlig.gyldigFra(1.januar(1980)),
+            15200.årlig.gyldigFra(1.januar(1979)),
+            14700.årlig.gyldigFra(1.juli(1978)),
+            14400.årlig.gyldigFra(1.desember(1977)),
+            13400.årlig.gyldigFra(1.mai(1977)),
+            13100.årlig.gyldigFra(1.januar(1977)),
+            12100.årlig.gyldigFra(1.mai(1976)),
+            11800.årlig.gyldigFra(1.januar(1976)),
+            11000.årlig.gyldigFra(1.mai(1975)),
+            10400.årlig.gyldigFra(1.januar(1975)),
+            9700.årlig.gyldigFra(1.mai(1974)),
+            9200.årlig.gyldigFra(1.januar(1974)),
+            8500.årlig.gyldigFra(1.januar(1973)),
+            7900.årlig.gyldigFra(1.januar(1972)),
+            7500.årlig.gyldigFra(1.mai(1971)),
+            7200.årlig.gyldigFra(1.januar(1971)),
+            6800.årlig.gyldigFra(1.januar(1970)),
+            6400.årlig.gyldigFra(1.januar(1969)),
+            5900.årlig.gyldigFra(1.januar(1968)),
+            5400.årlig.gyldigFra(1.januar(1967)),
+        )
 
-    fun beløp(dato: LocalDate) =
-        gjeldende(dato).beløp(multiplier)
+    fun beløp(dato: LocalDate) = gjeldende(dato).beløp(multiplier)
 
-    fun beløp(dato: LocalDate, virkningFra: LocalDate?) =
-        gjeldende(dato, virkningFra).beløp(multiplier)
+    fun beløp(
+        dato: LocalDate,
+        virkningFra: LocalDate?,
+    ) = gjeldende(dato, virkningFra).beløp(multiplier)
 
     fun dagsats(dato: LocalDate) = beløp(dato).rundTilDaglig()
-    fun dagsats(dato: LocalDate, virkningFra: LocalDate) = beløp(dato, virkningFra).rundTilDaglig()
+
+    fun dagsats(
+        dato: LocalDate,
+        virkningFra: LocalDate,
+    ) = beløp(dato, virkningFra).rundTilDaglig()
 
     fun snitt(år: Int) = HistoriskGrunnbeløp.snitt(grunnbeløp, år) * multiplier
 
-    private fun gjeldende(dato: LocalDate, virkningFra: LocalDate? = null) =
-        HistoriskGrunnbeløp.gjeldendeGrunnbeløp(grunnbeløp, dato, virkningFra ?: dato)
+    private fun gjeldende(
+        dato: LocalDate,
+        virkningFra: LocalDate? = null,
+    ) = HistoriskGrunnbeløp.gjeldendeGrunnbeløp(grunnbeløp, dato, virkningFra ?: dato)
 
     /*
      * Virkningstidspunktet for regulering av kravet til minsteinntekt for rett til ytelser etter folketrygdloven
      * kan settes til et tidspunkt etter virkningstidspunktet for for grunnbeløpet øvrig.
      * https://lovdata.no/forskrift/2021-05-21-1568/§6
-    **/
-    fun minsteinntekt(dato: LocalDate) = HistoriskGrunnbeløp.gjeldendeMinsteinntektGrunnbeløp(grunnbeløp, dato)
-        .beløp(multiplier)
+     **/
+    fun minsteinntekt(dato: LocalDate) =
+        HistoriskGrunnbeløp
+            .gjeldendeMinsteinntektGrunnbeløp(grunnbeløp, dato)
+            .beløp(multiplier)
 
     companion object {
         val `6G` = Grunnbeløp(6.0)
@@ -113,37 +125,53 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
         val `2G` = Grunnbeløp(2.0)
         val `1G` = Grunnbeløp(1.0)
 
-        private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra, gyldigSomMinsteinntektKrav: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
+        private fun Inntekt.gyldigFra(
+            gyldigFra: LocalDate,
+            virkningsdato: LocalDate = gyldigFra,
+            gyldigSomMinsteinntektKrav: LocalDate = gyldigFra,
+        ) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
 
-        fun virkningstidspunktFor(beløp: Inntekt): LocalDate {
-            return `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt() ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
-        }
+        fun virkningstidspunktFor(beløp: Inntekt): LocalDate =
+            `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt()
+                ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
     }
 
     private class HistoriskGrunnbeløp(
         private val beløp: Inntekt,
         private val gyldigFra: LocalDate,
         private val virkningsdato: LocalDate = gyldigFra,
-        private val gyldigMinsteinntektKrav: LocalDate
+        private val gyldigMinsteinntektKrav: LocalDate,
     ) {
         init {
             require(virkningsdato >= gyldigFra) { "Virkningsdato må være nyere eller lik gyldighetstidspunktet" }
-            require(gyldigMinsteinntektKrav >= gyldigFra) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
+            require(
+                gyldigMinsteinntektKrav >= gyldigFra,
+            ) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
         }
 
-        private fun gyldighetsperiode(år: Int, andre: List<HistoriskGrunnbeløp>) =
-            gyldigFra til (andre
+        private fun gyldighetsperiode(
+            år: Int,
+            andre: List<HistoriskGrunnbeløp>,
+        ) = gyldigFra til (
+            andre
                 .filter { it.gyldigFra > this.gyldigFra }
                 .minByOrNull { it.gyldigFra }
-                ?.gyldigFra?.forrigeDag
-                ?: gyldigFra.withMonth(12).withDayOfMonth(31))
+                ?.gyldigFra
+                ?.forrigeDag
+                ?: gyldigFra.withMonth(12).withDayOfMonth(31)
+        )
 
-        private fun snitt(år: Int, andre: List<HistoriskGrunnbeløp>): Inntekt {
+        private fun snitt(
+            år: Int,
+            andre: List<HistoriskGrunnbeløp>,
+        ): Inntekt {
             val gyldighetsperiode = gyldighetsperiode(år, andre)
             val periode = 1.januar(år) til 31.desember(år)
             if (!gyldighetsperiode.overlapperMed(periode)) return INGEN
-            val antallMånederSomDekkesAvGrunnbeløpet = gyldighetsperiode.subset(periode)
-                .let { it.endInclusive.monthValue - it.start.monthValue + 1}
+            val antallMånederSomDekkesAvGrunnbeløpet =
+                gyldighetsperiode
+                    .subset(periode)
+                    .let { it.endInclusive.monthValue - it.start.monthValue + 1 }
             return beløp(antallMånederSomDekkesAvGrunnbeløpet.toDouble())
                 .månedlig
                 .årlig
@@ -151,7 +179,11 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
 
         companion object {
             // TODO: Innføre startegy pattern
-            fun gjeldendeGrunnbeløp(grunnbeløper: List<HistoriskGrunnbeløp>, dato: LocalDate, virkningFra: LocalDate): HistoriskGrunnbeløp {
+            fun gjeldendeGrunnbeløp(
+                grunnbeløper: List<HistoriskGrunnbeløp>,
+                dato: LocalDate,
+                virkningFra: LocalDate,
+            ): HistoriskGrunnbeløp {
                 val virkningsdato = maxOf(dato, virkningFra)
                 return grunnbeløper
                     .filter { virkningsdato >= it.virkningsdato && dato >= it.gyldigFra }
@@ -159,20 +191,25 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
             }
 
-            fun gjeldendeMinsteinntektGrunnbeløp(grunnbeløper: List<HistoriskGrunnbeløp>, dato: LocalDate): HistoriskGrunnbeløp {
-                return grunnbeløper
+            fun gjeldendeMinsteinntektGrunnbeløp(
+                grunnbeløper: List<HistoriskGrunnbeløp>,
+                dato: LocalDate,
+            ): HistoriskGrunnbeløp =
+                grunnbeløper
                     .filter { dato >= it.gyldigMinsteinntektKrav }
                     .maxByOrNull { it.gyldigMinsteinntektKrav }
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp som gyldig som minsteinntektskrav for $dato")
-            }
 
-            fun snitt(grunnbeløper: List<HistoriskGrunnbeløp>, år: Int): Inntekt {
-                return grunnbeløper
+            fun snitt(
+                grunnbeløper: List<HistoriskGrunnbeløp>,
+                år: Int,
+            ): Inntekt =
+                grunnbeløper
                     .map { it.snitt(år, grunnbeløper) }
                     .summer()
-                    .årlig.roundToInt()
                     .årlig
-            }
+                    .roundToInt()
+                    .årlig
         }
 
         fun beløp(multiplier: Double) = beløp * multiplier

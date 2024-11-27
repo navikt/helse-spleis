@@ -1,8 +1,8 @@
 package no.nav.helse.dto.deserialisering
 
+import no.nav.helse.dto.InntektbeløpDto
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.dto.InntektbeløpDto
 
 data class InfotrygdInntektsopplysningInnDto(
     val orgnummer: String,
@@ -10,5 +10,5 @@ data class InfotrygdInntektsopplysningInnDto(
     val inntekt: InntektbeløpDto.MånedligDouble,
     val refusjonTilArbeidsgiver: Boolean,
     val refusjonTom: LocalDate?,
-    val lagret: LocalDateTime?
+    val lagret: LocalDateTime?,
 )

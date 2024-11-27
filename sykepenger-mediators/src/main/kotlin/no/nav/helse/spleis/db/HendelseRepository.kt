@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.db
 
-import java.time.ZoneId
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
@@ -12,7 +9,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKA
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.AVBRUTT_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GJENOPPLIV_VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
@@ -81,99 +77,119 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import java.time.ZoneId
+import java.util.UUID
+import javax.sql.DataSource
 
-internal class HendelseRepository(private val dataSource: DataSource) {
+internal class HendelseRepository(
+    private val dataSource: DataSource,
+) {
     fun lagreMelding(melding: HendelseMessage) {
         melding.lagreMelding(this)
     }
 
-    internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: UUID, json: String) {
+    internal fun lagreMelding(
+        melding: HendelseMessage,
+        personidentifikator: Personidentifikator,
+        meldingId: UUID,
+        json: String,
+    ) {
         val meldingtype = meldingstype(melding) ?: return
+        sessionOf(dataSource)
+            .use { session ->
+                session.run(
+                    queryOf(
+                        "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
+                        personidentifikator.toLong(),
+                        meldingId.toString(),
+                        meldingtype.name,
+                        json,
+                    ).asExecute,
+                )
+            }.also {
+                PostgresProbe.hendelseSkrevetTilDb()
+            }
+    }
+
+    fun markerSomBehandlet(meldingId: UUID) =
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
-                    personidentifikator.toLong(),
+                    "UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
                     meldingId.toString(),
-                    meldingtype.name,
-                    json
-                ).asExecute
+                ).asUpdate,
             )
-        }.also {
-            PostgresProbe.hendelseSkrevetTilDb()
         }
-    }
 
-    fun markerSomBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
-        session.run(queryOf("UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
-            meldingId.toString()
-        ).asUpdate)
-    }
-
-    fun erBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf("SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?", meldingId.toString())
-                .map { it.localDateTimeOrNull("behandlet_tidspunkt") }.asSingle
-        ) != null
-    }
-
-    private fun meldingstype(melding: HendelseMessage) = when (melding) {
-        is NySøknadMessage -> NY_SØKNAD
-        is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
-        is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
-        is NyArbeidsledigSøknadMessage -> NY_SØKNAD_ARBEIDSLEDIG
-        is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
-        is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
-        is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
-        is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
-        is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
-        is InntektsmeldingMessage -> INNTEKTSMELDING
-        is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
-        is YtelserMessage -> YTELSER
-        is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
-        is SimuleringMessage -> SIMULERING
-        is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
-        is UtbetalingMessage -> UTBETALING
-        is AnnulleringMessage -> KANSELLER_UTBETALING
-        is GrunnbeløpsreguleringMessage -> GRUNNBELØPSREGULERING
-        is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
-        is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
-        is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER
-        is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
-        is UtbetalingshistorikkEtterInfotrygdendringMessage -> UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
-        is DødsmeldingMessage -> DØDSMELDING
-        is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
-        is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
-        is IdentOpphørtMessage -> IDENT_OPPHØRT
-        is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
-        is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
-        is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
-        is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
-        is SykepengegrunnlagForArbeidsgiverMessage -> SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
-        is MigrateMessage,
-        is AvstemmingMessage,
-        is PersonPåminnelseMessage,
-        is PåminnelseMessage,
-        is UtbetalingshistorikkMessage,
-        is InfotrygdendringMessage,
-        is AvbruttArbeidsledigSøknadMessage -> null // Disse trenger vi ikke å lagre
-    }
-
-    internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
-        return sessionOf(dataSource).use { session ->
+    fun erBehandlet(meldingId: UUID) =
+        sessionOf(dataSource).use { session ->
             session.run(
-                queryOf(
-                    "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = ?",
-                    personidentifikator.toLong()
-                ).map {
-                    Hendelse(
-                        meldingsreferanseId = UUID.fromString(it.string("melding_id")),
-                        meldingstype = it.string("melding_type"),
-                        lestDato = it.instant("lest_dato").atZone(ZoneId.systemDefault()).toLocalDateTime()
-                    )
-                }.asList).associateBy { it.meldingsreferanseId }
+                queryOf("SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?", meldingId.toString())
+                    .map { it.localDateTimeOrNull("behandlet_tidspunkt") }
+                    .asSingle,
+            ) != null
         }
-    }
+
+    private fun meldingstype(melding: HendelseMessage) =
+        when (melding) {
+            is NySøknadMessage -> NY_SØKNAD
+            is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
+            is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
+            is NyArbeidsledigSøknadMessage -> NY_SØKNAD_ARBEIDSLEDIG
+            is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
+            is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
+            is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
+            is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
+            is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
+            is InntektsmeldingMessage -> INNTEKTSMELDING
+            is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
+            is YtelserMessage -> YTELSER
+            is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
+            is SimuleringMessage -> SIMULERING
+            is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
+            is UtbetalingMessage -> UTBETALING
+            is AnnulleringMessage -> KANSELLER_UTBETALING
+            is GrunnbeløpsreguleringMessage -> GRUNNBELØPSREGULERING
+            is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
+            is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
+            is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER
+            is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+            is UtbetalingshistorikkEtterInfotrygdendringMessage -> UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
+            is DødsmeldingMessage -> DØDSMELDING
+            is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
+            is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
+            is IdentOpphørtMessage -> IDENT_OPPHØRT
+            is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
+            is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
+            is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
+            is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
+            is SykepengegrunnlagForArbeidsgiverMessage -> SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
+            is MigrateMessage,
+            is AvstemmingMessage,
+            is PersonPåminnelseMessage,
+            is PåminnelseMessage,
+            is UtbetalingshistorikkMessage,
+            is InfotrygdendringMessage,
+            is AvbruttArbeidsledigSøknadMessage,
+            -> null // Disse trenger vi ikke å lagre
+        }
+
+    internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> =
+        sessionOf(dataSource).use { session ->
+            session
+                .run(
+                    queryOf(
+                        "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = ?",
+                        personidentifikator.toLong(),
+                    ).map {
+                        Hendelse(
+                            meldingsreferanseId = UUID.fromString(it.string("melding_id")),
+                            meldingstype = it.string("melding_type"),
+                            lestDato = it.instant("lest_dato").atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                        )
+                    }.asList,
+                ).associateBy { it.meldingsreferanseId }
+        }
 
     private enum class Meldingstype {
         NY_SØKNAD,
@@ -215,6 +231,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         AVBRUTT_SØKNAD,
         INNTEKTSMELDINGER_REPLAY,
         MINIMUM_SYKDOMSGRAD_VURDERT,
-        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
+        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER,
     }
 }

@@ -68,7 +68,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -78,7 +78,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSøknad(
             Sykdom(15.januar, 16.februar, 100.prosent),
             Ferie(1.februar, 16.februar),
-            sendtTilNAVEllerArbeidsgiver = 1.mai
+            sendtTilNAVEllerArbeidsgiver = 1.mai,
         )
         håndterInntektsmelding(listOf(15.januar til 30.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -94,16 +94,17 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
+
     @Test
     fun `foreldet dag innenfor agp -- kan lukkes uten manuell behandling`() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 16.februar))
         håndterSøknad(
             Sykdom(16.januar, 16.februar, 100.prosent),
             Ferie(1.februar, 16.februar),
-            sendtTilNAVEllerArbeidsgiver = 1.mai
+            sendtTilNAVEllerArbeidsgiver = 1.mai,
         )
         håndterInntektsmelding(listOf(16.januar til 31.januar))
         assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
@@ -114,7 +115,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET_UTEN_UTBETALING,
         )
     }
 
@@ -237,7 +238,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden",
             nå = { assertVarsel(RV_SØ_2) },
-            ønsket = { assertIngenVarsel(RV_SØ_2) }
+            ønsket = { assertIngenVarsel(RV_SØ_2) },
         )
     }
 }

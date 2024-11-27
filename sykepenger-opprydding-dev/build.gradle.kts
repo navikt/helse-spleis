@@ -27,20 +27,21 @@ tasks.named<Jar>("jar") {
 
     manifest {
         attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
-        }
+        attributes["Class-Path"] =
+            configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }
     }
 
     doLast {
         configurations.runtimeClasspath.get().forEach {
             val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-            if (!file.exists())
+            if (!file.exists()) {
                 it.copyTo(file)
+            }
         }
     }
     finalizedBy(":sykepenger-opprydding-dev:remove_spleis_opprydding_db_container")
-
 }
 
 tasks.create("remove_spleis_opprydding_db_container", DockerRemoveContainer::class) {
@@ -48,7 +49,8 @@ tasks.create("remove_spleis_opprydding_db_container", DockerRemoveContainer::cla
     dependsOn(":sykepenger-opprydding-dev:test")
     setProperty("force", true)
     onError {
-        if (!this.message!!.contains("No such container"))
+        if (!this.message!!.contains("No such container")) {
             throw this
+        }
     }
 }

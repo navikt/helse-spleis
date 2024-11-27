@@ -1,18 +1,16 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -90,9 +88,10 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
-
     @Test
     fun `revurdere mens en forlengelse er til utbetaling`() {
         nyttVedtak(januar)
@@ -150,7 +149,15 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(1).utbetalingId)
         assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre()) { "kan pt. ikke annullere når siste utbetaling har feilet" }
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+        )
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
@@ -185,7 +192,16 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertIngenFunksjonelleFeil()
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
@@ -302,7 +318,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
@@ -316,7 +332,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        håndterOverstyrTidslinje((19.januar til 22.januar).map { manuellFeriedag(it) })  // ferie på første navdag
+        håndterOverstyrTidslinje((19.januar til 22.januar).map { manuellFeriedag(it) }) // ferie på første navdag
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -339,7 +355,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         assertTilstander(
@@ -350,7 +366,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
+            AVVENTER_HISTORIKK,
         )
         val revurdering = inspektør.utbetaling(2)
         assertIngenFunksjonelleFeil()
@@ -376,13 +392,13 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVSLUTTET
+            AVSLUTTET,
         )
         assertTilstander(
             2.vedtaksperiode,
             AVVENTER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
+            AVVENTER_HISTORIKK,
         )
         assertIngenFunksjonelleFeil()
     }
@@ -401,8 +417,24 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET,
+        )
     }
 
     @Test
@@ -428,7 +460,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -440,7 +472,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
         assertTilstander(
             3.vedtaksperiode,
@@ -456,7 +488,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -483,7 +515,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVVENTER_HISTORIKK_REVURDERING,
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -494,7 +526,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_BLOKKERENDE_PERIODE
+            AVVENTER_BLOKKERENDE_PERIODE,
         )
     }
 
@@ -505,7 +537,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(6, inspektør.sisteMaksdato(1.vedtaksperiode).antallForbrukteDager)
 
-        håndterOverstyrTidslinje((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
+        håndterOverstyrTidslinje(
+            (3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) },
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -603,7 +637,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            REVURDERING_FEILET
+            REVURDERING_FEILET,
         )
     }
 
@@ -633,7 +667,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(
             1.vedtaksperiode,
-            foreldrepenger = listOf(GradertPeriode(16.januar til 28.januar, 100))
+            foreldrepenger = listOf(GradertPeriode(16.januar til 28.januar, 100)),
         )
 
         håndterAnnullerUtbetaling()
@@ -653,7 +687,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
-            TIL_INFOTRYGD
+            TIL_INFOTRYGD,
         )
     }
 
@@ -682,7 +716,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING
+            AVVENTER_GODKJENNING_REVURDERING,
         )
     }
 
@@ -712,7 +746,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         assertTilstander(
@@ -721,7 +755,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
+            AVVENTER_HISTORIKK,
         )
         assertIngenFunksjonelleFeil()
     }
@@ -762,7 +796,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         assertIngenFunksjonelleFeil()
@@ -797,8 +831,24 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET,
+        )
         assertIngenFunksjonelleFeil()
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -846,7 +896,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -930,7 +980,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -995,12 +1045,15 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    17.januar, INNTEKT, true
-                )
-            )
+            inntektshistorikk =
+                listOf(
+                    Inntektsopplysning(
+                        ORGNUMMER,
+                        17.januar,
+                        INNTEKT,
+                        true,
+                    ),
+                ),
         )
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -1045,12 +1098,15 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    1.februar, INNTEKT, true
-                )
-            )
+            inntektshistorikk =
+                listOf(
+                    Inntektsopplysning(
+                        ORGNUMMER,
+                        1.februar,
+                        INNTEKT,
+                        true,
+                    ),
+                ),
         )
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -1106,7 +1162,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
 
-        håndterOverstyrTidslinje((29.januar til 15.februar).map { manuellFeriedag(it) } + (16.februar til 23.februar).map { manuellPermisjonsdag(it) })
+        håndterOverstyrTidslinje(
+            (29.januar til 15.februar).map { manuellFeriedag(it) } + (16.februar til 23.februar).map { manuellPermisjonsdag(it) },
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1136,11 +1194,15 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    orgnummer = ORGNUMMER, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
-                )
-            )
+            inntektshistorikk =
+                listOf(
+                    Inntektsopplysning(
+                        orgnummer = ORGNUMMER,
+                        sykepengerFom = 1.november,
+                        32000.månedlig,
+                        refusjonTilArbeidsgiver = true,
+                    ),
+                ),
         )
         håndterOverstyrTidslinje(overstyringsdager = listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
@@ -1160,7 +1222,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
+            AVVENTER_SIMULERING_REVURDERING,
         )
     }
 
@@ -1171,7 +1233,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         val hendelseId = UUID.randomUUID()
         håndterOverstyrTidslinje(
             meldingsreferanseId = hendelseId,
-            overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+            overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) },
         )
         assertEquals(januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(februar, inspektør.periode(2.vedtaksperiode))
@@ -1186,7 +1248,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         val hendelseId = UUID.randomUUID()
         håndterOverstyrTidslinje(
             meldingsreferanseId = hendelseId,
-            overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+            overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) },
         )
         assertEquals(januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(2.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
@@ -1246,7 +1308,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true))
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true)),
         )
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Sykedag, 80)))
         håndterYtelser(1.vedtaksperiode)
@@ -1254,15 +1316,28 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 
-    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Foreldrepenger))
+    private fun assertEtterspurteYtelser(
+        expected: Int,
+        vedtaksperiodeIdInnhenter: IdInnhenter,
+    ) {
+        assertEquals(
+            expected,
+            person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Foreldrepenger),
+        )
         assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Pleiepenger))
         assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Omsorgspenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Opplæringspenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
+        assertEquals(
+            expected,
+            person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Opplæringspenger),
+        )
+        assertEquals(
+            expected,
+            person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger),
+        )
         assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Dagpenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Institusjonsopphold))
+        assertEquals(
+            expected,
+            person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Institusjonsopphold),
+        )
     }
-
-
 }

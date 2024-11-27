@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import java.time.Year
 import no.nav.helse.Alder
 import no.nav.helse.dto.FeriepengeberegnerDto
 import no.nav.helse.dto.UtbetaltDagDto
@@ -23,45 +21,56 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Infotryg
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdPerson
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisPerson
+import java.time.LocalDate
+import java.time.Year
 
 private typealias UtbetaltDagSelector = (Feriepengeberegner.UtbetaltDag) -> Boolean
 
 internal class Feriepengeberegner(
     private val alder: Alder,
     val opptjeningsår: Year,
-    val utbetalteDager: List<UtbetaltDag>
+    val utbetalteDager: List<UtbetaltDag>,
 ) {
     internal companion object {
-
-        internal fun gjenopprett(alder: Alder, dto: FeriepengeberegnerDto) =
-            Feriepengeberegner(
-                alder = alder,
-                opptjeningsår = dto.opptjeningsår,
-                utbetalteDager = dto.utbetalteDager.map { UtbetaltDag.gjenopprett(it) }
-            )
+        internal fun gjenopprett(
+            alder: Alder,
+            dto: FeriepengeberegnerDto,
+        ) = Feriepengeberegner(
+            alder = alder,
+            opptjeningsår = dto.opptjeningsår,
+            utbetalteDager = dto.utbetalteDager.map { UtbetaltDag.gjenopprett(it) },
+        )
 
         private const val ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET = 48
 
-        private fun utbetalteDager(grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>, grunnlagFraSpleisPerson: List<Arbeidsgiverferiepengegrunnlag>, opptjeningsår: Year): List<UtbetaltDag> {
-            val infotrygd = grunnlagFraInfotrygd.flatMap { arbeidsgiver ->
-                arbeidsgiver.utbetalinger.flatMap { utbetaling ->
-                    utbetaling.arbeidsgiverUtbetalteDager.map { dag ->
-                        InfotrygdArbeidsgiver(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
-                    } + utbetaling.personUtbetalteDager.map { dag ->
-                        InfotrygdPerson(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
+        private fun utbetalteDager(
+            grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>,
+            grunnlagFraSpleisPerson: List<Arbeidsgiverferiepengegrunnlag>,
+            opptjeningsår: Year,
+        ): List<UtbetaltDag> {
+            val infotrygd =
+                grunnlagFraInfotrygd.flatMap { arbeidsgiver ->
+                    arbeidsgiver.utbetalinger.flatMap { utbetaling ->
+                        utbetaling.arbeidsgiverUtbetalteDager.map { dag ->
+                            InfotrygdArbeidsgiver(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
+                        } +
+                            utbetaling.personUtbetalteDager.map { dag ->
+                                InfotrygdPerson(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
+                            }
                     }
                 }
-            }
 
-            val spleis = grunnlagFraSpleisPerson.flatMap { arbeidsgiver ->
-                arbeidsgiver.utbetalinger.flatMap { utbetaling ->
-                    utbetaling.arbeidsgiverUtbetalteDager.map { dag ->
-                        SpleisArbeidsgiver(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
-                    } + utbetaling.personUtbetalteDager.map { dag ->
-                        SpleisPerson(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
+            val spleis =
+                grunnlagFraSpleisPerson.flatMap { arbeidsgiver ->
+                    arbeidsgiver.utbetalinger.flatMap { utbetaling ->
+                        utbetaling.arbeidsgiverUtbetalteDager.map { dag ->
+                            SpleisArbeidsgiver(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
+                        } +
+                            utbetaling.personUtbetalteDager.map { dag ->
+                                SpleisPerson(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
+                            }
                     }
                 }
-            }
 
             return (infotrygd + spleis).filter(opptjeningsårFilter(opptjeningsår))
         }
@@ -71,27 +80,46 @@ internal class Feriepengeberegner(
         alder: Alder,
         opptjeningsår: Year,
         grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>,
-        grunnlagFraSpleis: List<Arbeidsgiverferiepengegrunnlag>
+        grunnlagFraSpleis: List<Arbeidsgiverferiepengegrunnlag>,
     ) : this(alder, opptjeningsår, utbetalteDager(grunnlagFraInfotrygd, grunnlagFraSpleis, opptjeningsår))
 
     internal fun gjelderForÅr(år: Year) = opptjeningsår == år
+
     internal fun feriepengedatoer() = feriepengedager().tilDato()
+
     internal fun beregnFeriepengerForInfotrygdPerson() = beregnForFilter(INFOTRYGD_PERSON)
+
     internal fun beregnFeriepengerForInfotrygdPerson(orgnummer: String) = beregnForFilter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
 
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver() = beregnForFilter(INFOTRYGD_ARBEIDSGIVER)
-    internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) = beregnForFilter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer))
+
+    internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) =
+        beregnForFilter(
+            INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer),
+        )
+
     internal fun beregnFeriepengerForSpleisArbeidsgiver() = beregnForFilter(SPLEIS_ARBEIDSGIVER)
-    internal fun beregnFeriepengerForSpleisArbeidsgiver(orgnummer: String) = beregnForFilter(SPLEIS_ARBEIDSGIVER and orgnummerFilter(orgnummer))
+
+    internal fun beregnFeriepengerForSpleisArbeidsgiver(orgnummer: String) =
+        beregnForFilter(
+            SPLEIS_ARBEIDSGIVER and orgnummerFilter(orgnummer),
+        )
+
     internal fun beregnFeriepengerForSpleisPerson(orgnummer: String) = beregnForFilter(SPLEIS_PERSON and orgnummerFilter(orgnummer))
+
     internal fun beregnFeriepengerForInfotrygd() = beregnForFilter(INFOTRYGD)
+
     internal fun beregnFeriepengerForInfotrygd(orgnummer: String) = beregnForFilter(INFOTRYGD and orgnummerFilter(orgnummer))
+
     internal fun beregnFeriepengerForArbeidsgiver(orgnummer: String) = beregnForFilter(ARBEIDSGIVER and orgnummerFilter(orgnummer))
+
     internal fun beregnFeriepengerForPerson(orgnummer: String) = beregnForFilter(PERSON and orgnummerFilter(orgnummer))
+
     internal fun beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer: String): Double {
         val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilArbeidsgiver(orgnummer)
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
+
     internal fun beregnUtbetalteFeriepengerForInfotrygdPerson(orgnummer: String): Double {
         val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilPerson(orgnummer)
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
@@ -114,7 +142,8 @@ internal class Feriepengeberegner(
         return alder.beregnFeriepenger(opptjeningsår, grunnlag - grunnlagUtbetaltAvInfotrygd)
     }
 
-    private fun første48dageneUtbetaltIInfotrygd() = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
+    private fun første48dageneUtbetaltIInfotrygd() =
+        utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
 
     private fun grunnlagForFeriepengerUtbetaltAvInfotrygdTilArbeidsgiver(orgnummer: String) =
         første48dageneUtbetaltIInfotrygd().filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
@@ -137,12 +166,13 @@ internal class Feriepengeberegner(
     internal sealed class UtbetaltDag(
         val orgnummer: String,
         val dato: LocalDate,
-        val beløp: Int
+        val beløp: Int,
     ) {
         internal companion object {
             internal fun List<UtbetaltDag>.tilDato() = map { it.dato }.distinct()
+
             internal fun List<UtbetaltDag>.feriepengedager(): List<Map.Entry<LocalDate, List<UtbetaltDag>>> {
-                //TODO: subsumsjonObserver.`§8-33 ledd 1`() //TODO: Finne ut hvordan vi løser denne mtp. input Infotrygd/Spleis og pr. arbeidsgiver
+                // TODO: subsumsjonObserver.`§8-33 ledd 1`() //TODO: Finne ut hvordan vi løser denne mtp. input Infotrygd/Spleis og pr. arbeidsgiver
                 return this
                     .sortedBy { it.dato }
                     .groupBy { it.dato }
@@ -159,9 +189,13 @@ internal class Feriepengeberegner(
             internal val SPLEIS_PERSON: UtbetaltDagSelector = { it is SpleisPerson }
             internal val ARBEIDSGIVER: UtbetaltDagSelector = INFOTRYGD_ARBEIDSGIVER or SPLEIS_ARBEIDSGIVER
             internal val PERSON: UtbetaltDagSelector = INFOTRYGD_PERSON or SPLEIS_PERSON
+
             internal fun orgnummerFilter(orgnummer: String): UtbetaltDagSelector = { it.orgnummer == orgnummer }
+
             internal fun opptjeningsårFilter(opptjeningsår: Year): UtbetaltDagSelector = { Year.from(it.dato) == opptjeningsår }
+
             private infix fun (UtbetaltDagSelector).or(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) || other(it) }
+
             internal infix fun (UtbetaltDagSelector).and(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) && other(it) }
 
             internal fun gjenopprett(dto: UtbetaltDagDto) =
@@ -176,80 +210,78 @@ internal class Feriepengeberegner(
         internal class InfotrygdPerson(
             orgnummer: String,
             dato: LocalDate,
-            beløp: Int
+            beløp: Int,
         ) : UtbetaltDag(orgnummer, dato, beløp) {
             override fun dto() = UtbetaltDagDto.InfotrygdPerson(orgnummer, dato, beløp)
 
             internal companion object {
-                internal fun gjenopprett(dto: UtbetaltDagDto.InfotrygdPerson): InfotrygdPerson {
-                    return InfotrygdPerson(
+                internal fun gjenopprett(dto: UtbetaltDagDto.InfotrygdPerson): InfotrygdPerson =
+                    InfotrygdPerson(
                         orgnummer = dto.orgnummer,
                         dato = dto.dato,
-                        beløp = dto.beløp
+                        beløp = dto.beløp,
                     )
-                }
             }
         }
 
         internal class InfotrygdArbeidsgiver(
             orgnummer: String,
             dato: LocalDate,
-            beløp: Int
+            beløp: Int,
         ) : UtbetaltDag(orgnummer, dato, beløp) {
             override fun dto() = UtbetaltDagDto.InfotrygdArbeidsgiver(orgnummer, dato, beløp)
 
             internal companion object {
-                internal fun gjenopprett(dto: UtbetaltDagDto.InfotrygdArbeidsgiver): InfotrygdArbeidsgiver {
-                    return InfotrygdArbeidsgiver(
+                internal fun gjenopprett(dto: UtbetaltDagDto.InfotrygdArbeidsgiver): InfotrygdArbeidsgiver =
+                    InfotrygdArbeidsgiver(
                         orgnummer = dto.orgnummer,
                         dato = dto.dato,
-                        beløp = dto.beløp
+                        beløp = dto.beløp,
                     )
-                }
             }
         }
 
         internal class SpleisArbeidsgiver(
             orgnummer: String,
             dato: LocalDate,
-            beløp: Int
+            beløp: Int,
         ) : UtbetaltDag(orgnummer, dato, beløp) {
             override fun dto() = UtbetaltDagDto.SpleisArbeidsgiver(orgnummer, dato, beløp)
 
             internal companion object {
-                internal fun gjenopprett(dto: UtbetaltDagDto.SpleisArbeidsgiver): SpleisArbeidsgiver {
-                    return SpleisArbeidsgiver(
+                internal fun gjenopprett(dto: UtbetaltDagDto.SpleisArbeidsgiver): SpleisArbeidsgiver =
+                    SpleisArbeidsgiver(
                         orgnummer = dto.orgnummer,
                         dato = dto.dato,
-                        beløp = dto.beløp
+                        beløp = dto.beløp,
                     )
-                }
             }
         }
+
         internal class SpleisPerson(
             orgnummer: String,
             dato: LocalDate,
-            beløp: Int
+            beløp: Int,
         ) : UtbetaltDag(orgnummer, dato, beløp) {
             override fun dto() = UtbetaltDagDto.SpleisPerson(orgnummer, dato, beløp)
 
             internal companion object {
-                internal fun gjenopprett(dto: UtbetaltDagDto.SpleisPerson): SpleisPerson {
-                    return SpleisPerson(
+                internal fun gjenopprett(dto: UtbetaltDagDto.SpleisPerson): SpleisPerson =
+                    SpleisPerson(
                         orgnummer = dto.orgnummer,
                         dato = dto.dato,
-                        beløp = dto.beløp
+                        beløp = dto.beløp,
                     )
-                }
             }
         }
 
         abstract fun dto(): UtbetaltDagDto
     }
 
-    internal fun dto() = FeriepengeberegnerDto(
-        opptjeningsår = this.opptjeningsår,
-        utbetalteDager = this.utbetalteDager.map { it.dto() },
-        feriepengedager = this.feriepengedager().map { it.dto() }
-    )
+    internal fun dto() =
+        FeriepengeberegnerDto(
+            opptjeningsår = this.opptjeningsår,
+            utbetalteDager = this.utbetalteDager.map { it.dto() },
+            feriepengedager = this.feriepengedager().map { it.dto() },
+        )
 }

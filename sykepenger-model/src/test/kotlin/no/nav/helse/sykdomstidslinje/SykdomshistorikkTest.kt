@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.util.UUID
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class SykdomshistorikkTest {
     private lateinit var historikk: Sykdomshistorikk
@@ -40,8 +40,18 @@ internal class SykdomshistorikkTest {
         historikk.håndter(TestHendelse(tidslinje), Aktivitetslogg())
         historikk.fjernDager(listOf(tidslinje.periode()!!))
         assertEquals(2, historikk.inspektør.elementer())
-        assertFalse(historikk.inspektør.tidslinje(0).iterator().hasNext())
-        assertTrue(historikk.inspektør.tidslinje(1).iterator().hasNext())
+        assertFalse(
+            historikk.inspektør
+                .tidslinje(0)
+                .iterator()
+                .hasNext(),
+        )
+        assertTrue(
+            historikk.inspektør
+                .tidslinje(1)
+                .iterator()
+                .hasNext(),
+        )
     }
 
     @Test
@@ -85,7 +95,7 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    fun `Overlappende biter`(){
+    fun `Overlappende biter`() {
         val meldingsreferanseId = UUID.randomUUID()
         val bit1 = TestHendelse(8.U(meldingsreferanseId = meldingsreferanseId))
         resetSeed()
@@ -99,7 +109,7 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    fun `Hele hendelsen er håndtert for en hendelse siden`(){
+    fun `Hele hendelsen er håndtert for en hendelse siden`() {
         val søknad = TestHendelse(10.S)
         val heleBiten = TestHendelse(16.U)
         historikk.håndter(heleBiten, Aktivitetslogg())
@@ -114,7 +124,7 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    fun `En bit av inntektsmeldingen håndteres før annen hendelse, og den andre biten etterpå`(){
+    fun `En bit av inntektsmeldingen håndteres før annen hendelse, og den andre biten etterpå`() {
         val søknad = TestHendelse(10.S)
         val bit1 = TestHendelse(8.U)
         val bit2 = TestHendelse(8.U)

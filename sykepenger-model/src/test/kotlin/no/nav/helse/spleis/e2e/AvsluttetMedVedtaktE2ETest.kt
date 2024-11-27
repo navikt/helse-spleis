@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -23,9 +22,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `sender ikke vedtak fattet for perioder innenfor arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
@@ -35,7 +34,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(1.januar til 10.januar, 1.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
+        assertEquals(
+            1.januar til 10.januar,
+            1
+                .vedtaksperiode.avsluttetUtenVedtakEventer
+                .single()
+                .periode,
+        )
     }
 
     @Test
@@ -49,12 +54,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val event = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(0).utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).tilstand)
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 372_000.0,
-            sykepengegrunnlag = 372_000.0,
-            `6G` = 561_804.0,
-            arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0))
-        )
+        val forventetSykepengegrunnlagsfakta =
+            FastsattEtterHovedregel(
+                omregnetÅrsinntekt = 372_000.0,
+                sykepengegrunnlag = 372_000.0,
+                `6G` = 561_804.0,
+                arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0)),
+            )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
     }
 
@@ -69,8 +75,20 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(
+            setOf(søknadId),
+            1
+                .vedtaksperiode.avsluttetUtenVedtakEventer
+                .first()
+                .hendelseIder,
+        )
+        assertEquals(
+            setOf(søknadId, inntektsmeldingId),
+            1
+                .vedtaksperiode.avsluttetUtenVedtakEventer
+                .last()
+                .hendelseIder,
+        )
     }
 
     @Test
@@ -88,12 +106,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val event = observatør.avsluttetMedVedtakEvent.getValue(2.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(1).utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).tilstand)
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 372_000.0,
-            `6G` = 561804.0,
-            sykepengegrunnlag = 372_000.0,
-            arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0))
-        )
+        val forventetSykepengegrunnlagsfakta =
+            FastsattEtterHovedregel(
+                omregnetÅrsinntekt = 372_000.0,
+                `6G` = 561804.0,
+                sykepengegrunnlag = 372_000.0,
+                arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0)),
+            )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
     }
 
@@ -117,19 +136,27 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.organisasjonsnummer == a1 }
+                .sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.organisasjonsnummer == a2 }
+                .sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 744_000.0,
-            `6G` = 599_148.0,
-            sykepengegrunnlag = 599_148.0,
-            arbeidsgivere = listOf(
-                FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0),
-                FastsattEtterHovedregel.Arbeidsgiver(a2, 372_000.0),
+        val forventetSykepengegrunnlagsfakta =
+            FastsattEtterHovedregel(
+                omregnetÅrsinntekt = 744_000.0,
+                `6G` = 599_148.0,
+                sykepengegrunnlag = 599_148.0,
+                arbeidsgivere =
+                    listOf(
+                        FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0),
+                        FastsattEtterHovedregel.Arbeidsgiver(a2, 372_000.0),
+                    ),
             )
-        )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
     }
 
@@ -151,7 +178,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
+        håndterSkjønnsmessigFastsettelse(
+            1.januar(2020),
+            listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -163,19 +193,27 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.organisasjonsnummer == a1 }
+                .sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.organisasjonsnummer == a2 }
+                .sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
-        val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
-            omregnetÅrsinntekt = 1_068_000.0,
-            `6G` = 599_148.0,
-            sykepengegrunnlag = 599_148.0,
-            arbeidsgivere = listOf(
-                FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0),
-                FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0),
+        val forventetSykepengegrunnlagsfakta =
+            FastsattEtterSkjønn(
+                omregnetÅrsinntekt = 1_068_000.0,
+                `6G` = 599_148.0,
+                sykepengegrunnlag = 599_148.0,
+                arbeidsgivere =
+                    listOf(
+                        FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0),
+                        FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0),
+                    ),
             )
-        )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
     }
 
@@ -190,21 +228,23 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`(){
+    fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`() {
         val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        val inntektsmeldingId = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe",
-        )
+        val inntektsmeldingId =
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "noe",
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val liste = (1..16).map{
-            ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
-        }
+        val liste =
+            (1..16).map {
+                ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
+            }
         val overstyringId = UUID.randomUUID()
         håndterOverstyrTidslinje(liste, meldingsreferanseId = overstyringId)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -212,10 +252,21 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(
+            setOf(søknadId),
+            1
+                .vedtaksperiode.avsluttetUtenVedtakEventer
+                .first()
+                .hendelseIder,
+        )
+        assertEquals(
+            setOf(søknadId, inntektsmeldingId, overstyringId),
+            1
+                .vedtaksperiode.avsluttetUtenVedtakEventer
+                .last()
+                .hendelseIder,
+        )
     }
-
 
     @Test
     fun `Sender avsluttet uten vedtak ved kort gap til periode med kun ferie`() {
@@ -225,7 +276,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         2.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(10.februar til 28.februar, 2.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
+        assertEquals(
+            10.februar til 28.februar,
+            2
+                .vedtaksperiode.avsluttetUtenVedtakEventer
+                .single()
+                .periode,
+        )
     }
 
     @Test
@@ -260,5 +317,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     }
 
     private val IdInnhenter.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(id(ORGNUMMER))
-    private fun IdInnhenter.assertIngenVedtakFattet() = assertEquals(emptyList<PersonObserver.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[id(ORGNUMMER)] ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>())
+
+    private fun IdInnhenter.assertIngenVedtakFattet() =
+        assertEquals(
+            emptyList<PersonObserver.AvsluttetMedVedtakEvent>(),
+            observatør.avsluttetMedVedtakEventer[id(ORGNUMMER)] ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>(),
+        )
 }

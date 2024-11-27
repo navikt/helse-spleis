@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
@@ -27,15 +26,18 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
-
     @Test
     fun `Saksbehandler overstyrer avslag pga minimum sykdomsgrad`() {
         settOppAvslagPåMinimumSykdomsgrad()
 
         val avvistedager =
-            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingstidslinje.inspektør.avvistedager
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .single()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertEquals(11, avvistedager.size)
@@ -48,9 +50,26 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
-        assertTrue(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 10 })
+        assertEquals(
+            0,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            11,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.navdager.size,
+        )
+        assertTrue(
+            inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all {
+                it.økonomi.inspektør.totalGrad ==
+                    10
+            },
+        )
     }
 
     @Test
@@ -64,13 +83,25 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        assertEquals(10, inspektør.sisteUtbetaling().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
+        assertEquals(
+            10,
+            inspektør
+                .sisteUtbetaling()
+                .utbetalingstidslinje[17.januar]
+                .økonomi.inspektør.totalGrad,
+        )
 
         nyPeriode(januar, orgnummer = a2, grad = 10.prosent)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 81000.månedlig, orgnummer = a2)
         håndterYtelser(orgnummer = a1)
 
-        assertEquals(19, inspektør.sisteUtbetaling().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
+        assertEquals(
+            19,
+            inspektør
+                .sisteUtbetaling()
+                .utbetalingstidslinje[17.januar]
+                .økonomi.inspektør.totalGrad,
+        )
 
         håndterSimulering(orgnummer = a1)
         håndterUtbetalingsgodkjenning(orgnummer = a1)
@@ -81,8 +112,20 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertEquals(0, inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(0, inspektør(a2).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(
+            0,
+            inspektør(a1)
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            0,
+            inspektør(a2)
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a2))
     }
 
@@ -90,34 +133,100 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
     fun `Vurderer samme måned til å være både ok og ikke ok`() {
         settOppAvslagPåMinimumSykdomsgrad()
         assertThrows<IllegalStateException> {
-            håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
+            håndterMinimumSykdomsgradVurdert(
+                perioderMedMinimumSykdomsgradVurdertOK = listOf(januar),
+                perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar),
+            )
         }
     }
 
     @Test
     fun `Saksbehandler angrer vurdering`() {
         settOppAvslagPåMinimumSykdomsgrad()
-        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        assertEquals(
+            11,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            0,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.navdager.size,
+        )
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
         håndterYtelser()
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
-        håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
+        assertEquals(
+            0,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            11,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.navdager.size,
+        )
+        håndterMinimumSykdomsgradVurdert(
+            perioderMedMinimumSykdomsgradVurdertOK = emptyList(),
+            perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar),
+        )
         håndterYtelser()
-        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        assertEquals(
+            11,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            0,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.navdager.size,
+        )
     }
 
     @Test
     fun `bare enkeltdager i vedtaksperioden er vurdert ok`() {
         settOppAvslagPåMinimumSykdomsgrad()
-        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        assertEquals(
+            11,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            0,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.navdager.size,
+        )
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(1.januar til 20.januar))
         håndterYtelser()
-        assertEquals(8, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertEquals(3, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        assertEquals(
+            8,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.avvistedager.size,
+        )
+        assertEquals(
+            3,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .last()
+                .inspektør.utbetalingstidslinje.inspektør.navdager.size,
+        )
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
@@ -126,14 +235,16 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 10000.månedlig, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(a1 to 10000.månedlig, a2 to 81000.månedlig),
-                1.januar
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, ORDINÆRT)
-            )
+            inntektsvurderingForSykepengegrunnlag =
+                lagStandardSykepengegrunnlag(
+                    listOf(a1 to 10000.månedlig, a2 to 81000.månedlig),
+                    1.januar,
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, ORDINÆRT),
+                ),
         )
         håndterYtelser(1.vedtaksperiode)
     }

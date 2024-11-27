@@ -3,12 +3,10 @@ package no.nav.helse.spleis.mediator.meldinger
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 
 internal class TestMessageMediator : IMessageMediator {
-
     internal var recognizedMessage = false
         get() = field.also { reset() }
         private set
@@ -21,12 +19,19 @@ internal class TestMessageMediator : IMessageMediator {
         riverError = false
     }
 
-    override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
+    override fun onRecognizedMessage(
+        message: HendelseMessage,
+        context: MessageContext,
+    ) {
         recognizedMessage = true
     }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+    override fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata,
+    ) {
         riverError = true
     }
 }
-

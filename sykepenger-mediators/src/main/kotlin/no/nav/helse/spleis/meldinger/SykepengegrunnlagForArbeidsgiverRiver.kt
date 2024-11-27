@@ -13,7 +13,7 @@ import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessa
 
 internal class SykepengegrunnlagForArbeidsgiverRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(InntekterForSykepengegrunnlagForArbeidsgiver)
 
@@ -32,8 +32,12 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = SykepengegrunnlagForArbeidsgiverMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        SykepengegrunnlagForArbeidsgiverMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

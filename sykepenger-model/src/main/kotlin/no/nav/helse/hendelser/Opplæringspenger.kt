@@ -4,9 +4,13 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Opplæringspenger(
-    private val perioder: List<GradertPeriode>
+    private val perioder: List<GradertPeriode>,
 ) {
-    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
+    internal fun overlapper(
+        aktivitetslogg: IAktivitetslogg,
+        sykdomsperiode: Periode,
+        erForlengelse: Boolean,
+    ): Boolean {
         if (perioder.isEmpty()) {
             aktivitetslogg.info("Bruker har ingen opplæringspengeytelser")
             return false
@@ -17,7 +21,5 @@ class Opplæringspenger(
         }
     }
 
-    internal fun perioder(): List<Periode> {
-        return perioder.map { it.periode }
-    }
+    internal fun perioder(): List<Periode> = perioder.map { it.periode }
 }

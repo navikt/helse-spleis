@@ -1,20 +1,19 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.Alder
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
-import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 
 internal class AvvisDagerEtterDødsdatofilter(
     private val alder: Alder,
-): UtbetalingstidslinjerFilter {
-
+) : UtbetalingstidslinjerFilter {
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): List<Utbetalingstidslinje> {
         val avvisteTidslinjer = alder.avvisDager(tidslinjer)
 

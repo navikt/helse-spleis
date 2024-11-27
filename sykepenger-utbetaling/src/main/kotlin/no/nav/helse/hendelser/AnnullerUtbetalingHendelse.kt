@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import java.util.UUID
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import java.util.UUID
 
 interface AnnullerUtbetalingHendelse {
     val utbetalingId: UUID

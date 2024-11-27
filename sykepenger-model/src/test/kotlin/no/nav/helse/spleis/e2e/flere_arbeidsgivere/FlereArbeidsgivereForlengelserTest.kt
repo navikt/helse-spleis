@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -29,9 +28,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
-
     @Test
     fun `Tillater forlengelse av flere arbeidsgivere`() {
         val periode = 1.januar(2021) til 31.januar(2021)
@@ -59,7 +58,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        //Forlengelsen starter her
+        // Forlengelsen starter her
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive), orgnummer = a2)
@@ -67,14 +66,18 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(
                 forlengelseperiode.start,
                 forlengelseperiode.endInclusive,
-                100.prosent
-            ), orgnummer = a1)
+                100.prosent,
+            ),
+            orgnummer = a1,
+        )
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(
                 forlengelseperiode.start,
                 forlengelseperiode.endInclusive,
-                100.prosent
-            ), orgnummer = a2)
+                100.prosent,
+            ),
+            orgnummer = a2,
+        )
 
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -115,23 +118,36 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a1,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = Arbeidsforholdtype.ORDINÆRT,
+                ),
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter,
+                ),
             arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -161,7 +177,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         Assertions.assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
         Assertions.assertEquals(
             inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode),
-            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode),
         )
     }
 

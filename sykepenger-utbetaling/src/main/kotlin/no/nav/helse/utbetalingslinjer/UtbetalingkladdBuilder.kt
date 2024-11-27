@@ -17,20 +17,22 @@ class UtbetalingkladdBuilder(
     private val periode: Periode,
     private val tidslinje: Utbetalingstidslinje,
     private val mottakerRefusjon: String,
-    private val mottakerBruker: String
+    private val mottakerBruker: String,
 ) {
     // bruker samme "sak id" i OS for begge oppdragene
     // TODO: krever at Overføringer/kvitteringer inneholder fagområde, ellers
     // kan ikke meldingene mappes til riktig oppdrag
     // private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
-    private var arbeidsgiveroppdragBuilder = OppdragBuilder(
-        mottaker = mottakerRefusjon,
-        fagområde = SykepengerRefusjon
-    )
-    private var personoppdragBuilder = OppdragBuilder(
-        mottaker = mottakerBruker,
-        fagområde = Sykepenger
-    )
+    private var arbeidsgiveroppdragBuilder =
+        OppdragBuilder(
+            mottaker = mottakerRefusjon,
+            fagområde = SykepengerRefusjon,
+        )
+    private var personoppdragBuilder =
+        OppdragBuilder(
+            mottaker = mottakerBruker,
+            fagområde = Sykepenger,
+        )
 
     init {
         tidslinje.forEach { dag ->
@@ -38,21 +40,38 @@ class UtbetalingkladdBuilder(
                 is Arbeidsdag,
                 is AvvistDag,
                 is ForeldetDag,
-                is Fridag -> {
+                is Fridag,
+                -> {
                     arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
                     personoppdragBuilder.ikkeBetalingsdag()
                 }
                 is ArbeidsgiverperiodedagNav,
-                is NavDag -> {
-                    arbeidsgiveroppdragBuilder.betalingsdag(økonomi = dag.økonomi, dato = dag.dato, grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
-                    personoppdragBuilder.betalingsdag(økonomi = dag.økonomi, dato = dag.dato, grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
+                is NavDag,
+                -> {
+                    arbeidsgiveroppdragBuilder.betalingsdag(
+                        økonomi = dag.økonomi,
+                        dato = dag.dato,
+                        grad =
+                            dag.økonomi.brukAvrundetGrad { grad ->
+                                grad
+                            },
+                    )
+                    personoppdragBuilder.betalingsdag(
+                        økonomi = dag.økonomi,
+                        dato = dag.dato,
+                        grad =
+                            dag.økonomi.brukAvrundetGrad { grad ->
+                                grad
+                            },
+                    )
                 }
                 is NavHelgDag -> {
                     arbeidsgiveroppdragBuilder.betalingshelgedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
                     personoppdragBuilder.betalingshelgedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
                 }
                 is Utbetalingsdag.ArbeidsgiverperiodeDag,
-                is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */ }
+                is Utbetalingsdag.UkjentDag,
+                -> { /* gjør ingenting */ }
             }
         }
     }

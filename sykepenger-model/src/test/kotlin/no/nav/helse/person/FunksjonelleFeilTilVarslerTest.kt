@@ -1,16 +1,15 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class FunksjonelleFeilTilVarslerTest {
-
     private lateinit var aktivitetslogg: IAktivitetslogg
 
     @BeforeEach

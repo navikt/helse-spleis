@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -62,9 +61,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
-
     @Test
     fun `revurder inntekt happy case`() {
         nyttVedtak(januar, 100.prosent)
@@ -106,7 +105,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+        sykepengegrunnlagInspektør
+            ?.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            ?.get(ORGNUMMER)
+            ?.inspektør
             ?.also {
                 assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
@@ -143,7 +145,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+        sykepengegrunnlagInspektør
+            ?.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            ?.get(ORGNUMMER)
+            ?.inspektør
             ?.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
@@ -180,7 +185,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVVENTER_HISTORIKK_REVURDERING,
         )
 
         assertTilstander(
@@ -194,7 +199,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_REVURDERING
+            AVVENTER_REVURDERING,
         )
 
         assertEquals(2, inspektør.antallUtbetalinger)
@@ -223,14 +228,19 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING
+            AVVENTER_GODKJENNING_REVURDERING,
         )
 
         val utbetalingTilRevurdering = inspektør.sisteUtbetaling()
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(-15741, utbetalingTilRevurdering.arbeidsgiverOppdrag.nettoBeløp())
 
-        assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
+        assertFalse(
+            inspektør
+                .vedtaksperioder(1.vedtaksperiode)
+                .inspektør.utbetalingstidslinje
+                .harUtbetalingsdager(),
+        )
     }
 
     @Test
@@ -245,7 +255,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -256,7 +266,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(), -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+        assertEquals(
+            inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(),
+            -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp(),
+        )
     }
 
     @Test
@@ -274,7 +287,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -339,7 +352,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET_UTEN_UTBETALING,
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -355,7 +368,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -392,7 +405,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET_UTEN_UTBETALING,
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -408,7 +421,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -467,7 +480,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling - utbetalingen feiler`() {
         tilGodkjent(januar, 100.prosent, 1.januar)
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = 1.januar)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
@@ -479,7 +492,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengTilGodkjentVedtak(februar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = 1.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -492,7 +505,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_REVURDERING
+            AVVENTER_REVURDERING,
         )
 
         assertTilstander(
@@ -503,11 +516,14 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVVENTER_REVURDERING
+            AVVENTER_REVURDERING,
         )
     }
 
-    private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") {
+    private fun Oppdrag.skalHaEndringskode(
+        kode: Endringskode,
+        message: String = "",
+    ) {
         assertEquals(kode, endringskode, message)
     }
 
@@ -516,7 +532,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         ønsketDelytelseId: Int,
         ønsketRefDelytelseId: Int? = null,
         ønsketRefFagsystemId: String? = null,
-        ønsketDatoStatusFom: LocalDate? = null
+        ønsketDatoStatusFom: LocalDate? = null,
     ) {
         assertEquals(ønsketEndringskode, endringskode)
         assertEquals(ønsketDelytelseId, delytelseId)

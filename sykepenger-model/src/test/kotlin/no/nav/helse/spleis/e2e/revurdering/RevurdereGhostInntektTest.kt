@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -37,9 +35,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
-internal class RevurderGhostInntektTest: AbstractDslTest() {
-
+internal class RevurderGhostInntektTest : AbstractDslTest() {
     @Test
     fun `revurder ghost-inntekt ned`() {
         a1 {
@@ -71,7 +70,10 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 15000.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 15000.månedlig)))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 15000.månedlig)),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -86,7 +88,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertPeriode(17.januar til 31.januar, 1431.daglig)
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
@@ -142,14 +144,23 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterOverstyrInntekt(
                 inntekt = 40000.månedlig,
                 skjæringstidspunkt = 1.januar,
-                organisasjonsnummer = a2
+                organisasjonsnummer = a2,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 943.daglig)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
@@ -201,7 +212,10 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 0.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 0.månedlig)))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 0.månedlig)),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -217,7 +231,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
@@ -267,7 +281,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterOverstyrInntekt(
                 inntekt = 15000.månedlig,
                 skjæringstidspunkt = 1.januar,
-                organisasjonsnummer = a2
+                organisasjonsnummer = a2,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -275,7 +289,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterOverstyrInntekt(
                 inntekt = 16000.månedlig,
                 skjæringstidspunkt = 1.januar,
-                organisasjonsnummer = a2
+                organisasjonsnummer = a2,
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -328,47 +342,56 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
 
-
-    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+    private fun TestPerson.TestArbeidsgiver.assertDag(
+        dato: LocalDate,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt,
+    ) {
         inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
             if (it is Utbetalingsdag.NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }
     }
+
     private fun TestPerson.TestArbeidsgiver.assertPeriode(
         periode: Periode,
         arbeidsgiverbeløp: Inntekt,
-        personbeløp: Inntekt = Inntekt.INGEN
-    ) =
-        periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
+        personbeløp: Inntekt = Inntekt.INGEN,
+    ) = periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
 
-
-    private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT) {
+    private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(
+        vedtaksperiode: UUID,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        inntekt: Inntekt = INNTEKT,
+    ) {
         håndterVilkårsgrunnlag(
             vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
-                    grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3))
-                )
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
+                            grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3)),
+                        ),
+                ),
         )
     }
 }

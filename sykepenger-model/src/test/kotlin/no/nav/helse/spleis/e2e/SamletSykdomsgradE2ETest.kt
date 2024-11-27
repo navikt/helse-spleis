@@ -27,8 +27,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
-
+internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
     @Test
     fun `hele perioden avvises`() {
         nyeVedtak(1.januar til 4.februar, a1, a2)
@@ -63,7 +62,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
-            AVSLUTTET
+            AVSLUTTET,
         )
     }
 
@@ -93,7 +92,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
     }
 
@@ -124,13 +123,13 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
         )
 
         assertForventetFeil(
             forklaring = "når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder",
             nå = { assertVarsel(RV_VV_4) },
-            ønsket = { assertIngenVarsler() }
+            ønsket = { assertIngenVarsler() },
         )
     }
 

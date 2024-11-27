@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.meldinger.model
 
+import no.nav.helse.hendelser.Periode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.Periode
 import kotlin.properties.Delegates
 
 internal abstract class SøknadBuilder {
@@ -19,16 +19,30 @@ internal abstract class SøknadBuilder {
     protected var innsendt: LocalDateTime? = null
 
     internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) = apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
+
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
+
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
+
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
+
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
+
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }
+
     internal fun permittert(permittert: Boolean) = apply { this.permittert = permittert }
+
     internal fun egenmeldinger(egenmeldinger: List<Periode>) = apply { this.egenmeldinger = egenmeldinger }
+
     internal fun arbeidUtenforNorge(arbeidUtenforNorge: Boolean) = apply { this.arbeidUtenforNorge = arbeidUtenforNorge }
+
     internal fun yrkesskade(yrkesskade: Boolean) = apply { this.yrkesskade = yrkesskade }
-    internal fun fravær(type: String, fom: LocalDate, tom: LocalDate?) {
+
+    internal fun fravær(
+        type: String,
+        fom: LocalDate,
+        tom: LocalDate?,
+    ) {
         when (type) {
             "PERMISJON" -> permisjon(fom, tom!!)
             "FERIE" -> ferie(fom, tom!!)
@@ -38,19 +52,50 @@ internal abstract class SøknadBuilder {
 
     internal open fun inntektskilde(andreInntektskilder: Boolean) = apply {}
 
-    internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
+    internal abstract fun periode(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Int,
+        arbeidshelse: Int?,
+    ): SøknadBuilder
 
-    internal open fun permisjon(fom: LocalDate, tom: LocalDate) = apply {}
-    internal open fun ferie(fom: LocalDate, tom: LocalDate) = apply {}
-    internal open fun utlandsopphold(fom: LocalDate, tom: LocalDate) = apply {}
-    internal open fun merknader(type: String, beskrivelse: String?) = apply {}
-    internal open fun papirsykmelding(fom: LocalDate, tom: LocalDate) = apply {}
-    internal open fun arbeidsgjennopptatt(fom: LocalDate, tom: LocalDate) = apply { }
+    internal open fun permisjon(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = apply {}
+
+    internal open fun ferie(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = apply {}
+
+    internal open fun utlandsopphold(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = apply {}
+
+    internal open fun merknader(
+        type: String,
+        beskrivelse: String?,
+    ) = apply {}
+
+    internal open fun papirsykmelding(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = apply {}
+
+    internal open fun arbeidsgjennopptatt(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = apply { }
+
     internal open fun utenlandskSykmelding(utenlandsk: Boolean) = apply {}
+
     internal open fun sendTilGosys(utenlandsk: Boolean) = apply {}
 
-    internal fun arbeidsgjennopptatt(fom: LocalDate?) = apply {
-        if (fom == null) return@apply
-        arbeidsgjennopptatt(fom, this.tom)
-    }
+    internal fun arbeidsgjennopptatt(fom: LocalDate?) =
+        apply {
+            if (fom == null) return@apply
+            arbeidsgjennopptatt(fom, this.tom)
+        }
 }

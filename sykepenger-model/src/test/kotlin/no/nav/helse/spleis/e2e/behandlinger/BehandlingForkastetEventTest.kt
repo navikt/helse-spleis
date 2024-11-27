@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BehandlingForkastetEventTest : AbstractDslTest() {
-
     @Test
     fun `uberegnet behandling forkastes`() {
         a1 {
@@ -27,17 +26,19 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId,
-                automatiskBehandling = true
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingForkastetEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                    automatiskBehandling = true,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
+
     @Test
     fun `uberegnet behandling forkastes manuelt`() {
         a1 {
@@ -46,12 +47,13 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId,
-                automatiskBehandling = false
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingForkastetEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                    automatiskBehandling = false,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
@@ -62,16 +64,19 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `behandling uten vedtak forkastes`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)),
+            )
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId,
-                automatiskBehandling = true
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingForkastetEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                    automatiskBehandling = true,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
@@ -82,16 +87,22 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `annullering oppretter ny behandling som forkastes`() {
         a1 {
             nyttVedtak(januar)
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingId)
+            håndterAnnullering(
+                inspektør
+                    .utbetalinger(1.vedtaksperiode)
+                    .single()
+                    .inspektør.utbetalingId,
+            )
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId,
-                automatiskBehandling = false
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingForkastetEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                    automatiskBehandling = false,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
@@ -110,16 +121,22 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
+            håndterAnnullering(
+                inspektør
+                    .utbetalinger(1.vedtaksperiode)
+                    .last()
+                    .inspektør.utbetalingId,
+            )
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingForkastetEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId,
-                automatiskBehandling = false
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingForkastetEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                    automatiskBehandling = false,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
