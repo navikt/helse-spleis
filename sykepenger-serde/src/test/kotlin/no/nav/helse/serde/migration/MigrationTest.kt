@@ -15,6 +15,7 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
     open fun meldingerSupplier() = MeldingerSupplier.empty
 
     protected fun toNode(json: String): JsonNode = serdeObjectMapper.readTree(json)
+
     protected fun migrer(json: String): JsonNode {
         val migers = migration()
         return listOf(migers).migrate(toNode(json), meldingerSupplier())
@@ -23,13 +24,18 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
     protected fun assertMigration(
         expectedJson: String,
         originalJson: String,
-        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
-    ) = assertMigrationRaw(expectedJson.readResource(), originalJson.readResource(), jsonCompareMode)
+        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT,
+    ) =
+        assertMigrationRaw(
+            expectedJson.readResource(),
+            originalJson.readResource(),
+            jsonCompareMode,
+        )
 
     protected fun assertMigrationRaw(
         expectedJson: String,
         originalJson: String,
-        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
+        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT,
     ): JsonNode {
         val migrert = migrer(originalJson)
         val expected = erstattPlaceholders(toNode(expectedJson), migrert)
@@ -38,14 +44,18 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         return migrert
     }
 
-    // bytter ut <!.......!> på felter med verdi fra actual. På den måten kan man asserte at feltet finnes, men verdien er ukjent.
-    // Eksempelvis om migreringen innfører en Random UUID på et felt i en migrering, så kan man i expected-json skrive:
+    // bytter ut <!.......!> på felter med verdi fra actual. På den måten kan man asserte at feltet
+    // finnes, men verdien er ukjent.
+    // Eksempelvis om migreringen innfører en Random UUID på et felt i en migrering, så kan man i
+    // expected-json skrive:
     // { "id": "<! en random UUID legges på her !>" }
     private fun erstattPlaceholders(expected: JsonNode, actual: JsonNode): JsonNode {
         when (expected) {
             is ArrayNode -> {
                 if (actual is ArrayNode) {
-                    expected.forEachIndexed { index, value -> erstattPlaceholders(value, actual.path(index)) }
+                    expected.forEachIndexed { index, value ->
+                        erstattPlaceholders(value, actual.path(index))
+                    }
                 }
             }
             is ObjectNode -> {
@@ -59,7 +69,8 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
                                 }
                             }
 
-                            is ArrayNode, is ObjectNode -> erstattPlaceholders(value, actual.path(key))
+                            is ArrayNode,
+                            is ObjectNode -> erstattPlaceholders(value, actual.path(key))
                         }
                     }
                 }
@@ -71,20 +82,16 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
     protected fun assertJson(
         actual: String,
         expected: String,
-        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
+        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT,
     ) {
-        JSONAssert.assertEquals(
-            "\n$expected\n$actual\n",
-            expected,
-            actual,
-            jsonCompareMode
-        )
+        JSONAssert.assertEquals("\n$expected\n$actual\n", expected, actual, jsonCompareMode)
     }
 
     internal companion object {
         private val placeholderRegex = "<!.*!>".toRegex()
 
         internal fun String.readResource() =
-            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: error("did not find resource <$this>")
+            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8)
+                ?: error("did not find resource <$this>")
     }
 }

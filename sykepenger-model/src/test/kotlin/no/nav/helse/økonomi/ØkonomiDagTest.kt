@@ -69,7 +69,7 @@ internal class ØkonomiDagTest {
         val b1 = tidslinjeOf(1.NAV(inntekt, 50))
         val (b) = listOf(b1).betal()
         assertØkonomi(b, 115.0, 0.0)
-        val c1 = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt/2))
+        val c1 = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt / 2))
         val (c) = listOf(c1).betal()
         assertØkonomi(c, 115.0, 116.0)
     }
@@ -110,7 +110,9 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `avvist dag endrer ikke på økonomi til navdag`() {
-        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(500.daglig, 500.daglig, `6G`= 600000.årlig, refusjonsbeløp = 500.daglig)
+        val økonomi =
+            Økonomi.sykdomsgrad(100.prosent)
+                .inntekt(500.daglig, 500.daglig, `6G` = 600000.årlig, refusjonsbeløp = 500.daglig)
         val builderFør = Økonomitester()
         økonomi.builder(builderFør)
 
@@ -144,7 +146,13 @@ internal class ØkonomiDagTest {
     fun `Beløp medNavDag som har blitt avvist`() {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
-        val c = Utbetalingstidslinje.avvis(listOf(tidslinjeOf(2.NAV(1200))), listOf(januar), listOf(Begrunnelse.MinimumInntekt)).single()
+        val c =
+            Utbetalingstidslinje.avvis(
+                    listOf(tidslinjeOf(2.NAV(1200))),
+                    listOf(januar),
+                    listOf(Begrunnelse.MinimumInntekt),
+                )
+                .single()
         val (a1, b1, c1) = listOf(a, b, c).betal()
         assertØkonomi(a, null, null)
         assertØkonomi(a1, 721.0, 0.0)
@@ -165,15 +173,22 @@ internal class ØkonomiDagTest {
         assertØkonomi(c, 0.0)
     }
 
-    private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
+    private fun assertØkonomi(
+        tidslinje: Utbetalingstidslinje,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double? = 0.0,
+    ) {
         tidslinje.forEach {
             assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
         }
     }
 
-    private fun List<Utbetalingstidslinje>.betal(virkningsdato: LocalDate = 1.januar): List<Utbetalingstidslinje> {
-        val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
+    private fun List<Utbetalingstidslinje>.betal(
+        virkningsdato: LocalDate = 1.januar
+    ): List<Utbetalingstidslinje> {
+        val periode =
+            virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
         return MaksimumUtbetalingFilter().betal(this, periode, Aktivitetslogg(), EmptyLog)
     }
 }

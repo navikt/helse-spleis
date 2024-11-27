@@ -15,7 +15,7 @@ object VedtaksperiodeProbe : PersonObserver {
             "vedtaksperiode endret {}, {}, {}",
             keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
             keyValue("tilstand", event.gjeldendeTilstand.name),
-            keyValue("forrigeTilstand", event.forrigeTilstand.name)
+            keyValue("forrigeTilstand", event.forrigeTilstand.name),
         )
     }
 
@@ -25,19 +25,26 @@ object VedtaksperiodeProbe : PersonObserver {
             keyValue("utbetalingId", event.utbetalingId),
             keyValue("korrelasjonsId", event.korrelasjonsId),
             keyValue("status", event.gjeldendeStatus),
-            keyValue("forrigeStatus", event.forrigeStatus)
+            keyValue("forrigeStatus", event.forrigeStatus),
         )
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        påminnelse: Påminnelse,
+    ) {
         log.debug(
             "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
             keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("tilstand", påminnelse.tilstand().name),
-            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
-            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
+            keyValue(
+                "tilstandsendringstidspunkt",
+                påminnelse.tilstandsendringstidspunkt().toString(),
+            ),
+            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString()),
         )
     }
 }

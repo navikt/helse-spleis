@@ -15,18 +15,28 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class SpekematClientTest {
-    private val azureTokenProvider = object : AzureTokenProvider {
-        override fun bearerToken(scope: String) = AzureToken("liksom-token", LocalDateTime.MAX).ok()
-        override fun onBehalfOfToken(scope: String, token: String): Result<AzureToken> {
-            throw NotImplementedError("ikke implementert i mock")
+    private val azureTokenProvider =
+        object : AzureTokenProvider {
+            override fun bearerToken(scope: String) =
+                AzureToken("liksom-token", LocalDateTime.MAX).ok()
+
+            override fun onBehalfOfToken(scope: String, token: String): Result<AzureToken> {
+                throw NotImplementedError("ikke implementert i mock")
+            }
         }
-    }
     private var httpClientMock = mockk<HttpClient>()
-    private val client = SpekematClient(httpClientMock, azureTokenProvider, "scope-til-spekemat", jacksonObjectMapper())
+    private val client =
+        SpekematClient(
+            httpClientMock,
+            azureTokenProvider,
+            "scope-til-spekemat",
+            jacksonObjectMapper(),
+        )
 
     @Test
     fun `tolker response fra spekemat`() {
-        every { httpClientMock.send<String>(any(), any()) } returns MockHttpResponse(responsFraSpekemat, 200, mapOf("callId" to "liksom call id"))
+        every { httpClientMock.send<String>(any(), any()) } returns
+            MockHttpResponse(responsFraSpekemat, 200, mapOf("callId" to "liksom call id"))
         val result = client.hentSpekemat("fnr", "callId")
         assertEquals(1, result.pakker.size)
         assertEquals(1, result.pakker.single().rader.size)
@@ -35,7 +45,8 @@ class SpekematClientTest {
 }
 
 @Language("JSON")
-private const val responsFraSpekemat = """{
+private const val responsFraSpekemat =
+    """{
     "yrkesaktiviteter": [
         {
             "yrkesaktivitetidentifikator": "990739323",

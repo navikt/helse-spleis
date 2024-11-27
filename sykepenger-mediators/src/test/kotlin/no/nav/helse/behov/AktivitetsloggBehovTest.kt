@@ -20,7 +20,7 @@ internal class AktivitetsloggBehovTest {
     }
 
     @Test
-    fun `kan hente ut behov`(){
+    fun `kan hente ut behov`() {
         val hendelse1 = aktivitetslogg.barn()
         hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -43,10 +43,8 @@ internal class AktivitetsloggBehovTest {
         assertEquals("Tilstand 1", aktivitetslogg.behov.last().kontekst()["Tilstand"])
     }
 
-    private class TestKontekst(
-        private val type: String,
-        private val melding: String
-    ): Aktivitetskontekst {
+    private class TestKontekst(private val type: String, private val melding: String) :
+        Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

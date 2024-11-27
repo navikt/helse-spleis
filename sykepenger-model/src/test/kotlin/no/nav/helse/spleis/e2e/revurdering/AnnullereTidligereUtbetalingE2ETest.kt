@@ -28,9 +28,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
 
     @Test
     fun `annullere tidligere utbetaling på annen arbeidsgiver`() {
-        a1 {
-            nyttVedtak(januar)
-        }
+        a1 { nyttVedtak(januar) }
         val utbetalingId = inspektør.utbetaling(0).utbetalingId
         a2 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))

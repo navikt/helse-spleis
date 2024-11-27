@@ -10,7 +10,5 @@ sealed class AvklarbarSykepengegrunnlag(
     hendelseId: UUID,
     dato: LocalDate,
     beløp: Inntekt,
-    tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-
-}
+    tidsstempel: LocalDateTime,
+) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {}

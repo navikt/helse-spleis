@@ -16,7 +16,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-class InfotrygdhistorikkElement private constructor(
+class InfotrygdhistorikkElement
+private constructor(
     val id: UUID,
     val tidsstempel: LocalDateTime,
     val hendelseId: UUID,
@@ -24,16 +25,19 @@ class InfotrygdhistorikkElement private constructor(
     inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
     oppdatert: LocalDateTime,
-    private var nyOpprettet: Boolean = false
+    private var nyOpprettet: Boolean = false,
 ) {
     var oppdatert = oppdatert
         private set
+
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     val perioder = Infotrygdperiode.sorter(perioder)
-    private val kilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
+    private val kilde =
+        SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {
-        if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
+        if (!erTom())
+            requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
     }
 
     companion object {
@@ -42,7 +46,7 @@ class InfotrygdhistorikkElement private constructor(
             hendelseId: UUID,
             perioder: List<Infotrygdperiode>,
             inntekter: List<Inntektsopplysning>,
-            arbeidskategorikoder: Map<String, LocalDate>
+            arbeidskategorikoder: Map<String, LocalDate>,
         ) =
             InfotrygdhistorikkElement(
                 id = UUID.randomUUID(),
@@ -52,7 +56,7 @@ class InfotrygdhistorikkElement private constructor(
                 inntekter = inntekter,
                 arbeidskategorikoder = arbeidskategorikoder,
                 oppdatert = oppdatert,
-                nyOpprettet = true
+                nyOpprettet = true,
             )
 
         internal fun gjenopprett(dto: InfotrygdhistorikkelementInnDto): InfotrygdhistorikkElement {
@@ -60,17 +64,23 @@ class InfotrygdhistorikkElement private constructor(
                 id = dto.id,
                 tidsstempel = dto.tidsstempel,
                 hendelseId = dto.hendelseId,
-                perioder = dto.arbeidsgiverutbetalingsperioder.map { ArbeidsgiverUtbetalingsperiode.gjenopprett(it) } +
-                    dto.personutbetalingsperioder.map { PersonUtbetalingsperiode.gjenopprett(it) } +
-                    dto.ferieperioder.map { Friperiode.gjenopprett(it) },
+                perioder =
+                    dto.arbeidsgiverutbetalingsperioder.map {
+                        ArbeidsgiverUtbetalingsperiode.gjenopprett(it)
+                    } +
+                        dto.personutbetalingsperioder.map {
+                            PersonUtbetalingsperiode.gjenopprett(it)
+                        } +
+                        dto.ferieperioder.map { Friperiode.gjenopprett(it) },
                 inntekter = dto.inntekter.map { Inntektsopplysning.gjenopprett(it) },
                 arbeidskategorikoder = dto.arbeidskategorikoder,
-                oppdatert = dto.oppdatert
+                oppdatert = dto.oppdatert,
             )
         }
     }
 
-    internal fun betaltePerioder(orgnummer: String? = null): List<Periode> = perioder.utbetalingsperioder(orgnummer)
+    internal fun betaltePerioder(orgnummer: String? = null): List<Periode> =
+        perioder.utbetalingsperioder(orgnummer)
 
     internal fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
         return perioder
@@ -89,14 +99,18 @@ class InfotrygdhistorikkElement private constructor(
     private fun erTom() =
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, organisasjonsnummer: String): Boolean {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        organisasjonsnummer: String,
+    ): Boolean {
         validerBetaltRettFør(periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
+    private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg) {
         if (!harBetaltRettFør(periode)) return
         aktivitetslogg.funksjonellFeil(RV_IT_14)
     }
@@ -114,8 +128,12 @@ class InfotrygdhistorikkElement private constructor(
         return this.arbeidskategorikoder == other.arbeidskategorikoder
     }
 
-    private fun harLikePerioder(other: InfotrygdhistorikkElement) = likhet(this.perioder, other.perioder, Infotrygdperiode::funksjoneltLik)
-    private fun harLikeInntekter(other: InfotrygdhistorikkElement) = likhet(this.inntekter, other.inntekter, Inntektsopplysning::funksjoneltLik)
+    private fun harLikePerioder(other: InfotrygdhistorikkElement) =
+        likhet(this.perioder, other.perioder, Infotrygdperiode::funksjoneltLik)
+
+    private fun harLikeInntekter(other: InfotrygdhistorikkElement) =
+        likhet(this.inntekter, other.inntekter, Inntektsopplysning::funksjoneltLik)
+
     private fun <R> likhet(one: List<R>, two: List<R>, comparator: (R, R) -> Boolean): Boolean {
         if (one.size != two.size) return false
         return one.zip(two, comparator).all { it }
@@ -135,27 +153,33 @@ class InfotrygdhistorikkElement private constructor(
         return utbetaling.erNyereEnn(this.tidsstempel)
     }
 
-    internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
+    internal fun erEndretUtbetaling(
+        sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement
+    ): Boolean {
         if (this === sisteElementSomFantesFørUtbetaling) return false
         return !harLikePerioder(sisteElementSomFantesFørUtbetaling)
     }
 
     internal fun erNyopprettet() = nyOpprettet
 
-    internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
+    internal fun harUtbetaltI(periode: Periode) =
+        betaltePerioder().any { it.overlapperMed(periode) }
 
-    internal fun harFerieI(periode: Periode) = perioder.filterIsInstance<Friperiode>().any { it.overlapperMed(periode) }
+    internal fun harFerieI(periode: Periode) =
+        perioder.filterIsInstance<Friperiode>().any { it.overlapperMed(periode) }
 
-    internal fun dto() = InfotrygdhistorikkelementUtDto(
-        id = this.id,
-        tidsstempel = this.tidsstempel,
-        hendelseId = this.hendelseId,
-        ferieperioder = this.perioder.filterIsInstance<Friperiode>().map { it.dto() },
-        arbeidsgiverutbetalingsperioder = this.perioder.filterIsInstance<ArbeidsgiverUtbetalingsperiode>().map { it.dto() },
-        personutbetalingsperioder = this.perioder.filterIsInstance<PersonUtbetalingsperiode>().map { it.dto() },
-        inntekter = this.inntekter.map { it.dto() },
-        arbeidskategorikoder = this.arbeidskategorikoder,
-        oppdatert = this.oppdatert
-    )
+    internal fun dto() =
+        InfotrygdhistorikkelementUtDto(
+            id = this.id,
+            tidsstempel = this.tidsstempel,
+            hendelseId = this.hendelseId,
+            ferieperioder = this.perioder.filterIsInstance<Friperiode>().map { it.dto() },
+            arbeidsgiverutbetalingsperioder =
+                this.perioder.filterIsInstance<ArbeidsgiverUtbetalingsperiode>().map { it.dto() },
+            personutbetalingsperioder =
+                this.perioder.filterIsInstance<PersonUtbetalingsperiode>().map { it.dto() },
+            inntekter = this.inntekter.map { it.dto() },
+            arbeidskategorikoder = this.arbeidskategorikoder,
+            oppdatert = this.oppdatert,
+        )
 }
-

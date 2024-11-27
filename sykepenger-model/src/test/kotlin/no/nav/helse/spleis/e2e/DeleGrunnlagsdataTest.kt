@@ -40,12 +40,17 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterSøknad(mars)
         håndterSøknad(5.april til 30.april)
-        val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val inntektsmelding2Id = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 5.april,
-            vedtaksperiodeIdInnhenter = 4.vedtaksperiode
-        )
+        val inntektsmelding1Id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            )
+        val inntektsmelding2Id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                førsteFraværsdag = 5.april,
+                vedtaksperiodeIdInnhenter = 4.vedtaksperiode,
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -66,9 +71,18 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
-        assertNotEquals(inspektør.vilkårsgrunnlag(3.vedtaksperiode), inspektør.vilkårsgrunnlag(4.vedtaksperiode))
+        assertEquals(
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode),
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode),
+        )
+        assertEquals(
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode),
+            inspektør.vilkårsgrunnlag(3.vedtaksperiode),
+        )
+        assertNotEquals(
+            inspektør.vilkårsgrunnlag(3.vedtaksperiode),
+            inspektør.vilkårsgrunnlag(4.vedtaksperiode),
+        )
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(1.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
@@ -89,8 +103,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(5.april til 30.april)
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
+        assertEquals(
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode),
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode),
+        )
+        assertEquals(
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode),
+            inspektør.vilkårsgrunnlag(3.vedtaksperiode),
+        )
         assertNull(inspektør.vilkårsgrunnlag(4.vedtaksperiode))
     }
 
@@ -108,7 +128,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(18.januar, 1.februar)),
             førsteFraværsdag = 4.mars,
-            avsendersystem = ALTINN
+            avsendersystem = ALTINN,
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -117,10 +137,18 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+        )
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode),
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode),
+        )
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
@@ -133,7 +161,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         val søknadId = håndterSøknad(mars)
 
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
+        val inntektsmeldingId =
+            håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -144,7 +173,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET_UTEN_UTBETALING,
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -153,9 +182,13 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
+            AVVENTER_SIMULERING,
         )
         assertEquals(2, inspektør.hendelseIder(2.vedtaksperiode).size)
-        assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(søknadId, inntektsmeldingId)))
+        assertTrue(
+            inspektør
+                .hendelseIder(2.vedtaksperiode)
+                .containsAll(listOf(søknadId, inntektsmeldingId))
+        )
     }
 }

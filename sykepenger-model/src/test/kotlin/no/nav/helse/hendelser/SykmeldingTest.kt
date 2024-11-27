@@ -10,9 +10,7 @@ import org.junit.jupiter.api.assertThrows
 internal class SykmeldingTest {
 
     private companion object {
-        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321"
-        )
+        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(organisasjonsnummer = "987654321")
     }
 
     private lateinit var sykmelding: Sykmelding
@@ -25,39 +23,36 @@ internal class SykmeldingTest {
             assertEquals(listOf(10.januar til 15.januar), result)
         }
 
-        sykmelding.oppdaterSykmeldingsperioder(
-            Aktivitetslogg(),
-            listOf(1.januar til 2.januar)
-        ).also { result ->
-            assertEquals(listOf(
-                1.januar til 2.januar,
-                10.januar til 15.januar
-            ), result)
-        }
+        sykmelding
+            .oppdaterSykmeldingsperioder(Aktivitetslogg(), listOf(1.januar til 2.januar))
+            .also { result ->
+                assertEquals(listOf(1.januar til 2.januar, 10.januar til 15.januar), result)
+            }
 
-        sykmelding.oppdaterSykmeldingsperioder(
-            Aktivitetslogg(),
-            listOf(17.januar til 20.januar)
-        ).also { result ->
-            assertEquals(listOf(
-                10.januar til 15.januar,
-                17.januar til 20.januar
-            ), result)
-        }
+        sykmelding
+            .oppdaterSykmeldingsperioder(Aktivitetslogg(), listOf(17.januar til 20.januar))
+            .also { result ->
+                assertEquals(listOf(10.januar til 15.januar, 17.januar til 20.januar), result)
+            }
 
-        sykmelding.oppdaterSykmeldingsperioder(Aktivitetslogg(), listOf(
-            1.januar til 2.januar,
-            6.januar til 10.januar,
-            15.januar til 20.januar,
-            23.januar til 25.januar
-        )).also { result ->
-            assertEquals(listOf(
-                1.januar til 2.januar,
-                6.januar til 20.januar,
-                23.januar til 25.januar
-            ), result)
-        }
+        sykmelding
+            .oppdaterSykmeldingsperioder(
+                Aktivitetslogg(),
+                listOf(
+                    1.januar til 2.januar,
+                    6.januar til 10.januar,
+                    15.januar til 20.januar,
+                    23.januar til 25.januar,
+                ),
+            )
+            .also { result ->
+                assertEquals(
+                    listOf(1.januar til 2.januar, 6.januar til 20.januar, 23.januar til 25.januar),
+                    result,
+                )
+            }
     }
+
     @Test
     fun `oppdaterer perioder - trimmet dager - en dag igjen`() {
         sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
@@ -66,6 +61,7 @@ internal class SykmeldingTest {
             assertEquals(listOf(15.januar til 15.januar), result)
         }
     }
+
     @Test
     fun `oppdaterer perioder - trimmet forbi`() {
         sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
@@ -82,9 +78,6 @@ internal class SykmeldingTest {
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) {
-        sykmelding = hendelsefabrikk.lagSykmelding(
-            sykeperioder = sykeperioder
-        )
+        sykmelding = hendelsefabrikk.lagSykmelding(sykeperioder = sykeperioder)
     }
-
 }

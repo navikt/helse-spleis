@@ -22,11 +22,15 @@ internal class SykdomsgradfilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    private val jurist =
+        BehandlingSubsumsjonslogg(
+            EmptyLog,
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+            ),
+        )
 
     @Test
     fun `sykdomsgrad over 20 prosent`() {
@@ -77,10 +81,8 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avvis dager for begge tidslinjer`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
-            tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
-        )
+        val tidslinjer =
+            listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0)), tidslinjeOf(16.AP, 5.NAV(1200, 19.0)))
         val periode = Periode(1.januar, 21.januar)
         val resultat = undersøke(tidslinjer, periode)
         assertEquals(3, resultat.inspektør(0).avvistDagTeller)
@@ -91,10 +93,8 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avviser utbetaling når samlet grad er under 20 prosent`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 39)),
-            tidslinjeOf(16.AP, 5.NAV, 1.FRI)
-        )
+        val tidslinjer =
+            listOf(tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 39)), tidslinjeOf(16.AP, 5.NAV, 1.FRI))
         val periode = Periode(1.januar, 22.januar)
         val resultat = undersøke(tidslinjer, periode)
         assertEquals(3, resultat.inspektør(0).navDagTeller)
@@ -107,10 +107,8 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avviser ikke utbetaling når samlet grad er minst 20 prosent`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 40)),
-            tidslinjeOf(16.AP, 5.NAV, 1.FRI)
-        )
+        val tidslinjer =
+            listOf(tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 40)), tidslinjeOf(16.AP, 5.NAV, 1.FRI))
         val periode = Periode(1.januar, 22.januar)
         val resultat = undersøke(tidslinjer, periode)
         assertEquals(4, resultat.inspektør(0).navDagTeller)
@@ -123,19 +121,35 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avviser ikke andre ytelser`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 6.AVV(grad = 0, dekningsgrunnlag = 0, begrunnelse = Begrunnelse.AndreYtelserForeldrepenger))
-        )
+        val tidslinjer =
+            listOf(
+                tidslinjeOf(
+                    16.AP,
+                    6.AVV(
+                        grad = 0,
+                        dekningsgrunnlag = 0,
+                        begrunnelse = Begrunnelse.AndreYtelserForeldrepenger,
+                    ),
+                )
+            )
         val periode = Periode(1.januar, 22.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(6, inspektør.avvistDagTeller)
-        assertEquals(listOf(Begrunnelse.AndreYtelserForeldrepenger), inspektør.begrunnelse(17.januar))
+        assertEquals(
+            listOf(Begrunnelse.AndreYtelserForeldrepenger),
+            inspektør.begrunnelse(17.januar),
+        )
     }
 
-    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
+    private fun undersøke(
+        tidslinjer: List<Utbetalingstidslinje>,
+        periode: Periode,
+    ): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, jurist)
+        val resultat =
+            Sykdomsgradfilter(MinimumSykdomsgradsvurdering())
+                .filter(tidslinjer, periode, aktivitetslogg, jurist)
         inspektør = resultat.inspektør(0)
         return resultat
     }

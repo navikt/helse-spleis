@@ -7,9 +7,5 @@ import io.ktor.server.auth.jwt.jwt
 import no.nav.helse.spleis.config.AzureAdAppConfig
 
 internal fun Application.azureAdAppAuthentication(config: AzureAdAppConfig) {
-    install(Authentication) {
-        jwt {
-            config.configureVerification(this)
-        }
-    }
+    install(Authentication) { jwt { config.configureVerification(this) } }
 }

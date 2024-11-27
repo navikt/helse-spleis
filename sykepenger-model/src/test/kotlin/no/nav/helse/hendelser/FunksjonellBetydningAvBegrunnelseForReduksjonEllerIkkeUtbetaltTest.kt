@@ -15,14 +15,16 @@ import org.junit.jupiter.api.Test
 
 class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
 
-    // Nyttig? = https://github.com/navikt/spinntektsmelding-frontend/commit/a99eaab06bbef83280715528f109118bc9511da5
+    // Nyttig? =
+    // https://github.com/navikt/spinntektsmelding-frontend/commit/a99eaab06bbef83280715528f109118bc9511da5
 
     @Test
     fun `arbeidsgiver vil at nav skal dekke ny agp fra første dag hvis det er et veldig nytt arbeidsforhold uten fire ukers opptjeningstid`() {
         val førsteFraværsdag = 1.januar
         val arbeidsgiverperiode = listOf(1.januar til 16.januar)
         val begrunnelse = "ManglerOpptjening"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
         assertEquals(ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG, funksjonellBetydning)
     }
 
@@ -31,7 +33,8 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         val førsteFraværsdag = 1.januar
         val arbeidsgiverperiode = listOf(1.januar til 16.januar)
         val begrunnelse = "TidligereVirksomhet"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
         assertEquals(ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG, funksjonellBetydning)
     }
 
@@ -40,8 +43,12 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         val førsteFraværsdag = 1.januar
         val arbeidsgiverperiode = emptyList<Periode>()
         val begrunnelse = "IkkeFravaer"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
-        assertEquals(ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT, funksjonellBetydning)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        assertEquals(
+            ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT,
+            funksjonellBetydning,
+        )
     }
 
     @Test
@@ -49,7 +56,8 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         val førsteFraværsdag = 1.januar
         val arbeidsgiverperiode = listOf(1.januar til 8.januar)
         val begrunnelse = "ArbeidOpphørt"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
         assertEquals(ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP, funksjonellBetydning)
     }
 
@@ -58,7 +66,8 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         val førsteFraværsdag = 1.januar
         val arbeidsgiverperiode = listOf(1.januar til 8.januar)
         val begrunnelse = "Permittering"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
         assertEquals(ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP, funksjonellBetydning)
     }
 
@@ -67,7 +76,8 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         val førsteFraværsdag = 1.mars
         val arbeidsgiverperiode = listOf(1.januar til 16.januar)
         val begrunnelse = "FerieEllerAvspasering"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
         assertEquals(ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP, funksjonellBetydning)
     }
 
@@ -76,22 +86,24 @@ class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {
         val førsteFraværsdag = 1.mars
         val arbeidsgiverperiode = listOf(1.januar til 16.januar)
         val begrunnelse = "IkkeFullStillingsandel"
-        val funksjonellBetydning = funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
+        val funksjonellBetydning =
+            funksjonellBetydning(førsteFraværsdag, arbeidsgiverperiode, begrunnelse)
         assertEquals(ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP, funksjonellBetydning)
     }
 
     private fun funksjonellBetydning(
         førsteFraværsdag: LocalDate,
         arbeidsgiverperioder: List<Periode>,
-        begrunnelse: String
+        begrunnelse: String,
     ): FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt {
         val antallDagerIOpplystArbeidsgiverperiode = arbeidsgiverperioder.periode()?.count() ?: 0
         val periodeMellom = arbeidsgiverperioder.periode()?.periodeMellom(førsteFraværsdag)
-        val førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP = periodeMellom != null && periodeMellom.count() > 16
+        val førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP =
+            periodeMellom != null && periodeMellom.count() > 16
         return funksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt(
             antallDagerIOpplystArbeidsgiverperiode,
             førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP,
-            begrunnelse
+            begrunnelse,
         )
     }
 }

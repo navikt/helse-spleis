@@ -5,18 +5,27 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
-class Aktivitetslogg(
-    private var forelder: Aktivitetslogg? = null
-) : IAktivitetslogg {
+class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitetslogg {
     private val _aktiviteter = mutableListOf<Aktivitet>()
-    val aktiviteter: List<Aktivitet> get() = _aktiviteter.toList()
-    private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
+    val aktiviteter: List<Aktivitet>
+        get() = _aktiviteter.toList()
 
-    val behov get() = aktiviteter.filterIsInstance<Aktivitet.Behov>()
-    val info get() = aktiviteter.filterIsInstance<Aktivitet.Info>()
-    val varsel get() = aktiviteter.filterIsInstance<Aktivitet.Varsel>()
-    val funksjonellFeil get() = aktiviteter.filterIsInstance<Aktivitet.FunksjonellFeil>()
-    val logiskFeil get() = aktiviteter.filterIsInstance<Aktivitet.LogiskFeil>()
+    private val kontekster = mutableListOf<Aktivitetskontekst>() // Doesn't need serialization
+
+    val behov
+        get() = aktiviteter.filterIsInstance<Aktivitet.Behov>()
+
+    val info
+        get() = aktiviteter.filterIsInstance<Aktivitet.Info>()
+
+    val varsel
+        get() = aktiviteter.filterIsInstance<Aktivitet.Varsel>()
+
+    val funksjonellFeil
+        get() = aktiviteter.filterIsInstance<Aktivitet.FunksjonellFeil>()
+
+    val logiskFeil
+        get() = aktiviteter.filterIsInstance<Aktivitet.LogiskFeil>()
 
     override fun info(melding: String, vararg params: Any?) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
@@ -46,11 +55,13 @@ class Aktivitetslogg(
         forelder?.add(aktivitet)
     }
 
-    private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
+    private fun MutableList<Aktivitetskontekst>.toSpesifikk() =
+        this.map { it.toSpesifikkKontekst() }
 
     override fun harVarslerEllerVerre() = varsel.isNotEmpty() || harFunksjonelleFeilEllerVerre()
 
-    override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil.isNotEmpty() || logiskFeil.isNotEmpty()
+    override fun harFunksjonelleFeilEllerVerre() =
+        funksjonellFeil.isNotEmpty() || logiskFeil.isNotEmpty()
 
     override fun barn() = Aktivitetslogg(this).also { it.kontekster.addAll(this.kontekster) }
 
@@ -76,11 +87,11 @@ class Aktivitetslogg(
     class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
         RuntimeException(aktivitetslogg.toString()) {
 
-        fun kontekst() = aktivitetslogg.kontekster.fold(mutableMapOf<String, String>()) { result, kontekst ->
-            result.apply { putAll(kontekst.toSpesifikkKontekst().kontekstMap) }
-        }
+        fun kontekst() =
+            aktivitetslogg.kontekster.fold(mutableMapOf<String, String>()) { result, kontekst ->
+                result.apply { putAll(kontekst.toSpesifikkKontekst().kontekstMap) }
+            }
 
         fun aktivitetslogg() = aktivitetslogg
     }
-
 }

@@ -16,7 +16,10 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
 import org.slf4j.LoggerFactory
 
-internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
+internal abstract class HendelseRiver(
+    rapidsConnection: RapidsConnection,
+    private val messageMediator: IMessageMediator,
+) : River.PacketValidation {
     protected val river = River(rapidsConnection)
     protected abstract val eventName: String
     protected abstract val riverName: String
@@ -40,13 +43,19 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
         override fun name() = this@HendelseRiver::class.simpleName ?: "ukjent"
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
-            withMDC(mapOf(
-                "river_name" to riverName,
-                "melding_type" to eventName,
-                "melding_id" to packet["@id"].asText()
-            )) {
-
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+            metadata: MessageMetadata,
+            meterRegistry: MeterRegistry,
+        ) {
+            withMDC(
+                mapOf(
+                    "river_name" to riverName,
+                    "melding_type" to eventName,
+                    "melding_id" to packet["@id"].asText(),
+                )
+            ) {
                 val timer = Timer.start(meterRegistry)
 
                 try {
@@ -66,7 +75,11 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             }
         }
 
-        override fun onError(problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+        override fun onError(
+            problems: MessageProblems,
+            context: MessageContext,
+            metadata: MessageMetadata,
+        ) {
             messageMediator.onRiverError(riverName, problems, context, metadata)
         }
     }

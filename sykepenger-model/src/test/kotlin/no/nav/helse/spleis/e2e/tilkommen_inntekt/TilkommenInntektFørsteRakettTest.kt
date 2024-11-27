@@ -24,18 +24,19 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(
-                Sykdom(1.februar, 28.februar,100.prosent),
+                Sykdom(1.februar, 28.februar, 100.prosent),
                 Permisjon(20.februar, 28.februar),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
-                )
+                tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, a2, 10000)),
             )
             assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
             assertIngenVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let {
+                sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1))
+                assertTrue(
+                    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1)
+                )
             }
         }
     }
@@ -47,16 +48,17 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 Ferie(20.februar, 28.februar),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
-                )
+                tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, a2, 10000)),
             )
             assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
             assertIngenVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let {
+                sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1))
+                assertTrue(
+                    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1)
+                )
             }
         }
     }
@@ -68,17 +70,18 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
                 Ferie(20.januar, 31.januar),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
-                )
+                tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, a2, 10000)),
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(Varselkode.RV_IV_9, 1.vedtaksperiode.filter())
             assertIngenVarsel(Varselkode.RV_SV_5, 1.vedtaksperiode.filter())
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let {
+                sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1))
+                assertTrue(
+                    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single().gjelder(a1)
+                )
             }
         }
     }
@@ -88,15 +91,12 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(
-                Sykdom(1.februar, 28.februar,100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
-                )
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, a2, 10000)),
             )
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(februar, 100)))
             assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
         }
     }
-
 }

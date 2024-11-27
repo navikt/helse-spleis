@@ -15,19 +15,17 @@ internal class ProsentdelTest {
 
     @Test
     fun `total sykdomsgrad - flyttall`() {
-        val inntekter = listOf(
-            100.prosent to 502400.04,
-            100.prosent to 70065.12
-        )
+        val inntekter = listOf(100.prosent to 502400.04, 100.prosent to 70065.12)
         val result = inntekter.average(tilkommet = 0.0, total = inntekter.sumOf { it.second })
         assertEquals(100.prosent, result)
     }
 
-    @Test fun equality() {
-        assertEquals(ratio(1.0, 4.0), 25.0.prosent )
-        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent )
-        assertNotEquals(ratio(1.0, 4.0), Any() )
-        assertNotEquals(ratio(1.0, 4.0), null )
+    @Test
+    fun equality() {
+        assertEquals(ratio(1.0, 4.0), 25.0.prosent)
+        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent)
+        assertNotEquals(ratio(1.0, 4.0), Any())
+        assertNotEquals(ratio(1.0, 4.0), null)
     }
 
     @Test
@@ -61,7 +59,7 @@ internal class ProsentdelTest {
     fun avrundingsfeil() {
         // Fredet variabelnavn
         val karakterMedAvrunding = (1 / 7.0).prosent
-        val dobbelomvendt = !!karakterMedAvrunding
+        val dobbelomvendt = ! !karakterMedAvrunding
         assertEquals(karakterMedAvrunding, dobbelomvendt)
         assertEquals(karakterMedAvrunding, karakterMedAvrunding)
         assertEquals(karakterMedAvrunding.hashCode(), (dobbelomvendt).hashCode())
@@ -73,7 +71,8 @@ internal class ProsentdelTest {
         assertThrows<IllegalArgumentException> { (100.001).prosent }
     }
 
-    @Test fun minimumssyke() {
+    @Test
+    fun minimumssyke() {
         assertFalse(25.prosent.erUnderGrensen())
         assertFalse(20.prosent.erUnderGrensen())
         assertTrue(15.prosent.erUnderGrensen())

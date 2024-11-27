@@ -17,26 +17,32 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilA
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding replay
-internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class InntektsmeldingerReplayMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
     override val skalDuplikatsjekkes = false
 
     private val inntektsmeldinger = mutableListOf<Inntektsmelding>()
 
-    private val inntektsmeldingerReplay = InntektsmeldingerReplay(
-        meldingsreferanseId = meldingsporing.id,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        inntektsmeldinger = inntektsmeldinger
-    )
+    private val inntektsmeldingerReplay =
+        InntektsmeldingerReplay(
+            meldingsreferanseId = meldingsporing.id,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntektsmeldinger = inntektsmeldinger,
+        )
 
     init {
         packet["inntektsmeldinger"].forEach { inntektsmelding ->
-            inntektsmeldinger.add(inntektsmeldingReplay(
-                inntektsmelding.path("internDokumentId").asText().toUUID(),
-                inntektsmelding.path("inntektsmelding")
-            ))
+            inntektsmeldinger.add(
+                inntektsmeldingReplay(
+                    inntektsmelding.path("internDokumentId").asText().toUUID(),
+                    inntektsmelding.path("inntektsmelding"),
+                )
+            )
         }
     }
 
@@ -45,25 +51,44 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
     }
 
     private fun inntektsmeldingReplay(internDokumentId: UUID, packet: JsonNode): Inntektsmelding {
-        val refusjon = Inntektsmelding.Refusjon(
-            beløp = packet.path("refusjon").path("beloepPrMnd").takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
-            opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
-            endringerIRefusjon = packet["endringIRefusjoner"].map {
-                Inntektsmelding.Refusjon.EndringIRefusjon(
-                    it.path("beloep").asDouble().månedlig,
-                    it.path("endringsdato").asLocalDate()
-                )
-            }
-        )
+        val refusjon =
+            Inntektsmelding.Refusjon(
+                beløp =
+                    packet
+                        .path("refusjon")
+                        .path("beloepPrMnd")
+                        .takeUnless(JsonNode::isMissingOrNull)
+                        ?.asDouble()
+                        ?.månedlig,
+                opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
+                endringerIRefusjon =
+                    packet["endringIRefusjoner"].map {
+                        Inntektsmelding.Refusjon.EndringIRefusjon(
+                            it.path("beloep").asDouble().månedlig,
+                            it.path("endringsdato").asLocalDate(),
+                        )
+                    },
+            )
         val orgnummer = packet.path("virksomhetsnummer").asText()
         val mottatt = packet.path("mottattDato").asLocalDateTime()
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
         val beregnetInntekt = packet.path("beregnetInntekt").asDouble()
         val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").map(::asPeriode)
-        val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
+        val begrunnelseForReduksjonEllerIkkeUtbetalt =
+            packet
+                .path("begrunnelseForReduksjonEllerIkkeUtbetalt")
+                .takeIf(JsonNode::isTextual)
+                ?.asText()
         val harOpphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").size() > 0
         val harFlereInntektsmeldinger = packet.path("harFlereInntektsmeldinger").asBoolean(false)
-        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem(null, null, førsteFraværsdag) // Vi skal ikke replaye portalIM så om det feiler her er noe gæli
+        val avsendersystem =
+            packet
+                .path("avsenderSystem")
+                .tilAvsendersystem(
+                    null,
+                    null,
+                    førsteFraværsdag,
+                ) // Vi skal ikke replaye portalIM så om det feiler her er noe gæli
 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,
@@ -75,7 +100,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
-            mottatt = mottatt
+            mottatt = mottatt,
         )
     }
 }

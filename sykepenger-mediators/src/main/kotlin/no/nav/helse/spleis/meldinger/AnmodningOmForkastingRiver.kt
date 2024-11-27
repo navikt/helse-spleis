@@ -10,7 +10,7 @@ import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 
 internal open class AnmodningOmForkastingRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventName = "anmodning_om_forkasting"
     override val riverName = "anmodningOmForkasting"
@@ -21,8 +21,12 @@ internal open class AnmodningOmForkastingRiver(
         message.interestedIn("force")
     }
 
-    override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        AnmodningOmForkastingMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

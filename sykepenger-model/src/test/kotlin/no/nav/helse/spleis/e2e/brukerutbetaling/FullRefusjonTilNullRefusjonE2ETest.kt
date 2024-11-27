@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
+internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `starter med ingen refusjon`() {
@@ -52,11 +52,17 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
         assertFalse(inspektør.utbetaling(0).arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(0).personOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).personOppdrag))
+        assertEquals(
+            17.januar til 31.januar,
+            Oppdrag.periode(inspektør.utbetaling(0).personOppdrag),
+        )
 
         assertFalse(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
+        assertEquals(
+            17.januar til 28.februar,
+            Oppdrag.periode(inspektør.utbetaling(1).personOppdrag),
+        )
     }
 
     @Test
@@ -64,9 +70,9 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,
-            refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 31.januar),
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -82,7 +88,10 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(AKSEPTERT)
 
         assertFalse(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag))
+        assertEquals(
+            17.januar til 31.januar,
+            Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag),
+        )
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
         assertEquals(februar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
     }
@@ -92,9 +101,9 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,
-            refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 3.februar),
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 3.februar),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -120,9 +129,9 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(AKSEPTERT)
 
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,
-            refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 31.januar),
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar),
         )
 
         håndterSykmelding(februar)
@@ -137,7 +146,10 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(AKSEPTERT)
 
         assertFalse(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag))
+        assertEquals(
+            17.januar til 31.januar,
+            Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag),
+        )
         assertTrue(inspektør.utbetaling(2).personOppdrag.harUtbetalinger())
         assertEquals(februar, Oppdrag.periode(inspektør.utbetaling(2).personOppdrag))
     }
@@ -181,10 +193,16 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertTrue(januarrevurdering.arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(januarrevurdering.personOppdrag.harUtbetalinger())
         assertTrue(januarrevurdering.personOppdrag[0].erOpphør())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(januarrevurdering.arbeidsgiverOppdrag))
+        assertEquals(
+            17.januar til 31.januar,
+            Oppdrag.periode(januarrevurdering.arbeidsgiverOppdrag),
+        )
 
         inspektør.utbetaling(2).also { utbetalingInspektør ->
-            assertEquals(17.januar til 28.februar, Oppdrag.periode(utbetalingInspektør.arbeidsgiverOppdrag))
+            assertEquals(
+                17.januar til 28.februar,
+                Oppdrag.periode(utbetalingInspektør.arbeidsgiverOppdrag),
+            )
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             utbetalingInspektør.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(Endringskode.ENDR, oppdrag.inspektør.endringskode)

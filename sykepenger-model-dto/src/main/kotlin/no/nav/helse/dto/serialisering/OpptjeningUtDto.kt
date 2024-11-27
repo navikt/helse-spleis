@@ -7,5 +7,5 @@ data class OpptjeningUtDto(
     val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagDto>,
     val opptjeningsperiode: PeriodeDto,
     val opptjeningsdager: Int,
-    val erOppfylt: Boolean
+    val erOppfylt: Boolean,
 )

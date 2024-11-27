@@ -26,9 +26,7 @@ internal class ToggleTest {
     fun `Enable for block`() {
         prepareToggle(enabled = false)
         assertFalse(toggle.enabled)
-        toggle.enable {
-            assertTrue(toggle.enabled)
-        }
+        toggle.enable { assertTrue(toggle.enabled) }
         assertFalse(toggle.enabled)
     }
 
@@ -36,9 +34,7 @@ internal class ToggleTest {
     fun `Disable for block`() {
         prepareToggle(enabled = true)
         assertTrue(toggle.enabled)
-        toggle.disable {
-            assertFalse(toggle.enabled)
-        }
+        toggle.disable { assertFalse(toggle.enabled) }
         assertTrue(toggle.enabled)
     }
 
@@ -46,9 +42,7 @@ internal class ToggleTest {
     fun `Enable until previous state requested`() {
         prepareToggle(enabled = false)
         assertFalse(toggle.enabled)
-        toggle.enable {
-            assertTrue(toggle.enabled)
-        }
+        toggle.enable { assertTrue(toggle.enabled) }
         assertFalse(toggle.enabled)
     }
 
@@ -56,9 +50,7 @@ internal class ToggleTest {
     fun `keep enabled`() {
         prepareToggle(enabled = true)
         assertTrue(toggle.enabled)
-        toggle.enable {
-            assertTrue(toggle.enabled)
-        }
+        toggle.enable { assertTrue(toggle.enabled) }
         assertTrue(toggle.enabled)
     }
 
@@ -66,9 +58,7 @@ internal class ToggleTest {
     fun `Disable until previous state requested`() {
         prepareToggle(enabled = true)
         assertTrue(toggle.enabled)
-        toggle.disable {
-            assertFalse(toggle.enabled)
-        }
+        toggle.disable { assertFalse(toggle.enabled) }
         assertTrue(toggle.enabled)
     }
 
@@ -80,9 +70,7 @@ internal class ToggleTest {
             assertTrue(toggle.enabled)
             toggle.disable {
                 assertFalse(toggle.enabled)
-                toggle.enable {
-                    assertTrue(toggle.enabled)
-                }
+                toggle.enable { assertTrue(toggle.enabled) }
                 assertFalse(toggle.enabled)
             }
             assertTrue(toggle.enabled)

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 
-internal class V288FjerneOverflødigeUberegnedeRevurderinger: JsonMigration(version = 288) {
+internal class V288FjerneOverflødigeUberegnedeRevurderinger : JsonMigration(version = 288) {
     override val description = "smelter sammen flere uberegnede (revurderinger) til én"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -19,17 +19,26 @@ internal class V288FjerneOverflødigeUberegnedeRevurderinger: JsonMigration(vers
         }
     }
 
-    private fun migrerUberegnedeRevurderinger(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
+    private fun migrerUberegnedeRevurderinger(
+        aktørId: String,
+        orgnr: String,
+        vedtaksperiode: JsonNode,
+    ) {
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
         val generasjoner = generasjonerNode.toList()
         if (generasjoner.size < 2) return
-        val uberegnede = generasjoner.dropLast(1).takeLastWhile {
-            it.path("tilstand").asText() == "UBEREGNET_REVURDERING"
-        }
+        val uberegnede =
+            generasjoner.dropLast(1).takeLastWhile {
+                it.path("tilstand").asText() == "UBEREGNET_REVURDERING"
+            }
         smeltSammen(aktørId, generasjonerNode, generasjoner, uberegnede)
     }
 
-    private fun migrerUberegnedeOmgjøringer(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
+    private fun migrerUberegnedeOmgjøringer(
+        aktørId: String,
+        orgnr: String,
+        vedtaksperiode: JsonNode,
+    ) {
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
         val generasjoner = generasjonerNode.toList()
         if (generasjoner.size < 2) return
@@ -40,33 +49,37 @@ internal class V288FjerneOverflødigeUberegnedeRevurderinger: JsonMigration(vers
                 put("avsluttet", sisteEndring)
             }
         }
-        val uberegnede = generasjoner.drop(1).dropLast(1).takeLastWhile {
-            it.path("tilstand").asText() == "UBEREGNET"
-        }
+        val uberegnede =
+            generasjoner.drop(1).dropLast(1).takeLastWhile {
+                it.path("tilstand").asText() == "UBEREGNET"
+            }
         smeltSammen(aktørId, generasjonerNode, generasjoner, uberegnede)
     }
 
-    private fun smeltSammen(aktørId: String, generasjonerNode: ArrayNode, generasjoner: List<JsonNode>, uberegnede: List<JsonNode>) {
+    private fun smeltSammen(
+        aktørId: String,
+        generasjonerNode: ArrayNode,
+        generasjoner: List<JsonNode>,
+        uberegnede: List<JsonNode>,
+    ) {
         if (uberegnede.isEmpty()) return
         val sisteGenerasjon = generasjoner.last()
         check(sisteGenerasjon.path("tilstand").asText() == "TIL_INFOTRYGD") {
             "Den siste generasjonen er ikke i TIL_INFOTRYGD for aktørId=$aktørId generasjonId=${sisteGenerasjon.path("id").asText()}"
         }
-        val avsluttettidspunkt = checkNotNull(sisteGenerasjon.path("avsluttet").asText().takeUnless(String::isBlank)) {
-            "Ingen avsluttetidspunkt på generasjon ${sisteGenerasjon.path("id").asText()} for aktørId=$aktørId"
-        }
+        val avsluttettidspunkt =
+            checkNotNull(sisteGenerasjon.path("avsluttet").asText().takeUnless(String::isBlank)) {
+                "Ingen avsluttetidspunkt på generasjon ${sisteGenerasjon.path("id").asText()} for aktørId=$aktørId"
+            }
         (uberegnede.first() as ObjectNode).apply {
             put("tilstand", "TIL_INFOTRYGD")
             put("avsluttet", avsluttettidspunkt)
         }
         sikkerLogg.info("fjerner ${uberegnede.size} generasjoner")
-        repeat(uberegnede.size) {
-            generasjonerNode.remove(generasjonerNode.size() - 1)
-        }
+        repeat(uberegnede.size) { generasjonerNode.remove(generasjonerNode.size() - 1) }
     }
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     }
 }

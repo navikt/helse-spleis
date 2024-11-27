@@ -7,5 +7,5 @@ import no.nav.helse.hendelser.Avsender
 data class Kilde(
     val meldingsreferanseId: UUID,
     val avsender: Avsender,
-    val tidsstempel: LocalDateTime
+    val tidsstempel: LocalDateTime,
 )

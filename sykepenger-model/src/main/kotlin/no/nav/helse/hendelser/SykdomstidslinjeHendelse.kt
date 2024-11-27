@@ -30,8 +30,9 @@ sealed class SykdomstidslinjeHendelse : Hendelse, SykdomshistorikkHendelse {
         return sykdomstidslinje().periode() ?: LocalDate.MIN.somPeriode()
     }
 
-    override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
-        && this.metadata.meldingsreferanseId == other.metadata.meldingsreferanseId
+    override fun equals(other: Any?): Boolean =
+        other is SykdomstidslinjeHendelse &&
+            this.metadata.meldingsreferanseId == other.metadata.meldingsreferanseId
 
     internal fun leggTil(vedtaksperiodeId: UUID, behandlinger: Behandlinger): Boolean {
         håndtertAv.add(vedtaksperiodeId)

@@ -15,9 +15,7 @@ internal abstract class RiverTest {
     }
 
     private val messageMediator = TestMessageMediator()
-    private val rapid = TestRapid().apply {
-        river(this, messageMediator)
-    }
+    private val rapid = TestRapid().apply { river(this, messageMediator) }
 
     protected abstract fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator)
 
@@ -29,12 +27,14 @@ internal abstract class RiverTest {
     }
 
     protected fun assertErrors(message: Pair<*, String>) = assertErrors(message.second)
+
     protected fun assertErrors(message: String) {
         rapid.sendTestMessage(message)
         assertTrue(messageMediator.riverError)
     }
 
     protected fun assertIgnored(message: Pair<*, String>) = assertIgnored(message.second)
+
     protected fun assertIgnored(message: String) {
         rapid.sendTestMessage(message)
         assertFalse(messageMediator.recognizedMessage)

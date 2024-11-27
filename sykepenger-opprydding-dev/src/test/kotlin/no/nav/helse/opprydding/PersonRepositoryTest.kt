@@ -15,7 +15,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest: DBTest() {
+internal class PersonRepositoryTest : DBTest() {
 
     private lateinit var personRepository: PersonRepository
 
@@ -61,13 +61,21 @@ internal class PersonRepositoryTest: DBTest() {
 
     private fun finnPerson(fødselsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
+            session.run(
+                queryOf("SELECT COUNT(1) FROM person WHERE fnr = ?", fødselsnummer.toLong())
+                    .map { it.int(1) }
+                    .asSingle
+            )
         } ?: 0
     }
 
     private fun finnMelding(fødselsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM melding WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
+            session.run(
+                queryOf("SELECT COUNT(1) FROM melding WHERE fnr = ?", fødselsnummer.toLong())
+                    .map { it.int(1) }
+                    .asSingle
+            )
         } ?: 0
     }
 
@@ -77,25 +85,19 @@ internal class PersonRepositoryTest: DBTest() {
                 "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(?, ?, ?, ?::json, ?)"
             it.run(
                 queryOf(
-                    opprettMelding,
-                    fødselsnummer.toLong(),
-                    UUID.randomUUID(),
-                    "melding",
-                    "{}",
-                    LocalDateTime.now()
-                ).asExecute
+                        opprettMelding,
+                        fødselsnummer.toLong(),
+                        UUID.randomUUID(),
+                        "melding",
+                        "{}",
+                        LocalDateTime.now(),
+                    )
+                    .asExecute
             )
 
             val opprettPerson =
                 "INSERT INTO person(skjema_versjon, fnr, data) VALUES(?, ?, ?::json)"
-            it.run(
-                queryOf(
-                    opprettPerson,
-                    0,
-                    fødselsnummer.toLong(),
-                    "{}"
-                ).asExecute
-            )
+            it.run(queryOf(opprettPerson, 0, fødselsnummer.toLong(), "{}").asExecute)
         }
     }
 }

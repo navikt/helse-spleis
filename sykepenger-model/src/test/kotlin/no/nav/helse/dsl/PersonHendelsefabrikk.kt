@@ -29,42 +29,60 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class PersonHendelsefabrikk() {
     internal fun lagDødsmelding(dødsdato: LocalDate) =
-        Dødsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            dødsdato = dødsdato
-        )
-    internal fun lagOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
+        Dødsmelding(meldingsreferanseId = UUID.randomUUID(), dødsdato = dødsdato)
+
+    internal fun lagOverstyrArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt,
+    ) =
         OverstyrArbeidsforhold(
             meldingsreferanseId = UUID.randomUUID(),
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList(),
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
         )
-    internal fun lagPåminnelse() =
-        PersonPåminnelse(
-            meldingsreferanseId = UUID.randomUUID()
-        )
+
+    internal fun lagPåminnelse() = PersonPåminnelse(meldingsreferanseId = UUID.randomUUID())
 
     internal fun lagSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
         arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
         meldingsreferanseId: UUID,
-        tidsstempel: LocalDateTime
+        tidsstempel: LocalDateTime,
     ) =
         SkjønnsmessigFastsettelse(
             meldingsreferanseId = meldingsreferanseId,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(meldingsreferanseId, skjæringstidspunkt),
-            opprettet = tidsstempel
+            arbeidsgiveropplysninger =
+                arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(
+                    meldingsreferanseId,
+                    skjæringstidspunkt,
+                ),
+            opprettet = tidsstempel,
         )
 
-    internal fun lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime) =
+    internal fun lagOverstyrArbeidsgiveropplysninger(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+        meldingsreferanseId: UUID,
+        tidsstempel: LocalDateTime,
+    ) =
         OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsreferanseId,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt, tidsstempel),
-            refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(skjæringstidspunkt, meldingsreferanseId, tidsstempel),
-            opprettet = tidsstempel
+            arbeidsgiveropplysninger =
+                arbeidsgiveropplysninger.medSaksbehandlerinntekt(
+                    meldingsreferanseId,
+                    skjæringstidspunkt,
+                    tidsstempel,
+                ),
+            refusjonstidslinjer =
+                arbeidsgiveropplysninger.refusjonstidslinjer(
+                    skjæringstidspunkt,
+                    meldingsreferanseId,
+                    tidsstempel,
+                ),
+            opprettet = tidsstempel,
         )
 
     internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =
@@ -72,9 +90,10 @@ internal class PersonHendelsefabrikk() {
             meldingsreferanseId = UUID.randomUUID(),
             utbetalinger = emptyList(),
             feriepengehistorikk = emptyList(),
-            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
+            arbeidskategorikoder =
+                UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
             opptjeningsår = opptjeningsår,
-            skalBeregnesManuelt = false
+            skalBeregnesManuelt = false,
         )
 }
 
@@ -84,51 +103,123 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val forklaring: String? = null,
     private val subsumsjon: Subsumsjon? = null,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
-    private val gjelder: Periode? = null
+    private val gjelder: Periode? = null,
 ) {
-    private fun refusjonsopplysninger(førsteDag: LocalDate) =  refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
+    private fun refusjonsopplysninger(førsteDag: LocalDate) =
+        refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
+
     internal companion object {
-        private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, tidsstempel: LocalDateTime, inntektsopplysning: (overstyrtArbeidsgiveropplysning: OverstyrtArbeidsgiveropplysning) -> Inntektsopplysning) =
-            map {
-                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = it.orgnummer,
-                    gjelder = gjelder,
-                    inntektsopplysning = inntektsopplysning(it),
-                    refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(gjelder.start).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, tidsstempel), tidsstempel) } }.build()
-                )
-            }
+        private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(
+            meldingsreferanseId: UUID,
+            skjæringstidspunkt: LocalDate,
+            tidsstempel: LocalDateTime,
+            inntektsopplysning:
+                (
+                    overstyrtArbeidsgiveropplysning: OverstyrtArbeidsgiveropplysning
+                ) -> Inntektsopplysning,
+        ) = map {
+            val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
+            ArbeidsgiverInntektsopplysning(
+                orgnummer = it.orgnummer,
+                gjelder = gjelder,
+                inntektsopplysning = inntektsopplysning(it),
+                refusjonsopplysninger =
+                    RefusjonsopplysningerBuilder()
+                        .apply {
+                            it.refusjonsopplysninger(gjelder.start).forEach {
+                                (fom, tom, refusjonsbeløp) ->
+                                leggTil(
+                                    Refusjonsopplysning(
+                                        meldingsreferanseId,
+                                        fom,
+                                        tom,
+                                        refusjonsbeløp,
+                                        SAKSBEHANDLER,
+                                        tidsstempel,
+                                    ),
+                                    tidsstempel,
+                                )
+                            }
+                        }
+                        .build(),
+            )
+        }
+
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSaksbehandlerinntekt(
             meldingsreferanseId: UUID,
             skjæringstidspunkt: LocalDate,
-            tidsstempel: LocalDateTime
-        ) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt, tidsstempel) {
-            checkNotNull(it.forklaring) { "Forklaring må settes på Saksbehandlerinntekt"}
-            Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now())
-        }
-        internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
+            tidsstempel: LocalDateTime,
+        ) =
+            tilArbeidsgiverInntektsopplysning(
+                meldingsreferanseId,
+                skjæringstidspunkt,
+                tidsstempel,
+            ) {
+                checkNotNull(it.forklaring) { "Forklaring må settes på Saksbehandlerinntekt" }
+                Saksbehandler(
+                    skjæringstidspunkt,
+                    meldingsreferanseId,
+                    it.inntekt,
+                    it.forklaring,
+                    it.subsumsjon,
+                    LocalDateTime.now(),
+                )
+            }
+
+        internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(
+            meldingsreferanseId: UUID,
+            skjæringstidspunkt: LocalDate,
+        ): List<ArbeidsgiverInntektsopplysning> {
             forEach {
-                check(it.refusjonsopplysninger == null) { "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt" }
-                check(it.forklaring == null) { "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt" }
-                check(it.subsumsjon == null) { "Skal ikke sette subsumsjon på Skjønssmessig fastsatt inntekt" }
+                check(it.refusjonsopplysninger == null) {
+                    "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt"
+                }
+                check(it.forklaring == null) {
+                    "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt"
+                }
+                check(it.subsumsjon == null) {
+                    "Skal ikke sette subsumsjon på Skjønssmessig fastsatt inntekt"
+                }
             }
             return map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = it.orgnummer,
                     gjelder = gjelder,
-                    inntektsopplysning = SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()),
-                    refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger()
+                    inntektsopplysning =
+                        SkjønnsmessigFastsatt(
+                            skjæringstidspunkt,
+                            meldingsreferanseId,
+                            it.inntekt,
+                            LocalDateTime.now(),
+                        ),
+                    refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger(),
                 )
             }
         }
 
-        internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
-            val defaultRefusjonFom = opplysning.gjelder?.start ?: skjæringstidspunkt
-            val strekkbar = opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_,tom) -> tom == null }
-            opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
-                acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet))
-            } to strekkbar
-        }
+        internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(
+            skjæringstidspunkt: LocalDate,
+            meldingsreferanseId: UUID,
+            opprettet: LocalDateTime,
+        ) =
+            this.associateBy { it.orgnummer }
+                .mapValues { (_, opplysning) ->
+                    val defaultRefusjonFom = opplysning.gjelder?.start ?: skjæringstidspunkt
+                    val strekkbar =
+                        opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_, tom) ->
+                            tom == null
+                        }
+                    opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) {
+                        acc,
+                        (fom, tom, beløp) ->
+                        acc +
+                            Beløpstidslinje.fra(
+                                fom til (tom ?: fom),
+                                beløp,
+                                Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet),
+                            )
+                    } to strekkbar
+                }
     }
 }

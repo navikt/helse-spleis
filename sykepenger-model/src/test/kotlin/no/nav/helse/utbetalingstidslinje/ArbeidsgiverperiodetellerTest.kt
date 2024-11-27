@@ -167,4 +167,3 @@ internal class ArbeidsgiverperiodetellerTest {
         }
     }
 }
-

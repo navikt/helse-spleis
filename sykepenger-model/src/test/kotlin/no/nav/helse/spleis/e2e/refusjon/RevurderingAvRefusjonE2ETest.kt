@@ -23,17 +23,24 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
                     versjon = 12.juni(2020),
                     ledd = Ledd.LEDD_1,
                     punktum = null,
-                    bokstav = null
+                    bokstav = null,
                 )
             }
 
             nyttVedtak(januar)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "ingen endring", null, listOf(
-                    Triple(25.januar, null, INGEN)
-                ))
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        "ingen endring",
+                        null,
+                        listOf(Triple(25.januar, null, INGEN)),
+                    )
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
         }

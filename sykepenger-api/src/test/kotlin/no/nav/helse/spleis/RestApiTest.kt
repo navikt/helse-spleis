@@ -47,7 +47,7 @@ internal class RestApiTest {
     }
 
     @Test
-    fun `hent personJson med fnr`() = blackboxTestApplication{
+    fun `hent personJson med fnr`() = blackboxTestApplication {
         "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
     }
 
@@ -63,15 +63,16 @@ internal class RestApiTest {
 
     @Test
     fun `request med manglende eller feil access token`() = blackboxTestApplication {
-            val query = """
+        val query =
+            """
             {
                 person(fnr: \"${UNG_PERSON_FNR}\") { } 
             }
         """
 
-            val body = """{"query": "$query"}"""
+        val body = """{"query": "$query"}"""
 
-            val annenIssuer = Issuer("annen")
+        val annenIssuer = Issuer("annen")
 
         post(body, HttpStatusCode.Unauthorized, accessToken = null)
         post(body, HttpStatusCode.Unauthorized, accessToken = issuer.createToken("feil_audience"))
@@ -79,7 +80,9 @@ internal class RestApiTest {
         post(body, HttpStatusCode.OK, accessToken = issuer.createToken(Issuer.AUDIENCE))
     }
 
-    private fun blackboxTestApplication(testblokk: suspend Applikasjonsservere.BlackboxTestContext.() -> Unit) {
+    private fun blackboxTestApplication(
+        testblokk: suspend Applikasjonsservere.BlackboxTestContext.() -> Unit
+    ) {
         appservere.kjørTest(::opprettTestdata, testblokk)
     }
 
@@ -88,27 +91,35 @@ internal class RestApiTest {
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
         val vedtaksperiodeId = UUID.randomUUID()
-        val sykmelding = Sykmelding(
-            meldingsreferanseId = vedtaksperiodeId,
-            orgnummer = ORGNUMMER,
-            sykeperioder = sykeperioder
-        )
-        val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = vedtaksperiodeId,
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = 12000.månedlig,
-                opphørsdato = null
-            ),
-            orgnummer = ORGNUMMER,
-            beregnetInntekt = 12000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harFlereInntektsmeldinger = false,
-            harOpphørAvNaturalytelser = false,
-            avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
-            mottatt = LocalDateTime.now()
-        )
-        val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
+        val sykmelding =
+            Sykmelding(
+                meldingsreferanseId = vedtaksperiodeId,
+                orgnummer = ORGNUMMER,
+                sykeperioder = sykeperioder,
+            )
+        val inntektsmelding =
+            Inntektsmelding(
+                meldingsreferanseId = vedtaksperiodeId,
+                refusjon = Inntektsmelding.Refusjon(beløp = 12000.månedlig, opphørsdato = null),
+                orgnummer = ORGNUMMER,
+                beregnetInntekt = 12000.månedlig,
+                arbeidsgiverperioder =
+                    listOf(
+                        Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))
+                    ),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+                harFlereInntektsmeldinger = false,
+                harOpphørAvNaturalytelser = false,
+                avsendersystem =
+                    Inntektsmelding.Avsendersystem.NavPortal(
+                        vedtaksperiodeId,
+                        LocalDate.EPOCH,
+                        true,
+                    ),
+                mottatt = LocalDateTime.now(),
+            )
+        val person =
+            Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.håndter(sykmelding, Aktivitetslogg())
         person.håndter(inntektsmelding, Aktivitetslogg())
         testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
@@ -118,11 +129,24 @@ internal class RestApiTest {
     private fun DataSource.lagrePerson(fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(this, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
-            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
-                fødselsnummer.toLong(), personId!!).asExecute)
-
+            val personId =
+                it.run(
+                    queryOf(
+                            "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                            fødselsnummer.toLong(),
+                            serialisertPerson.skjemaVersjon,
+                            serialisertPerson.json,
+                        )
+                        .asUpdateAndReturnGeneratedKey
+                )
+            it.run(
+                queryOf(
+                        "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
+                        fødselsnummer.toLong(),
+                        personId!!,
+                    )
+                    .asExecute
+            )
         }
     }
 
@@ -130,17 +154,18 @@ internal class RestApiTest {
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         fødselsnummer: String = UNG_PERSON_FNR,
-        data: String = "{}"
+        data: String = "{}",
     ) {
         sessionOf(this).use {
             it.run(
                 queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(),
-                    meldingsReferanse.toString(),
-                    meldingstype.toString(),
-                    data
-                ).asExecute
+                        "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                        fødselsnummer.toLong(),
+                        meldingsReferanse.toString(),
+                        meldingstype.toString(),
+                        data,
+                    )
+                    .asExecute
             )
         }
     }

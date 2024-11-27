@@ -56,18 +56,30 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 1.januar, ORGNUMMER)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(3.januar til 18.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT)
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD,
+        )
     }
 
     @Test
@@ -81,7 +93,12 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 28.februar))
         håndterUtbetalt()
 
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            3.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
     }
 
     @Test
@@ -92,7 +109,9 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterSimulering()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT)
+        )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
@@ -112,7 +131,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         assertEquals(4, inspektør.antallUtbetalinger)
         inspektør.utbetaling(2).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId)
+            assertEquals(
+                it.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+                inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId,
+            )
             assertEquals(2, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.ENDR, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.januar, it.arbeidsgiverOppdrag[0].inspektør.fom)
@@ -123,7 +145,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         }
         inspektør.utbetaling(3).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
+            assertEquals(
+                it.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+                inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId,
+            )
             assertEquals(1, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.mai, it.arbeidsgiverOppdrag[0].inspektør.fom)
@@ -131,29 +156,38 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         }
     }
 
-
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
         gjenopprettFraJSON("/personer/dobbelutbetaling.json", jurist)
     }
 
-    private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
-    }.also {
-        person.håndter(
-            Utbetalingshistorikk(
-                UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = listOf(
-                        Friperiode(fom = 1.februar, tom = 28.februar)
+    private fun createAuuBlirMedIRevureringPerson() =
+        createTestPerson { jurist ->
+                gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
+            }
+            .also {
+                person.håndter(
+                    Utbetalingshistorikk(
+                        UUID.randomUUID(),
+                        ORGNUMMER,
+                        UUID.randomUUID().toString(),
+                        InfotrygdhistorikkElement.opprett(
+                            oppdatert = LocalDateTime.now(),
+                            hendelseId = UUID.randomUUID(),
+                            perioder = listOf(Friperiode(fom = 1.februar, tom = 28.februar)),
+                            inntekter =
+                                listOf(
+                                    Inntektsopplysning(
+                                        ORGNUMMER,
+                                        1.januar,
+                                        TestPerson.INNTEKT,
+                                        true,
+                                    )
+                                ),
+                            arbeidskategorikoder = emptyMap(),
+                        ),
+                        besvart = LocalDateTime.now(),
                     ),
-                    inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
-                    arbeidskategorikoder = emptyMap()
-                ),
-                besvart = LocalDateTime.now()
-            ),
-            Aktivitetslogg()
-        )
-    }
+                    Aktivitetslogg(),
+                )
+            }
 }

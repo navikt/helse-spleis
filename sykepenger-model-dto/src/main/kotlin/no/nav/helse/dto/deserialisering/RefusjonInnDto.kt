@@ -14,5 +14,5 @@ data class RefusjonInnDto(
     val beløp: InntektbeløpDto.MånedligDouble?,
     val sisteRefusjonsdag: LocalDate?,
     val endringerIRefusjon: List<EndringIRefusjonDto>,
-    val tidsstempel: LocalDateTime
+    val tidsstempel: LocalDateTime,
 )

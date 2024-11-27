@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import no.nav.helse.januar
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.januar
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
@@ -17,44 +17,38 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
         OverstyrArbeidsforholdRiver(rapidsConnection, mediator)
     }
 
-    private val testMessageFactory = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
+    private val testMessageFactory =
+        TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
 
     @Test
     fun `kan mappe melding om overstyring av arbeidsforhold til modell uten feil`() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(
-                1.januar, listOf(
-                    ArbeidsforholdOverstyrt(
-                        ORGNUMMER,
-                        false,
-                        "Dette arbeidsforholdet gjelder"
-                    ),
+                1.januar,
+                listOf(
+                    ArbeidsforholdOverstyrt(ORGNUMMER, false, "Dette arbeidsforholdet gjelder"),
                     ArbeidsforholdOverstyrt(
                         "987654322",
                         true,
-                        "Dette arbeidsforholdet gjelder ikke"
+                        "Dette arbeidsforholdet gjelder ikke",
                     ),
-                )
+                ),
             )
         )
     }
 
     @Test
     fun `skal feile ved tom liste av overstyrte arbeidsforhold`() {
-        assertErrors(
-            testMessageFactory.lagOverstyrArbeidsforhold(1.januar, emptyList())
-        )
+        assertErrors(testMessageFactory.lagOverstyrArbeidsforhold(1.januar, emptyList()))
     }
 
     @Test
     fun `feiler ved manglende forklaring`() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(
-                1.januar, listOf(
-                    ArbeidsforholdOverstyrt(ORGNUMMER, false, null),
-                )
+                1.januar,
+                listOf(ArbeidsforholdOverstyrt(ORGNUMMER, false, null)),
             )
         )
-
     }
 }

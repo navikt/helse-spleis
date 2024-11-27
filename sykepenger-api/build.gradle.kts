@@ -1,8 +1,6 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
-plugins {
-    id("com.bmuschko.docker-remote-api") version "9.4.0"
-}
+plugins { id("com.bmuschko.docker-remote-api") version "9.4.0" }
 
 val tbdLibsVersion = "2024.11.25-10.59-6f263a10"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
@@ -35,21 +33,15 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
-        exclude(group = "junit")
-    }
+    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") { exclude(group = "junit") }
 
     testImplementation(project(":sykepenger-mediators")) // for å få tilgang på db/migrations-filene
     testImplementation(libs.bundles.flyway)
-    testImplementation(libs.testcontainers) {
-        exclude("com.fasterxml.jackson.core")
-    }
+    testImplementation(libs.testcontainers) { exclude("com.fasterxml.jackson.core") }
 
     testImplementation("com.github.navikt.tbd-libs:naisful-test-app:$tbdLibsVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("org.wiremock:wiremock:$wiremockVersion") {
-        exclude(group = "junit")
-    }
+    testImplementation("org.wiremock:wiremock:$wiremockVersion") { exclude(group = "junit") }
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
@@ -63,15 +55,15 @@ dependencies {
 }
 
 tasks {
-    val copyJars = create("copy-jars") {
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
+    val copyJars =
+        create("copy-jars") {
+            doLast {
+                configurations.runtimeClasspath.get().forEach {
+                    val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                    if (!file.exists()) it.copyTo(file)
+                }
             }
         }
-    }
     get("build").finalizedBy(copyJars)
 
     withType<Jar> {
@@ -79,9 +71,8 @@ tasks {
 
         manifest {
             attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") { it.name }
         }
         finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
     }
@@ -98,8 +89,5 @@ tasks.create("remove_spleis_api_db_container", DockerRemoveContainer::class) {
     targetContainerId("spleis-api")
     dependsOn(":sykepenger-api:test")
     setProperty("force", true)
-    onError {
-        if (!this.message!!.contains("No such container"))
-            throw this
-    }
+    onError { if (!this.message!!.contains("No such container")) throw this }
 }

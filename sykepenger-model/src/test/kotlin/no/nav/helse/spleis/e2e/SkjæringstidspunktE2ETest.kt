@@ -28,7 +28,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
+internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
@@ -50,12 +50,17 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
     fun `periode med bare ferie - tidligere sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  10.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
         )
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
         assertEquals(1.mars, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING,
+        )
     }
 
     @Test
@@ -66,21 +71,35 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
         håndterSøknad(januar, orgnummer = a1)
         håndterSøknad(24.februar til 24.mars, orgnummer = a1)
-        håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterInntektsmelding(listOf(25.januar til 10.februar), beregnetInntekt = 16000.månedlig, orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-
-        val inntekter = listOf(
-            grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
-            grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
+        håndterSøknad(
+            Sykdom(25.januar, 25.februar, 100.prosent),
+            Arbeid(20.februar, 25.februar),
+            orgnummer = a2,
         )
+
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 15000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        )
+        håndterInntektsmelding(
+            listOf(25.januar til 10.februar),
+            beregnetInntekt = 16000.månedlig,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        )
+
+        val inntekter =
+            listOf(
+                grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
+                grunnlag(a2, 1.januar, 16000.månedlig.repeat(3)),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
-            orgnummer = a1
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(inntekter = inntekter),
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -95,11 +114,25 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
 
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a2)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            orgnummer = a2,
+        )
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = 17000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(24.februar til 11.mars),
+            beregnetInntekt = 17000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -108,21 +141,44 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
-                    grunnlag(a2, 24.februar, 16000.månedlig.repeat(3))
-                )
-            ),
-            orgnummer = a1
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
+                            grunnlag(a2, 24.februar, 16000.månedlig.repeat(3)),
+                        )
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a2,
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a1,
+        )
     }
 
     @Test
@@ -133,21 +189,35 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
         håndterSøknad(januar, orgnummer = a1)
         håndterSøknad(23.februar til 24.mars, orgnummer = a1)
-        håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterInntektsmelding(listOf(25.januar til 10.februar), beregnetInntekt = 16000.månedlig, orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-
-        val inntekter = listOf(
-            grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
-            grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
+        håndterSøknad(
+            Sykdom(25.januar, 25.februar, 100.prosent),
+            Arbeid(20.februar, 25.februar),
+            orgnummer = a2,
         )
+
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 15000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        )
+        håndterInntektsmelding(
+            listOf(25.januar til 10.februar),
+            beregnetInntekt = 16000.månedlig,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        )
+
+        val inntekter =
+            listOf(
+                grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
+                grunnlag(a2, 1.januar, 16000.månedlig.repeat(3)),
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
-            orgnummer = a1
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(inntekter = inntekter),
+            orgnummer = a1,
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -165,10 +235,22 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a2)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            orgnummer = a2,
+        )
 
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(23.februar til 10.mars), beregnetInntekt = 15000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(23.februar til 10.mars),
+            beregnetInntekt = 15000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -176,7 +258,23 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            orgnummer = a1,
+        )
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a2,
+        )
     }
 }

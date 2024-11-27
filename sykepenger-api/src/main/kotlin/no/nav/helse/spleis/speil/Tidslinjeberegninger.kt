@@ -6,7 +6,9 @@ import no.nav.helse.spleis.speil.dto.Sykdomstidslinjedag
 import no.nav.helse.spleis.speil.dto.Utbetalingstidslinjedag
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 
-internal fun List<Sykdomstidslinjedag>.merge(utbetalingstidslinje: List<Utbetalingstidslinjedag>): List<SammenslåttDag> {
+internal fun List<Sykdomstidslinjedag>.merge(
+    utbetalingstidslinje: List<Utbetalingstidslinjedag>
+): List<SammenslåttDag> {
 
     fun begrunnelser(utbetalingsdag: Utbetalingstidslinjedag) =
         if (utbetalingsdag is AvvistDag) utbetalingsdag.begrunnelser else null
@@ -20,7 +22,7 @@ internal fun List<Sykdomstidslinjedag>.merge(utbetalingstidslinje: List<Utbetali
             kilde = sykdomsdag.kilde,
             grad = sykdomsdag.grad,
             utbetalingsinfo = utbetalingsdag?.utbetalingsinfo(),
-            begrunnelser = utbetalingsdag?.let { begrunnelser(it) }
+            begrunnelser = utbetalingsdag?.let { begrunnelser(it) },
         )
     }
 }

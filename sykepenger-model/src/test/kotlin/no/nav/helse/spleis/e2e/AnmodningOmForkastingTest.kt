@@ -20,41 +20,48 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Test
 
-internal class AnmodningOmForkastingTest: AbstractDslTest() {
+internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
     @Test
-    fun `anmodning avslås av en avsluttet vedtaksperiode`(){
+    fun `anmodning avslås av en avsluttet vedtaksperiode`() {
         a1 {
             nyttVedtak(januar)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertInfo("Avslår anmodning om forkasting i AVSLUTTET (kan ikke forkastes)", 1.vedtaksperiode.filter())
+            assertInfo(
+                "Avslår anmodning om forkasting i AVSLUTTET (kan ikke forkastes)",
+                1.vedtaksperiode.filter(),
+            )
         }
     }
 
     @Test
-    fun `når anmodning innfris forkastes alt på skjæringstidspunktet`(){
+    fun `når anmodning innfris forkastes alt på skjæringstidspunktet`() {
         (a1 og a2).nyeVedtak(januar)
-        a1 {
-            nyPeriode(mars)
-        }
+        a1 { nyPeriode(mars) }
         a2 {
             nyPeriode(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
-        a1 {
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        }
+        a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
             assertInfo("Etterkommer anmodning om forkasting", 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                TIL_INFOTRYGD,
+            )
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -68,19 +75,35 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD,
+            )
+            assertForkastetPeriodeTilstander(
+                3.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD,
+            )
+            assertForkastetPeriodeTilstander(
+                4.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
     @Test
-    fun `anmodning innfris av en vedtaksperiode som avventer inntektsmelding`(){
+    fun `anmodning innfris av en vedtaksperiode som avventer inntektsmelding`() {
         a1 {
             nyPeriode(januar)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -110,7 +133,11 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                3.vedtaksperiode,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                TIL_INFOTRYGD,
+            )
         }
     }
 }

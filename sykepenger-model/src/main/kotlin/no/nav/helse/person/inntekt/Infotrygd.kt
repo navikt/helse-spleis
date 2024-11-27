@@ -12,10 +12,11 @@ internal class Infotrygd(
     dato: LocalDate,
     hendelseId: UUID,
     beløp: Inntekt,
-    tidsstempel: LocalDateTime
+    tidsstempel: LocalDateTime,
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
 
     override fun kanOverstyresAv(ny: Inntektsopplysning) = false
+
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         throw IllegalStateException("Infotrygd kan ikke bli overstyrt")
     }
@@ -35,7 +36,7 @@ internal class Infotrygd(
                 hendelseId = dto.hendelseId,
                 dato = dto.dato,
                 beløp = Inntekt.gjenopprett(dto.beløp),
-                tidsstempel = dto.tidsstempel
+                tidsstempel = dto.tidsstempel,
             )
     }
 }

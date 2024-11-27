@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -83,9 +84,9 @@ import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import kotlin.math.roundToInt
 
-class Person private constructor(
+class Person
+private constructor(
     personidentifikator: Personidentifikator,
     internal var alder: Alder,
     private val _arbeidsgivere: MutableList<Arbeidsgiver>,
@@ -96,36 +97,42 @@ class Person private constructor(
     private val jurist: Subsumsjonslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
-    internal val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
+    internal val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering =
+        MinimumSykdomsgradsvurdering(),
 ) : Aktivitetskontekst {
     companion object {
         fun gjenopprett(
             subsumsjonslogg: Subsumsjonslogg,
             dto: PersonInnDto,
-            tidligereBehandlinger: List<Person> = emptyList()
+            tidligereBehandlinger: List<Person> = emptyList(),
         ): Person {
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
             val alder = Alder.gjenopprett(dto.alder)
-            val person = Person(
-                personidentifikator = Personidentifikator(dto.fødselsnummer),
-                alder = alder,
-                _arbeidsgivere = arbeidsgivere,
-                personlogg = Aktivitetslogg(),
-                opprettet = dto.opprettet,
-                infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
-                vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(
-                    alder,
-                    dto.vilkårsgrunnlagHistorikk,
-                    grunnlagsdataMap
-                ),
-                minimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
-                jurist = subsumsjonslogg,
-                tidligereBehandlinger = tidligereBehandlinger
+            val person =
+                Person(
+                    personidentifikator = Personidentifikator(dto.fødselsnummer),
+                    alder = alder,
+                    _arbeidsgivere = arbeidsgivere,
+                    personlogg = Aktivitetslogg(),
+                    opprettet = dto.opprettet,
+                    infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
+                    vilkårsgrunnlagHistorikk =
+                        VilkårsgrunnlagHistorikk.gjenopprett(
+                            alder,
+                            dto.vilkårsgrunnlagHistorikk,
+                            grunnlagsdataMap,
+                        ),
+                    minimumSykdomsgradsvurdering =
+                        MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
+                    jurist = subsumsjonslogg,
+                    tidligereBehandlinger = tidligereBehandlinger,
+                )
+            arbeidsgivere.addAll(
+                dto.arbeidsgivere.map {
+                    Arbeidsgiver.gjenopprett(person, alder, it, subsumsjonslogg, grunnlagsdataMap)
+                }
             )
-            arbeidsgivere.addAll(dto.arbeidsgivere.map {
-                Arbeidsgiver.gjenopprett(person, alder, it, subsumsjonslogg, grunnlagsdataMap)
-            })
             return person
         }
     }
@@ -134,7 +141,7 @@ class Person private constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
         subsumsjonslogg: Subsumsjonslogg,
-        regler: ArbeidsgiverRegler
+        regler: ArbeidsgiverRegler,
     ) : this(
         personidentifikator,
         alder,
@@ -145,33 +152,37 @@ class Person private constructor(
         VilkårsgrunnlagHistorikk(),
         subsumsjonslogg,
         emptyList<Person>(),
-        regler = regler
+        regler = regler,
     )
 
     constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
-        jurist: Subsumsjonslogg
+        jurist: Subsumsjonslogg,
     ) : this(personidentifikator, alder, jurist, NormalArbeidstaker)
 
-    internal val arbeidsgivere: List<Arbeidsgiver> get() = _arbeidsgivere.toList()
+    internal val arbeidsgivere: List<Arbeidsgiver>
+        get() = _arbeidsgivere.toList()
 
     var personidentifikator: Personidentifikator = personidentifikator
         private set
 
-    val fødselsnummer get() = personidentifikator.toString()
+    val fødselsnummer
+        get() = personidentifikator.toString()
 
     private val observers = mutableListOf<PersonObserver>()
 
-    internal fun view() = PersonView(
-        arbeidsgivere = arbeidsgivere.map{it.view()},
-        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view()
-    )
+    internal fun view() =
+        PersonView(
+            arbeidsgivere = arbeidsgivere.map { it.view() },
+            vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view(),
+        )
 
     fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler sykmelding")
         tidligereBehandlinger(sykmelding.behandlingsporing, aktivitetslogg, sykmelding.periode())
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding.behandlingsporing, aktivitetslogg)
+        val arbeidsgiver =
+            finnEllerOpprettArbeidsgiver(sykmelding.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(sykmelding, aktivitetslogg)
         håndterGjenoppta(sykmelding, aktivitetslogg)
     }
@@ -184,16 +195,21 @@ class Person private constructor(
         håndterGjenoppta(avbruttSøknad, aktivitetslogg)
     }
 
-    fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder, aktivitetslogg: IAktivitetslogg) {
+    fun håndter(
+        forkastSykmeldingsperioder: ForkastSykmeldingsperioder,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         registrer(aktivitetslogg, "Behandler forkasting av sykmeldingsperioder")
-        finnArbeidsgiver(forkastSykmeldingsperioder.behandlingsporing, aktivitetslogg).håndter(forkastSykmeldingsperioder, aktivitetslogg)
+        finnArbeidsgiver(forkastSykmeldingsperioder.behandlingsporing, aktivitetslogg)
+            .håndter(forkastSykmeldingsperioder, aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)
         håndterGjenoppta(forkastSykmeldingsperioder, aktivitetslogg)
     }
 
     fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler anmodning om forkasting")
-        finnArbeidsgiver(anmodningOmForkasting.behandlingsporing, aktivitetslogg).håndter(anmodningOmForkasting, aktivitetslogg)
+        finnArbeidsgiver(anmodningOmForkasting.behandlingsporing, aktivitetslogg)
+            .håndter(anmodningOmForkasting, aktivitetslogg)
         håndterGjenoppta(anmodningOmForkasting, aktivitetslogg)
     }
 
@@ -208,7 +224,8 @@ class Person private constructor(
 
     fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler inntektsmelding")
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding.behandlingsporing, aktivitetslogg)
+        val arbeidsgiver =
+            finnEllerOpprettArbeidsgiver(inntektsmelding.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(inntektsmelding, aktivitetslogg)
         arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding, aktivitetslogg)
         håndterGjenoppta(inntektsmelding, aktivitetslogg)
@@ -223,26 +240,39 @@ class Person private constructor(
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler minimum sykdomsgradvurdering")
         melding.oppdater(this.minimumSykdomsgradsvurdering)
-        this.igangsettOverstyring(Revurderingseventyr.Companion.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()), aktivitetslogg)
+        this.igangsettOverstyring(
+            Revurderingseventyr.Companion.minimumSykdomsgradVurdert(
+                melding,
+                melding.periodeForEndring(),
+            ),
+            aktivitetslogg,
+        )
         håndterGjenoppta(melding, aktivitetslogg)
     }
 
-    private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun tidligereBehandlinger(
+        behandlingsporing: Behandlingsporing.Arbeidsgiver,
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+    ) {
         val cutoff = periode.start.minusMonths(6)
-        val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
+        val andreBehandledeVedtaksperioder =
+            tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
         if (andreBehandledeVedtaksperioder.isNotEmpty()) {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_5)
-            val msg = andreBehandledeVedtaksperioder.map {
-                "vedtaksperiode(${it.periode()})"
-            }
-            aktivitetslogg.info("""hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen 
+            val msg = andreBehandledeVedtaksperioder.map { "vedtaksperiode(${it.periode()})" }
+            aktivitetslogg.info(
+                """hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen 
                 | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
                 | tidligere behandlede perioder: ${msg.joinToString { it }}
-                | cutoff: $cutoff""".trimMargin())
+                | cutoff: $cutoff"""
+                    .trimMargin()
+            )
         }
     }
 
-    private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
+    private fun vedtaksperioderEtter(dato: LocalDate) =
+        arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
 
     fun håndter(dødsmelding: Dødsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler dødsmelding")
@@ -251,7 +281,11 @@ class Person private constructor(
         håndterGjenoppta(dødsmelding, aktivitetslogg)
     }
 
-    fun håndter(identOpphørt: IdentOpphørt, aktivitetslogg: IAktivitetslogg, nyPersonidentifikator: Personidentifikator) {
+    fun håndter(
+        identOpphørt: IdentOpphørt,
+        aktivitetslogg: IAktivitetslogg,
+        nyPersonidentifikator: Personidentifikator,
+    ) {
         registrer(aktivitetslogg, "Behandler ident opphørt")
         aktivitetslogg.info("Person har byttet ident til $nyPersonidentifikator")
         this.personidentifikator = nyPersonidentifikator
@@ -265,16 +299,24 @@ class Person private constructor(
         håndterGjenoppta(infotrygdendring, aktivitetslogg)
     }
 
-    fun håndter(utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) = håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetslogg) {
-        utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(aktivitetslogg, it)
-    }
+    fun håndter(
+        utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
+        aktivitetslogg: IAktivitetslogg,
+    ) =
+        håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetslogg) {
+            utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(aktivitetslogg, it)
+        }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) =
         håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetslogg) {
-        utbetalingshistorikk.oppdaterHistorikk(aktivitetslogg, it)
-    }
+            utbetalingshistorikk.oppdaterHistorikk(aktivitetslogg, it)
+        }
 
-    private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
+    private fun håndterHistorikkFraInfotrygd(
+        hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
+        oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean,
+    ) {
         registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
         oppdatertHistorikk(infotrygdhistorikk)
         sykdomshistorikkEndret()
@@ -288,13 +330,19 @@ class Person private constructor(
         if (!infotrygdhistorikk.harHistorikk()) return
         val hendelseId = infotrygdhistorikk.siste.hendelseId
         val perioder = infotrygdhistorikk.siste.perioder
-        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())) { result, vedtaksperiode ->
-            vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
-        }
+        val event =
+            alleVedtaksperioder.fold(
+                PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())
+            ) { result, vedtaksperiode ->
+                vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
+            }
         emitOverlappendeInfotrygdperioder(event)
     }
 
-    fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger, aktivitetslogg: IAktivitetslogg) {
+    fun håndter(
+        utbetalingshistorikk: UtbetalingshistorikkForFeriepenger,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         registrer(aktivitetslogg, "Behandler utbetalingshistorikk for feriepenger")
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
@@ -309,24 +357,34 @@ class Person private constructor(
         // Hardkodet dato skal være datoen Infotrygd sist kjørte feriepenger
         val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2024, 10, 19)
 
-        val feriepengeberegner = Feriepengeberegner(
-            alder = alder,
-            opptjeningsår = utbetalingshistorikk.opptjeningsår,
-            grunnlagFraInfotrygd = utbetalingshistorikk.grunnlagForFeriepenger(DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD),
-            grunnlagFraSpleis = grunnlagForFeriepenger()
-        )
+        val feriepengeberegner =
+            Feriepengeberegner(
+                alder = alder,
+                opptjeningsår = utbetalingshistorikk.opptjeningsår,
+                grunnlagFraInfotrygd =
+                    utbetalingshistorikk.grunnlagForFeriepenger(
+                        DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD
+                    ),
+                grunnlagFraSpleis = grunnlagForFeriepenger(),
+            )
 
-        val feriepengepengebeløpPersonUtbetaltAvInfotrygd = utbetalingshistorikk.utbetalteFeriepengerTilPerson()
+        val feriepengepengebeløpPersonUtbetaltAvInfotrygd =
+            utbetalingshistorikk.utbetalteFeriepengerTilPerson()
         val beregnetFeriepengebeløpPersonInfotrygd =
             feriepengeberegner.beregnFeriepengerForInfotrygdPerson().roundToInt()
 
-        if (beregnetFeriepengebeløpPersonInfotrygd != 0 && beregnetFeriepengebeløpPersonInfotrygd !in feriepengepengebeløpPersonUtbetaltAvInfotrygd) {
+        if (
+            beregnetFeriepengebeløpPersonInfotrygd != 0 &&
+                beregnetFeriepengebeløpPersonInfotrygd !in
+                    feriepengepengebeløpPersonUtbetaltAvInfotrygd
+        ) {
             aktivitetslogg.info(
                 """
                 Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
                 Faktisk utbetalt beløp: $feriepengepengebeløpPersonUtbetaltAvInfotrygd
                 Beregnet beløp: $beregnetFeriepengebeløpPersonInfotrygd
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
 
@@ -337,7 +395,7 @@ class Person private constructor(
             personidentifikator,
             feriepengeberegner,
             utbetalingshistorikk,
-            aktivitetslogg
+            aktivitetslogg,
         )
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
@@ -347,55 +405,67 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser.behandlingsporing, aktivitetslogg).håndter(ytelser, aktivitetslogg, infotrygdhistorikk)
+        finnArbeidsgiver(ytelser.behandlingsporing, aktivitetslogg)
+            .håndter(ytelser, aktivitetslogg, infotrygdhistorikk)
         håndterGjenoppta(ytelser, aktivitetslogg)
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler utbetalingsgodkjenning")
-        finnArbeidsgiver(utbetalingsgodkjenning.behandlingsporing, aktivitetslogg).håndter(utbetalingsgodkjenning, aktivitetslogg)
+        finnArbeidsgiver(utbetalingsgodkjenning.behandlingsporing, aktivitetslogg)
+            .håndter(utbetalingsgodkjenning, aktivitetslogg)
         håndterGjenoppta(utbetalingsgodkjenning, aktivitetslogg)
     }
 
     fun håndter(vedtakFattet: VedtakFattet, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler vedtak fattet")
-        finnArbeidsgiver(vedtakFattet.behandlingsporing, aktivitetslogg).håndter(vedtakFattet, aktivitetslogg)
+        finnArbeidsgiver(vedtakFattet.behandlingsporing, aktivitetslogg)
+            .håndter(vedtakFattet, aktivitetslogg)
         håndterGjenoppta(vedtakFattet, aktivitetslogg)
     }
 
     fun håndter(kanIkkeBehandlesHer: KanIkkeBehandlesHer, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler kan ikke behandles her")
-        finnArbeidsgiver(kanIkkeBehandlesHer.behandlingsporing, aktivitetslogg).håndter(kanIkkeBehandlesHer, aktivitetslogg)
+        finnArbeidsgiver(kanIkkeBehandlesHer.behandlingsporing, aktivitetslogg)
+            .håndter(kanIkkeBehandlesHer, aktivitetslogg)
         håndterGjenoppta(kanIkkeBehandlesHer, aktivitetslogg)
     }
 
-    fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+    fun håndter(
+        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         registrer(aktivitetslogg, "Behandler sykepengegrunnlag for arbeidsgiver")
-        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver.behandlingsporing, aktivitetslogg).håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
+        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver.behandlingsporing, aktivitetslogg)
+            .håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
         håndterGjenoppta(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler vilkårsgrunnlag")
-        finnArbeidsgiver(vilkårsgrunnlag.behandlingsporing, aktivitetslogg).håndter(vilkårsgrunnlag, aktivitetslogg)
+        finnArbeidsgiver(vilkårsgrunnlag.behandlingsporing, aktivitetslogg)
+            .håndter(vilkårsgrunnlag, aktivitetslogg)
         håndterGjenoppta(vilkårsgrunnlag, aktivitetslogg)
     }
 
     fun håndter(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler simulering")
-        finnArbeidsgiver(simulering.behandlingsporing, aktivitetslogg).håndter(simulering, aktivitetslogg)
+        finnArbeidsgiver(simulering.behandlingsporing, aktivitetslogg)
+            .håndter(simulering, aktivitetslogg)
         håndterGjenoppta(simulering, aktivitetslogg)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler utbetaling")
-        finnArbeidsgiver(utbetaling.behandlingsporing, aktivitetslogg).håndter(utbetaling, aktivitetslogg)
+        finnArbeidsgiver(utbetaling.behandlingsporing, aktivitetslogg)
+            .håndter(utbetaling, aktivitetslogg)
         håndterGjenoppta(utbetaling, aktivitetslogg)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler utbetalingpåminnelse")
-        finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)
+        finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg)
+            .håndter(påminnelse, aktivitetslogg)
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
@@ -403,13 +473,17 @@ class Person private constructor(
         registrer(aktivitetslogg, "Behandler personpåminnelse")
         aktivitetslogg.info("Håndterer påminnelse for person")
         migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
-        //håndterGjenoppta(påminnelse, aktivitetslogg)
+        // håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         try {
             registrer(aktivitetslogg, "Behandler påminnelse")
-            if (finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)) return håndterGjenoppta(påminnelse, aktivitetslogg)
+            if (
+                finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg)
+                    .håndter(påminnelse, aktivitetslogg)
+            )
+                return håndterGjenoppta(påminnelse, aktivitetslogg)
         } catch (err: Aktivitetslogg.AktivitetException) {
             aktivitetslogg.funksjonellFeil(RV_AG_1)
         }
@@ -419,7 +493,8 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler Overstyr tidslinje")
-        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg)
+            .håndter(hendelse, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
@@ -450,13 +525,15 @@ class Person private constructor(
 
     fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler annulleringforespørsel")
-        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg)
+            .håndter(hendelse, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
     fun håndter(hendelse: Grunnbeløpsregulering, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler grunnbeløpsendring")
-        if (arbeidsgivere.håndter(hendelse, aktivitetslogg)) return håndterGjenoppta(hendelse, aktivitetslogg)
+        if (arbeidsgivere.håndter(hendelse, aktivitetslogg))
+            return håndterGjenoppta(hendelse, aktivitetslogg)
         observers.forEach { hendelse.sykefraværstilfelleIkkeFunnet(it) }
     }
 
@@ -468,12 +545,24 @@ class Person private constructor(
         observers.forEach { it.annullering(event) }
     }
 
-    internal fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
-        observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, organisasjonsnummer, påminnelse) }
+    internal fun vedtaksperiodePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        påminnelse: Påminnelse,
+    ) {
+        observers.forEach {
+            it.vedtaksperiodePåminnet(vedtaksperiodeId, organisasjonsnummer, påminnelse)
+        }
     }
 
-    internal fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, tilstandType: TilstandType) {
-        observers.forEach { it.vedtaksperiodeIkkePåminnet(vedtaksperiodeId, organisasjonsnummer, tilstandType) }
+    internal fun vedtaksperiodeIkkePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        tilstandType: TilstandType,
+    ) {
+        observers.forEach {
+            it.vedtaksperiodeIkkePåminnet(vedtaksperiodeId, organisasjonsnummer, tilstandType)
+        }
     }
 
     internal fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
@@ -492,7 +581,7 @@ class Person private constructor(
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
         trengerArbeidsgiverperiode: Boolean,
-        erPotensiellForespørsel: Boolean
+        erPotensiellForespørsel: Boolean,
     ) {
         observers.forEach {
             it.inntektsmeldingReplay(
@@ -504,20 +593,26 @@ class Person private constructor(
                 egenmeldingsperioder = egenmeldingsperioder,
                 førsteFraværsdager = førsteFraværsdager,
                 trengerArbeidsgiverperiode = trengerArbeidsgiverperiode,
-                erPotensiellForespørsel = erPotensiellForespørsel
+                erPotensiellForespørsel = erPotensiellForespørsel,
             )
         }
     }
 
-    internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+    internal fun trengerArbeidsgiveropplysninger(
+        event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
+    ) {
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }
 
-    internal fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
+    internal fun trengerIkkeArbeidsgiveropplysninger(
+        event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent
+    ) {
         observers.forEach { it.trengerIkkeArbeidsgiveropplysninger(event) }
     }
 
-    internal fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
+    internal fun arbeidsgiveropplysningerKorrigert(
+        event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
+    ) {
         observers.forEach { it.arbeidsgiveropplysningerKorrigert(event) }
     }
 
@@ -537,7 +632,9 @@ class Person private constructor(
         observers.forEach { it.avsluttetUtenVedtak(event) }
     }
 
-    internal fun avsluttetMedVedtak(avsluttetMedVedtakEvent: PersonObserver.AvsluttetMedVedtakEvent) {
+    internal fun avsluttetMedVedtak(
+        avsluttetMedVedtakEvent: PersonObserver.AvsluttetMedVedtakEvent
+    ) {
         observers.forEach { it.avsluttetMedVedtak(avsluttetMedVedtakEvent) }
     }
 
@@ -545,7 +642,9 @@ class Person private constructor(
         observers.forEach { it.behandlingLukket(behandlingLukketEvent) }
     }
 
-    internal fun behandlingForkastet(behandlingForkastetEvent: PersonObserver.BehandlingForkastetEvent) {
+    internal fun behandlingForkastet(
+        behandlingForkastetEvent: PersonObserver.BehandlingForkastetEvent
+    ) {
         observers.forEach { it.behandlingForkastet(behandlingForkastetEvent) }
     }
 
@@ -561,11 +660,15 @@ class Person private constructor(
         observers.forEach { it.overstyringIgangsatt(event) }
     }
 
-    internal fun emitOverlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
+    internal fun emitOverlappendeInfotrygdperioder(
+        event: PersonObserver.OverlappendeInfotrygdperioder
+    ) {
         observers.forEach { it.overlappendeInfotrygdperioder(event) }
     }
 
-    internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
+    internal fun feriepengerUtbetalt(
+        feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent
+    ) {
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
 
@@ -584,32 +687,63 @@ class Person private constructor(
         aktivitetslogg.info(melding)
     }
 
-    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
-        finnEllerOpprettArbeidsgiver(behandlingsporing.organisasjonsnummer.tilYrkesaktivitet(), aktivitetslogg)
+    private fun finnEllerOpprettArbeidsgiver(
+        behandlingsporing: Behandlingsporing.Arbeidsgiver,
+        aktivitetslogg: IAktivitetslogg,
+    ) =
+        finnEllerOpprettArbeidsgiver(
+            behandlingsporing.organisasjonsnummer.tilYrkesaktivitet(),
+            aktivitetslogg,
+        )
 
-    private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
+    private fun finnEllerOpprettArbeidsgiver(
+        yrkesaktivitet: Yrkesaktivitet,
+        aktivitetslogg: IAktivitetslogg,
+    ) = _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
-    private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
+    private fun finnArbeidsgiver(
+        behandlingsporing: Behandlingsporing.Arbeidsgiver,
+        aktivitetslogg: IAktivitetslogg,
+    ) =
         behandlingsporing.organisasjonsnummer.tilYrkesaktivitet().let { yrkesaktivitet ->
-            arbeidsgivere.finn(yrkesaktivitet) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
+            arbeidsgivere.finn(yrkesaktivitet)
+                ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
         }
 
-    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        finn(yrkesaktivitet) ?: Arbeidsgiver(this@Person, yrkesaktivitet, jurist).also { arbeidsgiver ->
-            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", yrkesaktivitet)
-            add(arbeidsgiver)
-        }
+    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(
+        yrkesaktivitet: Yrkesaktivitet,
+        aktivitetslogg: IAktivitetslogg,
+    ) =
+        finn(yrkesaktivitet)
+            ?: Arbeidsgiver(this@Person, yrkesaktivitet, jurist).also { arbeidsgiver ->
+                aktivitetslogg.info(
+                    "Ny arbeidsgiver med organisasjonsnummer %s for denne personen",
+                    yrkesaktivitet,
+                )
+                add(arbeidsgiver)
+            }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
         arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
-    internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
-    internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) = arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
 
-    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode) =
-        vilkårsgrunnlagHistorikk.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
+    internal fun vedtaksperioder(filter: VedtaksperiodeFilter) =
+        arbeidsgivere.vedtaksperioder(filter).sorted()
+
+    internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
+
+    internal fun forespurtInntektOgRefusjonsopplysninger(
+        organisasjonsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        periode: Periode,
+    ) =
+        vilkårsgrunnlagHistorikk.forespurtInntektOgRefusjonsopplysninger(
+            organisasjonsnummer,
+            skjæringstidspunkt,
+            periode,
+        )
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
@@ -625,24 +759,35 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
         skatteopplysninger: Map<String, SkattSykepengegrunnlag>,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): Inntektsgrunnlag {
-        skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), aktivitetslogg) } // oppretter evt. nye arbeidsgivere
+        skatteopplysninger.keys.forEach { orgnr ->
+            finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), aktivitetslogg)
+        } // oppretter evt. nye arbeidsgivere
         return Inntektsgrunnlag.opprett(
             alder,
-            arbeidsgivere.avklarSykepengegrunnlag(aktivitetslogg, skjæringstidspunkt, skatteopplysninger),
+            arbeidsgivere.avklarSykepengegrunnlag(
+                aktivitetslogg,
+                skjæringstidspunkt,
+                skatteopplysninger,
+            ),
             skjæringstidspunkt,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
     }
 
-    internal fun beregnSkjæringstidspunkt() = arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)
+    internal fun beregnSkjæringstidspunkt() =
+        arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)
 
     internal fun sykdomshistorikkEndret() {
         arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
     }
 
-    internal fun søppelbøtte(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, filter: VedtaksperiodeFilter) {
+    internal fun søppelbøtte(
+        hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
+        filter: VedtaksperiodeFilter,
+    ) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, aktivitetslogg, filter)
         sykdomshistorikkEndret()
@@ -653,35 +798,65 @@ class Person private constructor(
     internal fun emitInntektsmeldingFørSøknadEvent(
         meldingsreferanseId: UUID,
         relevanteSykmeldingsperioder: List<Periode>,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
     ) {
         observers.forEach {
-            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, relevanteSykmeldingsperioder, organisasjonsnummer))
+            it.inntektsmeldingFørSøknad(
+                PersonObserver.InntektsmeldingFørSøknadEvent(
+                    meldingsreferanseId,
+                    relevanteSykmeldingsperioder,
+                    organisasjonsnummer,
+                )
+            )
         }
     }
 
-    internal fun emitInntektsmeldingIkkeHåndtert(meldingsreferanseId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
+    internal fun emitInntektsmeldingIkkeHåndtert(
+        meldingsreferanseId: UUID,
+        organisasjonsnummer: String,
+        harPeriodeInnenfor16Dager: Boolean,
+    ) {
         observers.forEach {
-            it.inntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
+            it.inntektsmeldingIkkeHåndtert(
+                meldingsreferanseId,
+                organisasjonsnummer,
+                harPeriodeInnenfor16Dager,
+            )
         }
     }
 
-    internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Inntektsmelding, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) =
-        emitInntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
+    internal fun emitInntektsmeldingIkkeHåndtert(
+        hendelse: Inntektsmelding,
+        organisasjonsnummer: String,
+        harPeriodeInnenfor16Dager: Boolean,
+    ) =
+        emitInntektsmeldingIkkeHåndtert(
+            hendelse.metadata.meldingsreferanseId,
+            organisasjonsnummer,
+            harPeriodeInnenfor16Dager,
+        )
 
-    internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    internal fun emitInntektsmeldingHåndtert(
+        meldingsreferanseId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ) {
         observers.forEach {
             it.inntektsmeldingHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
     }
 
-    internal fun sendSkatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
-        observers.forEach {
-            it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent)
-        }
+    internal fun sendSkatteinntekterLagtTilGrunn(
+        skatteinntekterLagtTilGrunnEvent: PersonObserver.SkatteinntekterLagtTilGrunnEvent
+    ) {
+        observers.forEach { it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent) }
     }
 
-    internal fun emitSøknadHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    internal fun emitSøknadHåndtert(
+        meldingsreferanseId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ) {
         observers.forEach {
             it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
@@ -692,17 +867,25 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
         periode: Periode,
         nyeInntekter: List<NyInntektUnderveis>,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
         if (grunnlag == null) {
-            aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
+            aktivitetslogg.info(
+                "Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt"
+            )
             return
         }
         nyeInntekter.forEach { inntekt ->
             finnEllerOpprettArbeidsgiver(inntekt.orgnummer.tilYrkesaktivitet(), aktivitetslogg)
         }
-        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(aktivitetslogg, periode, nyeInntekter, subsumsjonslogg) ?: return
+        val nyttGrunnlag =
+            grunnlag.tilkomneInntekterFraSøknaden(
+                aktivitetslogg,
+                periode,
+                nyeInntekter,
+                subsumsjonslogg,
+            ) ?: return
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
     }
 
@@ -710,14 +893,22 @@ class Person private constructor(
         skjæringstidspunkt: LocalDate,
         inntektsmelding: Inntektsmelding,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): Revurderingseventyr? {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
         if (grunnlag == null) {
-            aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
+            aktivitetslogg.info(
+                "Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt"
+            )
             return null
         }
-        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, aktivitetslogg, subsumsjonslogg)
+        val (nyttGrunnlag, eventyr) =
+            grunnlag.nyeArbeidsgiverInntektsopplysninger(
+                this,
+                inntektsmelding,
+                aktivitetslogg,
+                subsumsjonslogg,
+            )
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         return eventyr
     }
@@ -726,23 +917,33 @@ class Person private constructor(
         hendelse: OverstyrArbeidsgiveropplysninger,
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, aktivitetslogg, subsumsjonslogg)
+        val grunnlag =
+            vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+                ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
+        val (nyttGrunnlag, eventyr) =
+            grunnlag.overstyrArbeidsgiveropplysninger(
+                this,
+                hendelse,
+                aktivitetslogg,
+                subsumsjonslogg,
+            )
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         igangsettOverstyring(eventyr, aktivitetslogg)
     }
-
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: SkjønnsmessigFastsettelse,
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, eventyr) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg)
+        val grunnlag =
+            vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+                ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
+        val (nyttGrunnlag, eventyr) =
+            grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg)
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         igangsettOverstyring(eventyr, aktivitetslogg)
     }
@@ -751,30 +952,48 @@ class Person private constructor(
         hendelse: OverstyrArbeidsforhold,
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        nyttVilkårsgrunnlag(aktivitetslogg, grunnlag.overstyrArbeidsforhold(hendelse, aktivitetslogg, subsumsjonslogg))
-        igangsettOverstyring(Revurderingseventyr.Companion.arbeidsforhold(hendelse, skjæringstidspunkt), aktivitetslogg)
+        val grunnlag =
+            vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+                ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
+        nyttVilkårsgrunnlag(
+            aktivitetslogg,
+            grunnlag.overstyrArbeidsforhold(hendelse, aktivitetslogg, subsumsjonslogg),
+        )
+        igangsettOverstyring(
+            Revurderingseventyr.Companion.arbeidsforhold(hendelse, skjæringstidspunkt),
+            aktivitetslogg,
+        )
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: Grunnbeløpsregulering,
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        grunnlag.grunnbeløpsregulering(hendelse, aktivitetslogg, subsumsjonslogg)?.let { grunnbeløpsregulert ->
+        val grunnlag =
+            vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+                ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
+        grunnlag.grunnbeløpsregulering(hendelse, aktivitetslogg, subsumsjonslogg)?.let {
+            grunnbeløpsregulert ->
             nyttVilkårsgrunnlag(aktivitetslogg, grunnbeløpsregulert)
-            igangsettOverstyring(Revurderingseventyr.Companion.grunnbeløpsregulering(hendelse, skjæringstidspunkt), aktivitetslogg)
+            igangsettOverstyring(
+                Revurderingseventyr.Companion.grunnbeløpsregulering(hendelse, skjæringstidspunkt),
+                aktivitetslogg,
+            )
         }
     }
 
-    private fun nyttVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement) {
+    private fun nyttVilkårsgrunnlag(
+        aktivitetslogg: IAktivitetslogg,
+        vilkårsgrunnlag: VilkårsgrunnlagElement,
+    ) {
         aktivitetslogg.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
+
     private var gjenopptaBehandlingNy = false
 
     internal fun gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
@@ -794,11 +1013,12 @@ class Person private constructor(
 
     private fun håndterVedtaksperiodeVenter(hendelse: Hendelse) {
         when (hendelse) {
-            is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */ }
+            is Sykmelding -> {
+                /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */
+            }
             else -> {
                 val nestemann = arbeidsgivere.nestemann() ?: return
-                val eventer = arbeidsgivere.venter(nestemann)
-                    .map { it.event() }
+                val eventer = arbeidsgivere.venter(nestemann).map { it.event() }
                 observers.forEach { it.vedtaksperioderVenter(eventer) }
             }
         }
@@ -808,7 +1028,10 @@ class Person private constructor(
         observers.forEach { it.behandlingUtført() }
     }
 
-    internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+    internal fun igangsettOverstyring(
+        revurdering: Revurderingseventyr,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         arbeidsgivere.igangsettOverstyring(revurdering, aktivitetslogg)
         revurdering.sendOverstyringIgangsattEvent(this)
         ryddOppVilkårsgrunnlag(aktivitetslogg)
@@ -819,41 +1042,69 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
     }
 
-    internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
-        observers.forEach { it.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
+    internal fun nyVedtaksperiodeUtbetaling(
+        organisasjonsnummer: String,
+        utbetalingId: UUID,
+        vedtaksperiodeId: UUID,
+    ) {
+        observers.forEach {
+            it.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
+        }
     }
 
-    internal fun vedtaksperiodeOpprettet(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode, skjæringstidspunkt: LocalDate, opprettet: LocalDateTime) {
-        val event = PersonObserver.VedtaksperiodeOpprettet(vedtaksperiodeId, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
+    internal fun vedtaksperiodeOpprettet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
+    ) {
+        val event =
+            PersonObserver.VedtaksperiodeOpprettet(
+                vedtaksperiodeId,
+                organisasjonsnummer,
+                periode,
+                skjæringstidspunkt,
+                opprettet,
+            )
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {
-        return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
+        return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) ||
+            infotrygdhistorikk.harFerieI(vedtaksperiode)
     }
 
-    internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
+    internal fun vedtaksperiodeAnnullert(
+        vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent
+    ) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
 
     internal fun migrerUbrukteRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Migrerer ubrukte refusjonsopplysninger")
-        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, infotrygdhistorikk.sisteUtbetalteDag())
+        arbeidsgivere.migrerUbrukteRefusjonsopplysninger(
+            aktivitetslogg,
+            infotrygdhistorikk.sisteUtbetalteDag(),
+        )
     }
 
     internal fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Migrerer refusjonsopplysninger på behandlinger")
-        arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, ::vilkårsgrunnlagFor)
+        arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(
+            aktivitetslogg,
+            ::vilkårsgrunnlagFor,
+        )
     }
 
-    fun dto() = PersonUtDto(
-        fødselsnummer = personidentifikator.toString(),
-        alder = alder.dto(),
-        arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann()) },
-        opprettet = opprettet,
-        infotrygdhistorikk = infotrygdhistorikk.dto(),
-        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
-        minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto()
-    )
-
+    fun dto() =
+        PersonUtDto(
+            fødselsnummer = personidentifikator.toString(),
+            alder = alder.dto(),
+            arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann()) },
+            opprettet = opprettet,
+            infotrygdhistorikk = infotrygdhistorikk.dto(),
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
+            minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto(),
+        )
 }

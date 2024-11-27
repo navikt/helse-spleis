@@ -6,20 +6,21 @@ import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.økonomi.Inntekt
 
-class Inntektsopplysning private constructor(
+class Inntektsopplysning
+private constructor(
     private val orgnummer: String,
     private val sykepengerFom: LocalDate,
     private val inntekt: Inntekt,
     private val refusjonTilArbeidsgiver: Boolean,
     private val refusjonTom: LocalDate?,
-    private var lagret: LocalDateTime?
+    private var lagret: LocalDateTime?,
 ) {
     constructor(
         orgnummer: String,
         sykepengerFom: LocalDate,
         inntekt: Inntekt,
         refusjonTilArbeidsgiver: Boolean,
-        refusjonTom: LocalDate? = null
+        refusjonTom: LocalDate? = null,
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
     internal fun funksjoneltLik(other: Inntektsopplysning): Boolean {
@@ -32,7 +33,9 @@ class Inntektsopplysning private constructor(
 
     internal companion object {
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
-            inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.inntekt }, { it.orgnummer }, { it.hashCode() }))
+            inntekter.sortedWith(
+                compareBy({ it.sykepengerFom }, { it.inntekt }, { it.orgnummer }, { it.hashCode() })
+            )
 
         internal fun gjenopprett(dto: InfotrygdInntektsopplysningInnDto): Inntektsopplysning {
             return Inntektsopplysning(
@@ -41,17 +44,18 @@ class Inntektsopplysning private constructor(
                 inntekt = Inntekt.gjenopprett(dto.inntekt),
                 refusjonTom = dto.refusjonTom,
                 refusjonTilArbeidsgiver = dto.refusjonTilArbeidsgiver,
-                lagret = dto.lagret
+                lagret = dto.lagret,
             )
         }
     }
 
-    internal fun dto() = InfotrygdInntektsopplysningUtDto(
-        orgnummer = orgnummer,
-        sykepengerFom = sykepengerFom,
-        inntekt = inntekt.dto(),
-        refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-        refusjonTom = refusjonTom,
-        lagret = lagret
-    )
+    internal fun dto() =
+        InfotrygdInntektsopplysningUtDto(
+            orgnummer = orgnummer,
+            sykepengerFom = sykepengerFom,
+            inntekt = inntekt.dto(),
+            refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+            refusjonTom = refusjonTom,
+            lagret = lagret,
+        )
 }

@@ -6,7 +6,7 @@ import java.util.UUID
 data class GraphQLGenerasjon(
     val id: UUID,
     val perioder: List<GraphQLTidslinjeperiode>,
-    val kildeTilGenerasjon: UUID
+    val kildeTilGenerasjon: UUID,
 )
 
 data class GraphQLGhostPeriode(
@@ -16,7 +16,7 @@ data class GraphQLGhostPeriode(
     val skjaeringstidspunkt: LocalDate,
     val vilkarsgrunnlagId: UUID,
     val deaktivert: Boolean,
-    val organisasjonsnummer: String
+    val organisasjonsnummer: String,
 )
 
 data class GraphQLNyttInntektsforholdPeriode(
@@ -26,7 +26,7 @@ data class GraphQLNyttInntektsforholdPeriode(
     val tom: LocalDate,
     val dagligBelop: Double,
     val manedligBelop: Double,
-    val skjaeringstidspunkt: LocalDate
+    val skjaeringstidspunkt: LocalDate,
 )
 
 data class GraphQLArbeidsgiver(
@@ -34,5 +34,5 @@ data class GraphQLArbeidsgiver(
     val id: UUID,
     val generasjoner: List<GraphQLGenerasjon>,
     val ghostPerioder: List<GraphQLGhostPeriode>,
-    val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode>
+    val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode>,
 )

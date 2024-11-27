@@ -46,17 +46,11 @@ internal class SimpleMergeTest {
     @Test
     fun `kan subsette en tidslinje`() {
         val original = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
-        Periode(3.januar, 17.januar).also {
-            assertEquals(it, original.subset(it).periode())
-        }
+        Periode(3.januar, 17.januar).also { assertEquals(it, original.subset(it).periode()) }
 
-        Periode(3.januar, 10.januar).also {
-            assertEquals(it, original.subset(it).periode())
-        }
+        Periode(3.januar, 10.januar).also { assertEquals(it, original.subset(it).periode()) }
 
-        Periode(6.januar, 14.januar).also {
-            assertEquals(it, original.subset(it).periode())
-        }
+        Periode(6.januar, 14.januar).also { assertEquals(it, original.subset(it).periode()) }
     }
 
     @Test
@@ -121,7 +115,7 @@ internal class SimpleMergeTest {
 
         count = 0
         for (dag: Dag in sykdomstidslinje) {
-             count++
+            count++
         }
         assertEquals(expected, count)
     }

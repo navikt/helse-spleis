@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -37,7 +36,10 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     @Test
     fun `Periode med bare ferie, så kommer en tidligere periode med sykdom - ferie skal ikke revurderes`() {
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(5.februar, 28.februar),
+        )
         håndterInntektsmelding(listOf(5.februar til 21.februar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
@@ -51,8 +53,15 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     fun `Forlengelse med bare ferie, så kommer en tidligere periode med sykdom - ferie skal revurderes`() {
         nyttVedtak(5.februar til 28.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(1.mars, 31.mars))
-        håndterInntektsmelding(listOf(5.mars til 21.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, avsendersystem = ALTINN)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(1.mars, 31.mars),
+        )
+        håndterInntektsmelding(
+            listOf(5.mars til 21.mars),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            avsendersystem = ALTINN,
+        )
 
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -71,7 +80,10 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     fun `Syk - Ferie - Syk, ferie skal i Avsluttet og revurderes ved revurdering av første periode`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(1.februar, 28.februar),
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         forlengVedtak(mars)

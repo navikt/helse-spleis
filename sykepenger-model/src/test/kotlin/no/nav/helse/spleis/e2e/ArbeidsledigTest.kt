@@ -13,9 +13,7 @@ internal class ArbeidsledigTest : AbstractDslTest() {
 
     @Test
     fun `håndterer at sykmelding kommer som arbeidsledig, mens søknaden kommer på arbeidsgiver`() {
-        arbeidsledig {
-            håndterSykmelding(januar)
-        }
+        arbeidsledig { håndterSykmelding(januar) }
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -40,5 +38,4 @@ internal class ArbeidsledigTest : AbstractDslTest() {
             assertTrue(inspektør.sykmeldingsperioder().isEmpty())
         }
     }
-
 }

@@ -17,7 +17,8 @@ import org.junit.jupiter.api.Test
 
 internal class SykdomshistorikkTest {
     private lateinit var historikk: Sykdomshistorikk
-    private val Sykdomshistorikk.inspektør get() = historikk.view().inspektør
+    private val Sykdomshistorikk.inspektør
+        get() = historikk.view().inspektør
 
     @BeforeEach
     fun setup() {
@@ -85,7 +86,7 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    fun `Overlappende biter`(){
+    fun `Overlappende biter`() {
         val meldingsreferanseId = UUID.randomUUID()
         val bit1 = TestHendelse(8.U(meldingsreferanseId = meldingsreferanseId))
         resetSeed()
@@ -99,7 +100,7 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    fun `Hele hendelsen er håndtert for en hendelse siden`(){
+    fun `Hele hendelsen er håndtert for en hendelse siden`() {
         val søknad = TestHendelse(10.S)
         val heleBiten = TestHendelse(16.U)
         historikk.håndter(heleBiten, Aktivitetslogg())
@@ -114,7 +115,7 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    fun `En bit av inntektsmeldingen håndteres før annen hendelse, og den andre biten etterpå`(){
+    fun `En bit av inntektsmeldingen håndteres før annen hendelse, og den andre biten etterpå`() {
         val søknad = TestHendelse(10.S)
         val bit1 = TestHendelse(8.U)
         val bit2 = TestHendelse(8.U)

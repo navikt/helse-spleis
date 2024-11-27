@@ -52,9 +52,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 import no.nav.helse.spleis.graphql.dto.Utbetalingtype
 
 internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
-    query("person") {
-        resolver { fnr: String -> personResolver(fnr) }
-    }
+    query("person") { resolver { fnr: String -> personResolver(fnr) } }
 
     personTypes()
     arbeidsgiverTypes()
@@ -137,12 +135,8 @@ private fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLUtbetalingsinfo>()
     type<GraphQLVurdering>()
     type<GraphQLUtbetaling> {
-        property(GraphQLUtbetaling::type) {
-            deprecate("Burde bruke enum \"typeEnum\"")
-        }
-        property(GraphQLUtbetaling::status) {
-            deprecate("Burde bruke enum \"statusEnum\"")
-        }
+        property(GraphQLUtbetaling::type) { deprecate("Burde bruke enum \"typeEnum\"") }
+        property(GraphQLUtbetaling::status) { deprecate("Burde bruke enum \"statusEnum\"") }
     }
     type<GraphQLDag>()
     type<GraphQLTidslinjeperiode>()

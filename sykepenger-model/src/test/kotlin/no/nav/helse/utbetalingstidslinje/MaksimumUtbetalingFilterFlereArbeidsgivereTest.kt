@@ -28,21 +28,32 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         assert6GBegrensetUtbetaling(ag2(), ag1())
     }
 
-    private fun assert6GBegrensetUtbetaling(ag1: Pair<Utbetalingstidslinje, Double>, ag2: Pair<Utbetalingstidslinje, Double>) {
-        val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first)) ?: fail { "forventer en periode" }
+    private fun assert6GBegrensetUtbetaling(
+        ag1: Pair<Utbetalingstidslinje, Double>,
+        ag2: Pair<Utbetalingstidslinje, Double>,
+    ) {
+        val periode =
+            Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first))
+                ?: fail { "forventer en periode" }
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
 
-        val resultat = MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, EmptyLog)
+        val resultat =
+            MaksimumUtbetalingFilter()
+                .betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, EmptyLog)
 
         resultat.first().inspektør.also { inspektør ->
             resultat.first().forEach { dag ->
-                assertEquals(maksDagsats, inspektør.arbeidsgiverbeløp(dag.dato)) { "noen dager har fått nytt grunnbeløp" }
+                assertEquals(maksDagsats, inspektør.arbeidsgiverbeløp(dag.dato)) {
+                    "noen dager har fått nytt grunnbeløp"
+                }
             }
         }
         resultat.last().inspektør.also { inspektør ->
             resultat.last().forEach { dag ->
-                assertEquals(maksDagsats, inspektør.arbeidsgiverbeløp(dag.dato)) { "noen dager har fått nytt grunnbeløp" }
+                assertEquals(maksDagsats, inspektør.arbeidsgiverbeløp(dag.dato)) {
+                    "noen dager har fått nytt grunnbeløp"
+                }
             }
         }
         assertEquals(ag1.second, resultat.last().inspektør.totalUtbetaling())

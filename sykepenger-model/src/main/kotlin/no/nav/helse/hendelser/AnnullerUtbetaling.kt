@@ -11,20 +11,21 @@ class AnnullerUtbetaling(
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
-    internal val opprettet: LocalDateTime
+    internal val opprettet: LocalDateTime,
 ) : Hendelse, AnnullerUtbetalingHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer
-    )
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = erAutomatisk()
-    )
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = erAutomatisk(),
+        )
 
-    override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
+    override val vurdering: Utbetaling.Vurdering =
+        Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
 
     fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
 }

@@ -8,6 +8,5 @@ data class GraphQLPerson(
     val arbeidsgivere: List<GraphQLArbeidsgiver>,
     val dodsdato: LocalDate?,
     val versjon: Int,
-    val vilkarsgrunnlag: List<GraphQLVilkarsgrunnlag>
+    val vilkarsgrunnlag: List<GraphQLVilkarsgrunnlag>,
 )
-

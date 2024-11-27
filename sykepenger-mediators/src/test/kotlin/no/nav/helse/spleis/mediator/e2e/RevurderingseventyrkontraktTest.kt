@@ -20,9 +20,13 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
     fun `eventyr`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar,
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -31,7 +35,8 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         )
         sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
@@ -40,21 +45,23 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
 
         sendOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(
-                TestMessageFactory.Arbeidsgiveropplysning(
-                    organisasjonsnummer = ORGNUMMER,
-                    månedligInntekt = 20000.0,
-                    forklaring = "forklaring",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(
-                        TestMessageFactory.Refusjonsopplysning(
-                            fom = 1.januar,
-                            tom = null,
-                            beløp = 20000.0
-                        )
+            arbeidsgiveropplysninger =
+                listOf(
+                    TestMessageFactory.Arbeidsgiveropplysning(
+                        organisasjonsnummer = ORGNUMMER,
+                        månedligInntekt = 20000.0,
+                        forklaring = "forklaring",
+                        subsumsjon = null,
+                        refusjonsopplysninger =
+                            listOf(
+                                TestMessageFactory.Refusjonsopplysning(
+                                    fom = 1.januar,
+                                    tom = null,
+                                    beløp = 20000.0,
+                                )
+                            ),
                     )
-                )
-            )
+                ),
         )
 
         val eventyr = testRapid.inspektør.siste("overstyring_igangsatt")
@@ -99,7 +106,4 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
         assertTrue(tekst.isNotEmpty())
         assertDoesNotThrow { LocalDate.parse(tekst) }
     }
-
 }
-
-

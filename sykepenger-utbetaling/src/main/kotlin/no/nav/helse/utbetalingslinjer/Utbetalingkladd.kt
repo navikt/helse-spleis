@@ -7,5 +7,5 @@ class Utbetalingkladd(
     val utbetalingsperiode: Periode,
     val arbeidsgiveroppdrag: Oppdrag,
     val personoppdrag: Oppdrag,
-    val utbetalingstidslinje: Utbetalingstidslinje
+    val utbetalingstidslinje: Utbetalingstidslinje,
 )

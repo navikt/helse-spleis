@@ -3,21 +3,22 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.Teller
 
 /*
-    Forstår hvordan man teller arbeidsgiverperioden
-    Telling økes for hver sykedag (eller feriedag som inngår i sykdom),
-    mens alle oppholdsdager (eller feriedag som ikke inngår i sykdom) minkes.
+   Forstår hvordan man teller arbeidsgiverperioden
+   Telling økes for hver sykedag (eller feriedag som inngår i sykdom),
+   mens alle oppholdsdager (eller feriedag som ikke inngår i sykdom) minkes.
 
-    For hver sykedag nullstilles oppholdstelleren
-    Frem til grensen for arbeidsgiverperiodetelling er nådd telles alle sykedager som del av arbeidsgiverperioden
-    Dersom grensen for oppholdstelleren nås nullstilles arbeidsgiverperiodetelleren
- */
-internal class Arbeidsgiverperiodeteller private constructor(
-    private val oppholdsteller: Teller,
-    private val sykedagteller: Teller
-) {
+   For hver sykedag nullstilles oppholdstelleren
+   Frem til grensen for arbeidsgiverperiodetelling er nådd telles alle sykedager som del av arbeidsgiverperioden
+   Dersom grensen for oppholdstelleren nås nullstilles arbeidsgiverperiodetelleren
+*/
+internal class Arbeidsgiverperiodeteller
+private constructor(private val oppholdsteller: Teller, private val sykedagteller: Teller) {
     companion object {
-        val NormalArbeidstaker get() = Arbeidsgiverperiodeteller(Teller(16), Teller(16))
-        val IngenArbeidsgiverperiode get() = Arbeidsgiverperiodeteller(Teller(16), Teller(0))
+        val NormalArbeidstaker
+            get() = Arbeidsgiverperiodeteller(Teller(16), Teller(16))
+
+        val IngenArbeidsgiverperiode
+            get() = Arbeidsgiverperiodeteller(Teller(16), Teller(0))
     }
 
     private val initiell: Tilstand = if (sykedagteller.ferdig()) IngenTelling else Initiell
@@ -34,6 +35,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
     }
 
     fun inc() = sykedagteller.inc()
+
     fun dec() = oppholdsteller.inc()
 
     fun fullfør() {
@@ -75,21 +77,30 @@ internal class Arbeidsgiverperiodeteller private constructor(
         companion object {
             val nullObserver = object : Observatør {}
         }
+
         fun arbeidsgiverperiodeFerdig() {}
+
         fun arbeidsgiverperiodeAvbrutt() {}
+
         fun arbeidsgiverperiodedag() {}
+
         fun sykedag() {}
     }
 
     private interface Tilstand {
         fun entering(teller: Arbeidsgiverperiodeteller) {}
+
         fun sykedag(teller: Arbeidsgiverperiodeteller) {}
+
         fun ferdig(teller: Arbeidsgiverperiodeteller) {}
+
         fun reset(teller: Arbeidsgiverperiodeteller) {
             teller.state(Initiell)
         }
+
         fun leaving(teller: Arbeidsgiverperiodeteller) {}
     }
+
     private object Initiell : Tilstand {
         override fun entering(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodeAvbrutt()
@@ -100,14 +111,17 @@ internal class Arbeidsgiverperiodeteller private constructor(
             teller.state(PåbegyntArbeidsgiverperiode)
         }
     }
+
     private object PåbegyntArbeidsgiverperiode : Tilstand {
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodedag()
         }
+
         override fun ferdig(teller: Arbeidsgiverperiodeteller) {
             teller.state(ArbeidsgiverperiodeFerdig)
         }
     }
+
     private object ArbeidsgiverperiodeFerdig : Tilstand {
         override fun entering(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodeFerdig()
@@ -117,6 +131,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
             teller.observatør.sykedag()
         }
     }
+
     private object IngenTelling : Tilstand {
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.sykedag()

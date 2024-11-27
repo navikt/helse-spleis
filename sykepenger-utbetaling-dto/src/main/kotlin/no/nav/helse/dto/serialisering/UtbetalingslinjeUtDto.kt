@@ -19,5 +19,5 @@ data class UtbetalingslinjeUtDto(
     val endringskode: EndringskodeDto,
     val klassekode: KlassekodeDto,
     val datoStatusFom: LocalDate?,
-    val statuskode: String?
+    val statuskode: String?,
 )

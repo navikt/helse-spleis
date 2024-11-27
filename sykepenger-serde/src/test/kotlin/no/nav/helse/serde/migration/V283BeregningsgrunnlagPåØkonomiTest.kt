@@ -2,7 +2,8 @@ package no.nav.helse.serde.migration
 
 import org.junit.jupiter.api.Test
 
-internal class V283BeregningsgrunnlagPåØkonomiTest: MigrationTest(V283BeregningsgrunnlagPåØkonomi()) {
+internal class V283BeregningsgrunnlagPåØkonomiTest :
+    MigrationTest(V283BeregningsgrunnlagPåØkonomi()) {
 
     @Test
     fun `migrerer inn beregningsgrunnlag`() {

@@ -42,7 +42,8 @@ enum class Ledd(val nummer: Int) {
     }
 
     companion object {
-        val Int.ledd get() = enumValues<Ledd>().first { it.nummer == this }
+        val Int.ledd
+            get() = enumValues<Ledd>().first { it.nummer == this }
     }
 }
 
@@ -64,8 +65,11 @@ enum class Punktum(val nummer: Int) {
     }
 
     companion object {
-        val Int.punktum get() = enumValues<Punktum>().first { it.nummer == this }
-        val IntRange.punktum get() = enumValues<Punktum>().filter { it.nummer in this }
+        val Int.punktum
+            get() = enumValues<Punktum>().first { it.nummer == this }
+
+        val IntRange.punktum
+            get() = enumValues<Punktum>().filter { it.nummer in this }
     }
 }
 
@@ -76,7 +80,9 @@ enum class Bokstav(val ref: Char) {
 
     init {
         val regex = "[a-zæøå]".toRegex()
-        require(regex.matches(ref.toString())) { "En bokstav må være en bokstav i det norske alfabetet" }
+        require(regex.matches(ref.toString())) {
+            "En bokstav må være en bokstav i det norske alfabetet"
+        }
     }
 
     override fun toString(): String {

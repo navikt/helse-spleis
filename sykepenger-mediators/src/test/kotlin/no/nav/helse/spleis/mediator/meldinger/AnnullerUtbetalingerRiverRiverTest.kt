@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import java.util.*
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.util.*
-import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 
 internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
@@ -23,7 +23,8 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     }
 
     @Language("JSON")
-    private val json = """{
+    private val json =
+        """{
     "@id": "${UUID.randomUUID()}",
     "@opprettet": "2020-01-24T11:25:00",
     "@event_name": "annullering",
@@ -38,10 +39,12 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
         "ident": "S1234567"
     }
 }
-""".trimIndent()
+"""
+            .trimIndent()
 
     @Language("JSON")
-    private val badJson = """
+    private val badJson =
+        """
     {
         "@id": "${UUID.randomUUID()}",
         "@opprettet": "2020-01-24T11:25:00",
@@ -52,5 +55,6 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
         "saksbehandler": "Ola Nordmann",
         "saksbehandlerEpost": "tbd@nav.no"
     }
-""".trimIndent()
+"""
+            .trimIndent()
 }

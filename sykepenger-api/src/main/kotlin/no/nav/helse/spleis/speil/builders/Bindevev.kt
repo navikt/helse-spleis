@@ -15,7 +15,7 @@ internal data class INyInntektUnderveis(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagligbeløp: Double,
-    val månedligBeløp: Double
+    val månedligBeløp: Double,
 )
 
 internal data class IArbeidsgiverinntekt(
@@ -24,7 +24,7 @@ internal data class IArbeidsgiverinntekt(
     val tom: LocalDate,
     val omregnetÅrsinntekt: IOmregnetÅrsinntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO?,
-    val deaktivert: Boolean
+    val deaktivert: Boolean,
 ) {
     internal fun toDTO(): Arbeidsgiverinntekt {
         return Arbeidsgiverinntekt(
@@ -33,22 +33,21 @@ internal data class IArbeidsgiverinntekt(
             skjønnsmessigFastsatt = skjønnsmessigFastsatt,
             fom = fom,
             tom = tom.takeUnless { it == LocalDate.MAX },
-            deaktivert = deaktivert
+            deaktivert = deaktivert,
         )
     }
 
-    internal fun erTilkommenInntekt(skjæringstidspunkt: LocalDate) =
-        fom > skjæringstidspunkt
+    internal fun erTilkommenInntekt(skjæringstidspunkt: LocalDate) = fom > skjæringstidspunkt
 }
 
 internal data class IArbeidsgiverrefusjon(
     val arbeidsgiver: String,
-    val refusjonsopplysninger: List<Refusjonselement>
+    val refusjonsopplysninger: List<Refusjonselement>,
 ) {
     internal fun toDTO(): Arbeidsgiverrefusjon {
         return Arbeidsgiverrefusjon(
             arbeidsgiver = arbeidsgiver,
-            refusjonsopplysninger = refusjonsopplysninger
+            refusjonsopplysninger = refusjonsopplysninger,
         )
     }
 }
@@ -57,38 +56,38 @@ internal data class IOmregnetÅrsinntekt(
     val kilde: IInntektkilde,
     val beløp: Double,
     val månedsbeløp: Double,
-    val inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
+    val inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null, // kun gyldig for A-ordningen
 ) {
     internal fun toDTO(): Inntekt {
         return Inntekt(
             kilde = kilde.toDTO(),
             beløp = beløp,
             månedsbeløp = månedsbeløp,
-            inntekterFraAOrdningen = inntekterFraAOrdningen?.sortedBy { it.måned }?.map { it.toDTO() }
+            inntekterFraAOrdningen =
+                inntekterFraAOrdningen?.sortedBy { it.måned }?.map { it.toDTO() },
         )
     }
 }
 
 internal enum class IInntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert;
+    Saksbehandler,
+    Inntektsmelding,
+    Infotrygd,
+    AOrdningen,
+    IkkeRapportert;
 
-    internal fun toDTO() = when (this) {
-        Saksbehandler -> Inntektkilde.Saksbehandler
-        Inntektsmelding -> Inntektkilde.Inntektsmelding
-        Infotrygd -> Inntektkilde.Infotrygd
-        AOrdningen -> Inntektkilde.AOrdningen
-        IkkeRapportert -> Inntektkilde.IkkeRapportert
-    }
+    internal fun toDTO() =
+        when (this) {
+            Saksbehandler -> Inntektkilde.Saksbehandler
+            Inntektsmelding -> Inntektkilde.Inntektsmelding
+            Infotrygd -> Inntektkilde.Infotrygd
+            AOrdningen -> Inntektkilde.AOrdningen
+            IkkeRapportert -> Inntektkilde.IkkeRapportert
+        }
 }
 
-internal data class IInntekterFraAOrdningen(
-    val måned: YearMonth,
-    val sum: Double
-) {
+internal data class IInntekterFraAOrdningen(val måned: YearMonth, val sum: Double) {
     internal fun toDTO(): InntekterFraAOrdningen {
         return InntekterFraAOrdningen(måned, sum)
     }
 }
-
-
-

@@ -22,53 +22,82 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
 
     @Test
     fun `En helt planke inntektsmelding`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(1.januar, listOf(1.januar til 16.januar), 1000.daglig)
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(1.januar, listOf(1.januar til 16.januar), 1000.daglig)
 
-        assertEquals(Beløpstidslinje.fra(1.januar.somPeriode(), 1000.daglig, kilde), refusjonstidslinje)
+        assertEquals(
+            Beløpstidslinje.fra(1.januar.somPeriode(), 1000.daglig, kilde),
+            refusjonstidslinje,
+        )
     }
 
     @Test
     fun `Opphør av refusjon opplyst å være før første fraværsdag`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(1.februar, listOf(1.februar til 16.februar), 1000.daglig, opphørsdato = 15.januar)
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(
+                1.februar,
+                listOf(1.februar til 16.februar),
+                1000.daglig,
+                opphørsdato = 15.januar,
+            )
 
         assertEquals(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, kilde), refusjonstidslinje)
     }
 
     @Test
     fun `Endring av refusjon oppgitt etter opphørsdato`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(1.januar, listOf(1.januar til 16.januar), 1000.daglig, opphørsdato = 15.februar, endringerIRefusjon = mapOf(28.februar to 500.daglig))
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(
+                1.januar,
+                listOf(1.januar til 16.januar),
+                1000.daglig,
+                opphørsdato = 15.februar,
+                endringerIRefusjon = mapOf(28.februar to 500.daglig),
+            )
 
         assertEquals(16.februar, refusjonstidslinje.last().dato)
-        assertEquals(Beløpstidslinje.fra(1.januar til 15.februar, 1000.daglig, kilde) + Beløpstidslinje.fra(16.februar.somPeriode(), INGEN, kilde), refusjonstidslinje)
+        assertEquals(
+            Beløpstidslinje.fra(1.januar til 15.februar, 1000.daglig, kilde) +
+                Beløpstidslinje.fra(16.februar.somPeriode(), INGEN, kilde),
+            refusjonstidslinje,
+        )
     }
-
 
     @Test
     fun `Endring av refusjon oppgitt før utløpet av en oppstykket agp`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(1.januar, listOf(1.januar til 13.januar, 15.januar til 17.januar), 1000.daglig, opphørsdato = null, endringerIRefusjon = mapOf(15.januar to 500.daglig))
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(
+                1.januar,
+                listOf(1.januar til 13.januar, 15.januar til 17.januar),
+                1000.daglig,
+                opphørsdato = null,
+                endringerIRefusjon = mapOf(15.januar to 500.daglig),
+            )
         assertEquals(15.januar, refusjonstidslinje.last().dato)
-        assertEquals(Beløpstidslinje.fra(15.januar.somPeriode(), 1000.daglig, kilde), refusjonstidslinje)
+        assertEquals(
+            Beløpstidslinje.fra(15.januar.somPeriode(), 1000.daglig, kilde),
+            refusjonstidslinje,
+        )
     }
 
     @Test
     fun `Arbeidsgiver utnytter inntektsmeldingens potensiale for å opplyse om refusjonsopplysninger`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(
-            førsteFraværsdag = 1.januar,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjonsbeløp = 1000.daglig,
-            opphørsdato = 1.mars,
-            endringerIRefusjon = mapOf(
-                31.januar to 500.daglig,
-                15.februar to 0.daglig,
-                20.februar to 400.daglig
-            ))
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                refusjonsbeløp = 1000.daglig,
+                opphørsdato = 1.mars,
+                endringerIRefusjon =
+                    mapOf(31.januar to 500.daglig, 15.februar to 0.daglig, 20.februar to 400.daglig),
+            )
 
         val forventet =
             Beløpstidslinje.fra(1.januar til 30.januar, 1000.daglig, kilde) +
-            Beløpstidslinje.fra(31.januar til 14.februar, 500.daglig, kilde) +
-            Beløpstidslinje.fra(15.februar til 19.februar, 0.daglig, kilde) +
-            Beløpstidslinje.fra(20.februar til 1.mars, 400.daglig, kilde) +
-            Beløpstidslinje.fra(2.mars.somPeriode(), 0.daglig, kilde)
+                Beløpstidslinje.fra(31.januar til 14.februar, 500.daglig, kilde) +
+                Beløpstidslinje.fra(15.februar til 19.februar, 0.daglig, kilde) +
+                Beløpstidslinje.fra(20.februar til 1.mars, 400.daglig, kilde) +
+                Beløpstidslinje.fra(2.mars.somPeriode(), 0.daglig, kilde)
 
         assertEquals(forventet, refusjonstidslinje)
     }
@@ -83,11 +112,21 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
             arbeidsgiverperioder: List<Periode> = emptyList(),
             refusjonsbeløp: Inntekt? = null,
             opphørsdato: LocalDate? = null,
-            endringerIRefusjon: Map<LocalDate, Inntekt> = emptyMap()
-        ) = Inntektsmelding.Refusjon(
-                beløp = refusjonsbeløp,
-                opphørsdato = opphørsdato,
-                endringerIRefusjon = endringerIRefusjon.map { Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key) }
-            ).refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt)
+            endringerIRefusjon: Map<LocalDate, Inntekt> = emptyMap(),
+        ) =
+            Inntektsmelding.Refusjon(
+                    beløp = refusjonsbeløp,
+                    opphørsdato = opphørsdato,
+                    endringerIRefusjon =
+                        endringerIRefusjon.map {
+                            Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key)
+                        },
+                )
+                .refusjonstidslinje(
+                    førsteFraværsdag,
+                    arbeidsgiverperioder,
+                    meldingsreferanseId,
+                    mottatt,
+                )
     }
 }

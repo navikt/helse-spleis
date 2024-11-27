@@ -25,7 +25,10 @@ internal class RefusjonsservitørTest {
         servitør.servér(suppekjøkken, Aktivitetslogg())
         assertNotNull(suppekjøkken[1.januar])
         assertNull(suppekjøkken[2.januar])
-        assertEquals(listOf(1.januar til 9.januar, 16.januar til 31.januar), suppekjøkken[1.januar]!!.perioderMedBeløp)
+        assertEquals(
+            listOf(1.januar til 9.januar, 16.januar til 31.januar),
+            suppekjøkken[1.januar]!!.perioderMedBeløp,
+        )
     }
 
     @Test
@@ -42,8 +45,14 @@ internal class RefusjonsservitørTest {
         assertNotNull(suppekjøkken[16.januar])
         assertNull(suppekjøkken[17.januar])
 
-        assertEquals(listOf(5.januar til 9.januar, 13.januar til 15.januar), suppekjøkken[5.januar]!!.perioderMedBeløp)
-        assertEquals(listOf(16.januar til 22.januar, 26.januar til 31.januar), suppekjøkken[16.januar]!!.perioderMedBeløp)
+        assertEquals(
+            listOf(5.januar til 9.januar, 13.januar til 15.januar),
+            suppekjøkken[5.januar]!!.perioderMedBeløp,
+        )
+        assertEquals(
+            listOf(16.januar til 22.januar, 26.januar til 31.januar),
+            suppekjøkken[16.januar]!!.perioderMedBeløp,
+        )
     }
 
     private companion object {

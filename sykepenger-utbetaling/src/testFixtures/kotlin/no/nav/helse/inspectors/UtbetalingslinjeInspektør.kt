@@ -2,7 +2,8 @@ package no.nav.helse.inspectors
 
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 
-val Utbetalingslinje.inspektør get() = UtbetalingslinjeInspektør(this)
+val Utbetalingslinje.inspektør
+    get() = UtbetalingslinjeInspektør(this)
 
 class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) {
     val endringskode = utbetalingslinje.endringskode

@@ -1,7 +1,7 @@
 package no.nav.helse.dto.deserialisering
 
-import no.nav.helse.dto.MaksdatobestemmelseDto
 import java.time.LocalDate
+import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.PeriodeDto
 
 data class MaksdatoresultatInnDto(
@@ -14,5 +14,5 @@ data class MaksdatoresultatInnDto(
     val avslåtteDager: List<PeriodeDto>,
     val maksdato: LocalDate,
     val gjenståendeDager: Int,
-    val grunnlag: UtbetalingstidslinjeInnDto
+    val grunnlag: UtbetalingstidslinjeInnDto,
 )

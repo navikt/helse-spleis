@@ -12,5 +12,5 @@ data class RefusjonsopplysningUtDto(
     val tom: LocalDate?,
     val beløp: InntektDto,
     val avsender: AvsenderDto,
-    val tidsstempel: LocalDateTime
+    val tidsstempel: LocalDateTime,
 )

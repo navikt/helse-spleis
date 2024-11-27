@@ -37,16 +37,21 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
-        assertTrue(person.personLogg.varsel.none { w ->
-            w.toString().contains("Mottatt flere inntektsmeldinger")
-        })
+        assertTrue(
+            person.personLogg.varsel.none { w ->
+                w.toString().contains("Mottatt flere inntektsmeldinger")
+            }
+        )
     }
 
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+        )
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, inntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -54,11 +59,15 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+        )
         håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
 
         assertForventetFeil(
-            forklaring = "Burde legge på warning om vi får en inntektsmelding ville ha truffet vedtaksperioden til søknaden",
+            forklaring =
+                "Burde legge på warning om vi får en inntektsmelding ville ha truffet vedtaksperioden til søknaden",
             nå = {
                 assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
                 assertIngenVarsel(RV_IM_3, 2.vedtaksperiode.filter())
@@ -66,8 +75,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
             ønsket = {
                 assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
                 assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-            }
+            },
         )
     }
-
 }

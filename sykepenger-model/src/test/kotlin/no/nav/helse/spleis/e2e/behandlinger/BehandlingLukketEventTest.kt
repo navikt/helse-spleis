@@ -10,9 +10,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.onsdag
+import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.søndag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,11 +28,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_UTBETALING)
             assertEquals(VEDTAK_FATTET, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -71,7 +72,10 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når vedtak uten utbetaling fattes`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                sendtTilNAVEllerArbeidsgiver = 1.mai,
+            )
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -79,11 +83,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -97,11 +102,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
             assertEquals(AVSLUTTET_UTEN_VEDTAK, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -112,7 +118,9 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     fun `behandling lukkes når revurdering fattes`() {
         a1 {
             nyttVedtak(1.januar til (onsdag den 31.januar))
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
+            håndterOverstyrTidslinje(
+                listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag))
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
@@ -120,11 +128,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_UTBETALING)
             assertEquals(VEDTAK_FATTET, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -135,7 +144,9 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     fun `behandling lukkes når revurdering avvises`() {
         a1 {
             nyttVedtak(1.januar til (onsdag den 31.januar))
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
+            håndterOverstyrTidslinje(
+                listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag))
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
@@ -143,11 +154,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(REVURDERT_VEDTAK_AVVIST, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -158,18 +170,21 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     fun `behandling lukkes når revurdering uten utbetaling fattes`() {
         a1 {
             nyttVedtak(1.januar til (søndag den 28.januar))
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(søndag den 28.januar, Dagtype.Feriedag)))
+            håndterOverstyrTidslinje(
+                listOf(ManuellOverskrivingDag(søndag den 28.januar, Dagtype.Feriedag))
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
 
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -180,7 +195,9 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     fun `behandling lukkes når revurdering gjør om til auu - med tidligere utbetaling`() {
         a1 {
             nyttVedtak(januar)
-            håndterOverstyrTidslinje((17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
+            håndterOverstyrTidslinje(
+                (17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
@@ -189,11 +206,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -203,24 +221,30 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når vedtak uten utbetaling fattes - uten tidligere utbetaling`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                sendtTilNAVEllerArbeidsgiver = 1.mai,
+            )
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
 
-            håndterOverstyrTidslinje((17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
+            håndterOverstyrTidslinje(
+                (17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
 
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                PersonObserver.BehandlingLukketEvent(
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)

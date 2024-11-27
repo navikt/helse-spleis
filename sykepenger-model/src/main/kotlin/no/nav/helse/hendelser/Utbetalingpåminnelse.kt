@@ -12,16 +12,16 @@ class Utbetalingpåminnelse(
     private val antallGangerPåminnet: Int,
     override val status: Utbetalingstatus,
     private val endringstidspunkt: LocalDateTime,
-    påminnelsestidspunkt: LocalDateTime
+    påminnelsestidspunkt: LocalDateTime,
 ) : Hendelse, UtbetalingpåminnelseHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer
-    )
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SYSTEM,
-        innsendt = påminnelsestidspunkt,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = true
-    )
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = påminnelsestidspunkt,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = true,
+        )
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import java.util.UUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import org.intellij.lang.annotations.Language
@@ -28,12 +28,12 @@ internal class YtelserRiverTest : RiverTest() {
     }
 
     @Test
-    fun `Ignorerer løsning uten pleiepenger`(){
+    fun `Ignorerer løsning uten pleiepenger`() {
         assertIgnored(utenPleiepenger)
     }
 
     @Test
-    fun `Ignorerer løsning uten omsorgspenger`(){
+    fun `Ignorerer løsning uten omsorgspenger`() {
         assertIgnored(utenOmsorgspenger)
     }
 
@@ -59,7 +59,8 @@ internal class YtelserRiverTest : RiverTest() {
 }
 
 @Language("JSON")
-private val json = """
+private val json =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -184,7 +185,8 @@ private val json = """
 """
 
 @Language("JSON")
-private val ukjentPeriode = """
+private val ukjentPeriode =
+    """
     {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -275,7 +277,8 @@ private val ukjentPeriode = """
 """
 
 @Language("JSON")
-private val ugyldigPeriode = """
+private val ugyldigPeriode =
+    """
     {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -366,7 +369,8 @@ private val ugyldigPeriode = """
 """
 
 @Language("JSON")
-private val utenPleiepenger = """
+private val utenPleiepenger =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -445,7 +449,8 @@ private val utenPleiepenger = """
 """
 
 @Language("JSON")
-private val utenOmsorgspenger = """
+private val utenOmsorgspenger =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -524,7 +529,8 @@ private val utenOmsorgspenger = """
 """
 
 @Language("JSON")
-private val utenOpplæringspenger = """
+private val utenOpplæringspenger =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -603,7 +609,8 @@ private val utenOpplæringspenger = """
 """
 
 @Language("JSON")
-private val utenInstitusjonsopphold = """
+private val utenInstitusjonsopphold =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -681,9 +688,9 @@ private val utenInstitusjonsopphold = """
     }
 """
 
-
 @Language("JSON")
-private val utenArbeidsavklaringspenger = """
+private val utenArbeidsavklaringspenger =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -782,7 +789,8 @@ private val utenArbeidsavklaringspenger = """
 """
 
 @Language("JSON")
-private val utenDagpenger = """
+private val utenDagpenger =
+    """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
@@ -882,4 +890,3 @@ private val utenDagpenger = """
       "@besvart": "2020-01-24T11:25:00"
     }
 """
-

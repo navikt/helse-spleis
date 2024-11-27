@@ -33,8 +33,11 @@ import org.junit.jupiter.api.Assertions
 
 internal class Applikasjonsservere(private val poolSize: Int) {
     constructor() : this(POOL_SIZE)
+
     companion object {
-        private val JUNIT_PARALLELISM = System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt() ?: 1
+        private val JUNIT_PARALLELISM =
+            System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt()
+                ?: 1
 
         private const val MIN_POOL_SIZE = 1
         private val MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors()
@@ -43,26 +46,29 @@ internal class Applikasjonsservere(private val poolSize: Int) {
 
     private val issuer = Issuer("Microsoft AD")
     private val azureTokenStub = AzureTokenStub(issuer)
-    private val azureConfig = AzureAdAppConfig(
-        clientId = Issuer.AUDIENCE,
-        issuer = issuer.navn,
-        jwkProvider = JwkProviderBuilder(azureTokenStub.wellKnownEndpoint().toURL()).build(),
-    )
+    private val azureConfig =
+        AzureAdAppConfig(
+            clientId = Issuer.AUDIENCE,
+            issuer = issuer.navn,
+            jwkProvider = JwkProviderBuilder(azureTokenStub.wellKnownEndpoint().toURL()).build(),
+        )
     private val tilgjengelige by lazy {
         ArrayBlockingQueue(poolSize, false, opprettApplikasjonsserver())
     }
 
     init {
-        runBlocking(Dispatchers.IO) {
-            azureTokenStub.startServer()
-        }
+        runBlocking(Dispatchers.IO) { azureTokenStub.startServer() }
     }
 
     fun nyAppserver(): Applikasjonserver {
-        return tilgjengelige.poll(20, TimeUnit.SECONDS) ?: throw RuntimeException("Ventet i 20 sekunder uten å få en ledig appserver")
+        return tilgjengelige.poll(20, TimeUnit.SECONDS)
+            ?: throw RuntimeException("Ventet i 20 sekunder uten å få en ledig appserver")
     }
 
-    fun kjørTest(testdata: (TestDataSource) -> Unit, testblokk: suspend BlackboxTestContext.() -> Unit) {
+    fun kjørTest(
+        testdata: (TestDataSource) -> Unit,
+        testblokk: suspend BlackboxTestContext.() -> Unit,
+    ) {
         val appserver = nyAppserver()
         try {
             appserver.kjørTest(testdata, testblokk)
@@ -72,9 +78,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
     }
 
     fun returner(appserver: Applikasjonserver) {
-        check(tilgjengelige.offer(appserver)) {
-            "Kunne ikke returnere appserveren"
-        }
+        check(tilgjengelige.offer(appserver)) { "Kunne ikke returnere appserveren" }
     }
 
     fun ryddOpp() {
@@ -83,36 +87,48 @@ internal class Applikasjonsservere(private val poolSize: Int) {
                 .map { async { it.stopp() } }
                 .plusElement(async { azureTokenStub.stopServer() })
                 .awaitAll()
-
         }
     }
 
-    private fun opprettApplikasjonsserver() = (1..poolSize).map {
-        val navn = "appserver_$it"
-        println("oppretter appserver $navn")
-        Applikasjonserver(navn, azureConfig, issuer)
-    }
+    private fun opprettApplikasjonsserver() =
+        (1..poolSize).map {
+            val navn = "appserver_$it"
+            println("oppretter appserver $navn")
+            Applikasjonserver(navn, azureConfig, issuer)
+        }
 
-    internal class Applikasjonserver(private val navn: String, azureConfig: AzureAdAppConfig, issuer: Issuer) {
+    internal class Applikasjonserver(
+        private val navn: String,
+        azureConfig: AzureAdAppConfig,
+        issuer: Issuer,
+    ) {
         private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val speedClient = mockk<SpeedClient>()
         private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(azureConfig, speedClient, spekematClient, { testDataSource.ds }, registry, randomPort)
+            createApp(
+                azureConfig,
+                speedClient,
+                spekematClient,
+                { testDataSource.ds },
+                registry,
+                randomPort,
+            )
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 
         private var startetOpp = false
 
-        fun kjørTest(testdata: (TestDataSource) -> Unit = {}, testblokk: suspend BlackboxTestContext.() -> Unit) {
+        fun kjørTest(
+            testdata: (TestDataSource) -> Unit = {},
+            testblokk: suspend BlackboxTestContext.() -> Unit,
+        ) {
             testDataSource = databaseContainer.nyTilkobling()
             try {
                 startOpp(testdata)
-                runBlocking {
-                    testblokk(testContext)
-                }
+                runBlocking { testblokk(testContext) }
             } finally {
                 databaseContainer.droppTilkobling(testDataSource)
             }
@@ -122,9 +138,10 @@ internal class Applikasjonsservere(private val poolSize: Int) {
             runBlocking(context = Dispatchers.IO) {
                 // starter opp ting, i parallell
                 listOf(
-                    launch { testdata(testDataSource) },
-                    launch { if (!startetOpp) app.start(wait = false) }
-                ).joinAll()
+                        launch { testdata(testDataSource) },
+                        launch { if (!startetOpp) app.start(wait = false) },
+                    )
+                    .joinAll()
             }
             startetOpp = true
         }
@@ -135,63 +152,64 @@ internal class Applikasjonsservere(private val poolSize: Int) {
 
         private companion object {
 
-            private fun lagHttpklient(port: Int) =
-                HttpClient {
-                    defaultRequest {
-                        host = "localhost"
-                        this.port = port
-                    }
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
+            private fun lagHttpklient(port: Int) = HttpClient {
+                defaultRequest {
+                    host = "localhost"
+                    this.port = port
                 }
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }
         }
     }
 
     internal class BlackboxTestContext(val client: HttpClient, val issuer: Issuer) {
         suspend fun post(body: String, forventetStatusCode: HttpStatusCode, accessToken: String?) =
-            client.post("/graphql") {
-                accessToken?.also { bearerAuth(accessToken) }
-                setBody(body)
-            }.also {
-                Assertions.assertEquals(forventetStatusCode, it.status)
-            }
+            client
+                .post("/graphql") {
+                    accessToken?.also { bearerAuth(accessToken) }
+                    setBody(body)
+                }
+                .also { Assertions.assertEquals(forventetStatusCode, it.status) }
 
         fun String.httpGet(
             expectedStatus: HttpStatusCode = HttpStatusCode.OK,
             headers: Map<String, String> = emptyMap(),
-            testBlock: String.() -> Unit = {}
+            testBlock: String.() -> Unit = {},
         ) {
             val token = issuer.createToken(Issuer.AUDIENCE)
 
             runBlocking {
-                client.get(this@httpGet) {
-                    bearerAuth(token)
-                    headers.forEach { (k, v) ->
-                        header(k, v)
-                    }
-                }.also {
-                    Assertions.assertEquals(expectedStatus, it.status)
-                }.bodyAsText()
-            }.also(testBlock)
+                    client
+                        .get(this@httpGet) {
+                            bearerAuth(token)
+                            headers.forEach { (k, v) -> header(k, v) }
+                        }
+                        .also { Assertions.assertEquals(expectedStatus, it.status) }
+                        .bodyAsText()
+                }
+                .also(testBlock)
         }
 
         fun String.httpPost(
             expectedStatus: HttpStatusCode = HttpStatusCode.OK,
             postBody: Map<String, String> = emptyMap(),
-            testBlock: String.() -> Unit = {}
+            testBlock: String.() -> Unit = {},
         ) {
             val token = issuer.createToken(Issuer.AUDIENCE)
 
             runBlocking {
-                client.post(this@httpPost) {
-                    bearerAuth(token)
-                    contentType(ContentType.Application.Json)
-                    setBody(postBody)
-                }.also {
-                    Assertions.assertEquals(expectedStatus, it.status)
-                }.bodyAsText()
-            }.also(testBlock)
+                    client
+                        .post(this@httpPost) {
+                            bearerAuth(token)
+                            contentType(ContentType.Application.Json)
+                            setBody(postBody)
+                        }
+                        .also { Assertions.assertEquals(expectedStatus, it.status) }
+                        .bodyAsText()
+                }
+                .also(testBlock)
         }
     }
 }

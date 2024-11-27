@@ -9,7 +9,7 @@ import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 
 internal class NyeArbeidsledigSøknaderRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventName = "ny_søknad_arbeidsledig"
     override val riverName = "Ny arbeidsledig søknad"
@@ -21,8 +21,12 @@ internal class NyeArbeidsledigSøknaderRiver(
         message.forbid("arbeidsgiver.orgnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = NyArbeidsledigSøknadMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        NyArbeidsledigSøknadMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fnr"].asText(),
+            ),
+        )
 }

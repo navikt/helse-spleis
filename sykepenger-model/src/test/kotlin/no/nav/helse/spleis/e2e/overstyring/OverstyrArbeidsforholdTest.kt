@@ -51,20 +51,45 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            1.vedtaksperiode,
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        1.desember(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        val relevanteOrgnumre1: Iterable<String> = hendelselogg.etterspurtBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+        val relevanteOrgnumre1: Iterable<String> =
+            hendelselogg.etterspurtBehov(
+                1.vedtaksperiode.id(ORGNUMMER),
+                Behovtype.Godkjenning,
+                "orgnummereMedRelevanteArbeidsforhold",
+            ) ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterOverstyrArbeidsforhold(
+            skjæringstidspunkt,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        val relevanteOrgnumre2: Iterable<String> = hendelselogg.etterspurtBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+        val relevanteOrgnumre2: Iterable<String> =
+            hendelselogg.etterspurtBehov(
+                1.vedtaksperiode.id(ORGNUMMER),
+                Behovtype.Godkjenning,
+                "orgnummereMedRelevanteArbeidsforhold",
+            ) ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1), relevanteOrgnumre2.toList())
     }
 
@@ -74,10 +99,22 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            1.vedtaksperiode,
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        1.desember(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -87,7 +124,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterOverstyrArbeidsforhold(
+            skjæringstidspunkt,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")),
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
@@ -96,7 +136,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+                ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -104,10 +146,13 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a1)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            }
     }
 
     @Test
@@ -115,25 +160,46 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar(2017) til 31.januar(2017), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a2,
+        )
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                )
-            ),
-            orgnummer = a2
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a3,
+                        1.desember(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                            grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                        )
+                ),
+            orgnummer = a2,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -142,7 +208,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a2).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
@@ -151,7 +220,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+                ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -159,60 +230,109 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a1)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            }
     }
 
     @Test
     fun `kan ikke overstyre arbeidsforhold for arbeidsgiver vi ikke kjenner til`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a1,
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                )
-            ),
-            orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                            grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                        )
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertThrows<IllegalStateException>("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til") {
-            håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+        assertThrows<IllegalStateException>(
+            "Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til"
+        ) {
+            håndterOverstyrArbeidsforhold(
+                1.januar,
+                listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")),
+            )
         }
     }
 
     @Test
     fun `deaktivering av arbeidsforhold uten sykdom fører til nytt sykepengegrunnlag uten arbeidsforholdet, selv med inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a1,
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a3, 1.januar, 1000.månedlig.repeat(1)) // Liten inntekt som saksbehandler ikke ser på som relevant
-                )
-            ),
-            orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a3,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                            grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                            grunnlag(
+                                a3,
+                                1.januar,
+                                1000.månedlig.repeat(1),
+                            ), // Liten inntekt som saksbehandler ikke ser på som relevant
+                        )
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -221,7 +341,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
             assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
@@ -229,7 +352,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+                ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -237,39 +362,61 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
-        }
-
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a1)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a2)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+            }
     }
 
     @Test
     fun `tar med inntekt fra inntektsmelding selv om vi ikke finner et aktivt arbeidsforhold i arbeidsforholdhistorikken`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a2,
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, 30.november(2017), Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a3, 1.januar, INNTEKT.repeat(3))
-                )
-            ),
-            orgnummer = a2
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        30.november(2017),
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a3,
+                        LocalDate.EPOCH,
+                        type = Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                            grunnlag(a3, 1.januar, INNTEKT.repeat(3)),
+                        )
+                ),
+            orgnummer = a2,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+                ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -277,71 +424,120 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a2).inntektskilde(1.vedtaksperiode))
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
-        }
-
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a2)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a3)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+            }
     }
 
     @Test
     fun `kan ikke overstyre arbeidsforhold dersom ingen vedtaksperioder kan håndtere hendelsen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a1,
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
-                )
-            ),
-            orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                            grunnlag(a2, 1.januar, 1000.månedlig.repeat(1)),
+                        )
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertThrows<IllegalStateException> {
-            håndterOverstyrArbeidsforhold(2.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+            håndterOverstyrArbeidsforhold(
+                2.januar,
+                listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")),
+            )
         }
     }
 
     @Test
     fun `vi vilkårsprøver krav om minimum inntekt ved overstyring av arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 3800.månedlig, orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a1,
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 3800.månedlig,
+            orgnummer = a1,
+        )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, 3800.månedlig.repeat(3)),
-                    grunnlag(a2, 1.januar, 300.månedlig.repeat(3))
-                )
-            ),
-            orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 1.januar, 3800.månedlig.repeat(3)),
+                            grunnlag(a2, 1.januar, 300.månedlig.repeat(3)),
+                        )
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+                ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(45600.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -349,31 +545,51 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(3800.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a1)
+            .inspektør
+            .also {
+                assertEquals(3800.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            }
         assertVarsel(RV_SV_1, 1.vedtaksperiode.filter(a1))
     }
 
     @Test
     fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            orgnummer = a1,
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1,
+        )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 31.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 5.januar, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
-                )
-            ),
-            orgnummer = a1
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        31.desember(2017),
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        5.januar,
+                        Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = listOf(grunnlag(a2, 1.januar, 1000.månedlig.repeat(3)))
+                ),
+            orgnummer = a1,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -382,7 +598,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")),
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
@@ -391,7 +610,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag =
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+                ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -399,11 +620,17 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            .getValue(a1)
+            .inspektør
+            .also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            }
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(a1))
-        assertInstanceOf(Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
+        assertInstanceOf(
+            Utbetalingsdag.AvvistDag::class.java,
+            inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar],
+        )
     }
 }

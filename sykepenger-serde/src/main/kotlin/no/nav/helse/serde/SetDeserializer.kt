@@ -9,12 +9,11 @@ internal class SetDeserializer(t: Class<Set<*>>) : StdDeserializer<Set<*>>(t) {
 
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Set<*> {
 
-        return p
-            .readValueAs(LinkedHashSet::class.java)
+        return p.readValueAs(LinkedHashSet::class.java)
             .map {
                 try {
                     fromString(it as String)
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     it
                 }
             }

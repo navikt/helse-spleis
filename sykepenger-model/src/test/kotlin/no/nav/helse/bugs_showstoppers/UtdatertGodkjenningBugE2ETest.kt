@@ -23,7 +23,7 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
+internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Håndterer løsning på godkjenningsbehov der utbetalingid på løsningen matcher med periodens gjeldende utbetaling`() {
@@ -39,7 +39,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
     }
 
@@ -63,7 +63,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
+            AVVENTER_GODKJENNING,
         )
     }
 
@@ -82,7 +82,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING
+            TIL_UTBETALING,
         )
     }
 }

@@ -17,10 +17,11 @@ import no.nav.helse.serde.SerialisertPerson
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.MDC
 
-private val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+private val objectMapper: ObjectMapper =
+    jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
     factory.createProducer().use { producer ->
@@ -36,7 +37,6 @@ fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
                     val melding = objectMapper.writeValueAsString(event)
                     producer.send(ProducerRecord("tbd.teknisk.v1", null, fødselsnummer, melding))
                     sikkerlogg.info("Skrev grunnbeløp til tbd.teknisk.v1 for:\n{}", melding)
-
                 } catch (err: Exception) {
                     log.info("person lar seg ikke serialisere: ${err.message}")
                     sikkerlogg.error("person lar seg ikke serialisere: ${err.message}", err)
@@ -48,7 +48,9 @@ fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
         producer.flush()
     }
     runBlocking {
-        log.info("Venter med å skru av i ett minutt for at securelogs-sidecar forhåpentligvis skal synce loggene")
+        log.info(
+            "Venter med å skru av i ett minutt for at securelogs-sidecar forhåpentligvis skal synce loggene"
+        )
         delay(60000L)
     }
 }
@@ -57,30 +59,23 @@ private fun finnGrunnbeløp(person: PersonInnDto): List<Grunnbeløp> {
     val historikk = person.vilkårsgrunnlagHistorikk.historikk
     if (historikk.isEmpty()) return emptyList()
     val siste = historikk.first()
-    return siste.vilkårsgrunnlag.filterNot { it.inntektsgrunnlag.vurdertInfotrygd }.map {
-        spleisVilkårsgrunnlag -> Grunnbeløp(
-            skjæringstidspunkt = spleisVilkårsgrunnlag.skjæringstidspunkt,
-            `6G` = spleisVilkårsgrunnlag.inntektsgrunnlag.`6G`.beløp
-        )
-    }
+    return siste.vilkårsgrunnlag
+        .filterNot { it.inntektsgrunnlag.vurdertInfotrygd }
+        .map { spleisVilkårsgrunnlag ->
+            Grunnbeløp(
+                skjæringstidspunkt = spleisVilkårsgrunnlag.skjæringstidspunkt,
+                `6G` = spleisVilkårsgrunnlag.inntektsgrunnlag.`6G`.beløp,
+            )
+        }
 }
 
+private fun fødselsnummerSomString(fnr: Long) =
+    fnr.toString().let { if (it.length == 11) it else "0$it" }
 
-private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.length == 11) it else "0$it" }
-
-private data class GrunnbeløpEvent(
-    val fødselsnummer: String,
-    val grunnbeløp: List<Grunnbeløp>
-) {
-    @JsonProperty("@event_name")
-    val eventName: String = "grunnbeløp"
-    @JsonProperty("@id")
-    val id: UUID = UUID.randomUUID()
-    @JsonProperty("@opprettet")
-    val opprettet: LocalDateTime = LocalDateTime.now()
+private data class GrunnbeløpEvent(val fødselsnummer: String, val grunnbeløp: List<Grunnbeløp>) {
+    @JsonProperty("@event_name") val eventName: String = "grunnbeløp"
+    @JsonProperty("@id") val id: UUID = UUID.randomUUID()
+    @JsonProperty("@opprettet") val opprettet: LocalDateTime = LocalDateTime.now()
 }
-private data class Grunnbeløp(
-    val skjæringstidspunkt: LocalDate,
-    val `6G`: Double
-)
 
+private data class Grunnbeløp(val skjæringstidspunkt: LocalDate, val `6G`: Double)

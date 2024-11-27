@@ -15,13 +15,22 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
         val testkilde = TestHendelse(LocalDateTime.now()).kilde
     }
 
-    val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class.simpleName ?: "Ukjent", UUID.randomUUID(), opprettet)
+    val kilde =
+        SykdomshistorikkHendelse.Hendelseskilde(
+            this::class.simpleName ?: "Ukjent",
+            UUID.randomUUID(),
+            opprettet,
+        )
 
     // Objects impersonating real-life sources of sickness timeline days
     class Inntektsmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
+
     class Sykmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
+
     class OverstyrTidslinje(opprettet: LocalDateTime) : TestEvent(opprettet)
+
     class Søknad(opprettet: LocalDateTime) : TestEvent(opprettet)
+
     class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
 
     override fun oppdaterFom(other: Periode): Periode {

@@ -1,4 +1,3 @@
-
 package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
@@ -7,7 +6,7 @@ import no.nav.helse.spleis.IMessageMediator
 
 internal abstract class ArbeidsgiverBehovRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : BehovRiver(rapidsConnection, messageMediator) {
 
     init {

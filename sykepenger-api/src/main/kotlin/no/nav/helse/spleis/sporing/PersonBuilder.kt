@@ -16,31 +16,44 @@ internal class PersonBuilder(private val person: Person) {
 
     private fun mapArbeidsgiver(arbeidsgiverDto: ArbeidsgiverUtDto): ArbeidsgiverDTO {
         val perioderBuilder = arbeidsgiverDto.vedtaksperioder.map { mapVedtaksperiode(it, false) }
-        val forkastetPerioderBuilder = arbeidsgiverDto.vedtaksperioder.map { mapVedtaksperiode(it, true) }
+        val forkastetPerioderBuilder =
+            arbeidsgiverDto.vedtaksperioder.map { mapVedtaksperiode(it, true) }
 
-        val perioder = (perioderBuilder + forkastetPerioderBuilder).sortedBy { it.fom }.toMutableList()
+        val perioder =
+            (perioderBuilder + forkastetPerioderBuilder).sortedBy { it.fom }.toMutableList()
         return ArbeidsgiverDTO(
             organisasjonsnummer = arbeidsgiverDto.organisasjonsnummer,
-            vedtaksperioder = perioder.onEachIndexed { index, denne ->
-                val erForlengelse = if (index > 0) perioder[index - 1].forlenger(denne) else false
-                val erForlenget = if (perioder.size > (index + 1)) denne.forlenger(perioder[index + 1]) else false
-                perioder[index] = denne.copy(periodetype = when {
-                    !erForlengelse && !erForlenget -> PeriodetypeDTO.GAP_SISTE
-                    !erForlengelse && erForlenget -> PeriodetypeDTO.GAP
-                    erForlengelse && !erForlenget -> PeriodetypeDTO.FORLENGELSE_SISTE
-                    else -> PeriodetypeDTO.FORLENGELSE
-                })
-            }
+            vedtaksperioder =
+                perioder.onEachIndexed { index, denne ->
+                    val erForlengelse =
+                        if (index > 0) perioder[index - 1].forlenger(denne) else false
+                    val erForlenget =
+                        if (perioder.size > (index + 1)) denne.forlenger(perioder[index + 1])
+                        else false
+                    perioder[index] =
+                        denne.copy(
+                            periodetype =
+                                when {
+                                    !erForlengelse && !erForlenget -> PeriodetypeDTO.GAP_SISTE
+                                    !erForlengelse && erForlenget -> PeriodetypeDTO.GAP
+                                    erForlengelse && !erForlenget ->
+                                        PeriodetypeDTO.FORLENGELSE_SISTE
+                                    else -> PeriodetypeDTO.FORLENGELSE
+                                }
+                        )
+                },
         )
     }
 
-    private fun mapVedtaksperiode(dto: VedtaksperiodeUtDto, forkastet: Boolean) = VedtaksperiodeDTO(
-        id = dto.id,
-        fom = dto.fom,
-        tom = dto.tom,
-        periodetype = PeriodetypeDTO.GAP,
-        forkastet = forkastet
-    )
+    private fun mapVedtaksperiode(dto: VedtaksperiodeUtDto, forkastet: Boolean) =
+        VedtaksperiodeDTO(
+            id = dto.id,
+            fom = dto.fom,
+            tom = dto.tom,
+            periodetype = PeriodetypeDTO.GAP,
+            forkastet = forkastet,
+        )
 
-    private fun VedtaksperiodeDTO.forlenger(other: VedtaksperiodeDTO) = this.tom.erRettFør(other.fom)
+    private fun VedtaksperiodeDTO.forlenger(other: VedtaksperiodeDTO) =
+        this.tom.erRettFør(other.fom)
 }

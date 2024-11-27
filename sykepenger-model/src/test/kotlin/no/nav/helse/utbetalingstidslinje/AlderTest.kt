@@ -61,11 +61,17 @@ internal class AlderTest {
 
     @Test
     fun `riktig begrunnelse for minimum inntekt ved alder over 67`() {
-        assertEquals(Begrunnelse.MinimumInntektOver67, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(2.januar))
+        assertEquals(
+            Begrunnelse.MinimumInntektOver67,
+            FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(2.januar),
+        )
     }
 
     @Test
     fun `riktig begrunnelse for minimum inntekt ved alder 67 eller under`() {
-        assertEquals(Begrunnelse.MinimumInntekt, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(1.januar))
+        assertEquals(
+            Begrunnelse.MinimumInntekt,
+            FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(1.januar),
+        )
     }
 }

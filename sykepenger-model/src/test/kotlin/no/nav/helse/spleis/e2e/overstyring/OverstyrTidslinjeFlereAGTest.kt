@@ -32,7 +32,10 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a2)
+        håndterOverstyrTidslinje(
+            (29.januar til 29.januar).map { manuellFeriedag(it) },
+            orgnummer = a2,
+        )
         assertIngenFunksjonelleFeil()
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -43,7 +46,10 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
     fun `overstyre en eldre periode hos en arbeidsgiver`() {
         nyttVedtak(januar, orgnummer = a1)
         tilGodkjenning(1.oktober til 30.oktober, a2)
-        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+        håndterOverstyrTidslinje(
+            (29.januar til 29.januar).map { manuellFeriedag(it) },
+            orgnummer = a1,
+        )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
     }
@@ -54,7 +60,10 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
         tilGodkjenning(1.oktober til 30.oktober, a2)
 
-        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+        håndterOverstyrTidslinje(
+            (29.januar til 29.januar).map { manuellFeriedag(it) },
+            orgnummer = a1,
+        )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)

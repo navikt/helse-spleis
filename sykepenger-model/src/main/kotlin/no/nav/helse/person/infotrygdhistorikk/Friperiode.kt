@@ -14,9 +14,9 @@ class Friperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
     }
 
     override fun utbetalingstidslinje(): Utbetalingstidslinje {
-        return Utbetalingstidslinje.Builder().apply {
-            periode.forEach { dag -> addFridag(dag, Økonomi.ikkeBetalt()) }
-        }.build()
+        return Utbetalingstidslinje.Builder()
+            .apply { periode.forEach { dag -> addFridag(dag, Økonomi.ikkeBetalt()) } }
+            .build()
     }
 
     internal fun dto() = InfotrygdFerieperiodeDto(periode.dto())
@@ -24,10 +24,7 @@ class Friperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
     internal companion object {
         internal fun gjenopprett(dto: InfotrygdFerieperiodeDto): Friperiode {
             val periode = Periode.gjenopprett(dto.periode)
-            return Friperiode(
-                fom = periode.start,
-                tom = periode.endInclusive
-            )
+            return Friperiode(fom = periode.start, tom = periode.endInclusive)
         }
     }
 }

@@ -11,19 +11,21 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 
-internal val Inntektsopplysning.inspektør get() = InntektsopplysningInspektør(this)
+internal val Inntektsopplysning.inspektør
+    get() = InntektsopplysningInspektør(this)
 
 internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysning) {
 
     val beløp: Inntekt = inntektsopplysning.beløp
     val hendelseId: UUID = inntektsopplysning.hendelseId
     val tidsstempel: LocalDateTime = inntektsopplysning.tidsstempel
-    val forrigeInntekt = when (inntektsopplysning) {
-        is Infotrygd -> null
-        is Saksbehandler -> inntektsopplysning.overstyrtInntekt
-        is SkjønnsmessigFastsatt -> inntektsopplysning.overstyrtInntekt
-        is IkkeRapportert -> null
-        is Inntektsmelding -> null
-        is SkattSykepengegrunnlag -> null
-    }
+    val forrigeInntekt =
+        when (inntektsopplysning) {
+            is Infotrygd -> null
+            is Saksbehandler -> inntektsopplysning.overstyrtInntekt
+            is SkjønnsmessigFastsatt -> inntektsopplysning.overstyrtInntekt
+            is IkkeRapportert -> null
+            is Inntektsmelding -> null
+            is SkattSykepengegrunnlag -> null
+        }
 }

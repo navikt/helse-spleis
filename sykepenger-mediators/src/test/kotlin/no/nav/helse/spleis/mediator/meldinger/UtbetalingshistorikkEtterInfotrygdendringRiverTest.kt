@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.time.LocalDateTime
 import java.util.UUID
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkEtterInfotrygdendringRiver
 import org.intellij.lang.annotations.Language
@@ -24,7 +24,8 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiverTest : RiverTest() 
     }
 
     @Language("JSON")
-    private fun json(vedtaksperiodeId: String? = null) = """
+    private fun json(vedtaksperiodeId: String? = null) =
+        """
       {
           "@event_name": "behov",
           "historikkFom": "2014-12-08",
@@ -70,5 +71,6 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiverTest : RiverTest() 
           "@final": true,
           "@besvart": "${LocalDateTime.now()}"
         }
-    """.trimIndent()
+    """
+            .trimIndent()
 }

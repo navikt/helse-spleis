@@ -5,14 +5,19 @@ import java.util.UUID
 import no.nav.helse.dto.AvsenderDto
 
 enum class Avsender {
-    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
+    SYKMELDT,
+    ARBEIDSGIVER,
+    SAKSBEHANDLER,
+    SYSTEM;
 
-    fun dto() = when (this) {
-        SYKMELDT -> AvsenderDto.SYKMELDT
-        ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
-        SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
-        SYSTEM -> AvsenderDto.SYSTEM
-    }
+    fun dto() =
+        when (this) {
+            SYKMELDT -> AvsenderDto.SYKMELDT
+            ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
+            SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
+            SYSTEM -> AvsenderDto.SYSTEM
+        }
+
     companion object {
         fun gjenopprett(dto: AvsenderDto): Avsender {
             return when (dto) {
@@ -32,6 +37,7 @@ sealed interface Hendelse {
 
 sealed interface Behandlingsporing {
     data object IngenArbeidsgiver : Behandlingsporing
+
     data class Arbeidsgiver(val organisasjonsnummer: String) : Behandlingsporing
 }
 
@@ -47,5 +53,5 @@ data class HendelseMetadata(
     val innsendt: LocalDateTime,
 
     // sann hvis et system har sendt meldingen på eget initiativ
-    val automatiskBehandling: Boolean
+    val automatiskBehandling: Boolean,
 )

@@ -13,16 +13,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
+internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
 
     @Test
     fun `periode i avventer blokkerende som venter på inntektsmelding fra annen arbeidsgiver bør ha samme timeout som avventer inntektsmelding`() {
-        a1 {
-            håndterSøknad(januar)
-        }
-        a2 {
-            håndterSøknad(januar)
-        }
+        a1 { håndterSøknad(januar) }
+        a2 { håndterSøknad(januar) }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -39,9 +35,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
 
     @Test
     fun `periode i avventer blokkerende som venter på søknad fra annen arbeidsgiver venter i 3 måneder`() {
-        a1 {
-            håndterSykmelding(januar)
-        }
+        a1 { håndterSykmelding(januar) }
         a2 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
@@ -69,9 +63,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
             tilGodkjenning(januar)
             håndterSøknad(mars)
         }
-        a2 {
-            håndterSøknad(mars)
-        }
+        a2 { håndterSøknad(mars) }
         a1 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -93,9 +85,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
             tilGodkjenning(januar)
             håndterSøknad(mars)
         }
-        a2 {
-            håndterSøknad(mars)
-        }
+        a2 { håndterSøknad(mars) }
         a1 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -113,5 +103,8 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     }
 
     private fun venterTil(vedtaksperiodeId: UUID) =
-        observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterTil.toLocalDate()
+        observatør.vedtaksperiodeVenter
+            .last { it.vedtaksperiodeId == vedtaksperiodeId }
+            .venterTil
+            .toLocalDate()
 }

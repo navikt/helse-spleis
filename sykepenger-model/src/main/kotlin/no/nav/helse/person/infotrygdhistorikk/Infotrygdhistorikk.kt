@@ -12,11 +12,13 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class Infotrygdhistorikk private constructor(
-    private val _elementer: MutableList<InfotrygdhistorikkElement>
-) {
-    val elementer get() = _elementer.toList()
-    val siste get() = _elementer.first()
+internal class Infotrygdhistorikk
+private constructor(private val _elementer: MutableList<InfotrygdhistorikkElement>) {
+    val elementer
+        get() = _elementer.toList()
+
+    val siste
+        get() = _elementer.first()
 
     constructor() : this(mutableListOf())
 
@@ -26,7 +28,8 @@ internal class Infotrygdhistorikk private constructor(
 
         internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk {
             return Infotrygdhistorikk(
-                _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
+                _elementer =
+                    dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
             )
         }
     }
@@ -35,7 +38,7 @@ internal class Infotrygdhistorikk private constructor(
         aktivitetslogg: IAktivitetslogg,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
-        orgnummer: String
+        orgnummer: String,
     ): Boolean {
         if (!harHistorikk()) return true
         return siste.valider(aktivitetslogg, periode, orgnummer)
@@ -76,9 +79,8 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         if (!harHistorikk()) return false
-        val sisteElementSomFantesFørUtbetaling = _elementer.firstOrNull{
-            it.erEldreEnn(utbetaling)
-        } ?: return siste.erNyopprettet()
+        val sisteElementSomFantesFørUtbetaling =
+            _elementer.firstOrNull { it.erEldreEnn(utbetaling) } ?: return siste.erNyopprettet()
         return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)
     }
 
@@ -93,6 +95,7 @@ internal class Infotrygdhistorikk private constructor(
         if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
 
     internal fun harHistorikk() = _elementer.isNotEmpty()
+
     internal fun harUtbetaltI(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harUtbetaltI(periode)
@@ -108,7 +111,5 @@ internal class Infotrygdhistorikk private constructor(
         return siste.perioder.maxOfOrNull { it.periode.endInclusive }
     }
 
-    internal fun dto() = InfotrygdhistorikkUtDto(
-        elementer = this._elementer.map { it.dto() }
-    )
+    internal fun dto() = InfotrygdhistorikkUtDto(elementer = this._elementer.map { it.dto() })
 }

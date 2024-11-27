@@ -60,9 +60,15 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(15.januar til 30.januar)
         håndterSykmelding(Sykmeldingsperiode(31.januar, 15.februar))
         håndterSøknad(31.januar til 15.februar)
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar)) // overlapper med vedtaksperiode 1 og vedtaksperiode 2
-        håndterSøknad(16.januar til 31.januar) // overlapper med vedtaksperiode 1 og vedtaksperiode 2
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar)) // overlapper med vedtaksperiode 2
+        håndterSykmelding(
+            Sykmeldingsperiode(16.januar, 31.januar)
+        ) // overlapper med vedtaksperiode 1 og vedtaksperiode 2
+        håndterSøknad(
+            16.januar til 31.januar
+        ) // overlapper med vedtaksperiode 1 og vedtaksperiode 2
+        håndterSykmelding(
+            Sykmeldingsperiode(1.februar, 16.februar)
+        ) // overlapper med vedtaksperiode 2
         håndterSøknad(1.februar til 16.februar) // overlapper med vedtaksperiode 2
         håndterSykmelding(Sykmeldingsperiode(19.februar, 8.mars)) // forlenger overlappende
         håndterSøknad(19.februar til 8.mars) // forlenger overlappende
@@ -72,12 +78,27 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertTrue(observatør.hendelseider(3.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
         assertTrue(observatør.hendelseider(4.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
         assertTrue(observatør.hendelseider(5.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(
+            "Overlappende søknad starter før, eller slutter etter, opprinnelig periode",
+            1.vedtaksperiode.filter(),
+        )
     }
 
     @Test
@@ -141,19 +162,24 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster også overlappende perioder som er uferdig`(){
+    fun `forkaster også overlappende perioder som er uferdig`() {
         nyPeriode(januar)
         forkastAlle()
 
         nyPeriode(mars)
         nyPeriode(1.februar til 31.mars)
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `forkaster etterfølgende perioder som er uferdig`(){
+    fun `forkaster etterfølgende perioder som er uferdig`() {
         nyPeriode(januar)
         forkastAlle()
 
@@ -162,14 +188,29 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(juni)
         nyPeriode(februar)
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            4.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `forkaster ikke etterfølgende perioder som er avsluttet`(){
+    fun `forkaster ikke etterfølgende perioder som er avsluttet`() {
         nyPeriode(januar)
         forkastAlle()
 
@@ -197,11 +238,37 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(februar)
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(5.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            4.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertForkastetPeriodeTilstander(
+            5.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
         assertForkastetPeriodeTilstander(6.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -220,7 +287,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
-
     @Test
     fun `forkaster forlengede og overlappende vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
         nyPeriode(januar, a1)
@@ -230,23 +296,58 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(10.februar til 20.februar, a2)
         nyPeriode(februar, a1)
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a1)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+            orgnummer = a1,
+        )
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+            orgnummer = a1,
+        )
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a1)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a2)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVSLUTTET_UTEN_UTBETALING,
+            TIL_INFOTRYGD,
+            orgnummer = a2,
+        )
     }
 
     @Test
     fun `Hensyntar ikke periode på overlappende søknad som forkastes når vi vurderer forlengelse fra Infotrygd`() {
         nyPeriode(7.juni til 28.juni)
         håndterSøknad(27.mai til 15.juni)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
+        assertFunksjonellFeil(
+            "Overlappende søknad starter før, eller slutter etter, opprinnelig periode",
+            1.vedtaksperiode.filter(),
+        )
         nyPeriode(16.juni til 16.juli)
         assertEquals(7.juni til 28.juni, inspektør.periode(1.vedtaksperiode))
         assertEquals(27.mai til 15.juni, inspektør.periode(2.vedtaksperiode))
         assertEquals(16.juni til 16.juli, inspektør.periode(3.vedtaksperiode))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            TIL_INFOTRYGD,
+        )
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -279,7 +380,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap` () {
+    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap`() {
         nyPeriode(1.januar til 19.januar)
         person.søppelbøtte(forrigeHendelse, 1.januar til 19.januar)
 
@@ -290,7 +391,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil` () {
+    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil`() {
         nyPeriode(1.januar til 17.januar)
         nyPeriode(18.januar til 31.januar)
         person.søppelbøtte(forrigeHendelse, januar)

@@ -54,8 +54,12 @@ internal class CreateØkonomiTest {
     fun `kan sette arbeidsgiverperiode`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            assertDoesNotThrow { økonomi
-                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
+            assertDoesNotThrow {
+                økonomi.inntekt(
+                    1200.daglig,
+                    `6G` = `6G`.beløp(1.januar),
+                    refusjonsbeløp = 1200.daglig,
+                )
             }
         }
     }
@@ -71,7 +75,13 @@ internal class CreateØkonomiTest {
             assertNull(økonomi.inspektør.arbeidsgiverbeløp)
             assertNull(økonomi.inspektør.personbeløp)
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> {
+                økonomi.inntekt(
+                    1200.daglig,
+                    `6G` = `6G`.beløp(1.januar),
+                    refusjonsbeløp = 1200.daglig,
+                )
+            }
             assertDoesNotThrow { listOf(økonomi).betal() }
         }
     }
@@ -89,7 +99,13 @@ internal class CreateØkonomiTest {
             assertEquals(320.daglig, økonomi.inspektør.personbeløp)
             assertTrue(økonomi.er6GBegrenset())
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> {
+                økonomi.inntekt(
+                    1200.daglig,
+                    `6G` = `6G`.beløp(1.januar),
+                    refusjonsbeløp = 1200.daglig,
+                )
+            }
             assertThrows<IllegalStateException> { listOf(økonomi).betal() }
         }
     }
@@ -102,55 +118,61 @@ internal class CreateØkonomiTest {
         arbeidsgiverbeløp: Double? = null,
         personbeløp: Double? = null,
         totalGrad: Double = grad,
-        er6GBegrenset: Boolean = false
-    ) = UtbetalingstidslinjeData.UtbetalingsdagData(
-        UtbetalingstidslinjeData.TypeData.NavDag,
-        aktuellDagsinntekt,
-        aktuellDagsinntekt,
-        dekningsgrunnlag,
-        `6G`.beløp(1.januar).årlig,
-        null,
-        grad,
-        totalGrad,
-        arbeidsgiverRefusjonsbeløp,
-        arbeidsgiverbeløp,
-        personbeløp,
-        er6GBegrenset,
-        dato = 1.januar,
-        fom = null,
-        tom = null
-    )
+        er6GBegrenset: Boolean = false,
+    ) =
+        UtbetalingstidslinjeData.UtbetalingsdagData(
+            UtbetalingstidslinjeData.TypeData.NavDag,
+            aktuellDagsinntekt,
+            aktuellDagsinntekt,
+            dekningsgrunnlag,
+            `6G`.beløp(1.januar).årlig,
+            null,
+            grad,
+            totalGrad,
+            arbeidsgiverRefusjonsbeløp,
+            arbeidsgiverbeløp,
+            personbeløp,
+            er6GBegrenset,
+            dato = 1.januar,
+            fom = null,
+            tom = null,
+        )
 
-    private fun sykdomstidslinjedag(grad: Double) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
-        grad,
-        null,
-        null,
-        null,
-        null,
-        1.januar
-    )
+    private fun sykdomstidslinjedag(grad: Double) =
+        PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+            PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
+            PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData(
+                "type",
+                UUID.randomUUID(),
+                1.januar.atStartOfDay(),
+            ),
+            grad,
+            null,
+            null,
+            null,
+            null,
+            1.januar,
+        )
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
-        val dagtype = dagData.tilDto()
-            .map { Utbetalingsdag.gjenopprett(it) }
-            .single()
+        val dagtype = dagData.tilDto().map { Utbetalingsdag.gjenopprett(it) }.single()
 
         return when (dagtype) {
             is Utbetalingsdag.NavDag -> dagtype.økonomi
-            else -> error("Finner ikke økonomi for $dagtype, denne when-blokka er jo ikke exhaustive!")
+            else ->
+                error("Finner ikke økonomi for $dagtype, denne when-blokka er jo ikke exhaustive!")
         }
     }
 
-    private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
-        val dagtype = dagData.tilDto()
-            .map { Dag.gjenopprett(it) }
-            .single()
+    private fun createØkonomi(
+        dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
+    ): Økonomi {
+        val dagtype = dagData.tilDto().map { Dag.gjenopprett(it) }.single()
 
         return when (dagtype) {
             is Dag.Sykedag -> dagtype.økonomi
-            else -> error("Finner ikke økonomi for $dagtype, denne when-blokka er jo ikke exhaustive!")
+            else ->
+                error("Finner ikke økonomi for $dagtype, denne when-blokka er jo ikke exhaustive!")
         }
     }
 }

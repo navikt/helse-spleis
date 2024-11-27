@@ -8,5 +8,5 @@ data class InntektsgrunnlagInnDto(
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningInnDto>,
     val tilkommendeInntekter: List<NyInntektUnderveisDto>,
     val vurdertInfotrygd: Boolean,
-    val `6G`: InntektbeløpDto.Årlig
+    val `6G`: InntektbeløpDto.Årlig,
 )

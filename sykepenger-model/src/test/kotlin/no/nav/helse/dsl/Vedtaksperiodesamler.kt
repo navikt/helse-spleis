@@ -17,11 +17,13 @@ internal class Vedtaksperiodesamler : PersonObserver {
         return sisteOpprettetVedtaksperiode?.takeUnless { it == forrigeOpprettetVedtaksperiode }
     }
 
-    override fun vedtaksperiodeEndret(
-        event: PersonObserver.VedtaksperiodeEndretEvent
-    ) {
+    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
-        if (vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)) {
+        if (
+            vedtaksperioder
+                .getOrPut(event.organisasjonsnummer) { mutableSetOf() }
+                .add(event.vedtaksperiodeId)
+        ) {
             sisteOpprettetVedtaksperiode = sisteVedtaksperiode
         }
     }

@@ -25,7 +25,7 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
             "AVSLUTTET",
             "AVVENTER_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
-            "AVVENTER_GODKJENNING_REVURDERING" // Ingenting å simulere
+            "AVVENTER_GODKJENNING_REVURDERING", // Ingenting å simulere
         )
     }
 
@@ -47,14 +47,20 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
             "AVVENTER_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_SIMULERING_REVURDERING", // Her må det simuleres
-            "AVVENTER_GODKJENNING_REVURDERING"
+            "AVVENTER_GODKJENNING_REVURDERING",
         )
     }
 
     private fun vedtaOgSkjønnsmessigFastsett(årlig: Double) {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendSøknad(
+            perioder =
+                listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar,
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, OK)
@@ -62,12 +68,8 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
         sendUtbetaling()
         sendSkjønnsmessigFastsettelse(
             skjæringstidspunkt = 1.januar,
-            skjønnsmessigFastsatt = listOf(
-                SkjønnsmessigFastsatt(
-                    organisasjonsnummer = ORGNUMMER,
-                    årlig = årlig
-                )
-            )
+            skjønnsmessigFastsatt =
+                listOf(SkjønnsmessigFastsatt(organisasjonsnummer = ORGNUMMER, årlig = årlig)),
         )
         sendYtelser(0)
     }

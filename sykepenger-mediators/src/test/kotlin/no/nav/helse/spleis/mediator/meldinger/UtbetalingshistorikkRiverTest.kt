@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.time.LocalDateTime
 import java.util.UUID
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
 import org.intellij.lang.annotations.Language
@@ -39,7 +39,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
     }
 
     @Language("JSON")
-    private val json = """
+    private val json =
+        """
       {
           "@event_name": "behov",
           "tilstand": "AVVENTER_HISTORIKK",
@@ -87,10 +88,12 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
           "@final": true,
           "@besvart": "${LocalDateTime.now()}"
         }
-    """.trimIndent()
+    """
+            .trimIndent()
 
     @Language("JSON")
-    private val ugyldigPeriode = """
+    private val ugyldigPeriode =
+        """
         {
           "@event_name": "behov",
           "tilstand": "AVVENTER_HISTORIKK",
@@ -153,7 +156,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
     """
 
     @Language("JSON")
-    private val gammelHistorikk = """
+    private val gammelHistorikk =
+        """
         {
           "@event_name": "behov",
           "tilstand": "AVVENTER_HISTORIKK",
@@ -217,7 +221,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
     """
 
     @Language("JSON")
-    private val komposittbehov = """
+    private val komposittbehov =
+        """
         {
           "@event_name": "behov",
           "tilstand": "AVVENTER_HISTORIKK",
@@ -241,7 +246,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
 
     // hva betyr det at den har fagsystemId, da?
     @Language("JSON")
-    private val medFagsystemId = """
+    private val medFagsystemId =
+        """
         {
           "@event_name": "behov",
           "tilstand": "AVVENTER_HISTORIKK",

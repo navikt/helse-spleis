@@ -49,7 +49,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal kunne overstyre en inntekt i et enkelt case`() {
-        // Hva gjør vi egentlig med overstyring? Skal man kunne sette opp inntekten uten å ha mottatt en ny inntektsmelding med nye refusjonsopplysninger?
+        // Hva gjør vi egentlig med overstyring? Skal man kunne sette opp inntekten uten å ha
+        // mottatt en ny inntektsmelding med nye refusjonsopplysninger?
         val fom = 1.januar(2021)
         val overstyrtInntekt = 32000.månedlig
         tilGodkjenning(fom til 31.januar(2021), 100.prosent, fom)
@@ -71,41 +72,73 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+        sykepengegrunnlagInspektør
+            ?.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+            ?.get(ORGNUMMER)
+            ?.inspektør
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
-        }
+            }
     }
 
     @Test
     fun `overstyre ghostinntekt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ), arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT)
-        ), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        inntektperioderForSykepengegrunnlag {
+                            1.oktober(2017) til 1.desember(2017) inntekter { a1 inntekt INNTEKT }
+                        }
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        type = Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        1.desember(2017),
+                        type = Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                ),
+            orgnummer = a1,
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(a2, 500.daglig, "retter opp ikke-rapportert-inntekt", null, emptyList())
-        ))
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    a2,
+                    500.daglig,
+                    "retter opp ikke-rapportert-inntekt",
+                    null,
+                    emptyList(),
+                )
+            ),
+        )
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        val a2Opplysninger = sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a2)?.inspektør ?: fail { "må ha inntekt for a2" }
+        val a2Opplysninger =
+            sykepengegrunnlagInspektør
+                ?.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                ?.get(a2)
+                ?.inspektør ?: fail { "må ha inntekt for a2" }
         assertEquals(500.daglig, a2Opplysninger.inntektsopplysning.inspektør.beløp)
         assertEquals(Saksbehandler::class, a2Opplysninger.inntektsopplysning::class)
-        val overstyrtInntekt = a2Opplysninger.inntektsopplysning.inspektør.forrigeInntekt ?: fail { "forventet overstyrt inntekt" }
+        val overstyrtInntekt =
+            a2Opplysninger.inntektsopplysning.inspektør.forrigeInntekt
+                ?: fail { "forventet overstyrt inntekt" }
         assertEquals(IkkeRapportert::class, overstyrtInntekt::class)
     }
 
@@ -113,7 +146,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     fun `skal ikke hente registerdata for vilkårsprøving på nytt ved overstyring av inntekt`() {
         tilGodkjenning(januar, ORGNUMMER)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = ORGNUMMER, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(
+            inntekt = 19000.månedlig,
+            orgnummer = ORGNUMMER,
+            skjæringstidspunkt = 1.januar,
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(
@@ -122,7 +159,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
+            AVVENTER_GODKJENNING,
         )
     }
 
@@ -141,7 +178,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(inntekter = inntekter),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -155,5 +193,4 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).erAvsluttet)
         assertTrue(inspektør.utbetaling(0).erForkastet)
     }
-
 }

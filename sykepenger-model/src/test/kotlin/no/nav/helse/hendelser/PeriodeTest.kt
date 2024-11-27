@@ -54,31 +54,29 @@ internal class PeriodeTest {
 
     @Test
     fun `grupperer perioder`() {
-        val perioder = listOf(
-            1.januar til 31.januar,
-            5.januar til 6.januar,
-            1.desember(2017) til 10.desember(2017),
-            4.mai til 20.mai,
-            28.desember(2017) til 31.desember(2017),
-            1.mai til 3.mai
-        )
+        val perioder =
+            listOf(
+                1.januar til 31.januar,
+                5.januar til 6.januar,
+                1.desember(2017) til 10.desember(2017),
+                4.mai til 20.mai,
+                28.desember(2017) til 31.desember(2017),
+                1.mai til 3.mai,
+            )
 
-        val forventet = listOf(
-            1.desember(2017) til 10.desember(2017),
-            28.desember(2017) til 31.januar,
-            1.mai til 20.mai
-        )
+        val forventet =
+            listOf(
+                1.desember(2017) til 10.desember(2017),
+                28.desember(2017) til 31.januar,
+                1.mai til 20.mai,
+            )
 
         assertEquals(forventet, perioder.grupperSammenhengendePerioder())
     }
 
     @Test
     fun `siste periode linker alle sammen`() {
-        val perioder = listOf(
-            1.januar til 2.januar,
-            4.januar til 4.januar,
-            3.januar til 3.januar
-        )
+        val perioder = listOf(1.januar til 2.januar, 4.januar til 4.januar, 3.januar til 3.januar)
         val forventet = listOf(1.januar til 4.januar)
         assertEquals(forventet, perioder.grupperSammenhengendePerioderMedHensynTilHelg())
     }
@@ -105,9 +103,18 @@ internal class PeriodeTest {
     fun `overlappende periode`() {
         assertNull((1.januar til 3.januar).overlappendePeriode(4.januar til 5.januar))
         assertNull((4.januar til 5.januar).overlappendePeriode(1.januar til 3.januar))
-        assertEquals(3.januar til 5.januar, ((1.januar til 10.januar).overlappendePeriode(3.januar til 5.januar)))
-        assertEquals(3.januar til 5.januar, ((1.januar til 5.januar).overlappendePeriode(3.januar til 10.januar)))
-        assertEquals(3.januar til 5.januar, ((3.januar til 10.januar).overlappendePeriode(1.januar til 5.januar)))
+        assertEquals(
+            3.januar til 5.januar,
+            ((1.januar til 10.januar).overlappendePeriode(3.januar til 5.januar)),
+        )
+        assertEquals(
+            3.januar til 5.januar,
+            ((1.januar til 5.januar).overlappendePeriode(3.januar til 10.januar)),
+        )
+        assertEquals(
+            3.januar til 5.januar,
+            ((3.januar til 10.januar).overlappendePeriode(1.januar til 5.januar)),
+        )
     }
 
     @Test
@@ -257,22 +264,32 @@ internal class PeriodeTest {
     @Test
     fun `slår sammen dager`() {
         assertTrue(emptyList<LocalDate>().grupperSammenhengendePerioder().isEmpty())
-        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar, 1.januar).grupperSammenhengendePerioder())
-        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar).grupperSammenhengendePerioder())
-        assertEquals(listOf(1.januar til 2.januar), listOf(2.januar, 1.januar).grupperSammenhengendePerioder())
-        assertEquals(listOf(1.januar til 1.januar, 3.januar til 3.januar), listOf(1.januar, 3.januar).grupperSammenhengendePerioder())
+        assertEquals(
+            listOf(1.januar til 1.januar),
+            listOf(1.januar, 1.januar).grupperSammenhengendePerioder(),
+        )
+        assertEquals(
+            listOf(1.januar til 1.januar),
+            listOf(1.januar).grupperSammenhengendePerioder(),
+        )
+        assertEquals(
+            listOf(1.januar til 2.januar),
+            listOf(2.januar, 1.januar).grupperSammenhengendePerioder(),
+        )
+        assertEquals(
+            listOf(1.januar til 1.januar, 3.januar til 3.januar),
+            listOf(1.januar, 3.januar).grupperSammenhengendePerioder(),
+        )
         assertEquals(
             listOf(1.januar til 5.januar, 8.januar til 8.januar),
-            listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).grupperSammenhengendePerioder()
+            listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar)
+                .grupperSammenhengendePerioder(),
         )
     }
 
     @Test
     fun `strekk en periode for å dekke en annen periode`() {
-        assertEquals(
-            1.januar til 31.januar,
-            (15.januar til 31.januar).plus(1.januar til 20.januar)
-        )
+        assertEquals(1.januar til 31.januar, (15.januar til 31.januar).plus(1.januar til 20.januar))
     }
 
     @Test
@@ -287,7 +304,9 @@ internal class PeriodeTest {
         assertEquals(11.januar til 12.januar, periode1.subset(11.januar til 12.januar))
         assertEquals(2.januar til 2.januar, (1.januar til 2.januar).subset(2.januar til 12.januar))
         assertEquals(2.januar til 2.januar, (2.januar til 3.januar).subset(1.januar til 2.januar))
-        assertThrows<IllegalArgumentException> { (1.januar til 2.januar).subset(11.januar til 12.januar) }
+        assertThrows<IllegalArgumentException> {
+            (1.januar til 2.januar).subset(11.januar til 12.januar)
+        }
     }
 
     @Test
@@ -304,7 +323,14 @@ internal class PeriodeTest {
     fun `perioder som overlapper`() {
         assertFalse(listOf<Periode>().overlapper())
         assertFalse(listOf(1.januar til 31.januar).overlapper())
-        assertFalse(listOf(1.desember(2017) til 31.desember(2017), 1.januar til 31.januar, 1.februar til 28.februar).overlapper())
+        assertFalse(
+            listOf(
+                    1.desember(2017) til 31.desember(2017),
+                    1.januar til 31.januar,
+                    1.februar til 28.februar,
+                )
+                .overlapper()
+        )
         assertTrue(listOf(1.desember(2017) til 1.januar, 1.januar til 31.januar).overlapper())
         assertTrue(listOf(1.januar til 31.januar, 31.januar til 28.februar).overlapper())
         assertTrue(listOf(1.januar til LocalDate.MAX, 1.februar til LocalDate.MAX).overlapper())
@@ -322,7 +348,10 @@ internal class PeriodeTest {
     @Test
     fun `omsluttende periode`() {
         assertNull(emptyList<LocalDate>().omsluttendePeriode)
-        assertEquals(1.januar til 31.januar, listOf(1.januar, 5.januar, 31.januar).omsluttendePeriode)
+        assertEquals(
+            1.januar til 31.januar,
+            listOf(1.januar, 5.januar, 31.januar).omsluttendePeriode,
+        )
         assertEquals(1.januar til 31.januar, listOf(31.januar, 1.januar).omsluttendePeriode)
         assertEquals(1.januar til 31.januar, (1.januar til 31.januar).omsluttendePeriode)
     }
@@ -341,14 +370,12 @@ internal class PeriodeTest {
     @Test
     fun `liste av perioder trimmer annen`() {
         val periode = 5.januar til 31.januar
-        val result = listOf(
-            1.januar til 5.januar,
-            10.januar til 14.januar,
-            28.januar til 29.januar
-        ).trim(periode)
+        val result =
+            listOf(1.januar til 5.januar, 10.januar til 14.januar, 28.januar til 29.januar)
+                .trim(periode)
         assertEquals(
             listOf(6.januar til 9.januar, 15.januar til 27.januar, 30.januar til 31.januar),
-            result
+            result,
         )
     }
 
@@ -367,9 +394,18 @@ internal class PeriodeTest {
         assertEquals(emptyList<Periode>(), periode.trim(4.januar til 21.januar))
 
         // trimmer perioden i to deler
-        assertEquals(listOf(5.januar.somPeriode(), 20.januar.somPeriode()), periode.trim(6.januar til 19.januar))
-        assertEquals(listOf(5.januar til 9.januar, 16.januar til 20.januar), periode.trim(10.januar til 15.januar))
-        assertEquals(listOf(5.januar til 13.januar, 15.januar til 20.januar), periode.trim(14.januar.somPeriode()))
+        assertEquals(
+            listOf(5.januar.somPeriode(), 20.januar.somPeriode()),
+            periode.trim(6.januar til 19.januar),
+        )
+        assertEquals(
+            listOf(5.januar til 9.januar, 16.januar til 20.januar),
+            periode.trim(10.januar til 15.januar),
+        )
+        assertEquals(
+            listOf(5.januar til 13.januar, 15.januar til 20.januar),
+            periode.trim(14.januar.somPeriode()),
+        )
 
         // trimmer bort snute
         assertEquals(listOf(20.januar.somPeriode()), periode.trim(4.januar til 19.januar))
@@ -386,8 +422,14 @@ internal class PeriodeTest {
     fun `legger til en ny periode i en liste`() {
         val perioden = 5.januar til 10.januar
         assertEquals(listOf(perioden), emptyList<Periode>().merge(perioden))
-        assertEquals(listOf(4.januar.somPeriode(), 5.januar til 10.januar, 11.januar.somPeriode()), listOf(4.januar til 11.januar).merge(perioden))
-        assertEquals(listOf(1.januar til 4.januar, 5.januar  til 10.januar, 11.januar til 12.januar), listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden))
+        assertEquals(
+            listOf(4.januar.somPeriode(), 5.januar til 10.januar, 11.januar.somPeriode()),
+            listOf(4.januar til 11.januar).merge(perioden),
+        )
+        assertEquals(
+            listOf(1.januar til 4.januar, 5.januar til 10.januar, 11.januar til 12.januar),
+            listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden),
+        )
     }
 
     @Test
@@ -408,7 +450,9 @@ internal class PeriodeTest {
         assertTrue(listOf(januar, februar).lik(listOf(januar, februar)))
         assertFalse(listOf(januar, februar).lik(listOf(januar, 1.februar til 27.februar)))
         assertTrue((januar.map { it til it }).lik(januar.shuffled().map { it til it }))
-        assertFalse(((1.januar til 30.januar).map { it til it }).lik(januar.shuffled().map { it til it }))
+        assertFalse(
+            ((1.januar til 30.januar).map { it til it }).lik(januar.shuffled().map { it til it })
+        )
         assertTrue(emptyList<Periode>().lik(emptyList()))
     }
 

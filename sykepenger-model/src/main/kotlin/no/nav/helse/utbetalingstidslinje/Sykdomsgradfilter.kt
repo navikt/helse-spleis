@@ -14,37 +14,46 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.økonomi.Prosentdel
 
-internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering) :
-    UtbetalingstidslinjerFilter {
+internal class Sykdomsgradfilter(
+    private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering
+) : UtbetalingstidslinjerFilter {
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): List<Utbetalingstidslinje> {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
 
         val oppdaterte = Utbetalingstidslinje.totalSykdomsgrad(tidslinjer)
 
         val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
-        val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
+        val avvistePerioder =
+            minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
         if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) {
             aktivitetslogg.varsel(RV_VV_17)
         }
 
-        val avvisteTidslinjer = avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
+        val avvisteTidslinjer =
+            avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
 
         Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
             logg(`§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder))
         }
         val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
-        `§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
-            subsumsjonslogg.logg(it)
-        }
+        `§ 8-13 ledd 1`(
+                periode,
+                avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(),
+                tidslinjerForSubsumsjon,
+            )
+            .forEach { subsumsjonslogg.logg(it) }
         if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
-        else aktivitetslogg.info("Ingen avviste dager på grunn av 20 % samlet sykdomsgrad-regel for denne perioden")
+        else
+            aktivitetslogg.info(
+                "Ingen avviste dager på grunn av 20 % samlet sykdomsgrad-regel for denne perioden"
+            )
         return avvisteTidslinjer
     }
 }

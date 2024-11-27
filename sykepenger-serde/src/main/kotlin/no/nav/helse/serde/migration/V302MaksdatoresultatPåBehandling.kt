@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 
-internal class V302MaksdatoresultatPåBehandling: JsonMigration(version = 302) {
+internal class V302MaksdatoresultatPåBehandling : JsonMigration(version = 302) {
     override val description = "lagrer maksdatoresultat på behandling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -20,9 +20,7 @@ internal class V302MaksdatoresultatPåBehandling: JsonMigration(version = 302) {
 
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
         vedtaksperiode.path("behandlinger").forEach { behandling ->
-            behandling.path("endringer").forEach { endring ->
-                migrerEndring(endring as ObjectNode)
-            }
+            behandling.path("endringer").forEach { endring -> migrerEndring(endring as ObjectNode) }
         }
     }
 
@@ -37,9 +35,7 @@ internal class V302MaksdatoresultatPåBehandling: JsonMigration(version = 302) {
             putArray("oppholdsdager")
             putArray("avslåtteDager")
             put("gjenståendeDager", 0)
-            withObject("grunnlag").apply {
-                putArray("dager")
-            }
+            withObject("grunnlag").apply { putArray("dager") }
         }
     }
 }

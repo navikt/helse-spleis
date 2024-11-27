@@ -1,3 +1,1 @@
-dependencies {
-    implementation(project(":sykepenger-model"))
-}
+dependencies { implementation(project(":sykepenger-model")) }

@@ -11,9 +11,11 @@ import org.junit.jupiter.api.Test
 internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `skatteinntekter lagt til grunn`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        @Language("JSON")
-        val forventet = """
+    fun `skatteinntekter lagt til grunn`() =
+        Toggle.InntektsmeldingSomIkkeKommer.enable {
+            @Language("JSON")
+            val forventet =
+                """
         {
             "@event_name": "skatteinntekter_lagt_til_grunn",
             "vedtaksperiodeId": "<uuid>",
@@ -26,19 +28,27 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
         }
         """
 
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendSykepengegrunnlagForArbeidsgiver(
-            vedtaksperiodeIndeks = 0,
-            skjæringstidspunkt = 1.januar,
-            orgnummer = ORGNUMMER,
-            inntekterForSykepengegrunnlag = sykepengegrunnlag(
-                1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, ORGNUMMER),
-                )
+            sendSøknad(
+                perioder =
+                    listOf(
+                        SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)
+                    )
             )
-        )
-        testRapid.assertUtgåendeMelding(forventet)
-    }
+            sendSykepengegrunnlagForArbeidsgiver(
+                vedtaksperiodeIndeks = 0,
+                skjæringstidspunkt = 1.januar,
+                orgnummer = ORGNUMMER,
+                inntekterForSykepengegrunnlag =
+                    sykepengegrunnlag(
+                        1.januar,
+                        listOf(
+                            TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(
+                                INNTEKT,
+                                ORGNUMMER,
+                            )
+                        ),
+                    ),
+            )
+            testRapid.assertUtgåendeMelding(forventet)
+        }
 }
-
-

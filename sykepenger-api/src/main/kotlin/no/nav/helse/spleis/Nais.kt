@@ -19,24 +19,19 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 internal fun Application.nais(collectorRegistry: PrometheusMeterRegistry) {
     install(MicrometerMetrics) {
         registry = collectorRegistry
-        meterBinders = listOf(
-            ClassLoaderMetrics(),
-            JvmMemoryMetrics(),
-            JvmGcMetrics(),
-            ProcessorMetrics(),
-            JvmThreadMetrics(),
-        )
+        meterBinders =
+            listOf(
+                ClassLoaderMetrics(),
+                JvmMemoryMetrics(),
+                JvmGcMetrics(),
+                ProcessorMetrics(),
+                JvmThreadMetrics(),
+            )
     }
 
     routing {
-        get("/isalive") {
-            call.respondText("ALIVE", ContentType.Text.Plain)
-        }
-        get("/isready") {
-            call.respondText("READY", ContentType.Text.Plain)
-        }
-        get("/metrics") {
-            call.respond(collectorRegistry.scrape())
-        }
+        get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+        get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+        get("/metrics") { call.respond(collectorRegistry.scrape()) }
     }
 }

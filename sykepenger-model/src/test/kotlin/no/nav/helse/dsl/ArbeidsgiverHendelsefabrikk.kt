@@ -46,7 +46,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -60,24 +59,23 @@ import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 
-
 internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
-    private val inntektsmeldinger = mutableMapOf<UUID, AbstractEndToEndTest.InnsendtInntektsmelding>()
+    private val inntektsmeldinger =
+        mutableMapOf<UUID, AbstractEndToEndTest.InnsendtInntektsmelding>()
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
     ): Sykmelding {
         return Sykmelding(
-            meldingsreferanseId = id,
-            orgnummer = organisasjonsnummer,
-            sykeperioder = listOf(*sykeperioder)
-        ).apply {
-            sykmeldinger.add(this)
-        }
+                meldingsreferanseId = id,
+                orgnummer = organisasjonsnummer,
+                sykeperioder = listOf(*sykeperioder),
+            )
+            .apply { sykmeldinger.add(this) }
     }
 
     internal fun lagSøknad(
@@ -98,37 +96,47 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         egenmeldinger: List<Periode> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
         registrert: LocalDateTime = LocalDateTime.now(),
-        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList(),
     ): Søknad {
-        val innsendt = (sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive).let {
-            when (it) {
-                is LocalDateTime -> it
-                is LocalDate -> it.atStartOfDay()
-                else -> throw IllegalStateException("Innsendt må være enten LocalDate eller LocalDateTime")
-            }
-        }
+        val innsendt =
+            (sendtTilNAVEllerArbeidsgiver
+                    ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive)
+                .let {
+                    when (it) {
+                        is LocalDateTime -> it
+                        is LocalDate -> it.atStartOfDay()
+                        else ->
+                            throw IllegalStateException(
+                                "Innsendt må være enten LocalDate eller LocalDateTime"
+                            )
+                    }
+                }
         return Søknad(
-            meldingsreferanseId = id,
-            orgnummer = organisasjonsnummer,
-            perioder = listOf(*perioder),
-            andreInntektskilder = andreInntektskilder,
-            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
-            sendtTilNAVEllerArbeidsgiver = innsendt,
-            permittert = permittert,
-            merknaderFraSykmelding = merknaderFraSykmelding,
-            sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
-            opprinneligSendt = opprinneligSendt?.atStartOfDay(),
-            utenlandskSykmelding = utenlandskSykmelding,
-            arbeidUtenforNorge = arbeidUtenforNorge,
-            sendTilGosys = sendTilGosys,
-            yrkesskade = yrkesskade,
-            egenmeldinger = egenmeldinger,
-            søknadstype = søknadstype,
-            registrert = registrert,
-            tilkomneInntekter = tilkomneInntekter
-        ).apply {
-            søknader.add(this)
-        }
+                meldingsreferanseId = id,
+                orgnummer = organisasjonsnummer,
+                perioder = listOf(*perioder),
+                andreInntektskilder = andreInntektskilder,
+                ikkeJobbetIDetSisteFraAnnetArbeidsforhold =
+                    ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
+                sendtTilNAVEllerArbeidsgiver = innsendt,
+                permittert = permittert,
+                merknaderFraSykmelding = merknaderFraSykmelding,
+                sykmeldingSkrevet =
+                    sykmeldingSkrevet
+                        ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!
+                            .start
+                            .atStartOfDay(),
+                opprinneligSendt = opprinneligSendt?.atStartOfDay(),
+                utenlandskSykmelding = utenlandskSykmelding,
+                arbeidUtenforNorge = arbeidUtenforNorge,
+                sendTilGosys = sendTilGosys,
+                yrkesskade = yrkesskade,
+                egenmeldinger = egenmeldinger,
+                søknadstype = søknadstype,
+                registrert = registrert,
+                tilkomneInntekter = tilkomneInntekter,
+            )
+            .apply { søknader.add(this) }
     }
 
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
@@ -138,12 +146,13 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        refusjon: Inntektsmelding.Refusjon =
+            Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
-        mottatt: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now(),
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -156,42 +165,45 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
-                mottatt = mottatt
+                mottatt = mottatt,
             )
         }
-        val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
-            inntektsmeldingId = UUID.randomUUID().toString(),
-            arbeidstakerFnr = "fnr",
-            arbeidstakerAktorId = "aktør",
-            virksomhetsnummer = organisasjonsnummer,
-            arbeidsgiverFnr = null,
-            arbeidsgiverAktorId = null,
-            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-            arbeidsforholdId = null,
-            beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.månedlig),
-            refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.månedlig), null),
-            endringIRefusjoner = emptyList(),
-            opphoerAvNaturalytelser = emptyList(),
-            gjenopptakelseNaturalytelser = emptyList(),
-            arbeidsgiverperioder = arbeidsgiverperioder.map {
-                no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
-            },
-            status = Status.GYLDIG,
-            arkivreferanse = "",
-            ferieperioder = emptyList(),
-            foersteFravaersdag = førsteFraværsdag,
-            mottattDato = mottatt,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            naerRelasjon = null,
-            avsenderSystem = AvsenderSystem("SpleisModell"),
-            innsenderTelefon = "tlfnr",
-            innsenderFulltNavn = "SPLEIS Modell"
-        )
-        inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(
-            tidspunkt = LocalDateTime.now(),
-            generator = inntektsmeldinggenerator,
-            inntektsmeldingkontrakt = kontrakten
-        )
+        val kontrakten =
+            no.nav.inntektsmeldingkontrakt.Inntektsmelding(
+                inntektsmeldingId = UUID.randomUUID().toString(),
+                arbeidstakerFnr = "fnr",
+                arbeidstakerAktorId = "aktør",
+                virksomhetsnummer = organisasjonsnummer,
+                arbeidsgiverFnr = null,
+                arbeidsgiverAktorId = null,
+                arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+                arbeidsforholdId = null,
+                beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.månedlig),
+                refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.månedlig), null),
+                endringIRefusjoner = emptyList(),
+                opphoerAvNaturalytelser = emptyList(),
+                gjenopptakelseNaturalytelser = emptyList(),
+                arbeidsgiverperioder =
+                    arbeidsgiverperioder.map {
+                        no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
+                    },
+                status = Status.GYLDIG,
+                arkivreferanse = "",
+                ferieperioder = emptyList(),
+                foersteFravaersdag = førsteFraværsdag,
+                mottattDato = mottatt,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                naerRelasjon = null,
+                avsenderSystem = AvsenderSystem("SpleisModell"),
+                innsenderTelefon = "tlfnr",
+                innsenderFulltNavn = "SPLEIS Modell",
+            )
+        inntektsmeldinger[id] =
+            AbstractEndToEndTest.InnsendtInntektsmelding(
+                tidspunkt = LocalDateTime.now(),
+                generator = inntektsmeldinggenerator,
+                inntektsmeldingkontrakt = kontrakten,
+            )
         return inntektsmeldinggenerator()
     }
 
@@ -199,35 +211,48 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         vedtaksperiodeId: UUID,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        refusjon: Inntektsmelding.Refusjon =
+            Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now(),
-        avsenderSystem: Avsenderutleder
-    ) = Inntektsmelding(
-        meldingsreferanseId = id,
-        refusjon = refusjon,
-        orgnummer = organisasjonsnummer,
-        beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, avsenderSystem == NAV_NO),
-        mottatt = mottatt
-    )
+        avsenderSystem: Avsenderutleder,
+    ) =
+        Inntektsmelding(
+            meldingsreferanseId = id,
+            refusjon = refusjon,
+            orgnummer = organisasjonsnummer,
+            beregnetInntekt = beregnetInntekt,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem =
+                Inntektsmelding.Avsendersystem.NavPortal(
+                    vedtaksperiodeId,
+                    LocalDate.EPOCH,
+                    avsenderSystem == NAV_NO,
+                ),
+            mottatt = mottatt,
+        )
 
-    internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
+    internal fun lagInntektsmeldingReplay(
+        forespørsel: Forespørsel,
+        håndterteInntektsmeldinger: Set<UUID>,
+    ) =
         InntektsmeldingerReplay(
             meldingsreferanseId = UUID.randomUUID(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = forespørsel.vedtaksperiodeId,
-            inntektsmeldinger = inntektsmeldinger
-                .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
-                .map { (_, im) -> im.generator() }
-                .filterNot { it.metadata.meldingsreferanseId in håndterteInntektsmeldinger }
+            inntektsmeldinger =
+                inntektsmeldinger
+                    .filter {
+                        forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt)
+                    }
+                    .map { (_, im) -> im.generator() }
+                    .filterNot { it.metadata.meldingsreferanseId in håndterteInntektsmeldinger },
         )
 
     internal fun lagUtbetalingshistorikk(
@@ -235,47 +260,53 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         harStatslønn: Boolean = false,
-        besvart: LocalDateTime = LocalDateTime.now()
+        besvart: LocalDateTime = LocalDateTime.now(),
     ) =
         Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            element = InfotrygdhistorikkElement.opprett(
-                oppdatert = besvart,
-                hendelseId = UUID.randomUUID(),
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap()
-            ),
-            besvart = LocalDateTime.now()
+            element =
+                InfotrygdhistorikkElement.opprett(
+                    oppdatert = besvart,
+                    hendelseId = UUID.randomUUID(),
+                    perioder = utbetalinger,
+                    inntekter = inntektshistorikk,
+                    arbeidskategorikoder = emptyMap(),
+                ),
+            besvart = LocalDateTime.now(),
         )
 
     internal fun lagUtbetalingshistorikkEtterInfotrygdendring(
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         besvart: LocalDateTime = LocalDateTime.now(),
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
     ) =
         UtbetalingshistorikkEtterInfotrygdendring(
             meldingsreferanseId = id,
-            element = InfotrygdhistorikkElement.opprett(
-                oppdatert = besvart,
-                hendelseId = UUID.randomUUID(),
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap()
-            ),
-            besvart = LocalDateTime.now()
+            element =
+                InfotrygdhistorikkElement.opprett(
+                    oppdatert = besvart,
+                    hendelseId = UUID.randomUUID(),
+                    perioder = utbetalinger,
+                    inntekter = inntektshistorikk,
+                    arbeidskategorikoder = emptyMap(),
+                ),
+            besvart = LocalDateTime.now(),
         )
 
-    internal fun lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>): SykepengegrunnlagForArbeidsgiver {
+    internal fun lagSykepengegrunnlagForArbeidsgiver(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>,
+    ): SykepengegrunnlagForArbeidsgiver {
         return SykepengegrunnlagForArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = organisasjonsnummer,
-            inntekter = ArbeidsgiverInntekt(organisasjonsnummer, inntekter)
+            inntekter = ArbeidsgiverInntekt(organisasjonsnummer, inntekter),
         )
     }
 
@@ -285,7 +316,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -295,7 +326,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
         )
     }
 
@@ -306,35 +337,24 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         pleiepenger: List<GradertPeriode> = emptyList(),
         omsorgspenger: List<GradertPeriode> = emptyList(),
         opplæringspenger: List<GradertPeriode> = emptyList(),
-        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> =
+            emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList()
+        dagpenger: List<Periode> = emptyList(),
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            foreldrepenger = Foreldrepenger(
-                foreldrepengeytelse = foreldrepenger,
-            ),
-            svangerskapspenger = Svangerskapspenger(
-                svangerskapsytelse = svangerskapspenger
-            ),
-            pleiepenger = Pleiepenger(
-                perioder = pleiepenger
-            ),
-            omsorgspenger = Omsorgspenger(
-                perioder = omsorgspenger
-            ),
-            opplæringspenger = Opplæringspenger(
-                perioder = opplæringspenger
-            ),
-            institusjonsopphold = Institusjonsopphold(
-                perioder = institusjonsoppholdsperioder
-            ),
+            foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
+            svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapspenger),
+            pleiepenger = Pleiepenger(perioder = pleiepenger),
+            omsorgspenger = Omsorgspenger(perioder = omsorgspenger),
+            opplæringspenger = Opplæringspenger(perioder = opplæringspenger),
+            institusjonsopphold = Institusjonsopphold(perioder = institusjonsoppholdsperioder),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-            dagpenger = Dagpenger(dagpenger)
+            dagpenger = Dagpenger(dagpenger),
         )
     }
 
@@ -344,7 +364,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         fagsystemId: String,
         fagområde: String,
         simuleringOK: Boolean,
-        simuleringsresultat: SimuleringResultatDto?
+        simuleringsresultat: SimuleringResultatDto?,
     ): Simulering {
         return Simulering(
             meldingsreferanseId = UUID.randomUUID(),
@@ -355,7 +375,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringsResultat = simuleringsresultat
+            simuleringsResultat = simuleringsresultat,
         )
     }
 
@@ -364,54 +384,58 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         utbetalingGodkjent: Boolean,
         automatiskBehandling: Boolean,
         utbetalingId: UUID,
-        godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
-    ) = Utbetalingsgodkjenning(
-        meldingsreferanseId = UUID.randomUUID(),
-        organisasjonsnummer = organisasjonsnummer,
-        utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        saksbehandler = "Ola Nordmann",
-        saksbehandlerEpost = "ola.nordmann@nav.no",
-        utbetalingGodkjent = utbetalingGodkjent,
-        godkjenttidspunkt = godkjenttidspunkt,
-        automatiskBehandling = automatiskBehandling,
-    )
+        godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
+    ) =
+        Utbetalingsgodkjenning(
+            meldingsreferanseId = UUID.randomUUID(),
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            saksbehandler = "Ola Nordmann",
+            saksbehandlerEpost = "ola.nordmann@nav.no",
+            utbetalingGodkjent = utbetalingGodkjent,
+            godkjenttidspunkt = godkjenttidspunkt,
+            automatiskBehandling = automatiskBehandling,
+        )
 
     internal fun lagVedtakFattet(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         automatisert: Boolean = true,
-        vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
-    ) = VedtakFattet(
-        meldingsreferanseId = UUID.randomUUID(),
-        organisasjonsnummer = organisasjonsnummer,
-        utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeId,
-        saksbehandlerIdent = "Vedtak fattesen",
-        saksbehandlerEpost = "vedtak.fattesen@nav.no",
-        vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-        automatisert = automatisert
-    )
+        vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    ) =
+        VedtakFattet(
+            meldingsreferanseId = UUID.randomUUID(),
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerIdent = "Vedtak fattesen",
+            saksbehandlerEpost = "vedtak.fattesen@nav.no",
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            automatisert = automatisert,
+        )
+
     internal fun lagKanIkkeBehandlesHer(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-        automatisert: Boolean = true
-    ) = KanIkkeBehandlesHer(
-        meldingsreferanseId = UUID.randomUUID(),
-        organisasjonsnummer = organisasjonsnummer,
-        utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeId,
-        saksbehandlerIdent = "Info trygdesen",
-        saksbehandlerEpost = "info.trygdesen@nav.no",
-        opprettet = LocalDateTime.now(),
-        automatisert = automatisert
-    )
+        automatisert: Boolean = true,
+    ) =
+        KanIkkeBehandlesHer(
+            meldingsreferanseId = UUID.randomUUID(),
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerIdent = "Info trygdesen",
+            saksbehandlerEpost = "info.trygdesen@nav.no",
+            opprettet = LocalDateTime.now(),
+            automatisert = automatisert,
+        )
 
     internal fun lagUtbetalinghendelse(
         utbetalingId: UUID,
         fagsystemId: String,
         status: Oppdragstatus,
-        meldingsreferanseId: UUID = UUID.randomUUID()
+        meldingsreferanseId: UUID = UUID.randomUUID(),
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = meldingsreferanseId,
@@ -421,7 +445,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
+            overføringstidspunkt = LocalDateTime.now(),
         )
 
     internal fun lagAnnullering(utbetalingId: UUID) =
@@ -431,20 +455,17 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
         )
 
-    internal fun lagIdentOpphørt() =
-        IdentOpphørt(
-            meldingsreferanseId = UUID.randomUUID()
-        )
+    internal fun lagIdentOpphørt() = IdentOpphørt(meldingsreferanseId = UUID.randomUUID())
 
     internal fun lagPåminnelse(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         tilstandsendringstidspunkt: LocalDateTime,
         nåtidspunkt: LocalDateTime = LocalDateTime.now(),
-        reberegning: Boolean = false
+        reberegning: Boolean = false,
     ) =
         Påminnelse(
             meldingsreferanseId = UUID.randomUUID(),
@@ -457,21 +478,21 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             påminnelsestidspunkt = nåtidspunkt,
             nestePåminnelsestidspunkt = nåtidspunkt,
             opprettet = nåtidspunkt,
-            ønskerReberegning = reberegning
+            ønskerReberegning = reberegning,
         )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
         Grunnbeløpsregulering(
             meldingsreferanseId = UUID.randomUUID(),
             skjæringstidspunkt = skjæringstidspunkt,
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
         )
 
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = UUID.randomUUID(),
             organisasjonsnummer = organisasjonsnummer,
-            periode = periode
+            periode = periode,
         )
 
     internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
@@ -479,7 +500,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             meldingsreferanseId = UUID.randomUUID(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            force = force
+            force = force,
         )
 
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
@@ -487,13 +508,29 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             meldingsreferanseId = UUID.randomUUID(),
             organisasjonsnummer = organisasjonsnummer,
             dager = overstyringsdager,
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
         )
 
-    internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String, tidsstempel: LocalDateTime = LocalDateTime.now()) =
-        PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
-            OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
-        ), meldingsreferanseId = hendelseId, tidsstempel)
-
-
+    internal fun lagOverstyrInntekt(
+        hendelseId: UUID,
+        skjæringstidspunkt: LocalDate,
+        inntekt: Inntekt,
+        orgnummer: String,
+        tidsstempel: LocalDateTime = LocalDateTime.now(),
+    ) =
+        PersonHendelsefabrikk()
+            .lagOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer,
+                        inntekt,
+                        "forklaring",
+                        null,
+                        emptyList(),
+                    )
+                ),
+                meldingsreferanseId = hendelseId,
+                tidsstempel,
+            )
 }

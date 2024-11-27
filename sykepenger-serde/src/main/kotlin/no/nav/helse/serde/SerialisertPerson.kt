@@ -42,39 +42,40 @@ import no.nav.helse.serde.migration.migrate
 class SerialisertPerson(val json: String) {
     // Teit kommentar
     internal companion object {
-        private val migrations = listOf(
-            V279AvsluttettidspunktVedtakFattet(),
-            V280HengendeRevurderinger(),
-            V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon(),
-            V282HengendeRevurderinger(),
-            V283BeregningsgrunnlagPåØkonomi(),
-            V284GjelderPeriodeArbeidsgiverInntektsopplysning(),
-            V285LoggeRareAnnulleringer(),
-            V286AnnullerteÅpneRevurderinger(),
-            V287AnnullerteÅpneRevurderingerEnGangTil(),
-            V288FjerneOverflødigeUberegnedeRevurderinger(),
-            V289AvsluttetTidspunktForkastedeGenerasjoner(),
-            V290FikseForbrukteDagerSomErNull(),
-            V291FikseTidligereOmgjøringerSomErRevurderingFeilet(),
-            V292AnnullertPeriode(),
-            V293AvsluttetUberegnedeOmgjøringer(),
-            V294RenameTilBehandlinger(),
-            V295BumpVersjon(),
-            V296SkjæringstidspunktPåBehandlinger(),
-            V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling(),
-            V298EgenmeldingsdagerPåVedtaksperiode(),
-            V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode(),
-            V302MaksdatoresultatPåBehandling(),
-            V303KopiereMaksdatoFraUtbetalingTilBehandling(),
-            V304FjerneArbeidsledigSykmeldingsperioder(),
-            V305RenameSykepengegrunnlagTilInntektsgrunnlag(),
-            V306RefusjonstidslinjePåBehandling(),
-            V307RefusjonstidslinjePåBehandlingsendring(),
-            V308HendelseIdPåInfotrygdhistorikk(),
-            V309LeggeTilUbrukteRefusjonsopplysninger(),
-            V311AvsenderOgTidsstempelPåRefusjonsopplysning(),
-            V312AvsenderOgTidsstempelPåRefusjonsopplysningForDeaktiverteArbeidsforhold()
-        )
+        private val migrations =
+            listOf(
+                V279AvsluttettidspunktVedtakFattet(),
+                V280HengendeRevurderinger(),
+                V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon(),
+                V282HengendeRevurderinger(),
+                V283BeregningsgrunnlagPåØkonomi(),
+                V284GjelderPeriodeArbeidsgiverInntektsopplysning(),
+                V285LoggeRareAnnulleringer(),
+                V286AnnullerteÅpneRevurderinger(),
+                V287AnnullerteÅpneRevurderingerEnGangTil(),
+                V288FjerneOverflødigeUberegnedeRevurderinger(),
+                V289AvsluttetTidspunktForkastedeGenerasjoner(),
+                V290FikseForbrukteDagerSomErNull(),
+                V291FikseTidligereOmgjøringerSomErRevurderingFeilet(),
+                V292AnnullertPeriode(),
+                V293AvsluttetUberegnedeOmgjøringer(),
+                V294RenameTilBehandlinger(),
+                V295BumpVersjon(),
+                V296SkjæringstidspunktPåBehandlinger(),
+                V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling(),
+                V298EgenmeldingsdagerPåVedtaksperiode(),
+                V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode(),
+                V302MaksdatoresultatPåBehandling(),
+                V303KopiereMaksdatoFraUtbetalingTilBehandling(),
+                V304FjerneArbeidsledigSykmeldingsperioder(),
+                V305RenameSykepengegrunnlagTilInntektsgrunnlag(),
+                V306RefusjonstidslinjePåBehandling(),
+                V307RefusjonstidslinjePåBehandlingsendring(),
+                V308HendelseIdPåInfotrygdhistorikk(),
+                V309LeggeTilUbrukteRefusjonsopplysninger(),
+                V311AvsenderOgTidsstempelPåRefusjonsopplysning(),
+                V312AvsenderOgTidsstempelPåRefusjonsopplysningForDeaktiverteArbeidsforhold(),
+            )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
     }
@@ -97,7 +98,10 @@ class SerialisertPerson(val json: String) {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
             return personData.tilPersonDto()
         } catch (err: Exception) {
-            throw DeserializationException("Feil under oversetting til modellobjekter: ${err.message}", err)
+            throw DeserializationException(
+                "Feil under oversetting til modellobjekter: ${err.message}",
+                err,
+            )
         }
     }
 }

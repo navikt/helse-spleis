@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.PrintWriter
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
-plugins {
-    kotlin("jvm") version "2.0.21"
-}
+plugins { kotlin("jvm") version "2.0.21" }
 
 val junitJupiterVersion = "5.11.3"
 
@@ -17,9 +15,9 @@ allprojects {
         val githubPassword: String? by project
         mavenCentral()
         /* ihht. https://github.com/navikt/utvikling/blob/main/docs/teknisk/Konsumere%20biblioteker%20fra%20Github%20Package%20Registry.md
-            så plasseres github-maven-repo (med autentisering) før nav-mirror slik at github actions kan anvende førstnevnte.
-            Det er fordi nav-mirroret kjører i Google Cloud og da ville man ellers fått unødvendige utgifter til datatrafikk mellom Google Cloud og GitHub
-         */
+           så plasseres github-maven-repo (med autentisering) før nav-mirror slik at github actions kan anvende førstnevnte.
+           Det er fordi nav-mirroret kjører i Google Cloud og da ville man ellers fått unødvendige utgifter til datatrafikk mellom Google Cloud og GitHub
+        */
         maven {
             url = uri("https://maven.pkg.github.com/navikt/maven-release")
             credentials {
@@ -31,43 +29,34 @@ allprojects {
     }
 
     /*
-        avhengigheter man legger til her blir lagt på -alle- prosjekter.
-        med mindre alle submodulene (modellen, apiet, jobs, osv) har behov for samme avhengighet,
-        bør det heller legges til de enkelte som har behov.
-        Dersom det er flere som har behov så kan det være lurt å legge avhengigheten til
-         dependencyResolutionManagement i settings.gradle.kts
-     */
+       avhengigheter man legger til her blir lagt på -alle- prosjekter.
+       med mindre alle submodulene (modellen, apiet, jobs, osv) har behov for samme avhengighet,
+       bør det heller legges til de enkelte som har behov.
+       Dersom det er flere som har behov så kan det være lurt å legge avhengigheten til
+        dependencyResolutionManagement i settings.gradle.kts
+    */
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
     configure<KotlinJvmProjectExtension> {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("21"))
-        }
+        jvmToolchain { languageVersion.set(JavaLanguageVersion.of("21")) }
     }
 
-    tasks {
-        withType<Jar> {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-
-    }
+    tasks { withType<Jar> { duplicatesStrategy = DuplicatesStrategy.EXCLUDE } }
 }
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin="java-library")
-    apply(plugin="java-test-fixtures")
+    apply(plugin = "java-library")
+    apply(plugin = "java-test-fixtures")
 
     tasks {
         withType<Test> {
             maxHeapSize = "6G"
             useJUnitPlatform()
-            testLogging {
-                events("skipped", "failed")
-            }
+            testLogging { events("skipped", "failed") }
         }
     }
 }
@@ -75,7 +64,7 @@ subprojects {
 /**
  * kjør gjerne denne slik:
  *
- *  ./gradlew tegn_modul_graf -Putputt=EnGrad.md
+ * ./gradlew tegn_modul_graf -Putputt=EnGrad.md
  *
  * så får du en fin graf under /doc/EnGrad.md
  */
@@ -91,14 +80,15 @@ tasks.create("tegn_modul_graf") {
     }
 }
 
-fun hentPrinter() = if (ext.properties["utputt"] != null) {
-    val paff = "${project.rootDir.absolutePath}/doc/${ext.properties["utputt"]}"
-    val fail = File(paff)
-    if (!fail.exists()) {
-        fail.createNewFile()
-    }
-    fail.printWriter()
-} else PrintWriter(System.out, true)
+fun hentPrinter() =
+    if (ext.properties["utputt"] != null) {
+        val paff = "${project.rootDir.absolutePath}/doc/${ext.properties["utputt"]}"
+        val fail = File(paff)
+        if (!fail.exists()) {
+            fail.createNewFile()
+        }
+        fail.printWriter()
+    } else PrintWriter(System.out, true)
 
 fun Project.listUtModulAvhengigheter(printer: PrintWriter) {
     val deps = mutableSetOf<String>()
@@ -115,4 +105,3 @@ fun Project.listUtModulAvhengigheter(printer: PrintWriter) {
         deps.forEach { printer.println("\t${this.name}-->$it") }
     }
 }
-
