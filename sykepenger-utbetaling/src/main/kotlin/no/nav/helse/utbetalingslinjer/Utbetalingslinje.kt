@@ -170,28 +170,28 @@ class Utbetalingslinje(
 
     private fun equals(other: Utbetalingslinje) =
         this.fom == other.fom &&
-                this.tom == other.tom &&
-                this.beløp == other.beløp &&
-                this.grad == other.grad &&
-                this.datoStatusFom == other.datoStatusFom
+            this.tom == other.tom &&
+            this.beløp == other.beløp &&
+            this.grad == other.grad &&
+            this.datoStatusFom == other.datoStatusFom
 
     fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
-                this.fom == other.fom &&
-                this.beløp == other.beløp &&
-                this.grad == other.grad &&
-                this.datoStatusFom == other.datoStatusFom
+            this.fom == other.fom &&
+            this.beløp == other.beløp &&
+            this.grad == other.grad &&
+            this.datoStatusFom == other.datoStatusFom
 
     fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag && (this.fom > other.fom)
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
-                tom.hashCode() * 17 +
-                beløp.hashCode() * 41 +
-                grad.hashCode() * 61 +
-                endringskode.name.hashCode() * 59 +
-                datoStatusFom.hashCode() * 23
+            tom.hashCode() * 17 +
+            beløp.hashCode() * 41 +
+            grad.hashCode() * 61 +
+            endringskode.name.hashCode() * 59 +
+            datoStatusFom.hashCode() * 23
     }
 
     fun markerUendret(tidligere: Utbetalingslinje) = kopier(
@@ -226,8 +226,8 @@ class Utbetalingslinje(
 
     internal fun kuttHelg(): Utbetalingslinje? {
         return when (tom.dayOfWeek) {
-            DayOfWeek.SUNDAY -> tom.minusDays(2).takeUnless { it < fom}?.let { nyTom -> kopier(tom = nyTom) }
-            DayOfWeek.SATURDAY -> tom.forrigeDag.takeUnless { it < fom}?.let { nyTom -> kopier(tom = nyTom) }
+            DayOfWeek.SUNDAY -> tom.minusDays(2).takeUnless { it < fom }?.let { nyTom -> kopier(tom = nyTom) }
+            DayOfWeek.SATURDAY -> tom.forrigeDag.takeUnless { it < fom }?.let { nyTom -> kopier(tom = nyTom) }
             else -> this
         }
     }

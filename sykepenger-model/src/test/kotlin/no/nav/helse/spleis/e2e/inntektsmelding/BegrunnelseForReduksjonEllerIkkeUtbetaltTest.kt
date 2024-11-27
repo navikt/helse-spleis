@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
+internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() {
 
     @Test
     fun `arbeidsgiverperioden strekker seg over to perioder og inntektsmelding kommer etter søknadene`() {
@@ -99,7 +99,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
                         assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
 
                     }
-                 },
+                },
                 ønsket = {
                     (25.januar til 31.januar).let { periode ->
                         assertEquals(periode, inspektør.periode(2.vedtaksperiode))
@@ -129,9 +129,9 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
             assertEquals("SSSSSHH SSSSSHH SSSSNHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertForventetFeil(
                 forklaring = "Når arbeidsgiver oppgir første fraværsdag ut i forlengelsen havner varselet om uenighet i " +
-                        "AGP på siste periode. Da utbetaler vi potensielt første periode feil og automatisk.",
+                    "AGP på siste periode. Da utbetaler vi potensielt første periode feil og automatisk.",
                 nå = {
-                     assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+                    assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
                 },
                 ønsket = {
                     assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())

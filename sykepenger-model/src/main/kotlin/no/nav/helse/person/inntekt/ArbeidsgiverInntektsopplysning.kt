@@ -39,6 +39,7 @@ data class ArbeidsgiverInntektsopplysning(
     private fun fastsattÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + beregningsgrunnlag(skjæringstidspunkt)
     }
+
     private fun omregnetÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + omregnetÅrsinntekt(skjæringstidspunkt)
     }
@@ -106,12 +107,15 @@ data class ArbeidsgiverInntektsopplysning(
 
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
-            .map { VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
-                organisasjonsnummer = it.orgnummer,
-                fastsattÅrsinntekt = it.inntektsopplysning.fastsattÅrsinntekt(),
-                gjelder = it.gjelder,
-                refusjonsopplysninger = it.refusjonsopplysninger
-            ) }
+            .map {
+                VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
+                    organisasjonsnummer = it.orgnummer,
+                    fastsattÅrsinntekt = it.inntektsopplysning.fastsattÅrsinntekt(),
+                    gjelder = it.gjelder,
+                    refusjonsopplysninger = it.refusjonsopplysninger
+                )
+            }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet(skjæringstidspunkt: LocalDate) =
             omregnetÅrsinntekter(skjæringstidspunkt, this).validerSkjønnsmessigAltEllerIntet()
 
@@ -189,7 +193,7 @@ data class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
-            singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()
+            singleOrNull { it.gjelder(organisasjonsnummer) }?.refusjonsopplysninger ?: Refusjonsopplysninger()
 
         internal fun List<ArbeidsgiverInntektsopplysning>.forespurtInntektOgRefusjonsopplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, periode: Periode): Triple<PersonObserver.FastsattInntekt, PersonObserver.Refusjon, PersonObserver.Inntektsdata?>? {
             val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
@@ -211,13 +215,15 @@ data class ArbeidsgiverInntektsopplysning(
             return PersonObserver.Inntektsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 kilde = type,
-                beløp = originalInntektsopplysning.fastsattÅrsinntekt().månedlig)
+                beløp = originalInntektsopplysning.fastsattÅrsinntekt().månedlig
+            )
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {
             val forrigeInntektsopplysninger = forrige.map { it.inntektsopplysning }
             return filterNot { it.inntektsopplysning in forrigeInntektsopplysninger }
         }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonslogg: Subsumsjonslogg, opptjening: Opptjening? = null, forrige: List<ArbeidsgiverInntektsopplysning>) {
             val endredeInntektsopplysninger = finnEndredeInntektsopplysninger(forrige)
             if (endredeInntektsopplysninger.isEmpty()) return
@@ -244,7 +250,7 @@ data class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt(skjæringstidspunkt: LocalDate) =
-            fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc, skjæringstidspunkt)}
+            fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc, skjæringstidspunkt) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt(skjæringstidspunkt: LocalDate) =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc, skjæringstidspunkt) }

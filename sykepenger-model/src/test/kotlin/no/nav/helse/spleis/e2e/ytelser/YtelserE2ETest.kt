@@ -131,7 +131,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Foreldrepenger påvirker skjæringstidspunkt for senere perioder`() {
         nyttVedtak(januar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT*1.1)))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -322,7 +322,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode,
+        håndterYtelser(
+            1.vedtaksperiode,
             foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             svangerskapspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             omsorgspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
@@ -337,7 +338,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode,
+        håndterYtelser(
+            2.vedtaksperiode,
             foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             svangerskapspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             omsorgspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
@@ -346,6 +348,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         )
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
+
     @Test
     fun `Omsorgspenger starter mer enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
@@ -362,9 +365,12 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(april)
         håndterInntektsmelding(listOf(1.april til 16.april))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(
+        håndterYtelser(
+            1.vedtaksperiode, foreldrepenger = listOf(
             GradertPeriode(februar, 100),
-            GradertPeriode(mai, 100) ))
+            GradertPeriode(mai, 100)
+        )
+        )
         assertIngenFunksjonelleFeil()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
@@ -449,7 +455,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Var ikke permisjon i forlengelsen likevel`(){
+    fun `Var ikke permisjon i forlengelsen likevel`() {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Permisjon(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
@@ -469,7 +475,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt INNTEKT
@@ -503,8 +510,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-        håndterOverstyrTidslinje((20..31).map {  ManuellOverskrivingDag(it.januar, Dagtype.Pleiepengerdag) }, orgnummer = a1)
-        håndterOverstyrTidslinje((20..31).map {  ManuellOverskrivingDag(it.januar, Dagtype.Pleiepengerdag) }, orgnummer = a2)
+        håndterOverstyrTidslinje((20..31).map { ManuellOverskrivingDag(it.januar, Dagtype.Pleiepengerdag) }, orgnummer = a1)
+        håndterOverstyrTidslinje((20..31).map { ManuellOverskrivingDag(it.januar, Dagtype.Pleiepengerdag) }, orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)

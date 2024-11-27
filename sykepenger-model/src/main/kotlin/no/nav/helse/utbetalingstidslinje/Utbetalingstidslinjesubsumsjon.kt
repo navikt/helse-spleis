@@ -48,10 +48,12 @@ internal class Utbetalingstidslinjesubsumsjon(
                     arbeidsgiverperiodedager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
+
                 is Utbetalingsdag.ArbeidsgiverperiodedagNav -> {
                     arbeidsgiverperiodeNavdager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
+
                 is Utbetalingsdag.AvvistDag -> {
                     if (AndreYtelserAap in dag.begrunnelser) aap.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     val andreYtelser = setOf(
@@ -61,22 +63,28 @@ internal class Utbetalingstidslinjesubsumsjon(
                         this.andreYtelser.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     }
                 }
+
                 is Utbetalingsdag.ForeldetDag -> {
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
+
                 is Utbetalingsdag.Fridag -> {
                     fridager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
+
                 is Utbetalingsdag.NavDag -> {
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
+
                 is Utbetalingsdag.NavHelgDag -> {
                     helger.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
+
                 is Utbetalingsdag.Arbeidsdag,
-                is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */ }
+                is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */
+                }
             }
         }
     }
@@ -115,6 +123,7 @@ internal class Utbetalingstidslinjesubsumsjon(
                 nyttElement = { dato.somPeriode() }
             )
         }
+
         private fun MutableList<Dekningsgrunnlag>.utvidForrigeDatoperiodeEllerLeggTil(dato: LocalDate, økonomi: Økonomi) {
             utvidForrigeDatoperiodeEllerLeggTil(
                 dato = dato,
@@ -123,6 +132,7 @@ internal class Utbetalingstidslinjesubsumsjon(
                 nyttElement = { Dekningsgrunnlag(periode = dato.somPeriode(), inntekt = økonomi.subsumsjonsdata()) }
             )
         }
+
         private fun <E> MutableList<E>.utvidForrigeDatoperiodeEllerLeggTil(
             dato: LocalDate,
             finnPeriode: (E) -> Periode,

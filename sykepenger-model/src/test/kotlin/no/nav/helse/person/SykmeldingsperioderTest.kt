@@ -228,7 +228,7 @@ internal class SykmeldingsperioderTest {
         harOpphørAvNaturalytelser = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
     ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
+        it.valider(object : Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, Aktivitetslogg())

@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class RevurderGhostInntektTest: AbstractDslTest() {
+internal class RevurderGhostInntektTest : AbstractDslTest() {
 
     @Test
     fun `revurder ghost-inntekt ned`() {
@@ -348,6 +348,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }
     }
+
     private fun TestPerson.TestArbeidsgiver.assertPeriode(
         periode: Periode,
         arbeidsgiverbeløp: Inntekt,

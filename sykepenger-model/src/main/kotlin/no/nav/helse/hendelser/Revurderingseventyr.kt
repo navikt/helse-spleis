@@ -6,9 +6,6 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Annullering
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
@@ -17,6 +14,9 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Reberegning
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
@@ -82,7 +82,7 @@ class Revurderingseventyr private constructor(
     }
 
     internal fun loggDersomKorrigerendeSøknad(aktivitetslogg: IAktivitetslogg, loggMelding: String) {
-        if (hvorfor == KorrigertSøknad){
+        if (hvorfor == KorrigertSøknad) {
             aktivitetslogg.info(loggMelding)
         }
     }
@@ -114,7 +114,7 @@ class Revurderingseventyr private constructor(
             override fun navn() = "ARBEIDSGIVERPERIODE"
         }
 
-        data object Infotrygdendring: RevurderingÅrsak {
+        data object Infotrygdendring : RevurderingÅrsak {
             override fun navn(): String {
                 return "INFOTRYGDENDRING"
             }
@@ -135,9 +135,11 @@ class Revurderingseventyr private constructor(
         data object Arbeidsforhold : RevurderingÅrsak {
             override fun navn() = "ARBEIDSFORHOLD"
         }
+
         data object Grunnbeløpsregulering : RevurderingÅrsak {
             override fun navn() = "GRUNNBELØPSREGULERING"
         }
+
         data object Annullering : RevurderingÅrsak {
             override fun navn() = "ANNULLERING"
             override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
@@ -156,7 +158,8 @@ class Revurderingseventyr private constructor(
                 skjæringstidspunkt: LocalDate,
                 periodeForEndring: Periode,
                 meldingsreferanseId: UUID
-            ) { /* trenger ikke fortelle om en reberegning */ }
+            ) { /* trenger ikke fortelle om en reberegning */
+            }
 
             override fun navn() = "REBEREGNING"
         }

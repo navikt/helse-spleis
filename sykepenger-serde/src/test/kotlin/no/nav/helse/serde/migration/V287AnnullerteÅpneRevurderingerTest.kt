@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import org.junit.jupiter.api.Test
 
-internal class V287AnnullerteÅpneRevurderingerEnGangTilTest: MigrationTest(V287AnnullerteÅpneRevurderingerEnGangTil()) {
+internal class V287AnnullerteÅpneRevurderingerEnGangTilTest : MigrationTest(V287AnnullerteÅpneRevurderingerEnGangTil()) {
 
     @Test
     fun `smelter sammen uberegnet revurdering med til_infotrygd`() {

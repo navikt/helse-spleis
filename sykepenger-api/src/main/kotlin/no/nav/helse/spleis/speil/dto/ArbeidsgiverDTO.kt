@@ -17,14 +17,15 @@ data class ArbeidsgiverDTO(
         fun List<ArbeidsgiverDTO>.sykefraværstilfeller() = this
             .flatMap { arbeidsgiver ->
                 arbeidsgiver.generasjoner.firstOrNull()?.perioder?.map { periode ->
-                    periode.skjæringstidspunkt to (periode.fom .. periode.tom)
+                    periode.skjæringstidspunkt to (periode.fom..periode.tom)
                 } ?: emptyList()
             }.groupBy({ it.first }) { it.second }
     }
+
     internal fun erTom(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ghostPerioder.isEmpty()
-            && nyeInntektsforhold.isEmpty()
-            && generasjoner.isEmpty()
-            && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
+        && nyeInntektsforhold.isEmpty()
+        && generasjoner.isEmpty()
+        && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
 
     internal fun medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
         val sykefraværstilfeller = arbeidsgivere.sykefraværstilfeller()

@@ -108,6 +108,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
         assertNoErrors(ValidInntektsmeldingMedVedtaksperiodeId)
     }
+
     private fun ObjectNode.toJson(): String = put("fødselsdato", "$fødselsdato").toString()
 }
 

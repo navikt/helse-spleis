@@ -56,7 +56,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
+internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere første periode - flere ag - ag 1`() {
@@ -337,7 +337,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
         * */
         nyttVedtak(januar, orgnummer = a1)
-        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null )
+        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
@@ -485,15 +485,19 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(17.januar, Feriedag),
-            ManuellOverskrivingDag(18.januar, Feriedag)
-        ), a1)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(17.januar, Feriedag),
+                ManuellOverskrivingDag(18.januar, Feriedag)
+            ), a1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(18.januar, Sykedag, 100)
-        ), a1)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(18.januar, Sykedag, 100)
+            ), a1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

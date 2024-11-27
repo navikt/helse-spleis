@@ -69,7 +69,7 @@ internal class ØkonomiDagTest {
         val b1 = tidslinjeOf(1.NAV(inntekt, 50))
         val (b) = listOf(b1).betal()
         assertØkonomi(b, 115.0, 0.0)
-        val c1 = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt/2))
+        val c1 = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt / 2))
         val (c) = listOf(c1).betal()
         assertØkonomi(c, 115.0, 116.0)
     }
@@ -110,7 +110,7 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `avvist dag endrer ikke på økonomi til navdag`() {
-        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(500.daglig, 500.daglig, `6G`= 600000.årlig, refusjonsbeløp = 500.daglig)
+        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(500.daglig, 500.daglig, `6G` = 600000.årlig, refusjonsbeløp = 500.daglig)
         val builderFør = Økonomitester()
         økonomi.builder(builderFør)
 

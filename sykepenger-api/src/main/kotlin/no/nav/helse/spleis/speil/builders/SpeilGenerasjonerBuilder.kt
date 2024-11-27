@@ -55,6 +55,7 @@ internal class SpeilGenerasjonerBuilder(
         val forkastede = arbeidsgiverUtDto.forkastede.flatMap { mapVedtaksperiode(it.vedtaksperiode) }
         return aktive + forkastede
     }
+
     private fun mapVedtaksperiode(vedtaksperiode: VedtaksperiodeUtDto): List<SpeilTidslinjeperiode> {
         var forrigeGenerasjon: SpeilTidslinjeperiode? = null
         return vedtaksperiode.behandlinger.behandlinger.mapNotNull { generasjon ->
@@ -65,10 +66,12 @@ internal class SpeilGenerasjonerBuilder(
                 BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST,
                 BehandlingtilstandDto.VEDTAK_FATTET,
                 BehandlingtilstandDto.VEDTAK_IVERKSATT -> mapBeregnetPeriode(vedtaksperiode, generasjon)
+
                 BehandlingtilstandDto.UBEREGNET,
                 BehandlingtilstandDto.UBEREGNET_OMGJØRING,
                 BehandlingtilstandDto.UBEREGNET_REVURDERING,
                 BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> mapUberegnetPeriode(vedtaksperiode, generasjon)
+
                 BehandlingtilstandDto.TIL_INFOTRYGD -> mapTilInfotrygdperiode(vedtaksperiode, forrigeGenerasjon, generasjon)
                 BehandlingtilstandDto.ANNULLERT_PERIODE -> mapAnnullertPeriode(vedtaksperiode, generasjon)
             }.also {
@@ -116,6 +119,7 @@ internal class SpeilGenerasjonerBuilder(
 
         )
     }
+
     private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): BeregnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
@@ -207,6 +211,7 @@ internal class SpeilGenerasjonerBuilder(
                 avgrensetUtbetalingstidslinje.none { it.utbetalingsinfo()?.harUtbetaling() == true } -> Periodetilstand.IngenUtbetaling
                 else -> Periodetilstand.Utbetalt
             }
+
             Utbetalingstatus.Ubetalt -> when {
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_GODKJENNING) -> Periodetilstand.TilGodkjenning
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING) -> Periodetilstand.ForberederGodkjenning
@@ -215,8 +220,10 @@ internal class SpeilGenerasjonerBuilder(
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE, VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING) -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
                 else -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
             }
+
             Utbetalingstatus.Godkjent,
             Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling
+
             else -> error("har ikke mappingregel for ${utbetalingDTO.status}")
         }
 

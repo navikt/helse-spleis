@@ -30,11 +30,11 @@ internal class InntektForInntektsgrunnlagTest {
             ),
             ArbeidsgiverInntekt(
                 "orgnummer2", (1..2).map {
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        YearMonth.of(2017, it),
-                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
-                    )
-                }
+                ArbeidsgiverInntekt.MånedligInntekt(
+                    YearMonth.of(2017, it),
+                    31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                )
+            }
             )
         )
         assertEquals(3, inntekter.antallMåneder())

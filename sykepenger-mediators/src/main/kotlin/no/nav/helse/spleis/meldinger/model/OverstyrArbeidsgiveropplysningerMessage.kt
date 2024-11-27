@@ -33,12 +33,12 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
             this, OverstyrArbeidsgiveropplysninger(
-                meldingsreferanseId = meldingsporing.id,
-                skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiveropplysninger = arbeidsgiveropplysninger,
-                opprettet = opprettet,
-                refusjonstidslinjer = refusjonstidslinjer
-            ),
+            meldingsreferanseId = meldingsporing.id,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger,
+            opprettet = opprettet,
+            refusjonstidslinjer = refusjonstidslinjer
+        ),
             context
         )
 
@@ -81,7 +81,8 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                         beløp = refusjonsopplysning.path("beløp").asDouble().månedlig,
                         avsender = SAKSBEHANDLER,
                         tidsstempel = opprettet
-                    ), opprettet)
+                    ), opprettet
+                )
             }
         }.build()
 
@@ -93,7 +94,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
             }
         }
 
-        private fun JsonNode.refusjonstidslinje(meldingsreferanseId: UUID, opprettet: LocalDateTime) : Pair<Beløpstidslinje, Boolean> {
+        private fun JsonNode.refusjonstidslinje(meldingsreferanseId: UUID, opprettet: LocalDateTime): Pair<Beløpstidslinje, Boolean> {
             var strekkbar = false
             val refusjonstidslinje = this.fold(Beløpstidslinje()) { acc, node ->
                 val fom = node.path("fom").asLocalDate()

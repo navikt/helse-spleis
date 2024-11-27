@@ -10,7 +10,7 @@ class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
-): Hendelse, OverstyrInntektsgrunnlag {
+) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
 
     override val metadata = HendelseMetadata(

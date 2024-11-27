@@ -26,7 +26,7 @@ class Inntektsmelding internal constructor(
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde = Kilde.Arbeidsgiver, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) } ?: this
 
     internal fun view() = InntektsmeldingView(
         id = id,
@@ -56,6 +56,7 @@ class Inntektsmelding internal constructor(
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
     }
+
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         inntektsmelding: no.nav.helse.hendelser.Inntektsmelding
@@ -68,6 +69,7 @@ class Inntektsmelding internal constructor(
             )
         )
     }
+
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         orgnummer: String,
@@ -111,7 +113,7 @@ class Inntektsmelding internal constructor(
         Arbeidsgiver,
         AOrdningen;
 
-        fun dto() = when(this) {
+        fun dto() = when (this) {
             Arbeidsgiver -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
             AOrdningen -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen
         }

@@ -159,7 +159,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return aktivitetslogg
     }
 
-    private fun utbetalingsdagerI(periode: Periode) = periode.filter { dag -> utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
+    private fun utbetalingsdagerI(periode: Periode) = periode.filter { dag -> utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode } }
 
     internal companion object {
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)

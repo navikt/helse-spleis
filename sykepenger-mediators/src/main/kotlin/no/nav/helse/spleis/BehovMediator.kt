@@ -16,7 +16,7 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
             .groupBy { it.kontekster }
             .forEach { (kontekster, behovMedSammeKontekster) ->
                 val kontekstMap = kontekster.fold(emptyMap<String, String>()) { result, item -> result + item.kontekstMap }
-                val behovMap =  behovMedSammeKontekster
+                val behovMap = behovMedSammeKontekster
                     .groupBy({ it.type.name }, { it.detaljer() })
                     .ikkeTillatUnikeDetaljerPåSammeBehov(kontekstMap, behovMedSammeKontekster)
 
@@ -28,7 +28,7 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
             }
     }
 
-    private fun <K: Any> Map<K, List<Map<String, Any?>>>.ikkeTillatUnikeDetaljerPåSammeBehov(kontekst: Map<String, String>, behovliste: List<Aktivitet.Behov>) =
+    private fun <K : Any> Map<K, List<Map<String, Any?>>>.ikkeTillatUnikeDetaljerPåSammeBehov(kontekst: Map<String, String>, behovliste: List<Aktivitet.Behov>) =
         mapValues { (_, detaljerList) ->
             // tillater duplikate detaljer-maps, så lenge de er like
             detaljerList

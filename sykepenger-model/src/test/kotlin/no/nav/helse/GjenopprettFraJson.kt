@@ -9,6 +9,7 @@ internal fun gjenopprettFraJSON(fil: String, subsumsjonslogg: Subsumsjonslogg = 
     val json = fil.readResource()
     return gjenopprettFraJSONtekst(json, subsumsjonslogg)
 }
+
 internal fun gjenopprettFraJSONtekst(json: String, subsumsjonslogg: Subsumsjonslogg = EmptyLog): Person {
     val serialisertPerson = SerialisertPerson(json)
     val dto = serialisertPerson.tilPersonDto()

@@ -22,7 +22,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Test
 
-internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
+internal class AvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
     /*
         Hvis vi har en kort periode som har endt opp i AVSLUTTET_UTEN_UTBETALING vil alle etterkommende perioder
         bli stuck med å vente på den korte perioden. Da vil de aldri komme seg videre og til slutt time ut
@@ -70,7 +70,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
-        håndterSøknad(3.januar  til 10.januar)
+        håndterSøknad(3.januar til 10.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,

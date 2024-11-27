@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -83,7 +84,6 @@ import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import kotlin.math.roundToInt
 
 class Person private constructor(
     personidentifikator: Personidentifikator,
@@ -164,7 +164,7 @@ class Person private constructor(
     private val observers = mutableListOf<PersonObserver>()
 
     internal fun view() = PersonView(
-        arbeidsgivere = arbeidsgivere.map{it.view()},
+        arbeidsgivere = arbeidsgivere.map { it.view() },
         vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view()
     )
 
@@ -235,10 +235,12 @@ class Person private constructor(
             val msg = andreBehandledeVedtaksperioder.map {
                 "vedtaksperiode(${it.periode()})"
             }
-            aktivitetslogg.info("""hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen 
+            aktivitetslogg.info(
+                """hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen 
                 | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
                 | tidligere behandlede perioder: ${msg.joinToString { it }}
-                | cutoff: $cutoff""".trimMargin())
+                | cutoff: $cutoff""".trimMargin()
+            )
         }
     }
 
@@ -271,8 +273,8 @@ class Person private constructor(
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) =
         håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetslogg) {
-        utbetalingshistorikk.oppdaterHistorikk(aktivitetslogg, it)
-    }
+            utbetalingshistorikk.oppdaterHistorikk(aktivitetslogg, it)
+        }
 
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
         registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
@@ -775,6 +777,7 @@ class Person private constructor(
         aktivitetslogg.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
+
     private var gjenopptaBehandlingNy = false
 
     internal fun gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
@@ -794,7 +797,9 @@ class Person private constructor(
 
     private fun håndterVedtaksperiodeVenter(hendelse: Hendelse) {
         when (hendelse) {
-            is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */ }
+            is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */
+            }
+
             else -> {
                 val nestemann = arbeidsgivere.nestemann() ?: return
                 val eventer = arbeidsgivere.venter(nestemann)

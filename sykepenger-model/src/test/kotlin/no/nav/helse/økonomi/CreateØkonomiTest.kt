@@ -54,8 +54,9 @@ internal class CreateØkonomiTest {
     fun `kan sette arbeidsgiverperiode`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            assertDoesNotThrow { økonomi
-                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
+            assertDoesNotThrow {
+                økonomi
+                    .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
             }
         }
     }

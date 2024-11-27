@@ -83,7 +83,8 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                     "forklaring",
                     null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                ))
+                )
+            )
         )
 
         val expected = ArbeidsgiveropplysningerKorrigertEvent(

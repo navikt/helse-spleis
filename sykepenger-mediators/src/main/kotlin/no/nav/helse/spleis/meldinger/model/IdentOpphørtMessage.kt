@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.IdentOpphørt
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
@@ -15,8 +15,8 @@ internal class IdentOpphørtMessage(packet: JsonMessage, override val meldingspo
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(
             Personidentifikator(nyttFødselsnummer), this, IdentOpphørt(
-                meldingsreferanseId = meldingsporing.id
-            ), gamleIdenter, context
+            meldingsreferanseId = meldingsporing.id
+        ), gamleIdenter, context
         )
     }
 

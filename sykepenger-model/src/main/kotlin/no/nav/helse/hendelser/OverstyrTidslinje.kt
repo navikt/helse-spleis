@@ -66,74 +66,87 @@ class OverstyrTidslinje(
                     grad = it.grad!!.prosent, // Sykedager må ha grad
                     kilde = kilde
                 )
+
                 Dagtype.Feriedag -> Sykdomstidslinje.feriedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
                 )
+
                 Dagtype.ArbeidIkkeGjenopptattDag -> Sykdomstidslinje.arbeidIkkeGjenopptatt(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
                 )
+
                 Dagtype.Permisjonsdag -> Sykdomstidslinje.permisjonsdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
                 )
+
                 Dagtype.Arbeidsdag -> Sykdomstidslinje.arbeidsdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
                 )
+
                 Dagtype.Egenmeldingsdag -> Sykdomstidslinje.arbeidsgiverdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = 100.prosent,
                     kilde = kilde
                 )
+
                 Dagtype.SykedagNav -> Sykdomstidslinje.sykedagerNav(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = it.grad!!.prosent, // Sykedager må ha grad
                     kilde = kilde
                 )
+
                 Dagtype.Foreldrepengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = Foreldrepenger
                 )
+
                 Dagtype.AAPdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = AAP
                 )
+
                 Dagtype.Omsorgspengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = Omsorgspenger
                 )
+
                 Dagtype.Pleiepengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = Pleiepenger
                 )
+
                 Dagtype.Svangerskapspengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = Svangerskapspenger
                 )
+
                 Dagtype.Opplaringspengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = Opplæringspenger
                 )
+
                 Dagtype.Dagpengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,

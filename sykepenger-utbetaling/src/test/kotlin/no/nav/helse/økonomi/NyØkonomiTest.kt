@@ -1,6 +1,5 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.mai
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

@@ -20,6 +20,7 @@ data class GhostPeriodeDTO(
         id = UUID.randomUUID(),
         tom = other.start.forrigeDag
     )
+
     internal fun fra(other: ClosedRange<LocalDate>) = copy(
         id = UUID.randomUUID(),
         fom = other.endInclusive.nesteDag
@@ -45,6 +46,7 @@ internal fun ClosedRange<LocalDate>.erUtenfor(fom: LocalDate, tom: LocalDate) =
 
 internal fun ClosedRange<LocalDate>.erInni(fom: LocalDate, tom: LocalDate) =
     this.start > fom && this.endInclusive < tom
+
 internal fun ClosedRange<LocalDate>.overlapperMedHale(fom: LocalDate, tom: LocalDate) =
     this.start > fom && this.endInclusive >= tom
 

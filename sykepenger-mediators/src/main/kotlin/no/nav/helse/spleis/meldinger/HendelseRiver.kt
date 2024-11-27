@@ -41,11 +41,13 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
         override fun name() = this@HendelseRiver::class.simpleName ?: "ukjent"
 
         override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
-            withMDC(mapOf(
-                "river_name" to riverName,
-                "melding_type" to eventName,
-                "melding_id" to packet["@id"].asText()
-            )) {
+            withMDC(
+                mapOf(
+                    "river_name" to riverName,
+                    "melding_type" to eventName,
+                    "melding_id" to packet["@id"].asText()
+                )
+            ) {
 
                 val timer = Timer.start(meterRegistry)
 

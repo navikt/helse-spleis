@@ -71,7 +71,8 @@ internal class Feriepengeutbetaling private constructor(
         aktivitetslogg.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         when (utbetalingHendelse.status) {
             Oppdragstatus.OVERFØRT,
-            Oppdragstatus.AKSEPTERT -> { } // all is good
+            Oppdragstatus.AKSEPTERT -> {
+            } // all is good
             Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.varsel(RV_UT_2)
             Oppdragstatus.AVVIST,
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
@@ -163,7 +164,7 @@ internal class Feriepengeutbetaling private constructor(
         }
 
         private val Double.finere get() = "$this".padStart(10, ' ')
-        private val List<Periode>.finere get() = joinToString(separator = "\n\t\t\t\t\t", prefix = "\n\t\t\t\t\t") {"$it (${it.count()} dager)" }
+        private val List<Periode>.finere get() = joinToString(separator = "\n\t\t\t\t\t", prefix = "\n\t\t\t\t\t") { "$it (${it.count()} dager)" }
 
         internal fun build(aktivitetslogg: IAktivitetslogg): Feriepengeutbetaling {
             // Arbeidsgiver
@@ -271,7 +272,7 @@ internal class Feriepengeutbetaling private constructor(
                     Infotrygd-utbetalingen må korrigeres med:   ${differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson.finere}
 
                 - GENERELT:         
-                ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder().finere}"}}
+                ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder().finere}" }}
                 
                 - OPPDRAG:
                 Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag

@@ -7,9 +7,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.server.application.install
 import io.ktor.server.testing.testApplication
 import java.nio.file.Paths
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -18,9 +20,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
 
 internal class SchemaGenerator {
 

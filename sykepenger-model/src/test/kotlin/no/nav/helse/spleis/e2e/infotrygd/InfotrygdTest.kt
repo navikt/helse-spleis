@@ -59,6 +59,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
+
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(

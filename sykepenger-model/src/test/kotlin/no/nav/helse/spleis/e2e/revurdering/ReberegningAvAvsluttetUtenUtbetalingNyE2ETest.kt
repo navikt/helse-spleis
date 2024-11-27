@@ -220,8 +220,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-            )
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+        )
         )
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -243,8 +243,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, false)
-            )
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, false)
+        )
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -268,8 +268,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             PersonUtbetalingsperiode(a2, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                Inntektsopplysning(a2, 1.januar, INNTEKT, false)
-            )
+            Inntektsopplysning(a2, 1.januar, INNTEKT, false)
+        )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
@@ -447,7 +447,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `støtter omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`()  {
+    fun `støtter omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
@@ -736,7 +736,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING,  orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -1060,9 +1060,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(27.februar, Dagtype.Feriedag)
-        ), orgnummer = a1)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(27.februar, Dagtype.Feriedag)
+            ), orgnummer = a1
+        )
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)

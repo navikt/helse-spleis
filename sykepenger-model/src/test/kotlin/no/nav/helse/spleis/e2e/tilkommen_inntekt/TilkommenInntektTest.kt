@@ -136,7 +136,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalt()
             håndterSøknad(
                 Sykdom(1.mars, 31.mars, 100.prosent),
-                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
                 )
             )
             håndterYtelser(3.vedtaksperiode)
@@ -518,7 +519,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar,"a3", 100)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100)))
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)
@@ -556,7 +557,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar,"a3", 100)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100)))
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)

@@ -12,20 +12,24 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import org.junit.jupiter.api.Test
 import no.nav.inntektsmeldingkontrakt.Periode as IMPeriode
 
-internal class InntektsmeldingReplayTest: AbstractEndToEndMediatorTest() {
+internal class InntektsmeldingReplayTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `inntektsmelding strekker periode tilbake - uoverstemmelse av refusjonsopplysninger etter replay av inntektsmeldinger`() {
         nyPeriode(12.februar(2024) til 16.februar(2024), a1)
         nyPeriode(17.februar(2024) til 3.mars(2024), a2)
         nyPeriode(4.mars(2024) til 24.mars(2024), a1)
-        sendInntektsmelding(listOf(
-            IMPeriode(12.februar(2024), 27.februar(2024))
-        ), 4.mars(2024), orgnummer = a1)
+        sendInntektsmelding(
+            listOf(
+                IMPeriode(12.februar(2024), 27.februar(2024))
+            ), 4.mars(2024), orgnummer = a1
+        )
         sendVilkårsgrunnlag(2, 12.februar(2024), orgnummer = a1)
-        sendInntektsmelding(listOf(
-            IMPeriode(12.februar(2024), 27.februar(2024))
-        ), 12.februar(2024), orgnummer = a1)
+        sendInntektsmelding(
+            listOf(
+                IMPeriode(12.februar(2024), 27.februar(2024))
+            ), 12.februar(2024), orgnummer = a1
+        )
         assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
         assertTilstand(1, "AVSLUTTET_UTEN_UTBETALING")
         assertTilstand(2, "AVVENTER_HISTORIKK")

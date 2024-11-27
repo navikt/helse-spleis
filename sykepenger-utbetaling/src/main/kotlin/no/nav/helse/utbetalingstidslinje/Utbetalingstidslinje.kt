@@ -26,7 +26,7 @@ import no.nav.helse.økonomi.Økonomi
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
  */
 
-class Utbetalingstidslinje private constructor(private val utbetalingsdager: SortedMap<LocalDate, Utbetalingsdag>): Collection<Utbetalingsdag> by utbetalingsdager.values {
+class Utbetalingstidslinje private constructor(private val utbetalingsdager: SortedMap<LocalDate, Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager.values {
 
     private val førsteDato get() = utbetalingsdager.firstKey()
     private val sisteDato get() = utbetalingsdager.lastKey()
@@ -36,6 +36,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             "Utbetalingstidslinjen består av minst én dato som pekes på av mer enn én Utbetalingsdag"
         }
     }
+
     constructor() : this(mutableListOf())
 
     companion object {
@@ -121,6 +122,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
                     true -> Fridag(dag, Økonomi.ikkeBetalt())
                     false -> Arbeidsdag(dag, Økonomi.ikkeBetalt())
                 }
+
                 venstre == null -> høyre!!
                 høyre == null -> venstre
                 else -> maxOf(venstre, høyre)
@@ -270,16 +272,17 @@ sealed class Begrunnelse {
     object MinimumInntekt : Begrunnelse()
     object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
-    object AndreYtelserForeldrepenger: Begrunnelse()
-    object AndreYtelserAap: Begrunnelse()
-    object AndreYtelserOmsorgspenger: Begrunnelse()
-    object AndreYtelserPleiepenger: Begrunnelse()
-    object AndreYtelserSvangerskapspenger: Begrunnelse()
-    object AndreYtelserOpplaringspenger: Begrunnelse()
-    object AndreYtelserDagpenger: Begrunnelse()
+    object AndreYtelserForeldrepenger : Begrunnelse()
+    object AndreYtelserAap : Begrunnelse()
+    object AndreYtelserOmsorgspenger : Begrunnelse()
+    object AndreYtelserPleiepenger : Begrunnelse()
+    object AndreYtelserSvangerskapspenger : Begrunnelse()
+    object AndreYtelserOpplaringspenger : Begrunnelse()
+    object AndreYtelserDagpenger : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse() {
         override fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
     }
+
     object EtterDødsdato : Begrunnelse()
     object Over70 : Begrunnelse()
     object ManglerOpptjening : Begrunnelse()

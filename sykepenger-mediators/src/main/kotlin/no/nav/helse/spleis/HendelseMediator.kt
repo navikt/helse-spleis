@@ -320,7 +320,7 @@ internal class HendelseMediator(
         anmodning: AnmodningOmForkasting,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, context) {person, aktivitetslogg ->
+        hentPersonOgHåndter(message, context) { person, aktivitetslogg ->
             person.håndter(anmodning, aktivitetslogg)
         }
     }
@@ -333,7 +333,7 @@ internal class HendelseMediator(
     }
 
     override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext) {
-        person(personidentifikator, message, emptySet(), EmptyLog, null) { person  ->
+        person(personidentifikator, message, emptySet(), EmptyLog, null) { person ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
             context.publish(avstemmer.tilJsonMessage().toJson().also {
@@ -390,9 +390,13 @@ internal class HendelseMediator(
             if (støtterIdentbytte) {
                 person.håndter(identOpphørt, aktivitetslogg, nyPersonidentifikator)
             }
-            context.publish(JsonMessage.newMessage("slackmelding", mapOf(
-                "melding" to "Det er en person som har byttet ident."
-            )).toJson())
+            context.publish(
+                JsonMessage.newMessage(
+                    "slackmelding", mapOf(
+                    "melding" to "Det er en person som har byttet ident."
+                )
+                ).toJson()
+            )
         }
     }
 
@@ -428,6 +432,7 @@ internal class HendelseMediator(
             person.håndter(forkastSykmeldingsperioder, aktivitetslogg)
         }
     }
+
     override fun behandle(
         message: AvbruttSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
@@ -438,6 +443,7 @@ internal class HendelseMediator(
             person.håndter(avbruttSøknad, aktivitetslogg)
         }
     }
+
     override fun behandle(
         message: AvbruttArbeidsledigSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
@@ -490,6 +496,7 @@ internal class HendelseMediator(
         val personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer)
         hentPersonOgHåndter(personidentifikator, null, message, context, handler = handler)
     }
+
     private fun hentPersonOgHåndter(
         personidentifikator: Personidentifikator,
         personopplysninger: Personopplysninger?,
@@ -504,7 +511,7 @@ internal class HendelseMediator(
         val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
         val personMediator = PersonMediator(message)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
-        person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
+        person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person, aktivitetslogg)
@@ -551,6 +558,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: NyFrilansSøknadMessage,
@@ -558,6 +566,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: NySelvstendigSøknadMessage,
@@ -565,6 +574,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigSøknadMessage,
@@ -572,6 +582,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsgiverMessage,
@@ -579,6 +590,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadFrilansMessage,
@@ -586,6 +598,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadSelvstendigMessage,
@@ -593,6 +606,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsledigMessage,
@@ -600,6 +614,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadNavMessage,
@@ -607,6 +622,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
+
     fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: MessageContext)
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)
@@ -637,6 +653,7 @@ internal interface IHendelseMediator {
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
     )
+
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
     fun behandle(avbruttSøknadMessage: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)

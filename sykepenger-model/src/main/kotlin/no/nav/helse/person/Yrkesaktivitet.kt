@@ -41,6 +41,7 @@ internal sealed interface Yrkesaktivitet {
 
     fun jurist(other: BehandlingSubsumsjonslogg): BehandlingSubsumsjonslogg =
         other.medOrganisasjonsnummer(this.toString())
+
     fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean
 
     fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
@@ -79,6 +80,7 @@ internal sealed interface Yrkesaktivitet {
         override fun identifikator() = organisasjonsnummer
         override fun toString() = identifikator()
     }
+
     class Frilans : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
@@ -97,6 +99,7 @@ internal sealed interface Yrkesaktivitet {
         override fun identifikator() = Frilans
         override fun toString() = identifikator()
     }
+
     class Selvstendig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
@@ -111,9 +114,11 @@ internal sealed interface Yrkesaktivitet {
             if (this === other) return true
             return other is Selvstendig
         }
+
         override fun identifikator() = Selvstendig
         override fun toString() = identifikator()
     }
+
     class Arbeidsledig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
@@ -144,6 +149,7 @@ internal sealed interface Yrkesaktivitet {
             if (this === other) return true
             return other is Arbeidsledig
         }
+
         override fun identifikator() = Arbeidsledig
         override fun toString() = identifikator()
     }

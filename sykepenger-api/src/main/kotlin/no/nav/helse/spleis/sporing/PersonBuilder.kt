@@ -24,12 +24,14 @@ internal class PersonBuilder(private val person: Person) {
             vedtaksperioder = perioder.onEachIndexed { index, denne ->
                 val erForlengelse = if (index > 0) perioder[index - 1].forlenger(denne) else false
                 val erForlenget = if (perioder.size > (index + 1)) denne.forlenger(perioder[index + 1]) else false
-                perioder[index] = denne.copy(periodetype = when {
-                    !erForlengelse && !erForlenget -> PeriodetypeDTO.GAP_SISTE
-                    !erForlengelse && erForlenget -> PeriodetypeDTO.GAP
-                    erForlengelse && !erForlenget -> PeriodetypeDTO.FORLENGELSE_SISTE
-                    else -> PeriodetypeDTO.FORLENGELSE
-                })
+                perioder[index] = denne.copy(
+                    periodetype = when {
+                        !erForlengelse && !erForlenget -> PeriodetypeDTO.GAP_SISTE
+                        !erForlengelse && erForlenget -> PeriodetypeDTO.GAP
+                        erForlengelse && !erForlenget -> PeriodetypeDTO.FORLENGELSE_SISTE
+                        else -> PeriodetypeDTO.FORLENGELSE
+                    }
+                )
             }
         )
     }

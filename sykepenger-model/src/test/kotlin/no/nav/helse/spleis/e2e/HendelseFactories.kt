@@ -284,13 +284,15 @@ internal fun sykepengegrunnlagForArbeidsgiver(
         vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkt,
         orgnummer = orgnummer,
-        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map { ArbeidsgiverInntekt.MånedligInntekt(
-            yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
-            inntekt = INNTEKT,
-            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-            fordel = "",
-            beskrivelse = ""
-        ) })
+        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map {
+            ArbeidsgiverInntekt.MånedligInntekt(
+                yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
+                inntekt = INNTEKT,
+                type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                fordel = "",
+                beskrivelse = ""
+            )
+        })
     )
 }
 
@@ -539,15 +541,15 @@ private fun lagMånedsinntekter(
     inntekter: List<Inntekt>
 ) = ArbeidsgiverInntekt(
     orgnummer, inntekter.mapIndexed { index, inntekt ->
-        val sluttMnd = YearMonth.from(skjæringstidspunkt)
-        ArbeidsgiverInntekt.MånedligInntekt(
-            sluttMnd.minusMonths((inntekter.size - index).toLong()),
-            inntekt,
-            ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-            "Juidy inntekt",
-            "Juidy fordel"
-        )
-    }
+    val sluttMnd = YearMonth.from(skjæringstidspunkt)
+    ArbeidsgiverInntekt.MånedligInntekt(
+        sluttMnd.minusMonths((inntekter.size - index).toLong()),
+        inntekt,
+        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+        "Juidy inntekt",
+        "Juidy fordel"
+    )
+}
 )
 
 internal fun Inntektperioder.lagInntektperioder(

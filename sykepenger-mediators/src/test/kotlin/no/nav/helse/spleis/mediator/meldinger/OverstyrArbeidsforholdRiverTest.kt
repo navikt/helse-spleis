@@ -24,17 +24,17 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(
                 1.januar, listOf(
-                    ArbeidsforholdOverstyrt(
-                        ORGNUMMER,
-                        false,
-                        "Dette arbeidsforholdet gjelder"
-                    ),
-                    ArbeidsforholdOverstyrt(
-                        "987654322",
-                        true,
-                        "Dette arbeidsforholdet gjelder ikke"
-                    ),
-                )
+                ArbeidsforholdOverstyrt(
+                    ORGNUMMER,
+                    false,
+                    "Dette arbeidsforholdet gjelder"
+                ),
+                ArbeidsforholdOverstyrt(
+                    "987654322",
+                    true,
+                    "Dette arbeidsforholdet gjelder ikke"
+                ),
+            )
             )
         )
     }
@@ -51,8 +51,8 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(
                 1.januar, listOf(
-                    ArbeidsforholdOverstyrt(ORGNUMMER, false, null),
-                )
+                ArbeidsforholdOverstyrt(ORGNUMMER, false, null),
+            )
             )
         )
 

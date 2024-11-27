@@ -37,8 +37,10 @@ class Ukedager(private val antallUkedager: Int) {
         private const val table = "01234012360125601456034562345612345"
         private fun String.tilleggsdager(row: DayOfWeek, col: Int) = this[(row.value - 1) * 5 + col % 5].toString().toInt()
     }
+
     private fun dager(dato: LocalDate) =
         antallUkedager / 5 * 7 + table.tilleggsdager(dato.dayOfWeek, antallUkedager)
+
     operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
 
@@ -72,4 +74,5 @@ fun ukedager(fom: LocalDate, tom: LocalDate): Int {
     val justerSisteHelg = if (tom.dayOfWeek == SUNDAY) 1 else 0
     return dagerMellom - heleHelger + justerFørsteHelg - justerSisteHelg
 }
+
 fun ClosedRange<LocalDate>.ukedager() = ukedager(start, endInclusive)

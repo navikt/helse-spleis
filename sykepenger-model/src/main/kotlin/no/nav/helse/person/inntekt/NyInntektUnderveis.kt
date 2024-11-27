@@ -8,8 +8,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import kotlin.collections.filterNot
-import kotlin.collections.plus
 
 data class NyInntektUnderveis(
     val orgnummer: String,
@@ -19,6 +17,7 @@ data class NyInntektUnderveis(
         orgnummer = orgnummer,
         beløpstidslinje = beløpstidslinje.dto()
     )
+
     companion object {
         internal fun List<NyInntektUnderveis>.finnEndringsdato(
             tidligere: List<NyInntektUnderveis>
@@ -32,9 +31,9 @@ data class NyInntektUnderveis(
 
         private fun List<NyInntektUnderveis>.førsteEndring(others: List<NyInntektUnderveis>): LocalDate? {
             val datoer = mapNotNull { nyInntektUnderveis ->
-                    val other = others.find { it.orgnummer == nyInntektUnderveis.orgnummer } ?: return@mapNotNull null
-                    nyInntektUnderveis.beløpstidslinje.førsteEndring(other.beløpstidslinje)
-                }
+                val other = others.find { it.orgnummer == nyInntektUnderveis.orgnummer } ?: return@mapNotNull null
+                nyInntektUnderveis.beløpstidslinje.førsteEndring(other.beløpstidslinje)
+            }
             return datoer.minOrNull()
         }
 

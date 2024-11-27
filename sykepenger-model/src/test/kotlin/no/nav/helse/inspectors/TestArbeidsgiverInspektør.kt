@@ -69,10 +69,11 @@ internal class TestArbeidsgiverInspektør(
         val feriepengeutbetalingslinjer: List<Feriepengeutbetalingslinje>
     ) {
         internal companion object {
-            val List<Feriepengeoppdrag>.utbetalingslinjer get(): List<Feriepengeutbetalingslinje> {
-                val sisteOppdragPerFagsystemId = groupBy { it.fagsystemId }.map { (_, oppdrag) -> oppdrag.last() }
-                return sisteOppdragPerFagsystemId.flatMap { it.feriepengeutbetalingslinjer }
-            }
+            val List<Feriepengeoppdrag>.utbetalingslinjer
+                get(): List<Feriepengeutbetalingslinje> {
+                    val sisteOppdragPerFagsystemId = groupBy { it.fagsystemId }.map { (_, oppdrag) -> oppdrag.last() }
+                    return sisteOppdragPerFagsystemId.flatMap { it.feriepengeutbetalingslinjer }
+                }
         }
     }
 

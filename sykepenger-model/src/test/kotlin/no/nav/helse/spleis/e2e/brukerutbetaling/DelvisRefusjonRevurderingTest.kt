@@ -79,7 +79,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
 

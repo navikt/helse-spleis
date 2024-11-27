@@ -157,6 +157,7 @@ class Søknad(
     internal fun forUng(aktivitetslogg: IAktivitetslogg, alder: Alder) = alder.forUngForÅSøke(metadata.innsendt.toLocalDate()).also {
         if (it) aktivitetslogg.funksjonellFeil(RV_SØ_17)
     }
+
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
@@ -195,6 +196,7 @@ class Søknad(
                 "DELVIS_GODKJENT"
             )
         }
+
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type !in tilbakedateringer) return
             aktivitetslogg.varsel(RV_SØ_3)
@@ -237,11 +239,14 @@ class Søknad(
             }
             aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
         }
+
         override fun equals(other: Any?): Boolean {
             if (other !is Søknadstype) return false
             return this.type == other.type
         }
+
         override fun hashCode() = type.hashCode()
+
         companion object {
             val Arbeidstaker = Søknadstype("ARBEIDSTAKERE")
             val Arbeidsledig = Søknadstype("ARBEIDSLEDIG")
@@ -353,9 +358,9 @@ class Søknad(
                 aktivitetslogg.varsel(RV_SØ_8)
             }
 
-            private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {
+            private fun alleUtlandsdagerErFerie(søknad: Søknad): Boolean {
                 val feriePerioder = søknad.perioder.filterIsInstance<Ferie>()
-                return this.periode.all { utlandsdag -> feriePerioder.any { ferie -> ferie.periode.contains(utlandsdag)} }
+                return this.periode.all { utlandsdag -> feriePerioder.any { ferie -> ferie.periode.contains(utlandsdag) } }
             }
         }
     }

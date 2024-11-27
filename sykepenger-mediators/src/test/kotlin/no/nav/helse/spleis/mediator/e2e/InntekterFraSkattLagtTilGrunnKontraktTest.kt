@@ -33,8 +33,8 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
             orgnummer = ORGNUMMER,
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, ORGNUMMER),
-                )
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, ORGNUMMER),
+            )
             )
         )
         testRapid.assertUtgåendeMelding(forventet)

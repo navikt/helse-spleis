@@ -52,6 +52,7 @@ internal class DagturneringTest {
 
         assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
+
     @Test
     fun `arbeidsgiverdag fra inntektsmelding vinner over arbeidsgiverdag fra søknad`() {
         val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, søknad)

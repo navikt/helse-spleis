@@ -32,11 +32,13 @@ import org.junit.jupiter.api.assertThrows
 internal class ArbeidsgiverInntektsopplysningTest {
 
     private val subsumsjonslogg = SubsumsjonsListLog()
-    private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        subsumsjonslogg, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     @Test
     fun `overstyr inntekter`() {
@@ -51,32 +53,40 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val expected = listOf(a1Opplysning, a2Opplysning)
         val new = listOf(a1Overstyrt)
 
-        assertEquals(expected, original.overstyrInntekter(
+        assertEquals(
+            expected, original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             listOf(a1Overstyrt, a1Overstyrt),
             EmptyLog
-        )) { "kan ikke velge mellom inntekter for samme orgnr" }
+        )
+        ) { "kan ikke velge mellom inntekter for samme orgnr" }
 
-        assertEquals(expected, original.overstyrInntekter(
+        assertEquals(
+            expected, original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             emptyList(),
             EmptyLog
-        ))
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
+        )
+        )
+        assertEquals(
+            listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             new,
             EmptyLog
-        ))
+        )
+        )
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
+        assertEquals(
+            listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             forMange,
             EmptyLog
-        ))
+        )
+        )
     }
 
     @Test
@@ -112,11 +122,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
         val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt)
-        val skattA1 = SkattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, listOf(
+        val skattA1 = SkattSykepengegrunnlag(
+            UUID.randomUUID(), skjæringstidspunkt, listOf(
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
-        ), emptyList(), LocalDateTime.now())
+        ), emptyList(), LocalDateTime.now()
+        )
         val inntektsmeldingA2 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig)
         val inntektsmeldingA3 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
 
@@ -147,15 +159,19 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val ansattFom = 1.januar
         val orgnummer = "a1"
 
-        val opptjening = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
-                    ansattFom,
-                    null,
-                    false
+        val opptjening = Opptjening.nyOpptjening(
+            listOf(
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    orgnummer, listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
+                        ansattFom,
+                        null,
+                        false
+                    )
                 )
-            ))
-        ), skjæringstidspunkt)
+                )
+            ), skjæringstidspunkt
+        )
 
 
         val paragraf = Paragraf.PARAGRAF_8_28

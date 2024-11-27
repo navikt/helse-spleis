@@ -4,6 +4,7 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
@@ -16,7 +17,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
     private val vedtaksperiodeId: UUID,
@@ -26,6 +26,7 @@ internal class UtkastTilVedtakBuilder(
     private val harPeriodeRettFør: Boolean
 ) {
     private val tags = mutableSetOf<Tag>()
+
     init {
         if (erForlengelse) tags.add(Tag.Forlengelse)
         else tags.add(Tag.Førstegangsbehandling)
@@ -34,6 +35,7 @@ internal class UtkastTilVedtakBuilder(
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
 
     private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
+
     private val relevantePerioder = mutableSetOf<RelevantPeriode>()
     internal fun relevantPeriode(vedtaksperiodeId: UUID, behandlingId: UUID, skjæringstidspunkt: LocalDate, periode: Periode) = apply {
         relevantePerioder.add(RelevantPeriode(vedtaksperiodeId, behandlingId, skjæringstidspunkt, periode))
@@ -96,16 +98,17 @@ internal class UtkastTilVedtakBuilder(
         tags.add(utbetalingstidslinje.behandlingsresultat)
     }
 
-    private val Utbetalingstidslinje.behandlingsresultat get(): Tag {
-        val avvistDag = any { it is Utbetalingsdag.AvvistDag || it is Utbetalingsdag.ForeldetDag }
-        val navDag = any { it is Utbetalingsdag.NavDag }
+    private val Utbetalingstidslinje.behandlingsresultat
+        get(): Tag {
+            val avvistDag = any { it is Utbetalingsdag.AvvistDag || it is Utbetalingsdag.ForeldetDag }
+            val navDag = any { it is Utbetalingsdag.NavDag }
 
-        return when {
-            !navDag -> Tag.Avslag
-            navDag && avvistDag -> Tag.DelvisInnvilget
-            else -> Tag.Innvilget
+            return when {
+                !navDag -> Tag.Avslag
+                navDag && avvistDag -> Tag.DelvisInnvilget
+                else -> Tag.Innvilget
+            }
         }
-    }
 
     internal fun sykdomstidslinje(sykdomstidslinje: Sykdomstidslinje) = apply {
         if (sykdomstidslinje.any { it is Dag.Feriedag }) tags.add(Tag.Ferie)
@@ -121,13 +124,14 @@ internal class UtkastTilVedtakBuilder(
         this.totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig
         this.seksG = seksG.årlig
 
-        val toG = seksG/3
+        val toG = seksG / 3
         if (!inngangsvilkårFraInfotrygd && beregningsgrunnlag > seksG) tags.add(Tag.`6GBegrenset`)
         if (sykepengegrunnlag < toG) tags.add(Tag.SykepengegrunnlagUnder2G)
         if (inngangsvilkårFraInfotrygd) tags.add(Tag.InngangsvilkårFraInfotrygd)
     }
 
     private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode, val skatteopplysning: Boolean)
+
     private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
     internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode, skatteopplysning: Boolean) = apply {
         arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder, skatteopplysning))
@@ -137,7 +141,7 @@ internal class UtkastTilVedtakBuilder(
     internal fun tilkommetInntekt(arbeidsgiver: String) {
         tilkomneArbeidsgivere.add(arbeidsgiver)
     }
-    
+
     private val build by lazy { Build() }
 
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
@@ -161,24 +165,30 @@ internal class UtkastTilVedtakBuilder(
             tags.contains(Tag.InngangsvilkårFraInfotrygd) -> PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd(totalOmregnetÅrsinntekt).also {
                 check(Tag.FlereArbeidsgivere !in tags) { "Skal ikke være mulig med vilkårsgrunnlag fra Infotrygd og flere arbeidsgivere!" }
             }
-            skjønnsfastsatt ->  PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
+
+            skjønnsfastsatt -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
                 sykepengegrunnlag = sykepengegrunnlag,
-                `6G`= seksG,
-                arbeidsgivere = arbeidsgiverinntekter.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
-                    arbeidsgiver = it.arbeidsgiver,
-                    omregnetÅrsinntekt = it.omregnedeÅrsinntekt,
-                    skjønnsfastsatt = it.skjønnsfastsatt!!
-                )}
+                `6G` = seksG,
+                arbeidsgivere = arbeidsgiverinntekter.map {
+                    PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
+                        arbeidsgiver = it.arbeidsgiver,
+                        omregnetÅrsinntekt = it.omregnedeÅrsinntekt,
+                        skjønnsfastsatt = it.skjønnsfastsatt!!
+                    )
+                }
             )
+
             else -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
                 sykepengegrunnlag = sykepengegrunnlag,
-                `6G`= seksG,
-                arbeidsgivere = arbeidsgiverinntekter.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
-                    arbeidsgiver = it.arbeidsgiver,
-                    omregnetÅrsinntekt = it.omregnedeÅrsinntekt
-                )}
+                `6G` = seksG,
+                arbeidsgivere = arbeidsgiverinntekter.map {
+                    PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
+                        arbeidsgiver = it.arbeidsgiver,
+                        omregnetÅrsinntekt = it.omregnedeÅrsinntekt
+                    )
+                }
             )
         }
 
@@ -227,6 +237,7 @@ internal class UtkastTilVedtakBuilder(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                     "fastsatt" to sykepengegrunnlagsfakta.fastsatt
                 )
+
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                     "sykepengegrunnlag" to sykepengegrunnlag,
@@ -239,6 +250,7 @@ internal class UtkastTilVedtakBuilder(
                         )
                     }
                 )
+
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mapOf(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                     "6G" to seksG,
@@ -260,7 +272,7 @@ internal class UtkastTilVedtakBuilder(
             skjæringstidspunkt = skjæringstidspunkt,
             behandlingId = behandlingId,
             tags = tags.utgående,
-            `6G`= when (val fakta = sykepengegrunnlagsfakta) {
+            `6G` = when (val fakta = sykepengegrunnlagsfakta) {
                 is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> null
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> fakta.`6G`
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.`6G`
@@ -294,6 +306,7 @@ internal class UtkastTilVedtakBuilder(
                     `6G` = fakta.`6G`.toDesimaler,
                     arbeidsgivere = fakta.arbeidsgivere.map { it.copy(omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler) }
                 )
+
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.copy(
                     omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler,
                     `6G` = fakta.`6G`.toDesimaler,
@@ -359,8 +372,8 @@ internal class UtkastTilVedtakBuilder(
 
         private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(arbeidsgiver: String): List<Map<String, Any>> = when (val fakta = this) {
             is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> listOf(mapOf("organisasjonsnummer" to arbeidsgiver, "beløp" to fakta.omregnetÅrsinntekt))
-            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt ) }
-            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt ) } // Nei, ikke bug at det er omregnetÅrsinntekt
+            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt) }
+            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt) } // Nei, ikke bug at det er omregnetÅrsinntekt
         }
     }
 }

@@ -13,6 +13,6 @@ internal class NySøknadMessage(packet: JsonMessage, override val meldingsporing
 
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.fremtidigSøknad(packet["fremtidig_søknad"].asBoolean())
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) } .toSet())
+        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }
 }

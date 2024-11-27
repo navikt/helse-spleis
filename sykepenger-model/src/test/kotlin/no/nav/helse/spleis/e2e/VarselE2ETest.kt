@@ -35,7 +35,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class VarselE2ETest: AbstractEndToEndTest() {
+internal class VarselE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `varsel - Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling`() {
@@ -66,7 +66,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Endrer tidligere oppdrag, Kontroller simuleringen`(){
+    fun `varsel - Endrer tidligere oppdrag, Kontroller simuleringen`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
 
@@ -133,9 +133,11 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyPeriode(26.januar til 31.januar)
         håndterInntektsmelding(listOf(10.januar til 25.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
-        ))
+        )
+        )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_14)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
@@ -145,9 +147,11 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyttVedtak(10.februar til 28.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.februar, 11.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.februar, 11.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
-        ))
+        )
+        )
         assertFunksjonellFeil(RV_IT_37, 2.vedtaksperiode.filter(ORGNUMMER))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
     }

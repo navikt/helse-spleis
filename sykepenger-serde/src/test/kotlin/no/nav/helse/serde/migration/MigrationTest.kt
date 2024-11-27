@@ -48,6 +48,7 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
                     expected.forEachIndexed { index, value -> erstattPlaceholders(value, actual.path(index)) }
                 }
             }
+
             is ObjectNode -> {
                 if (actual is ObjectNode) {
                     expected.fields().forEach { (key, value) ->

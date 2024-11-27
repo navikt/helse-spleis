@@ -103,7 +103,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -138,7 +138,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

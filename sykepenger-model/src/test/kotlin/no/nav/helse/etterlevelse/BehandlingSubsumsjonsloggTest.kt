@@ -21,17 +21,17 @@ internal class BehandlingSubsumsjonsloggTest {
         val subsumsjonslogg = SubsumsjonListLog()
         val vedtaksperiodeJurist = BehandlingSubsumsjonslogg(
             subsumsjonslogg, listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, "10052088033"),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
-                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"),
-            )
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, "10052088033"),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
+            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"),
+        )
         )
 
         vedtaksperiodeJurist.logg(`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1))
 
         assertKontekster(
             subsumsjonslogg.subsumsjoner[0],
-             "10052088033" to KontekstType.Fødselsnummer,
+            "10052088033" to KontekstType.Fødselsnummer,
             "123456789" to KontekstType.Organisasjonsnummer,
             "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc" to KontekstType.Vedtaksperiode
         )
@@ -42,11 +42,11 @@ internal class BehandlingSubsumsjonsloggTest {
         val subsumsjonslogg = SubsumsjonListLog()
         val vedtaksperiodeJurist = BehandlingSubsumsjonslogg(
             subsumsjonslogg, listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, "10052088033"),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
-                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"),
-            )
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, "10052088033"),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
+            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"),
+        )
         )
 
         assertThrows<IllegalStateException> {
@@ -55,14 +55,14 @@ internal class BehandlingSubsumsjonsloggTest {
     }
 
     @Test
-    fun `avviste dager`(){
+    fun `avviste dager`() {
         val subsumsjonslogg = SubsumsjonListLog()
         val vedtaksperiodeJurist = BehandlingSubsumsjonslogg(
             subsumsjonslogg, listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, "10052088033"),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
-                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"),
-            )
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, "10052088033"),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "123456789"),
+            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"),
+        )
         )
         `§ 8-13 ledd 1`(1.januar..31.januar, listOf(15.januar..16.januar), emptyList()).forEach {
             vedtaksperiodeJurist.logg(it)

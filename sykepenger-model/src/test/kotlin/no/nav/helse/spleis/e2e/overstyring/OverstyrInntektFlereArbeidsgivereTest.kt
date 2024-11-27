@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
+internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyr inntekt med flere AG -- happy case`() {

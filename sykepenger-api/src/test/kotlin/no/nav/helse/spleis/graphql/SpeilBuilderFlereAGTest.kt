@@ -571,10 +571,10 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
         assertEquals(1.januar, refusjonsopplysningerForAG1.fom)
         assertEquals(null, refusjonsopplysningerForAG1.tom)
-        assertEquals(48000.månedlig,refusjonsopplysningerForAG1.beløp.månedlig)
+        assertEquals(48000.månedlig, refusjonsopplysningerForAG1.beløp.månedlig)
         assertEquals(1.januar, refusjonsopplysningerForAG2.fom)
         assertEquals(null, refusjonsopplysningerForAG2.tom)
-        assertEquals(48000.månedlig,refusjonsopplysningerForAG2.beløp.månedlig)
+        assertEquals(48000.månedlig, refusjonsopplysningerForAG2.beløp.månedlig)
     }
 
     @Test

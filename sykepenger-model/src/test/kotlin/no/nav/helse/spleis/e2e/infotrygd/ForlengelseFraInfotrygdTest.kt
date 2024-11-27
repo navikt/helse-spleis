@@ -31,10 +31,12 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke førstegangsbehandling selv om det er lagret inntekter i IT`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 17.januar, INNTEKT, true),
-            Inntektsopplysning(a2, 17.januar, INNTEKT, true)
-        ))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            inntektshistorikk = listOf(
+                Inntektsopplysning(a1, 17.januar, INNTEKT, true),
+                Inntektsopplysning(a2, 17.januar, INNTEKT, true)
+            )
+        )
         håndterSøknad(januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -91,9 +93,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `bare ferie - etter infotrygdutbetaling`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
-        ))
+        )
+        )
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
         assertForlengerInfotrygdperiode()

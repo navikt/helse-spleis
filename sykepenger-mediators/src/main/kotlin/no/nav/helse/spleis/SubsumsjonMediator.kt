@@ -24,6 +24,7 @@ interface Subsumsjonproducer {
         }
     }
 }
+
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,
     private val versjonAvKode: String
@@ -51,7 +52,8 @@ internal class SubsumsjonMediator(
             input = subsumsjon.input,
             output = subsumsjon.output,
             utfall = subsumsjon.utfall.name
-        ))
+        )
+        )
     }
 
     private fun bekreftAtSubsumsjonerHarKnytningTilBehandling(subsumsjon: Subsumsjon) {
@@ -102,14 +104,20 @@ internal class SubsumsjonMediator(
                 this["input"] = event.input
                 this["output"] = event.output
                 this["utfall"] = event.utfall
-                if (event.ledd != null) { this["ledd"] = event.ledd }
-                if (event.punktum != null) { this["punktum"] = event.punktum }
-                if (event.bokstav != null) { this["bokstav"] = event.bokstav }
+                if (event.ledd != null) {
+                    this["ledd"] = event.ledd
+                }
+                if (event.punktum != null) {
+                    this["punktum"] = event.punktum
+                }
+                if (event.bokstav != null) {
+                    this["bokstav"] = event.bokstav
+                }
             }
         ))
     }
 
-    private fun KontekstType.tilEkstern() = when(this) {
+    private fun KontekstType.tilEkstern() = when (this) {
         KontekstType.Fødselsnummer -> "fodselsnummer"
         KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
         KontekstType.Vedtaksperiode -> "vedtaksperiode"

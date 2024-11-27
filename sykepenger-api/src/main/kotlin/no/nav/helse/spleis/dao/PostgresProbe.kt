@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.dao
 
-import io.micrometer.core.instrument.Counter.*
+import io.micrometer.core.instrument.Counter.builder
 import io.micrometer.core.instrument.MeterRegistry
 
 object PostgresProbe {

@@ -14,7 +14,7 @@ internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
-         assertNoErrors(json)
+        assertNoErrors(json)
     }
 
     @Language("JSON")

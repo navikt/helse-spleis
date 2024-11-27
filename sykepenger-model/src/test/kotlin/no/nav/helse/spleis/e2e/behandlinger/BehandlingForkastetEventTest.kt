@@ -38,6 +38,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
+
     @Test
     fun `uberegnet behandling forkastes manuelt`() {
         a1 {

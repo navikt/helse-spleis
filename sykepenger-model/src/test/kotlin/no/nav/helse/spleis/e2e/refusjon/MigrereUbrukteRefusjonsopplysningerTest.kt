@@ -82,7 +82,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = 28.februar),
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT / 2, opphørsdato = 28.februar),
             beregnetInntekt = INNTEKT,
             id = meldingsreferanseId2,
             mottatt = mottatt2
@@ -141,7 +141,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
     }
 
     private fun setup7og8() {
-        a1{
+        a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -178,7 +178,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
     }
 
     private fun setup9og10() {
-        a1{
+        a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -191,13 +191,15 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "foo",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2), Triple(1.februar, null, INGEN))
-                )),
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        forklaring = "foo",
+                        subsumsjon = null,
+                        refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT / 2), Triple(1.februar, null, INGEN))
+                    )
+                ),
                 hendelseId = meldingsreferanseId2,
                 tidsstempel = mottatt2
             )
@@ -254,18 +256,20 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Hensyntar Infotrygd-utbetaling ved ubrukte refusjonsopplysninger i inntektsgrunnlaget`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable{
+    fun `Hensyntar Infotrygd-utbetaling ved ubrukte refusjonsopplysninger i inntektsgrunnlaget`() = Toggle.LagreUbrukteRefusjonsopplysninger.disable {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "foo",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
-                )),
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        forklaring = "foo",
+                        subsumsjon = null,
+                        refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
+                    )
+                ),
             )
             håndterUtbetalingshistorikkEtterInfotrygdendring(PersonUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT))
 
@@ -305,7 +309,7 @@ internal class MigrereUbrukteRefusjonsopplysningerTest : AbstractDslTest() {
             migrerUbrukteRefusjonsopplysninger()
 
             val beløpstidslinje = Beløpstidslinje.fra(11.januar til 25.januar, INNTEKT, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1)) +
-                    Beløpstidslinje.fra(26.januar.somPeriode(), INGEN, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1))
+                Beløpstidslinje.fra(26.januar.somPeriode(), INGEN, Kilde(meldingsreferanseId1, ARBEIDSGIVER, mottatt1))
 
             assertEquals(RefusjonsservitørView(mapOf(1.januar to beløpstidslinje)), inspektør.ubrukteRefusjonsopplysninger)
         }

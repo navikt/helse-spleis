@@ -204,6 +204,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }
     }
+
     private fun assertPeriode(periode: Periode, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN) =
         periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
 

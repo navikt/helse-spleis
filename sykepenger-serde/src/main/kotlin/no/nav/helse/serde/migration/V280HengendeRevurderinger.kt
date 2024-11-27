@@ -8,7 +8,7 @@ import java.util.UUID
 import no.nav.helse.serde.migration.V280HengendeRevurderinger.Dokumentsporing.Companion.dokumentsporing
 import org.slf4j.LoggerFactory
 
-internal class V280HengendeRevurderinger: JsonMigration(280) {
+internal class V280HengendeRevurderinger : JsonMigration(280) {
     override val description = "fjerner hengende uberegnede revurderinger på eldre perioder som er avsluttet"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -21,6 +21,7 @@ internal class V280HengendeRevurderinger: JsonMigration(280) {
                 .onEach { periode -> migrerVedtaksperiode(aktørId, periode) }
         }
     }
+
     private fun migrerVedtaksperiode(aktørId: String, periode: JsonNode) {
         val tilstandForVedtaksperiode = periode.path("tilstand").asText()
         if (tilstandForVedtaksperiode != "AVSLUTTET") return
@@ -69,10 +70,11 @@ internal class V280HengendeRevurderinger: JsonMigration(280) {
         val type: String
     ) {
         companion object {
-            val JsonNode.dokumentsporing get() = Dokumentsporing(
-                id = this.path("dokumentId").asText().uuid,
-                type = this.path("dokumenttype").asText()
-            )
+            val JsonNode.dokumentsporing
+                get() = Dokumentsporing(
+                    id = this.path("dokumentId").asText().uuid,
+                    type = this.path("dokumenttype").asText()
+                )
         }
     }
 

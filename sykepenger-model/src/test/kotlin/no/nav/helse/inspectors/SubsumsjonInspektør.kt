@@ -39,18 +39,20 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
 
     init {
         jurist.subsumsjoner.forEach { subsumsjon ->
-            subsumsjoner.add(Subsumsjon(
-                lovverk = subsumsjon.lovverk,
-                paragraf = subsumsjon.paragraf,
-                ledd = subsumsjon.ledd,
-                punktum = subsumsjon.punktum,
-                bokstav = subsumsjon.bokstav,
-                versjon = subsumsjon.versjon,
-                sporing = subsumsjon.kontekster,
-                utfall = subsumsjon.utfall,
-                input = subsumsjon.input,
-                output = subsumsjon.output
-            ))
+            subsumsjoner.add(
+                Subsumsjon(
+                    lovverk = subsumsjon.lovverk,
+                    paragraf = subsumsjon.paragraf,
+                    ledd = subsumsjon.ledd,
+                    punktum = subsumsjon.punktum,
+                    bokstav = subsumsjon.bokstav,
+                    versjon = subsumsjon.versjon,
+                    sporing = subsumsjon.kontekster,
+                    utfall = subsumsjon.utfall,
+                    input = subsumsjon.input,
+                    output = subsumsjon.output
+                )
+            )
         }
     }
 
@@ -122,9 +124,11 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
 
         sporing?.also { forventet ->
             assertEquals(forventet, subsumsjon.sporing) {
-                "Fant ikke forventet sporing. Har dette:\n${subsumsjon.sporing.joinToString(separator = "\n") { (key, value) ->
-                    "$key: $value"
-                }}\n"
+                "Fant ikke forventet sporing. Har dette:\n${
+                    subsumsjon.sporing.joinToString(separator = "\n") { (key, value) ->
+                        "$key: $value"
+                    }
+                }\n"
             }
         }
         assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }

@@ -20,7 +20,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     fun `sender infotrygdendring`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendInfotrygdendring()
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall()-1)
+        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertBehov(behov)
         assertSykepengehistorikkdetaljer(behov)
     }
@@ -69,6 +69,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
         assertTrue(tekst.isNotEmpty())
         Assertions.assertDoesNotThrow { LocalDate.parse(tekst) }
     }
+
     private fun assertDatotid(tekst: String) {
         assertTrue(tekst.isNotEmpty())
         Assertions.assertDoesNotThrow { LocalDateTime.parse(tekst) }

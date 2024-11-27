@@ -387,7 +387,7 @@ internal class PeriodeTest {
         val perioden = 5.januar til 10.januar
         assertEquals(listOf(perioden), emptyList<Periode>().merge(perioden))
         assertEquals(listOf(4.januar.somPeriode(), 5.januar til 10.januar, 11.januar.somPeriode()), listOf(4.januar til 11.januar).merge(perioden))
-        assertEquals(listOf(1.januar til 4.januar, 5.januar  til 10.januar, 11.januar til 12.januar), listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden))
+        assertEquals(listOf(1.januar til 4.januar, 5.januar til 10.januar, 11.januar til 12.januar), listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden))
     }
 
     @Test

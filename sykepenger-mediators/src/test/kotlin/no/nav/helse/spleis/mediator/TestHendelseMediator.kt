@@ -289,7 +289,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: InntektsmeldingerReplayMessage,
         replays: InntektsmeldingerReplay,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
         lestDødsmeldingVerdi.set(true)
@@ -301,7 +302,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         identOpphørt: IdentOpphørt,
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
         lestutbetalingpåminnelseVerdi.set(true)
@@ -407,23 +409,27 @@ internal class TestHendelseMediator : IHendelseMediator {
         avbruttSøknadMessage: AvbruttSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(
         avbruttArbeidsledigSøknadMessage: AvbruttArbeidsledigSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(
         message: SkjønnsmessigFastsettelseMessage,
         skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(
         message: MinimumSykdomsgradVurdertMessage,
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
         context: MessageContext
-    ) {}
+    ) {
+    }
 }

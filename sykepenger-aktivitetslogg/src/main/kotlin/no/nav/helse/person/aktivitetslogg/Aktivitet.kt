@@ -69,7 +69,8 @@ sealed class Aktivitet(
     ) : Aktivitet(id, 50, 'N', melding, tidsstempel, kontekster) {
         companion object {
             internal fun opprett(type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>) = Behov(
-                UUID.randomUUID(), type, kontekster, melding, detaljer)
+                UUID.randomUUID(), type, kontekster, melding, detaljer
+            )
 
             fun utbetalingshistorikk(
                 aktivitetslogg: IAktivitetslogg,
@@ -77,9 +78,9 @@ sealed class Aktivitet(
             ) {
                 aktivitetslogg.behov(
                     Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
-                        "historikkFom" to periode.start.toString(),
-                        "historikkTom" to periode.endInclusive.toString()
-                    )
+                    "historikkFom" to periode.start.toString(),
+                    "historikkTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -87,9 +88,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Foreldrepenger,
                     "Trenger informasjon om foreldrepengeytelser fra FPSAK", mapOf(
-                        "foreldrepengerFom" to periode.start.toString(),
-                        "foreldrepengerTom" to periode.endInclusive.toString()
-                    )
+                    "foreldrepengerFom" to periode.start.toString(),
+                    "foreldrepengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -97,9 +98,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Pleiepenger,
                     "Trenger informasjon om pleiepengeytelser fra Infotrygd", mapOf(
-                        "pleiepengerFom" to periode.start.toString(),
-                        "pleiepengerTom" to periode.endInclusive.toString()
-                    )
+                    "pleiepengerFom" to periode.start.toString(),
+                    "pleiepengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -107,9 +108,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Omsorgspenger,
                     "Trenger informasjon om omsorgspengerytelser fra Infotrygd", mapOf(
-                        "omsorgspengerFom" to periode.start.toString(),
-                        "omsorgspengerTom" to periode.endInclusive.toString()
-                    )
+                    "omsorgspengerFom" to periode.start.toString(),
+                    "omsorgspengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -117,9 +118,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Opplæringspenger,
                     "Trenger informasjon om opplæringspengerytelser fra Infotrygd", mapOf(
-                        "opplæringspengerFom" to periode.start.toString(),
-                        "opplæringspengerTom" to periode.endInclusive.toString()
-                    )
+                    "opplæringspengerFom" to periode.start.toString(),
+                    "opplæringspengerTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -127,9 +128,9 @@ sealed class Aktivitet(
                 aktivitetslogg.behov(
                     Behovtype.Institusjonsopphold,
                     "Trenger informasjon om institusjonsopphold fra Inst2", mapOf(
-                        "institusjonsoppholdFom" to periode.start.toString(),
-                        "institusjonsoppholdTom" to periode.endInclusive.toString()
-                    )
+                    "institusjonsoppholdFom" to periode.start.toString(),
+                    "institusjonsoppholdTom" to periode.endInclusive.toString()
+                )
                 )
             }
 
@@ -187,36 +188,38 @@ sealed class Aktivitet(
             }
 
             fun arbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
-                aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold", mapOf(
+                aktivitetslogg.behov(
+                    Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold", mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt.toString()
-                ))
+                )
+                )
             }
 
             fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
-                        "periodeFom" to fom.toString(),
-                        "periodeTom" to tom.toString()
-                    )
+                    "periodeFom" to fom.toString(),
+                    "periodeTom" to tom.toString()
+                )
                 )
             }
 
             fun arbeidsavklaringspenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Arbeidsavklaringspenger, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
-                        "periodeFom" to fom.toString(),
-                        "periodeTom" to tom.toString()
-                    )
+                    "periodeFom" to fom.toString(),
+                    "periodeTom" to tom.toString()
+                )
                 )
             }
 
             fun medlemskap(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
-                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                        "medlemskapPeriodeFom" to fom.toString(),
-                        "medlemskapPeriodeTom" to tom.toString()
-                    )
+                    "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+                    "medlemskapPeriodeFom" to fom.toString(),
+                    "medlemskapPeriodeTom" to tom.toString()
+                )
                 )
             }
 

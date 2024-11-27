@@ -4,11 +4,10 @@ import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
-import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.nesteDag
-import kotlin.collections.plus
 
 // Understands beginning and end of a time interval
 class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -35,9 +34,11 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(
             mergeKantIKant
         )
+
         fun Iterable<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() = map(LocalDate::somPeriode).merge(
             mergeOverHelg
         )
+
         fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
 

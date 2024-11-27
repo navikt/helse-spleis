@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import org.junit.jupiter.api.Test
 
-internal class V291FikseTidligereOmgjøringerSomErRevurderingFeiletTest: MigrationTest(V291FikseTidligereOmgjøringerSomErRevurderingFeilet()) {
+internal class V291FikseTidligereOmgjøringerSomErRevurderingFeiletTest : MigrationTest(V291FikseTidligereOmgjøringerSomErRevurderingFeilet()) {
 
     @Test
     fun `fjerner feilaktige behandlinger`() {

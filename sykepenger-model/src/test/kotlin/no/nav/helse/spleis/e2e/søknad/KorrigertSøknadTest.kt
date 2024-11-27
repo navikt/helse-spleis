@@ -101,6 +101,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
+
     @Test
     fun `Overlappende søknad som er lengre frem støttes ikke`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
@@ -330,7 +331,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING
         )

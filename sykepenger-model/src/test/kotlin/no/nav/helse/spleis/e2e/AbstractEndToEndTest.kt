@@ -63,18 +63,20 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     }
 
-    inner class Hendelser(private val hendelser:()->Unit) {
+    inner class Hendelser(private val hendelser: () -> Unit) {
         infix fun førerTil(postCondition: TilstandType) = førerTil(listOf(postCondition))
-        infix fun førerTil(postCondition: List<TilstandType>):Hendelser {
+        infix fun førerTil(postCondition: List<TilstandType>): Hendelser {
             hendelser()
             postCondition.forEachIndexed { index, tilstand ->
-                assertTilstand((index+1).vedtaksperiode, tilstand)
+                assertTilstand((index + 1).vedtaksperiode, tilstand)
             }
             return this
         }
-        infix fun somEtterfulgtAv(f: ()->Unit) = Hendelser(f)
+
+        infix fun somEtterfulgtAv(f: () -> Unit) = Hendelser(f)
     }
-    fun hendelsene(f:()->Unit) = Hendelser(f)
+
+    fun hendelsene(f: () -> Unit) = Hendelser(f)
 
     data class InnsendtInntektsmelding(
         val tidspunkt: LocalDateTime,

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SkjønnsmessigFastsattTest {
-    
+
     @Test
     fun `inntektsmelding blir overskrevet av skjønnsmessig fastsettelse`() {
         val skjønnsmessigFastsattBeløp = 5000.daglig

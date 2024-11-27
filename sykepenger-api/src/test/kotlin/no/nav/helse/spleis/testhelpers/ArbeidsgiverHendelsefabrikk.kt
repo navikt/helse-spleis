@@ -336,6 +336,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         automatisert = automatisert
     )
+
     internal fun lagKanIkkeBehandlesHer(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

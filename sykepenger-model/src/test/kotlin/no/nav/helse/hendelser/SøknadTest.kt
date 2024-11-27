@@ -55,11 +55,13 @@ internal class SøknadTest {
 
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var søknad: Søknad
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     @Test
     fun `søknad med bare sykdom`() {

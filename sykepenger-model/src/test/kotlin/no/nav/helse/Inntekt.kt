@@ -35,6 +35,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonslogg = subsumsjonslogg
     )
+
 internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Inntektsgrunnlag.ferdigSykepengegrunnlag(
         alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,

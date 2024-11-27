@@ -75,6 +75,7 @@ internal class UtbetalingsperiodeTest {
         assertTrue(one.funksjoneltLik(two))
         assertTrue(two.funksjoneltLik(one))
     }
+
     private fun assertNotEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
         assertFalse(one.funksjoneltLik(two))
         assertFalse(two.funksjoneltLik(one))

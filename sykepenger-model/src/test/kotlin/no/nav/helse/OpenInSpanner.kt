@@ -72,7 +72,7 @@ class SpannerEtterTestInterceptor : TestWatcher {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build()
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-            check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?"}
+            check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?" }
         }
         // Litt gøyale query parametre til Spannerish
         val queryString = mapOf("testnavn" to testnavn, "error" to errorMsg).queryString
@@ -81,10 +81,11 @@ class SpannerEtterTestInterceptor : TestWatcher {
         return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid${queryString}")
     }
 
-    private val Map<String, String?>.queryString get() = this
-        .filterNot { (_, value) -> value.isNullOrBlank() }.entries
-        .joinToString("&") { (key, value) -> "${key}=${URLEncoder.encode(value, "UTF-8")}" }
-        .let { if (it.isBlank()) "" else "?$it" }
+    private val Map<String, String?>.queryString
+        get() = this
+            .filterNot { (_, value) -> value.isNullOrBlank() }.entries
+            .joinToString("&") { (key, value) -> "${key}=${URLEncoder.encode(value, "UTF-8")}" }
+            .let { if (it.isBlank()) "" else "?$it" }
 
     private fun åpneBrowser(uri: URI) {
         if (Desktop.isDesktopSupported()) {
@@ -110,35 +111,39 @@ class SpannerEtterTestInterceptor : TestWatcher {
                     nivå = "BEHOV",
                     tekst = it.melding,
                     tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
                 )
+
                 is Aktivitet.FunksjonellFeil -> AktivitetDto(
                     id = 0,
                     nivå = "FUNKSJONELL_FEIL",
                     tekst = it.melding,
                     tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
                 )
+
                 is Aktivitet.Info -> AktivitetDto(
                     id = 0,
                     nivå = "INFO",
                     tekst = it.melding,
                     tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
                 )
+
                 is Aktivitet.LogiskFeil -> AktivitetDto(
                     id = 0,
                     nivå = "LOGISK_FEIL",
                     tekst = it.melding,
                     tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
                 )
+
                 is Aktivitet.Varsel -> AktivitetDto(
                     id = 0,
                     nivå = "VARSEL",
                     tekst = it.melding,
                     tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
+                    kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
                 )
             }
         }

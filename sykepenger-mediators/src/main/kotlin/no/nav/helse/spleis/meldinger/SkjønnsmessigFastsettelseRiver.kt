@@ -2,9 +2,9 @@ package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
@@ -12,16 +12,18 @@ import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 internal class SkjønnsmessigFastsettelseRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-): HendelseRiver(rapidsConnection, messageMediator) {
+) : HendelseRiver(rapidsConnection, messageMediator) {
 
     override val eventName = "skjønnsmessig_fastsettelse"
 
     override val riverName = "Skjønnsmessig fastsettelse"
 
-    override fun createMessage(packet: JsonMessage) = SkjønnsmessigFastsettelseMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = SkjønnsmessigFastsettelseMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 
     override fun validate(message: JsonMessage) {
         message.requireKey("fødselsnummer")

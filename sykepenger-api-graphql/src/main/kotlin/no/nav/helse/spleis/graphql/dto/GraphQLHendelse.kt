@@ -61,6 +61,7 @@ data class GraphQLSoknadFrilans(
 ) : GraphQLHendelse {
     override val type = GraphQLHendelsetype.SendtSoknadFrilans
 }
+
 data class GraphQLSoknadSelvstendig(
     override val id: String,
     override val eksternDokumentId: String,
@@ -71,6 +72,7 @@ data class GraphQLSoknadSelvstendig(
 ) : GraphQLHendelse {
     override val type = GraphQLHendelsetype.SendtSoknadSelvstendig
 }
+
 data class GraphQLSoknadArbeidsledig(
     override val id: String,
     override val eksternDokumentId: String,

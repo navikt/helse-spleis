@@ -11,7 +11,7 @@ import io.mockk.mockk
 import java.net.http.HttpClient
 import java.time.LocalDateTime
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class SpekematClientTest {

@@ -24,8 +24,8 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
-    private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
+internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
+    private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
     private val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
     @Test

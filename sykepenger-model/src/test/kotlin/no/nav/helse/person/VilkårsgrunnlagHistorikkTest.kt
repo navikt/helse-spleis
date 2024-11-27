@@ -52,11 +52,13 @@ internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk.view())
     private val subsumsjonslogg = SubsumsjonsListLog()
-    private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        subsumsjonslogg, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     companion object {
         private const val ORGNR = "123456789"
@@ -103,15 +105,17 @@ internal class VilkårsgrunnlagHistorikkTest {
         val gammeltSkjæringstidspunkt = 10.januar
         val nyttSkjæringstidspunkt = 1.januar
 
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = gammeltSkjæringstidspunkt,
-            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
+        historikk.lagre(
+            VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                skjæringstidspunkt = gammeltSkjæringstidspunkt,
+                inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
+                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                vurdertOk = true,
+                meldingsreferanseId = UUID.randomUUID(),
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
+        )
 
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
         historikk.oppdaterHistorikk(Aktivitetslogg(), setOf(nyttSkjæringstidspunkt))
@@ -459,27 +463,27 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(element1, element1)
         assertEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 1.januar,
-                inntektsgrunnlag = sykepengegrunnlag
-            )
+            skjæringstidspunkt = 1.januar,
+            inntektsgrunnlag = sykepengegrunnlag
+        )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 2.januar,
-                inntektsgrunnlag = sykepengegrunnlag
-            )
+            skjæringstidspunkt = 2.januar,
+            inntektsgrunnlag = sykepengegrunnlag
+        )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 5.februar,
-                inntektsgrunnlag = 25000.månedlig.sykepengegrunnlag
-            )
+            skjæringstidspunkt = 5.februar,
+            inntektsgrunnlag = 25000.månedlig.sykepengegrunnlag
+        )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = 1.januar,
-                inntektsgrunnlag = 30900.månedlig.sykepengegrunnlag
-            )
+            skjæringstidspunkt = 1.januar,
+            inntektsgrunnlag = 30900.månedlig.sykepengegrunnlag
+        )
         )
     }
 }

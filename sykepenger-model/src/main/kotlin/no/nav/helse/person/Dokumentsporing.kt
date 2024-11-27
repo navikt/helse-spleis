@@ -78,9 +78,11 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
         if (other === this) return true
         return this.id == other.id && this.dokumentType == other.dokumentType
     }
+
     override fun hashCode(): Int {
         return Objects.hash(id, dokumentType)
     }
+
     override fun toString() = "$dokumentType ($id)"
 
     internal fun dto() = DokumentsporingDto(

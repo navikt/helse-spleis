@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
+import kotlin.reflect.KClass
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomshistorikkHendelse>
 
@@ -51,6 +51,7 @@ interface SykdomshistorikkHendelse {
         override fun hashCode() = Objects.hash(type, tidsstempel, meldingsreferanseId)
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
+
         // todo: midlertidig fordi "Inntektsmelding" ikke er en SykdomshistorikkHendelse. Alle dager med kilde "Inntektsmelding" må migreres til "BitFraInntektsmelding"
         internal fun erAvType(meldingstype: String) = this.type == meldingstype
         internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)

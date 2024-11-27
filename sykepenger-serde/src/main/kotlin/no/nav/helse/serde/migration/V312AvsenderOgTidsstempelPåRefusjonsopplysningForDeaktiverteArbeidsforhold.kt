@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import org.slf4j.LoggerFactory
 
-internal class V312AvsenderOgTidsstempelPåRefusjonsopplysningForDeaktiverteArbeidsforhold: JsonMigration(version = 312) {
+internal class V312AvsenderOgTidsstempelPåRefusjonsopplysningForDeaktiverteArbeidsforhold : JsonMigration(version = 312) {
     override val description = "legger til avsender og tidsstempel på refusjonsopplysning i deaktiverte arbedisforhold"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -38,14 +38,16 @@ internal class V312AvsenderOgTidsstempelPåRefusjonsopplysningForDeaktiverteArbe
     }
 
     internal companion object {
-        val String.avsender get() = when(this) {
-            "INNTEKTSMELDING" -> "ARBEIDSGIVER"
-            "OVERSTYRARBEIDSGIVEROPPLYSNINGER",
-            "OVERSTYRINNTEKT",
-            "MANUELL_SAKSBEHANDLING",
-            "GJENOPPLIV_VILKÅRSGRUNNLAG" -> "SAKSBEHANDLER"
-            else -> "ARBEIDSGIVER".also { sikkerlogg.info("Mappet meldingstype $this til avsender ARBEIDSGIVER") }
-        }
+        val String.avsender
+            get() = when (this) {
+                "INNTEKTSMELDING" -> "ARBEIDSGIVER"
+                "OVERSTYRARBEIDSGIVEROPPLYSNINGER",
+                "OVERSTYRINNTEKT",
+                "MANUELL_SAKSBEHANDLING",
+                "GJENOPPLIV_VILKÅRSGRUNNLAG" -> "SAKSBEHANDLER"
+
+                else -> "ARBEIDSGIVER".also { sikkerlogg.info("Mappet meldingstype $this til avsender ARBEIDSGIVER") }
+            }
 
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }

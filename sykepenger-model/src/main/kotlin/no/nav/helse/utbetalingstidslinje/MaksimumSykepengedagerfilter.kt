@@ -19,7 +19,7 @@ internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val infotrygdtidslinje: Utbetalingstidslinje
-): UtbetalingstidslinjerFilter {
+) : UtbetalingstidslinjerFilter {
 
     private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
@@ -63,10 +63,12 @@ internal class MaksimumSykepengedagerfilter(
                     if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
                     state.betalbarDag(this, dag.dato)
                 }
+
                 is Utbetalingsdag.NavHelgDag -> {
                     if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
                     state.sykdomshelg(this, dag.dato)
                 }
+
                 is UkjentDag -> state.oppholdsdag(this, dag.dato)
             }
         }
@@ -111,15 +113,17 @@ internal class MaksimumSykepengedagerfilter(
         val gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler)
         // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
         if (harTilstrekkeligOpphold || gjenståendeSykepengedager == 0) {
-            subsumsjonslogg.logg(`§ 8-12 ledd 2`(
-                oppfylt = harTilstrekkeligOpphold,
-                dato = dagen,
-                gjenståendeSykepengedager = gjenståendeSykepengedager,
-                beregnetAntallOppholdsdager = oppholdFørDagen,
-                tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
-                beregnetTidslinje = beregnetTidslinjesubsumsjon,
-            ))
+            subsumsjonslogg.logg(
+                `§ 8-12 ledd 2`(
+                    oppfylt = harTilstrekkeligOpphold,
+                    dato = dagen,
+                    gjenståendeSykepengedager = gjenståendeSykepengedager,
+                    beregnetAntallOppholdsdager = oppholdFørDagen,
+                    tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                    tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+                    beregnetTidslinje = beregnetTidslinjesubsumsjon,
+                )
+            )
         }
         return harTilstrekkeligOpphold
     }
@@ -131,15 +135,18 @@ internal class MaksimumSykepengedagerfilter(
             else -> state(Syk)
         }
     }
+
     private fun håndterBetalbarDagEtterFerie(dagen: LocalDate) {
         håndterBetalbarDag(dagen)
     }
+
     private fun håndterBetalbarDagEtterOpphold(dagen: LocalDate) {
         val oppholdFørDagen = sisteVurdering.oppholdsteller
         sisteVurdering = sisteVurdering.dekrementer(dagen, dagen.minusYears(HISTORISK_PERIODE_I_ÅR))
         subsummerTilstrekkeligOppholdNådd(dagen, oppholdFørDagen = oppholdFørDagen)
         håndterBetalbarDag(dagen)
     }
+
     private fun håndterBetalbarDagEtterMaksdato(dag: LocalDate) {
         sisteVurdering = sisteVurdering.medAvslåttDag(dag)
     }

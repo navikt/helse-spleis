@@ -125,7 +125,7 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `Har blitt håndtert av`() {
-        val vedtaksperiode1 =  2.januar til 15.januar
+        val vedtaksperiode1 = 2.januar til 15.januar
         val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
@@ -167,8 +167,8 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `Har ikke blitt håndtert av revurdering mindre enn 10 dager med gap`() {
-        val vedtaksperiode1 =  10.januar til 31.januar
-        val vedtaksperiode2 =  2.februar til 28.februar
+        val vedtaksperiode1 = 10.januar til 31.januar
+        val vedtaksperiode2 = 2.februar til 28.februar
         val sammenhengendePeriode1 = 10.januar til 31.januar
         val sammenhengendePeriode2 = 2.februar til 28.februar
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
@@ -262,7 +262,7 @@ internal class InntektsmeldingMatchingTest {
                 beregnetInntekt = 400.månedlig,
                 førsteFraværsdag = førsteFraværsdag
             )
-            inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+            inntektsmelding.valider(object : Inntektsmelding.Valideringsgrunnlag {
                 override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
                 override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
             }, Aktivitetslogg())

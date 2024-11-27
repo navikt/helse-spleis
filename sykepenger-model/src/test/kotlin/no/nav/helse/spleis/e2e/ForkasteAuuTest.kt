@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class ForkasteAuuTest: AbstractDslTest() {
+internal class ForkasteAuuTest : AbstractDslTest() {
 
     @Test
     fun `En auu vegg i vegg til neste periode forkastes`() {

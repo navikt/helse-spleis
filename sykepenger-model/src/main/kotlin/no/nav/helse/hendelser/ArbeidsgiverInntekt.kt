@@ -11,10 +11,10 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.som
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 class ArbeidsgiverInntekt(
@@ -89,7 +89,7 @@ class ArbeidsgiverInntekt(
         )
 
         companion object {
-            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN }
 
             internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
                 return map {

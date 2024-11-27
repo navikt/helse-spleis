@@ -78,8 +78,8 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            "historikkFom" to LocalDate.now()
+        )
         )
         aktivitetslogg.behov(Foreldrepenger, "Trenger foreldrepengeytelser")
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
@@ -134,13 +134,13 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            "historikkFom" to LocalDate.now()
+        )
         )
         aktivitetslogg.behov(
             Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
-                "historikkFom" to LocalDate.now()
-            )
+            "historikkFom" to LocalDate.now()
+        )
         )
 
         assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -155,13 +155,13 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            "historikkFom" to LocalDate.now().minusDays(1)
+        )
         )
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            "historikkFom" to LocalDate.now().minusDays(1)
+        )
         )
 
         assertDoesNotThrow { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }
@@ -176,13 +176,13 @@ class BehovMediatorTest {
         aktivitetslogg.kontekst(vedtaksperiode1)
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
-            )
+            "historikkFom" to LocalDate.now().minusDays(1)
+        )
         )
         aktivitetslogg.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(2)
-            )
+            "historikkFom" to LocalDate.now().minusDays(2)
+        )
         )
 
         assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, eksempelmelding, aktivitetslogg) }

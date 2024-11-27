@@ -70,7 +70,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(setOf(søknadId, inntektsmeldingId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
     }
 
     @Test
@@ -190,7 +190,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`(){
+    fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`() {
         val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val inntektsmeldingId = håndterInntektsmelding(
@@ -202,7 +202,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val liste = (1..16).map{
+        val liste = (1..16).map {
             ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
         }
         val overstyringId = UUID.randomUUID()
@@ -213,7 +213,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
     }
 
 

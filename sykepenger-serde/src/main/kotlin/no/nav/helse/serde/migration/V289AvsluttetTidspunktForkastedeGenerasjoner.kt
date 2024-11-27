@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 
-internal class V289AvsluttetTidspunktForkastedeGenerasjoner: JsonMigration(version = 289) {
+internal class V289AvsluttetTidspunktForkastedeGenerasjoner : JsonMigration(version = 289) {
     override val description = "setter avsluttettidspunkt på TIL_INFOTRYGD-generasjoner"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

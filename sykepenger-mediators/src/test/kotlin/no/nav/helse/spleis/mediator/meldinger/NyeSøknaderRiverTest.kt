@@ -47,15 +47,17 @@ internal class NyeSøknaderRiverTest : RiverTest() {
         sendtNav = null,
         sendtArbeidsgiver = LocalDateTime.now(),
         egenmeldinger = listOf(PeriodeDTO(fom = LocalDate.now(), tom = LocalDate.now())),
-        soknadsperioder = listOf(SoknadsperiodeDTO(
-            fom = LocalDate.now(),
-            tom = LocalDate.now(),
-            sykmeldingsgrad = 100,
-            faktiskGrad = 100,
-            avtaltTimer = Double.MIN_VALUE,
-            faktiskTimer = Double.MAX_VALUE,
-            sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
-        )),
+        soknadsperioder = listOf(
+            SoknadsperiodeDTO(
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                sykmeldingsgrad = 100,
+                faktiskGrad = 100,
+                avtaltTimer = Double.MIN_VALUE,
+                faktiskTimer = Double.MAX_VALUE,
+                sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
+            )
+        ),
         fravar = listOf(FravarDTO(fom = LocalDate.now(), tom = LocalDate.now()))
     )
 
@@ -82,13 +84,16 @@ internal class NyeSøknaderRiverTest : RiverTest() {
         assertNoErrors(ValidNySøknad)
         assertNoErrors(ValidNySøknadUtenPerioder)
     }
+
     private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
     private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
     private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato")
 }
+
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
 private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
     put("@id", UUID.randomUUID().toString())
     put("@event_name", if (this["status"].asText() == "NY") "ny_søknad" else "ukjent")

@@ -28,7 +28,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
+internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
@@ -50,7 +50,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
     fun `periode med bare ferie - tidligere sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  10.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))

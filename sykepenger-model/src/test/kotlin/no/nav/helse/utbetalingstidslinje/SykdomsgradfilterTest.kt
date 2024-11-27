@@ -22,11 +22,13 @@ internal class SykdomsgradfilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     @Test
     fun `sykdomsgrad over 20 prosent`() {

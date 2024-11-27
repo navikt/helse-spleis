@@ -20,10 +20,10 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Test
 
-internal class AnmodningOmForkastingTest: AbstractDslTest() {
+internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
     @Test
-    fun `anmodning avslås av en avsluttet vedtaksperiode`(){
+    fun `anmodning avslås av en avsluttet vedtaksperiode`() {
         a1 {
             nyttVedtak(januar)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
@@ -32,7 +32,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `når anmodning innfris forkastes alt på skjæringstidspunktet`(){
+    fun `når anmodning innfris forkastes alt på skjæringstidspunktet`() {
         (a1 og a2).nyeVedtak(januar)
         a1 {
             nyPeriode(mars)
@@ -75,7 +75,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `anmodning innfris av en vedtaksperiode som avventer inntektsmelding`(){
+    fun `anmodning innfris av en vedtaksperiode som avventer inntektsmelding`() {
         a1 {
             nyPeriode(januar)
             nullstillTilstandsendringer()

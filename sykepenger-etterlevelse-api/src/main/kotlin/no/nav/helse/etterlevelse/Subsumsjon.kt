@@ -22,6 +22,7 @@ data class Subsumsjon(
         punktum = punktum,
         bokstav = bokstav
     )
+
     companion object {
         fun enkelSubsumsjon(
             utfall: Utfall,
@@ -49,6 +50,7 @@ data class Subsumsjon(
                 kontekster = kontekster
             )
         }
+
         fun periodisertSubsumsjon(
             perioder: Collection<ClosedRange<LocalDate>>,
             lovverk: String,
@@ -89,6 +91,7 @@ data class Subsumsjon(
     enum class Subsumsjonstype {
         ENKEL, PERIODISERT
     }
+
     enum class Utfall {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
     }

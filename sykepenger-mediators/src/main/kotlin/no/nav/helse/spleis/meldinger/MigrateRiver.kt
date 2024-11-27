@@ -17,10 +17,12 @@ internal class MigrateRiver(rapidsConnection: RapidsConnection, messageMediator:
         message.require("fødselsnummer", ::requireLong)
     }
 
-    override fun createMessage(packet: JsonMessage) = MigrateMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = MigrateMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 
     private fun requireLong(node: JsonNode) {
         require(node.asLong() > 0)

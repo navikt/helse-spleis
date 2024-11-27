@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
+internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `starter med ingen refusjon`() {
@@ -66,7 +66,8 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 31.januar),
+                INNTEKT, 31.januar
+            ),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -94,7 +95,8 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 3.februar),
+                INNTEKT, 3.februar
+            ),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -122,7 +124,8 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 31.januar),
+                INNTEKT, 31.januar
+            ),
         )
 
         håndterSykmelding(februar)

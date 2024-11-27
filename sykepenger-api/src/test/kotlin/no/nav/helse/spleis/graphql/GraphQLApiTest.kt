@@ -24,13 +24,13 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.Personidentifikator
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.LokalePayload
 import no.nav.helse.spleis.SpekematClient
@@ -759,11 +759,13 @@ internal class GraphQLApiTest : AbstractObservableTest() {
   }
 }
         """
+
         private fun assertHeltLike(forventet: String, faktisk: String) =
             JSONAssert.assertEquals(forventet, faktisk, STRICT)
 
         private fun assertIngenFærreFelt(forventet: String, faktisk: String) =
             JSONAssert.assertEquals(forventet, faktisk, STRICT_ORDER)
+
         private fun String.readResource() =
             object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
 
@@ -821,7 +823,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {
-        return fun (testDataSource: TestDataSource) {
+        return fun(testDataSource: TestDataSource) {
             observatør = TestObservatør().also { person.addObserver(it) }
             person.håndter(sykmelding(), Aktivitetslogg())
             person.håndter(utbetalinghistorikk(), Aktivitetslogg())
@@ -869,10 +871,18 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     private fun lagrePerson(dataSource: DataSource, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(dataSource, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
-            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
-                fødselsnummer.toLong(), personId!!).asExecute)
+            val personId = it.run(
+                queryOf(
+                    "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                    fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
+                ).asUpdateAndReturnGeneratedKey
+            )
+            it.run(
+                queryOf(
+                    "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
+                    fødselsnummer.toLong(), personId!!
+                ).asExecute
+            )
 
         }
     }

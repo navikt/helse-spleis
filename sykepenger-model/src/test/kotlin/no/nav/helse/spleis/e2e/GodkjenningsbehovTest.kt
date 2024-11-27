@@ -64,9 +64,10 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "sykepengegrunnlagsfakta"
     )!!["sykepengegrunnlag"]
+
     @Test
     fun `sender med sykepengegrunnlag i godkjenningsbehovet`() {
-        tilGodkjenning(januar, beregnetInntekt = INNTEKT*6, organisasjonsnummere = arrayOf(a1))
+        tilGodkjenning(januar, beregnetInntekt = INNTEKT * 6, organisasjonsnummere = arrayOf(a1))
         assertEquals(Grunnbeløp.`6G`.beløp(1.januar).årlig, sykepengegrunnlag(1.vedtaksperiode))
     }
 
@@ -284,7 +285,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2, avsendersystem = ALTINN)
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
@@ -332,6 +334,5 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         felt = "vilkårsgrunnlagId"
     )!!.let { UUID.fromString(it) }
 
-    private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1)
-        = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
+    private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1) = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
 }

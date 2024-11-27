@@ -161,7 +161,7 @@ fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<Lo
         versjon = LocalDate.of(2021, 6, 1),
         paragraf = PARAGRAF_8_9,
         ledd = LEDD_1,
-        input = mapOf( "soknadsPerioder" to søknadsperioder),
+        input = mapOf("soknadsPerioder" to søknadsperioder),
         kontekster = emptyList()
     )
 
@@ -234,7 +234,7 @@ fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<Cl
         ledd = 1.ledd,
         utfall = VILKAR_IKKE_OPPFYLT,
         versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-        input = mapOf("periode" to mapOf( "fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive)),
+        input = mapOf("periode" to mapOf("fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive)),
         kontekster = emptyList()
     )
 
@@ -267,28 +267,28 @@ fun `§ 8-12 ledd 1 punktum 1`(
         .partition { it <= maksdato }
 
     fun lagSubsumsjon(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) =
-            Subsumsjon.enkelSubsumsjon(
-                utfall = utfall,
-                lovverk = "folketrygdloven",
-                versjon = LocalDate.of(2021, 5, 21),
-                paragraf = PARAGRAF_8_12,
-                ledd = 1.ledd,
-                punktum = 1.punktum,
-                input = mapOf(
-                    "fom" to periode.start,
-                    "tom" to periode.endInclusive,
-                    "utfallFom" to utfallFom,
-                    "utfallTom" to utfallTom,
-                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
-                    "beregnetTidslinje" to beregnetTidslinje.dager(periode)
-                ),
-                output = mapOf(
-                    "gjenståendeSykedager" to gjenståendeSykedager,
-                    "forbrukteSykedager" to forbrukteSykedager,
-                    "maksdato" to maksdato,
-                ),
-                kontekster = emptyList()
-            )
+        Subsumsjon.enkelSubsumsjon(
+            utfall = utfall,
+            lovverk = "folketrygdloven",
+            versjon = LocalDate.of(2021, 5, 21),
+            paragraf = PARAGRAF_8_12,
+            ledd = 1.ledd,
+            punktum = 1.punktum,
+            input = mapOf(
+                "fom" to periode.start,
+                "tom" to periode.endInclusive,
+                "utfallFom" to utfallFom,
+                "utfallTom" to utfallTom,
+                "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
+                "beregnetTidslinje" to beregnetTidslinje.dager(periode)
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to gjenståendeSykedager,
+                "forbrukteSykedager" to forbrukteSykedager,
+                "maksdato" to maksdato,
+            ),
+            kontekster = emptyList()
+        )
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
     if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
@@ -803,7 +803,7 @@ fun `§ 8-29`(
     grunnlagForSykepengegrunnlagÅrlig: Double,
     inntektsopplysninger: List<Inntektsubsumsjon>,
     organisasjonsnummer: String
-) =             Subsumsjon.enkelSubsumsjon(
+) = Subsumsjon.enkelSubsumsjon(
     utfall = VILKAR_BEREGNET,
     lovverk = "folketrygdloven",
     versjon = LocalDate.of(2019, 1, 1),
@@ -946,6 +946,7 @@ fun `§ 8-51 ledd 3`(
             ),
             kontekster = emptyList()
         )
+
     val subsumsjoner = mutableListOf<Subsumsjon>()
     if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
     if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
@@ -1025,12 +1026,15 @@ fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>
         kontekster = emptyList()
     )
 
-internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {
+internal class RangeIterator(start: LocalDate, private val end: LocalDate) : Iterator<LocalDate> {
     private var currentDate = start
+
     constructor(range: ClosedRange<LocalDate>) : this(range.start, range.endInclusive)
+
     fun subsetFom(fom: LocalDate) = apply {
         currentDate = maxOf(currentDate, fom)
     }
+
     override fun hasNext() = end >= currentDate
     override fun next(): LocalDate {
         check(hasNext())

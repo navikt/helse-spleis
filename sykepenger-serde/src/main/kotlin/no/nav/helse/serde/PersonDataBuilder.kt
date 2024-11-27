@@ -68,6 +68,7 @@ fun PersonData.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson 
     val node = serdeObjectMapper.valueToTree<ObjectNode>(this)
     return SerialisertPerson(if (pretty) node.toPrettyString() else node.toString())
 }
+
 fun PersonUtDto.tilPersonData() = PersonData(
     fødselsdato = this.alder.fødselsdato,
     fødselsnummer = this.fødselsnummer,
@@ -113,6 +114,7 @@ private fun SykdomshistorikkElementDto.tilPersonData() = PersonData.Sykdomshisto
     hendelseSykdomstidslinje = this.hendelseSykdomstidslinje.tilPersonData(),
     beregnetSykdomstidslinje = this.beregnetSykdomstidslinje.tilPersonData(),
 )
+
 private fun SykdomstidslinjeDto.tilPersonData() = PersonData.ArbeidsgiverData.SykdomstidslinjeData(
     dager = dager.map { it.tilPersonData() }.forkortSykdomstidslinje(),
     låstePerioder = this.låstePerioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
@@ -152,6 +154,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.AndreYtelserDto -> DagData(
         type = when (this.ytelse) {
             SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_AAP
@@ -170,6 +173,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG,
         kilde = this.kilde.tilPersonData(),
@@ -180,6 +184,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.ArbeidsdagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG,
         kilde = this.kilde.tilPersonData(),
@@ -190,6 +195,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
@@ -200,6 +206,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
@@ -210,6 +217,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.FeriedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG,
         kilde = this.kilde.tilPersonData(),
@@ -220,6 +228,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.ForeldetSykedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
         kilde = this.kilde.tilPersonData(),
@@ -230,6 +239,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.FriskHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG,
         kilde = this.kilde.tilPersonData(),
@@ -240,6 +250,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.PermisjonsdagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG,
         kilde = this.kilde.tilPersonData(),
@@ -250,6 +261,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.ProblemDagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG,
         kilde = this.kilde.tilPersonData(),
@@ -260,6 +272,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.SykHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
@@ -270,6 +283,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.SykedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
@@ -280,6 +294,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
+
     is SykdomstidslinjeDagDto.SykedagNavDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV,
         kilde = this.kilde.tilPersonData(),
@@ -291,11 +306,13 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 }
+
 private fun HendelseskildeDto.tilPersonData() = PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData(
     type = this.type,
     id = this.meldingsreferanseId,
     tidsstempel = this.tidsstempel
 )
+
 private fun RefusjonUtDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData(
     meldingsreferanseId = this.meldingsreferanseId,
     førsteFraværsdag = this.førsteFraværsdag,
@@ -305,6 +322,7 @@ private fun RefusjonUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Refusjon
     endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
     tidsstempel = this.tidsstempel
 )
+
 private fun EndringIRefusjonDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData(
     beløp = this.beløp.beløp,
     endringsdato = this.endringsdato
@@ -313,9 +331,11 @@ private fun EndringIRefusjonDto.tilPersonData() = PersonData.ArbeidsgiverData.Re
 private fun SykmeldingsperioderDto.tilPersonData() = perioder.map {
     PersonData.ArbeidsgiverData.SykmeldingsperiodeData(it.fom, it.tom)
 }
+
 private fun ForkastetVedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.ForkastetVedtaksperiodeData(
     vedtaksperiode = this.vedtaksperiode.tilPersonData()
 )
+
 private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData(
     id = id,
     tilstand = when (tilstand) {
@@ -344,6 +364,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
     opprettet = opprettet,
     oppdatert = oppdatert
 )
+
 private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData(
     id = this.id,
     tilstand = when (this.tilstand) {
@@ -365,6 +386,7 @@ private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Vedtak
     kilde = this.kilde.tilPersonData(),
     endringer = this.endringer.map { it.tilPersonData() },
 )
+
 private fun BehandlingkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
     meldingsreferanseId = this.meldingsreferanseId,
     innsendt = this.innsendt,
@@ -378,6 +400,7 @@ private fun AvsenderDto.tilPersonData() = when (this) {
     AvsenderDto.SYKMELDT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
     AvsenderDto.SYSTEM -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
 }
+
 private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
     id = id,
     tidsstempel = tidsstempel,
@@ -395,6 +418,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData()
 )
+
 private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
     vurdertTilOgMed = vurdertTilOgMed,
     bestemmelse = when (bestemmelse) {
@@ -412,6 +436,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.
     gjenståendeDager = gjenståendeDager,
     grunnlag = grunnlag.tilPersonData()
 )
+
 private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
     dokumentId = this.id,
     dokumenttype = when (type) {
@@ -430,6 +455,7 @@ private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.Ved
         DokumenttypeDto.AndreYtelser -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.AndreYtelser
     }
 )
+
 private fun UtbetalingUtDto.tilPersonData() = PersonData.UtbetalingData(
     id = this.id,
     korrelasjonsId = this.korrelasjonsId,
@@ -467,6 +493,7 @@ private fun UtbetalingUtDto.tilPersonData() = PersonData.UtbetalingData(
     avsluttet = avsluttet,
     oppdatert = oppdatert
 )
+
 private fun UtbetalingstidslinjeUtDto.tilPersonData() = PersonData.UtbetalingstidslinjeData(
     dager = this.dager.map { it.tilPersonData() }.forkortUtbetalingstidslinje()
 )
@@ -553,6 +580,7 @@ private fun UtbetalingVurderingDto.tilPersonData() = PersonData.UtbetalingData.V
     tidspunkt = tidspunkt,
     automatiskBehandling = automatiskBehandling
 )
+
 private fun OppdragUtDto.tilPersonData() = PersonData.OppdragData(
     mottaker = this.mottaker,
     fagområde = when (this.fagområde) {
@@ -577,11 +605,13 @@ private fun OppdragUtDto.tilPersonData() = PersonData.OppdragData(
     erSimulert = this.erSimulert,
     simuleringsResultat = this.simuleringsResultat?.tilPersonData()
 )
+
 private fun EndringskodeDto.tilPersonData() = when (this) {
     EndringskodeDto.ENDR -> "ENDR"
     EndringskodeDto.NY -> "NY"
     EndringskodeDto.UEND -> "UEND"
 }
+
 private fun UtbetalingslinjeUtDto.tilPersonData() = PersonData.UtbetalingslinjeData(
     fom = this.fom,
     tom = this.tom,
@@ -598,12 +628,14 @@ private fun UtbetalingslinjeUtDto.tilPersonData() = PersonData.UtbetalingslinjeD
     klassekode = this.klassekode.tilPersonData(),
     datoStatusFom = this.datoStatusFom
 )
+
 private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
     KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
     KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
 }
+
 private fun SimuleringResultatDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(
     totalbeløp = this.totalbeløp,
     perioder = this.perioder.map {
@@ -645,6 +677,7 @@ private fun SimuleringResultatDto.tilPersonData() = PersonData.ArbeidsgiverData.
         )
     }
 )
+
 private fun FeriepengeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData(
     infotrygdFeriepengebeløpPerson = this.infotrygdFeriepengebeløpPerson,
     infotrygdFeriepengebeløpArbeidsgiver = this.infotrygdFeriepengebeløpArbeidsgiver,
@@ -659,6 +692,7 @@ private fun FeriepengeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Feriep
     sendTilOppdrag = sendTilOppdrag,
     sendPersonoppdragTilOS = sendPersonoppdragTilOS
 )
+
 private fun UtbetaltDagDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(
     type = when (this) {
         is UtbetaltDagDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
@@ -670,6 +704,7 @@ private fun UtbetaltDagDto.tilPersonData() = PersonData.ArbeidsgiverData.Feriepe
     dato = dato,
     beløp = beløp
 )
+
 private fun InfotrygdhistorikkelementUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData(
     id = this.id,
     tidsstempel = this.tidsstempel,
@@ -681,10 +716,12 @@ private fun InfotrygdhistorikkelementUtDto.tilPersonData() = PersonData.Infotryg
     arbeidskategorikoder = arbeidskategorikoder,
     oppdatert = oppdatert
 )
+
 private fun InfotrygdFerieperiodeDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.FerieperiodeData(
     fom = this.periode.fom,
     tom = this.periode.tom
 )
+
 private fun InfotrygdArbeidsgiverutbetalingsperiodeUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData(
     orgnr = this.orgnr,
     fom = this.periode.fom,
@@ -692,6 +729,7 @@ private fun InfotrygdArbeidsgiverutbetalingsperiodeUtDto.tilPersonData() = Perso
     grad = this.grad.prosent,
     inntekt = this.inntekt.dagligInt.beløp
 )
+
 private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.PersonutbetalingsperiodeData(
     orgnr = this.orgnr,
     fom = this.periode.fom,
@@ -699,6 +737,7 @@ private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() = PersonData.
     grad = this.grad.prosent,
     inntekt = this.inntekt.dagligInt.beløp
 )
+
 private fun InfotrygdInntektsopplysningUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.InntektsopplysningData(
     orgnr = this.orgnummer,
     sykepengerFom = this.sykepengerFom,
@@ -707,11 +746,13 @@ private fun InfotrygdInntektsopplysningUtDto.tilPersonData() = PersonData.Infotr
     refusjonTom = refusjonTom,
     lagret = lagret
 )
+
 private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagInnslagData(
     id = this.id,
     opprettet = this.opprettet,
     vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilPersonData() }
 )
+
 private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData(
     skjæringstidspunkt = this.skjæringstidspunkt,
     type = when (this) {
@@ -730,6 +771,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
             MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> JsonMedlemskapstatus.UAVKLART_MED_BRUKERSPØRSMÅL
             MedlemskapsvurderingDto.VetIkke -> JsonMedlemskapstatus.VET_IKKE
         }
+
         else -> null
     },
     vurdertOk = when (this) {
@@ -759,6 +801,7 @@ private fun OpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElement
         )
     }
 )
+
 private fun InntektsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.InntektsgrunnlagData(
     grunnbeløp = this.`6G`.årlig.beløp,
     arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
@@ -814,6 +857,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
                 ledd = it.ledd
             )
         }
+
         else -> null
     },
     tidsstempel = this.tidsstempel,
@@ -831,6 +875,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
             InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
             InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
         }
+
         else -> null
     }
 )
@@ -843,6 +888,7 @@ private fun RefusjonsopplysningUtDto.tilPersonData() = PersonData.ArbeidsgiverDa
     avsender = this.avsender.tilPersonData(),
     tidsstempel = this.tidsstempel
 )
+
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = SkatteopplysningData(
     hendelseId = this.hendelseId,
     beløp = this.beløp.beløp,

@@ -48,7 +48,7 @@ class Ytelser(
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate, erForlengelse: Boolean ): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate, erForlengelse: Boolean): Boolean {
         if (periode.start > maksdato) return true
 
         val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)

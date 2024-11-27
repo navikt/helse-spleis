@@ -61,14 +61,15 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
                 31.januar to 500.daglig,
                 15.februar to 0.daglig,
                 20.februar to 400.daglig
-            ))
+            )
+        )
 
         val forventet =
             Beløpstidslinje.fra(1.januar til 30.januar, 1000.daglig, kilde) +
-            Beløpstidslinje.fra(31.januar til 14.februar, 500.daglig, kilde) +
-            Beløpstidslinje.fra(15.februar til 19.februar, 0.daglig, kilde) +
-            Beløpstidslinje.fra(20.februar til 1.mars, 400.daglig, kilde) +
-            Beløpstidslinje.fra(2.mars.somPeriode(), 0.daglig, kilde)
+                Beløpstidslinje.fra(31.januar til 14.februar, 500.daglig, kilde) +
+                Beløpstidslinje.fra(15.februar til 19.februar, 0.daglig, kilde) +
+                Beløpstidslinje.fra(20.februar til 1.mars, 400.daglig, kilde) +
+                Beløpstidslinje.fra(2.mars.somPeriode(), 0.daglig, kilde)
 
         assertEquals(forventet, refusjonstidslinje)
     }
@@ -85,9 +86,9 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
             opphørsdato: LocalDate? = null,
             endringerIRefusjon: Map<LocalDate, Inntekt> = emptyMap()
         ) = Inntektsmelding.Refusjon(
-                beløp = refusjonsbeløp,
-                opphørsdato = opphørsdato,
-                endringerIRefusjon = endringerIRefusjon.map { Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key) }
-            ).refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt)
+            beløp = refusjonsbeløp,
+            opphørsdato = opphørsdato,
+            endringerIRefusjon = endringerIRefusjon.map { Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key) }
+        ).refusjonstidslinje(førsteFraværsdag, arbeidsgiverperioder, meldingsreferanseId, mottatt)
     }
 }

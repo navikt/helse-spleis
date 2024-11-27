@@ -29,8 +29,8 @@ internal class NyInntektUnderveisTest {
 
         val forventetTidslinje =
             (Arbeidsgiver oppgir 500.daglig fra 1.januar til 9.januar) og
-            (Arbeidsgiver oppgir 1000.daglig fra 10.januar til 25.januar) og
-            (Arbeidsgiver oppgir 500.daglig fra 26.januar til 31.januar)
+                (Arbeidsgiver oppgir 1000.daglig fra 10.januar til 25.januar) og
+                (Arbeidsgiver oppgir 500.daglig fra 26.januar til 31.januar)
 
         assertEquals(1, result.size)
         assertEquals(listOf(1.januar til 31.januar), result.single().beløpstidslinje.perioderMedBeløp)

@@ -139,6 +139,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
+
     companion object {
         fun AbstractEndToEndTest.assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)

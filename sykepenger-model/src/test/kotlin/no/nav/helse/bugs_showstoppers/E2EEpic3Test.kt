@@ -509,7 +509,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `ikke medlem avviser alle dager og legger på warning`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(
+        håndterInntektsmelding(
+            listOf(
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
@@ -548,7 +549,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(
+        håndterInntektsmelding(
+            listOf(
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
@@ -587,7 +589,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(listOf(
+        håndterInntektsmelding(
+            listOf(
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
@@ -633,7 +636,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 31.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(
+        håndterInntektsmelding(
+            listOf(
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
@@ -668,7 +672,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(listOf(
+        håndterInntektsmelding(
+            listOf(
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
@@ -742,7 +747,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(listOf(
+        håndterInntektsmelding(
+            listOf(
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode

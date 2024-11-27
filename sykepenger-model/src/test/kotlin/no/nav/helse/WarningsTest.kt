@@ -63,9 +63,11 @@ internal class WarningsTest {
         assertForventetFeil(
             forklaring = "Ikke alle warnings testes eksplisitt",
             ønsket = { assertEquals(emptySet<String>(), ikkeTestedeWarnings) },
-            nå = { assertEquals(emptySet<String>(), nyeWarningerSomManglerEksplisittTest) {
-                "Legg til eksplisitt test for nye warnings! _ikke_ legg den i listen av warnings som mangler eksplisitt test."
-            }}
+            nå = {
+                assertEquals(emptySet<String>(), nyeWarningerSomManglerEksplisittTest) {
+                    "Legg til eksplisitt test for nye warnings! _ikke_ legg den i listen av warnings som mangler eksplisitt test."
+                }
+            }
         )
 
         assertEquals(emptySet<String>(), warningerSomNåTestesEkplisitt) {
@@ -77,8 +79,10 @@ internal class WarningsTest {
         private fun warningEquals(warningDefinisjon: String, warningBruk: String) = when (warningDefinisjon) {
             "Utbetalingen ble gjennomført, men med advarsel: \$melding" ->
                 warningBruk.startsWith("Utbetalingen ble gjennomført, men med advarsel: ")
+
             "Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene." ->
                 warningBruk == "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene."
+
             else -> warningDefinisjon == warningBruk
         }
 
@@ -89,7 +93,8 @@ internal class WarningsTest {
             scope: String,
             regex: Regex,
             ignorePath: (path: Path) -> Boolean = { false },
-            ignoreLinje: (linje: String) -> Boolean = { false }) =
+            ignoreLinje: (linje: String) -> Boolean = { false }
+        ) =
             Files.walk(Paths.get("../")).use { paths ->
                 paths
                     .filter(Files::isRegularFile)

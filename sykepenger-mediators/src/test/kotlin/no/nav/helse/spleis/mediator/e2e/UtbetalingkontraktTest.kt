@@ -284,7 +284,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `annullering delvis refusjon`()  {
+    fun `annullering delvis refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -464,12 +464,22 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         }
     }
 
-    private val arbeidsgiverFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText().also { check(it.matches(
-        FagsystemIdRegex
-    )) }
-    private val personFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag").path("fagsystemId").asText().also { check(it.matches(
-        FagsystemIdRegex
-    )) }
+    private val arbeidsgiverFagsystemId
+        get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText().also {
+            check(
+                it.matches(
+                    FagsystemIdRegex
+                )
+            )
+        }
+    private val personFagsystemId
+        get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag").path("fagsystemId").asText().also {
+            check(
+                it.matches(
+                    FagsystemIdRegex
+                )
+            )
+        }
     private val utbetalingId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").let { UUID.fromString(it.asText()) }
     private val korrelasjonsId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId").let { UUID.fromString(it.asText()) }
 

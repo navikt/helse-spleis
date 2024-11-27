@@ -8,7 +8,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediatorTest() {
+internal class FjerneGodkjenningsbehovOgVedtakFattetTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `avsluttet uten vedtak`() {

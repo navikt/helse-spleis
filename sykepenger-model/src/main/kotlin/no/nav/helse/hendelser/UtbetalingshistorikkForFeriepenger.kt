@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato

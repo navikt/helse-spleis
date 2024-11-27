@@ -21,11 +21,13 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
-            håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, listOf(
+            håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode, 1.januar, listOf(
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            ))
+            )
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -52,11 +54,13 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
         val sprøInntektFraSkatt = 30000.månedlig * -1
         a1 {
             håndterSøknad(januar)
-            håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, listOf(
+            håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode, 1.januar, listOf(
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), sprøInntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            ))
+            )
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 

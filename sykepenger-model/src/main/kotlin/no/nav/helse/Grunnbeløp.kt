@@ -1,21 +1,21 @@
 package no.nav.helse
 
 import java.time.LocalDate
+import kotlin.math.roundToInt
 import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import kotlin.math.roundToInt
 
 class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
         124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
         118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
         111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
-        106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021) ),
-        101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020), gyldigSomMinsteinntektKrav = 21.september(2020) ),
-        99858.årlig.gyldigFra(1.mai(2019), gyldigSomMinsteinntektKrav = 27. mai(2019)),
+        106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021)),
+        101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020), gyldigSomMinsteinntektKrav = 21.september(2020)),
+        99858.årlig.gyldigFra(1.mai(2019), gyldigSomMinsteinntektKrav = 27.mai(2019)),
         96883.årlig.gyldigFra(1.mai(2018)),
         93634.årlig.gyldigFra(1.mai(2017)),
         92576.årlig.gyldigFra(1.mai(2016)),
@@ -143,7 +143,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
             val periode = 1.januar(år) til 31.desember(år)
             if (!gyldighetsperiode.overlapperMed(periode)) return INGEN
             val antallMånederSomDekkesAvGrunnbeløpet = gyldighetsperiode.subset(periode)
-                .let { it.endInclusive.monthValue - it.start.monthValue + 1}
+                .let { it.endInclusive.monthValue - it.start.monthValue + 1 }
             return beløp(antallMånederSomDekkesAvGrunnbeløpet.toDouble())
                 .månedlig
                 .årlig

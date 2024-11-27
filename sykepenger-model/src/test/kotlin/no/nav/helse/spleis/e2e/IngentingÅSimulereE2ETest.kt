@@ -36,7 +36,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg`() {
-        nyttVedtak(1.januar til  18.januar)
+        nyttVedtak(1.januar til 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
         håndterSøknad(20.januar til 21.januar)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)

@@ -100,15 +100,15 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
-    fun `Du haver to stykk beløpstidslinje, som du ønsker forent`()  {
+    fun `Du haver to stykk beløpstidslinje, som du ønsker forent`() {
         val gammelTidslinje = (Arbeidsgiver oppgir 31000.månedlig hele januar) og (Arbeidsgiver oppgir 0.daglig hele mars)
 
         val nyTidslinje = (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars)
 
         val forventetTidslinje =
             (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 19.januar) og
-            (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
-            (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
+                (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
+                (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
 
         assertEquals(forventetTidslinje, gammelTidslinje og nyTidslinje)
     }
@@ -215,32 +215,34 @@ internal class BeløpstidslinjeTest {
     @Test
     fun dto() {
         val tidslinje = (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
-                (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
-                (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
+            (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
+            (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
 
         val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId, Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
-        assertEquals(BeløpstidslinjeDto(
-            perioder = listOf(
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 1.februar,
-                    tom = 1.februar,
-                    dagligBeløp = 500.0,
-                    kilde = kilde
-                ),
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 2.februar,
-                    tom = 10.februar,
-                    dagligBeløp = 250.0,
-                    kilde = kilde
-                ),
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 11.februar,
-                    tom = 12.februar,
-                    dagligBeløp = 500.0,
-                    kilde = kilde
+        assertEquals(
+            BeløpstidslinjeDto(
+                perioder = listOf(
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = 1.februar,
+                        tom = 1.februar,
+                        dagligBeløp = 500.0,
+                        kilde = kilde
+                    ),
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = 2.februar,
+                        tom = 10.februar,
+                        dagligBeløp = 250.0,
+                        kilde = kilde
+                    ),
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = 11.februar,
+                        tom = 12.februar,
+                        dagligBeløp = 500.0,
+                        kilde = kilde
+                    )
                 )
-            )
-        ), tidslinje.dto())
+            ), tidslinje.dto()
+        )
     }
 
     internal companion object {

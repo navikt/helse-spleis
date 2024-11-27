@@ -38,6 +38,7 @@ class SkjønnsmessigFastsatt internal constructor(
 
     override fun erSamme(other: Inntektsopplysning) =
         other is SkjønnsmessigFastsatt && this.dato == other.dato && this.beløp == other.beløp
+
     override fun dto() =
         InntektsopplysningUtDto.SkjønnsmessigFastsattDto(
             id = id,

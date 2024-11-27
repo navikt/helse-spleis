@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 
-internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
+internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
     @Test
     fun `Når inntekt skjønnsfastsettes til 0 og det finnes andre arbeidsgivere i økonomi-lista`() {
@@ -62,10 +62,13 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                a1 to INNTEKT,
-                a2 to INNTEKT
-            ), 1.januar),
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 1.januar
+            ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
@@ -74,10 +77,12 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            håndterSkjønnsmessigFastsettelse(
+                1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
                 OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig)
-            ))
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -119,10 +124,13 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                a1 to INNTEKT,
-                a2 to inntektVedSkjønnsvurdering
-            ), 1.januar),
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to INNTEKT,
+                    a2 to inntektVedSkjønnsvurdering
+                ), 1.januar
+            ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
@@ -131,10 +139,12 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            håndterSkjønnsmessigFastsettelse(
+                1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
                 OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig)
-            ))
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -173,10 +183,12 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     fun `endring i refusjon skal ikke endre omregnet årsinntekt`() {
         (a1 og a2).nyeVedtak(januar)
 
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(a1, 19000.0.månedlig),
             OverstyrtArbeidsgiveropplysning(a2, 21000.0.månedlig)
-        ))
+        )
+        )
 
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -333,17 +345,25 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
 
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
-                orgnummer = a1,
-                inntekt = INNTEKT * 2
-            )))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2
+                )
+            )
+            )
 
 
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
-                orgnummer = a1,
-                inntekt = INNTEKT,
-                forklaring = "forklaring"
-            )))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT,
+                    forklaring = "forklaring"
+                )
+            )
+            )
 
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
             håndterYtelser(1.vedtaksperiode)

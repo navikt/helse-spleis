@@ -253,7 +253,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             orgnummer = a1
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -419,7 +419,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt INNTEKT
@@ -708,7 +709,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD,
             orgnummer = a1
         )

@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -14,7 +15,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
 sealed class Inntektsopplysning(
     val id: UUID,
@@ -35,7 +35,7 @@ sealed class Inntektsopplysning(
     protected open fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
         // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
         if (ny is SkjønnsmessigFastsatt) return true
-        if (ny is Saksbehandler){
+        if (ny is Saksbehandler) {
             return when {
                 // hvis inntekten er skjønnsmessig fastsatt og det overstyres til samme omregnede årsinntekt, så beholdes den skjønnsmessig fastsatte inntekten
                 this is SkjønnsmessigFastsatt && this.omregnetÅrsinntekt().fastsattÅrsinntekt() == ny.fastsattÅrsinntekt() -> false
@@ -54,6 +54,7 @@ sealed class Inntektsopplysning(
     internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
     }
+
     internal open fun overstyrer(gammel: SkjønnsmessigFastsatt): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre skjønnsmessig fastsatt-inntekt")
     }
@@ -68,7 +69,7 @@ sealed class Inntektsopplysning(
 
     protected abstract fun erSamme(other: Inntektsopplysning): Boolean
 
-    internal open fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) { }
+    internal open fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {}
 
     internal open fun subsumerArbeidsforhold(
         subsumsjonslogg: Subsumsjonslogg,
@@ -76,13 +77,15 @@ sealed class Inntektsopplysning(
         forklaring: String,
         oppfylt: Boolean
     ) = apply {
-        subsumsjonslogg.logg(`§ 8-15`(
-            skjæringstidspunkt = dato,
-            organisasjonsnummer = organisasjonsnummer,
-            inntekterSisteTreMåneder = emptyList(),
-            forklaring = forklaring,
-            oppfylt = oppfylt
-        ))
+        subsumsjonslogg.logg(
+            `§ 8-15`(
+                skjæringstidspunkt = dato,
+                organisasjonsnummer = organisasjonsnummer,
+                inntekterSisteTreMåneder = emptyList(),
+                forklaring = forklaring,
+                oppfylt = oppfylt
+            )
+        )
     }
 
     internal open fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmelding? = null
@@ -111,15 +114,17 @@ sealed class Inntektsopplysning(
     internal open fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         inntektsmelding: InntektsmeldingHendelse
-    ) {}
+    ) {
+    }
 
     internal open fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         orgnummer: String,
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
-    ) {}
+    ) {
+    }
 
-    internal open fun erSkatteopplysning() : Boolean = false
+    internal open fun erSkatteopplysning(): Boolean = false
 
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =
@@ -138,7 +143,7 @@ sealed class Inntektsopplysning(
         }
 
         internal fun List<Inntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
-            check(all { it is SkjønnsmessigFastsatt } || none { it is SkjønnsmessigFastsatt }) {"Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det"}
+            check(all { it is SkjønnsmessigFastsatt } || none { it is SkjønnsmessigFastsatt }) { "Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det" }
         }
 
         internal fun gjenopprett(dto: InntektsopplysningInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsopplysning {

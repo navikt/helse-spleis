@@ -20,6 +20,7 @@ class Avstemmer(private val person: PersonUtDto) {
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
+
     private val melding = mapTilMelding(person)
 
     fun tilJsonMessage() = JsonMessage.newMessage("person_avstemt", mapper.convertValue(melding))
@@ -95,6 +96,7 @@ data class AvstemtVedtaksperiode(
     val skjæringstidspunkt: LocalDate,
     val utbetalinger: List<UUID>
 )
+
 data class AvstemtUtbetaling(
     val id: UUID,
     val type: String,
@@ -104,6 +106,7 @@ data class AvstemtUtbetaling(
     val avsluttet: LocalDateTime?,
     val vurdering: AvstemtVurdering?
 )
+
 data class AvstemtVurdering(
     val ident: String,
     val tidspunkt: LocalDateTime,

@@ -23,7 +23,7 @@ class OppdragBuilder(
     }
 
     fun betalingshelgedag(dato: LocalDate, grad: Int) {
-       if (utbetalingslinjer.isEmpty() || grad != linje.grad)
+        if (utbetalingslinjer.isEmpty() || grad != linje.grad)
             tilstand.nyLinje(dato, grad)
         else
             tilstand.helgedag(dato, grad)
@@ -47,7 +47,8 @@ class OppdragBuilder(
             økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
-        ) {}
+        ) {
+        }
 
         fun helgedag(dato: LocalDate, grad: Int) {}
 
@@ -55,7 +56,8 @@ class OppdragBuilder(
             økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
-        ) {}
+        ) {
+        }
 
         fun nyLinje(dato: LocalDate, grad: Int) {}
 

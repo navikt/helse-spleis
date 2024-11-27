@@ -115,7 +115,7 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `Melding sendt til forelder`(){
+    fun `Melding sendt til forelder`() {
         val hendelse = aktivitetslogg.barn()
         "info message".also {
             hendelse.info(it)
@@ -128,7 +128,7 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `Melding sendt fra barnebarn til forelder`(){
+    fun `Melding sendt fra barnebarn til forelder`() {
         val hendelse = aktivitetslogg.barn()
         hendelse.kontekst(person)
         val arbeidsgiver = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -162,7 +162,7 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `Vis bare arbeidsgiveraktivitet`(){
+    fun `Vis bare arbeidsgiveraktivitet`() {
         val hendelse1 = aktivitetslogg.barn()
         hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -194,7 +194,8 @@ internal class AktivitetsloggTest {
             Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
             "param1" to param1,
             "param2" to param2
-        ))
+        )
+        )
 
         assertEquals(1, aktivitetslogg.behov.size)
         assertEquals(1, aktivitetslogg.behov.first().kontekst().size)
@@ -238,7 +239,7 @@ internal class AktivitetsloggTest {
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

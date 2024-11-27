@@ -49,24 +49,28 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
-            val meldingsreferanseId = håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, listOf(
+            val meldingsreferanseId = håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode, 1.januar, listOf(
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            ))
+            )
+            )
             val hendelser = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.hendelser
             assertTrue(hendelser.contains(Dokumentsporing.inntektFraAOrdingen(meldingsreferanseId)))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
-            assertUtbetalingsbeløp(1.vedtaksperiode,
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
                 forventetPersonbeløp = 462,
                 subset = 17.januar til 31.januar
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING,
+            assertTilstander(
+                1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING
             )
         }
@@ -77,21 +81,25 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         val inntektFraSkatt = INGEN
         a1 {
             håndterSøknad(januar)
-            håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, listOf(
+            håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode, 1.januar, listOf(
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            ))
+            )
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
-            assertUtbetalingsbeløp(1.vedtaksperiode,
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
                 forventetPersonbeløp = 0,
                 subset = 17.januar til 31.januar
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING,
+            assertTilstander(
+                1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING
             )
             val forelagteOpplysninger = observatør.skatteinntekterLagtTilGrunnEventer.last()
@@ -115,13 +123,15 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
-            assertUtbetalingsbeløp(1.vedtaksperiode,
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
                 forventetPersonbeløp = 0,
                 subset = 17.januar til 31.januar
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING,
+            assertTilstander(
+                1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING
             )
 

@@ -19,13 +19,14 @@ internal class SykepengegrunnlagForArbeidsgiverMessage(packet: JsonMessage, over
 
     private val skjæringstidspunkter = packet["${InntekterForSykepengegrunnlagForArbeidsgiver.name}.skjæringstidspunkt"].asLocalDate()
 
-    private val sykepengegrunnlagForArbeidsgiver get() = SykepengegrunnlagForArbeidsgiver(
-        meldingsreferanseId = meldingsporing.id,
-        vedtaksperiodeId = vedtaksperiodeId,
-        skjæringstidspunkt = skjæringstidspunkter,
-        orgnummer = organisasjonsnummer,
-        inntekter = if (inntekterForSykepengegrunnlag.isEmpty()) ArbeidsgiverInntekt(organisasjonsnummer, emptyList()) else inntekterForSykepengegrunnlag.single()
-    )
+    private val sykepengegrunnlagForArbeidsgiver
+        get() = SykepengegrunnlagForArbeidsgiver(
+            meldingsreferanseId = meldingsporing.id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkter,
+            orgnummer = organisasjonsnummer,
+            inntekter = if (inntekterForSykepengegrunnlag.isEmpty()) ArbeidsgiverInntekt(organisasjonsnummer, emptyList()) else inntekterForSykepengegrunnlag.single()
+        )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(this, sykepengegrunnlagForArbeidsgiver, context)

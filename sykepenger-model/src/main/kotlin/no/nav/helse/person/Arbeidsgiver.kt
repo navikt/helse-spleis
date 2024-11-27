@@ -187,7 +187,7 @@ internal class Arbeidsgiver private constructor(
             forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
         }
 
-        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
+        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): () -> Skjæringstidspunkt = {
             infotrygdhistorikk.skjæringstidspunkt(map(Arbeidsgiver::sykdomstidslinje))
         }
 
@@ -245,12 +245,14 @@ internal class Arbeidsgiver private constructor(
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
             aktivitetslogg: IAktivitetslogg
         ) {
-            forEach { it.utbetalFeriepenger(
-                personidentifikator,
-                feriepengeberegner,
-                utbetalingshistorikkForFeriepenger,
-                aktivitetslogg
-            ) }
+            forEach {
+                it.utbetalFeriepenger(
+                    personidentifikator,
+                    feriepengeberegner,
+                    utbetalingshistorikkForFeriepenger,
+                    aktivitetslogg
+                )
+            }
         }
 
 
@@ -343,7 +345,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = avklarSykepengegrunnlag(skjæringstidspunkt) != null
 
-    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
+    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null): ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
     }
@@ -465,14 +467,14 @@ internal class Arbeidsgiver private constructor(
     internal fun vurderOmSøknadIkkeKanHåndteres(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         // sjekker først egen arbeidsgiver først
         return yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(aktivitetslogg) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg, vedtaksperiode)
-                || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg, vedtaksperiode) }
-                || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, aktivitetslogg, vedtaksperiode)
+            || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg, vedtaksperiode) }
+            || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, aktivitetslogg, vedtaksperiode)
     }
 
     private fun harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
         return ForkastetVedtaksperiode.forlengerForkastet(forkastede, aktivitetslogg, vedtaksperiode)
-                || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
-                || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
+            || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
+            || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
     }
 
     internal fun håndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -796,7 +798,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun sykdomstidslinjeInkludertForkastet(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-        return  forkastede
+        return forkastede
             .slåSammenSykdomstidslinjer(sykdomstidslinje)
             .merge(sykdomstidslinje(), replace)
     }
@@ -824,8 +826,10 @@ internal class Arbeidsgiver private constructor(
         val arbeidsgiverperioder = arbeidsgiverperiodeFor(sykdomstidslinje)
         return arbeidsgiverperioder.finn(periode)?.somArbeidsgiverperiode()
     }
+
     internal fun arbeidsgiverperiode(periode: Periode) =
         arbeidsgiverperiode(periode, sykdomstidslinje())
+
     internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje) =
         arbeidsgiverperiode(periode, sykdomstidslinjeInkludertForkastet(sykdomstidslinje))
 
@@ -914,9 +918,9 @@ internal class Arbeidsgiver private constructor(
     private fun subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding: Inntektsmelding) =
         BehandlingSubsumsjonslogg(
             subsumsjonslogg, listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
-            ) + inntektsmelding.subsumsjonskontekst()
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
+        ) + inntektsmelding.subsumsjonskontekst()
         )
 
     internal fun lagreTidsnærInntektsmelding(
@@ -990,12 +994,15 @@ internal class Arbeidsgiver private constructor(
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
+
     internal fun låsOpp(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
     }
+
     internal fun bekreftErLåst(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().bekreftErLåst(periode)
     }
+
     internal fun bekreftErÅpen(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
     }

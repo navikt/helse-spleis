@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V294RenameTilBehandlinger: JsonMigration(version = 294) {
+internal class V294RenameTilBehandlinger : JsonMigration(version = 294) {
     override val description = "renamer generasjoner til behandlinger i json"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

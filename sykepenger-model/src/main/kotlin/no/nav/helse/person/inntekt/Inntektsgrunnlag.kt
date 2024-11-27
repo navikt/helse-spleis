@@ -73,8 +73,10 @@ internal class Inntektsgrunnlag private constructor(
     }
 
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
+
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt(skjæringstidspunkt)
+
     // summen av alle inntekter
     private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt(skjæringstidspunkt)
     private val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
@@ -93,12 +95,14 @@ internal class Inntektsgrunnlag private constructor(
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), emptyList(), vurdertInfotrygd) {
         subsumsjonslogg.apply {
             arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
-            logg(`§ 8-10 ledd 2 punktum 1`(
-                erBegrenset = begrensning == ER_6G_BEGRENSET,
-                maksimaltSykepengegrunnlagÅrlig = `6G`.årlig,
-                skjæringstidspunkt = skjæringstidspunkt,
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
-            ))
+            logg(
+                `§ 8-10 ledd 2 punktum 1`(
+                    erBegrenset = begrensning == ER_6G_BEGRENSET,
+                    maksimaltSykepengegrunnlagÅrlig = `6G`.årlig,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
+                )
+            )
             subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, this)
         }
     }
@@ -109,20 +113,24 @@ internal class Inntektsgrunnlag private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ) {
         if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-            subsumsjonslogg.logg(`§ 8-51 ledd 2`(
-                oppfylt = oppfyllerMinsteinntektskrav,
-                skjæringstidspunkt = skjæringstidspunkt,
-                alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                minimumInntektÅrlig = minsteinntekt.årlig
-            ))
+            subsumsjonslogg.logg(
+                `§ 8-51 ledd 2`(
+                    oppfylt = oppfyllerMinsteinntektskrav,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
+                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
+                    minimumInntektÅrlig = minsteinntekt.årlig
+                )
+            )
         else
-            subsumsjonslogg.logg(`§ 8-3 ledd 2 punktum 1`(
-                oppfylt = oppfyllerMinsteinntektskrav,
-                skjæringstidspunkt = skjæringstidspunkt,
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                minimumInntektÅrlig = minsteinntekt.årlig
-            ))
+            subsumsjonslogg.logg(
+                `§ 8-3 ledd 2 punktum 1`(
+                    oppfylt = oppfyllerMinsteinntektskrav,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
+                    minimumInntektÅrlig = minsteinntekt.årlig
+                )
+            )
     }
 
     internal companion object {
@@ -319,7 +327,7 @@ internal class Inntektsgrunnlag private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ): Inntektsgrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = tilkommendeInntekter).apply {
-           subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
+            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
         }
     }
 
@@ -329,13 +337,13 @@ internal class Inntektsgrunnlag private constructor(
         nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt,
         tilkommendeInntekter: List<NyInntektUnderveis> = this.tilkommendeInntekter
     ) = Inntektsgrunnlag(
-            alder = alder,
-            skjæringstidspunkt = nyttSkjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
-            deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
-            tilkommendeInntekter = tilkommendeInntekter,
-            vurdertInfotrygd = vurdertInfotrygd
-        )
+        alder = alder,
+        skjæringstidspunkt = nyttSkjæringstidspunkt,
+        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
+        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
+        tilkommendeInntekter = tilkommendeInntekter,
+        vurdertInfotrygd = vurdertInfotrygd
+    )
 
     internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger,
@@ -365,11 +373,11 @@ internal class Inntektsgrunnlag private constructor(
     override fun equals(other: Any?): Boolean {
         if (other !is Inntektsgrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag
-                 && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
-                 && beregningsgrunnlag == other.beregningsgrunnlag
-                 && begrensning == other.begrensning
-                 && `6G` == other.`6G`
-                 && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
+            && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
+            && beregningsgrunnlag == other.beregningsgrunnlag
+            && begrensning == other.begrensning
+            && `6G` == other.`6G`
+            && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
 
     override fun hashCode(): Int {

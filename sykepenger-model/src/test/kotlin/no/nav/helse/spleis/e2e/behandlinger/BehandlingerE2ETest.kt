@@ -193,6 +193,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere iverksatt vedtak`() {
         a1 {
@@ -217,6 +218,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere flere iverksatte vedtak`() {
         a1 {
@@ -573,7 +575,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT), Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT))
             )
@@ -710,9 +713,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            ))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                )
+            )
 
             nyttVedtak(mars)
             forlengVedtak(april)

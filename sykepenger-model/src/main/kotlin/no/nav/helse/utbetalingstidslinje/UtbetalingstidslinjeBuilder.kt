@@ -31,6 +31,7 @@ internal class VilkårsprøvdSkjæringstidspunkt(
             refusjonsopplysninger = inntekt.refusjonsopplysninger
         )
     }
+
     internal fun forArbeidsgiver(organisasjonsnummer: String): ArbeidsgiverFaktaavklartInntekt? {
         return inntekter[organisasjonsnummer]
     }
@@ -53,13 +54,16 @@ internal class VilkårsprøvdSkjæringstidspunkt(
                 beregningsperiode.forEach { dato ->
                     when (val beløpsdag = nyInntekt.beløpstidslinje[dato]) {
                         is Beløpsdag -> {
-                            addArbeidsdag(dato, Økonomi.ikkeBetalt().inntekt(
+                            addArbeidsdag(
+                                dato, Økonomi.ikkeBetalt().inntekt(
                                 aktuellDagsinntekt = beløpsdag.beløp,
                                 beregningsgrunnlag = INGEN,
                                 `6G` = `6G`,
                                 refusjonsbeløp = INGEN
-                            ))
+                            )
+                            )
                         }
+
                         is UkjentDag -> {
                             addArbeidsdag(dato, Økonomi.ikkeBetalt())
                         }
@@ -107,6 +111,7 @@ internal class ArbeidsgiverFaktaavklartInntekt(
         if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return INGEN
         return fastsattÅrsinntekt
     }
+
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = skjæringstidspunkt == gjelder.start
 
     internal fun medInntektHvisFinnes(
@@ -163,13 +168,15 @@ internal class ArbeidsgiverFaktaavklartInntekt(
                 periode.forEach { dag ->
                     val aktuellDagsinntekt = fastsattÅrsinntekt(dag)
                     if (dag.erHelg()) addFridag(dag, Økonomi.ikkeBetalt())
-                    else addArbeidsdag(dag, Økonomi.ikkeBetalt().inntekt(
+                    else addArbeidsdag(
+                        dag, Økonomi.ikkeBetalt().inntekt(
                         aktuellDagsinntekt = aktuellDagsinntekt,
                         beregningsgrunnlag = beregningsgrunnlag(skjæringstidspunkt),
                         dekningsgrunnlag = INGEN,
                         `6G` = `6G`,
                         refusjonsbeløp = INGEN
-                    ))
+                    )
+                    )
                 }
             }.build()
         }
@@ -201,18 +208,22 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
                     else helg(builder, dag.dato, dag.økonomi)
                 }
+
                 is Dag.Arbeidsgiverdag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
                     else avvistDag(builder, dag.dato, dag.økonomi.ikkeBetalt(), Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
                 }
+
                 is Dag.Sykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
                     else navDag(builder, dag.dato, dag.økonomi)
                 }
+
                 is Dag.SykHelgedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
                     else helg(builder, dag.dato, dag.økonomi)
                 }
+
                 is Dag.SykedagNav -> {
                     if (erAGP(dag.dato)) builder.addArbeidsgiverperiodedagNav(dag.dato, faktaavklarteInntekter.medInntektEllersVarsel(dag.dato, dag.økonomi, regler, refusjonstidslinje))
                     else when (dag.dato.erHelg()) {
@@ -220,12 +231,13 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                         false -> navDag(builder, dag.dato, dag.økonomi)
                     }
                 }
+
                 is Dag.AndreYtelser -> {
                     // andreytelse-dagen er fridag hvis den overlapper med en agp-dag, eller om vedtaksperioden ikke har noen agp -- fordi andre ytelsen spiser opp alt
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, Økonomi.ikkeBetalt())
                     else if (arbeidsgiverperiode.isEmpty() || dag.dato < arbeidsgiverperiode.first().start) fridag(builder, dag.dato)
                     else {
-                        val begrunnelse = when(dag.ytelse) {
+                        val begrunnelse = when (dag.ytelse) {
                             Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
                             Dag.AndreYtelser.AnnenYtelse.Dagpenger -> Begrunnelse.AndreYtelserDagpenger
                             Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
@@ -238,18 +250,22 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
                     }
                 }
+
                 is Dag.Feriedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, Økonomi.ikkeBetalt())
                     else fridag(builder, dag.dato)
                 }
+
                 is Dag.ForeldetSykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
                     else builder.addForeldetDag(dag.dato, faktaavklarteInntekter.medInntektHvisFinnes(dag.dato, dag.økonomi, regler, refusjonstidslinje))
                 }
+
                 is Dag.ArbeidIkkeGjenopptattDag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, Økonomi.ikkeBetalt())
                     else fridag(builder, dag.dato)
                 }
+
                 is Dag.Permisjonsdag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, Økonomi.ikkeBetalt())
                     else fridag(builder, dag.dato)
@@ -262,6 +278,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                     // den andre builderen kaster egentlig exception her, men trenger vi det –– sånn egentlig?
                     fridag(builder, dag.dato)
                 }
+
                 is Dag.UkjentDag -> {
                     // todo: pga strekking av egenmeldingsdager fra søknad så har vi vedtaksperioder med ukjentdager
                     // error("Forventer ikke å finne en ukjentdag i en vedtaksperiode")
@@ -280,18 +297,23 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, refusjonstidslinje))
     }
+
     private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
         builder.addAvvistDag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi, regler, refusjonstidslinje), listOf(begrunnelse))
     }
+
     private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         builder.addHelg(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, refusjonstidslinje))
     }
+
     private fun navDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         builder.addNAVdag(dato, faktaavklarteInntekter.medInntektEllersVarsel(dato, økonomi, regler, refusjonstidslinje))
     }
+
     private fun fridag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         builder.addFridag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, refusjonstidslinje))
     }
+
     private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         builder.addArbeidsdag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, refusjonstidslinje))
     }

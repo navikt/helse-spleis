@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import kotlin.properties.Delegates
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -9,7 +10,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
-import kotlin.properties.Delegates
 
 class Økonomi private constructor(
     val grad: Prosentdel,
@@ -231,6 +231,7 @@ class Økonomi private constructor(
 
     // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre personen mer syk"
     fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.toDouble().toInt())
+
     // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
 
@@ -254,7 +255,7 @@ class Økonomi private constructor(
 
     fun ikkeBetalt() = kopierMed(tilstand = Tilstand.IkkeBetalt)
 
-    internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when(område) {
+    internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when (område) {
         Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.daglig?.toInt()
         Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
     }

@@ -38,29 +38,30 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
+internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ny forespørsel når korrigerende søknad kommer før vi har fått svar på forrige forespørsel -- flytter skjæringstidspunktet`() {
         nyPeriode(2.januar til 31.januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 1.januar))
 
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
-                skjæringstidspunkt = 2.januar,
-                sykmeldingsperioder = listOf(2.januar til 31.januar),
-                egenmeldingsperioder = listOf(1.januar til 1.januar),
-                førsteFraværsdager = listOf(
-                    PersonObserver.FørsteFraværsdag(a1, 2.januar)
-                ),
-                forespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(forslag = null),
-                    PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-                    PersonObserver.Arbeidsgiverperiode
-                )
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+            skjæringstidspunkt = 2.januar,
+            sykmeldingsperioder = listOf(2.januar til 31.januar),
+            egenmeldingsperioder = listOf(1.januar til 1.januar),
+            førsteFraværsdager = listOf(
+                PersonObserver.FørsteFraværsdag(a1, 2.januar)
+            ),
+            forespurteOpplysninger = listOf(
+                PersonObserver.Inntekt(forslag = null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
             )
+        )
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INFOTRYGDHISTORIKK,
             TilstandType.AVVENTER_INNTEKTSMELDING
@@ -92,7 +93,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             )
         )
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INFOTRYGDHISTORIKK,
             TilstandType.AVVENTER_INNTEKTSMELDING
@@ -145,11 +147,14 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     fun `oppdaterte opplysninger for mars når ag2 tetter gapet`() {
         nyPeriode(januar, a1)
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                a1 to INNTEKT,
-                a2 to INNTEKT
-            ), 1.januar),
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 1.januar
+            ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
@@ -266,7 +271,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(mars)
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT/2)))
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT / 2)))
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(

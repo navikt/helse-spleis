@@ -1,7 +1,7 @@
 package no.nav.helse.dto.serialisering
 
-import no.nav.helse.dto.MaksdatobestemmelseDto
 import java.time.LocalDate
+import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.PeriodeDto
 
 data class MaksdatoresultatUtDto(

@@ -305,6 +305,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerSimuleringRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
@@ -329,6 +330,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerHistorikkRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
@@ -352,6 +354,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
@@ -485,7 +488,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun assertRevurderingUtenEndring(vedtakperiodeId: IdInnhenter, orgnummer: String = ORGNUMMER, block:() -> Unit) {
+    private fun assertRevurderingUtenEndring(vedtakperiodeId: IdInnhenter, orgnummer: String = ORGNUMMER, block: () -> Unit) {
         val sykdomsHistorikkElementerFør = inspektør(orgnummer).sykdomshistorikk.elementer()
         val utbetalingerFør = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
         block()

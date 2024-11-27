@@ -61,7 +61,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
-internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
+internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
     @Test
     fun `Stuckiness med helg involvert - da gjenbruker vi tidsnære opplysninger`() {
@@ -274,9 +274,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             tilGodkjenning(10.januar til 31.januar, beregnetInntekt = 20000.månedlig)
             val vilkårsgrunnlagFørEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
             nullstillTilstandsendringer()
-            håndterOverstyrTidslinje(listOf(
-                ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
-            ))
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
+                )
+            )
 
             assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
 
@@ -289,7 +291,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             val vilkårsgrunnlagEtterEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
 
             assertTidsnærInntektsopplysning(a1, vilkårsgrunnlagFørEndring.inspektør.inntektsgrunnlag, vilkårsgrunnlagEtterEndring.inspektør.inntektsgrunnlag)
-            assertTilstander(1.vedtaksperiode,
+            assertTilstander(
+                1.vedtaksperiode,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
@@ -389,10 +392,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             nullstillTilstandsendringer()
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje(listOf(
-                ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
-                ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
-            ))
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+                    ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+                )
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -424,10 +429,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
             nullstillTilstandsendringer()
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
-            håndterOverstyrTidslinje(listOf(
-                ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
-                ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
-            ))
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+                    ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+                )
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -494,7 +501,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,
+            assertTilstander(
+                1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET
             )
@@ -884,6 +892,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertIngenVarsel(RV_IV_7)
         }
     }
+
     @Test
     fun `gjenbruker saksbehandlerinntekt`() {
         a1 {
@@ -896,9 +905,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
 
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))
-            ))
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -927,6 +938,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(hendelseIdFør, hendelseIdEtter)
         }
     }
+
     @Test
     fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() {
         a1 {
@@ -1038,16 +1050,19 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(inntektsmeldingId, inspektør.skjønnsmessigFastsattOverstyrtHendelseId(1.februar))
         }
     }
+
     @Test
     fun `ikke varsel når det er hull i agp`() {
         a1 {
             håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
             håndterSøknad(Sykdom(21.januar, 8.februar, 100.prosent))
             håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent))
-            håndterInntektsmelding(listOf(
-                17.januar til 20.januar,
-                2.februar til 13.februar
-            ))
+            håndterInntektsmelding(
+                listOf(
+                    17.januar til 20.januar,
+                    2.februar til 13.februar
+                )
+            )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)

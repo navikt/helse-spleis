@@ -200,7 +200,7 @@ internal val Int.PROBLEM get() = PROBLEM("Problemdag", INGEN)
 internal fun Int.PROBLEM(melding: String, kilde: Hendelseskilde) = Sykdomstidslinje(
     dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
         .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.FORELDET
     get() = Sykdomstidslinje(

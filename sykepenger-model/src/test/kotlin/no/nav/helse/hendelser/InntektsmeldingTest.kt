@@ -326,8 +326,8 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-       dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
-       assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -505,7 +505,7 @@ internal class InntektsmeldingTest {
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+        inntektsmelding.valider(object : Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, aktivitetslogg)
@@ -532,7 +532,7 @@ internal class InntektsmeldingTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             avsenderSystem = avsenderSystem
         )
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
+        inntektsmelding.valider(object : Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.ForenkletVedtaksperiode({ null }, { LocalDate.EPOCH }, { erForlengelse })
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, aktivitetslogg)

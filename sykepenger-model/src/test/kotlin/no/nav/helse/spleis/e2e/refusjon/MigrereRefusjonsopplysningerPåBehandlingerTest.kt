@@ -47,15 +47,17 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
 
     private fun setup1og2() {
         håndterSøknad(januar)
-        tillatUgyldigSituasjon {  håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
-            beregnetInntekt = INNTEKT,
-            id = meldingsreferanseId1,
-            mottatt = mottatt1
-        ) }
-        tillatUgyldigSituasjon {  håndterVilkårsgrunnlag(1.vedtaksperiode) }
-        tillatUgyldigSituasjon {  håndterYtelser(1.vedtaksperiode) }
+        tillatUgyldigSituasjon {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
+                beregnetInntekt = INNTEKT,
+                id = meldingsreferanseId1,
+                mottatt = mottatt1
+            )
+        }
+        tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
+        tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
     }
 
     @Test
@@ -80,30 +82,34 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     private fun setup3og4() {
         a1 {
             håndterSøknad(januar)
-            tillatUgyldigSituasjon { håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
-                beregnetInntekt = INNTEKT,
-                id = meldingsreferanseId1,
-                mottatt = mottatt1
-            ) }
+            tillatUgyldigSituasjon {
+                håndterInntektsmelding(
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
+                    beregnetInntekt = INNTEKT,
+                    id = meldingsreferanseId1,
+                    mottatt = mottatt1
+                )
+            }
             tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
             tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
             tillatUgyldigSituasjon { håndterSimulering(1.vedtaksperiode) }
-            tillatUgyldigSituasjon { håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = INNTEKT,
-                        forklaring = "foo",
-                        subsumsjon = null,
-                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.25))
-                    )
-                ),
-                hendelseId = meldingsreferanseId2,
-                tidsstempel = mottatt2
-            ) }
+            tillatUgyldigSituasjon {
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer = listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a1,
+                            inntekt = INNTEKT,
+                            forklaring = "foo",
+                            subsumsjon = null,
+                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.25))
+                        )
+                    ),
+                    hendelseId = meldingsreferanseId2,
+                    tidsstempel = mottatt2
+                )
+            }
             tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
         }
     }
@@ -278,22 +284,24 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
             tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(3.vedtaksperiode) }
             tillatUgyldigSituasjon { håndterUtbetalt() }
 
-            tillatUgyldigSituasjon { håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = INNTEKT,
-                        forklaring = "foo",
-                        subsumsjon = null,
-                        refusjonsopplysninger = listOf(
-                            Triple(1.januar, 31.januar, INNTEKT * 1.25),
-                            Triple(1.februar, 28.februar, INNTEKT * 1.5),
-                            Triple(1.mars, null, INNTEKT * 1.75)
+            tillatUgyldigSituasjon {
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer = listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a1,
+                            inntekt = INNTEKT,
+                            forklaring = "foo",
+                            subsumsjon = null,
+                            refusjonsopplysninger = listOf(
+                                Triple(1.januar, 31.januar, INNTEKT * 1.25),
+                                Triple(1.februar, 28.februar, INNTEKT * 1.5),
+                                Triple(1.mars, null, INNTEKT * 1.75)
+                            )
                         )
-                    )
-                ),
-            ) }
+                    ),
+                )
+            }
             tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
@@ -308,8 +316,8 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
             setup11og12()
             forrigeRefusjonstidslinje =
                 inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje +
-                inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
-                inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
+                    inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
+                    inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
         }
     }
 
@@ -319,16 +327,16 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
         a1 {
             setup11og12()
             migrerRefusjonsopplysningerPåBehandlinger()
-            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT*1.25)
-            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT*1.5)
-            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT*1.75)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT * 1.25)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT * 1.5)
+            forrigeRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT * 1.75)
             val faktiskRefusjonstidslinje =
                 inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje +
-                inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
-                inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
-            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT*1.25)
-            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT*1.5)
-            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT*1.75)
+                    inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje +
+                    inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje
+            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT * 1.25)
+            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT * 1.5)
+            faktiskRefusjonstidslinje.assertBeløpstidslinje(1.mars til 31.mars to INNTEKT * 1.75)
         }
     }
 
@@ -389,8 +397,8 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     private fun Beløpstidslinje.assertBeløpstidslinje(vararg forventetBeløp: Pair<Periode, Inntekt>) {
         forventetBeløp.forEach { (periode, inntekt) ->
             val subset = subset(periode)
-            assertEquals(periode, subset.perioderMedBeløp.singleOrNull()) {"Vi har ikke beløp i hele $periode"}
-            assertTrue(subset.all { it.beløp == inntekt }) {"Vi forventet at inntekten skulle være ${inntekt.dagligInt} i $periode, men var: ${subset.map { it.beløp.dagligInt }}"}
+            assertEquals(periode, subset.perioderMedBeløp.singleOrNull()) { "Vi har ikke beløp i hele $periode" }
+            assertTrue(subset.all { it.beløp == inntekt }) { "Vi forventet at inntekten skulle være ${inntekt.dagligInt} i $periode, men var: ${subset.map { it.beløp.dagligInt }}" }
         }
     }
 }

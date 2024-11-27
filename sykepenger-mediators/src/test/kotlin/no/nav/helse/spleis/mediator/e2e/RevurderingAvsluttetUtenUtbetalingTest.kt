@@ -86,7 +86,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         logger.detachAndStopAllAppenders()
     }
 
-    private class LogCollector private constructor(private val messages: MutableList<ILoggingEvent>): AppenderBase<ILoggingEvent>(), Iterable<ILoggingEvent> by (messages) {
+    private class LogCollector private constructor(private val messages: MutableList<ILoggingEvent>) : AppenderBase<ILoggingEvent>(), Iterable<ILoggingEvent> by (messages) {
         constructor() : this(mutableListOf())
 
         override fun append(eventObject: ILoggingEvent) {

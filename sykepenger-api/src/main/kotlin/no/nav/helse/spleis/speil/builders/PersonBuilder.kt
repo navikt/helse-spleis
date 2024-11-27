@@ -20,8 +20,9 @@ internal class PersonBuilder(
             }
             .map { it.build(alder, vilkårsgrunnlagHistorikk) }
             .let { arbeidsgivere ->
-                arbeidsgivere.map { it
-                    .medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
+                arbeidsgivere.map {
+                    it
+                        .medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
                 }
             }
             .filterNot { it.erTom(vilkårsgrunnlagHistorikk) }

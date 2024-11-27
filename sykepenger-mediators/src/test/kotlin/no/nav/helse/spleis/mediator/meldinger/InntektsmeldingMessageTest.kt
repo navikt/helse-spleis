@@ -17,7 +17,7 @@ internal class InntektsmeldingMessageTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val inntektsdato = LocalDate.EPOCH
         val førsteFraværsdag = LocalDate.EPOCH.plusDays(1)
-        assertEquals(LPS(førsteFraværsdag),  objectMapper.nullNode().tilAvsendersystem(null, null, førsteFraværsdag))
+        assertEquals(LPS(førsteFraværsdag), objectMapper.nullNode().tilAvsendersystem(null, null, førsteFraværsdag))
         assertEquals(LPS(førsteFraværsdag), objectMapper.missingNode().tilAvsendersystem(null, null, førsteFraværsdag))
         assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(mangler).tilAvsendersystem(null, null, førsteFraværsdag))
         assertEquals(LPS(førsteFraværsdag), objectMapper.readTree(sattTilNull).tilAvsendersystem(null, null, førsteFraværsdag))

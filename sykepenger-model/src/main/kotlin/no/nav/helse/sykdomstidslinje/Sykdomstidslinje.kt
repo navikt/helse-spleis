@@ -111,6 +111,7 @@ class Sykdomstidslinje private constructor(
     internal fun bekreftErLåst(periode: Periode) {
         check(låstePerioder.any { it == periode }) { "$periode er ikke låst" }
     }
+
     internal fun bekreftErÅpen(periode: Periode) {
         check(låstePerioder.none { it.overlapperMed(periode) }) { "hele eller deler av $periode er låst" }
     }
@@ -140,6 +141,7 @@ class Sykdomstidslinje private constructor(
         is Arbeidsdag,
         is FriskHelgedag,
         is ArbeidIkkeGjenopptattDag -> true
+
         else -> false
     }
 
@@ -199,6 +201,7 @@ class Sykdomstidslinje private constructor(
 
         internal fun arbeidsdager(periode: Periode, kilde: Hendelseskilde) =
             Sykdomstidslinje(periode.associateWith { if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) })
+
         internal fun ghostdager(periode: Periode) =
             Sykdomstidslinje(periode.associateWith { if (it.erHelg()) UkjentDag(it, INGEN) else UkjentDag(it, INGEN) })
 

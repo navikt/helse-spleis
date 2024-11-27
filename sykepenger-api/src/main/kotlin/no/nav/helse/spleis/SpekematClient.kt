@@ -24,6 +24,7 @@ class SpekematClient(
     baseUrl: String? = null
 ) {
     private val baseUrl = baseUrl ?: "http://spekemat"
+
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -88,6 +89,7 @@ class SpekematClient(
             .build()
     }
 }
+
 class SpekematClientException(override val message: String, override val cause: Throwable? = null) : RuntimeException()
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -96,10 +98,12 @@ private data class YrkesaktivitetDto(
     val yrkesaktivitetidentifikator: String,
     val rader: List<PølseradDto>
 )
+
 private data class PølseradDto(
     val pølser: List<PølseDto>,
     val kildeTilRad: UUID
 )
+
 private data class PølseDto(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
@@ -107,4 +111,5 @@ private data class PølseDto(
     // tingen som gjorde at behandlingen ble opprettet
     val kilde: UUID
 )
+
 private enum class Pølsestatus { ÅPEN, LUKKET, FORKASTET }

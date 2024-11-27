@@ -50,7 +50,7 @@ import kotlin.collections.toSet
 import kotlin.error
 import kotlin.let
 
-internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
+internal class UgyldigeSituasjonerObservatør(private val person: Person) : PersonObserver {
 
     private val arbeidsgivereMap = mutableMapOf<String, Arbeidsgiver>()
     private val gjeldendeTilstander = mutableMapOf<UUID, TilstandType>()
@@ -182,7 +182,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun sjekk(block: () -> Unit) {
-        try { block() } catch (throwable: Throwable) {
+        try {
+            block()
+        } catch (throwable: Throwable) {
             if (throwable is UgyldigSituasjonException) throw throwable
             throw UgyldigSituasjonException(throwable)
         }
@@ -250,13 +252,15 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                         val førsteIkkeUkjenteDagErSykedagNav = it.sykdomstidslinje.inspektør.dager[it.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag] is Dag.SykedagNav
                         if (førsteIkkeUkjenteDagErSykedagNav) return
 
-                        error("""
+                        error(
+                            """
                 - Nå har det skjedd noe sprøtt.. sykdomstidslinjen starter med UkjentDag.. er du helt sikker på at det er så lurt?
                 Sykdomstidslinje: ${it.sykdomstidslinje.toShortString()}
                 Periode på sykdomstidslinje: ${it.sykdomstidslinje.periode()}
                 FørsteIkkeUkjenteDag=${it.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}
                 Periode på endring: ${it.periode}
-            """)
+            """
+                        )
                     }
                 }
             }
@@ -266,7 +270,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     private fun validerRefusjonsopplysningerPåBehandlinger() {
         arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
             arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach behandling@ { behandling ->
+                vedtaksperiode.behandlinger.behandlinger.forEach behandling@{ behandling ->
                     behandling.endringer.last().let { endring ->
                         if (endring.refusjonstidslinje.isEmpty()) {
                             if (behandling.tilstand == AVSLUTTET_UTEN_VEDTAK) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
@@ -300,15 +304,24 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                 }
                 .forEach { (tilstand, sisteBehandlinger) ->
                     when (tilstand) {
-                        TilstandType.TIL_INFOTRYGD -> sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let { check(it.isEmpty()) {
-                            "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
+                        TilstandType.TIL_INFOTRYGD -> sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let {
+                            check(it.isEmpty()) {
+                                "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                            }
                         }
-                        TilstandType.AVSLUTTET_UTEN_UTBETALING -> sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let { check(it.isEmpty()) {
-                            "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
+
+                        TilstandType.AVSLUTTET_UTEN_UTBETALING -> sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let {
+                            check(it.isEmpty()) {
+                                "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                            }
                         }
-                        TilstandType.AVSLUTTET -> sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let { check(it.isEmpty()) {
-                            "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
+
+                        TilstandType.AVSLUTTET -> sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let {
+                            check(it.isEmpty()) {
+                                "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                            }
                         }
+
                         else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
                     }
                 }
@@ -331,10 +344,22 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     private class Inntektsmeldinger {
         private val signaler = mutableMapOf<UUID, MutableList<Signal>>()
 
-        fun håndtert(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.HÅNDTERT) }
-        fun ikkeHåndtert(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.IKKE_HÅNDTERT) }
-        fun førSøknad(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.FØR_SØKNAD) }
-        fun korrigertInntekt(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.KORRIGERT_INNTEKT) }
+        fun håndtert(inntektsmeldingId: UUID) {
+            signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.HÅNDTERT)
+        }
+
+        fun ikkeHåndtert(inntektsmeldingId: UUID) {
+            signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.IKKE_HÅNDTERT)
+        }
+
+        fun førSøknad(inntektsmeldingId: UUID) {
+            signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.FØR_SØKNAD)
+        }
+
+        fun korrigertInntekt(inntektsmeldingId: UUID) {
+            signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.KORRIGERT_INNTEKT)
+        }
+
         fun behandlingUtført() = signaler.clear()
 
         fun bekreftEntydighåndtering() {
@@ -365,7 +390,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     internal companion object {
-        internal class UgyldigSituasjonException(cause: Throwable): Throwable(cause.message, cause)
+        internal class UgyldigSituasjonException(cause: Throwable) : Throwable(cause.message, cause)
 
         internal fun assertUgyldigSituasjon(forventetUgyldigSituasjon: String, block: () -> Unit) {
             val ugyldigSituasjon = assertThrows<UgyldigSituasjonException> { block() }.message

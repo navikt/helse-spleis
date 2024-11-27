@@ -144,6 +144,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
     }
+
     @Test
     fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() = a1 {
         nyttVedtak(januar)

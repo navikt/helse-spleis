@@ -138,14 +138,16 @@ internal class Refusjonshistorikk {
                     val aktuelle = refusjoner.filter { it.startskuddet >= skjæringstidspunkt }
                     val første = aktuelle.minByOrNull { it.startskuddet }
                     if (første != null && første.startskuddet != skjæringstidspunkt) {
-                        refusjonsopplysningBuilder.leggTil(Refusjonsopplysning(
-                            meldingsreferanseId = første.meldingsreferanseId,
-                            fom = skjæringstidspunkt,
-                            tom = første.startskuddet.forrigeDag,
-                            beløp = første.beløp ?: INGEN,
-                            avsender = Avsender.ARBEIDSGIVER,
-                            tidsstempel = første.tidsstempel
-                        ), første.tidsstempel)
+                        refusjonsopplysningBuilder.leggTil(
+                            Refusjonsopplysning(
+                                meldingsreferanseId = første.meldingsreferanseId,
+                                fom = skjæringstidspunkt,
+                                tom = første.startskuddet.forrigeDag,
+                                beløp = første.beløp ?: INGEN,
+                                avsender = Avsender.ARBEIDSGIVER,
+                                tidsstempel = første.tidsstempel
+                            ), første.tidsstempel
+                        )
                     }
                     aktuelle.leggTilRefusjonsopplysninger(refusjonsopplysningBuilder)
                     return refusjonsopplysningBuilder.build()
@@ -183,14 +185,16 @@ internal class Refusjonshistorikk {
                         }
 
                     if (sisteRefusjonsdag == null) return
-                    refusjonsopplysningerBuilder.leggTil(Refusjonsopplysning(
-                        meldingsreferanseId = meldingsreferanseId,
-                        fom = sisteRefusjonsdag.nesteDag,
-                        tom = null,
-                        beløp = INGEN,
-                        avsender = Avsender.ARBEIDSGIVER,
-                        tidsstempel = tidsstempel
-                    ), tidsstempel)
+                    refusjonsopplysningerBuilder.leggTil(
+                        Refusjonsopplysning(
+                            meldingsreferanseId = meldingsreferanseId,
+                            fom = sisteRefusjonsdag.nesteDag,
+                            tom = null,
+                            beløp = INGEN,
+                            avsender = Avsender.ARBEIDSGIVER,
+                            tidsstempel = tidsstempel
+                        ), tidsstempel
+                    )
                 }
 
                 internal fun Refusjonshistorikk.beløpstidslinje(søkevindu: Periode): Beløpstidslinje {
@@ -257,6 +261,7 @@ data class RefusjonView(
     val endringerIRefusjon: List<EndringIRefusjonView>,
     val tidsstempel: LocalDateTime
 )
+
 data class EndringIRefusjonView(
     val beløp: Inntekt,
     val endringsdato: LocalDate

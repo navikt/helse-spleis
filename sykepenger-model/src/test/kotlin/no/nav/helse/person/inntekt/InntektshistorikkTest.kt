@@ -43,11 +43,13 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
+        assertEquals(
+            INNTEKT, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
             null
-        )?.inspektør?.beløp)
+        )?.inspektør?.beløp
+        )
     }
 
     @Test
@@ -88,7 +90,7 @@ internal class InntektshistorikkTest {
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
     ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
+        it.valider(object : Inntektsmelding.Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
             override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
         }, Aktivitetslogg())

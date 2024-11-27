@@ -137,8 +137,9 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
                     arbeidsstedOrgnummer = "4",
                     opplysningspliktigOrgnummer = "5",
                     harJobbet = true
-                    )
-            ))
+                )
+            )
+        )
 
         assertNoErrors(søknad)
     }
@@ -200,6 +201,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
     }
+
     private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
     private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
     private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato")

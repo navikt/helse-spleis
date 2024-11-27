@@ -35,10 +35,12 @@ internal class RefusjonTest {
 
     @Test
     fun `refusjonsbeløp med endringer i refusjon med opphørsdato`() {
-        val refusjon = refusjon(sisteRefusjonsdag = 6.januar, endringerIRefusjon = listOf(
+        val refusjon = refusjon(
+            sisteRefusjonsdag = 6.januar, endringerIRefusjon = listOf(
             Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp = 28000.månedlig, endringsdato = 3.januar),
             Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp = 20000.månedlig, endringsdato = 5.januar)
-        ))
+        )
+        )
 
         assertEquals(31000.månedlig, refusjon.beløp(2.januar))
         assertEquals(28000.månedlig, refusjon.beløp(3.januar))

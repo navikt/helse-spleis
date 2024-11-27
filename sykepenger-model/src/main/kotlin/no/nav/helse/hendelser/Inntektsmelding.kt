@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -33,7 +34,6 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
-import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -60,16 +60,17 @@ class Inntektsmelding(
     )
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
-    private val dager get() = DagerFraInntektsmelding(
-        arbeidsgiverperioder = this.arbeidsgiverperioder,
-        førsteFraværsdag = type.førsteFraværsdagForHåndteringAvDager(this),
-        mottatt = metadata.registrert,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        avsendersystem = avsendersystem,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        hendelse = this
-    )
+    private val dager
+        get() = DagerFraInntektsmelding(
+            arbeidsgiverperioder = this.arbeidsgiverperioder,
+            førsteFraværsdag = type.førsteFraværsdagForHåndteringAvDager(this),
+            mottatt = metadata.registrert,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            avsendersystem = avsendersystem,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            hendelse = this
+        )
     private var håndtertInntekt = false
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
@@ -88,15 +89,16 @@ class Inntektsmelding(
 
     internal fun skjæringstidspunkt(person: Person) = type.skjæringstidspunkt(this, person)
 
-    private val refusjonsElement get() = Refusjonshistorikk.Refusjon(
-        meldingsreferanseId = metadata.meldingsreferanseId,
-        førsteFraværsdag = type.refusjonsdato(this),
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beløp = refusjon.beløp,
-        sisteRefusjonsdag = refusjon.opphørsdato,
-        endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
-        tidsstempel = metadata.registrert
-    )
+    private val refusjonsElement
+        get() = Refusjonshistorikk.Refusjon(
+            meldingsreferanseId = metadata.meldingsreferanseId,
+            førsteFraværsdag = type.refusjonsdato(this),
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beløp = refusjon.beløp,
+            sisteRefusjonsdag = refusjon.opphørsdato,
+            endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
+            tidsstempel = metadata.registrert
+        )
 
     internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(type.refusjonsdato(this), arbeidsgiverperioder, metadata.meldingsreferanseId, metadata.innsendt))
 
@@ -128,9 +130,9 @@ class Inntektsmelding(
     }
 
     sealed interface Avsendersystem {
-        data class Altinn(internal val førsteFraværsdag: LocalDate?): Avsendersystem
-        data class LPS(internal val førsteFraværsdag: LocalDate?): Avsendersystem
-        data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate, internal val forespurt: Boolean): Avsendersystem
+        data class Altinn(internal val førsteFraværsdag: LocalDate?) : Avsendersystem
+        data class LPS(internal val førsteFraværsdag: LocalDate?) : Avsendersystem
+        data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate, internal val forespurt: Boolean) : Avsendersystem
     }
 
     class Refusjon(
@@ -153,7 +155,7 @@ class Inntektsmelding(
                 .filter { it.endringsdato >= startskuddet }
                 .filter { it.endringsdato <= (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
 
-            check(alleRefusjonsopplysninger.isNotEmpty()) {"Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?"}
+            check(alleRefusjonsopplysninger.isNotEmpty()) { "Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?" }
 
             val sisteBit = Beløpstidslinje.fra(alleRefusjonsopplysninger.last().endringsdato.somPeriode(), alleRefusjonsopplysninger.last().beløp, kilde)
             val refusjonstidslinje = alleRefusjonsopplysninger
@@ -205,6 +207,7 @@ class Inntektsmelding(
         }
         person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
+
     private fun håndtertNå() = håndtertInntekt
     internal fun subsumsjonskontekst() = Subsumsjonskontekst(
         type = KontekstType.Inntektsmelding,
@@ -220,7 +223,7 @@ class Inntektsmelding(
         fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding)
 
         data class ForenkletVedtaksperiode(val førsteFraværsdag: () -> LocalDate?, val skjæringstidspunkt: () -> LocalDate, val erForlengelse: () -> Boolean)
-        data class DefaultValideringsgrunnlag(private val vedtaksperioder: List<Vedtaksperiode>, private val person: Person): Valideringsgrunnlag {
+        data class DefaultValideringsgrunnlag(private val vedtaksperioder: List<Vedtaksperiode>, private val person: Person) : Valideringsgrunnlag {
             override fun vedtaksperiode(vedtaksperiodeId: UUID): ForenkletVedtaksperiode? {
                 val vedtaksperiode = vedtaksperioder.finn(vedtaksperiodeId) ?: return null
                 return ForenkletVedtaksperiode(vedtaksperiode::førsteFraværsdag, vedtaksperiode::skjæringstidspunkt, vedtaksperiode::erForlengelse)
@@ -273,36 +276,41 @@ class Inntektsmelding(
         fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person): LocalDate
     }
 
-    private data class KlassiskInntektsmelding(private val førsteFraværsdag: LocalDate?): Type {
+    private data class KlassiskInntektsmelding(private val førsteFraværsdag: LocalDate?) : Type {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
             if (inntektsmelding.arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) error("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
             return true
         }
+
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean {
             if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
             return inntektsdato(inntektsmelding) in sykdomstidslinjeperiode
         }
+
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             if (førsteFraværsdag != null && (inntektsmelding.arbeidsgiverperioder.isEmpty() || førsteFraværsdag > inntektsmelding.arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
             return inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
         }
+
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdato(inntektsmelding) }
         override fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate {
             return if (førsteFraværsdag == null) inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
             else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
         }
+
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = førsteFraværsdag
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) =
             person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato(inntektsmelding).somPeriode())
     }
 
-    private data object ForkastetPortalinntektsmelding: Type {
+    private data object ForkastetPortalinntektsmelding : Type {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: () -> Unit): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
             aktivitetslogg.info("Inntektsmelding ikke håndtert")
             inntektsmeldingIkkeHåndtert()
             return false
         }
+
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun inntektsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
@@ -324,6 +332,7 @@ class Inntektsmelding(
             }
             return skjæringstidspunkt
         }
+
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = minimalVedtaksperiode.førsteFraværsdag() ?: minimalVedtaksperiode.skjæringstidspunkt()
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = minimalVedtaksperiode.førsteFraværsdag()

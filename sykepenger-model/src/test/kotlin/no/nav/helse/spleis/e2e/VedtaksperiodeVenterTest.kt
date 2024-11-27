@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class VedtaksperiodeVenterTest: AbstractDslTest() {
+internal class VedtaksperiodeVenterTest : AbstractDslTest() {
 
     @Test
     fun `Korrigerte søknader kommer i vedtaksperiode_venter`() {
@@ -74,7 +74,8 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(
                     Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
@@ -129,37 +130,43 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Venter på tidligere periode som ikke har fått inntektsmelding`(){
+    fun `Venter på tidligere periode som ikke har fått inntektsmelding`() {
         a1 {
             val søknadIdJanuar = UUID.randomUUID()
             nyPeriode(januar, søknadId = søknadIdJanuar)
 
-            assertVenterPå(listOf(
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING
-            ))
+            assertVenterPå(
+                listOf(
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING
+                )
+            )
             val søknadIdMars = UUID.randomUUID()
             nyPeriode(mars, søknadId = søknadIdMars)
-            assertVenterPå(listOf(
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                2.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                2.vedtaksperiode to Hva.INNTEKTSMELDING
-            ))
+            assertVenterPå(
+                listOf(
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    2.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    2.vedtaksperiode to Hva.INNTEKTSMELDING
+                )
+            )
 
             val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
-            assertVenterPå(listOf(
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                2.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                2.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                2.vedtaksperiode to Hva.INNTEKTSMELDING
-            ))
+            assertVenterPå(
+                listOf(
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    2.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    2.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    2.vedtaksperiode to Hva.INNTEKTSMELDING
+                )
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
@@ -199,7 +206,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                     )
                 )
             )
-            assertEquals(forventetVedtaksperiode1, observatør.vedtaksperiodeVenter.last{
+            assertEquals(forventetVedtaksperiode1, observatør.vedtaksperiodeVenter.last {
                 it.vedtaksperiodeId == 1.vedtaksperiode
             })
             assertEquals(forventetVedtaksperiode2, observatør.vedtaksperiodeVenter.last {
@@ -209,25 +216,29 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Venter på søknad på annen arbeidsgiver`(){
+    fun `Venter på søknad på annen arbeidsgiver`() {
         a1 {
             håndterSykmelding(januar)
         }
         a2 {
             val søknadId = UUID.randomUUID()
             nyPeriode(januar, søknadId = søknadId)
-            assertVenterPå(listOf(
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING
-            ))
+            assertVenterPå(
+                listOf(
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING
+                )
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertVenterPå(listOf(
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                1.vedtaksperiode to Hva.SØKNAD
-            ))
+            assertVenterPå(
+                listOf(
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                    1.vedtaksperiode to Hva.SØKNAD
+                )
+            )
 
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
                 organisasjonsnummer = a2,

@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -24,10 +24,12 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
         validerSykepengehistorikk(message)
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {

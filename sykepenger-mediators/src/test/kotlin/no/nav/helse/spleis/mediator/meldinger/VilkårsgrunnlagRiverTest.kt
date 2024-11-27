@@ -33,14 +33,16 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 tilstand = TilstandType.START,
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
-                    måned = YearMonth.of(2017, 12),
-                    inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER))
-                )),
+                        måned = YearMonth.of(2017, 12),
+                        inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER))
+                    )
+                ),
                 inntekterForOpptjeningsvurdering = listOf(
                     TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
-                    måned = YearMonth.of(2017, 12),
-                    inntekter = listOf(TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER))
-                )),
+                        måned = YearMonth.of(2017, 12),
+                        inntekter = listOf(TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER))
+                    )
+                ),
                 arbeidsforhold = listOf(
                     TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
                     TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.FRILANSER)
@@ -59,17 +61,21 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 tilstand = TilstandType.START,
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
-                    måned = YearMonth.of(2017, 12),
-                    inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322"))
-                )),
+                        måned = YearMonth.of(2017, 12),
+                        inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322"))
+                    )
+                ),
                 inntekterForOpptjeningsvurdering = listOf(
                     TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
                         måned = YearMonth.of(2017, 12),
                         inntekter = listOf(
-                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
+                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
+                                32000.0,
                                 ORGNUMMER
-                            )),
-                    )),
+                            )
+                        ),
+                    )
+                ),
                 arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             )

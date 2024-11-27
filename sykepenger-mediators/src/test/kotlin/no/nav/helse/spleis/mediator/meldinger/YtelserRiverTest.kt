@@ -28,12 +28,12 @@ internal class YtelserRiverTest : RiverTest() {
     }
 
     @Test
-    fun `Ignorerer løsning uten pleiepenger`(){
+    fun `Ignorerer løsning uten pleiepenger`() {
         assertIgnored(utenPleiepenger)
     }
 
     @Test
-    fun `Ignorerer løsning uten omsorgspenger`(){
+    fun `Ignorerer løsning uten omsorgspenger`() {
         assertIgnored(utenOmsorgspenger)
     }
 

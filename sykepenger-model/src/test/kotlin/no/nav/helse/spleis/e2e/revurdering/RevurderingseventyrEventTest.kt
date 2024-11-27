@@ -48,6 +48,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this avTypeEndring "REVURDERING"
         }
     }
+
     @Test
     fun `happy case overstyring`() {
         tilGodkjenning(januar, a1)
@@ -68,16 +69,16 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         håndterSkjønnsmessigFastsettelse(
             1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = ORGNUMMER,
-                    inntekt = 60000.månedlig,
-                    forklaring = "",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, 31000.månedlig)
-                    )
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = ORGNUMMER,
+                inntekt = 60000.månedlig,
+                forklaring = "",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(
+                    Triple(1.januar, null, 31000.månedlig)
                 )
             )
+        )
         )
         revurderingIgangsattEvent {
             this bleForårsaketAv "SKJØNNSMESSIG_FASTSETTELSE"
@@ -221,12 +222,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this medførteRevurderingAv (januar og februar og mars og april)
             assertEquals(
                 listOf(
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING"),
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING")
-                    )
-                , this.berørtePerioder
+                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
+                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
+                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING"),
+                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING")
+                ), this.berørtePerioder
             )
         }
     }
@@ -252,7 +252,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     }
 
     private fun revurderingIgangsattEvent(nr: Int = 0, assertBlock: PersonObserver.OverstyringIgangsatt.() -> Unit) {
-       val revurderingIgangsattEvent = observatør.overstyringIgangsatt[nr]
+        val revurderingIgangsattEvent = observatør.overstyringIgangsatt[nr]
         revurderingIgangsattEvent.run(assertBlock)
     }
 

@@ -33,10 +33,12 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
 
     init {
         packet["inntektsmeldinger"].forEach { inntektsmelding ->
-            inntektsmeldinger.add(inntektsmeldingReplay(
-                inntektsmelding.path("internDokumentId").asText().toUUID(),
-                inntektsmelding.path("inntektsmelding")
-            ))
+            inntektsmeldinger.add(
+                inntektsmeldingReplay(
+                    inntektsmelding.path("internDokumentId").asText().toUUID(),
+                    inntektsmelding.path("inntektsmelding")
+                )
+            )
         }
     }
 

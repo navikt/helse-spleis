@@ -58,8 +58,8 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin="java-library")
-    apply(plugin="java-test-fixtures")
+    apply(plugin = "java-library")
+    apply(plugin = "java-test-fixtures")
 
     tasks {
         withType<Test> {

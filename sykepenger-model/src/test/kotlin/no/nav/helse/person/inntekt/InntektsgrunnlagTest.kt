@@ -60,13 +60,16 @@ import kotlin.properties.Delegates
 
 internal class InntektsgrunnlagTest {
     private companion object {
-        private val fødseldato67år =  1.februar(1954)
+        private val fødseldato67år = 1.februar(1954)
     }
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+
+    private val jurist = BehandlingSubsumsjonslogg(
+        EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     @Test
     fun equality() {
@@ -241,6 +244,7 @@ internal class InntektsgrunnlagTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(observer.`§ 8-51 ledd 2`)
     }
+
     @Test
     fun `mindre enn 2G, og skjæringstidspunkt er etter virkningen av minsteinntekt`() {
         val alder = fødseldato67år.alder
@@ -272,7 +276,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (inntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt,  jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(0, resultat.inspektør.avvistDagTeller)
     }
 
@@ -285,7 +289,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (halvG - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(20, resultat.inspektør.avvistDagTeller)
         assertTrue((1.februar(2021) til 1.februar(2021))
             .filterNot { it.erHelg() }
@@ -300,6 +304,7 @@ internal class InntektsgrunnlagTest {
             }
         )
     }
+
     @Test
     fun `begrunnelse etter 67 år`() {
         val alder = fødseldato67år.alder
@@ -309,7 +314,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (`2G` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(27.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(19, resultat.inspektør.avvistDagTeller)
         assertTrue((2.februar(2021) til 28.februar(2021))
             .filterNot { it.erHelg() }
@@ -336,6 +341,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = `6G`.sykepengegrunnlag
         assertEquals(`6G`, sykepengegrunnlag.inspektør.sykepengegrunnlag)
     }
+
     @Test
     fun `sykepengegrunnlaget skal ikke rundes av - under 6`() {
         val daglig = 255.5.daglig
@@ -388,6 +394,7 @@ internal class InntektsgrunnlagTest {
 
         assertNotNull(overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
         val skjæringstidspunkt = 1.januar
@@ -413,6 +420,7 @@ internal class InntektsgrunnlagTest {
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
         val skjæringstidspunkt = 1.januar
@@ -441,6 +449,7 @@ internal class InntektsgrunnlagTest {
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1Refusjonsopplysninger)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
         val skjæringstidspunkt = 1.januar
@@ -468,6 +477,7 @@ internal class InntektsgrunnlagTest {
 
         assertNotNull(overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {
         val skjæringstidspunkt = 1.januar
@@ -505,7 +515,7 @@ internal class InntektsgrunnlagTest {
         val resultat = overstyring.resultat()
         assertNotNull(resultat)
         assertEquals(2, resultat.size)
-        assertFalse(resultat.any { it.inspektør.orgnummer == "a3" } )
+        assertFalse(resultat.any { it.inspektør.orgnummer == "a3" })
     }
 
     @Test
@@ -557,22 +567,28 @@ internal class InntektsgrunnlagTest {
             vurdertInfotrygd = false
         )
 
-        val opptjening = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = sluttdatoA1,
-                    deaktivert = false
+        val opptjening = Opptjening.nyOpptjening(
+            listOf(
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    a1, listOf(
+                    Arbeidsforhold(
+                        ansattFom = LocalDate.EPOCH,
+                        ansattTom = sluttdatoA1,
+                        deaktivert = false
+                    )
                 )
-            )),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
-                Arbeidsforhold(
-                    ansattFom = startdatoA2,
-                    ansattTom = null,
-                    deaktivert = false
+                ),
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    a2, listOf(
+                    Arbeidsforhold(
+                        ansattFom = startdatoA2,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
                 )
-            ))
-        ), skjæringstidspunkt)
+                )
+            ), skjæringstidspunkt
+        )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
@@ -720,31 +736,41 @@ internal class InntektsgrunnlagTest {
             vurdertInfotrygd = false
         )
 
-        val opptjeningUtenA2 = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = null,
-                    deaktivert = false
+        val opptjeningUtenA2 = Opptjening.nyOpptjening(
+            listOf(
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    a1, listOf(
+                    Arbeidsforhold(
+                        ansattFom = LocalDate.EPOCH,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
                 )
-            ))
-        ), skjæringstidspunkt)
-        val opptjeningMedA2 = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = null,
-                    deaktivert = false
                 )
-            )),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = null,
-                    deaktivert = false
+            ), skjæringstidspunkt
+        )
+        val opptjeningMedA2 = Opptjening.nyOpptjening(
+            listOf(
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    a1, listOf(
+                    Arbeidsforhold(
+                        ansattFom = LocalDate.EPOCH,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
                 )
-            ))
-        ), skjæringstidspunkt)
+                ),
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    a2, listOf(
+                    Arbeidsforhold(
+                        ansattFom = LocalDate.EPOCH,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
+                )
+            ), skjæringstidspunkt
+        )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)
@@ -875,6 +901,7 @@ internal class InntektsgrunnlagTest {
             when {
                 subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_3).annetLedd.førstePunktum) ->
                     this.`§ 8-3 ledd 2 punktum 1` = subsumsjon.utfall == VILKAR_OPPFYLT
+
                 subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_51).annetLedd) -> {
                     this.`§ 8-51 ledd 2` = subsumsjon.utfall == VILKAR_OPPFYLT
                 }
