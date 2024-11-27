@@ -21,16 +21,16 @@ import java.time.LocalDate
 import java.util.*
 
 internal class InntektshistorikkTest {
-
     private lateinit var historikk: Inntektshistorikk
     private val inspektør get() = InntektshistorikkInspektør(historikk.view())
 
     private companion object {
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
-        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER
-        )
+        val hendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = ORGNUMMER
+            )
     }
 
     @BeforeEach
@@ -43,11 +43,16 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
-            1.januar,
-            1.januar,
-            null
-        )?.inspektør?.beløp)
+        assertEquals(
+            INNTEKT,
+            historikk
+                .avklarSykepengegrunnlag(
+                    1.januar,
+                    1.januar,
+                    null
+                )?.inspektør
+                ?.beløp
+        )
     }
 
     @Test
@@ -81,17 +86,21 @@ internal class InntektshistorikkTest {
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
-    ) = hendelsefabrikk.lagInntektsmelding(
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beregnetInntekt = beregnetInntekt,
-        førsteFraværsdag = førsteFraværsdag,
-        refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, Aktivitetslogg())
+    ) = hendelsefabrikk
+        .lagInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+        ).also {
+            it.valider(
+                object : Inntektsmelding.Valideringsgrunnlag {
+                    override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
 
-    }
+                    override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+                },
+                Aktivitetslogg()
+            )
+        }
 }

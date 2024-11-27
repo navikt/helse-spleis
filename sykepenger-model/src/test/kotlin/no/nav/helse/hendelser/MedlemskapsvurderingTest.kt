@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class MedlemskapsvurderingTest {
-
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -26,7 +25,8 @@ internal class MedlemskapsvurderingTest {
     @Test
     fun `bruker er kanskje medlem`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.VetIkke)
-            .valider(aktivitetslogg).also {
+            .valider(aktivitetslogg)
+            .also {
                 assertFalse(aktivitetslogg.harVarslerEllerVerre())
                 assertTrue(it)
             }
@@ -35,7 +35,8 @@ internal class MedlemskapsvurderingTest {
     @Test
     fun `får varsel ved status UavklartMedBrukerspørsmål`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål)
-            .valider(aktivitetslogg).also {
+            .valider(aktivitetslogg)
+            .also {
                 assertTrue(aktivitetslogg.harVarslerEllerVerre())
                 assertTrue(it)
             }

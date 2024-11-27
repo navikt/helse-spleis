@@ -13,7 +13,6 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.tilSpannerPersonDto
@@ -22,8 +21,12 @@ import no.nav.helse.person.Person
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.sporing.serializePersonForSporing
+import java.util.UUID
 
-internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao) {
+internal fun Application.spannerApi(
+    hendelseDao: HendelseDao,
+    personDao: PersonDao
+) {
     routing {
         authenticate {
             post("/api/person-json") {
@@ -40,11 +43,12 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
                 withContext(Dispatchers.IO) {
                     val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
 
-                    val meldingsReferanse = try {
-                        UUID.fromString(hendelseId)
-                    } catch (_: IllegalArgumentException) {
-                        throw BadRequestException("meldingsreferanse bør/skal være en UUID")
-                    }
+                    val meldingsReferanse =
+                        try {
+                            UUID.fromString(hendelseId)
+                        } catch (_: IllegalArgumentException) {
+                            throw BadRequestException("meldingsreferanse bør/skal være en UUID")
+                        }
 
                     val hendelse =
                         hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = $hendelseId")
@@ -56,7 +60,10 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
     }
 }
 
-internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonDao) {
+internal fun Application.sporingApi(
+    hendelseDao: HendelseDao,
+    personDao: PersonDao
+) {
     routing {
         authenticate {
             get("/api/vedtaksperioder") {

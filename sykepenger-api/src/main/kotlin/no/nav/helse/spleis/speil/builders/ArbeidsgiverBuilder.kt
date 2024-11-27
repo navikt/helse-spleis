@@ -9,14 +9,15 @@ internal class ArbeidsgiverBuilder(
     private val arbeidsgiverUtDto: ArbeidsgiverUtDto,
     private val pølsepakke: SpekematDTO.PølsepakkeDTO?
 ) {
-
-    internal fun build(alder: AlderDTO, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
-        return ArbeidsgiverDTO(
+    internal fun build(
+        alder: AlderDTO,
+        vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
+    ): ArbeidsgiverDTO =
+        ArbeidsgiverDTO(
             id = arbeidsgiverUtDto.id,
             organisasjonsnummer = arbeidsgiverUtDto.organisasjonsnummer,
             generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(arbeidsgiverUtDto.organisasjonsnummer, alder, arbeidsgiverUtDto, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
         )
-    }
 
     internal companion object {
         fun List<SpekematDTO.PølsepakkeDTO.PølseradDTO>.fjernUnødvendigeRader(): List<SpekematDTO.PølsepakkeDTO.PølseradDTO> {
@@ -38,7 +39,8 @@ internal class ArbeidsgiverBuilder(
 
                 if (nåværende.pølser.all { pølse ->
                         pølseFinnesIRad(forrige, pølse) || pølseFinnesIRad(neste, pølse)
-                    }) {
+                    }
+                ) {
                     // raden er unyttig
                     println("unyttige rad $radnummer fra bunnen!! $nåværende er unyttig")
                 } else {

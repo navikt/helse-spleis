@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
-
+internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
     @Test
     fun `Først sier sykmeldte at det var egenmeldingsdag, så ombestemmer de seg`() {
         a1 {
@@ -31,12 +30,24 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
             håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent), egenmeldinger = listOf(5.februar til 5.februar))
             observatør.vedtaksperiodeVenter.last().let {
                 assertEquals("INNTEKTSMELDING", it.venterPå.venteårsak.hva)
-                assertEquals("SSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+                assertEquals(
+                    "SSHH SSSSSHH SSS",
+                    inspektør
+                        .vedtaksperioder(2.vedtaksperiode)
+                        .inspektør.sykdomstidslinje
+                        .toShortString()
+                )
             }
 
             håndterSøknad(5.februar til 5.februar)
 
-            assertEquals("S", inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "S",
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .inspektør.sykdomstidslinje
+                    .toShortString()
+            )
             assertTilstand(3.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING)
         }
     }
@@ -48,7 +59,13 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
             håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
 
             observatør.vedtaksperiodeVenter.last().let {
-                assertEquals("SHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+                assertEquals(
+                    "SHH SSS",
+                    inspektør
+                        .vedtaksperioder(1.vedtaksperiode)
+                        .inspektør.sykdomstidslinje
+                        .toShortString()
+                )
                 assertEquals("INNTEKTSMELDING", it.venterPå.venteårsak.hva)
                 assertNull(it.venterPå.venteårsak.hvorfor)
             }
@@ -84,12 +101,24 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
             håndterSøknad(17.september til 19.september)
 
             assertEquals(17.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
-            assertEquals("SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSS",
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.sykdomstidslinje
+                    .toShortString()
+            )
 
             håndterInntektsmelding(listOf(20.august til 4.september), førsteFraværsdag = 17.september)
 
             assertEquals(4.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
-            assertEquals("U????? ??????? SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "U????? ??????? SSS",
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.sykdomstidslinje
+                    .toShortString()
+            )
             assertEquals(17.september, inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -103,5 +132,4 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }
     }
-
 }

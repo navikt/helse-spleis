@@ -4,9 +4,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
 
-
 internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `selvstendigsøknad`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))

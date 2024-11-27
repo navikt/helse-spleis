@@ -1,10 +1,5 @@
 package no.nav.helse.dto
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -33,6 +28,11 @@ import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.nesteDag
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
 
 data class SpannerPersonDto(
     val fødselsnummer: String,
@@ -44,7 +44,11 @@ data class SpannerPersonDto(
     val minimumSykdomsgradVurdering: List<MinimumSykdomsgradVurderingPeriode>,
     val dødsdato: LocalDate?
 ) {
-    data class MinimumSykdomsgradVurderingPeriode(val fom: LocalDate, val tom: LocalDate)
+    data class MinimumSykdomsgradVurderingPeriode(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
     data class InfotrygdhistorikkElementData(
         val id: UUID,
         val tidsstempel: LocalDateTime,
@@ -60,6 +64,7 @@ data class SpannerPersonDto(
             val fom: LocalDate,
             val tom: LocalDate
         )
+
         data class PersonutbetalingsperiodeData(
             val orgnr: String,
             val fom: LocalDate,
@@ -67,6 +72,7 @@ data class SpannerPersonDto(
             val grad: Double,
             val inntekt: Int
         )
+
         data class ArbeidsgiverutbetalingsperiodeData(
             val orgnr: String,
             val fom: LocalDate,
@@ -102,6 +108,7 @@ data class SpannerPersonDto(
         val vilkårsgrunnlagId: UUID
     ) {
         enum class MedlemskapstatusDto { JA, VET_IKKE, NEI, UAVKLART_MED_BRUKERSPØRSMÅL }
+
         enum class GrunnlagsdataType { Infotrygd, Vilkårsprøving }
 
         data class InntektsgrunnlagData(
@@ -122,6 +129,7 @@ data class SpannerPersonDto(
             val orgnummer: String,
             val beløpstidslinje: BeløpstidslinjeData
         )
+
         data class ArbeidsgiverInntektsopplysningData(
             val orgnummer: String,
             val fom: LocalDate,
@@ -214,7 +222,8 @@ data class SpannerPersonDto(
             val kilde: KildeData
         ) {
             enum class KildeData {
-                Arbeidsgiver, AOrdningen
+                Arbeidsgiver,
+                AOrdningen
             }
         }
 
@@ -227,7 +236,11 @@ data class SpannerPersonDto(
             val tidsstempel: LocalDateTime
         )
 
-        data class PeriodeData(val fom: LocalDate, val tom: LocalDate)
+        data class PeriodeData(
+            val fom: LocalDate,
+            val tom: LocalDate
+        )
+
         data class SykdomstidslinjeData(
             val dager: List<DagData>,
             val periode: PeriodeData?,
@@ -244,7 +257,7 @@ data class SpannerPersonDto(
                 val dato: LocalDate?
             ) {
                 init {
-                    check (dato != null || (fom != null && tom != null)) {
+                    check(dato != null || (fom != null && tom != null)) {
                         "enten må dato være satt eller så må både fom og tom være satt"
                     }
                 }
@@ -296,13 +309,13 @@ data class SpannerPersonDto(
             val feriepengedager: List<UtbetaltDagData>,
             val utbetalingId: UUID,
             val sendTilOppdrag: Boolean,
-            val sendPersonoppdragTilOS: Boolean,
+            val sendPersonoppdragTilOS: Boolean
         ) {
             data class UtbetaltDagData(
                 val type: String,
                 val orgnummer: String,
                 val dato: LocalDate,
-                val beløp: Int,
+                val beløp: Int
             )
         }
 
@@ -351,7 +364,7 @@ data class SpannerPersonDto(
             data class VedtaksperiodeVenterDto(
                 val ventetSiden: LocalDateTime,
                 val venterTil: LocalDateTime,
-                val venterPå: VenterPåDto,
+                val venterPå: VenterPåDto
             )
 
             data class VenterPåDto(
@@ -366,7 +379,10 @@ data class SpannerPersonDto(
             )
 
             enum class MaksdatobestemmelseDto {
-                IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR
+                IKKE_VURDERT,
+                ORDINÆR_RETT,
+                BEGRENSET_RETT,
+                SYTTI_ÅR
             }
 
             data class MaksdatoresultatData(
@@ -383,10 +399,12 @@ data class SpannerPersonDto(
             ) {
                 val forbrukteDagerAntall = forbrukteDager.sumOf { it.fom.datesUntil(it.tom).count() + 1 }
             }
+
             data class DokumentsporingData(
                 val dokumentId: UUID,
                 val dokumenttype: DokumentTypeData
             )
+
             enum class DokumentTypeData {
                 Sykmelding,
                 Søknad,
@@ -410,14 +428,28 @@ data class SpannerPersonDto(
                 val vedtakFattet: LocalDateTime?,
                 val avsluttet: LocalDateTime?,
                 val kilde: KildeData,
-                val endringer: List<EndringData>,
+                val endringer: List<EndringData>
             ) {
                 enum class TilstandData {
-                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
-                    VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
+                    UBEREGNET,
+                    UBEREGNET_OMGJØRING,
+                    UBEREGNET_REVURDERING,
+                    BEREGNET,
+                    BEREGNET_OMGJØRING,
+                    BEREGNET_REVURDERING,
+                    VEDTAK_FATTET,
+                    REVURDERT_VEDTAK_AVVIST,
+                    VEDTAK_IVERKSATT,
+                    AVSLUTTET_UTEN_VEDTAK,
+                    ANNULLERT_PERIODE,
+                    TIL_INFOTRYGD
                 }
+
                 enum class AvsenderData {
-                    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM
+                    SYKMELDT,
+                    ARBEIDSGIVER,
+                    SAKSBEHANDLER,
+                    SYSTEM
                 }
 
                 data class KildeData(
@@ -446,6 +478,7 @@ data class SpannerPersonDto(
                     val maksdatoresultat: MaksdatoresultatData
                 )
             }
+
             data class DataForSimuleringData(
                 val totalbeløp: Int,
                 val perioder: List<SimulertPeriode>
@@ -509,7 +542,9 @@ data class SpannerPersonDto(
             )
         }
 
-        data class RefusjonservitørData(val refusjonstidslinjer: Map<LocalDate, BeløpstidslinjeData>)
+        data class RefusjonservitørData(
+            val refusjonstidslinjer: Map<LocalDate, BeløpstidslinjeData>
+        )
     }
 
     data class SykdomshistorikkData(
@@ -542,6 +577,7 @@ data class SpannerPersonDto(
         val oppdatert: LocalDateTime
     ) {
         enum class UtbetalingtypeData { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+
         enum class UtbetalingstatusData {
             NY,
             IKKE_UTBETALT,
@@ -553,6 +589,7 @@ data class SpannerPersonDto(
             ANNULLERT,
             FORKASTET
         }
+
         data class VurderingData(
             val godkjent: Boolean,
             val ident: String,
@@ -653,41 +690,54 @@ data class SpannerPersonDto(
         )
     }
 
-    data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>)
-    data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
+    data class BeløpstidslinjeData(
+        val perioder: List<BeløpstidslinjeperiodeData>
+    )
+
+    data class BeløpstidslinjeperiodeData(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagligBeløp: Double,
+        val meldingsreferanseId: UUID,
+        val avsender: AvsenderData,
+        val tidsstempel: LocalDateTime
+    )
 }
 
-fun PersonUtDto.tilSpannerPersonDto() = SpannerPersonDto(
-    fødselsdato = this.alder.fødselsdato,
-    fødselsnummer = this.fødselsnummer,
-    opprettet = this.opprettet,
-    arbeidsgivere = this.arbeidsgivere.map { it.tilPersonData() },
-    infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
-    vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
-    minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { SpannerPersonDto.MinimumSykdomsgradVurderingPeriode(it.fom, it.tom) },
-    dødsdato = this.alder.dødsdato
-)
+fun PersonUtDto.tilSpannerPersonDto() =
+    SpannerPersonDto(
+        fødselsdato = this.alder.fødselsdato,
+        fødselsnummer = this.fødselsnummer,
+        opprettet = this.opprettet,
+        arbeidsgivere = this.arbeidsgivere.map { it.tilPersonData() },
+        infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
+        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
+        minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { SpannerPersonDto.MinimumSykdomsgradVurderingPeriode(it.fom, it.tom) },
+        dødsdato = this.alder.dødsdato
+    )
 
-private fun ArbeidsgiverUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData(
-    id = this.id,
-    organisasjonsnummer = this.organisasjonsnummer,
-    inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
-    sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
-    sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
-    vedtaksperioder = this.vedtaksperioder.map { it.tilPersonData() },
-    forkastede = this.forkastede.map { it.tilPersonData() },
-    utbetalinger = this.utbetalinger.map { it.tilPersonData() },
-    feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
-    refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() },
-    ubrukteRefusjonsopplysninger = RefusjonservitørData(this.ubrukteRefusjonsopplysninger.refusjonstidslinjer.mapValues { (_, dto) -> dto.tilPersonData() })
-)
+private fun ArbeidsgiverUtDto.tilPersonData() =
+    SpannerPersonDto.ArbeidsgiverData(
+        id = this.id,
+        organisasjonsnummer = this.organisasjonsnummer,
+        inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
+        sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
+        sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
+        vedtaksperioder = this.vedtaksperioder.map { it.tilPersonData() },
+        forkastede = this.forkastede.map { it.tilPersonData() },
+        utbetalinger = this.utbetalinger.map { it.tilPersonData() },
+        feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
+        refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() },
+        ubrukteRefusjonsopplysninger = RefusjonservitørData(this.ubrukteRefusjonsopplysninger.refusjonstidslinjer.mapValues { (_, dto) -> dto.tilPersonData() })
+    )
 
-private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
-    årlig = this.årlig.beløp,
-    månedligDouble = this.månedligDouble.beløp,
-    dagligDouble = this.dagligDouble.beløp,
-    dagligInt = this.dagligInt.beløp
-)
+private fun InntektDto.tilPersonData() =
+    SpannerPersonDto.InntektDto(
+        årlig = this.årlig.beløp,
+        månedligDouble = this.månedligDouble.beløp,
+        dagligDouble = this.dagligDouble.beløp,
+        dagligInt = this.dagligInt.beløp
+    )
 
 private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData(
@@ -696,28 +746,32 @@ private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() =
         hendelseId = this.hendelseId,
         beløp = this.beløp.tilPersonData(),
         tidsstempel = this.tidsstempel,
-        kilde = when (this.kilde) {
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
-        }
+        kilde =
+            when (this.kilde) {
+                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+            }
     )
 
-private fun SykdomshistorikkElementDto.tilPersonData() = SpannerPersonDto.SykdomshistorikkData(
-    id = this.id,
-    tidsstempel = this.tidsstempel,
-    hendelseId = this.hendelseId,
-    hendelseSykdomstidslinje = this.hendelseSykdomstidslinje.tilPersonData(),
-    beregnetSykdomstidslinje = this.beregnetSykdomstidslinje.tilPersonData(),
-)
+private fun SykdomshistorikkElementDto.tilPersonData() =
+    SpannerPersonDto.SykdomshistorikkData(
+        id = this.id,
+        tidsstempel = this.tidsstempel,
+        hendelseId = this.hendelseId,
+        hendelseSykdomstidslinje = this.hendelseSykdomstidslinje.tilPersonData(),
+        beregnetSykdomstidslinje = this.beregnetSykdomstidslinje.tilPersonData()
+    )
+
 private fun SykdomstidslinjeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData(
         dager = dager.map { it.tilPersonData() }.forkortSykdomstidslinje(),
-        låstePerioder = this.låstePerioder.map {
-            SpannerPersonDto.ArbeidsgiverData.PeriodeData(
-                it.fom,
-                it.tom
-            )
-        },
+        låstePerioder =
+            this.låstePerioder.map {
+                SpannerPersonDto.ArbeidsgiverData.PeriodeData(
+                    it.fom,
+                    it.tom
+                )
+            },
         periode = this.periode?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
     )
 
@@ -743,238 +797,266 @@ private fun SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData.kanUt
     return utenDatoer(this) == utenDatoer(other) && (dato ?: tom!!).nesteDag == other.dato
 }
 
-private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
-    is SykdomstidslinjeDagDto.UkjentDagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.UKJENT_DAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.AndreYtelserDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = when (this.ytelse) {
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_AAP
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Foreldrepenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_FORELDREPENGER
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Omsorgspenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_OMSORGSPENGER
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Pleiepenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_PLEIEPENGER
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Svangerskapspenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Opplæringspenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER
-            SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Dagpenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_DAGPENGER
-        },
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.ArbeidsdagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.FeriedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.ForeldetSykedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.FriskHelgedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.PermisjonsdagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.ProblemDagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = 0.0,
-        other = this.other.tilPersonData(),
-        melding = this.melding,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.SykHelgedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.SykedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-    is SykdomstidslinjeDagDto.SykedagNavDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
-}
+private fun SykdomstidslinjeDagDto.tilPersonData() =
+    when (this) {
+        is SykdomstidslinjeDagDto.UkjentDagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.UKJENT_DAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.AndreYtelserDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type =
+                    when (this.ytelse) {
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_AAP
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Foreldrepenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_FORELDREPENGER
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Omsorgspenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_OMSORGSPENGER
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Pleiepenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_PLEIEPENGER
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Svangerskapspenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Opplæringspenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER
+                        SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Dagpenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_DAGPENGER
+                    },
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.ArbeidsdagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosent,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.ArbeidsgiverdagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosent,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.FeriedagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.ForeldetSykedagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosent,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.FriskHelgedagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.PermisjonsdagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.ProblemDagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = 0.0,
+                other = this.other.tilPersonData(),
+                melding = this.melding,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.SykHelgedagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosent,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.SykedagDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosent,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+        is SykdomstidslinjeDagDto.SykedagNavDto ->
+            SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosent,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null
+            )
+    }
+
 private fun HendelseskildeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.KildeData(
         type = this.type,
         id = this.meldingsreferanseId,
         tidsstempel = this.tidsstempel
     )
-private fun RefusjonUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.RefusjonData(
-    meldingsreferanseId = this.meldingsreferanseId,
-    førsteFraværsdag = this.førsteFraværsdag,
-    arbeidsgiverperioder = this.arbeidsgiverperioder.map {
-        SpannerPersonDto.ArbeidsgiverData.PeriodeData(
-            it.fom,
-            it.tom
-        )
-    },
-    beløp = this.beløp?.tilPersonData(),
-    sisteRefusjonsdag = this.sisteRefusjonsdag,
-    endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
-    tidsstempel = this.tidsstempel
-)
+
+private fun RefusjonUtDto.tilPersonData() =
+    SpannerPersonDto.ArbeidsgiverData.RefusjonData(
+        meldingsreferanseId = this.meldingsreferanseId,
+        førsteFraværsdag = this.førsteFraværsdag,
+        arbeidsgiverperioder =
+            this.arbeidsgiverperioder.map {
+                SpannerPersonDto.ArbeidsgiverData.PeriodeData(
+                    it.fom,
+                    it.tom
+                )
+            },
+        beløp = this.beløp?.tilPersonData(),
+        sisteRefusjonsdag = this.sisteRefusjonsdag,
+        endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
+        tidsstempel = this.tidsstempel
+    )
+
 private fun EndringIRefusjonDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.RefusjonData.EndringIRefusjonData(
         beløp = this.beløp.beløp,
         endringsdato = this.endringsdato
     )
 
-private fun SykmeldingsperioderDto.tilPersonData() = perioder.map {
-    SpannerPersonDto.ArbeidsgiverData.SykmeldingsperiodeData(it.fom, it.tom)
-}
+private fun SykmeldingsperioderDto.tilPersonData() =
+    perioder.map {
+        SpannerPersonDto.ArbeidsgiverData.SykmeldingsperiodeData(it.fom, it.tom)
+    }
+
 private fun ForkastetVedtaksperiodeUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.ForkastetVedtaksperiodeData(
         vedtaksperiode = this.vedtaksperiode.tilPersonData()
     )
-private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData(
-    id = id,
-    tilstand = when (tilstand) {
-        VedtaksperiodetilstandDto.AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET
-        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET_UTEN_UTBETALING
-        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_HISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INNTEKTSMELDING
-        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.REVURDERING_FEILET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.REVURDERING_FEILET
-        VedtaksperiodetilstandDto.START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.START
-        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD
-        VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
-    },
-    skjæringstidspunkt = skjæringstidspunkt,
-    fom = fom,
-    tom = tom,
-    sykmeldingFom = sykmeldingFom,
-    sykmeldingTom = sykmeldingTom,
-    behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
-    venteårsak = utledVenteårsak(venteårsak),
-    egenmeldingsperioder = egenmeldingsperioder,
-    opprettet = opprettet,
-    oppdatert = oppdatert,
-)
+
+private fun VedtaksperiodeUtDto.tilPersonData() =
+    SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData(
+        id = id,
+        tilstand =
+            when (tilstand) {
+                VedtaksperiodetilstandDto.AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET
+                VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET_UTEN_UTBETALING
+                VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+                VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING
+                VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+                VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_HISTORIKK
+                VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+                VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+                VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INNTEKTSMELDING
+                VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_REVURDERING
+                VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING
+                VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING_REVURDERING
+                VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING
+                VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+                VedtaksperiodetilstandDto.REVURDERING_FEILET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.REVURDERING_FEILET
+                VedtaksperiodetilstandDto.START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.START
+                VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD
+                VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
+            },
+        skjæringstidspunkt = skjæringstidspunkt,
+        fom = fom,
+        tom = tom,
+        sykmeldingFom = sykmeldingFom,
+        sykmeldingTom = sykmeldingTom,
+        behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
+        venteårsak = utledVenteårsak(venteårsak),
+        egenmeldingsperioder = egenmeldingsperioder,
+        opprettet = opprettet,
+        oppdatert = oppdatert
+    )
 
 private fun utledVenteårsak(venteårsak: LazyVedtaksperiodeVenterDto): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
-     try {
+    try {
         return venteårsak.value?.tilPersonData()
     } catch (e: Exception) {
         return SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto(
             ventetSiden = LocalDateTime.now(),
             venterTil = LocalDateTime.MAX,
-            venterPå = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenterPåDto(
-                vedtaksperiodeId =  "00000000-0000-0000-0000-000000000000".let { UUID.fromString(it) },
-                organisasjonsnummer = "ORGNUMMER",
-                venteårsak = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenteårsakDto(
-                    hva = "Hjelp - kræsj",
-                    hvorfor = "Det kastes en feil et sted når venteårsak evalueres, se i loggene"
+            venterPå =
+                SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenterPåDto(
+                    vedtaksperiodeId = "00000000-0000-0000-0000-000000000000".let { UUID.fromString(it) },
+                    organisasjonsnummer = "ORGNUMMER",
+                    venteårsak =
+                        SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenteårsakDto(
+                            hva = "Hjelp - kræsj",
+                            hvorfor = "Det kastes en feil et sted når venteårsak evalueres, se i loggene"
+                        )
                 )
-            )
         )
     }
 }
@@ -985,39 +1067,44 @@ private fun VedtaksperiodeVenterDto.tilPersonData() =
         venterTil = venterTil,
         venterPå = venterPå.tilPersonData()
     )
+
 private fun VenterPåDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenterPåDto(
         vedtaksperiodeId = vedtaksperiodeId,
         organisasjonsnummer = organisasjonsnummer,
         venteårsak = venteårsak.tilPersonData()
     )
+
 private fun VenteårsakDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenteårsakDto(
         hva = hva,
         hvorfor = hvorfor
     )
+
 private fun BehandlingUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData(
         id = this.id,
-        tilstand = when (this.tilstand) {
-            BehandlingtilstandDto.ANNULLERT_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.ANNULLERT_PERIODE
-            BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.AVSLUTTET_UTEN_VEDTAK
-            BehandlingtilstandDto.BEREGNET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET
-            BehandlingtilstandDto.BEREGNET_OMGJØRING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_OMGJØRING
-            BehandlingtilstandDto.BEREGNET_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_REVURDERING
-            BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.REVURDERT_VEDTAK_AVVIST
-            BehandlingtilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.TIL_INFOTRYGD
-            BehandlingtilstandDto.UBEREGNET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET
-            BehandlingtilstandDto.UBEREGNET_OMGJØRING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_OMGJØRING
-            BehandlingtilstandDto.UBEREGNET_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_REVURDERING
-            BehandlingtilstandDto.VEDTAK_FATTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_FATTET
-            BehandlingtilstandDto.VEDTAK_IVERKSATT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_IVERKSATT
-        },
+        tilstand =
+            when (this.tilstand) {
+                BehandlingtilstandDto.ANNULLERT_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.ANNULLERT_PERIODE
+                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.AVSLUTTET_UTEN_VEDTAK
+                BehandlingtilstandDto.BEREGNET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET
+                BehandlingtilstandDto.BEREGNET_OMGJØRING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_OMGJØRING
+                BehandlingtilstandDto.BEREGNET_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_REVURDERING
+                BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.REVURDERT_VEDTAK_AVVIST
+                BehandlingtilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.TIL_INFOTRYGD
+                BehandlingtilstandDto.UBEREGNET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET
+                BehandlingtilstandDto.UBEREGNET_OMGJØRING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_OMGJØRING
+                BehandlingtilstandDto.UBEREGNET_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_REVURDERING
+                BehandlingtilstandDto.VEDTAK_FATTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_FATTET
+                BehandlingtilstandDto.VEDTAK_IVERKSATT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_IVERKSATT
+            },
         vedtakFattet = this.vedtakFattet,
         avsluttet = this.avsluttet,
         kilde = this.kilde.tilPersonData(),
-        endringer = this.endringer.map { it.tilPersonData() },
+        endringer = this.endringer.map { it.tilPersonData() }
     )
+
 private fun BehandlingkildeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
         meldingsreferanseId = this.meldingsreferanseId,
@@ -1025,12 +1112,15 @@ private fun BehandlingkildeDto.tilPersonData() =
         registrert = this.registert,
         avsender = this.avsender.tilPersonData()
     )
-private fun AvsenderDto.tilPersonData() = when (this) {
-    AvsenderDto.ARBEIDSGIVER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
-    AvsenderDto.SAKSBEHANDLER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
-    AvsenderDto.SYKMELDT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
-    AvsenderDto.SYSTEM -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
-}
+
+private fun AvsenderDto.tilPersonData() =
+    when (this) {
+        AvsenderDto.ARBEIDSGIVER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
+        AvsenderDto.SAKSBEHANDLER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
+        AvsenderDto.SYKMELDT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
+        AvsenderDto.SYSTEM -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
+    }
+
 private fun BehandlingendringUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
         id = id,
@@ -1047,94 +1137,104 @@ private fun BehandlingendringUtDto.tilPersonData() =
         utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
         refusjonstidslinje = refusjonstidslinje.tilPersonData(),
         dokumentsporing = dokumentsporing.tilPersonData(),
-        arbeidsgiverperiode = arbeidsgiverperioder.map {
-            SpannerPersonDto.ArbeidsgiverData.PeriodeData(
-                it.fom,
-                it.tom
-            )
-        },
+        arbeidsgiverperiode =
+            arbeidsgiverperioder.map {
+                SpannerPersonDto.ArbeidsgiverData.PeriodeData(
+                    it.fom,
+                    it.tom
+                )
+            },
         maksdatoresultat = maksdatoresultat.tilPersonData()
     )
-private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
-    vurdertTilOgMed = vurdertTilOgMed,
-    bestemmelse = when (bestemmelse) {
-        MaksdatobestemmelseDto.IKKE_VURDERT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.IKKE_VURDERT
-        MaksdatobestemmelseDto.ORDINÆR_RETT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.ORDINÆR_RETT
-        MaksdatobestemmelseDto.BEGRENSET_RETT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.BEGRENSET_RETT
-        MaksdatobestemmelseDto.SYTTI_ÅR -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.SYTTI_ÅR
-    },
-    startdatoTreårsvindu = startdatoTreårsvindu,
-    startdatoSykepengerettighet = startdatoSykepengerettighet,
-    forbrukteDager = forbrukteDager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    oppholdsdager = oppholdsdager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    avslåtteDager = avslåtteDager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    maksdato = maksdato,
-    gjenståendeDager = gjenståendeDager,
-    grunnlag = grunnlag.tilPersonData()
-)
+
+private fun MaksdatoresultatUtDto.tilPersonData() =
+    SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
+        vurdertTilOgMed = vurdertTilOgMed,
+        bestemmelse =
+            when (bestemmelse) {
+                MaksdatobestemmelseDto.IKKE_VURDERT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.IKKE_VURDERT
+                MaksdatobestemmelseDto.ORDINÆR_RETT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.ORDINÆR_RETT
+                MaksdatobestemmelseDto.BEGRENSET_RETT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.BEGRENSET_RETT
+                MaksdatobestemmelseDto.SYTTI_ÅR -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.SYTTI_ÅR
+            },
+        startdatoTreårsvindu = startdatoTreårsvindu,
+        startdatoSykepengerettighet = startdatoSykepengerettighet,
+        forbrukteDager = forbrukteDager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+        oppholdsdager = oppholdsdager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+        avslåtteDager = avslåtteDager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+        maksdato = maksdato,
+        gjenståendeDager = gjenståendeDager,
+        grunnlag = grunnlag.tilPersonData()
+    )
+
 private fun DokumentsporingDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
         dokumentId = this.id,
-        dokumenttype = when (type) {
-            DokumenttypeDto.InntektsmeldingDager -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingDager
-            DokumenttypeDto.InntektsmeldingInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingInntekt
-            DokumenttypeDto.InntektsmeldingRefusjon -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingRefusjon
-            DokumenttypeDto.InntektFraAOrdningen -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektFraAOrdningen
-            DokumenttypeDto.OverstyrArbeidsforhold -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsforhold
-            DokumenttypeDto.OverstyrArbeidsgiveropplysninger -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsgiveropplysninger
-            DokumenttypeDto.OverstyrInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrInntekt
-            DokumenttypeDto.OverstyrRefusjon -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrRefusjon
-            DokumenttypeDto.OverstyrTidslinje -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrTidslinje
-            DokumenttypeDto.SkjønnsmessigFastsettelse -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.SkjønnsmessigFastsettelse
-            DokumenttypeDto.Sykmelding -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Sykmelding
-            DokumenttypeDto.Søknad -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Søknad
-            DokumenttypeDto.AndreYtelser -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.AndreYtelser
-        }
+        dokumenttype =
+            when (type) {
+                DokumenttypeDto.InntektsmeldingDager -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingDager
+                DokumenttypeDto.InntektsmeldingInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingInntekt
+                DokumenttypeDto.InntektsmeldingRefusjon -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingRefusjon
+                DokumenttypeDto.InntektFraAOrdningen -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektFraAOrdningen
+                DokumenttypeDto.OverstyrArbeidsforhold -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsforhold
+                DokumenttypeDto.OverstyrArbeidsgiveropplysninger -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrArbeidsgiveropplysninger
+                DokumenttypeDto.OverstyrInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrInntekt
+                DokumenttypeDto.OverstyrRefusjon -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrRefusjon
+                DokumenttypeDto.OverstyrTidslinje -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.OverstyrTidslinje
+                DokumenttypeDto.SkjønnsmessigFastsettelse -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.SkjønnsmessigFastsettelse
+                DokumenttypeDto.Sykmelding -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Sykmelding
+                DokumenttypeDto.Søknad -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Søknad
+                DokumenttypeDto.AndreYtelser -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.AndreYtelser
+            }
     )
-private fun UtbetalingUtDto.tilPersonData() = SpannerPersonDto.UtbetalingData(
-    id = this.id,
-    korrelasjonsId = this.korrelasjonsId,
-    fom = this.periode.fom,
-    tom = this.periode.tom,
-    annulleringer = this.annulleringer,
-    utbetalingstidslinje = this.utbetalingstidslinje.tilPersonData(),
-    arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.tilPersonData(),
-    personOppdrag = this.personOppdrag.tilPersonData(),
-    tidsstempel = this.tidsstempel,
-    type = when (this.type) {
-        UtbetalingtypeDto.ANNULLERING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.ANNULLERING
-        UtbetalingtypeDto.ETTERUTBETALING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.ETTERUTBETALING
-        UtbetalingtypeDto.FERIEPENGER -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.FERIEPENGER
-        UtbetalingtypeDto.REVURDERING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.REVURDERING
-        UtbetalingtypeDto.UTBETALING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.UTBETALING
-    },
-    status = this.tilstand.tilPersonData(),
-    maksdato = this.maksdato,
-    forbrukteSykedager = this.forbrukteSykedager,
-    gjenståendeSykedager = this.gjenståendeSykedager,
-    vurdering = this.vurdering?.tilPersonData(),
-    overføringstidspunkt = overføringstidspunkt,
-    avstemmingsnøkkel = avstemmingsnøkkel,
-    avsluttet = avsluttet,
-    oppdatert = oppdatert
-)
 
-private fun UtbetalingTilstandDto.tilPersonData() = when (this) {
-    UtbetalingTilstandDto.ANNULLERT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.ANNULLERT
-    UtbetalingTilstandDto.FORKASTET -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.FORKASTET
-    UtbetalingTilstandDto.GODKJENT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.GODKJENT
-    UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.GODKJENT_UTEN_UTBETALING
-    UtbetalingTilstandDto.IKKE_GODKJENT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.IKKE_GODKJENT
-    UtbetalingTilstandDto.IKKE_UTBETALT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.IKKE_UTBETALT
-    UtbetalingTilstandDto.NY -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.NY
-    UtbetalingTilstandDto.OVERFØRT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.OVERFØRT
-    UtbetalingTilstandDto.UTBETALT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.UTBETALT
-}
+private fun UtbetalingUtDto.tilPersonData() =
+    SpannerPersonDto.UtbetalingData(
+        id = this.id,
+        korrelasjonsId = this.korrelasjonsId,
+        fom = this.periode.fom,
+        tom = this.periode.tom,
+        annulleringer = this.annulleringer,
+        utbetalingstidslinje = this.utbetalingstidslinje.tilPersonData(),
+        arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.tilPersonData(),
+        personOppdrag = this.personOppdrag.tilPersonData(),
+        tidsstempel = this.tidsstempel,
+        type =
+            when (this.type) {
+                UtbetalingtypeDto.ANNULLERING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.ANNULLERING
+                UtbetalingtypeDto.ETTERUTBETALING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.ETTERUTBETALING
+                UtbetalingtypeDto.FERIEPENGER -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.FERIEPENGER
+                UtbetalingtypeDto.REVURDERING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.REVURDERING
+                UtbetalingtypeDto.UTBETALING -> SpannerPersonDto.UtbetalingData.UtbetalingtypeData.UTBETALING
+            },
+        status = this.tilstand.tilPersonData(),
+        maksdato = this.maksdato,
+        forbrukteSykedager = this.forbrukteSykedager,
+        gjenståendeSykedager = this.gjenståendeSykedager,
+        vurdering = this.vurdering?.tilPersonData(),
+        overføringstidspunkt = overføringstidspunkt,
+        avstemmingsnøkkel = avstemmingsnøkkel,
+        avsluttet = avsluttet,
+        oppdatert = oppdatert
+    )
 
-private fun UtbetalingstidslinjeUtDto.tilPersonData() = SpannerPersonDto.UtbetalingstidslinjeData(
-    dager = this.dager.map { it.tilPersonData() }.forkortUtbetalingstidslinje()
-)
+private fun UtbetalingTilstandDto.tilPersonData() =
+    when (this) {
+        UtbetalingTilstandDto.ANNULLERT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.ANNULLERT
+        UtbetalingTilstandDto.FORKASTET -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.FORKASTET
+        UtbetalingTilstandDto.GODKJENT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.GODKJENT
+        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.GODKJENT_UTEN_UTBETALING
+        UtbetalingTilstandDto.IKKE_GODKJENT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.IKKE_GODKJENT
+        UtbetalingTilstandDto.IKKE_UTBETALT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.IKKE_UTBETALT
+        UtbetalingTilstandDto.NY -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.NY
+        UtbetalingTilstandDto.OVERFØRT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.OVERFØRT
+        UtbetalingTilstandDto.UTBETALT -> SpannerPersonDto.UtbetalingData.UtbetalingstatusData.UTBETALT
+    }
 
+private fun UtbetalingstidslinjeUtDto.tilPersonData() =
+    SpannerPersonDto.UtbetalingstidslinjeData(
+        dager = this.dager.map { it.tilPersonData() }.forkortUtbetalingstidslinje()
+    )
 
 private fun List<SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData>.forkortUtbetalingstidslinje(): List<SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData> {
     return this.fold(emptyList()) { result, neste ->
@@ -1160,162 +1260,193 @@ private fun SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData.kanUtvi
 
 private fun UtbetalingsdagUtDto.tilPersonData() =
     SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData(
-        type = when (this) {
-            is UtbetalingsdagUtDto.ArbeidsdagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Arbeidsdag
-            is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
-            is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodedagNav
-            is UtbetalingsdagUtDto.AvvistDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.AvvistDag
-            is UtbetalingsdagUtDto.ForeldetDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ForeldetDag
-            is UtbetalingsdagUtDto.FridagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Fridag
-            is UtbetalingsdagUtDto.NavDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavDag
-            is UtbetalingsdagUtDto.NavHelgDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavHelgDag
-            is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
-        },
+        type =
+            when (this) {
+                is UtbetalingsdagUtDto.ArbeidsdagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Arbeidsdag
+                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
+                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodedagNav
+                is UtbetalingsdagUtDto.AvvistDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.AvvistDag
+                is UtbetalingsdagUtDto.ForeldetDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ForeldetDag
+                is UtbetalingsdagUtDto.FridagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Fridag
+                is UtbetalingsdagUtDto.NavDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavDag
+                is UtbetalingsdagUtDto.NavHelgDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavHelgDag
+                is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
+            },
         aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
         beregningsgrunnlag = this.økonomi.beregningsgrunnlag.dagligDouble.beløp,
         dekningsgrunnlag = this.økonomi.dekningsgrunnlag.dagligDouble.beløp,
-        grunnbeløpgrense = this.økonomi.grunnbeløpgrense?.dagligDouble?.beløp,
-        begrunnelser = when (this) {
-            is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
-            else -> null
-        },
+        grunnbeløpgrense =
+            this.økonomi.grunnbeløpgrense
+                ?.dagligDouble
+                ?.beløp,
+        begrunnelser =
+            when (this) {
+                is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
+                else -> null
+            },
         grad = this.økonomi.grad.prosent,
         totalGrad = this.økonomi.totalGrad.prosent,
         arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
-        arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
-        personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,
+        arbeidsgiverbeløp =
+            this.økonomi.arbeidsgiverbeløp
+                ?.dagligDouble
+                ?.beløp,
+        personbeløp =
+            this.økonomi.personbeløp
+                ?.dagligDouble
+                ?.beløp,
         er6GBegrenset = this.økonomi.er6GBegrenset,
         dato = this.dato,
         fom = null,
         tom = null
     )
 
-private fun BegrunnelseDto.tilPersonData() = when (this) {
-    BegrunnelseDto.AndreYtelserAap -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserAap
-    BegrunnelseDto.AndreYtelserDagpenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserDagpenger
-    BegrunnelseDto.AndreYtelserForeldrepenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserForeldrepenger
-    BegrunnelseDto.AndreYtelserOmsorgspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserOmsorgspenger
-    BegrunnelseDto.AndreYtelserOpplaringspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserOpplaringspenger
-    BegrunnelseDto.AndreYtelserPleiepenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserPleiepenger
-    BegrunnelseDto.AndreYtelserSvangerskapspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserSvangerskapspenger
-    BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode
-    BegrunnelseDto.EtterDødsdato -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.EtterDødsdato
-    BegrunnelseDto.ManglerMedlemskap -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.ManglerMedlemskap
-    BegrunnelseDto.ManglerOpptjening -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.ManglerOpptjening
-    BegrunnelseDto.MinimumInntekt -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt
-    BegrunnelseDto.MinimumInntektOver67 -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntektOver67
-    BegrunnelseDto.MinimumSykdomsgrad -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MinimumSykdomsgrad
-    BegrunnelseDto.NyVilkårsprøvingNødvendig -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.NyVilkårsprøvingNødvendig
-    BegrunnelseDto.Over70 -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.Over70
-    BegrunnelseDto.SykepengedagerOppbrukt -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt
-    BegrunnelseDto.SykepengedagerOppbruktOver67 -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbruktOver67
-}
+private fun BegrunnelseDto.tilPersonData() =
+    when (this) {
+        BegrunnelseDto.AndreYtelserAap -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserAap
+        BegrunnelseDto.AndreYtelserDagpenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserDagpenger
+        BegrunnelseDto.AndreYtelserForeldrepenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserForeldrepenger
+        BegrunnelseDto.AndreYtelserOmsorgspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserOmsorgspenger
+        BegrunnelseDto.AndreYtelserOpplaringspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserOpplaringspenger
+        BegrunnelseDto.AndreYtelserPleiepenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserPleiepenger
+        BegrunnelseDto.AndreYtelserSvangerskapspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserSvangerskapspenger
+        BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode
+        BegrunnelseDto.EtterDødsdato -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.EtterDødsdato
+        BegrunnelseDto.ManglerMedlemskap -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.ManglerMedlemskap
+        BegrunnelseDto.ManglerOpptjening -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.ManglerOpptjening
+        BegrunnelseDto.MinimumInntekt -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt
+        BegrunnelseDto.MinimumInntektOver67 -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntektOver67
+        BegrunnelseDto.MinimumSykdomsgrad -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MinimumSykdomsgrad
+        BegrunnelseDto.NyVilkårsprøvingNødvendig -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.NyVilkårsprøvingNødvendig
+        BegrunnelseDto.Over70 -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.Over70
+        BegrunnelseDto.SykepengedagerOppbrukt -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt
+        BegrunnelseDto.SykepengedagerOppbruktOver67 -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbruktOver67
+    }
 
-private fun UtbetalingVurderingDto.tilPersonData() = SpannerPersonDto.UtbetalingData.VurderingData(
-    godkjent = godkjent,
-    ident = ident,
-    epost = epost,
-    tidspunkt = tidspunkt,
-    automatiskBehandling = automatiskBehandling
-)
-private fun OppdragUtDto.tilPersonData() = SpannerPersonDto.OppdragData(
-    mottaker = this.mottaker,
-    fagområde = when (this.fagområde) {
-        FagområdeDto.SP -> "SP"
-        FagområdeDto.SPREF -> "SPREF"
-    },
-    linjer = this.linjer.map { it.tilPersonData() },
-    fagsystemId = this.fagsystemId,
-    endringskode = this.endringskode.tilPersonData(),
-    tidsstempel = this.tidsstempel,
-    nettoBeløp = this.nettoBeløp,
-    totalbeløp = this.totalbeløp,
-    stønadsdager = this.stønadsdager,
-    avstemmingsnøkkel = this.avstemmingsnøkkel,
-    status = when (this.status) {
-        OppdragstatusDto.AKSEPTERT -> SpannerPersonDto.OppdragData.OppdragstatusData.AKSEPTERT
-        OppdragstatusDto.AKSEPTERT_MED_FEIL -> SpannerPersonDto.OppdragData.OppdragstatusData.AKSEPTERT_MED_FEIL
-        OppdragstatusDto.AVVIST -> SpannerPersonDto.OppdragData.OppdragstatusData.AVVIST
-        OppdragstatusDto.FEIL -> SpannerPersonDto.OppdragData.OppdragstatusData.FEIL
-        OppdragstatusDto.OVERFØRT -> SpannerPersonDto.OppdragData.OppdragstatusData.OVERFØRT
-        null -> null
-    },
-    overføringstidspunkt = this.overføringstidspunkt,
-    erSimulert = this.erSimulert,
-    simuleringsResultat = this.simuleringsResultat?.tilPersonData()
-)
-private fun EndringskodeDto.tilPersonData() = when (this) {
-    EndringskodeDto.ENDR -> "ENDR"
-    EndringskodeDto.NY -> "NY"
-    EndringskodeDto.UEND -> "UEND"
-}
-private fun UtbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.UtbetalingslinjeData(
-    fom = this.fom,
-    tom = this.tom,
-    satstype = when (this.satstype) {
-        SatstypeDto.Daglig -> "DAG"
-        SatstypeDto.Engang -> "ENG"
-    },
-    sats = this.beløp,
-    grad = this.grad,
-    totalbeløp = this.totalbeløp,
-    stønadsdager = this.stønadsdager,
-    refFagsystemId = this.refFagsystemId,
-    delytelseId = this.delytelseId,
-    refDelytelseId = this.refDelytelseId,
-    endringskode = this.endringskode.tilPersonData(),
-    klassekode = this.klassekode.tilPersonData(),
-    datoStatusFom = this.datoStatusFom,
-    statuskode = this.statuskode
-)
-private fun KlassekodeDto.tilPersonData() = when (this) {
-    KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
-    KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
-    KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
-    KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
-}
+private fun UtbetalingVurderingDto.tilPersonData() =
+    SpannerPersonDto.UtbetalingData.VurderingData(
+        godkjent = godkjent,
+        ident = ident,
+        epost = epost,
+        tidspunkt = tidspunkt,
+        automatiskBehandling = automatiskBehandling
+    )
+
+private fun OppdragUtDto.tilPersonData() =
+    SpannerPersonDto.OppdragData(
+        mottaker = this.mottaker,
+        fagområde =
+            when (this.fagområde) {
+                FagområdeDto.SP -> "SP"
+                FagområdeDto.SPREF -> "SPREF"
+            },
+        linjer = this.linjer.map { it.tilPersonData() },
+        fagsystemId = this.fagsystemId,
+        endringskode = this.endringskode.tilPersonData(),
+        tidsstempel = this.tidsstempel,
+        nettoBeløp = this.nettoBeløp,
+        totalbeløp = this.totalbeløp,
+        stønadsdager = this.stønadsdager,
+        avstemmingsnøkkel = this.avstemmingsnøkkel,
+        status =
+            when (this.status) {
+                OppdragstatusDto.AKSEPTERT -> SpannerPersonDto.OppdragData.OppdragstatusData.AKSEPTERT
+                OppdragstatusDto.AKSEPTERT_MED_FEIL -> SpannerPersonDto.OppdragData.OppdragstatusData.AKSEPTERT_MED_FEIL
+                OppdragstatusDto.AVVIST -> SpannerPersonDto.OppdragData.OppdragstatusData.AVVIST
+                OppdragstatusDto.FEIL -> SpannerPersonDto.OppdragData.OppdragstatusData.FEIL
+                OppdragstatusDto.OVERFØRT -> SpannerPersonDto.OppdragData.OppdragstatusData.OVERFØRT
+                null -> null
+            },
+        overføringstidspunkt = this.overføringstidspunkt,
+        erSimulert = this.erSimulert,
+        simuleringsResultat = this.simuleringsResultat?.tilPersonData()
+    )
+
+private fun EndringskodeDto.tilPersonData() =
+    when (this) {
+        EndringskodeDto.ENDR -> "ENDR"
+        EndringskodeDto.NY -> "NY"
+        EndringskodeDto.UEND -> "UEND"
+    }
+
+private fun UtbetalingslinjeUtDto.tilPersonData() =
+    SpannerPersonDto.UtbetalingslinjeData(
+        fom = this.fom,
+        tom = this.tom,
+        satstype =
+            when (this.satstype) {
+                SatstypeDto.Daglig -> "DAG"
+                SatstypeDto.Engang -> "ENG"
+            },
+        sats = this.beløp,
+        grad = this.grad,
+        totalbeløp = this.totalbeløp,
+        stønadsdager = this.stønadsdager,
+        refFagsystemId = this.refFagsystemId,
+        delytelseId = this.delytelseId,
+        refDelytelseId = this.refDelytelseId,
+        endringskode = this.endringskode.tilPersonData(),
+        klassekode = this.klassekode.tilPersonData(),
+        datoStatusFom = this.datoStatusFom,
+        statuskode = this.statuskode
+    )
+
+private fun KlassekodeDto.tilPersonData() =
+    when (this) {
+        KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
+        KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
+        KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
+        KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
+    }
+
 private fun SimuleringResultatDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(
         totalbeløp = this.totalbeløp,
-        perioder = this.perioder.map {
-            SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertPeriode(
-                fom = it.fom,
-                tom = it.tom,
-
-                utbetalinger = it.utbetalinger.map {
-                    SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertUtbetaling(
-                        forfallsdato = it.forfallsdato,
-                        utbetalesTil = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Mottaker(
-                            id = it.utbetalesTil.id,
-                            navn = it.utbetalesTil.navn
-                        ),
-                        feilkonto = it.feilkonto,
-                        detaljer = it.detaljer.map {
-                            SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Detaljer(
-                                fom = it.fom,
-                                tom = it.tom,
-                                konto = it.konto,
-                                beløp = it.beløp,
-                                klassekode = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Klassekode(
-                                    kode = it.klassekode.kode,
-                                    beskrivelse = it.klassekode.beskrivelse
-                                ),
-                                uføregrad = it.uføregrad,
-                                utbetalingstype = it.utbetalingstype,
-                                tilbakeføring = it.tilbakeføring,
-                                sats = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Sats(
-                                    sats = it.sats.sats,
-                                    antall = it.sats.antall,
-                                    type = it.sats.type
-                                ),
-                                refunderesOrgnummer = it.refunderesOrgnummer
+        perioder =
+            this.perioder.map {
+                SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertPeriode(
+                    fom = it.fom,
+                    tom = it.tom,
+                    utbetalinger =
+                        it.utbetalinger.map {
+                            SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertUtbetaling(
+                                forfallsdato = it.forfallsdato,
+                                utbetalesTil =
+                                    SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Mottaker(
+                                        id = it.utbetalesTil.id,
+                                        navn = it.utbetalesTil.navn
+                                    ),
+                                feilkonto = it.feilkonto,
+                                detaljer =
+                                    it.detaljer.map {
+                                        SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Detaljer(
+                                            fom = it.fom,
+                                            tom = it.tom,
+                                            konto = it.konto,
+                                            beløp = it.beløp,
+                                            klassekode =
+                                                SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Klassekode(
+                                                    kode = it.klassekode.kode,
+                                                    beskrivelse = it.klassekode.beskrivelse
+                                                ),
+                                            uføregrad = it.uføregrad,
+                                            utbetalingstype = it.utbetalingstype,
+                                            tilbakeføring = it.tilbakeføring,
+                                            sats =
+                                                SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Sats(
+                                                    sats = it.sats.sats,
+                                                    antall = it.sats.antall,
+                                                    type = it.sats.type
+                                                ),
+                                            refunderesOrgnummer = it.refunderesOrgnummer
+                                        )
+                                    }
                             )
                         }
-                    )
-                }
-            )
-        }
+                )
+            }
     )
+
 private fun FeriepengeUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData(
         infotrygdFeriepengebeløpPerson = this.infotrygdFeriepengebeløpPerson,
@@ -1331,18 +1462,21 @@ private fun FeriepengeUtDto.tilPersonData() =
         sendTilOppdrag = sendTilOppdrag,
         sendPersonoppdragTilOS = sendPersonoppdragTilOS
     )
+
 private fun UtbetaltDagDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(
-        type = when (this) {
-            is UtbetaltDagDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
-            is UtbetaltDagDto.InfotrygdPerson -> "InfotrygdPersonDag"
-            is UtbetaltDagDto.SpleisArbeidsgiver -> "SpleisArbeidsgiverDag"
-            is UtbetaltDagDto.SpleisPerson -> "SpleisPersonDag"
-        },
+        type =
+            when (this) {
+                is UtbetaltDagDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
+                is UtbetaltDagDto.InfotrygdPerson -> "InfotrygdPersonDag"
+                is UtbetaltDagDto.SpleisArbeidsgiver -> "SpleisArbeidsgiverDag"
+                is UtbetaltDagDto.SpleisPerson -> "SpleisPersonDag"
+            },
         orgnummer = orgnummer,
         dato = dato,
         beløp = beløp
     )
+
 private fun InfotrygdhistorikkelementUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData(
         id = this.id,
@@ -1355,11 +1489,13 @@ private fun InfotrygdhistorikkelementUtDto.tilPersonData() =
         arbeidskategorikoder = arbeidskategorikoder,
         oppdatert = oppdatert
     )
+
 private fun InfotrygdFerieperiodeDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData.FerieperiodeData(
         fom = this.periode.fom,
         tom = this.periode.tom
     )
+
 private fun InfotrygdArbeidsgiverutbetalingsperiodeUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData(
         orgnr = this.orgnr,
@@ -1368,6 +1504,7 @@ private fun InfotrygdArbeidsgiverutbetalingsperiodeUtDto.tilPersonData() =
         grad = this.grad.prosent,
         inntekt = this.inntekt.dagligInt.beløp
     )
+
 private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData.PersonutbetalingsperiodeData(
         orgnr = this.orgnr,
@@ -1376,6 +1513,7 @@ private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() =
         grad = this.grad.prosent,
         inntekt = this.inntekt.dagligInt.beløp
     )
+
 private fun InfotrygdInntektsopplysningUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData.InntektsopplysningData(
         orgnr = this.orgnummer,
@@ -1385,60 +1523,73 @@ private fun InfotrygdInntektsopplysningUtDto.tilPersonData() =
         refusjonTom = refusjonTom,
         lagret = lagret
     )
-private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() = SpannerPersonDto.VilkårsgrunnlagInnslagData(
-    id = this.id,
-    opprettet = this.opprettet,
-    vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilPersonData() }
-)
-private fun VilkårsgrunnlagUtDto.tilPersonData() = SpannerPersonDto.VilkårsgrunnlagElementData(
-    skjæringstidspunkt = this.skjæringstidspunkt,
-    type = when (this) {
-        is VilkårsgrunnlagUtDto.Infotrygd -> SpannerPersonDto.VilkårsgrunnlagElementData.GrunnlagsdataType.Infotrygd
-        is VilkårsgrunnlagUtDto.Spleis -> SpannerPersonDto.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
-    },
-    inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
-    opptjening = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.opptjening.tilPersonData()
-        is VilkårsgrunnlagUtDto.Infotrygd -> null
-    },
-    medlemskapstatus = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> when (this.medlemskapstatus) {
-            MedlemskapsvurderingDto.Ja -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.JA
-            MedlemskapsvurderingDto.Nei -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.NEI
-            MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.UAVKLART_MED_BRUKERSPØRSMÅL
-            MedlemskapsvurderingDto.VetIkke -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.VET_IKKE
-        }
 
-        else -> null
-    },
-    vurdertOk = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.vurdertOk
-        else -> null
-    },
-    meldingsreferanseId = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId
-        else -> null
-    },
-    vilkårsgrunnlagId = this.vilkårsgrunnlagId
-)
+private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() =
+    SpannerPersonDto.VilkårsgrunnlagInnslagData(
+        id = this.id,
+        opprettet = this.opprettet,
+        vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilPersonData() }
+    )
+
+private fun VilkårsgrunnlagUtDto.tilPersonData() =
+    SpannerPersonDto.VilkårsgrunnlagElementData(
+        skjæringstidspunkt = this.skjæringstidspunkt,
+        type =
+            when (this) {
+                is VilkårsgrunnlagUtDto.Infotrygd -> SpannerPersonDto.VilkårsgrunnlagElementData.GrunnlagsdataType.Infotrygd
+                is VilkårsgrunnlagUtDto.Spleis -> SpannerPersonDto.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
+            },
+        inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
+        opptjening =
+            when (this) {
+                is VilkårsgrunnlagUtDto.Spleis -> this.opptjening.tilPersonData()
+                is VilkårsgrunnlagUtDto.Infotrygd -> null
+            },
+        medlemskapstatus =
+            when (this) {
+                is VilkårsgrunnlagUtDto.Spleis ->
+                    when (this.medlemskapstatus) {
+                        MedlemskapsvurderingDto.Ja -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.JA
+                        MedlemskapsvurderingDto.Nei -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.NEI
+                        MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.UAVKLART_MED_BRUKERSPØRSMÅL
+                        MedlemskapsvurderingDto.VetIkke -> SpannerPersonDto.VilkårsgrunnlagElementData.MedlemskapstatusDto.VET_IKKE
+                    }
+
+                else -> null
+            },
+        vurdertOk =
+            when (this) {
+                is VilkårsgrunnlagUtDto.Spleis -> this.vurdertOk
+                else -> null
+            },
+        meldingsreferanseId =
+            when (this) {
+                is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId
+                else -> null
+            },
+        vilkårsgrunnlagId = this.vilkårsgrunnlagId
+    )
 
 private fun OpptjeningUtDto.tilPersonData() =
     SpannerPersonDto.VilkårsgrunnlagElementData.OpptjeningData(
         opptjeningFom = this.opptjeningsperiode.fom,
         opptjeningTom = this.opptjeningsperiode.tom,
-        arbeidsforhold = this.arbeidsforhold.map {
-            SpannerPersonDto.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData(
-                orgnummer = it.orgnummer,
-                ansattPerioder = it.ansattPerioder.map {
-                    SpannerPersonDto.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData.ArbeidsforholdData(
-                        ansattFom = it.ansattFom,
-                        ansattTom = it.ansattTom,
-                        deaktivert = it.deaktivert
-                    )
-                }
-            )
-        }
+        arbeidsforhold =
+            this.arbeidsforhold.map {
+                SpannerPersonDto.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData(
+                    orgnummer = it.orgnummer,
+                    ansattPerioder =
+                        it.ansattPerioder.map {
+                            SpannerPersonDto.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData.ArbeidsforholdData(
+                                ansattFom = it.ansattFom,
+                                ansattTom = it.ansattTom,
+                                deaktivert = it.deaktivert
+                            )
+                        }
+                )
+            }
     )
+
 private fun InntektsgrunnlagUtDto.tilPersonData() =
     SpannerPersonDto.VilkårsgrunnlagElementData.InntektsgrunnlagData(
         grunnbeløp = this.`6G`.årlig.beløp,
@@ -1460,69 +1611,80 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
         fom = this.gjelder.fom,
         tom = this.gjelder.tom,
         inntektsopplysning = this.inntektsopplysning.tilPersonData(),
-        refusjonsopplysninger = this.refusjonsopplysninger.opplysninger.map {
-            it.tilPersonData()
-        }
+        refusjonsopplysninger =
+            this.refusjonsopplysninger.opplysninger.map {
+                it.tilPersonData()
+            }
     )
 
-private fun NyInntektUnderveisDto.tilPersonData() = SpannerPersonDto.VilkårsgrunnlagElementData.NyInntektUnderveisData(
-    orgnummer = this.orgnummer,
-    beløpstidslinje = this.beløpstidslinje.tilPersonData()
-)
+private fun NyInntektUnderveisDto.tilPersonData() =
+    SpannerPersonDto.VilkårsgrunnlagElementData.NyInntektUnderveisData(
+        orgnummer = this.orgnummer,
+        beløpstidslinje = this.beløpstidslinje.tilPersonData()
+    )
 
 private fun InntektsopplysningUtDto.tilPersonData() =
     SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
         id = this.id,
         dato = this.dato,
         hendelseId = this.hendelseId,
-        beløp = when (this) {
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
-            is InntektsopplysningUtDto.IkkeRapportertDto -> null
-            is InntektsopplysningUtDto.InfotrygdDto -> this.beløp.tilPersonData()
-            is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.tilPersonData()
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.tilPersonData()
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.tilPersonData()
-        },
-        kilde = when (this) {
-            is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
-            is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
-            is InntektsopplysningUtDto.InntektsmeldingDto -> "INNTEKTSMELDING"
-            is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
-        },
-        forklaring = when (this) {
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.forklaring
-            else -> null
-        },
-        subsumsjon = when (this) {
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.subsumsjon?.let {
-                SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.SubsumsjonData(
-                    paragraf = it.paragraf,
-                    bokstav = it.bokstav,
-                    ledd = it.ledd
-                )
-            }
+        beløp =
+            when (this) {
+                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
+                is InntektsopplysningUtDto.IkkeRapportertDto -> null
+                is InntektsopplysningUtDto.InfotrygdDto -> this.beløp.tilPersonData()
+                is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.tilPersonData()
+                is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.tilPersonData()
+                is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.tilPersonData()
+            },
+        kilde =
+            when (this) {
+                is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
+                is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
+                is InntektsopplysningUtDto.InntektsmeldingDto -> "INNTEKTSMELDING"
+                is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
+                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
+                is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
+            },
+        forklaring =
+            when (this) {
+                is InntektsopplysningUtDto.SaksbehandlerDto -> this.forklaring
+                else -> null
+            },
+        subsumsjon =
+            when (this) {
+                is InntektsopplysningUtDto.SaksbehandlerDto ->
+                    this.subsumsjon?.let {
+                        SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.SubsumsjonData(
+                            paragraf = it.paragraf,
+                            bokstav = it.bokstav,
+                            ledd = it.ledd
+                        )
+                    }
 
-            else -> null
-        },
+                else -> null
+            },
         tidsstempel = this.tidsstempel,
-        overstyrtInntektId = when (this) {
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt
-            else -> null
-        },
-        skatteopplysninger = when (this) {
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> this.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-            else -> null
-        },
-        inntektsmeldingkilde = when (this) {
-            is InntektsopplysningUtDto.InntektsmeldingDto -> when (this.kilde) {
-                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
-                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+        overstyrtInntektId =
+            when (this) {
+                is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
+                is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt
+                else -> null
+            },
+        skatteopplysninger =
+            when (this) {
+                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> this.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+                else -> null
+            },
+        inntektsmeldingkilde =
+            when (this) {
+                is InntektsopplysningUtDto.InntektsmeldingDto ->
+                    when (this.kilde) {
+                        InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+                        InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+                    }
+                else -> null
             }
-            else -> null
-        }
     )
 
 private fun RefusjonsopplysningUtDto.tilPersonData() =
@@ -1540,25 +1702,29 @@ private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =
         hendelseId = this.hendelseId,
         beløp = this.beløp.beløp,
         måned = this.måned,
-        type = when (this.type) {
-            InntekttypeDto.LØNNSINNTEKT -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.LØNNSINNTEKT
-            InntekttypeDto.NÆRINGSINNTEKT -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.NÆRINGSINNTEKT
-            InntekttypeDto.PENSJON_ELLER_TRYGD -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
-            InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
-        },
+        type =
+            when (this.type) {
+                InntekttypeDto.LØNNSINNTEKT -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.LØNNSINNTEKT
+                InntekttypeDto.NÆRINGSINNTEKT -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.NÆRINGSINNTEKT
+                InntekttypeDto.PENSJON_ELLER_TRYGD -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
+                InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
+            },
         fordel = fordel,
         beskrivelse = beskrivelse,
         tidsstempel = tidsstempel
     )
-private fun BeløpstidslinjeDto.tilPersonData() = SpannerPersonDto.BeløpstidslinjeData(
-    perioder = this.perioder.map {
-        SpannerPersonDto.BeløpstidslinjeperiodeData(
-            fom = it.fom,
-            tom = it.tom,
-            dagligBeløp = it.dagligBeløp,
-            meldingsreferanseId = it.kilde.meldingsreferanseId,
-            avsender = it.kilde.avsender.tilPersonData(),
-            tidsstempel = it.kilde.tidsstempel
-        )
-    }
-)
+
+private fun BeløpstidslinjeDto.tilPersonData() =
+    SpannerPersonDto.BeløpstidslinjeData(
+        perioder =
+            this.perioder.map {
+                SpannerPersonDto.BeløpstidslinjeperiodeData(
+                    fom = it.fom,
+                    tom = it.tom,
+                    dagligBeløp = it.dagligBeløp,
+                    meldingsreferanseId = it.kilde.meldingsreferanseId,
+                    avsender = it.kilde.avsender.tilPersonData(),
+                    tidsstempel = it.kilde.tidsstempel
+                )
+            }
+    )

@@ -1,7 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
@@ -36,12 +34,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
+import java.time.LocalDate
+import java.util.UUID
 
 internal class InntektsmeldingTest {
-
-    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "88888888"
-    )
+    private val hendelsefabrikk =
+        ArbeidsgiverHendelsefabrikk(
+            organisasjonsnummer = "88888888"
+        )
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntektsmelding: Inntektsmelding
     private lateinit var dager: DagerFraInntektsmelding
@@ -114,7 +114,8 @@ internal class InntektsmeldingTest {
             listOf(
                 1.januar til 7.januar,
                 10.januar til 18.januar
-            ), førsteFraværsdag = 25.januar
+            ),
+            førsteFraværsdag = 25.januar
         )
         val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje() ?: fail { "forventet sykdomstidslinje" }
         assertEquals(1.januar, tidslinje.førsteDag())
@@ -131,7 +132,8 @@ internal class InntektsmeldingTest {
             listOf(
                 1.januar til 7.januar,
                 10.januar til 18.januar
-            ), førsteFraværsdag = 25.januar
+            ),
+            førsteFraværsdag = 25.januar
         )
         val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 20.januar til 31.januar)?.sykdomstidslinje() ?: fail { "forventet sykdomstidslinje" }
         assertEquals(1.januar, tidslinje.førsteDag())
@@ -149,7 +151,8 @@ internal class InntektsmeldingTest {
             listOf(
                 1.januar til 7.januar,
                 10.januar til 18.januar
-            ), førsteFraværsdag = 25.januar
+            ),
+            førsteFraværsdag = 25.januar
         )
         val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 31.desember(2017) til 31.januar)?.sykdomstidslinje() ?: fail { "forventet sykdomstidslinje" }
         assertEquals(31.desember(2017), tidslinje.førsteDag())
@@ -168,7 +171,8 @@ internal class InntektsmeldingTest {
                 Periode(1.januar, 2.januar),
                 Periode(10.januar, 12.januar),
                 Periode(15.januar, 24.januar)
-            ), førsteFraværsdag = 1.januar
+            ),
+            førsteFraværsdag = 1.januar
         )
         val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 10.januar til 31.januar)?.sykdomstidslinje() ?: fail { "forventet sykdomstidslinje" }
         assertEquals(1.januar, nyTidslinje.periode()?.start)
@@ -326,8 +330,8 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-       dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
-       assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -354,7 +358,8 @@ internal class InntektsmeldingTest {
                 // 6. og 7. januar er helg
                 8.januar til 12.januar,
                 13.januar til 18.januar
-            ), førsteFraværsdag = 1.januar
+            ),
+            førsteFraværsdag = 1.januar
         )
         val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje() ?: fail { "forventet sykdomstidslinje" }
 
@@ -395,7 +400,6 @@ internal class InntektsmeldingTest {
         assertEquals(FriskHelgedag::class, nyTidslinje[21.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
-
 
     @Test
     fun `opphold mellom arbeidsgiverperiode og første fraværsdag, arbeidsgiverperiode slutter på torsdag`() {
@@ -498,17 +502,22 @@ internal class InntektsmeldingTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
         aktivitetslogg = Aktivitetslogg()
-        inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+        inntektsmelding =
+            hendelsefabrikk.lagInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+            )
+        inntektsmelding.valider(
+            object : Inntektsmelding.Valideringsgrunnlag {
+                override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+
+                override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+            },
+            aktivitetslogg
         )
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, aktivitetslogg)
         dager = inntektsmelding.dager()
     }
 
@@ -524,18 +533,23 @@ internal class InntektsmeldingTest {
         erForlengelse: Boolean = false
     ) {
         aktivitetslogg = Aktivitetslogg()
-        inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            vedtaksperiodeId = vedtaksperiodeId,
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            avsenderSystem = avsenderSystem
+        inntektsmelding =
+            hendelsefabrikk.lagPortalinntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                vedtaksperiodeId = vedtaksperiodeId,
+                refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                avsenderSystem = avsenderSystem
+            )
+        inntektsmelding.valider(
+            object : Inntektsmelding.Valideringsgrunnlag {
+                override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.ForenkletVedtaksperiode({ null }, { LocalDate.EPOCH }, { erForlengelse })
+
+                override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+            },
+            aktivitetslogg
         )
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.ForenkletVedtaksperiode({ null }, { LocalDate.EPOCH }, { erForlengelse })
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, aktivitetslogg)
 
         dager = inntektsmelding.dager()
     }

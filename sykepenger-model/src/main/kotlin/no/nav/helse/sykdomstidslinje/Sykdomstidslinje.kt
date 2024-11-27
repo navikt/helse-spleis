@@ -1,10 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.util.Objects
-import java.util.SortedMap
-import java.util.stream.Collectors.toMap
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
@@ -37,6 +32,11 @@ import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.util.Objects
+import java.util.SortedMap
+import java.util.stream.Collectors.toMap
 
 class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
@@ -54,7 +54,9 @@ class Sykdomstidslinje private constructor(
         this(original.dager, original.periode?.plus(spanningPeriode), original.låstePerioder.toMutableList())
 
     internal fun periode() = periode
+
     internal fun førsteDag() = periode!!.start
+
     internal fun sisteDag() = periode!!.endInclusive
 
     internal fun overlapperMed(other: Sykdomstidslinje) =
@@ -64,7 +66,10 @@ class Sykdomstidslinje private constructor(
             else -> this.periode.overlapperMed(other.periode)
         }
 
-    internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
+    internal fun merge(
+        other: Sykdomstidslinje,
+        beste: BesteStrategy = default
+    ): Sykdomstidslinje {
         val nyeDager = dager.toMutableMap()
         other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
         return Sykdomstidslinje(
@@ -75,20 +80,24 @@ class Sykdomstidslinje private constructor(
     }
 
     internal operator fun plus(other: Sykdomstidslinje) = this.merge(other)
+
     internal operator fun minus(other: Sykdomstidslinje) = Sykdomstidslinje(dager.filterNot { it.key in other.dager.keys }.toSortedMap())
+
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
+
     internal fun subset(periode: Periode) =
-        if (this.periode == null || !periode.overlapperMed(this.periode)) Sykdomstidslinje()
-        else Sykdomstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag), this.periode.subset(periode))
+        if (this.periode == null || !periode.overlapperMed(this.periode)) {
+            Sykdomstidslinje()
+        } else {
+            Sykdomstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag), this.periode.subset(periode))
+        }
 
     /**
      * Uten å utvide tidslinjen
      */
-    internal fun fremTilOgMed(dato: LocalDate) =
-        if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
+    internal fun fremTilOgMed(dato: LocalDate) = if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
 
-    internal fun fraOgMed(dato: LocalDate) =
-        Sykdomstidslinje(dager.tailMap(dato).toMap())
+    internal fun fraOgMed(dato: LocalDate) = Sykdomstidslinje(dager.tailMap(dato).toMap())
 
     internal fun trim(perioder: List<Periode>): Sykdomstidslinje {
         val forkast = perioder.flatten()
@@ -98,19 +107,22 @@ class Sykdomstidslinje private constructor(
 
     internal fun erLåst(periode: Periode) = låstePerioder.contains(periode)
 
-    internal fun lås(periode: Periode) = this.also {
-        requireNotNull(this.periode)
-        require(periode in this.periode) { "$periode er ikke i ${this.periode}" }
-        _låstePerioder.add(periode)
-    }
+    internal fun lås(periode: Periode) =
+        this.also {
+            requireNotNull(this.periode)
+            require(periode in this.periode) { "$periode er ikke i ${this.periode}" }
+            _låstePerioder.add(periode)
+        }
 
-    internal fun låsOpp(periode: Periode) = this.also {
-        _låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
-    }
+    internal fun låsOpp(periode: Periode) =
+        this.also {
+            _låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
+        }
 
     internal fun bekreftErLåst(periode: Periode) {
         check(låstePerioder.any { it == periode }) { "$periode er ikke låst" }
     }
+
     internal fun bekreftErÅpen(periode: Periode) {
         check(låstePerioder.none { it.overlapperMed(periode) }) { "hele eller deler av $periode er låst" }
     }
@@ -119,7 +131,9 @@ class Sykdomstidslinje private constructor(
         if (periode == null) return emptyList<Nothing>().iterator()
         return object : Iterator<Dag> {
             private val periodeIterator = periode.iterator()
+
             override fun hasNext() = periodeIterator.hasNext()
+
             override fun next() = this@Sykdomstidslinje[periodeIterator.next()]
         }
     }
@@ -135,13 +149,16 @@ class Sykdomstidslinje private constructor(
     }
 
     private fun erFørsteDagOppholdsdag() = erOppholdsdagtype(this.førsteDag())
+
     private fun erSisteDagOppholdsdag() = erOppholdsdagtype(this.sisteDag())
-    private fun erOppholdsdagtype(dato: LocalDate) = when (this[dato]) {
-        is Arbeidsdag,
-        is FriskHelgedag,
-        is ArbeidIkkeGjenopptattDag -> true
-        else -> false
-    }
+
+    private fun erOppholdsdagtype(dato: LocalDate) =
+        when (this[dato]) {
+            is Arbeidsdag,
+            is FriskHelgedag,
+            is ArbeidIkkeGjenopptattDag -> true
+            else -> false
+        }
 
     override fun equals(other: Any?): Boolean {
         if (other !is Sykdomstidslinje) return false
@@ -159,27 +176,27 @@ class Sykdomstidslinje private constructor(
         return String(toShortString().replace(" ", "").toSortedSet().toCharArray())
     }
 
-    internal fun toShortString(): String {
-        return periode?.joinToString(separator = "") {
-            (if (it.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
-                when (this[it]) {
-                    is Sykedag -> "S"
-                    is Arbeidsdag -> "A"
-                    is UkjentDag -> "?"
-                    is ProblemDag -> "X"
-                    is SykHelgedag -> "H"
-                    is Arbeidsgiverdag -> "U"
-                    is ArbeidsgiverHelgedag -> "G"
-                    is Feriedag -> "F"
-                    is ArbeidIkkeGjenopptattDag -> "J"
-                    is Permisjonsdag -> "P"
-                    is FriskHelgedag -> "R"
-                    is ForeldetSykedag -> "K"
-                    is SykedagNav -> "N"
-                    is AndreYtelser -> "Y"
-                }
-        }?.trim() ?: "Tom tidslinje"
-    }
+    internal fun toShortString(): String =
+        periode
+            ?.joinToString(separator = "") {
+                (if (it.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
+                    when (this[it]) {
+                        is Sykedag -> "S"
+                        is Arbeidsdag -> "A"
+                        is UkjentDag -> "?"
+                        is ProblemDag -> "X"
+                        is SykHelgedag -> "H"
+                        is Arbeidsgiverdag -> "U"
+                        is ArbeidsgiverHelgedag -> "G"
+                        is Feriedag -> "F"
+                        is ArbeidIkkeGjenopptattDag -> "J"
+                        is Permisjonsdag -> "P"
+                        is FriskHelgedag -> "R"
+                        is ForeldetSykedag -> "K"
+                        is SykedagNav -> "N"
+                        is AndreYtelser -> "Y"
+                    }
+            }?.trim() ?: "Tom tidslinje"
 
     internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
 
@@ -190,73 +207,80 @@ class Sykdomstidslinje private constructor(
                 acc.merge(utenProblemdager, replace)
             }
 
-        internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) =
-            Skjæringstidspunkt(samletTidslinje(tidslinjer))
+        internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) = Skjæringstidspunkt(samletTidslinje(tidslinjer))
 
-        private fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
-            .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
-            .merge(sammenhengendeSykdom)
+        private fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) =
+            tidslinjer
+                .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
+                .merge(sammenhengendeSykdom)
 
-        internal fun arbeidsdager(periode: Periode, kilde: Hendelseskilde) =
-            Sykdomstidslinje(periode.associateWith { if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) })
-        internal fun ghostdager(periode: Periode) =
-            Sykdomstidslinje(periode.associateWith { if (it.erHelg()) UkjentDag(it, INGEN) else UkjentDag(it, INGEN) })
+        internal fun arbeidsdager(
+            periode: Periode,
+            kilde: Hendelseskilde
+        ) = Sykdomstidslinje(periode.associateWith { if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) })
 
-        internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
-            arbeidsdager(Periode(førsteDato, sisteDato), kilde)
+        internal fun ghostdager(periode: Periode) = Sykdomstidslinje(periode.associateWith { if (it.erHelg()) UkjentDag(it, INGEN) else UkjentDag(it, INGEN) })
+
+        internal fun arbeidsdager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: Hendelseskilde
+        ) = arbeidsdager(Periode(førsteDato, sisteDato), kilde)
 
         internal fun sykedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             grad: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap(
-                            { it },
-                            {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
-                                }
-
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(
+                    toMap(
+                        { it },
+                        {
+                            Økonomi.sykdomsgrad(grad).let { økonomi ->
+                                if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
                             }
-                        )
-                    ))
+                        }
+                    )
+                )
+        )
 
         internal fun sykedagerNav(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             grad: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap(
-                            { it },
-                            {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else SykedagNav(it, økonomi, kilde)
-                                }
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(
+                    toMap(
+                        { it },
+                        {
+                            Økonomi.sykdomsgrad(grad).let { økonomi ->
+                                if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else SykedagNav(it, økonomi, kilde)
                             }
-                        )
-                    ))
+                        }
+                    )
+                )
+        )
 
         internal fun ukjent(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap<LocalDate, LocalDate, Dag>(
-                            { it },
-                            { UkjentDag(it, kilde) }
-                        )
-                    ))
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(
+                    toMap<LocalDate, LocalDate, Dag>(
+                        { it },
+                        { UkjentDag(it, kilde) }
+                    )
+                )
+        )
 
         internal fun sykedager(
             førsteDato: LocalDate,
@@ -264,24 +288,29 @@ class Sykdomstidslinje private constructor(
             avskjæringsdato: LocalDate,
             grad: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap(
-                            { it },
-                            {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else sykedag(
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(
+                    toMap(
+                        { it },
+                        {
+                            Økonomi.sykdomsgrad(grad).let { økonomi ->
+                                if (it.erHelg()) {
+                                    SykHelgedag(it, økonomi, kilde)
+                                } else {
+                                    sykedag(
                                         it,
                                         avskjæringsdato,
                                         økonomi,
                                         kilde
                                     )
                                 }
-                            })
+                            }
+                        }
                     )
-            )
+                )
+        )
 
         private fun sykedag(
             dato: LocalDate,
@@ -295,89 +324,96 @@ class Sykdomstidslinje private constructor(
             sisteDato: LocalDate,
             grad: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap(
-                            { it },
-                            {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) ArbeidsgiverHelgedag(it, økonomi, kilde)
-                                    else Arbeidsgiverdag(it, økonomi, kilde)
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(
+                    toMap(
+                        { it },
+                        {
+                            Økonomi.sykdomsgrad(grad).let { økonomi ->
+                                if (it.erHelg()) {
+                                    ArbeidsgiverHelgedag(it, økonomi, kilde)
+                                } else {
+                                    Arbeidsgiverdag(it, økonomi, kilde)
                                 }
-                            })
+                            }
+                        }
                     )
-            )
+                )
+        )
 
         internal fun feriedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Feriedag(it, kilde) }))
-            )
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Feriedag(it, kilde) }))
+        )
 
         internal fun arbeidIkkeGjenopptatt(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ArbeidIkkeGjenopptattDag(it, kilde) }))
-            )
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ArbeidIkkeGjenopptattDag(it, kilde) }))
+        )
 
         internal fun permisjonsdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, kilde) }))
-            )
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, kilde) }))
+        )
 
         internal fun andreYtelsedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde,
             ytelse: AnnenYtelse
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AndreYtelser(it, kilde, ytelse) }))
-            )
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AndreYtelser(it, kilde, ytelse) }))
+        )
 
         internal fun problemdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde,
             melding: String
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
-            )
+        ) = Sykdomstidslinje(
+            førsteDato
+                .datesUntil(sisteDato.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
+        )
 
-        internal fun gjenopprett(dto: SykdomstidslinjeDto): Sykdomstidslinje {
-            return Sykdomstidslinje(
+        internal fun gjenopprett(dto: SykdomstidslinjeDto): Sykdomstidslinje =
+            Sykdomstidslinje(
                 dager = dto.dager.associate { it.dato to Dag.gjenopprett(it) }.toSortedMap(),
                 periode = dto.periode?.let { Periode.gjenopprett(it) },
                 _låstePerioder = dto.låstePerioder.map { Periode.gjenopprett(it) }.toMutableList()
             )
-        }
     }
 
-    internal fun dto() = SykdomstidslinjeDto(
-        dager = dager.map { (_, dag) -> dag.dto() },
-        periode = periode?.dto(),
-        låstePerioder = låstePerioder.map { it.dto() }
-    )
+    internal fun dto() =
+        SykdomstidslinjeDto(
+            dager = dager.map { (_, dag) -> dag.dto() },
+            periode = periode?.dto(),
+            låstePerioder = låstePerioder.map { it.dto() }
+        )
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =
-    if (this.isEmpty()) Sykdomstidslinje()
-    else reduce { result, tidslinje -> result.merge(tidslinje, beste) }
+    if (this.isEmpty()) {
+        Sykdomstidslinje()
+    } else {
+        reduce { result, tidslinje -> result.merge(tidslinje, beste) }
+    }

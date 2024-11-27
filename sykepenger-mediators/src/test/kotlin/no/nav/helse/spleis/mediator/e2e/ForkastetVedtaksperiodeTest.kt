@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Periode
@@ -12,18 +10,21 @@ import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertAntallUtgående
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `vedtaksperiode_forkastet`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-        val søknadId2 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100))
-        )
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            )
+        val søknadId2 =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100))
+            )
 
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "TIL_INFOTRYGD")
         assertTilstander(1, "TIL_INFOTRYGD")
@@ -82,11 +83,12 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), fnr = nyttFnr)
-        val søknadId2 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
-            historiskeFolkeregisteridenter = listOf(historiskFnr),
-            fnr = nyttFnr
-        )
+        val søknadId2 =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
+                historiskeFolkeregisteridenter = listOf(historiskFnr),
+                fnr = nyttFnr
+            )
 
         testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 1)
 
@@ -114,16 +116,18 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtaksperide_forkastet sender med flagg om den forkastede vedtaksperiode skal be om arbeidsgiveropplysninger`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        val søknadId1 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            sendTilGosys = true
-        )
+        val søknadId1 =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+                sendTilGosys = true
+            )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
-        val søknadId2 = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
-            sendTilGosys = true
-        )
+        val søknadId2 =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
+                sendTilGosys = true
+            )
 
         testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 2)
 
@@ -135,7 +139,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
                 28.februar,
                 false,
                 listOf(1.januar til 31.januar, 1.februar til 28.februar)
-            ), 1
+            ),
+            1
         )
     }
 
@@ -164,8 +169,10 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
             }
         """
 
-    private fun assertVedtaksperiodeForkastet(forventetMelding: String, index: Int) =
-        testRapid.assertUtgåendeMelding(forventetMelding, faktiskMelding = { it[index] })
+    private fun assertVedtaksperiodeForkastet(
+        forventetMelding: String,
+        index: Int
+    ) = testRapid.assertUtgåendeMelding(forventetMelding, faktiskMelding = { it[index] })
 }
 
 private fun Periode.hardcodedJson(): String =

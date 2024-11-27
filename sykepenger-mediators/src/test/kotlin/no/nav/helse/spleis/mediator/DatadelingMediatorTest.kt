@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -18,6 +16,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class DatadelingMediatorTest {
     private val fødselsnummer = "12345678910"
@@ -25,9 +25,13 @@ internal class DatadelingMediatorTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
-    private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-        it.requireKey("@event_name")
-    }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
+    private val eksempelmelding =
+        MigrateMessage(
+            JsonMessage.newMessage("testevent", emptyMap()).also {
+                it.requireKey("@event_name")
+            },
+            Meldingsporing(UUID.randomUUID(), fødselsnummer)
+        )
 
     @BeforeEach
     fun beforeEach() {
@@ -67,7 +71,8 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.funksjonellFeil(RV_VT_1)
         try {
             aktivitetslogg.logiskFeil("Dette er en severe")
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         datadelingMediator.ferdigstill(testRapid)
 
         assertEquals(1, testRapid.inspektør.antall())
@@ -88,7 +93,10 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        try { aktivitetslogg.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
+        try {
+            aktivitetslogg.logiskFeil("Dette er en infomelding")
+        } catch (_: Exception) {
+        }
         datadelingMediator.ferdigstill(testRapid)
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
@@ -101,7 +109,7 @@ internal class DatadelingMediatorTest {
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

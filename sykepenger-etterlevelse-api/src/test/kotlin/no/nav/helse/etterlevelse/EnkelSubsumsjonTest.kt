@@ -1,6 +1,5 @@
 package no.nav.helse.etterlevelse
 
-import java.time.LocalDate
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
@@ -8,9 +7,9 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class EnkelSubsumsjonTest {
-
     private val vurderinger: MutableList<Subsumsjon> = mutableListOf()
 
     @BeforeEach
@@ -42,11 +41,12 @@ internal class EnkelSubsumsjonTest {
         bokstav: Bokstav? = null,
         input: Map<String, Any> = emptyMap(),
         output: Map<String, Any> = emptyMap(),
-        kontekster: List<Subsumsjonskontekst> = listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeId")
-        )
+        kontekster: List<Subsumsjonskontekst> =
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeId")
+            )
     ) {
         Subsumsjon.enkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
             vurderinger.add(it)

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -38,15 +37,21 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class InfotrygdTest : AbstractEndToEndTest() {
-
     @Test
     fun `infotrygd flytter skjæringstidspunkt`() {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
+        assertEquals(
+            2,
+            inspektør
+                .vilkårsgrunnlagHistorikkInnslag()
+                .first()
+                .vilkårsgrunnlag.size
+        )
     }
 
     @Test
@@ -59,6 +64,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
+
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -103,8 +109,16 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     }
 
     private fun refusjonsopplysninger(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.orgnummer == a1 }.inspektør.refusjonsopplysninger
+        inspektør
+            .vilkårsgrunnlag(vedtaksperiode)!!
+            .inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger
+            .single { it.orgnummer == a1 }
+            .inspektør.refusjonsopplysninger
 
     private fun inntektsopplysning(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inspektør.inntektsopplysning
+        inspektør
+            .vilkårsgrunnlag(vedtaksperiode)!!
+            .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+            .single { it.gjelder(a1) }
+            .inspektør.inntektsopplysning
 }

@@ -16,8 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
-
+internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() {
     @Test
     fun `arbeidsgiverperioden strekker seg over to perioder og inntektsmelding kommer etter søknadene`() {
         a1 {
@@ -89,22 +88,49 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
 
             assertTrue(inspektør.sykdomstidslinje[25.januar] is Dag.SykedagNav)
-            assertEquals(25.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.inspektør.førsteIkkeUkjenteDag)
+            assertEquals(
+                25.januar,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .sykdomstidslinje.inspektør.førsteIkkeUkjenteDag
+            )
 
             assertForventetFeil(
                 forklaring = "Vedtaksperiode blir strukket med UkjentDag",
                 nå = {
                     (17.januar til 31.januar).let { periode ->
                         assertEquals(periode, inspektør.periode(2.vedtaksperiode))
-                        assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
-
+                        assertEquals(
+                            periode,
+                            inspektør
+                                .vedtaksperioder(2.vedtaksperiode)
+                                .inspektør.behandlinger
+                                .last()
+                                .endringer
+                                .last()
+                                .sykdomstidslinje
+                                .periode()
+                        )
                     }
-                 },
+                },
                 ønsket = {
                     (25.januar til 31.januar).let { periode ->
                         assertEquals(periode, inspektør.periode(2.vedtaksperiode))
-                        assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
-
+                        assertEquals(
+                            periode,
+                            inspektør
+                                .vedtaksperioder(2.vedtaksperiode)
+                                .inspektør.behandlinger
+                                .last()
+                                .endringer
+                                .last()
+                                .sykdomstidslinje
+                                .periode()
+                        )
                     }
                 }
             )
@@ -128,10 +154,11 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
             håndterUtbetalt()
             assertEquals("SSSSSHH SSSSSHH SSSSNHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertForventetFeil(
-                forklaring = "Når arbeidsgiver oppgir første fraværsdag ut i forlengelsen havner varselet om uenighet i " +
+                forklaring =
+                    "Når arbeidsgiver oppgir første fraværsdag ut i forlengelsen havner varselet om uenighet i " +
                         "AGP på siste periode. Da utbetaler vi potensielt første periode feil og automatisk.",
                 nå = {
-                     assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+                    assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
                 },
                 ønsket = {
                     assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())

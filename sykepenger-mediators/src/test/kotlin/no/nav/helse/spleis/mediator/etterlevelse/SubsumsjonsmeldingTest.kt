@@ -8,8 +8,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
-import java.net.URI
-import java.util.UUID
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Tidslinjedag
@@ -24,6 +22,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.util.UUID
 
 internal class SubsumsjonsmeldingTest {
     private val fnr = "12029240045"
@@ -35,31 +35,45 @@ internal class SubsumsjonsmeldingTest {
 
     @BeforeEach
     fun beforeEach() {
-        val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-            it.requireKey("@event_name")
-        }, Meldingsporing(UUID.randomUUID(), fnr))
+        val eksempelmelding =
+            MigrateMessage(
+                JsonMessage.newMessage("testevent", emptyMap()).also {
+                    it.requireKey("@event_name")
+                },
+                Meldingsporing(UUID.randomUUID(), fnr)
+            )
         subsumsjonMediator = SubsumsjonMediator(eksempelmelding, versjonAvKode)
         testRapid = TestRapid()
     }
 
     @Test
     fun `en melding på gyldig format`() {
-        val subsumsjonen = `§ 8-17 ledd 2`(
-            listOf(1.januar(2018).somPeriode()),
-            MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
-        ).copy(kontekster = listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid"),
-        ))
+        val subsumsjonen =
+            `§ 8-17 ledd 2`(
+                listOf(1.januar(2018).somPeriode()),
+                MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
+            ).copy(
+                kontekster =
+                    listOf(
+                        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid")
+                    )
+            )
         subsumsjonMediator.logg(subsumsjonen)
-        val subsumsjoner = buildList<JsonNode> {
-            subsumsjonMediator.ferdigstill(object : Subsumsjonproducer {
-                override fun send(fnr: String, melding: String) {
-                    add(objectMapper.readTree(melding))
-                }
-            })
-        }
+        val subsumsjoner =
+            buildList<JsonNode> {
+                subsumsjonMediator.ferdigstill(
+                    object : Subsumsjonproducer {
+                        override fun send(
+                            fnr: String,
+                            melding: String
+                        ) {
+                            add(objectMapper.readTree(melding))
+                        }
+                    }
+                )
+            }
         assertSubsumsjonsmelding(subsumsjoner.first().path("subsumsjon"))
     }
 

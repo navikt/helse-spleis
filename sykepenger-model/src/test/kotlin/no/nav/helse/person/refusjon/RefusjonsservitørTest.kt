@@ -1,7 +1,5 @@
 package no.nav.helse.person.refusjon
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -13,9 +11,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class RefusjonsservitørTest {
-
     @Test
     fun `rester etter servering`() {
         val refusjonstidslinje = Beløpstidslinje.fra(januar, 100.daglig, kilde)

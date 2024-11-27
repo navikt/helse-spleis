@@ -1,8 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
@@ -22,6 +19,7 @@ import no.nav.helse.etterlevelse.førstePunktum
 import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
+import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -41,7 +39,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
-import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull
@@ -56,17 +53,25 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.properties.Delegates
 
 internal class InntektsgrunnlagTest {
     private companion object {
-        private val fødseldato67år =  1.februar(1954)
+        private val fødseldato67år = 1.februar(1954)
     }
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+
+    private val jurist =
+        BehandlingSubsumsjonslogg(
+            EmptyLog,
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}")
+            )
+        )
 
     @Test
     fun equality() {
@@ -155,17 +160,19 @@ internal class InntektsgrunnlagTest {
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(41, resultat.inspektør.avvistDagTeller)
-        assertTrue((1.januar(2021) til 1.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
-            }
+        assertTrue(
+            (1.januar(2021) til 1.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
+                }
         )
-        assertTrue((2.februar(2021) til 28.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-            }
+        assertTrue(
+            (2.februar(2021) til 28.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+                }
         )
     }
 
@@ -180,9 +187,11 @@ internal class InntektsgrunnlagTest {
         val tidslinje = tidslinjeOf(20.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(20, resultat.inspektør.avvistDagTeller)
-        assertTrue(resultat.inspektør.avvistedatoer.all { dato ->
-            resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-        })
+        assertTrue(
+            resultat.inspektør.avvistedatoer.all { dato ->
+                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+            }
+        )
     }
 
     @Test
@@ -196,9 +205,11 @@ internal class InntektsgrunnlagTest {
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(27, resultat.inspektør.avvistDagTeller)
-        assertTrue(resultat.inspektør.avvistedatoer.all { dato ->
-            resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-        })
+        assertTrue(
+            resultat.inspektør.avvistedatoer.all { dato ->
+                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+            }
+        )
     }
 
     @Test
@@ -241,6 +252,7 @@ internal class InntektsgrunnlagTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(observer.`§ 8-51 ledd 2`)
     }
+
     @Test
     fun `mindre enn 2G, og skjæringstidspunkt er etter virkningen av minsteinntekt`() {
         val alder = fødseldato67år.alder
@@ -272,7 +284,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (inntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt,  jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(0, resultat.inspektør.avvistDagTeller)
     }
 
@@ -285,21 +297,24 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (halvG - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(20, resultat.inspektør.avvistDagTeller)
-        assertTrue((1.februar(2021) til 1.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
-            }
+        assertTrue(
+            (1.februar(2021) til 1.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
+                }
         )
-        assertTrue((2.februar(2021) til 28.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-            }
+        assertTrue(
+            (2.februar(2021) til 28.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+                }
         )
     }
+
     @Test
     fun `begrunnelse etter 67 år`() {
         val alder = fødseldato67år.alder
@@ -309,13 +324,14 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (`2G` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(27.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(19, resultat.inspektør.avvistDagTeller)
-        assertTrue((2.februar(2021) til 28.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-            }
+        assertTrue(
+            (2.februar(2021) til 28.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+                }
         )
     }
 
@@ -336,6 +352,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = `6G`.sykepengegrunnlag
         assertEquals(`6G`, sykepengegrunnlag.inspektør.sykepengegrunnlag)
     }
+
     @Test
     fun `sykepengegrunnlaget skal ikke rundes av - under 6`() {
         val daglig = 255.5.daglig
@@ -350,21 +367,35 @@ internal class InntektsgrunnlagTest {
         val a2Fom = skjæringstidspunkt.plusDays(1)
         val a1Inntekt = 25000.månedlig
         val a2Inntekt = 5000.månedlig
-        val inntekter = listOf(
-            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmelding(a1Fom, UUID.randomUUID(), a1Inntekt), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), a1Fom, null, a1Inntekt), LocalDateTime.now())
-            }.build()),
-            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmelding(a2Fom, UUID.randomUUID(), a2Inntekt), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), a2Fom, null, INGEN), LocalDateTime.now())
-            }.build()),
-        )
+        val inntekter =
+            listOf(
+                ArbeidsgiverInntektsopplysning(
+                    "a1",
+                    a1Fom til LocalDate.MAX,
+                    Inntektsmelding(a1Fom, UUID.randomUUID(), a1Inntekt),
+                    RefusjonsopplysningerBuilder()
+                        .apply {
+                            leggTil(Refusjonsopplysning(UUID.randomUUID(), a1Fom, null, a1Inntekt), LocalDateTime.now())
+                        }.build()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    "a2",
+                    a2Fom til LocalDate.MAX,
+                    Inntektsmelding(a2Fom, UUID.randomUUID(), a2Inntekt),
+                    RefusjonsopplysningerBuilder()
+                        .apply {
+                            leggTil(Refusjonsopplysning(UUID.randomUUID(), a2Fom, null, INGEN), LocalDateTime.now())
+                        }.build()
+                )
+            )
 
-        val inntektsgrunnlag = Inntektsgrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            arbeidsgiverInntektsopplysninger = inntekter,
-            skjæringstidspunkt = skjæringstidspunkt,
-            subsumsjonslogg = EmptyLog
-        )
+        val inntektsgrunnlag =
+            Inntektsgrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                arbeidsgiverInntektsopplysninger = inntekter,
+                skjæringstidspunkt = skjæringstidspunkt,
+                subsumsjonslogg = EmptyLog
+            )
         assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.beregningsgrunnlag)
     }
@@ -372,58 +403,90 @@ internal class InntektsgrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - endre til samme`() {
         val skjæringstidsounkt = 1.januar
-        val opprinnelig = listOf(
-            ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Inntektsmelding(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
-            }.build()),
-            ArbeidsgiverInntektsopplysning("a2", skjæringstidsounkt til LocalDate.MAX, Inntektsmelding(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, INGEN), LocalDateTime.now())
-            }.build()),
-        )
+        val opprinnelig =
+            listOf(
+                ArbeidsgiverInntektsopplysning(
+                    "a1",
+                    skjæringstidsounkt til LocalDate.MAX,
+                    Inntektsmelding(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig),
+                    RefusjonsopplysningerBuilder()
+                        .apply {
+                            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
+                        }.build()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    "a2",
+                    skjæringstidsounkt til LocalDate.MAX,
+                    Inntektsmelding(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig),
+                    RefusjonsopplysningerBuilder()
+                        .apply {
+                            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, INGEN), LocalDateTime.now())
+                        }.build()
+                )
+            )
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, EmptyLog)
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build())
+        val endretOpplysning =
+            ArbeidsgiverInntektsopplysning(
+                "a1",
+                skjæringstidsounkt til LocalDate.MAX,
+                Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()),
+                RefusjonsopplysningerBuilder()
+                    .apply {
+                        leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
+                    }.build()
+            )
         overstyring.leggTilInntekt(endretOpplysning)
 
         assertNotNull(overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
         val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a2Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
+                }.build()
+        val a1Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 2000.månedlig), LocalDateTime.now())
-        }.build()
+        val a1EndretRefusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 2000.månedlig), LocalDateTime.now())
+                }.build()
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
         val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a2Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
+                }.build()
+        val a1Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
@@ -431,9 +494,11 @@ internal class InntektsgrunnlagTest {
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a1EndretRefusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
 
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
@@ -441,17 +506,22 @@ internal class InntektsgrunnlagTest {
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1Refusjonsopplysninger)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a2Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
+                }.build()
+        val a1Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
@@ -459,26 +529,33 @@ internal class InntektsgrunnlagTest {
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a1EndretRefusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
 
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
         assertNotNull(overstyring.resultat())
     }
+
     @Test
     fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
         val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a2Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
+                }.build()
+        val a1Refusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
@@ -486,14 +563,18 @@ internal class InntektsgrunnlagTest {
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a3EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a3EndretRefusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
+        val a1EndretRefusjonsopplysninger =
+            RefusjonsopplysningerBuilder()
+                .apply {
+                    leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
+                }.build()
 
         val endretOpplysningA3 = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysningA3)
@@ -501,11 +582,10 @@ internal class InntektsgrunnlagTest {
         val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysningA1)
 
-
         val resultat = overstyring.resultat()
         assertNotNull(resultat)
         assertEquals(2, resultat.size)
-        assertFalse(resultat.any { it.inspektør.orgnummer == "a3" } )
+        assertFalse(resultat.any { it.inspektør.orgnummer == "a3" })
     }
 
     @Test
@@ -516,63 +596,78 @@ internal class InntektsgrunnlagTest {
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
         val startdatoA2 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(2)
 
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = SkattSykepengegrunnlag(
-                        hendelseId = UUID.randomUUID(),
-                        dato = skjæringstidspunkt,
-                        inntektsopplysninger = listOf(
-                            Skatteopplysning(
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 25000.månedlig,
-                                måned = 1.januar.yearMonth,
-                                type = LØNNSINNTEKT,
-                                fordel = "",
-                                beskrivelse = "",
-                                tidsstempel = LocalDateTime.now()
-                            )
+        val inntektsgrunnlag =
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a1,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = skjæringstidspunkt,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
                         ),
-                        ansattPerioder = emptyList()
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a2,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                SkattSykepengegrunnlag(
+                                    hendelseId = UUID.randomUUID(),
+                                    dato = skjæringstidspunkt,
+                                    inntektsopplysninger =
+                                        listOf(
+                                            Skatteopplysning(
+                                                hendelseId = UUID.randomUUID(),
+                                                beløp = 25000.månedlig,
+                                                måned = 1.januar.yearMonth,
+                                                type = LØNNSINNTEKT,
+                                                fordel = "",
+                                                beskrivelse = "",
+                                                tidsstempel = LocalDateTime.now()
+                                            )
+                                        ),
+                                    ansattPerioder = emptyList()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
+                deaktiverteArbeidsforhold = emptyList(),
+                vurdertInfotrygd = false
+            )
 
-        val opptjening = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = sluttdatoA1,
-                    deaktivert = false
-                )
-            )),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
-                Arbeidsforhold(
-                    ansattFom = startdatoA2,
-                    ansattTom = null,
-                    deaktivert = false
-                )
-            ))
-        ), skjæringstidspunkt)
+        val opptjening =
+            Opptjening.nyOpptjening(
+                listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a1,
+                        listOf(
+                            Arbeidsforhold(
+                                ansattFom = LocalDate.EPOCH,
+                                ansattTom = sluttdatoA1,
+                                deaktivert = false
+                            )
+                        )
+                    ),
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a2,
+                        listOf(
+                            Arbeidsforhold(
+                                ansattFom = startdatoA2,
+                                ansattTom = null,
+                                deaktivert = false
+                            )
+                        )
+                    )
+                ),
+                skjæringstidspunkt
+            )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
@@ -591,47 +686,51 @@ internal class InntektsgrunnlagTest {
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = førsteFraværsdagAG1,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = SkattSykepengegrunnlag(
-                        hendelseId = UUID.randomUUID(),
-                        dato = skjæringstidspunkt,
-                        inntektsopplysninger = listOf(
-                            Skatteopplysning(
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 25000.månedlig,
-                                måned = 1.januar.yearMonth,
-                                type = LØNNSINNTEKT,
-                                fordel = "",
-                                beskrivelse = "",
-                                tidsstempel = LocalDateTime.now()
-                            )
+        val inntektsgrunnlag =
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a1,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = førsteFraværsdagAG1,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
                         ),
-                        ansattPerioder = emptyList()
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a2,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                SkattSykepengegrunnlag(
+                                    hendelseId = UUID.randomUUID(),
+                                    dato = skjæringstidspunkt,
+                                    inntektsopplysninger =
+                                        listOf(
+                                            Skatteopplysning(
+                                                hendelseId = UUID.randomUUID(),
+                                                beløp = 25000.månedlig,
+                                                måned = 1.januar.yearMonth,
+                                                type = LØNNSINNTEKT,
+                                                fordel = "",
+                                                beskrivelse = "",
+                                                tidsstempel = LocalDateTime.now()
+                                            )
+                                        ),
+                                    ansattPerioder = emptyList()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
+                deaktiverteArbeidsforhold = emptyList(),
+                vurdertInfotrygd = false
+            )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
@@ -646,37 +745,40 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = førsteFraværsdagAG1,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+        val inntektsgrunnlag =
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a1,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = førsteFraværsdagAG1,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        ),
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a2,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = førsteFraværsdagAG2,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = førsteFraværsdagAG2,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
+                deaktiverteArbeidsforhold = emptyList(),
+                vurdertInfotrygd = false
+            )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
@@ -689,62 +791,83 @@ internal class InntektsgrunnlagTest {
         val a1 = "a1"
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+        val inntektsgrunnlag =
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a1,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = skjæringstidspunkt,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        ),
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a2,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = skjæringstidspunkt,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
+                deaktiverteArbeidsforhold = emptyList(),
+                vurdertInfotrygd = false
+            )
 
-        val opptjeningUtenA2 = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = null,
-                    deaktivert = false
-                )
-            ))
-        ), skjæringstidspunkt)
-        val opptjeningMedA2 = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = null,
-                    deaktivert = false
-                )
-            )),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
-                Arbeidsforhold(
-                    ansattFom = LocalDate.EPOCH,
-                    ansattTom = null,
-                    deaktivert = false
-                )
-            ))
-        ), skjæringstidspunkt)
+        val opptjeningUtenA2 =
+            Opptjening.nyOpptjening(
+                listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a1,
+                        listOf(
+                            Arbeidsforhold(
+                                ansattFom = LocalDate.EPOCH,
+                                ansattTom = null,
+                                deaktivert = false
+                            )
+                        )
+                    )
+                ),
+                skjæringstidspunkt
+            )
+        val opptjeningMedA2 =
+            Opptjening.nyOpptjening(
+                listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a1,
+                        listOf(
+                            Arbeidsforhold(
+                                ansattFom = LocalDate.EPOCH,
+                                ansattTom = null,
+                                deaktivert = false
+                            )
+                        )
+                    ),
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a2,
+                        listOf(
+                            Arbeidsforhold(
+                                ansattFom = LocalDate.EPOCH,
+                                ansattTom = null,
+                                deaktivert = false
+                            )
+                        )
+                    )
+                ),
+                skjæringstidspunkt
+            )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)
@@ -764,37 +887,40 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = førsteFraværsdagAG1,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+        val inntektsgrunnlag =
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a1,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = førsteFraværsdagAG1,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        ),
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = a2,
+                            gjelder = skjæringstidspunkt til LocalDate.MAX,
+                            inntektsopplysning =
+                                Inntektsmelding(
+                                    dato = førsteFraværsdagAG2,
+                                    hendelseId = UUID.randomUUID(),
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = LocalDateTime.now()
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
-                        dato = førsteFraværsdagAG2,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
+                deaktiverteArbeidsforhold = emptyList(),
+                vurdertInfotrygd = false
+            )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
@@ -807,26 +933,29 @@ internal class InntektsgrunnlagTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val inntektsgrunnlag1 = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = "orgnummer",
-                    gjelder = 1.januar til LocalDate.MAX,
-                    inntektsopplysning = Infotrygd(
-                        id = inntektID,
-                        dato = 1.januar,
-                        hendelseId = hendelseId,
-                        beløp = 25000.månedlig,
-                        tidsstempel = tidsstempel
+        val inntektsgrunnlag1 =
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
+                alder = UNG_PERSON_FØDSELSDATO.alder,
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = "orgnummer",
+                            gjelder = 1.januar til LocalDate.MAX,
+                            inntektsopplysning =
+                                Infotrygd(
+                                    id = inntektID,
+                                    dato = 1.januar,
+                                    hendelseId = hendelseId,
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = tidsstempel
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
+                deaktiverteArbeidsforhold = emptyList(),
+                vurdertInfotrygd = false
+            )
 
         assertEquals(inntektsgrunnlag1, inntektsgrunnlag1.grunnbeløpsregulering()) { "grunnbeløpet trenger ikke justering" }
         assertNotEquals(
@@ -834,34 +963,38 @@ internal class InntektsgrunnlagTest {
             Inntektsgrunnlag.ferdigSykepengegrunnlag(
                 alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiverInntektsopplysninger = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        gjelder = 1.januar til LocalDate.MAX,
-                        inntektsopplysning = Infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
-                    )
-                ),
-                deaktiverteArbeidsforhold = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        gjelder = 1.januar til LocalDate.MAX,
-                        inntektsopplysning = Infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
-                    )
-                ),
+                arbeidsgiverInntektsopplysninger =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = "orgnummer",
+                            gjelder = 1.januar til LocalDate.MAX,
+                            inntektsopplysning =
+                                Infotrygd(
+                                    id = inntektID,
+                                    dato = 1.januar,
+                                    hendelseId = hendelseId,
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = tidsstempel
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
+                    ),
+                deaktiverteArbeidsforhold =
+                    listOf(
+                        ArbeidsgiverInntektsopplysning(
+                            orgnummer = "orgnummer",
+                            gjelder = 1.januar til LocalDate.MAX,
+                            inntektsopplysning =
+                                Infotrygd(
+                                    id = inntektID,
+                                    dato = 1.januar,
+                                    hendelseId = hendelseId,
+                                    beløp = 25000.månedlig,
+                                    tidsstempel = tidsstempel
+                                ),
+                            refusjonsopplysninger = Refusjonsopplysninger()
+                        )
+                    ),
                 vurdertInfotrygd = false
             )
         )

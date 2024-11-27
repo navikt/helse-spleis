@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -48,9 +46,10 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `skjæringstidspunkt endres som følge av infotrygdperiode`() {
         nyPeriode(1.januar til 1.januar, ORGNUMMER)
@@ -131,29 +130,33 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    private fun createDobbelutbetalingPerson() =
+        createTestPerson { jurist ->
+            gjenopprettFraJSON("/personer/dobbelutbetaling.json", jurist)
+        }
 
-    private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/dobbelutbetaling.json", jurist)
-    }
-
-    private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
-    }.also {
-        person.håndter(
-            Utbetalingshistorikk(
-                UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = listOf(
-                        Friperiode(fom = 1.februar, tom = 28.februar)
+    private fun createAuuBlirMedIRevureringPerson() =
+        createTestPerson { jurist ->
+            gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
+        }.also {
+            person.håndter(
+                Utbetalingshistorikk(
+                    UUID.randomUUID(),
+                    ORGNUMMER,
+                    UUID.randomUUID().toString(),
+                    InfotrygdhistorikkElement.opprett(
+                        oppdatert = LocalDateTime.now(),
+                        hendelseId = UUID.randomUUID(),
+                        perioder =
+                            listOf(
+                                Friperiode(fom = 1.februar, tom = 28.februar)
+                            ),
+                        inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                        arbeidskategorikoder = emptyMap()
                     ),
-                    inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
-                    arbeidskategorikoder = emptyMap()
+                    besvart = LocalDateTime.now()
                 ),
-                besvart = LocalDateTime.now()
-            ),
-            Aktivitetslogg()
-        )
-    }
+                Aktivitetslogg()
+            )
+        }
 }

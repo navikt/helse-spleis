@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
@@ -37,9 +36,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
-
     @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
@@ -88,7 +87,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(
             (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
-            listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
+                listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
         )
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)
@@ -400,7 +399,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         assertTrue(inspektør.sisteUtbetaling().erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
-        assertEquals(2,
+        assertEquals(
+            2,
             person.personLogg.behov
                 .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
                 .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
@@ -432,8 +432,16 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val avvisteDager =
+            observatør.utbetalingMedUtbetalingEventer
+                .first()
+                .utbetalingsdager
+                .filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val ikkeAvvisteDager =
+            observatør.utbetalingMedUtbetalingEventer
+                .first()
+                .utbetalingsdager
+                .filter { it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
 
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(7, avvisteDager.size)

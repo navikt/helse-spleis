@@ -11,36 +11,42 @@ class Spekemat : PersonObserver {
     private val hendelser = mutableListOf<Any>()
     private val arbeidsgivere = mutableMapOf<String, Pølsefabrikk>()
 
-    fun resultat() = SpekematDTO(
-        pakker = arbeidsgivere.mapNotNull { resultat(it.key) }
-    )
+    fun resultat() =
+        SpekematDTO(
+            pakker = arbeidsgivere.mapNotNull { resultat(it.key) }
+        )
+
     fun resultat(orgnr: String) = arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr)
 
     private fun List<PølseradDto>.mapTilPølsepakkeDTO(orgnr: String) =
         SpekematDTO.PølsepakkeDTO(
             yrkesaktivitetidentifikator = orgnr,
-            rader = map { rad ->
-                SpekematDTO.PølsepakkeDTO.PølseradDTO(
-                    kildeTilRad = rad.kildeTilRad,
-                    pølser = rad.pølser.map { pølseDto ->
-                        SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
-                            vedtaksperiodeId = pølseDto.vedtaksperiodeId,
-                            behandlingId = pølseDto.behandlingId,
-                            kilde = pølseDto.kilde,
-                            status = when (pølseDto.status) {
-                                Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
-                                Pølsestatus.LUKKET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.LUKKET
-                                Pølsestatus.FORKASTET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.FORKASTET
+            rader =
+                map { rad ->
+                    SpekematDTO.PølsepakkeDTO.PølseradDTO(
+                        kildeTilRad = rad.kildeTilRad,
+                        pølser =
+                            rad.pølser.map { pølseDto ->
+                                SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
+                                    vedtaksperiodeId = pølseDto.vedtaksperiodeId,
+                                    behandlingId = pølseDto.behandlingId,
+                                    kilde = pølseDto.kilde,
+                                    status =
+                                        when (pølseDto.status) {
+                                            Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
+                                            Pølsestatus.LUKKET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.LUKKET
+                                            Pølsestatus.FORKASTET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.FORKASTET
+                                        }
+                                )
                             }
-                        )
-                    }
-                )
-            }
+                    )
+                }
         )
 
     override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         hendelser.add(event)
-        arbeidsgivere.getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
+        arbeidsgivere
+            .getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
             .nyPølse(
                 Pølse(
                     vedtaksperiodeId = event.vedtaksperiodeId,
@@ -53,13 +59,15 @@ class Spekemat : PersonObserver {
 
     override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
         hendelser.add(event)
-        arbeidsgivere.getValue(event.organisasjonsnummer)
+        arbeidsgivere
+            .getValue(event.organisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.LUKKET)
     }
 
     override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
         hendelser.add(event)
-        arbeidsgivere.getValue(event.organisasjonsnummer)
+        arbeidsgivere
+            .getValue(event.organisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.FORKASTET)
     }
 }

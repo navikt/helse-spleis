@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `infotrygdendring gjør vi at trenger oppdatert historikk`() {
         nyPeriode(1.januar til 16.januar)
@@ -43,36 +42,44 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         assertEquals(2, observatør.overlappendeInfotrygdperioder.size)
         val event = observatør.overlappendeInfotrygdperioder.last()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(1.vedtaksperiode)
-        val forventet = PersonObserver.OverlappendeInfotrygdperioder(listOf(
-            PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = vedtaksperiodeId,
-                vedtaksperiodeFom = 1.januar,
-                vedtaksperiodeTom = 20.januar,
-                vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
-                infotrygdperioder = listOf(Infotrygdperiode(
-                    fom = 17.januar,
-                    tom = 31.januar,
-                    type = "ARBEIDSGIVERUTBETALING",
-                    orgnummer = ORGNUMMER
-                ))
-            ),
-
-            PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = inspektør.vedtaksperiodeId(2.vedtaksperiode),
-                vedtaksperiodeFom = 21.januar,
-                vedtaksperiodeTom = 31.januar,
-                vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
-                infotrygdperioder = listOf(Infotrygdperiode(
-                    fom = 17.januar,
-                    tom = 31.januar,
-                    type = "ARBEIDSGIVERUTBETALING",
-                    orgnummer = ORGNUMMER
-                ))
+        val forventet =
+            PersonObserver.OverlappendeInfotrygdperioder(
+                listOf(
+                    PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+                        organisasjonsnummer = ORGNUMMER,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        vedtaksperiodeFom = 1.januar,
+                        vedtaksperiodeTom = 20.januar,
+                        vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
+                        infotrygdperioder =
+                            listOf(
+                                Infotrygdperiode(
+                                    fom = 17.januar,
+                                    tom = 31.januar,
+                                    type = "ARBEIDSGIVERUTBETALING",
+                                    orgnummer = ORGNUMMER
+                                )
+                            )
+                    ),
+                    PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+                        organisasjonsnummer = ORGNUMMER,
+                        vedtaksperiodeId = inspektør.vedtaksperiodeId(2.vedtaksperiode),
+                        vedtaksperiodeFom = 21.januar,
+                        vedtaksperiodeTom = 31.januar,
+                        vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
+                        infotrygdperioder =
+                            listOf(
+                                Infotrygdperiode(
+                                    fom = 17.januar,
+                                    tom = 31.januar,
+                                    type = "ARBEIDSGIVERUTBETALING",
+                                    orgnummer = ORGNUMMER
+                                )
+                            )
+                    )
+                ),
+                meldingsreferanseId.toString()
             )
-
-        ), meldingsreferanseId.toString())
         assertEquals(forventet, event)
     }
 }

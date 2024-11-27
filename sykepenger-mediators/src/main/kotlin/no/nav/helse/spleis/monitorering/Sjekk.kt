@@ -1,15 +1,18 @@
 package no.nav.helse.spleis.monitorering
 
-import java.time.LocalDateTime
 import no.nav.helse.erHelg
 import org.slf4j.event.Level
+import java.time.LocalDateTime
 
 internal interface Sjekk {
     fun sjekk(): Pair<Level, String>?
+
     fun skalSjekke(nå: LocalDateTime): Boolean
 }
 
-internal class RegelmessigAvstemming(private val manglerAvstemming: () -> Int): Sjekk {
+internal class RegelmessigAvstemming(
+    private val manglerAvstemming: () -> Int
+) : Sjekk {
     override fun sjekk(): Pair<Level, String>? {
         val mangler = manglerAvstemming()
         if (mangler == 0) return null

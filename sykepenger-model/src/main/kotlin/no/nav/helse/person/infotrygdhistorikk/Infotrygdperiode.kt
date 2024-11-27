@@ -1,6 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.hendelser.til
@@ -9,21 +8,32 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.LocalDate
 
-sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
+sealed class Infotrygdperiode(
+    fom: LocalDate,
+    tom: LocalDate
+) {
     val periode = fom til tom
 
     internal open fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
+
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        organisasjonsnummer: String,
+        periode: Periode
+    ) {
         validerHarBetaltTidligere(periode, aktivitetslogg)
         validerOverlapp(aktivitetslogg, periode)
         validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
     }
 
-
-    private fun validerHarBetaltTidligere(periode: Periode, aktivitetslogg: IAktivitetslogg) {
+    private fun validerHarBetaltTidligere(
+        periode: Periode,
+        aktivitetslogg: IAktivitetslogg
+    ) {
         if (!harBetaltTidligere(periode)) return
         aktivitetslogg.funksjonellFeil(Varselkode.RV_IT_37)
     }
@@ -33,13 +43,20 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         return periodeMellom.count() < Vedtaksperiode.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
     }
 
-    private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun validerOverlapp(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode
+    ) {
         if (!this.periode.overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
         aktivitetslogg.varsel(Varselkode.RV_IT_3)
     }
 
-    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+    private fun validerNyereOpplysninger(
+        aktivitetslogg: IAktivitetslogg,
+        organisasjonsnummer: String,
+        periode: Periode
+    ) {
         if (!gjelder(organisasjonsnummer)) return
         if (this.periode.start <= periode.endInclusive) return
         aktivitetslogg.varsel(Varselkode.RV_IT_1)
@@ -55,17 +72,18 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     }
 
     internal companion object {
-        internal fun sorter(perioder: List<Infotrygdperiode>) =
-            perioder.sortedWith(compareBy( { it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
+        internal fun sorter(perioder: List<Infotrygdperiode>) = perioder.sortedWith(compareBy({ it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
 
-        internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) =  this
-            .filterIsInstance<Utbetalingsperiode>()
-            .filter { organisasjonsnummer == null || it.gjelder(organisasjonsnummer) }
-            .map { it.periode }
+        internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) =
+            this
+                .filterIsInstance<Utbetalingsperiode>()
+                .filter { organisasjonsnummer == null || it.gjelder(organisasjonsnummer) }
+                .map { it.periode }
 
-        internal fun List<Infotrygdperiode>.harBetaltRettFør(other: Periode) = this
-            .any {
-                it.periode.erRettFør(other)
-            }
+        internal fun List<Infotrygdperiode>.harBetaltRettFør(other: Periode) =
+            this
+                .any {
+                    it.periode.erRettFør(other)
+                }
     }
 }

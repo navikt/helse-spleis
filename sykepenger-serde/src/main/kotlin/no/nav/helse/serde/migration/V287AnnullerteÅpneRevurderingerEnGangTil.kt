@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 
-internal class V287AnnullerteÅpneRevurderingerEnGangTil: JsonMigration(version = 287) {
+internal class V287AnnullerteÅpneRevurderingerEnGangTil : JsonMigration(version = 287) {
     override val description = "smelter sammen til_infotrygd-generasjonen og nest siste generasjon hvis den er en åpen revurdering"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("forkastede").forEach { forkastet ->
                 migrerForkastetVedtaksperiode("", "", forkastet.path("vedtaksperiode"))
@@ -17,7 +20,11 @@ internal class V287AnnullerteÅpneRevurderingerEnGangTil: JsonMigration(version 
         }
     }
 
-    private fun migrerForkastetVedtaksperiode(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
+    private fun migrerForkastetVedtaksperiode(
+        aktørId: String,
+        orgnr: String,
+        vedtaksperiode: JsonNode
+    ) {
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
         val generasjoner = generasjonerNode.toList()
         if (generasjoner.size < 2) return
@@ -34,6 +41,5 @@ internal class V287AnnullerteÅpneRevurderingerEnGangTil: JsonMigration(version 
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     }
 }

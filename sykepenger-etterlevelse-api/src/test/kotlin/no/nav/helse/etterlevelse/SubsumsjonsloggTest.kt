@@ -7,14 +7,17 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SubsumsjonsloggTest {
-
     @Test
     fun tidslinjedager() {
-        val dager = List(31) { index ->
-            val dagen = (index + 1).januar
-            if (dagen < 16.januar) Tidslinjedag(dagen, "NAVDAG", 100)
-            else Tidslinjedag(dagen, "FERIEDAG", 100)
-        }
+        val dager =
+            List(31) { index ->
+                val dagen = (index + 1).januar
+                if (dagen < 16.januar) {
+                    Tidslinjedag(dagen, "NAVDAG", 100)
+                } else {
+                    Tidslinjedag(dagen, "FERIEDAG", 100)
+                }
+            }
 
         assertEquals(
             listOf(
@@ -37,11 +40,15 @@ internal class SubsumsjonsloggTest {
 
     @Test
     fun `tidslinjedager blir cappet til periode`() {
-        val dager = List(31) { index ->
-            val dagen = (index + 1).januar
-            if (dagen < 16.januar) Tidslinjedag(dagen, "NAVDAG", 100)
-            else Tidslinjedag(dagen, "FERIEDAG", 100)
-        }
+        val dager =
+            List(31) { index ->
+                val dagen = (index + 1).januar
+                if (dagen < 16.januar) {
+                    Tidslinjedag(dagen, "NAVDAG", 100)
+                } else {
+                    Tidslinjedag(dagen, "FERIEDAG", 100)
+                }
+            }
 
         assertEquals(
             listOf(

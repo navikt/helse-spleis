@@ -1,23 +1,20 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class AndreYtelserOppdatereHistorikkTest {
-
     private fun skalOppdatereHistorikk(
         ytelse: AnnenYtelseSomKanOppdatereHistorikk,
         periode: Periode,
         periodeRettEtter: Periode? = null,
-        skjæringstidspunkt: LocalDate = periode.start,
-    ): Boolean {
-        return ytelse.skalOppdatereHistorikk(Aktivitetslogg(), ytelse, periode, skjæringstidspunkt, periodeRettEtter)
-    }
+        skjæringstidspunkt: LocalDate = periode.start
+    ): Boolean = ytelse.skalOppdatereHistorikk(Aktivitetslogg(), ytelse, periode, skjæringstidspunkt, periodeRettEtter)
 
     @Test
     fun `foreldrepenger fullstendig i perioden`() {
@@ -85,33 +82,39 @@ class AndreYtelserOppdatereHistorikkTest {
     @Test
     fun `foreldrepenger oppstykket i perioden`() {
         val vedtaksperiode = januar
-        val foreldrepenger = Foreldrepenger(
-            listOf(
-                GradertPeriode(1.januar til 10.januar, 100),
-                GradertPeriode(20.januar til 31.januar, 100))
-        )
+        val foreldrepenger =
+            Foreldrepenger(
+                listOf(
+                    GradertPeriode(1.januar til 10.januar, 100),
+                    GradertPeriode(20.januar til 31.januar, 100)
+                )
+            )
         assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
 
     @Test
     fun `foreldrepenger oppstykket sammenhengende i perioden`() {
         val vedtaksperiode = januar
-        val foreldrepenger = Foreldrepenger(
-            listOf(
-                GradertPeriode(5.januar til 10.januar, 100),
-                GradertPeriode(11.januar til 31.januar, 100))
-        )
+        val foreldrepenger =
+            Foreldrepenger(
+                listOf(
+                    GradertPeriode(5.januar til 10.januar, 100),
+                    GradertPeriode(11.januar til 31.januar, 100)
+                )
+            )
         assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
 
     @Test
     fun `foreldrepenger oppstykket sammenhengende i og før perioden`() {
         val vedtaksperiode = 5.januar til 31.januar
-        val foreldrepenger = Foreldrepenger(
-            listOf(
-                GradertPeriode(1.januar til 10.januar, 100),
-                GradertPeriode(11.januar til 31.januar, 100))
-        )
+        val foreldrepenger =
+            Foreldrepenger(
+                listOf(
+                    GradertPeriode(1.januar til 10.januar, 100),
+                    GradertPeriode(11.januar til 31.januar, 100)
+                )
+            )
         assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
 

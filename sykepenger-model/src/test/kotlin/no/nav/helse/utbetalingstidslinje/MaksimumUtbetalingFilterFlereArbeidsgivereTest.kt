@@ -28,7 +28,10 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         assert6GBegrensetUtbetaling(ag2(), ag1())
     }
 
-    private fun assert6GBegrensetUtbetaling(ag1: Pair<Utbetalingstidslinje, Double>, ag2: Pair<Utbetalingstidslinje, Double>) {
+    private fun assert6GBegrensetUtbetaling(
+        ag1: Pair<Utbetalingstidslinje, Double>,
+        ag2: Pair<Utbetalingstidslinje, Double>
+    ) {
         val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first)) ?: fail { "forventer en periode" }
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)

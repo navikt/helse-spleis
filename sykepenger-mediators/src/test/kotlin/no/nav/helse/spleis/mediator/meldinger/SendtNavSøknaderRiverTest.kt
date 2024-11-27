@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverForskuttererDTO
@@ -28,32 +25,37 @@ import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class SendtNavSøknaderRiverTest : RiverTest() {
-
     private val fødselsdato = 12.desember(1995)
     private val invalidJson = "foo"
     private val unknownJson = "{\"foo\": \"bar\"}"
+
     private fun validSøknad(
         status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
-        soknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                sykmeldingsgrad = 100,
-                faktiskGrad = 100,
-                avtaltTimer = Double.MIN_VALUE,
-                faktiskTimer = Double.MAX_VALUE,
-                sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
+        soknadsperioder: List<SoknadsperiodeDTO> =
+            listOf(
+                SoknadsperiodeDTO(
+                    fom = LocalDate.now(),
+                    tom = LocalDate.now(),
+                    sykmeldingsgrad = 100,
+                    faktiskGrad = 100,
+                    avtaltTimer = Double.MIN_VALUE,
+                    faktiskTimer = Double.MAX_VALUE,
+                    sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
+                )
+            ),
+        fravar: List<FravarDTO> =
+            listOf(
+                FravarDTO(
+                    fom = LocalDate.now(),
+                    tom = LocalDate.now(),
+                    type = FravarstypeDTO.FERIE
+                )
             )
-        ),
-        fravar: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                type = FravarstypeDTO.FERIE
-            )
-        ),
     ) = SykepengesoknadDTO(
         id = UUID.randomUUID().toString(),
         type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -85,60 +87,75 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
             .asObjectNode()
             .put(UUID.randomUUID().toString(), "foobar")
             .toJson()
-    private val ukjentFraværskode = validSøknad().asObjectNode().also {
-        (it.path("fravar").first() as ObjectNode).put("type", "INVALID_FRAVÆRSTYPE")
-    }.toJson()
-    private val søknadMedUtlandsopphold = validSøknad(
-        fravar = listOf(
-            FravarDTO(
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                type = FravarstypeDTO.UTLANDSOPPHOLD
-            )
-        )
-    ).toJson()
-    private val søknadMedPermisjon = validSøknad(
-        fravar = listOf(
-            FravarDTO(
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                type = FravarstypeDTO.PERMISJON
-            )
-        )
-    ).toJson()
-    private val validSendtSøknadMedFaktiskGradStørreEnn100 = validSøknad(
-        soknadsperioder = listOf(
-            SoknadsperiodeDTO(
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                sykmeldingsgrad = 100,
-                faktiskGrad = 150,
-                avtaltTimer = 40.0,
-                faktiskTimer = 12.0,
-                sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
-            )
-        )
-    ).toJson()
+    private val ukjentFraværskode =
+        validSøknad()
+            .asObjectNode()
+            .also {
+                (it.path("fravar").first() as ObjectNode).put("type", "INVALID_FRAVÆRSTYPE")
+            }.toJson()
+    private val søknadMedUtlandsopphold =
+        validSøknad(
+            fravar =
+                listOf(
+                    FravarDTO(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        type = FravarstypeDTO.UTLANDSOPPHOLD
+                    )
+                )
+        ).toJson()
+    private val søknadMedPermisjon =
+        validSøknad(
+            fravar =
+                listOf(
+                    FravarDTO(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        type = FravarstypeDTO.PERMISJON
+                    )
+                )
+        ).toJson()
+    private val validSendtSøknadMedFaktiskGradStørreEnn100 =
+        validSøknad(
+            soknadsperioder =
+                listOf(
+                    SoknadsperiodeDTO(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        sykmeldingsgrad = 100,
+                        faktiskGrad = 150,
+                        avtaltTimer = 40.0,
+                        faktiskTimer = 12.0,
+                        sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
+                    )
+                )
+        ).toJson()
 
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator
+    ) {
         SendtNavSøknaderRiver(rapidsConnection, mediator)
     }
 
     @Test
     fun `Gyldig søknad med inntekt fra nytt arbeidsforhold`() {
         val factory = TestMessageFactory("1", "3", 31000.0, 1.januar(1990))
-        val (_, søknad) = factory.lagSøknadNav(
-            perioder = listOf(SoknadsperiodeDTO(1.januar, 31.januar, 100)),
-            inntektFraNyttArbeidsforhold = listOf(
-                InntektFraNyttArbeidsforholdDTO(
-                    fom = 10.januar,
-                    tom = 31.januar,
-                    belop = 10000,
-                    arbeidsstedOrgnummer = "4",
-                    opplysningspliktigOrgnummer = "5",
-                    harJobbet = true
+        val (_, søknad) =
+            factory.lagSøknadNav(
+                perioder = listOf(SoknadsperiodeDTO(1.januar, 31.januar, 100)),
+                inntektFraNyttArbeidsforhold =
+                    listOf(
+                        InntektFraNyttArbeidsforholdDTO(
+                            fom = 10.januar,
+                            tom = 31.januar,
+                            belop = 10000,
+                            arbeidsstedOrgnummer = "4",
+                            opplysningspliktigOrgnummer = "5",
+                            harJobbet = true
+                        )
                     )
-            ))
+            )
 
         assertNoErrors(søknad)
     }
@@ -200,20 +217,25 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
     }
+
     private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
+
     private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
+
     private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato")
 }
 
-private val objectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+private val objectMapper =
+    jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
-    put("@id", UUID.randomUUID().toString())
-    put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
-    put("@opprettet", LocalDateTime.now().toString())
-}
+private fun SykepengesoknadDTO.asObjectNode(): ObjectNode =
+    objectMapper.valueToTree<ObjectNode>(this).apply {
+        put("@id", UUID.randomUUID().toString())
+        put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
+        put("@opprettet", LocalDateTime.now().toString())
+    }
 
 @Language("JSON")
 private val søknadMedRareEgenmeldinger = """
@@ -280,4 +302,3 @@ private val søknadMedRareEgenmeldinger = """
       "fødselsdato": "1995-12-12"
     }
 """
-

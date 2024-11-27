@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MonitoreringRiverTest {
-
     @Test
     fun `Både avsender og Spleis skal være system participating services`() {
-        val sprute = TestRapid().apply {
-            MonitoreringRiver(this, RegelmessigAvstemming { 2 })
-        }
+        val sprute =
+            TestRapid().apply {
+                MonitoreringRiver(this, RegelmessigAvstemming { 2 })
+            }
 
         @Language("JSON")
         val spruteMelding = """

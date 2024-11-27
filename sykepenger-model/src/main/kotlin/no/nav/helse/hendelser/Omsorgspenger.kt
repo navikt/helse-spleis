@@ -6,7 +6,11 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 class Omsorgspenger(
     private val perioder: List<GradertPeriode>
 ) {
-    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
+    internal fun overlapper(
+        aktivitetslogg: IAktivitetslogg,
+        sykdomsperiode: Periode,
+        erForlengelse: Boolean
+    ): Boolean {
         if (perioder.isEmpty()) {
             aktivitetslogg.info("Bruker har ingen omsorgspengeytelser")
             return false
@@ -17,7 +21,5 @@ class Omsorgspenger(
         }
     }
 
-    internal fun perioder(): List<Periode> {
-        return perioder.map { it.periode }
-    }
+    internal fun perioder(): List<Periode> = perioder.map { it.periode }
 }

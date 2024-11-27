@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -30,6 +29,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
@@ -54,31 +54,34 @@ internal class PeriodeTest {
 
     @Test
     fun `grupperer perioder`() {
-        val perioder = listOf(
-            1.januar til 31.januar,
-            5.januar til 6.januar,
-            1.desember(2017) til 10.desember(2017),
-            4.mai til 20.mai,
-            28.desember(2017) til 31.desember(2017),
-            1.mai til 3.mai
-        )
+        val perioder =
+            listOf(
+                1.januar til 31.januar,
+                5.januar til 6.januar,
+                1.desember(2017) til 10.desember(2017),
+                4.mai til 20.mai,
+                28.desember(2017) til 31.desember(2017),
+                1.mai til 3.mai
+            )
 
-        val forventet = listOf(
-            1.desember(2017) til 10.desember(2017),
-            28.desember(2017) til 31.januar,
-            1.mai til 20.mai
-        )
+        val forventet =
+            listOf(
+                1.desember(2017) til 10.desember(2017),
+                28.desember(2017) til 31.januar,
+                1.mai til 20.mai
+            )
 
         assertEquals(forventet, perioder.grupperSammenhengendePerioder())
     }
 
     @Test
     fun `siste periode linker alle sammen`() {
-        val perioder = listOf(
-            1.januar til 2.januar,
-            4.januar til 4.januar,
-            3.januar til 3.januar
-        )
+        val perioder =
+            listOf(
+                1.januar til 2.januar,
+                4.januar til 4.januar,
+                3.januar til 3.januar
+            )
         val forventet = listOf(1.januar til 4.januar)
         assertEquals(forventet, perioder.grupperSammenhengendePerioderMedHensynTilHelg())
     }
@@ -341,11 +344,12 @@ internal class PeriodeTest {
     @Test
     fun `liste av perioder trimmer annen`() {
         val periode = 5.januar til 31.januar
-        val result = listOf(
-            1.januar til 5.januar,
-            10.januar til 14.januar,
-            28.januar til 29.januar
-        ).trim(periode)
+        val result =
+            listOf(
+                1.januar til 5.januar,
+                10.januar til 14.januar,
+                28.januar til 29.januar
+            ).trim(periode)
         assertEquals(
             listOf(6.januar til 9.januar, 15.januar til 27.januar, 30.januar til 31.januar),
             result
@@ -387,7 +391,7 @@ internal class PeriodeTest {
         val perioden = 5.januar til 10.januar
         assertEquals(listOf(perioden), emptyList<Periode>().merge(perioden))
         assertEquals(listOf(4.januar.somPeriode(), 5.januar til 10.januar, 11.januar.somPeriode()), listOf(4.januar til 11.januar).merge(perioden))
-        assertEquals(listOf(1.januar til 4.januar, 5.januar  til 10.januar, 11.januar til 12.januar), listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden))
+        assertEquals(listOf(1.januar til 4.januar, 5.januar til 10.januar, 11.januar til 12.januar), listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden))
     }
 
     @Test
@@ -412,7 +416,10 @@ internal class PeriodeTest {
         assertTrue(emptyList<Periode>().lik(emptyList()))
     }
 
-    private fun assertSize(expected: Int, periode: Periode) {
+    private fun assertSize(
+        expected: Int,
+        periode: Periode
+    ) {
         var count = 0
         periode.forEach { _ -> count++ }
         assertEquals(expected, count)

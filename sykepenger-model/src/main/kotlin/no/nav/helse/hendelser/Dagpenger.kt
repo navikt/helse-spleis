@@ -1,12 +1,18 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
+import java.time.LocalDate
 
-class Dagpenger(val perioder: List<Periode>) {
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, periode: Periode): IAktivitetslogg {
+class Dagpenger(
+    val perioder: List<Periode>
+) {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        skjæringstidspunkt: LocalDate,
+        periode: Periode
+    ): IAktivitetslogg {
         if (perioder.isEmpty()) {
             aktivitetslogg.info("Bruker har ingen dagpenger")
             return aktivitetslogg

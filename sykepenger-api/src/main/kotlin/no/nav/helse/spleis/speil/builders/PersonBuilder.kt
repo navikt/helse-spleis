@@ -14,17 +14,17 @@ internal class PersonBuilder(
         val alder = AlderDTO(personUtDto.alder.fødselsdato, personUtDto.alder.dødsdato)
 
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(personUtDto.vilkårsgrunnlagHistorikk).build()
-        val arbeidsgivere = personUtDto.arbeidsgivere
-            .map { arbeidsgiverDto ->
-                ArbeidsgiverBuilder(arbeidsgiverDto, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == arbeidsgiverDto.organisasjonsnummer })
-            }
-            .map { it.build(alder, vilkårsgrunnlagHistorikk) }
-            .let { arbeidsgivere ->
-                arbeidsgivere.map { it
-                    .medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
-                }
-            }
-            .filterNot { it.erTom(vilkårsgrunnlagHistorikk) }
+        val arbeidsgivere =
+            personUtDto.arbeidsgivere
+                .map { arbeidsgiverDto ->
+                    ArbeidsgiverBuilder(arbeidsgiverDto, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == arbeidsgiverDto.organisasjonsnummer })
+                }.map { it.build(alder, vilkårsgrunnlagHistorikk) }
+                .let { arbeidsgivere ->
+                    arbeidsgivere.map {
+                        it
+                            .medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
+                    }
+                }.filterNot { it.erTom(vilkårsgrunnlagHistorikk) }
 
         return PersonDTO(
             fødselsnummer = personUtDto.fødselsnummer,

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.august
@@ -82,9 +81,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
-
+internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
     @Test
     fun `skal aldri foreslå sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt`() {
         håndterSøknad(Sykdom(18.april, 30.april, 100.prosent))
@@ -104,10 +103,11 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
 
         nullstillTilstandsendringer()
-        val inntektsmeldingId = håndterInntektsmelding(
-            listOf(14.april til 14.april, 18.april til 2.mai),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse",
-        )
+        val inntektsmeldingId =
+            håndterInntektsmelding(
+                listOf(14.april til 14.april, 18.april til 2.mai),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse"
+            )
 
         assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
 
@@ -191,11 +191,12 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     @Test
     fun `hullete AGP sammen med begrunnelse for reduksjon blir kastet ut foreløpig`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
-        val im = håndterInntektsmelding(
-            listOf(1.januar til 5.januar, 10.januar til 20.januar),
-            refusjon = Refusjon(INGEN, null),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "NoeSomUmuligKanVæreIListaViIkkeTillater",
-        )
+        val im =
+            håndterInntektsmelding(
+                listOf(1.januar til 5.januar, 10.januar til 20.januar),
+                refusjon = Refusjon(INGEN, null),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "NoeSomUmuligKanVæreIListaViIkkeTillater"
+            )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23)
         assertEquals(setOf(Dokumentsporing.søknad(søknad), Dokumentsporing.inntektsmeldingDager(im)), inspektør.hendelser(1.vedtaksperiode).toSet())
@@ -210,7 +211,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             emptyList(),
             førsteFraværsdag = lørdag den 6.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo"
         )
         assertEquals("HH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -227,7 +228,14 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             avsendersystem = ALTINN
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
+        assertEquals(
+            AVSLUTTET_UTEN_VEDTAK,
+            inspektør
+                .vedtaksperioder(1.vedtaksperiode)
+                .inspektør.behandlinger
+                .last()
+                .tilstand
+        )
     }
 
     @Test
@@ -262,7 +270,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Refusjon(INGEN, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert"
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -279,7 +287,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Refusjon(INGEN, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         val dagerFør = inspektør.sykdomstidslinje.inspektør.dager
@@ -362,7 +370,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             listOf(),
             førsteFraværsdag = 1.januar,
             refusjon = Refusjon(INGEN, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
         )
         assertEquals(SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
         assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra("Inntektsmelding"))
@@ -384,7 +392,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(),
             førsteFraværsdag = 1.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertEquals(SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
         assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra("Inntektsmelding"))
@@ -411,10 +419,13 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     @Test
     fun `kort periode etter ferie uten sykdom med arbeidsgiverperioden spredt litt utover`() {
         nyttVedtak(
-            juni, arbeidsgiverperiode = listOf(
-            1.juni til 5.juni,
-            8.juni til 18.juni
-        ))
+            juni,
+            arbeidsgiverperiode =
+                listOf(
+                    1.juni til 5.juni,
+                    8.juni til 18.juni
+                )
+        )
         håndterSøknad(Sykdom(1.august, 10.august, 100.prosent))
         nullstillTilstandsendringer()
         håndterInntektsmelding(
@@ -446,7 +457,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(2.januar til 4.januar, 14.januar til 26.januar),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
         )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
@@ -462,21 +473,24 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             listOf(2.januar til 17.januar),
             beregnetInntekt = 4000.månedlig,
             orgnummer = a1,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "mjau",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "mjau"
         )
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 4000.månedlig.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3))
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 4000.månedlig.repeat(3)),
+                            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3))
+                        )
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
                 )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
         )
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -501,14 +515,17 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertIngenVarsel(RV_IM_8)
         assertVarsel(RV_IM_25)
 
-        håndterOverstyrTidslinje((1..31).map {
-            ManuellOverskrivingDag(
-                it.juli,
-                Dagtype.ArbeidIkkeGjenopptattDag
-            )
-        } + listOf(
-            ManuellOverskrivingDag(1.august, Dagtype.Sykedag, 50)
-        ))
+        håndterOverstyrTidslinje(
+            (1..31).map {
+                ManuellOverskrivingDag(
+                    it.juli,
+                    Dagtype.ArbeidIkkeGjenopptattDag
+                )
+            } +
+                listOf(
+                    ManuellOverskrivingDag(1.august, Dagtype.Sykedag, 50)
+                )
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
@@ -522,7 +539,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = underHalvG,
             refusjon = Refusjon(INGEN, null),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "HvaSomHelst",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "HvaSomHelst"
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = underHalvG)
         håndterYtelser(1.vedtaksperiode)

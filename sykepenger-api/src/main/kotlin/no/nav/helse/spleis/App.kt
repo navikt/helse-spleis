@@ -14,22 +14,25 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.header
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 import kotlin.text.get
 
-internal val nyObjectmapper get() = jacksonObjectMapper()
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    .registerModule(JavaTimeModule())
-    .setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-        indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-        indentObjectsWith(DefaultIndenter("  ", "\n"))
-    })
+internal val nyObjectmapper get() =
+    jacksonObjectMapper()
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .registerModule(JavaTimeModule())
+        .setDefaultPrettyPrinter(
+            DefaultPrettyPrinter().apply {
+                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                indentObjectsWith(DefaultIndenter("  ", "\n"))
+            }
+        )
 
 internal val objectMapper = nyObjectmapper
 internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
@@ -64,10 +67,11 @@ internal fun createApp(
             // eksempel: <APP>.<NAMESPACE>.serviceaccount.identity.linkerd.cluster.local
             .tag("konsument", call.request.header("L5d-Client-Id") ?: "n/a")
     },
-    mdcEntries = mapOf(
-        "azp_name" to { call: ApplicationCall -> call.principal<JWTPrincipal>()?.get("azp_name") },
-        "konsument" to { call: ApplicationCall -> call.request.header("L5d-Client-Id") }
-    ),
+    mdcEntries =
+        mapOf(
+            "azp_name" to { call: ApplicationCall -> call.principal<JWTPrincipal>()?.get("azp_name") },
+            "konsument" to { call: ApplicationCall -> call.request.header("L5d-Client-Id") }
+        ),
     port = port,
     applicationModule = {
         azureAdAppAuthentication(azureConfig)

@@ -1,9 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-
-import java.time.LocalDate
-import java.time.Year
-import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.august
@@ -34,6 +30,9 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.Year
+import java.util.UUID
 
 internal class FeriepengedatoerTest : AbstractEndToEndTest() {
     private companion object {
@@ -42,15 +41,18 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         private val a2 = "789456213"
     }
 
-    private fun feriepengerFor(opptjeningsår: Year, historikk: UtbetalingshistorikkForFeriepenger, sisteInfotrygdkjøring: LocalDate = LocalDate.MAX) =
-        Feriepengeberegner(alder, opptjeningsår, grunnlagFraInfotrygd = historikk.grunnlagForFeriepenger(sisteInfotrygdkjøring), grunnlagFraSpleis = person.grunnlagForFeriepenger())
-
+    private fun feriepengerFor(
+        opptjeningsår: Year,
+        historikk: UtbetalingshistorikkForFeriepenger,
+        sisteInfotrygdkjøring: LocalDate = LocalDate.MAX
+    ) = Feriepengeberegner(alder, opptjeningsår, grunnlagFraInfotrygd = historikk.grunnlagForFeriepenger(sisteInfotrygdkjøring), grunnlagFraSpleis = person.grunnlagForFeriepenger())
 
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000, 7.mars))
-        )
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000, 7.mars))
+            )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(48, beregner.feriepengedatoer().size)
@@ -58,9 +60,10 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000, 8.mars))
-        )
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000, 8.mars))
+            )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(48, beregner.feriepengedatoer().size)
@@ -68,9 +71,10 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000, 6.mars))
-        )
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000, 6.mars))
+            )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(47, beregner.feriepengedatoer().size)
@@ -78,17 +82,18 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner datoer for feriepengeberegning kun for dager i aktuelt opptjeningsår`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.desember(2017),
-                    31.januar(2018),
-                    1000,
-                    31.januar(2018)
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                        ORGNUMMER,
+                        1.desember(2017),
+                        31.januar(2018),
+                        1000,
+                        31.januar(2018)
+                    )
                 )
             )
-        )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(23, beregner.feriepengedatoer().size)
@@ -96,17 +101,18 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT - oppdatert for første kjøring i 23 for regnskapåret i 21`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.desember(2017),
-                    31.januar(2018),
-                    1000,
-                    24.august(2024)
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                        ORGNUMMER,
+                        1.desember(2017),
+                        31.januar(2018),
+                        1000,
+                        24.august(2024)
+                    )
                 )
             )
-        )
 
         val beregner = feriepengerFor(Year.of(2018), historikk, sisteInfotrygdkjøring = 24.august(2024))
         assertEquals(0, beregner.feriepengedatoer().size)
@@ -114,25 +120,28 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Teller ikke med utbetalinger med inaktiv arbeidskategorikode i IT`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.desember(2017),
-                    31.januar(2018),
-                    1000,
-                    31.januar(2018)
-                )
-            ),
-            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
-                listOf(
-                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
-                        periode = 1.desember(2017) til 31.januar(2018),
-                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Inaktiv
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                utbetalinger =
+                    listOf(
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                            ORGNUMMER,
+                            1.desember(2017),
+                            31.januar(2018),
+                            1000,
+                            31.januar(2018)
+                        )
+                    ),
+                arbeidskategorikoder =
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                        listOf(
+                            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                                periode = 1.desember(2017) til 31.januar(2018),
+                                arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Inaktiv
+                            )
+                        )
                     )
-                )
             )
-        )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(0, beregner.feriepengedatoer().size)
@@ -140,32 +149,35 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Teller ikke med utbetalinger med kombinert arbeidskategorikode og orgnummer lik 0 i IT`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
-                    "0",
-                    1.desember(2017),
-                    31.januar(2018),
-                    1000,
-                    31.januar(2018)
-                ),
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.desember(2017),
-                    31.januar(2018),
-                    1000,
-                    31.januar(2018)
-                )
-            ),
-            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
-                listOf(
-                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
-                        periode = 1.desember(2017) til 31.januar(2018),
-                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.ArbeidstakerSelvstendig
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                utbetalinger =
+                    listOf(
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
+                            "0",
+                            1.desember(2017),
+                            31.januar(2018),
+                            1000,
+                            31.januar(2018)
+                        ),
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                            ORGNUMMER,
+                            1.desember(2017),
+                            31.januar(2018),
+                            1000,
+                            31.januar(2018)
+                        )
+                    ),
+                arbeidskategorikoder =
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                        listOf(
+                            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                                periode = 1.desember(2017) til 31.januar(2018),
+                                arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.ArbeidstakerSelvstendig
+                            )
+                        )
                     )
-                )
             )
-        )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
@@ -178,32 +190,35 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
             syktil = 28.mars(2018)
         )
 
-        val historikk = utbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
-                    "0",
-                    1.desember(2018),
-                    31.desember(2018),
-                    1000,
-                    31.desember(2018)
-                ),
-                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.desember(2018),
-                    31.desember(2018),
-                    1000,
-                    31.desember(2018)
-                )
-            ),
-            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
-                listOf(
-                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
-                        periode = 1.desember(2018) til 31.desember(2018),
-                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.ArbeidstakerSelvstendig
+        val historikk =
+            utbetalingshistorikkForFeriepenger(
+                utbetalinger =
+                    listOf(
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
+                            "0",
+                            1.desember(2018),
+                            31.desember(2018),
+                            1000,
+                            31.desember(2018)
+                        ),
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                            ORGNUMMER,
+                            1.desember(2018),
+                            31.desember(2018),
+                            1000,
+                            31.desember(2018)
+                        )
+                    ),
+                arbeidskategorikoder =
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                        listOf(
+                            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                                periode = 1.desember(2018) til 31.desember(2018),
+                                arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.ArbeidstakerSelvstendig
+                            )
+                        )
                     )
-                )
             )
-        )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals((17.januar(2018) til 23.mars(2018)).filterNot { it.erHelg() }, beregner.feriepengedatoer())
@@ -351,24 +366,24 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
-        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
-            listOf(
-                UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
-                    periode = LocalDate.MIN til LocalDate.MAX,
-                    arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Arbeidstaker
+        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder =
+            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                        periode = LocalDate.MIN til LocalDate.MAX,
+                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Arbeidstaker
+                    )
                 )
-            )
-        ),
+            ),
         skalBeregnesManuelt: Boolean = false
-    ) =
-        UtbetalingshistorikkForFeriepenger(
-            meldingsreferanseId = UUID.randomUUID(),
-            utbetalinger = utbetalinger,
-            feriepengehistorikk = emptyList(),
-            arbeidskategorikoder = arbeidskategorikoder,
-            opptjeningsår = Year.of(2020),
-            skalBeregnesManuelt = skalBeregnesManuelt,
-        )
+    ) = UtbetalingshistorikkForFeriepenger(
+        meldingsreferanseId = UUID.randomUUID(),
+        utbetalinger = utbetalinger,
+        feriepengehistorikk = emptyList(),
+        arbeidskategorikoder = arbeidskategorikoder,
+        opptjeningsår = Year.of(2020),
+        skalBeregnesManuelt = skalBeregnesManuelt
+    )
 
     private fun byggPerson(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
@@ -430,5 +445,4 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
     }
-
 }

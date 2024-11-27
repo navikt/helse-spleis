@@ -1,9 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
@@ -12,6 +8,10 @@ import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMa
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 
 interface PersonObserver {
     data class SykefraværstilfelleIkkeFunnet(
@@ -53,7 +53,7 @@ interface PersonObserver {
         )
 
         data class Venteårsak(
-            val hva : String,
+            val hva: String,
             val hvorfor: String?
         )
     }
@@ -83,14 +83,16 @@ interface PersonObserver {
                 "forlengerPeriode" to forlengerPeriode,
                 "harPeriodeInnenfor16Dager" to harPeriodeInnenfor16Dager,
                 "trengerArbeidsgiveropplysninger" to trengerArbeidsgiveropplysninger,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                }
+                "sykmeldingsperioder" to
+                    sykmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive
+                        )
+                    }
             )
     }
+
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
         val relevanteSykmeldingsperioder: List<Periode>,
@@ -117,12 +119,13 @@ interface PersonObserver {
                 "behandlingId" to behandlingId,
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "omregnetÅrsinntekt" to omregnetÅrsinntekt,
-                "skatteinntekter" to skatteinntekter.map {
-                    mapOf(
-                        "måned" to it.måned,
-                        "beløp" to it.beløp
-                    )
-                }
+                "skatteinntekter" to
+                    skatteinntekter.map {
+                        mapOf(
+                            "måned" to it.måned,
+                            "beløp" to it.beløp
+                        )
+                    }
             )
     }
 
@@ -140,24 +143,27 @@ interface PersonObserver {
                 "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "skjæringstidspunkt" to skjæringstidspunkt,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "egenmeldingsperioder" to egenmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "førsteFraværsdager" to førsteFraværsdager.map {
-                    mapOf(
-                        "organisasjonsnummer" to it.organisasjonsnummer,
-                        "førsteFraværsdag" to it.førsteFraværsdag
-                    )
-                },
+                "sykmeldingsperioder" to
+                    sykmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive
+                        )
+                    },
+                "egenmeldingsperioder" to
+                    egenmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive
+                        )
+                    },
+                "førsteFraværsdager" to
+                    førsteFraværsdager.map {
+                        mapOf(
+                            "organisasjonsnummer" to it.organisasjonsnummer,
+                            "førsteFraværsdag" to it.førsteFraværsdag
+                        )
+                    },
                 "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap()
             )
     }
@@ -190,58 +196,85 @@ interface PersonObserver {
         val organisasjonsnummer: String,
         val førsteFraværsdag: LocalDate
     )
+
     sealed class ForespurtOpplysning {
-
         companion object {
-            fun List<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
-                when (forespurtOpplysning) {
-                    is Arbeidsgiverperiode -> mapOf(
-                        "opplysningstype" to "Arbeidsgiverperiode"
-                    )
-
-                    is Inntekt -> mapOf(
-                        "opplysningstype" to "Inntekt",
-                        "forslag" to mapOf(
-                            "forrigeInntekt" to forespurtOpplysning.forslag?.let {
-                                mapOf(
-                                    "skjæringstidspunkt" to it.skjæringstidspunkt,
-                                    "kilde" to it.kilde.name,
-                                    "beløp" to it.beløp
-                                )
-                            }
-                        )
-                    )
-
-                    is FastsattInntekt -> mapOf(
-                        "opplysningstype" to "FastsattInntekt",
-                        "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.månedlig
-                    )
-
-                    is Refusjon -> mapOf(
-                        "opplysningstype" to "Refusjon",
-                        "forslag" to forespurtOpplysning.forslag.map { forslag ->
+            fun List<ForespurtOpplysning>.toJsonMap() =
+                map { forespurtOpplysning ->
+                    when (forespurtOpplysning) {
+                        is Arbeidsgiverperiode ->
                             mapOf(
-                                "fom" to forslag.fom,
-                                "tom" to forslag.tom,
-                                "beløp" to forslag.månedligBeløp
+                                "opplysningstype" to "Arbeidsgiverperiode"
                             )
-                        }
-                    )
+
+                        is Inntekt ->
+                            mapOf(
+                                "opplysningstype" to "Inntekt",
+                                "forslag" to
+                                    mapOf(
+                                        "forrigeInntekt" to
+                                            forespurtOpplysning.forslag?.let {
+                                                mapOf(
+                                                    "skjæringstidspunkt" to it.skjæringstidspunkt,
+                                                    "kilde" to it.kilde.name,
+                                                    "beløp" to it.beløp
+                                                )
+                                            }
+                                    )
+                            )
+
+                        is FastsattInntekt ->
+                            mapOf(
+                                "opplysningstype" to "FastsattInntekt",
+                                "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.månedlig
+                            )
+
+                        is Refusjon ->
+                            mapOf(
+                                "opplysningstype" to "Refusjon",
+                                "forslag" to
+                                    forespurtOpplysning.forslag.map { forslag ->
+                                        mapOf(
+                                            "fom" to forslag.fom,
+                                            "tom" to forslag.tom,
+                                            "beløp" to forslag.månedligBeløp
+                                        )
+                                    }
+                            )
+                    }
                 }
-            }
         }
     }
 
-    data class Inntektsdata(val skjæringstidspunkt: LocalDate, val kilde: Inntektsopplysningstype, val beløp: Double)
-    enum class Inntektsopplysningstype{
+    data class Inntektsdata(
+        val skjæringstidspunkt: LocalDate,
+        val kilde: Inntektsopplysningstype,
+        val beløp: Double
+    )
+
+    enum class Inntektsopplysningstype {
         INNTEKTSMELDING,
         SAKSBEHANDLER
     }
-    data class Inntekt(val forslag: Inntektsdata?) : ForespurtOpplysning()
-    data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
+
+    data class Inntekt(
+        val forslag: Inntektsdata?
+    ) : ForespurtOpplysning()
+
+    data class FastsattInntekt(
+        val fastsattInntekt: no.nav.helse.økonomi.Inntekt
+    ) : ForespurtOpplysning()
+
     object Arbeidsgiverperiode : ForespurtOpplysning()
-    data class Refusjon(val forslag: List<Refusjonsforslag>) : ForespurtOpplysning() {
-        data class Refusjonsforslag(val fom: LocalDate, val tom: LocalDate?, val månedligBeløp: Double)
+
+    data class Refusjon(
+        val forslag: List<Refusjonsforslag>
+    ) : ForespurtOpplysning() {
+        data class Refusjonsforslag(
+            val fom: LocalDate,
+            val tom: LocalDate?,
+            val månedligBeløp: Double
+        )
     }
 
     data class UtbetalingAnnullertEvent(
@@ -256,6 +289,7 @@ interface PersonObserver {
         val saksbehandlerEpost: String,
         val saksbehandlerIdent: String
     )
+
     data class UtbetalingEndretEvent(
         val organisasjonsnummer: String,
         val utbetalingId: UUID,
@@ -279,17 +313,20 @@ interface PersonObserver {
             )
 
             companion object {
-                fun mapOppdrag(oppdrag: Oppdrag) = OppdragEventDetaljer(
-                    fagsystemId = oppdrag.fagsystemId,
-                    mottaker = oppdrag.mottaker,
-                    nettoBeløp = oppdrag.nettoBeløp(),
-                    linjer = oppdrag.map { linje ->
-                        OppdragEventLinjeDetaljer(
-                            fom = linje.fom,
-                            tom = linje.tom,
-                            totalbeløp = linje.totalbeløp()
-                        )
-                    })
+                fun mapOppdrag(oppdrag: Oppdrag) =
+                    OppdragEventDetaljer(
+                        fagsystemId = oppdrag.fagsystemId,
+                        mottaker = oppdrag.mottaker,
+                        nettoBeløp = oppdrag.nettoBeløp(),
+                        linjer =
+                            oppdrag.map { linje ->
+                                OppdragEventLinjeDetaljer(
+                                    fom = linje.fom,
+                                    tom = linje.tom,
+                                    totalbeløp = linje.totalbeløp()
+                                )
+                            }
+                    )
             }
         }
     }
@@ -335,6 +372,7 @@ interface PersonObserver {
 
             companion object {
                 fun mapOppdrag(oppdrag: Oppdrag) = mapOppdragdetaljer(oppdrag.detaljer())
+
                 private fun mapOppdragdetaljer(detaljer: OppdragDetaljer) =
                     OppdragEventDetaljer(
                         fagsystemId = detaljer.fagsystemId,
@@ -344,17 +382,18 @@ interface PersonObserver {
                         stønadsdager = detaljer.stønadsdager,
                         fom = detaljer.fom,
                         tom = detaljer.tom,
-                        linjer = detaljer.linjer.map {
-                            OppdragEventLinjeDetaljer(
-                                fom = it.fom,
-                                tom = it.tom,
-                                sats = it.sats,
-                                grad = it.grad ?: error("mangler grad for linje"),
-                                stønadsdager = it.stønadsdager,
-                                totalbeløp = it.totalbeløp,
-                                statuskode = it.statuskode
-                            )
-                        }
+                        linjer =
+                            detaljer.linjer.map {
+                                OppdragEventLinjeDetaljer(
+                                    fom = it.fom,
+                                    tom = it.tom,
+                                    sats = it.sats,
+                                    grad = it.grad ?: error("mangler grad for linje"),
+                                    stønadsdager = it.stønadsdager,
+                                    totalbeløp = it.totalbeløp,
+                                    statuskode = it.statuskode
+                                )
+                            }
                     )
             }
         }
@@ -400,26 +439,27 @@ interface PersonObserver {
             Over70;
 
             internal companion object {
-                fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
-                    is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
-                    is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
-                    is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
-                    is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
-                    is Begrunnelse.MinimumInntekt -> MinimumInntekt
-                    is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
-                    is Begrunnelse.EtterDødsdato -> EtterDødsdato
-                    is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
-                    is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
-                    is Begrunnelse.Over70 -> Over70
-                    is Begrunnelse.AndreYtelserAap -> AndreYtelserAap
-                    is Begrunnelse.AndreYtelserDagpenger -> AndreYtelserDagpenger
-                    is Begrunnelse.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
-                    is Begrunnelse.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
-                    is Begrunnelse.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
-                    is Begrunnelse.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
-                    is Begrunnelse.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
-                    is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
-                }
+                fun fraBegrunnelse(begrunnelse: Begrunnelse) =
+                    when (begrunnelse) {
+                        is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+                        is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
+                        is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
+                        is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                        is Begrunnelse.MinimumInntekt -> MinimumInntekt
+                        is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
+                        is Begrunnelse.EtterDødsdato -> EtterDødsdato
+                        is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
+                        is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
+                        is Begrunnelse.Over70 -> Over70
+                        is Begrunnelse.AndreYtelserAap -> AndreYtelserAap
+                        is Begrunnelse.AndreYtelserDagpenger -> AndreYtelserDagpenger
+                        is Begrunnelse.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
+                        is Begrunnelse.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
+                        is Begrunnelse.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
+                        is Begrunnelse.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
+                        is Begrunnelse.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
+                        is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
+                    }
             }
         }
     }
@@ -444,19 +484,21 @@ interface PersonObserver {
 
             companion object {
                 fun mapOppdrag(oppdrag: Oppdrag) = mapDetaljer(oppdrag.detaljer())
+
                 private fun mapDetaljer(detaljer: OppdragDetaljer) =
                     OppdragEventDetaljer(
                         fagsystemId = detaljer.fagsystemId,
                         mottaker = detaljer.mottaker,
                         fom = detaljer.fom,
                         tom = detaljer.tom,
-                        linjer = detaljer.linjer.map {
-                            OppdragEventLinjeDetaljer(
-                                fom = it.fom,
-                                tom = it.tom,
-                                totalbeløp = it.totalbeløp
-                            )
-                        }
+                        linjer =
+                            detaljer.linjer.map {
+                                OppdragEventLinjeDetaljer(
+                                    fom = it.fom,
+                                    tom = it.tom,
+                                    totalbeløp = it.totalbeløp
+                                )
+                            }
                     )
             }
         }
@@ -521,6 +563,7 @@ interface PersonObserver {
             Omgjøring,
             Revurdering
         }
+
         data class Kilde(
             val meldingsreferanseId: UUID,
             val innsendt: LocalDateTime,
@@ -540,17 +583,41 @@ interface PersonObserver {
             val fastsatt: String
             val omregnetÅrsinntekt: Double
         }
-        data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta {
+
+        data class FastsattIInfotrygd(
+            override val omregnetÅrsinntekt: Double
+        ) : Sykepengegrunnlagsfakta {
             override val fastsatt = "IInfotrygd"
         }
-        data class FastsattEtterHovedregel(override val omregnetÅrsinntekt: Double, val sykepengegrunnlag: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
+
+        data class FastsattEtterHovedregel(
+            override val omregnetÅrsinntekt: Double,
+            val sykepengegrunnlag: Double,
+            val `6G`: Double,
+            val arbeidsgivere: List<Arbeidsgiver>
+        ) : Sykepengegrunnlagsfakta {
             override val fastsatt = "EtterHovedregel"
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double)
+
+            data class Arbeidsgiver(
+                val arbeidsgiver: String,
+                val omregnetÅrsinntekt: Double
+            )
         }
-        data class FastsattEtterSkjønn(override val omregnetÅrsinntekt: Double, val sykepengegrunnlag: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
+
+        data class FastsattEtterSkjønn(
+            override val omregnetÅrsinntekt: Double,
+            val sykepengegrunnlag: Double,
+            val `6G`: Double,
+            val arbeidsgivere: List<Arbeidsgiver>
+        ) : Sykepengegrunnlagsfakta {
             override val fastsatt = "EtterSkjønn"
             val skjønnsfastsatt = arbeidsgivere.sumOf { it.skjønnsfastsatt }
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double)
+
+            data class Arbeidsgiver(
+                val arbeidsgiver: String,
+                val omregnetÅrsinntekt: Double,
+                val skjønnsfastsatt: Double
+            )
         }
     }
 
@@ -616,41 +683,92 @@ interface PersonObserver {
         trengerArbeidsgiverperiode: Boolean,
         erPotensiellForespørsel: Boolean
     ) {}
+
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
-    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
-    fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
+
+    fun vedtaksperiodePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        påminnelse: Påminnelse
+    ) {}
+
+    fun vedtaksperiodeIkkePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        nåværendeTilstand: TilstandType
+    ) {}
+
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
+
     fun vedtaksperioderVenter(eventer: List<VedtaksperiodeVenterEvent>) {}
+
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
+
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
+
     fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}
+
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
+
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}
+
     fun arbeidsgiveropplysningerKorrigert(event: ArbeidsgiveropplysningerKorrigertEvent) {}
+
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
+
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
+
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
+
     fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
+
     fun annullering(event: UtbetalingAnnullertEvent) {}
+
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
 
     fun behandlingLukket(event: BehandlingLukketEvent) {}
+
     fun behandlingForkastet(event: BehandlingForkastetEvent) {}
+
     fun nyBehandling(event: BehandlingOpprettetEvent) {}
+
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
+
     fun nyVedtaksperiodeUtbetaling(
         organisasjonsnummer: String,
         utbetalingId: UUID,
         vedtaksperiodeId: UUID
     ) {}
+
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
+
     fun overlappendeInfotrygdperioder(event: OverlappendeInfotrygdperioder) {}
+
     fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}
-    fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {}
-    fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+
+    fun inntektsmeldingIkkeHåndtert(
+        inntektsmeldingId: UUID,
+        organisasjonsnummer: String,
+        harPeriodeInnenfor16Dager: Boolean
+    ) {}
+
+    fun inntektsmeldingHåndtert(
+        inntektsmeldingId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String
+    ) {}
+
     fun skatteinntekterLagtTilGrunn(event: SkatteinntekterLagtTilGrunnEvent) {}
-    fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+
+    fun søknadHåndtert(
+        søknadId: UUID,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String
+    ) {}
+
     fun behandlingUtført() {}
+
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
+
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
 }

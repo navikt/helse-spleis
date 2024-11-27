@@ -28,6 +28,7 @@ internal fun perioder(
     periode4: Sykdomstidslinje,
     test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
-    listOf(periode1, periode2, periode3, periode4).merge(Dagturnering.TURNERING::beste)
+    listOf(periode1, periode2, periode3, periode4)
+        .merge(Dagturnering.TURNERING::beste)
         .test(periode1, periode2, periode3, periode4)
 }

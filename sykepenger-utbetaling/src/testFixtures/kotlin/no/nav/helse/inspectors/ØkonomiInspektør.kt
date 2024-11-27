@@ -6,16 +6,20 @@ import no.nav.helse.økonomi.Økonomi
 
 val Økonomi.inspektør get() = ØkonomiInspektørBuilder(this).build()
 
-private class ØkonomiInspektørBuilder(økonomi: Økonomi) {
-    private val inspektøren = ØkonomiInspektør(
-        økonomi.grad.toDouble(),
-        økonomi.arbeidsgiverRefusjonsbeløp,
-        økonomi.dekningsgrunnlag,
-        økonomi.totalGrad.toDouble().toInt(),
-        økonomi.aktuellDagsinntekt,
-        økonomi.arbeidsgiverbeløp,
-        økonomi.personbeløp
-    )
+private class ØkonomiInspektørBuilder(
+    økonomi: Økonomi
+) {
+    private val inspektøren =
+        ØkonomiInspektør(
+            økonomi.grad.toDouble(),
+            økonomi.arbeidsgiverRefusjonsbeløp,
+            økonomi.dekningsgrunnlag,
+            økonomi.totalGrad.toDouble().toInt(),
+            økonomi.aktuellDagsinntekt,
+            økonomi.arbeidsgiverbeløp,
+            økonomi.personbeløp
+        )
+
     fun build() = inspektøren
 }
 

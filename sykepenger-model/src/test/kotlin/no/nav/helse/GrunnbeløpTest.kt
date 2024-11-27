@@ -1,7 +1,5 @@
 package no.nav.helse
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
@@ -18,14 +16,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.util.UUID
 
 internal class GrunnbeløpTest {
-
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    private val jurist =
+        BehandlingSubsumsjonslogg(
+            EmptyLog,
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}")
+            )
+        )
 
     @Test
     fun dagsats() {
@@ -66,7 +69,6 @@ internal class GrunnbeløpTest {
         assertEquals(101351.årlig, Grunnbeløp.`1G`.beløp(10.oktober(2020), 21.september(2020)))
     }
 
-
     @Test
     fun `virkningstidspunktet for regulering av kravet til minsteinntekt`() {
         val halvG2018 = Grunnbeløp.halvG.beløp(30.april(2019))
@@ -78,52 +80,51 @@ internal class GrunnbeløpTest {
         assertMinsteinntektOk(
             skjæringstidspunkt = 26.mai(2019),
             inntekt = halvG2018,
-            alder = under67(),
+            alder = under67()
         )
         assertMinimumInntektAvslag(
             skjæringstidspunkt = 27.mai(2019),
             inntekt = halvG2018,
-            alder = under67(),
+            alder = under67()
         )
         assertMinsteinntektOk(
             skjæringstidspunkt = 27.mai(2019),
             inntekt = halvG2019,
-            alder = under67(),
+            alder = under67()
         )
 
         // 67-åring blir behandlet som under 67 år
         assertMinsteinntektOk(
             skjæringstidspunkt = 26.mai(2019),
-            inntekt =  halvG2018,
-            alder = akkurat67(26.mai(2019)),
+            inntekt = halvG2018,
+            alder = akkurat67(26.mai(2019))
         )
         assertMinimumInntektAvslag(
             skjæringstidspunkt = 27.mai(2019),
-            inntekt =  halvG2018,
-            alder = akkurat67(27.mai(2019)),
+            inntekt = halvG2018,
+            alder = akkurat67(27.mai(2019))
         )
         assertMinsteinntektOk(
             skjæringstidspunkt = 27.mai(2019),
             inntekt = halvG2019,
-            alder = akkurat67(27.mai(2019)),
+            alder = akkurat67(27.mai(2019))
         )
-
 
         // person er over 67 ved skjæringstidspunkt
         assertMinsteinntektOk(
             skjæringstidspunkt = 26.mai(2019),
             inntekt = `2G2018`,
-            alder = over67(30.april(2019)),
+            alder = over67(30.april(2019))
         )
         assertMinimumInntektOver67Avslag(
             skjæringstidspunkt = 27.mai(2019),
             inntekt = `2G2018`,
-            alder = over67(27.mai(2019)),
+            alder = over67(27.mai(2019))
         )
         assertMinsteinntektOk(
             skjæringstidspunkt = 27.mai(2019),
             inntekt = `2G2019`,
-            alder = over67(30.april(2019)),
+            alder = over67(30.april(2019))
         )
     }
 
@@ -141,7 +142,6 @@ internal class GrunnbeløpTest {
         assertEquals(1.mai(2019), virkningstidspunkt)
     }
 
-
     @Test
     fun `virkningstidspunkt etter ny G sitt virkningstidspunkt`() {
         val beløp = Grunnbeløp.`1G`.beløp(2.mai(2021))
@@ -152,7 +152,7 @@ internal class GrunnbeløpTest {
     @Test
     fun `kaster exception for beløp som ikke er gyldig Grunnbeløp`() {
         val ikkeGyldigGrunnbeløp = 123123.årlig
-        assertThrows<IllegalArgumentException> { Grunnbeløp.virkningstidspunktFor(ikkeGyldigGrunnbeløp)}
+        assertThrows<IllegalArgumentException> { Grunnbeløp.virkningstidspunktFor(ikkeGyldigGrunnbeløp) }
     }
 
     private fun assertMinsteinntektOk(
@@ -187,7 +187,8 @@ internal class GrunnbeløpTest {
         inntekt: Inntekt,
         alder: Alder
     ) = assertEquals(
-        Begrunnelse.MinimumInntekt, Grunnbeløp.validerMinsteInntekt(
+        Begrunnelse.MinimumInntekt,
+        Grunnbeløp.validerMinsteInntekt(
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
@@ -196,32 +197,46 @@ internal class GrunnbeløpTest {
     )
 
     private fun under67() = LocalDate.now().minusYears(66).alder
+
     private fun over67(skjæringstidspunkt: LocalDate) = skjæringstidspunkt.minusYears(67).minusDays(1).alder
+
     private fun akkurat67(skjæringstidspunkt: LocalDate) = skjæringstidspunkt.minusYears(67).alder
 
-    private fun Grunnbeløp.oppfyllerMinsteInntekt(dato: LocalDate, inntekt: Inntekt) =
-        inntekt >= minsteinntekt(dato)
-    private fun Grunnbeløp.Companion.validerMinsteInntekt(skjæringstidspunkt: LocalDate, inntekt: Inntekt, alder: Alder, subsumsjonslogg: Subsumsjonslogg): Begrunnelse? {
-        val gjeldendeGrense = if(alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
+    private fun Grunnbeløp.oppfyllerMinsteInntekt(
+        dato: LocalDate,
+        inntekt: Inntekt
+    ) = inntekt >= minsteinntekt(dato)
+
+    private fun Grunnbeløp.Companion.validerMinsteInntekt(
+        skjæringstidspunkt: LocalDate,
+        inntekt: Inntekt,
+        alder: Alder,
+        subsumsjonslogg: Subsumsjonslogg
+    ): Begrunnelse? {
+        val gjeldendeGrense = if (alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
         val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
 
         if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
-            subsumsjonslogg.logg(`§ 8-51 ledd 2`(
-                oppfylt = oppfylt,
-                skjæringstidspunkt = skjæringstidspunkt,
-                alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                beregningsgrunnlagÅrlig = inntekt.årlig,
-                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
-            ))
+            subsumsjonslogg.logg(
+                `§ 8-51 ledd 2`(
+                    oppfylt = oppfylt,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
+                    beregningsgrunnlagÅrlig = inntekt.årlig,
+                    minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
+                )
+            )
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }
-        subsumsjonslogg.logg(`§ 8-3 ledd 2 punktum 1`(
-            oppfylt = oppfylt,
-            skjæringstidspunkt = skjæringstidspunkt,
-            beregningsgrunnlagÅrlig = inntekt.årlig,
-            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
-        ))
+        subsumsjonslogg.logg(
+            `§ 8-3 ledd 2 punktum 1`(
+                oppfylt = oppfylt,
+                skjæringstidspunkt = skjæringstidspunkt,
+                beregningsgrunnlagÅrlig = inntekt.årlig,
+                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
+            )
+        )
         if (oppfylt) return null
         return Begrunnelse.MinimumInntekt
     }

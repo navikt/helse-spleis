@@ -1,10 +1,10 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class Inntektsopplysning private constructor(
     private val orgnummer: String,
@@ -31,11 +31,10 @@ class Inntektsopplysning private constructor(
     }
 
     internal companion object {
-        internal fun sorter(inntekter: List<Inntektsopplysning>) =
-            inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.inntekt }, { it.orgnummer }, { it.hashCode() }))
+        internal fun sorter(inntekter: List<Inntektsopplysning>) = inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.inntekt }, { it.orgnummer }, { it.hashCode() }))
 
-        internal fun gjenopprett(dto: InfotrygdInntektsopplysningInnDto): Inntektsopplysning {
-            return Inntektsopplysning(
+        internal fun gjenopprett(dto: InfotrygdInntektsopplysningInnDto): Inntektsopplysning =
+            Inntektsopplysning(
                 orgnummer = dto.orgnummer,
                 sykepengerFom = dto.sykepengerFom,
                 inntekt = Inntekt.gjenopprett(dto.inntekt),
@@ -43,15 +42,15 @@ class Inntektsopplysning private constructor(
                 refusjonTilArbeidsgiver = dto.refusjonTilArbeidsgiver,
                 lagret = dto.lagret
             )
-        }
     }
 
-    internal fun dto() = InfotrygdInntektsopplysningUtDto(
-        orgnummer = orgnummer,
-        sykepengerFom = sykepengerFom,
-        inntekt = inntekt.dto(),
-        refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-        refusjonTom = refusjonTom,
-        lagret = lagret
-    )
+    internal fun dto() =
+        InfotrygdInntektsopplysningUtDto(
+            orgnummer = orgnummer,
+            sykepengerFom = sykepengerFom,
+            inntekt = inntekt.dto(),
+            refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+            refusjonTom = refusjonTom,
+            lagret = lagret
+        )
 }

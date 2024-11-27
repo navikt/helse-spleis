@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import java.time.LocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
@@ -9,9 +8,9 @@ import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.O
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class InfotrygdendringerRiverTest : RiverTest() {
-
     @Test
     fun `kan mappe melding om infotrygdendring uten feil`() {
         assertNoErrors(
@@ -26,7 +25,10 @@ internal class InfotrygdendringerRiverTest : RiverTest() {
         )
     }
 
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator
+    ) {
         InfotrygdendringerRiver(rapidsConnection, mediator)
     }
 

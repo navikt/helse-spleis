@@ -3,9 +3,9 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.desember
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `Inntektsmelding opplyser om endret arbeidsgiverperiode - AUU periode inneholder utbetalingsdag`() {
         nyPeriode(2.januar til 17.januar)
@@ -113,7 +112,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         }
 
         observatør.vedtaksperiodeVenter.clear()
-        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_REVURDERING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!"){
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_REVURDERING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!") {
             håndterSøknad(10.januar til 26.januar)
         }
         observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
@@ -165,7 +164,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
-
 
     @Test
     fun `korrigert arbeidsgiverperiode under pågående revurdering`() {

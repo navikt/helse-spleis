@@ -4,7 +4,9 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 
 val Utbetalingslinje.inspektør get() = UtbetalingslinjeInspektør(this)
 
-class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) {
+class UtbetalingslinjeInspektør(
+    utbetalingslinje: Utbetalingslinje
+) {
     val endringskode = utbetalingslinje.endringskode
     val fom = utbetalingslinje.fom
     val tom = utbetalingslinje.tom

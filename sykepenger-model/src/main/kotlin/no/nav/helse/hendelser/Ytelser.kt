@@ -1,15 +1,14 @@
 package no.nav.helse.hendelser
 
-
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class Ytelser(
     meldingsreferanseId: UUID,
@@ -23,23 +22,27 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger
-) : Hendelse, SykdomshistorikkHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer
-    )
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
+) : Hendelse,
+    SykdomshistorikkHendelse {
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(
+            organisasjonsnummer = organisasjonsnummer
         )
-    }
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true
+            )
+        }
 
-    private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
-        foreldrepenger
-    )
+    private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> =
+        listOf(
+            foreldrepenger
+        )
     private lateinit var sykdomstidslinje: Sykdomstidslinje
 
     companion object {
@@ -48,7 +51,13 @@ class Ytelser(
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate, erForlengelse: Boolean ): Boolean {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        maksdato: LocalDate,
+        erForlengelse: Boolean
+    ): Boolean {
         if (periode.start > maksdato) return true
 
         val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)
@@ -71,22 +80,22 @@ class Ytelser(
         periodeRettEtter: Periode?,
         oppdaterHistorikk: () -> Unit
     ) {
-        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
-            if (!ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
-            else ytelse.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert)
-        }
+        val sykdomstidslinjer =
+            YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
+                if (!ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) {
+                    null
+                } else {
+                    ytelse.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert)
+                }
+            }
         if (sykdomstidslinjer.isEmpty()) return
         this.sykdomstidslinje = sykdomstidslinjer.merge(beste = default)
         oppdaterHistorikk()
     }
 
-    override fun oppdaterFom(other: Periode): Periode {
-        return other
-    }
+    override fun oppdaterFom(other: Periode): Periode = other
 
-    override fun sykdomstidslinje(): Sykdomstidslinje {
-        return sykdomstidslinje
-    }
+    override fun sykdomstidslinje(): Sykdomstidslinje = sykdomstidslinje
 
     internal fun avgrensTil(periode: Periode): Ytelser {
         sykdomstidslinje = sykdomstidslinje.fraOgMed(periode.start).fremTilOgMed(periode.endInclusive)
@@ -113,7 +122,10 @@ class Ytelser(
     }
 }
 
-class GradertPeriode(internal val periode: Periode, internal val grad: Int)
+class GradertPeriode(
+    internal val periode: Periode,
+    internal val grad: Int
+)
 
 data class AndreYtelserPerioder(
     val foreldrepenger: List<Periode>,

@@ -1,7 +1,22 @@
 rootProject.name = "sykepenger-spleis"
-include("jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", "sykepenger-api-dto", "sykepenger-model", "sykepenger-model-dto",
-    "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling",
-    "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api")
+include(
+    "jobs",
+    "sykepenger-serde",
+    "sykepenger-api",
+    "sykepenger-api-graphql",
+    "sykepenger-api-dto",
+    "sykepenger-model",
+    "sykepenger-model-dto",
+    "sykepenger-mediators",
+    "sykepenger-opprydding-dev",
+    "sykepenger-primitiver",
+    "sykepenger-primitiver-dto",
+    "sykepenger-utbetaling",
+    "sykepenger-utbetaling-dto",
+    "sykepenger-aktivitetslogg",
+    "sykepenger-aktivitetslogg-dto",
+    "sykepenger-etterlevelse-api"
+)
 
 val rapidsAndRiversVersion = "2024112511071732529266.253c42b70448"
 

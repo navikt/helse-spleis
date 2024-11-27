@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
@@ -73,18 +72,20 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `forlengelse etter revurdering uten endring`() {
         nyttVedtak(januar)
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(mai)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(31.januar, Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(31.januar, Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -233,7 +234,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere dager i arbeidsgiverperioden på tidligere utbetaling`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar,0.0)
+        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
@@ -249,7 +250,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar,0.0)
+        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
@@ -1075,12 +1076,16 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         }
     }
 
-    private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
+    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(
+        dato: LocalDate,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double? = 0.0
+    ) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
-            assertTrue(it is D) { "Forventet at $dato er ${D::class.simpleName} men var ${it::class.simpleName}"}
+            assertTrue(it is D) { "Forventet at $dato er ${D::class.simpleName} men var ${it::class.simpleName}" }
         }
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
-            assertTrue(it is UD) { "Forventet at $dato er ${UD::class.simpleName} men var ${it::class.simpleName}"}
+            assertTrue(it is UD) { "Forventet at $dato er ${UD::class.simpleName} men var ${it::class.simpleName}" }
             assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
         }

@@ -1,8 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
 import no.nav.helse.hendelser.Periode
@@ -46,9 +43,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtbetalingTest {
-
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
@@ -63,44 +62,48 @@ internal class UtbetalingTest {
 
     @Test
     fun `forkaster annulleringer som utbetalingen peker på`() {
-        val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.februar til 15.februar,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
-        val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 3.mars til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering1 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.februar til 15.februar,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 3.mars til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
 
-        val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.januar til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.UTBETALING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248,
-            annulleringer = listOf(
-                annullering1,
-                annullering2
-            )
-        ).also { it.opprett(Aktivitetslogg()) }
+        val utbetalingen =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.januar til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.UTBETALING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248,
+                annulleringer =
+                    listOf(
+                        annullering1,
+                        annullering2
+                    )
+            ).also { it.opprett(Aktivitetslogg()) }
 
         utbetalingen.forkast(Aktivitetslogg())
 
@@ -111,44 +114,48 @@ internal class UtbetalingTest {
 
     @Test
     fun `ny utbetaling erstatter flere uten utbetalinger`() {
-        val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.februar til 15.februar,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
-        val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 3.mars til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering1 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.februar til 15.februar,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 3.mars til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
 
-        val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.januar til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.UTBETALING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248,
-            annulleringer = listOf(
-                annullering1,
-                annullering2
-            )
-        ).also { it.opprett(Aktivitetslogg()) }
+        val utbetalingen =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.januar til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.UTBETALING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248,
+                annulleringer =
+                    listOf(
+                        annullering1,
+                        annullering2
+                    )
+            ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
         assertFalse(hendelse.harBehov(Behovtype.Utbetaling))
@@ -159,46 +166,56 @@ internal class UtbetalingTest {
 
     @Test
     fun `ny utbetaling erstatter flere med utbetalinger`() {
-        val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.februar til 15.februar,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
-                Utbetalingslinje(1.februar, 15.februar, beløp = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
-            )),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
-        val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 3.mars til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering1 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.februar til 15.februar,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag =
+                    Oppdrag(
+                        "orgnr",
+                        Fagområde.SykepengerRefusjon,
+                        linjer =
+                            listOf(
+                                Utbetalingslinje(1.februar, 15.februar, beløp = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
+                            )
+                    ),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 3.mars til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
 
-        val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.januar til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.UTBETALING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248,
-            annulleringer = listOf(
-                annullering1,
-                annullering2
-            )
-        ).also { it.opprett(Aktivitetslogg()) }
+        val utbetalingen =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.januar til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.UTBETALING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248,
+                annulleringer =
+                    listOf(
+                        annullering1,
+                        annullering2
+                    )
+            ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
         assertEquals(1, hendelse.behov.size)
@@ -233,48 +250,64 @@ internal class UtbetalingTest {
 
     @Test
     fun `ny utbetaling erstatter flere med utbetalinger - med egne utbetalinger`() {
-        val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.februar til 15.februar,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
-                Utbetalingslinje(1.februar, 15.februar, beløp = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
-            )),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
-        val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 3.mars til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.ANNULLERING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248
-        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering1 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.februar til 15.februar,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag =
+                    Oppdrag(
+                        "orgnr",
+                        Fagområde.SykepengerRefusjon,
+                        linjer =
+                            listOf(
+                                Utbetalingslinje(1.februar, 15.februar, beløp = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
+                            )
+                    ),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 3.mars til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.ANNULLERING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248
+            ).also { it.opprett(Aktivitetslogg()) }
 
-        val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
-            periode = 1.januar til 31.mars,
-            utbetalingstidslinje = Utbetalingstidslinje(),
-            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
-                Utbetalingslinje(1.januar, 31.januar, beløp = 500, grad = 10, delytelseId = 1, endringskode = NY)
-            )),
-            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
-            type = Utbetalingtype.UTBETALING,
-            maksdato = 28.desember,
-            forbrukteSykedager = 0,
-            gjenståendeSykedager = 248,
-            annulleringer = listOf(
-                annullering1,
-                annullering2
-            )
-        ).also { it.opprett(Aktivitetslogg()) }
+        val utbetalingen =
+            Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = 1.januar til 31.mars,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                arbeidsgiverOppdrag =
+                    Oppdrag(
+                        "orgnr",
+                        Fagområde.SykepengerRefusjon,
+                        linjer =
+                            listOf(
+                                Utbetalingslinje(1.januar, 31.januar, beløp = 500, grad = 10, delytelseId = 1, endringskode = NY)
+                            )
+                    ),
+                personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+                type = Utbetalingtype.UTBETALING,
+                maksdato = 28.desember,
+                forbrukteSykedager = 0,
+                gjenståendeSykedager = 248,
+                annulleringer =
+                    listOf(
+                        annullering1,
+                        annullering2
+                    )
+            ).also { it.opprett(Aktivitetslogg()) }
 
         val hendelse = godkjenn(utbetalingen)
         assertEquals(1, hendelse.behov.size)
@@ -431,18 +464,20 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
 
         val sisteDato = 21.januar
-        val utbetaling = Utbetaling.lagUtbetaling(
-            emptyList(),
-            UNG_PERSON_FNR_2018,
-            ORGNUMMER,
-            tidslinje,
-            sisteDato.somPeriode(),
-            listOf(Utbetalingsak(1.januar, listOf(sisteDato.somPeriode()))),
-            aktivitetslogg,
-            LocalDate.MAX,
-            100,
-            148
-        ).first
+        val utbetaling =
+            Utbetaling
+                .lagUtbetaling(
+                    emptyList(),
+                    UNG_PERSON_FNR_2018,
+                    ORGNUMMER,
+                    tidslinje,
+                    sisteDato.somPeriode(),
+                    listOf(Utbetalingsak(1.januar, listOf(sisteDato.somPeriode()))),
+                    aktivitetslogg,
+                    LocalDate.MAX,
+                    100,
+                    148
+                ).first
         assertEquals(Utbetalingstatus.NY, utbetaling.inspektør.tilstand)
         utbetaling.opprett(aktivitetslogg)
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
@@ -453,18 +488,21 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
 
         val sisteDato = 21.januar
-        val utbetaling = Utbetaling.lagUtbetaling(
-            emptyList(),
-            UNG_PERSON_FNR_2018,
-            ORGNUMMER,
-            tidslinje,
-            sisteDato.somPeriode(),
-            listOf(Utbetalingsak(1.januar, listOf(sisteDato.somPeriode()))),
-            aktivitetslogg,
-            LocalDate.MAX,
-            100,
-            148
-        ).first.also { it.opprett(aktivitetslogg) }
+        val utbetaling =
+            Utbetaling
+                .lagUtbetaling(
+                    emptyList(),
+                    UNG_PERSON_FNR_2018,
+                    ORGNUMMER,
+                    tidslinje,
+                    sisteDato.somPeriode(),
+                    listOf(Utbetalingsak(1.januar, listOf(sisteDato.somPeriode()))),
+                    aktivitetslogg,
+                    LocalDate.MAX,
+                    100,
+                    148
+                ).first
+                .also { it.opprett(aktivitetslogg) }
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.utbetalingstidslinje.periode())
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.periode)
     }
@@ -476,7 +514,12 @@ internal class UtbetalingTest {
         val annullering = annuller(første) ?: fail { "forventet utbetaling" }
         val andre = opprettUtbetaling(tidslinje, annullering)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
-        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertNotEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            andre.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
     }
 
     @Test
@@ -486,14 +529,38 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.betale())
         val andre = opprettUtbetaling(ferietidslinje.betale(), første)
         val tredje = opprettUtbetaling(tidslinje.betale(), andre)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            andre.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            tredje.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
-        assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
-        assertEquals(26.januar, tredje.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
-        assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode?.start)
+        assertEquals(
+            17.januar,
+            tredje.inspektør.arbeidsgiverOppdrag
+                .first()
+                .inspektør.fom
+        )
+        assertEquals(
+            26.januar,
+            tredje.inspektør.arbeidsgiverOppdrag
+                .last()
+                .inspektør.tom
+        )
+        assertEquals(
+            17.januar,
+            tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode
+                ?.start
+        )
     }
 
     @Test
@@ -501,16 +568,38 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
         val første = opprettUtbetaling(tidslinje.fremTilOgMed(16.januar))
         val andre = opprettUtbetaling(tidslinje, første)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            andre.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(første.inspektør.arbeidsgiverOppdrag.isEmpty())
         assertTrue(andre.inspektør.arbeidsgiverOppdrag.isNotEmpty())
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            andre.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(NY, andre.inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(NY, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
-        assertEquals(17.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
-        assertEquals(26.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
+        assertEquals(
+            NY,
+            andre.inspektør.arbeidsgiverOppdrag[0]
+                .inspektør.endringskode
+        )
+        assertEquals(
+            17.januar,
+            andre.inspektør.arbeidsgiverOppdrag[0]
+                .inspektør.fom
+        )
+        assertEquals(
+            26.januar,
+            andre.inspektør.arbeidsgiverOppdrag[0]
+                .inspektør.tom
+        )
     }
 
     @Test
@@ -520,23 +609,54 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje)
         val andre = opprettUtbetaling(ferietidslinje.betale(), første)
         val tredje = opprettUtbetaling(beregnUtbetalinger(ferietidslinje + tidslinjeOf(10.NAV, startDato = 27.januar)), andre)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            andre.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            tredje.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
-        assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
-        assertNull(tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
-        assertEquals(5.februar, tredje.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
-        assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode?.start)
+        assertEquals(
+            27.januar,
+            tredje.inspektør.arbeidsgiverOppdrag
+                .first()
+                .inspektør.fom
+        )
+        assertNull(
+            tredje.inspektør.arbeidsgiverOppdrag
+                .first()
+                .inspektør.datoStatusFom
+        )
+        assertEquals(
+            5.februar,
+            tredje.inspektør.arbeidsgiverOppdrag
+                .last()
+                .inspektør.tom
+        )
+        assertEquals(
+            27.januar,
+            tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode
+                ?.start
+        )
     }
 
     @Test
     fun `setter refFagsystemId og refDelytelseId når en linje peker på en annen`() {
-        val tidslinje = tidslinjeOf(
-            16.AP, 3.NAV, 5.NAV(1200, 50.0),
-            startDato = 1.januar(2020)
-        ).betale()
+        val tidslinje =
+            tidslinjeOf(
+                16.AP,
+                3.NAV,
+                5.NAV(1200, 50.0),
+                startDato = 1.januar(2020)
+            ).betale()
 
         val tidligere = opprettUtbetaling(tidslinje.fremTilOgMed(19.januar(2020)))
         val utbetaling = opprettUtbetaling(tidslinje.fremTilOgMed(24.januar(2020)), tidligere = tidligere)
@@ -585,7 +705,11 @@ internal class UtbetalingTest {
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        kvittèr(
+            utbetaling,
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
@@ -593,7 +717,12 @@ internal class UtbetalingTest {
     fun `kan ikke forkaste feilet utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), status = AVVIST)
+        kvittèr(
+            utbetaling,
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            status = AVVIST
+        )
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
@@ -609,9 +738,10 @@ internal class UtbetalingTest {
     fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
         val tidslinje = tidslinjeOf(16.AP, 32.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje.fremTilOgMed(31.januar))
-        val annullert = opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling).let {
-            annuller(it)
-        } ?: fail { "Kunne ikke annullere" }
+        val annullert =
+            opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling).let {
+                annuller(it)
+            } ?: fail { "Kunne ikke annullere" }
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullert)))
     }
 
@@ -636,7 +766,12 @@ internal class UtbetalingTest {
     fun `utbetalingen er feilet dersom én av oppdragene er avvist 1`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
+        kvittèr(
+            utbetaling,
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            AVVIST
+        )
         assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
@@ -644,10 +779,23 @@ internal class UtbetalingTest {
     fun `tar imot kvittering på det andre oppdraget selv om utbetalingen har feilet`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
+        kvittèr(
+            utbetaling,
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            AVVIST
+        )
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId, AKSEPTERT)
-        assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
-        assertEquals(AKSEPTERT, utbetaling.inspektør.personOppdrag.inspektør.status())
+        assertEquals(
+            AVVIST,
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .status()
+        )
+        assertEquals(
+            AKSEPTERT,
+            utbetaling.inspektør.personOppdrag.inspektør
+                .status()
+        )
         assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
@@ -655,7 +803,12 @@ internal class UtbetalingTest {
     fun `utbetalingen er feilet dersom én av oppdragene er avvist 2`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AKSEPTERT)
+        kvittèr(
+            utbetaling,
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            AKSEPTERT
+        )
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId, AVVIST)
         assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
@@ -672,8 +825,16 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val annullering = annuller(utbetaling) ?: fail { "forventet utbetaling" }
-        assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
-        assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
+        assertTrue(
+            annullering.inspektør.arbeidsgiverOppdrag
+                .last()
+                .erOpphør()
+        )
+        assertTrue(
+            annullering.inspektør.personOppdrag
+                .last()
+                .erOpphør()
+        )
     }
 
     @Test
@@ -682,8 +843,16 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.fremTilOgMed(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         val annullering = annuller(andre) ?: fail { "forventet utbetaling" }
-        assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
-        assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
+        assertTrue(
+            annullering.inspektør.arbeidsgiverOppdrag
+                .last()
+                .erOpphør()
+        )
+        assertTrue(
+            annullering.inspektør.personOppdrag
+                .last()
+                .erOpphør()
+        )
     }
 
     @Test
@@ -703,7 +872,12 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.fremTilOgMed(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.personOppdrag.fagsystemId, andre.inspektør.personOppdrag.fagsystemId)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(
+            første.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
+            andre.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId()
+        )
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
 
@@ -711,30 +885,51 @@ internal class UtbetalingTest {
     fun `simulerer ingen refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        val simulering = opprettSimulering(
-            utbetaling.inspektør.personOppdrag.fagsystemId, Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, SimuleringResultatDto(
-                totalbeløp = 1000,
-                perioder = emptyList()
+        val simulering =
+            opprettSimulering(
+                utbetaling.inspektør.personOppdrag.fagsystemId,
+                Fagområde.Sykepenger,
+                utbetaling.inspektør.utbetalingId,
+                SimuleringResultatDto(
+                    totalbeløp = 1000,
+                    perioder = emptyList()
+                )
             )
-        )
         utbetaling.håndter(simulering)
-        assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
-        assertNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
+        assertNotNull(
+            utbetaling.inspektør.personOppdrag.inspektør
+                .simuleringsResultat()
+        )
+        assertNull(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .simuleringsResultat()
+        )
     }
 
     @Test
     fun `simulerer full refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 1000)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        val simulering = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, SimuleringResultatDto(
-                totalbeløp = 1000,
-                perioder = emptyList()
+        val simulering =
+            opprettSimulering(
+                utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                    .fagsystemId(),
+                Fagområde.SykepengerRefusjon,
+                utbetaling.inspektør.utbetalingId,
+                SimuleringResultatDto(
+                    totalbeløp = 1000,
+                    perioder = emptyList()
+                )
             )
-        )
         utbetaling.håndter(simulering)
-        assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
-        assertNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
+        assertNotNull(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .simuleringsResultat()
+        )
+        assertNull(
+            utbetaling.inspektør.personOppdrag.inspektør
+                .simuleringsResultat()
+        )
     }
 
     @Test
@@ -742,34 +937,54 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 500)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
 
-        val simuleringArbeidsgiver = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, SimuleringResultatDto(
-                totalbeløp = 500,
-                perioder = emptyList()
+        val simuleringArbeidsgiver =
+            opprettSimulering(
+                utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                    .fagsystemId(),
+                Fagområde.SykepengerRefusjon,
+                utbetaling.inspektør.utbetalingId,
+                SimuleringResultatDto(
+                    totalbeløp = 500,
+                    perioder = emptyList()
+                )
             )
-        )
-        val simuleringPerson = opprettSimulering(
-            utbetaling.inspektør.personOppdrag.fagsystemId, Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, SimuleringResultatDto(
-                totalbeløp = 500,
-                perioder = emptyList()
+        val simuleringPerson =
+            opprettSimulering(
+                utbetaling.inspektør.personOppdrag.fagsystemId,
+                Fagområde.Sykepenger,
+                utbetaling.inspektør.utbetalingId,
+                SimuleringResultatDto(
+                    totalbeløp = 500,
+                    perioder = emptyList()
+                )
             )
-        )
         utbetaling.håndter(simuleringArbeidsgiver)
         utbetaling.håndter(simuleringPerson)
 
-        assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
-        assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
+        assertNotNull(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .simuleringsResultat()
+        )
+        assertNotNull(
+            utbetaling.inspektør.personOppdrag.inspektør
+                .simuleringsResultat()
+        )
     }
 
-    private fun opprettSimulering(fagsystemId: String, fagområde: Fagområde, utbetalingId: UUID, simuleringResultat: SimuleringResultatDto? = null) =
-        Simulering(
-            utbetalingId = utbetalingId,
-            fagsystemId = fagsystemId,
-            fagområde = fagområde,
-            simuleringsResultat = simuleringResultat
-        )
+    private fun opprettSimulering(
+        fagsystemId: String,
+        fagområde: Fagområde,
+        utbetalingId: UUID,
+        simuleringResultat: SimuleringResultatDto? = null
+    ) = Simulering(
+        utbetalingId = utbetalingId,
+        fagsystemId = fagsystemId,
+        fagområde = fagområde,
+        simuleringsResultat = simuleringResultat
+    )
 
     private fun Utbetalingstidslinje.betale() = beregnUtbetalinger(this)
+
     private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = Utbetalingstidslinje.betale(listOf(tidslinje)).single()
 
     private fun opprettGodkjentUtbetaling(
@@ -781,8 +996,8 @@ internal class UtbetalingTest {
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
     ) = opprettUbetaltUtbetaling(tidslinje, null, periode, fødselsnummer, orgnummer, utbetalingsaker, aktivitetslogg)
         .also { godkjenn(it) }
-    private fun opprettGodkjentUtbetaling() =
-        opprettGodkjentUtbetaling(beregnUtbetalinger(tidslinjeOf(16.AP, 5.NAV(3000))))
+
+    private fun opprettGodkjentUtbetaling() = opprettGodkjentUtbetaling(beregnUtbetalinger(tidslinjeOf(16.AP, 5.NAV(3000))))
 
     private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,
@@ -792,18 +1007,20 @@ internal class UtbetalingTest {
         orgnummer: String = ORGNUMMER,
         utbetalingsaker: List<Utbetalingsak> = listOf(Utbetalingsak(tidslinje.periode().start, listOf(periode))),
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = Utbetaling.lagUtbetaling(
-        tidligere?.let { listOf(tidligere) } ?: emptyList(),
-        fødselsnummer,
-        orgnummer,
-        tidslinje,
-        periode,
-        utbetalingsaker,
-        aktivitetslogg,
-        LocalDate.MAX,
-        100,
-        148
-    ).first.also { it.opprett(aktivitetslogg) }
+    ) = Utbetaling
+        .lagUtbetaling(
+            tidligere?.let { listOf(tidligere) } ?: emptyList(),
+            fødselsnummer,
+            orgnummer,
+            tidslinje,
+            periode,
+            utbetalingsaker,
+            aktivitetslogg,
+            LocalDate.MAX,
+            100,
+            148
+        ).first
+        .also { it.opprett(aktivitetslogg) }
 
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,
@@ -823,21 +1040,27 @@ internal class UtbetalingTest {
 
     private fun kvittèr(
         utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+        fagsystemId: String =
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør
+                .fagsystemId(),
         status: Oppdragstatus = AKSEPTERT,
         utbetalingmottaker: Utbetaling = utbetaling
     ): Aktivitetslogg {
-        val hendelsen = Kvittering(
-            fagsystemId = fagsystemId,
-            utbetalingId = utbetaling.inspektør.utbetalingId,
-            status = status
-        )
+        val hendelsen =
+            Kvittering(
+                fagsystemId = fagsystemId,
+                utbetalingId = utbetaling.inspektør.utbetalingId,
+                status = status
+            )
         val aktivitetslogg = Aktivitetslogg()
         utbetalingmottaker.håndter(hendelsen, aktivitetslogg)
         return aktivitetslogg
     }
 
-    private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) = Aktivitetslogg().also { aktivitetslogg ->
+    private fun godkjenn(
+        utbetaling: Utbetaling,
+        utbetalingGodkjent: Boolean = true
+    ) = Aktivitetslogg().also { aktivitetslogg ->
         Utbetalingsgodkjenning(
             utbetalingId = utbetaling.inspektør.utbetalingId,
             godkjent = utbetalingGodkjent
@@ -846,8 +1069,11 @@ internal class UtbetalingTest {
         }
     }
 
-    private fun annuller(utbetaling: Utbetaling, utbetalingId: UUID = utbetaling.inspektør.utbetalingId) =
-        utbetaling.annuller(
+    private fun annuller(
+        utbetaling: Utbetaling,
+        utbetalingId: UUID = utbetaling.inspektør.utbetalingId
+    ) = utbetaling
+        .annuller(
             hendelse = AnnullerUtbetaling(utbetalingId),
             Aktivitetslogg(),
             alleUtbetalinger = listOf(utbetaling)
@@ -855,11 +1081,9 @@ internal class UtbetalingTest {
             it.opprett(aktivitetslogg)
         }
 
-    private fun Aktivitetslogg.sisteBehov(type: Behovtype) =
-        behov.last { it.type == type }
+    private fun Aktivitetslogg.sisteBehov(type: Behovtype) = behov.last { it.type == type }
 
-    private fun Aktivitetslogg.harBehov(behov: Behovtype) =
-        this.behov.any { it.type == behov }
+    private fun Aktivitetslogg.harBehov(behov: Behovtype) = this.behov.any { it.type == behov }
 
     private class Utbetalingsgodkjenning(
         override val utbetalingId: UUID,

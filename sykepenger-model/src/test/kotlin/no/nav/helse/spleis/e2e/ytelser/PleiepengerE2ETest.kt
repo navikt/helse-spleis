@@ -38,7 +38,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class PleiepengerE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `Periode for person der det ikke foreligger pleiepengerytelse blir behandlet og sendt til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
@@ -108,7 +107,6 @@ internal class PleiepengerE2ETest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_AY_6)
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
-
 
     @Test
     fun `Pleiepenger starter mer enn 4 uker før sykefraværstilfellet`() {

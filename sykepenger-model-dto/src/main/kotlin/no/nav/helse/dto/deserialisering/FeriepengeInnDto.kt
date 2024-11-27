@@ -1,7 +1,7 @@
 package no.nav.helse.dto.deserialisering
 
-import java.util.UUID
 import no.nav.helse.dto.FeriepengeberegnerDto
+import java.util.UUID
 
 data class FeriepengeInnDto(
     val feriepengeberegner: FeriepengeberegnerDto,
@@ -13,5 +13,5 @@ data class FeriepengeInnDto(
     val personoppdrag: OppdragInnDto,
     val utbetalingId: UUID,
     val sendTilOppdrag: Boolean,
-    val sendPersonoppdragTilOS: Boolean,
+    val sendPersonoppdragTilOS: Boolean
 )

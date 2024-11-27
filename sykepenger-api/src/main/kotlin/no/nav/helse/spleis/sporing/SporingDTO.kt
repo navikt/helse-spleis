@@ -14,7 +14,10 @@ data class ArbeidsgiverDTO(
 )
 
 enum class PeriodetypeDTO {
-    GAP, FORLENGELSE, GAP_SISTE, FORLENGELSE_SISTE
+    GAP,
+    FORLENGELSE,
+    GAP_SISTE,
+    FORLENGELSE_SISTE
 }
 
 data class VedtaksperiodeDTO(

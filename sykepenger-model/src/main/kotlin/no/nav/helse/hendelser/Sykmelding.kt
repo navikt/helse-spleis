@@ -1,29 +1,31 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class Sykmelding(
     meldingsreferanseId: UUID,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = orgnummer
-    )
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(
+            organisasjonsnummer = orgnummer
         )
-    }
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true
+            )
+        }
 
     private val opprinneligPeriode = checkNotNull(Sykmeldingsperiode.periode(sykeperioder)) { "må ha minst én periode" }
     private var sykmeldingsperiode: Periode? = opprinneligPeriode
@@ -34,7 +36,10 @@ class Sykmelding(
         sykmeldingsperiode = sykmeldingsperiode?.beholdDagerEtter(dato)
     }
 
-    internal fun oppdaterSykmeldingsperioder(aktivitetslogg: IAktivitetslogg, perioder: List<Periode>): List<Periode> {
+    internal fun oppdaterSykmeldingsperioder(
+        aktivitetslogg: IAktivitetslogg,
+        perioder: List<Periode>
+    ): List<Periode> {
         val periode = sykmeldingsperiode
         if (periode == null) {
             aktivitetslogg.info("Sykmeldingsperiode har allerede blitt tidligere håndtert, mistenker korrigert sykmelding")
@@ -47,8 +52,12 @@ class Sykmelding(
     }
 }
 
-class Sykmeldingsperiode(fom: LocalDate, tom: LocalDate) {
+class Sykmeldingsperiode(
+    fom: LocalDate,
+    tom: LocalDate
+) {
     private val periode = fom til tom
+
     internal companion object {
         internal fun periode(perioder: List<Sykmeldingsperiode>) = perioder.map { it.periode }.periode()
     }

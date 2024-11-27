@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -42,10 +41,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
-
-
     @Test
     fun ferieforlengelse() {
         nyttVedtak(januar)
@@ -63,17 +61,20 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    listOf(
+                        grunnlag(a1, 1.januar, 31000.månedlig.repeat(3)),
+                        grunnlag(a2, 1.januar, 31000.månedlig.repeat(3))
+                    )
+                ),
+            arbeidsforhold =
                 listOf(
-                    grunnlag(a1, 1.januar, 31000.månedlig.repeat(3)),
-                    grunnlag(a2, 1.januar, 31000.månedlig.repeat(3)),
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
-            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -171,6 +172,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(listOf(24.februar til 28.februar), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
+
     @Test
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
         nyttVedtak(januar)

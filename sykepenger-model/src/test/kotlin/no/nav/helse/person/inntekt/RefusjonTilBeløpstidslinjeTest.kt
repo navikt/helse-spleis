@@ -1,8 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
@@ -14,11 +11,13 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class RefusjonTilBeløpstidslinjeTest {
-
     @Test
     fun `Planke opplysning`() {
         val refusjonstidslinje = refusjontidslinje(31.januar, førsteFraværsdag = 1.januar, beløp = 100.daglig)
@@ -29,8 +28,8 @@ internal class RefusjonTilBeløpstidslinjeTest {
     fun `Siste refusjonsdag er satt`() {
         val refusjonstidslinje = refusjontidslinje(31.januar, førsteFraværsdag = 1.januar, beløp = 100.daglig, sisteRefusjonsdag = 20.januar)
         assertEquals(Beløpstidslinje.fra(1.januar til 20.januar, 100.daglig, kilde) + Beløpstidslinje.fra(21.januar til 31.januar, INGEN, kilde), refusjonstidslinje)
-
     }
+
     @Test
     fun `Siste refusjonsdag er satt til siste dag i vedtaksperioden`() {
         val refusjonstidslinje = refusjontidslinje(31.januar, førsteFraværsdag = 1.januar, beløp = 100.daglig, sisteRefusjonsdag = 31.januar)
@@ -68,18 +67,19 @@ internal class RefusjonTilBeløpstidslinjeTest {
     }
 
     @Test
-    fun `Tom tidslinje før første fraværsdag`(){
+    fun `Tom tidslinje før første fraværsdag`() {
         val refusjonstidslinje = refusjontidslinje(1.januar, førsteFraværsdag = 2.januar, beløp = 500.daglig)
         assertEquals(Beløpstidslinje(), refusjonstidslinje)
     }
 
     @Test
-    fun `Endringer i refusjon i fremtiden`(){
+    fun `Endringer i refusjon i fremtiden`() {
         val refusjonstidslinje = refusjontidslinje(31.januar, førsteFraværsdag = 1.januar, beløp = 500.daglig, endringer = listOf(EndringIRefusjon(1000.daglig, 1.februar)))
         assertEquals(Beløpstidslinje.fra(1.januar til 31.januar, 500.daglig, kilde), refusjonstidslinje)
     }
 
     private val kilde = Kilde(UUID.randomUUID(), Avsender.ARBEIDSGIVER, LocalDateTime.now())
+
     private fun refusjontidslinje(
         tilOgMed: LocalDate,
         førsteFraværsdag: LocalDate? = null,
@@ -87,13 +87,14 @@ internal class RefusjonTilBeløpstidslinjeTest {
         beløp: Inntekt? = null,
         sisteRefusjonsdag: LocalDate? = null,
         endringer: List<EndringIRefusjon> = emptyList()
-    ) = Refusjonshistorikk.Refusjon(
-        meldingsreferanseId = kilde.meldingsreferanseId,
-        førsteFraværsdag = førsteFraværsdag,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beløp = beløp,
-        sisteRefusjonsdag = sisteRefusjonsdag,
-        endringerIRefusjon =  endringer,
-        tidsstempel = kilde.tidsstempel
-    ).beløpstidslinje(tilOgMed)
+    ) = Refusjonshistorikk
+        .Refusjon(
+            meldingsreferanseId = kilde.meldingsreferanseId,
+            førsteFraværsdag = førsteFraværsdag,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beløp = beløp,
+            sisteRefusjonsdag = sisteRefusjonsdag,
+            endringerIRefusjon = endringer,
+            tidsstempel = kilde.tidsstempel
+        ).beløpstidslinje(tilOgMed)
 }

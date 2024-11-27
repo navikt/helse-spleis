@@ -15,8 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
 // https://github.com/navikt/sykepengesoknad-kafka/blob/master/src/main/kotlin/no/nav/helse/flex/sykepengesoknad/kafka/SoknadstypeDTO.kt
-internal class AndreSøknadstyperTest: AbstractDslTest() {
-
+internal class AndreSøknadstyperTest : AbstractDslTest() {
     @ParameterizedTest
     @ValueSource(strings = ["SELVSTENDIGE_OG_FRILANSERE", "OPPHOLD_UTLAND", "ANNET_ARBEIDSFORHOLD", "BEHANDLINGSDAGER", "REISETILSKUDD", "GRADERT_REISETILSKUDD"])
     fun `støtter ikke førstegangsbehandlinger`(søknadstype: String) {

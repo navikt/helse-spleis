@@ -17,9 +17,9 @@ internal class AzureTokenStub(
 
     fun wellKnownEndpoint() = URI("http://localhost:$randomPort$jwksPath")
 
-    suspend fun startServer(): Boolean {
-        return suspendCoroutine { continuation ->
-            //Stub ID provider (for authentication of REST endpoints)
+    suspend fun startServer(): Boolean =
+        suspendCoroutine { continuation ->
+            // Stub ID provider (for authentication of REST endpoints)
             wireMockServer.start()
             ventPåServeroppstart()
             wireMockServer.stubFor(
@@ -27,18 +27,19 @@ internal class AzureTokenStub(
             )
             continuation.resume(true) // returnerer true bare for å ha en verdi
         }
-    }
 
-    suspend fun stopServer() = suspendCoroutine {
-        wireMockServer.stop()
-        it.resume(true) // returnerer true bare for å ha en verdi
-    }
-
-    private fun ventPåServeroppstart() = retry {
-        try {
-            Socket("localhost", wireMockServer.port()).use { it.isConnected }
-        } catch (err: Exception) {
-            false
+    suspend fun stopServer() =
+        suspendCoroutine {
+            wireMockServer.stop()
+            it.resume(true) // returnerer true bare for å ha en verdi
         }
-    }
+
+    private fun ventPåServeroppstart() =
+        retry {
+            try {
+                Socket("localhost", wireMockServer.port()).use { it.isConnected }
+            } catch (err: Exception) {
+                false
+            }
+        }
 }

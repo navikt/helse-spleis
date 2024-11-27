@@ -34,15 +34,17 @@ dependencies {
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 
-val copyJars = tasks.create("copy-jars") {
-    doLast {
-        configurations.runtimeClasspath.get().forEach {
-            val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-            if (!file.exists())
-                it.copyTo(file)
+val copyJars =
+    tasks.create("copy-jars") {
+        doLast {
+            configurations.runtimeClasspath.get().forEach {
+                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                if (!file.exists()) {
+                    it.copyTo(file)
+                }
+            }
         }
     }
-}
 
 tasks.get("build").finalizedBy(copyJars)
 
@@ -51,18 +53,19 @@ tasks.withType<Jar> {
 
     manifest {
         attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
-        }
+        attributes["Class-Path"] =
+            configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }
     }
     finalizedBy(":sykepenger-mediators:remove_spleis_mediators_db_container")
 }
 
 tasks.withType<Test> {
-        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-        systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
-        systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
+    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+    systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
+    systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
 }
 
 tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
@@ -70,7 +73,8 @@ tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::clas
     dependsOn(":sykepenger-mediators:test")
     setProperty("force", true)
     onError {
-        if (!this.message!!.contains("No such container"))
+        if (!this.message!!.contains("No such container")) {
             throw this
+        }
     }
 }

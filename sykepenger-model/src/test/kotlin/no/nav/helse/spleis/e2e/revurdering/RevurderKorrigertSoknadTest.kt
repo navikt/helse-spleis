@@ -65,7 +65,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
-
     @Test
     fun `Avsluttet periode får en korrigert søknad med perfekt overlapp - skal sette i gang en revurdering`() {
         nyttVedtak(januar)
@@ -145,13 +144,28 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(januar, inspektør.sykdomstidslinje.periode())
         håndterYtelser(1.vedtaksperiode)
         (1..16).forEach {
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                100.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (17..25).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (26..31).forEach {
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                100.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
     }
 
@@ -198,9 +212,24 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-        assertEquals(20, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[Sykedag::class])
-        assertEquals(2, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[Feriedag::class])
-        assertEquals(9, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[SykHelgedag::class])
+        assertEquals(
+            20,
+            inspektør.sykdomstidslinje
+                .subset(mars)
+                .inspektør.dagteller[Sykedag::class]
+        )
+        assertEquals(
+            2,
+            inspektør.sykdomstidslinje
+                .subset(mars)
+                .inspektør.dagteller[Feriedag::class]
+        )
+        assertEquals(
+            9,
+            inspektør.sykdomstidslinje
+                .subset(mars)
+                .inspektør.dagteller[SykHelgedag::class]
+        )
     }
 
     @Test
@@ -211,9 +240,24 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        assertEquals(21, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Sykedag::class])
-        assertEquals(2, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Feriedag::class])
-        assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[SykHelgedag::class])
+        assertEquals(
+            21,
+            inspektør.sykdomstidslinje
+                .subset(januar)
+                .inspektør.dagteller[Sykedag::class]
+        )
+        assertEquals(
+            2,
+            inspektør.sykdomstidslinje
+                .subset(januar)
+                .inspektør.dagteller[Feriedag::class]
+        )
+        assertEquals(
+            8,
+            inspektør.sykdomstidslinje
+                .subset(januar)
+                .inspektør.dagteller[SykHelgedag::class]
+        )
     }
 
     @Test
@@ -227,13 +271,28 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(2.vedtaksperiode)
         (1..4).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(2.vedtaksperiode)[it.februar]
+                    .økonomi.inspektør.grad
+            )
         }
         (5..20).forEach {
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+            assertEquals(
+                100.prosent,
+                inspektør
+                    .utbetalingstidslinjer(2.vedtaksperiode)[it.februar]
+                    .økonomi.inspektør.grad
+            )
         }
         (21..28).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(2.vedtaksperiode)[it.februar]
+                    .økonomi.inspektør.grad
+            )
         }
     }
 
@@ -248,7 +307,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVSLUTTET)
         assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-
     }
 
     @Test
@@ -263,7 +321,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVSLUTTET)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
-
     }
 
     @Test
@@ -296,15 +353,26 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
         (17..21).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (27..31).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerSimuleringRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
@@ -320,15 +388,26 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
         (17..21).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (27..31).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerHistorikkRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
@@ -343,15 +422,26 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
         (17..21).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (27..31).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                    .økonomi.inspektør.grad
+            )
         }
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
@@ -373,10 +463,20 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         (15..28).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(2.vedtaksperiode)[it.februar]
+                    .økonomi.inspektør.grad
+            )
         }
         (1..15).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.mars].økonomi.inspektør.grad)
+            assertEquals(
+                50.prosent,
+                inspektør
+                    .utbetalingstidslinjer(2.vedtaksperiode)[it.mars]
+                    .økonomi.inspektør.grad
+            )
         }
     }
 
@@ -398,7 +498,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         (16..16).forEach {
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+            assertEquals(
+                100.prosent,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[it.februar]
+                    .økonomi.inspektør.grad
+            )
         }
     }
 
@@ -415,7 +520,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
-
     @Test
     fun `Korrigert søknad med friskmelding for avsluttet periode`() {
         nyttVedtak(januar, 100.prosent)
@@ -424,7 +528,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
-        assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
+        assertEquals(
+            8,
+            inspektør.sykdomstidslinje
+                .subset(januar)
+                .inspektør.dagteller[Arbeidsdag::class]
+        )
         val utbetalingInspektør = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør
         val utbetalingInspektørRevurdering = inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør
         assertEquals(utbetalingInspektør.fagsystemId(), utbetalingInspektørRevurdering.fagsystemId())
@@ -445,7 +554,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
+        assertEquals(
+            8,
+            inspektør.sykdomstidslinje
+                .subset(januar)
+                .inspektør.dagteller[Arbeidsdag::class]
+        )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
@@ -485,15 +599,29 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun assertRevurderingUtenEndring(vedtakperiodeId: IdInnhenter, orgnummer: String = ORGNUMMER, block:() -> Unit) {
+    private fun assertRevurderingUtenEndring(
+        vedtakperiodeId: IdInnhenter,
+        orgnummer: String = ORGNUMMER,
+        block: () -> Unit
+    ) {
         val sykdomsHistorikkElementerFør = inspektør(orgnummer).sykdomshistorikk.elementer()
         val utbetalingerFør = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
         block()
         val utbetalingerEtter = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
         val sykdomsHistorikkElementerEtter = inspektør(orgnummer).sykdomshistorikk.elementer()
         assertEquals(1, utbetalingerEtter.size - utbetalingerFør.size) { "Forventet at det skal være opprettet en utbetaling" }
-        assertEquals(UEND, utbetalingerEtter.last().inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(0, utbetalingerEtter.last().inspektør.personOppdrag.size)
+        assertEquals(
+            UEND,
+            utbetalingerEtter
+                .last()
+                .inspektør.arbeidsgiverOppdrag.inspektør.endringskode
+        )
+        assertEquals(
+            0,
+            utbetalingerEtter
+                .last()
+                .inspektør.personOppdrag.size
+        )
         assertEquals(sykdomsHistorikkElementerFør, sykdomsHistorikkElementerEtter) { "Forventet at sykdomshistorikken skal være uendret" }
     }
 }

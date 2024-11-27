@@ -6,17 +6,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V291FikseTidligereOmgjøringerSomErRevurderingFeilet: JsonMigration(version = 291) {
+internal class V291FikseTidligereOmgjøringerSomErRevurderingFeilet : JsonMigration(version = 291) {
     override val description = "fikser opp i gamle auu-perioder som står i REVURDERING_FEILET, hvor siste behandling er TIL_INFOTRYGD og den nest siste er BEREGNET_OMGJØRING"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier
+    ) {
         val aktørId = jsonNode.path("aktørId").asText()
         val fnr = jsonNode.path("fødselsnummer").asText()
         MDC.putCloseable("aktørId", aktørId).use {
             jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
                 val orgnr = arbeidsgiver.path("organisasjonsnummer").asText()
                 MDC.putCloseable("orgnr", orgnr).use {
-                    arbeidsgiver.path("forkastede")
+                    arbeidsgiver
+                        .path("forkastede")
                         .forEach { forkastet ->
                             migrerVedtaksperiode(forkastet.path("vedtaksperiode"))
                         }
@@ -48,6 +52,5 @@ internal class V291FikseTidligereOmgjøringerSomErRevurderingFeilet: JsonMigrati
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     }
 }

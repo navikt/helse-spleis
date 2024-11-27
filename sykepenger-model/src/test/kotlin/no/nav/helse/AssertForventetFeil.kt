@@ -11,12 +11,17 @@ private fun Throwable.håndterNåOppførselFeil(harØnsketOppførsel: Boolean) {
     throw AssertionError(FeilITestkode, this)
 }
 
-private fun Throwable.håndterØnsketOppførselFeil(forklaring: String?)= when (this) {
-    is AssertionError -> println("☹️ Det er kjent at vi ikke har ønsket oppførsel for ${forklaring?:"denne testen"} ☹️️")
-    else -> throw AssertionError(FeilITestkode, this)
-}
+private fun Throwable.håndterØnsketOppførselFeil(forklaring: String?) =
+    when (this) {
+        is AssertionError -> println("☹️ Det er kjent at vi ikke har ønsket oppførsel for ${forklaring ?: "denne testen"} ☹️️")
+        else -> throw AssertionError(FeilITestkode, this)
+    }
 
-internal fun assertForventetFeil(forklaring: String? = null, nå: () -> Unit, ønsket: () -> Unit) {
+internal fun assertForventetFeil(
+    forklaring: String? = null,
+    nå: () -> Unit,
+    ønsket: () -> Unit
+) {
     runCatching(nå).exceptionOrNull()?.håndterNåOppførselFeil(harØnsketOppførsel = runCatching(ønsket).isSuccess)
     assertThrows<Throwable>(ØnsketOppførsel) { ønsket() }.håndterØnsketOppførselFeil(forklaring)
 }

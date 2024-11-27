@@ -1,9 +1,9 @@
 package no.nav.helse.dto.serialisering
 
+import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.InfotrygdFerieperiodeDto
 
 data class InfotrygdhistorikkelementUtDto(
     val id: UUID,

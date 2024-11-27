@@ -3,7 +3,9 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
-class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
+class FunksjonelleFeilTilVarsler(
+    private val other: IAktivitetslogg
+) : IAktivitetslogg by other {
     override fun funksjonellFeil(kode: Varselkode) {
         varsel(kode)
         info("Deeskalerer $kode")

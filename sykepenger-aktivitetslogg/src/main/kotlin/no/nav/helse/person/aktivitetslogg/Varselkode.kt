@@ -9,7 +9,6 @@ enum class Varselkode(
     val funksjonellFeilTekst: String = varseltekst,
     val avviklet: Boolean = false
 ) {
-
     RV_SY_1("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", avviklet = true),
     RV_SY_2("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer", avviklet = true),
     RV_SY_3("Mottatt flere sykmeldinger for perioden - den første sykmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt", avviklet = true),
@@ -172,6 +171,7 @@ enum class Varselkode(
 
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", avviklet = true),
+
     @Deprecated("Denne skal ikke være i bruk i Spleis mer, brukes av spinnvill")
     RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", funksjonellFeilTekst = "Har mer enn 25 % avvik"),
     RV_IV_3("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene"),
@@ -246,7 +246,7 @@ enum class Varselkode(
     // RV: Revurdering
     RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"),
     RV_RV_2("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger."),
-    RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", avviklet= true),
+    RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", avviklet = true),
     RV_RV_4("Revurdering er igangsatt og må fullføres", avviklet = true),
     RV_RV_5("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres", avviklet = true),
     RV_RV_6("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", avviklet = true),
@@ -263,7 +263,7 @@ enum class Varselkode(
 
     RV_AG_1("Finner ikke arbeidsgiver"),
 
-    //AN: Annet
+    // AN: Annet
     RV_AN_1("Avslutter perioden på grunn av tilbakestilling", avviklet = true),
     RV_AN_2("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD", avviklet = true),
     RV_AN_3("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_GAP", avviklet = true),
@@ -275,13 +275,12 @@ enum class Varselkode(
     ;
 
     init {
-        require(this.name.matches(regex)) {"Ugyldig varselkode-format: ${this.name}"}
+        require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel =
-        Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
-    internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil =
-        Aktivitet.FunksjonellFeil.opprett(kontekster, this, funksjonellFeilTekst)
+    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel = Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
+
+    internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil = Aktivitet.FunksjonellFeil.opprett(kontekster, this, funksjonellFeilTekst)
 
     override fun toString() = "${this.name}: $varseltekst"
 
@@ -296,12 +295,14 @@ enum class Varselkode(
         val `Overlapper med svangerskapspenger` = RV_AY_11
         val `Forlenger foreldrepenger med mer enn 14 dager` = RV_AY_12
 
-
         val `Støtter ikke søknadstypen` = RV_SØ_39
         val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
-        val `Arbeidsledigsøknad er lagt til grunn` =  RV_SØ_43
+        val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
 
-        fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
+        fun IAktivitetslogg.varsel(
+            varselkode: Varselkode,
+            detaljer: String
+        ) {
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")
         }

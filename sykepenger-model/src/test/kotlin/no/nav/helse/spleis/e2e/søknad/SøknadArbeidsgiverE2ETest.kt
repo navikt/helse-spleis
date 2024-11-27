@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
@@ -49,8 +49,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
-
-
     @Test
     fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))
@@ -194,7 +192,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
                 6.januar til 9.januar, // lager et tredagers opphold (10. januar - 12. januar) som forskyver agp
                 13.januar til 19.januar // til å slutte 19. januar. Periode nr 3. forlenger derfor kun helg, og skal også avsluttes uten utbetaling
             ),
-            førsteFraværsdag = 13.januar,
+            førsteFraværsdag = 13.januar
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -217,9 +215,9 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(
                 1.januar til 7.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 3
-                15.januar til 23.januar  // haver innenfor arbeidsgiverperioden likevel
+                15.januar til 23.januar // haver innenfor arbeidsgiverperioden likevel
             ),
-            førsteFraværsdag = 15.januar,
+            førsteFraværsdag = 15.januar
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -236,14 +234,13 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(
                 1.januar til 8.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 2
-                12.januar til 19.januar  // haver innenfor arbeidsgiverperioden likevel
+                12.januar til 19.januar // haver innenfor arbeidsgiverperioden likevel
             ),
-            førsteFraværsdag = 12.januar,
+            førsteFraværsdag = 12.januar
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
-
 
     @Test
     fun `litt permisjon`() {
@@ -558,5 +555,4 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }
-
 }

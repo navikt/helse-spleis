@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import java.time.LocalDate.EPOCH
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -27,9 +25,10 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 
 internal class FrilanserTest : AbstractDslTest() {
-
     @Test
     fun `frilanssøknad gir error`() {
         frilans {
@@ -65,10 +64,11 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
+                    )
             )
             assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(
@@ -139,10 +139,11 @@ internal class FrilanserTest : AbstractDslTest() {
                 førsteFraværsdag = 1.mars,
                 beregnetInntekt = 10000.månedlig
             )
-            val arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = 1.februar, type = Arbeidsforholdtype.ORDINÆRT)
-            )
+            val arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = 1.februar, type = Arbeidsforholdtype.ORDINÆRT)
+                )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
@@ -170,5 +171,4 @@ internal class FrilanserTest : AbstractDslTest() {
             assertIngenVarsler()
         }
     }
-
 }

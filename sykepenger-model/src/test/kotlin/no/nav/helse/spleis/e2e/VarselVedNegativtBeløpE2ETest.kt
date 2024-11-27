@@ -11,33 +11,59 @@ import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class VarselVedNegativtBeløpE2ETest: AbstractDslTest() {
-
+internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
     @Test
     fun `skal få varsel når utbetaling flyttes fra arbeidsgiver til person`() {
         a1 {
             nyttVedtak(januar)
             assertIngenVarsel(RV_UT_23)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, Inntekt.INGEN)))
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, Inntekt.INGEN)))
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(-15741, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(15741, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
+            assertEquals(
+                -15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .arbeidsgiverOppdrag.inspektør.nettoBeløp
+            )
+            assertEquals(
+                15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .personOppdrag.inspektør.nettoBeløp
+            )
             assertVarsel(RV_UT_23)
         }
     }
+
     @Test
     fun `skal få varsel når utbetaling flyttes fra person til arbeidsgiver`() {
         a1 {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
             assertIngenVarsel(RV_UT_23)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, INNTEKT)))
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, INNTEKT)))
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(15741, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(-15741, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
+            assertEquals(
+                15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .arbeidsgiverOppdrag.inspektør.nettoBeløp
+            )
+            assertEquals(
+                -15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .personOppdrag.inspektør.nettoBeløp
+            )
             assertVarsel(RV_UT_23)
         }
     }
@@ -48,14 +74,26 @@ internal class VarselVedNegativtBeløpE2ETest: AbstractDslTest() {
             nyttVedtak(januar)
             assertIngenVarsel(RV_UT_23)
 
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT*0.8, ".", null, emptyList())
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 0.8, ".", null, emptyList())
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(-3146, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(0, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
+            assertEquals(
+                -3146,
+                inspektør
+                    .sisteUtbetaling()
+                    .arbeidsgiverOppdrag.inspektør.nettoBeløp
+            )
+            assertEquals(
+                0,
+                inspektør
+                    .sisteUtbetaling()
+                    .personOppdrag.inspektør.nettoBeløp
+            )
             assertVarsel(RV_UT_23)
         }
     }
-
 }

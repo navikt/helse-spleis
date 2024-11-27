@@ -5,9 +5,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
 
-
 internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `arbeidsledigsøknad`() {
         sendNySøknadArbeidsledig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -16,6 +14,7 @@ internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
         )
         assertTilstander(0, "TIL_INFOTRYGD")
     }
+
     @Test
     fun `overgang til arbeidsledig`() {
         nyttVedtak(1.januar, 31.januar)

@@ -9,7 +9,6 @@ internal abstract class ArbeidsgiverBehovRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
-
     init {
         river.validate(::validateBehov)
     }

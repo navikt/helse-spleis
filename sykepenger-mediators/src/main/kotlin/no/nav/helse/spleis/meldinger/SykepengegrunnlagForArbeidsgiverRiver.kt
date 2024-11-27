@@ -32,8 +32,12 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = SykepengegrunnlagForArbeidsgiverMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        SykepengegrunnlagForArbeidsgiverMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText()
+            )
+        )
 }

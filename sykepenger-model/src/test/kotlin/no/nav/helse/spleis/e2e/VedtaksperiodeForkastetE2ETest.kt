@@ -4,8 +4,8 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `vedtaksperioder forkastes`() {
         nyttVedtak(januar)
@@ -291,7 +290,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender forventede sykmeldingsperioder når søknad blir kastet ut pga delvis overlapp` () {
+    fun `Sender forventede sykmeldingsperioder når søknad blir kastet ut pga delvis overlapp`() {
         nyPeriode(1.januar til 25.januar)
 
         håndterSykmelding(januar)
@@ -302,7 +301,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forventer arbeidsgiveropplysninger når søknad delvis overlapper med en kort periode` () {
+    fun `Forventer arbeidsgiveropplysninger når søknad delvis overlapper med en kort periode`() {
         nyPeriode(1.januar til 15.januar)
 
         håndterSykmelding(januar)
@@ -312,7 +311,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes` () {
+    fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes`() {
         nyPeriode(januar)
         nyPeriode(februar)
         forkastAlle()

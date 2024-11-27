@@ -1,9 +1,9 @@
 package no.nav.helse.dto.serialisering
 
-import java.util.UUID
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykmeldingsperioderDto
+import java.util.UUID
 
 data class ArbeidsgiverUtDto(
     val id: UUID,

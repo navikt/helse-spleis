@@ -1,15 +1,14 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class SkjønnsmessigFastsattTest {
-    
     @Test
     fun `inntektsmelding blir overskrevet av skjønnsmessig fastsettelse`() {
         val skjønnsmessigFastsattBeløp = 5000.daglig

@@ -21,15 +21,17 @@ dependencies {
 }
 
 tasks {
-    val copyJars = create("copy-jars") {
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
+    val copyJars =
+        create("copy-jars") {
+            doLast {
+                configurations.runtimeClasspath.get().forEach {
+                    val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                    if (!file.exists()) {
+                        it.copyTo(file)
+                    }
+                }
             }
         }
-    }
     get("build").finalizedBy(copyJars)
 
     withType<Jar> {
@@ -37,9 +39,10 @@ tasks {
 
         manifest {
             attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                    it.name
+                }
         }
     }
 }

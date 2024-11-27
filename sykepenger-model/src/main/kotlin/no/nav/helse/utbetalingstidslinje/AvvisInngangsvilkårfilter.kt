@@ -8,8 +8,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal class AvvisInngangsvilkårfilter(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-): UtbetalingstidslinjerFilter {
-
+) : UtbetalingstidslinjerFilter {
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,

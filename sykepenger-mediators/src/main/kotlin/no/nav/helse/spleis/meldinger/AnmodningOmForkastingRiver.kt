@@ -3,10 +3,10 @@ package no.nav.helse.spleis.meldinger
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
+import java.util.UUID
 
 internal open class AnmodningOmForkastingRiver(
     rapidsConnection: RapidsConnection,
@@ -21,8 +21,12 @@ internal open class AnmodningOmForkastingRiver(
         message.interestedIn("force")
     }
 
-    override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        AnmodningOmForkastingMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText()
+            )
+        )
 }

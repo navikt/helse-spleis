@@ -1,17 +1,16 @@
 package no.nav.helse
 
-import java.time.DayOfWeek.SATURDAY
-import java.time.DayOfWeek.SUNDAY
-import java.time.LocalDate
 import no.nav.helse.hendelser.til
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
+import java.time.LocalDate
 
 internal class DatoerTest {
-
     @Test
     fun accuracy() {
         assertEquals(LocalDate.of(2018, 1, 1), 1.mandag)
@@ -177,7 +176,10 @@ internal class DatoerTest {
             (1.februar(2016) til 31.desember(2020)).ukedager()
         }
         val alternative2 = {
-            periode.start.datesUntil(periode.endInclusive).filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }.count()
+            periode.start
+                .datesUntil(periode.endInclusive)
+                .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
+                .count()
         }
 
         tournament(times, alternative1, alternative2)

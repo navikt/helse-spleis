@@ -1,13 +1,12 @@
 package no.nav.helse.spleis
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 object VedtaksperiodeProbe : PersonObserver {
-
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
@@ -29,7 +28,11 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        påminnelse: Påminnelse
+    ) {
         log.debug(
             "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),

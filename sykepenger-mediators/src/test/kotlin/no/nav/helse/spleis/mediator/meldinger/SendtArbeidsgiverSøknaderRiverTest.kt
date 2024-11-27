@@ -1,25 +1,28 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import java.util.*
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
-
     @Test
     fun `valid json`() {
         assertNoErrors(validJson)
     }
 
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator
+    ) {
         SendtArbeidsgiverSøknaderRiver(rapidsConnection, mediator)
     }
 
     @Language("JSON")
-    private val validJson = """
+    private val validJson =
+        """
 {
   "@event_name": "sendt_søknad_arbeidsgiver",
   "@id": "${UUID.randomUUID()}",
@@ -66,5 +69,6 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
   "merknaderFraSykmelding": null,
   "fødselsdato": "1992-12-02",
   "egenmeldingsdagerFraSykmelding": ["2019-12-31"]
-}""".trimIndent()
+}
+        """.trimIndent()
 }

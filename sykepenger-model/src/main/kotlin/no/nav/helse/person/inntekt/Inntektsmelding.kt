@@ -1,9 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.InntektsmeldingDto.KildeDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
@@ -15,6 +11,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 class Inntektsmelding internal constructor(
     id: UUID,
@@ -26,25 +26,27 @@ class Inntektsmelding internal constructor(
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde = Kilde.Arbeidsgiver, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) } ?: this
 
-    internal fun view() = InntektsmeldingView(
-        id = id,
-        dato = dato,
-        hendelseId = hendelseId,
-        beløp = beløp,
-        tidsstempel = tidsstempel
-    )
+    internal fun view() =
+        InntektsmeldingView(
+            id = id,
+            dato = dato,
+            hendelseId = hendelseId,
+            beløp = beløp,
+            tidsstempel = tidsstempel
+        )
 
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this)
-    }
+    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning = ny.overstyrer(this)
 
     override fun overstyrer(gammel: Saksbehandler) = this
 
     override fun overstyrer(gammel: SkjønnsmessigFastsatt) =
-        if (erOmregnetÅrsinntektEndret(this, gammel)) this
-        else gammel.overstyrer(this)
+        if (erOmregnetÅrsinntektEndret(this, gammel)) {
+            this
+        } else {
+            gammel.overstyrer(this)
+        }
 
     internal fun avklarSykepengegrunnlag(skatt: AvklarbarSykepengegrunnlag): Inntektsopplysning {
         if (skatt.dato.yearMonth < this.dato.yearMonth) return skatt
@@ -53,9 +55,8 @@ class Inntektsmelding internal constructor(
 
     internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId || this.dato != other.dato
 
-    override fun erSamme(other: Inntektsopplysning): Boolean {
-        return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
-    }
+    override fun erSamme(other: Inntektsopplysning): Boolean = other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
+
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         inntektsmelding: no.nav.helse.hendelser.Inntektsmelding
@@ -68,6 +69,7 @@ class Inntektsmelding internal constructor(
             )
         )
     }
+
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,
         orgnummer: String,
@@ -111,37 +113,45 @@ class Inntektsmelding internal constructor(
         Arbeidsgiver,
         AOrdningen;
 
-        fun dto() = when(this) {
-            Arbeidsgiver -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
-            AOrdningen -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen
-        }
+        fun dto() =
+            when (this) {
+                Arbeidsgiver -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+                AOrdningen -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen
+            }
 
         companion object {
-            fun gjenopprett(dto: KildeDto) = when (dto) {
-                KildeDto.Arbeidsgiver -> Arbeidsgiver
-                KildeDto.AOrdningen -> AOrdningen
-            }
+            fun gjenopprett(dto: KildeDto) =
+                when (dto) {
+                    KildeDto.Arbeidsgiver -> Arbeidsgiver
+                    KildeDto.AOrdningen -> AOrdningen
+                }
         }
     }
 
     internal companion object {
-        internal fun gjenopprett(dto: InntektsopplysningInnDto.InntektsmeldingDto): Inntektsmelding {
-            return Inntektsmelding(
+        internal fun gjenopprett(dto: InntektsopplysningInnDto.InntektsmeldingDto): Inntektsmelding =
+            Inntektsmelding(
                 id = dto.id,
                 dato = dto.dato,
                 hendelseId = dto.hendelseId,
                 beløp = Inntekt.gjenopprett(dto.beløp),
                 tidsstempel = dto.tidsstempel,
-                kilde = Kilde.gjenopprett(dto.kilde),
+                kilde = Kilde.gjenopprett(dto.kilde)
             )
-        }
 
-        internal fun List<Inntektsmelding>.finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsmelding? {
+        internal fun List<Inntektsmelding>.finnInntektsmeldingForSkjæringstidspunkt(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?
+        ): Inntektsmelding? {
             val inntektsmeldinger = this.filter { it.dato == skjæringstidspunkt || it.dato == førsteFraværsdag }
             return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.tidsstempel }
         }
 
-        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? {
+        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?,
+            skattSykepengegrunnlag: SkattSykepengegrunnlag?
+        ): Inntektsopplysning? {
             val inntektsmelding = finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
             val skatt = skattSykepengegrunnlag?.takeIf { it.kanBrukes(skjæringstidspunkt) }?.somSykepengegrunnlag() ?: return inntektsmelding
             return inntektsmelding?.avklarSykepengegrunnlag(skatt) ?: skatt

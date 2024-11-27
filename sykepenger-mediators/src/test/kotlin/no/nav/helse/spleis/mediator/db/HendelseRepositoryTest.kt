@@ -4,8 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
@@ -18,8 +16,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 private val fnr = Personidentifikator("01011012345")
+
 internal class HendelseRepositoryTest {
     private lateinit var dataSource: TestDataSource
 
@@ -27,6 +28,7 @@ internal class HendelseRepositoryTest {
     internal fun setup() {
         dataSource = databaseContainer.nyTilkobling()
     }
+
     @AfterEach
     internal fun tearDown() {
         databaseContainer.droppTilkobling(dataSource)
@@ -73,10 +75,11 @@ private object TestMessages {
         }
         """
 
-        val packet = json.somPacket { packet ->
-            packet.requireKey("@id", "@event_name", "@opprettet", "fødselsnummer", "skjæringstidspunkt")
-            packet.requireArbeidsgiveropplysninger()
-        }
+        val packet =
+            json.somPacket { packet ->
+                packet.requireKey("@id", "@event_name", "@opprettet", "fødselsnummer", "skjæringstidspunkt")
+                packet.requireArbeidsgiveropplysninger()
+            }
 
         return OverstyrArbeidsgiveropplysningerMessage(packet, Meldingsporing(id, fnr.toString()))
     }

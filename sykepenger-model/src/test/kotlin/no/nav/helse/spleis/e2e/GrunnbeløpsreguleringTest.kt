@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.til
@@ -25,20 +24,30 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
-
+internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     @Test
     fun `Grunnbeløpsregulering med allerede riktig G-beløp`() {
         nyttVedtak(januar)
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
+        assertEquals(
+            561804.årlig,
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør.inntektsgrunnlag.inspektør.`6G`
+        )
         nullstillTilstandsendringer()
         inspektør.vilkårsgrunnlagHistorikkInnslag()
         håndterGrunnbeløpsregulering(1.januar)
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertInfo("Grunnbeløpet i sykepengegrunnlaget 2018-01-01 er allerede korrekt.", 1.vedtaksperiode.filter())
-        assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
+        assertEquals(
+            561804.årlig,
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør.inntektsgrunnlag.inspektør.`6G`
+        )
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertEquals(0, observatør.sykefraværstilfelleIkkeFunnet.size)
     }
@@ -58,7 +67,12 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-        assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering"))
+        assertTrue(
+            observatør.utkastTilVedtakEventer
+                .last()
+                .tags
+                .contains("Grunnbeløpsregulering")
+        )
     }
 
     @Test
@@ -68,7 +82,12 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-        assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering"))
+        assertTrue(
+            observatør.utkastTilVedtakEventer
+                .last()
+                .tags
+                .contains("Grunnbeløpsregulering")
+        )
     }
 
     private fun tilGodkjenningMedFeilGrunnbeløp() {
@@ -77,9 +96,19 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 3)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertEquals(riktig6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
+        assertEquals(
+            riktig6G.årlig,
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør.inntektsgrunnlag.inspektør.`6G`
+        )
         hackGrunnbeløp(fra = riktig6G, til = feil6G) // Hacker inn 2017-G
-        assertEquals(feil6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
+        assertEquals(
+            feil6G.årlig,
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør.inntektsgrunnlag.inspektør.`6G`
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -90,8 +119,17 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         ArbeidsgiverHendelsefabrikk(ORGNUMMER).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
     }
 
-    private fun hackGrunnbeløp(fra: Int, til: Int) {
-        val json = person.dto().tilPersonData().tilSerialisertPerson().json.replace("\"grunnbeløp\":$fra.0", "\"grunnbeløp\":$til.0")
+    private fun hackGrunnbeløp(
+        fra: Int,
+        til: Int
+    ) {
+        val json =
+            person
+                .dto()
+                .tilPersonData()
+                .tilSerialisertPerson()
+                .json
+                .replace("\"grunnbeløp\":$fra.0", "\"grunnbeløp\":$til.0")
         createTestPerson { jurist -> gjenopprettFraJSONtekst(json, jurist) }
     }
 }

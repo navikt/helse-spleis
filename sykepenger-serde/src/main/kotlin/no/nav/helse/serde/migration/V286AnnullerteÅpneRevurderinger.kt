@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 
-internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
+internal class V286AnnullerteÅpneRevurderinger : JsonMigration(version = 286) {
     override val description = "smelter sammen til_infotrygd-generasjonen og nest siste generasjon hvis den er en åpen revurdering"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier
+    ) {
         val aktørId = jsonNode.path("aktørId").asText()
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
@@ -20,8 +23,13 @@ internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
         }
     }
 
-    private fun migrerVedtaksperiode(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
-        vedtaksperiode.path("generasjoner")
+    private fun migrerVedtaksperiode(
+        aktørId: String,
+        orgnr: String,
+        vedtaksperiode: JsonNode
+    ) {
+        vedtaksperiode
+            .path("generasjoner")
             .filterNot { it.hasNonNull("kilde") }
             .forEach {
                 val generasjon = it as ObjectNode
@@ -34,7 +42,12 @@ internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
                 }
             }
     }
-    private fun migrerForkastetVedtaksperiode(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
+
+    private fun migrerForkastetVedtaksperiode(
+        aktørId: String,
+        orgnr: String,
+        vedtaksperiode: JsonNode
+    ) {
         migrerVedtaksperiode(aktørId, orgnr, vedtaksperiode)
 
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
@@ -53,6 +66,5 @@ internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     }
 }

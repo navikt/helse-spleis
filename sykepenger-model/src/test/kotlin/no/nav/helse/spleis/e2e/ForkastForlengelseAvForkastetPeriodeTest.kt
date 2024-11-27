@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest() {
-
     @Test
     fun `forlenger med forkastet periode hos annen arbeidsgiver`() {
         (1.januar til 17.januar).forkast()
@@ -141,7 +140,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster også overlappende perioder som er uferdig`(){
+    fun `forkaster også overlappende perioder som er uferdig`() {
         nyPeriode(januar)
         forkastAlle()
 
@@ -153,7 +152,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster etterfølgende perioder som er uferdig`(){
+    fun `forkaster etterfølgende perioder som er uferdig`() {
         nyPeriode(januar)
         forkastAlle()
 
@@ -169,7 +168,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster ikke etterfølgende perioder som er avsluttet`(){
+    fun `forkaster ikke etterfølgende perioder som er avsluttet`() {
         nyPeriode(januar)
         forkastAlle()
 
@@ -219,7 +218,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
-
 
     @Test
     fun `forkaster forlengede og overlappende vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
@@ -279,7 +277,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap` () {
+    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap`() {
         nyPeriode(1.januar til 19.januar)
         person.søppelbøtte(forrigeHendelse, 1.januar til 19.januar)
 
@@ -290,7 +288,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil` () {
+    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil`() {
         nyPeriode(1.januar til 17.januar)
         nyPeriode(18.januar til 31.januar)
         person.søppelbøtte(forrigeHendelse, januar)

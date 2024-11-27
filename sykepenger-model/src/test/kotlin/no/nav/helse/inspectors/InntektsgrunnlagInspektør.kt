@@ -8,7 +8,9 @@ import no.nav.helse.økonomi.Inntekt
 internal val Inntektsgrunnlag.inspektør get() = view().inspektør
 internal val InntektsgrunnlagView.inspektør get() = InntektsgrunnlagInspektør(this)
 
-internal class InntektsgrunnlagInspektør(view: InntektsgrunnlagView) {
+internal class InntektsgrunnlagInspektør(
+    view: InntektsgrunnlagView
+) {
     val minsteinntekt: Inntekt = view.minsteinntekt
     val oppfyllerMinsteinntektskrav = view.oppfyllerMinsteinntektskrav
     val sykepengegrunnlag: Inntekt = view.sykepengegrunnlag

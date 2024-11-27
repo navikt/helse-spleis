@@ -39,7 +39,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `Opplæringspenger starter mindre enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
@@ -120,5 +119,4 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_AY_8)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
-
 }

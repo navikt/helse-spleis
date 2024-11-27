@@ -23,7 +23,6 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import org.junit.jupiter.api.Test
 
 internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
-
     @Test
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
         tilGodkjenning(januar, a1, a2)

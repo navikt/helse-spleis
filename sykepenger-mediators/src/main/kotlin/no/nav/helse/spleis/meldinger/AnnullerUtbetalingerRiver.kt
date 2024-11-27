@@ -26,8 +26,12 @@ internal class AnnullerUtbetalingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage) = AnnulleringMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        AnnulleringMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText()
+            )
+        )
 }

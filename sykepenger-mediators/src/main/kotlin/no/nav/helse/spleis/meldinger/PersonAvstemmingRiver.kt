@@ -20,10 +20,14 @@ internal class PersonAvstemmingRiver(
         message.require("fødselsnummer", ::requireLong)
     }
 
-    override fun createMessage(packet: JsonMessage) = AvstemmingMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        AvstemmingMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText()
+            )
+        )
 
     private fun requireLong(node: JsonNode) {
         require(node.asLong() > 0)

@@ -53,6 +53,5 @@ internal class MaksimumUtbetalingFilterHendelseTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
-    private fun Utbetalingstidslinje.betal() =
-        MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, EmptyLog).single()
+    private fun Utbetalingstidslinje.betal() = MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, EmptyLog).single()
 }

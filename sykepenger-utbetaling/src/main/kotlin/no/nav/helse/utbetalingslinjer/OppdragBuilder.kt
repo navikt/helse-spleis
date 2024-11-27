@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.økonomi.Økonomi
 
 class OppdragBuilder(
     private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
@@ -15,41 +15,59 @@ class OppdragBuilder(
 
     fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId)
 
-    fun betalingsdag(økonomi: Økonomi, dato: LocalDate, grad: Int) {
-        if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, økonomi, grad))
+    fun betalingsdag(
+        økonomi: Økonomi,
+        dato: LocalDate,
+        grad: Int
+    ) {
+        if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, økonomi, grad)) {
             tilstand.nyLinje(økonomi, dato, grad)
-        else
+        } else {
             tilstand.betalingsdag(økonomi, dato, grad)
+        }
     }
 
-    fun betalingshelgedag(dato: LocalDate, grad: Int) {
-       if (utbetalingslinjer.isEmpty() || grad != linje.grad)
+    fun betalingshelgedag(
+        dato: LocalDate,
+        grad: Int
+    ) {
+        if (utbetalingslinjer.isEmpty() || grad != linje.grad) {
             tilstand.nyLinje(dato, grad)
-        else
+        } else {
             tilstand.helgedag(dato, grad)
+        }
     }
 
     fun ikkeBetalingsdag() {
         tilstand.ikkeBetalingsdag()
     }
 
-    private fun addLinje(økonomi: Økonomi, dato: LocalDate, grad: Int) {
+    private fun addLinje(
+        økonomi: Økonomi,
+        dato: LocalDate,
+        grad: Int
+    ) {
         utbetalingslinjer.add(fagområde.linje(fagsystemId, økonomi, dato, grad))
     }
 
-    private fun addLinje(dato: LocalDate, grad: Int) {
+    private fun addLinje(
+        dato: LocalDate,
+        grad: Int
+    ) {
         utbetalingslinjer.add(fagområde.linje(fagsystemId, dato, grad))
     }
 
     private interface Tilstand {
-
         fun betalingsdag(
             økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {}
 
-        fun helgedag(dato: LocalDate, grad: Int) {}
+        fun helgedag(
+            dato: LocalDate,
+            grad: Int
+        ) {}
 
         fun nyLinje(
             økonomi: Økonomi,
@@ -57,7 +75,10 @@ class OppdragBuilder(
             grad: Int
         ) {}
 
-        fun nyLinje(dato: LocalDate, grad: Int) {}
+        fun nyLinje(
+            dato: LocalDate,
+            grad: Int
+        ) {}
 
         fun ikkeBetalingsdag() {}
     }
@@ -72,7 +93,6 @@ class OppdragBuilder(
             tilstand = LinjeMedSats()
         }
 
-
         override fun nyLinje(
             økonomi: Økonomi,
             dato: LocalDate,
@@ -82,19 +102,23 @@ class OppdragBuilder(
             tilstand = LinjeMedSats()
         }
 
-
-        override fun helgedag(dato: LocalDate, grad: Int) {
+        override fun helgedag(
+            dato: LocalDate,
+            grad: Int
+        ) {
             nyLinje(dato, grad)
         }
 
-        override fun nyLinje(dato: LocalDate, grad: Int) {
+        override fun nyLinje(
+            dato: LocalDate,
+            grad: Int
+        ) {
             addLinje(dato, grad)
             tilstand = LinjeUtenSats()
         }
     }
 
     private inner class LinjeMedSats : Tilstand {
-
         override fun ikkeBetalingsdag() {
             tilstand = MellomLinjer()
         }
@@ -116,19 +140,24 @@ class OppdragBuilder(
             addLinje(økonomi, dato, grad)
         }
 
-        override fun helgedag(dato: LocalDate, grad: Int) {
+        override fun helgedag(
+            dato: LocalDate,
+            grad: Int
+        ) {
             val førsteLinje = utbetalingslinjer.removeLast()
             utbetalingslinjer.add(førsteLinje.kopier(tom = dato))
         }
 
-        override fun nyLinje(dato: LocalDate, grad: Int) {
+        override fun nyLinje(
+            dato: LocalDate,
+            grad: Int
+        ) {
             addLinje(dato, grad)
             tilstand = LinjeUtenSats()
         }
     }
 
     private inner class LinjeUtenSats : Tilstand {
-
         override fun ikkeBetalingsdag() {
             tilstand = MellomLinjer()
         }
@@ -151,12 +180,18 @@ class OppdragBuilder(
             tilstand = LinjeMedSats()
         }
 
-        override fun helgedag(dato: LocalDate, grad: Int) {
+        override fun helgedag(
+            dato: LocalDate,
+            grad: Int
+        ) {
             val førsteLinje = utbetalingslinjer.removeLast()
             utbetalingslinjer.add(førsteLinje.kopier(tom = dato))
         }
 
-        override fun nyLinje(dato: LocalDate, grad: Int) {
+        override fun nyLinje(
+            dato: LocalDate,
+            grad: Int
+        ) {
             addLinje(dato, grad)
         }
     }

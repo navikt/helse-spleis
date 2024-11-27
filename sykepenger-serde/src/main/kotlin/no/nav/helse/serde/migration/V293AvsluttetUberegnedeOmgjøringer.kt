@@ -7,10 +7,13 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V293AvsluttetUberegnedeOmgjøringer: JsonMigration(version = 293) {
+internal class V293AvsluttetUberegnedeOmgjøringer : JsonMigration(version = 293) {
     override val description = "avslutter uberegnede omgjøringer for auu-perioder"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier
+    ) {
         val aktørId = jsonNode.path("aktørId").asText()
         val fnr = jsonNode.path("fødselsnummer").asText()
         MDC.putCloseable("aktørId", aktørId).use {
@@ -45,6 +48,5 @@ internal class V293AvsluttetUberegnedeOmgjøringer: JsonMigration(version = 293)
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     }
 }

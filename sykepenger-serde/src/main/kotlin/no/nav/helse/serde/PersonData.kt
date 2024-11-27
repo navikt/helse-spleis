@@ -1,11 +1,5 @@
 package no.nav.helse.serde
 
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
@@ -81,6 +75,12 @@ import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
 import kotlin.streams.asSequence
 
 data class PersonData(
@@ -94,19 +94,25 @@ data class PersonData(
     val dødsdato: LocalDate?,
     val skjemaVersjon: Int
 ) {
-    fun tilPersonDto() = PersonInnDto(
-        fødselsnummer = this.fødselsnummer,
-        alder = AlderDto(fødselsdato = this.fødselsdato, dødsdato = this.dødsdato),
-        opprettet = this.opprettet,
-        arbeidsgivere = this.arbeidsgivere.map { it.tilDto() },
-        infotrygdhistorikk = InfotrygdhistorikkInnDto(this.infotrygdhistorikk.map { it.tilDto() }),
-        vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkInnDto(vilkårsgrunnlagHistorikk.map { it.tilDto() }),
-        minimumSykdomsgradVurdering = MinimumSykdomsgradVurderingInnDto(
-            perioder = minimumSykdomsgradVurdering?.map { PeriodeDto(it.fom, it.tom) } ?: emptyList()
+    fun tilPersonDto() =
+        PersonInnDto(
+            fødselsnummer = this.fødselsnummer,
+            alder = AlderDto(fødselsdato = this.fødselsdato, dødsdato = this.dødsdato),
+            opprettet = this.opprettet,
+            arbeidsgivere = this.arbeidsgivere.map { it.tilDto() },
+            infotrygdhistorikk = InfotrygdhistorikkInnDto(this.infotrygdhistorikk.map { it.tilDto() }),
+            vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkInnDto(vilkårsgrunnlagHistorikk.map { it.tilDto() }),
+            minimumSykdomsgradVurdering =
+                MinimumSykdomsgradVurderingInnDto(
+                    perioder = minimumSykdomsgradVurdering?.map { PeriodeDto(it.fom, it.tom) } ?: emptyList()
+                )
         )
+
+    data class MinimumSykdomsgradVurderingPeriodeData(
+        val fom: LocalDate,
+        val tom: LocalDate
     )
 
-    data class MinimumSykdomsgradVurderingPeriodeData(val fom: LocalDate, val tom: LocalDate)
     data class InfotrygdhistorikkElementData(
         val id: UUID,
         val tidsstempel: LocalDateTime,
@@ -118,28 +124,31 @@ data class PersonData(
         val arbeidskategorikoder: Map<String, LocalDate>,
         val oppdatert: LocalDateTime
     ) {
-        fun tilDto() = InfotrygdhistorikkelementInnDto(
-            id = this.id,
-            tidsstempel = this.tidsstempel,
-            hendelseId = this.hendelseId,
-            ferieperioder = this.ferieperioder.map { it.tilDto() },
-            arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilDto() },
-            personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilDto() },
-            inntekter = this.inntekter.map { it.tilDto() },
-            arbeidskategorikoder = this.arbeidskategorikoder,
-            oppdatert = this.oppdatert
-        )
+        fun tilDto() =
+            InfotrygdhistorikkelementInnDto(
+                id = this.id,
+                tidsstempel = this.tidsstempel,
+                hendelseId = this.hendelseId,
+                ferieperioder = this.ferieperioder.map { it.tilDto() },
+                arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilDto() },
+                personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilDto() },
+                inntekter = this.inntekter.map { it.tilDto() },
+                arbeidskategorikoder = this.arbeidskategorikoder,
+                oppdatert = this.oppdatert
+            )
 
         data class FerieperiodeData(
             val fom: LocalDate,
             val tom: LocalDate
         ) {
-            fun tilDto() = InfotrygdFerieperiodeDto(
-                periode = PeriodeDto(
-                    fom = this.fom,
-                    tom = this.tom
+            fun tilDto() =
+                InfotrygdFerieperiodeDto(
+                    periode =
+                        PeriodeDto(
+                            fom = this.fom,
+                            tom = this.tom
+                        )
                 )
-            )
         }
 
         data class PersonutbetalingsperiodeData(
@@ -149,15 +158,17 @@ data class PersonData(
             val grad: Double,
             val inntekt: Int
         ) {
-            fun tilDto() = InfotrygdPersonutbetalingsperiodeInnDto(
-                orgnr = this.orgnr,
-                periode = PeriodeDto(
-                    fom = this.fom,
-                    tom = this.tom
-                ),
-                grad = ProsentdelDto(prosent = this.grad),
-                inntekt = InntektbeløpDto.DagligInt(this.inntekt)
-            )
+            fun tilDto() =
+                InfotrygdPersonutbetalingsperiodeInnDto(
+                    orgnr = this.orgnr,
+                    periode =
+                        PeriodeDto(
+                            fom = this.fom,
+                            tom = this.tom
+                        ),
+                    grad = ProsentdelDto(prosent = this.grad),
+                    inntekt = InntektbeløpDto.DagligInt(this.inntekt)
+                )
         }
 
         data class ArbeidsgiverutbetalingsperiodeData(
@@ -167,12 +178,13 @@ data class PersonData(
             val grad: Double,
             val inntekt: Int
         ) {
-            fun tilDto() = InfotrygdArbeidsgiverutbetalingsperiodeInnDto(
-                orgnr = this.orgnr,
-                periode = PeriodeDto(fom = this.fom, tom = this.tom),
-                grad = ProsentdelDto(prosent = grad),
-                inntekt = InntektbeløpDto.DagligInt(inntekt)
-            )
+            fun tilDto() =
+                InfotrygdArbeidsgiverutbetalingsperiodeInnDto(
+                    orgnr = this.orgnr,
+                    periode = PeriodeDto(fom = this.fom, tom = this.tom),
+                    grad = ProsentdelDto(prosent = grad),
+                    inntekt = InntektbeløpDto.DagligInt(inntekt)
+                )
         }
 
         data class InntektsopplysningData(
@@ -183,14 +195,15 @@ data class PersonData(
             val refusjonTom: LocalDate?,
             val lagret: LocalDateTime?
         ) {
-            fun tilDto() = InfotrygdInntektsopplysningInnDto(
-                orgnummer = this.orgnr,
-                sykepengerFom = this.sykepengerFom,
-                inntekt = InntektbeløpDto.MånedligDouble(inntekt),
-                refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-                refusjonTom = refusjonTom,
-                lagret = lagret
-            )
+            fun tilDto() =
+                InfotrygdInntektsopplysningInnDto(
+                    orgnummer = this.orgnr,
+                    sykepengerFom = this.sykepengerFom,
+                    inntekt = InntektbeløpDto.MånedligDouble(inntekt),
+                    refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+                    refusjonTom = refusjonTom,
+                    lagret = lagret
+                )
         }
     }
 
@@ -199,11 +212,12 @@ data class PersonData(
         val opprettet: LocalDateTime,
         val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
     ) {
-        fun tilDto() = VilkårsgrunnlagInnslagInnDto(
-            id = this.id,
-            opprettet = this.opprettet,
-            vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilDto() }
-        )
+        fun tilDto() =
+            VilkårsgrunnlagInnslagInnDto(
+                id = this.id,
+                opprettet = this.opprettet,
+                vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilDto() }
+            )
     }
 
     data class VilkårsgrunnlagElementData(
@@ -216,22 +230,25 @@ data class PersonData(
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID
     ) {
-        fun tilDto() = when (type) {
-            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagInnDto.Infotrygd(
-                vilkårsgrunnlagId = this.vilkårsgrunnlagId,
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto()
-            )
-            GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagInnDto.Spleis(
-                vilkårsgrunnlagId = this.vilkårsgrunnlagId,
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                inntektsgrunnlag = this.inntektsgrunnlag.tilSpleisDto(),
-                opptjening = this.opptjening!!.tilDto(),
-                medlemskapstatus = this.medlemskapstatus!!.tilDto(),
-                vurdertOk = this.vurdertOk!!,
-                meldingsreferanseId = this.meldingsreferanseId
-            )
-        }
+        fun tilDto() =
+            when (type) {
+                GrunnlagsdataType.Infotrygd ->
+                    VilkårsgrunnlagInnDto.Infotrygd(
+                        vilkårsgrunnlagId = this.vilkårsgrunnlagId,
+                        skjæringstidspunkt = this.skjæringstidspunkt,
+                        inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto()
+                    )
+                GrunnlagsdataType.Vilkårsprøving ->
+                    VilkårsgrunnlagInnDto.Spleis(
+                        vilkårsgrunnlagId = this.vilkårsgrunnlagId,
+                        skjæringstidspunkt = this.skjæringstidspunkt,
+                        inntektsgrunnlag = this.inntektsgrunnlag.tilSpleisDto(),
+                        opptjening = this.opptjening!!.tilDto(),
+                        medlemskapstatus = this.medlemskapstatus!!.tilDto(),
+                        vurdertOk = this.vurdertOk!!,
+                        meldingsreferanseId = this.meldingsreferanseId
+                    )
+            }
 
         enum class GrunnlagsdataType {
             Infotrygd,
@@ -245,30 +262,34 @@ data class PersonData(
             val tilkommendeInntekter: List<NyInntektUnderveisData>?, // todo: migrere inn tom liste for å unngå null
             val vurdertInfotrygd: Boolean
         ) {
-            fun tilSpleisDto() = InntektsgrunnlagInnDto(
-                arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
-                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
-                tilkommendeInntekter = this.tilkommendeInntekter?.map { it.tilDto() } ?: emptyList(),
-                vurdertInfotrygd = this.vurdertInfotrygd,
-                `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
-            )
-            fun tilInfotrygdDto() = InntektsgrunnlagInnDto(
-                arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
-                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
-                tilkommendeInntekter = emptyList(),
-                vurdertInfotrygd = this.vurdertInfotrygd,
-                `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
-            )
+            fun tilSpleisDto() =
+                InntektsgrunnlagInnDto(
+                    arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
+                    deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
+                    tilkommendeInntekter = this.tilkommendeInntekter?.map { it.tilDto() } ?: emptyList(),
+                    vurdertInfotrygd = this.vurdertInfotrygd,
+                    `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
+                )
+
+            fun tilInfotrygdDto() =
+                InntektsgrunnlagInnDto(
+                    arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
+                    deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
+                    tilkommendeInntekter = emptyList(),
+                    vurdertInfotrygd = this.vurdertInfotrygd,
+                    `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
+                )
         }
 
         data class NyInntektUnderveisData(
             val orgnummer: String,
             val beløpstidslinje: BeløpstidslinjeData
         ) {
-            fun tilDto() = NyInntektUnderveisDto(
-                orgnummer = orgnummer,
-                beløpstidslinje = beløpstidslinje.tilDto()
-            )
+            fun tilDto() =
+                NyInntektUnderveisDto(
+                    orgnummer = orgnummer,
+                    beløpstidslinje = beløpstidslinje.tilDto()
+                )
         }
 
         data class ArbeidsgiverInntektsopplysningData(
@@ -278,12 +299,13 @@ data class PersonData(
             val inntektsopplysning: InntektsopplysningData,
             val refusjonsopplysninger: List<ArbeidsgiverData.RefusjonsopplysningData>
         ) {
-            fun tilDto() = ArbeidsgiverInntektsopplysningInnDto(
-                orgnummer = this.orgnummer,
-                gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
-                inntektsopplysning = this.inntektsopplysning.tilDto(),
-                refusjonsopplysninger = RefusjonsopplysningerInnDto(opplysninger = this.refusjonsopplysninger.map { it.tilDto() })
-            )
+            fun tilDto() =
+                ArbeidsgiverInntektsopplysningInnDto(
+                    orgnummer = this.orgnummer,
+                    gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
+                    inntektsopplysning = this.inntektsopplysning.tilDto(),
+                    refusjonsopplysninger = RefusjonsopplysningerInnDto(opplysninger = this.refusjonsopplysninger.map { it.tilDto() })
+                )
 
             data class SkatteopplysningData(
                 val hendelseId: UUID,
@@ -300,20 +322,23 @@ data class PersonData(
                     PENSJON_ELLER_TRYGD,
                     YTELSE_FRA_OFFENTLIGE
                 }
-                fun tilDto() = SkatteopplysningDto(
-                    hendelseId = this.hendelseId,
-                    beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                    måned = this.måned,
-                    type = when (type) {
-                        InntekttypeData.LØNNSINNTEKT -> InntekttypeDto.LØNNSINNTEKT
-                        InntekttypeData.NÆRINGSINNTEKT -> InntekttypeDto.NÆRINGSINNTEKT
-                        InntekttypeData.PENSJON_ELLER_TRYGD -> InntekttypeDto.PENSJON_ELLER_TRYGD
-                        InntekttypeData.YTELSE_FRA_OFFENTLIGE -> InntekttypeDto.YTELSE_FRA_OFFENTLIGE
-                    },
-                    fordel = fordel,
-                    beskrivelse = beskrivelse,
-                    tidsstempel = tidsstempel
-                )
+
+                fun tilDto() =
+                    SkatteopplysningDto(
+                        hendelseId = this.hendelseId,
+                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                        måned = this.måned,
+                        type =
+                            when (type) {
+                                InntekttypeData.LØNNSINNTEKT -> InntekttypeDto.LØNNSINNTEKT
+                                InntekttypeData.NÆRINGSINNTEKT -> InntekttypeDto.NÆRINGSINNTEKT
+                                InntekttypeData.PENSJON_ELLER_TRYGD -> InntekttypeDto.PENSJON_ELLER_TRYGD
+                                InntekttypeData.YTELSE_FRA_OFFENTLIGE -> InntekttypeDto.YTELSE_FRA_OFFENTLIGE
+                            },
+                        fordel = fordel,
+                        beskrivelse = beskrivelse,
+                        tidsstempel = tidsstempel
+                    )
             }
 
             data class InntektsopplysningData(
@@ -333,61 +358,71 @@ data class PersonData(
                     Arbeidsgiver,
                     AOrdningen
                 }
-                fun tilDto() = when (kilde.let(Inntektsopplysningskilde::valueOf)) {
-                    Inntektsopplysningskilde.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel
-                    )
-                    Inntektsopplysningskilde.INNTEKTSMELDING -> InntektsopplysningInnDto.InntektsmeldingDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        kilde = this.inntektsmeldingkilde?.let {
-                            when (it) {
-                                InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
-                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
-                            }
-                        } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
-                        tidsstempel = this.tidsstempel
-                    )
-                    Inntektsopplysningskilde.IKKE_RAPPORTERT -> InntektsopplysningInnDto.IkkeRapportertDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        tidsstempel = this.tidsstempel
-                    )
-                    Inntektsopplysningskilde.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel,
-                        overstyrtInntekt = this.overstyrtInntektId!!,
-                        forklaring = this.forklaring,
-                        subsumsjon = this.subsumsjon?.tilDto()
-                    )
-                    Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT -> InntektsopplysningInnDto.SkjønnsmessigFastsattDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel,
-                        overstyrtInntekt = this.overstyrtInntektId!!
-                    )
-                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
-                        id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        tidsstempel = this.tidsstempel,
-                        inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() },
-                        ansattPerioder = emptyList()
-                    )
-                    else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
-                }
+
+                fun tilDto() =
+                    when (kilde.let(Inntektsopplysningskilde::valueOf)) {
+                        Inntektsopplysningskilde.INFOTRYGD ->
+                            InntektsopplysningInnDto.InfotrygdDto(
+                                id = this.id,
+                                hendelseId = this.hendelseId,
+                                dato = this.dato,
+                                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                                tidsstempel = this.tidsstempel
+                            )
+                        Inntektsopplysningskilde.INNTEKTSMELDING ->
+                            InntektsopplysningInnDto.InntektsmeldingDto(
+                                id = this.id,
+                                hendelseId = this.hendelseId,
+                                dato = this.dato,
+                                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                                kilde =
+                                    this.inntektsmeldingkilde?.let {
+                                        when (it) {
+                                            InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+                                            InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
+                                        }
+                                    } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver,
+                                // todo: denne trenger ikke være nullable etter 20. oktober 2024..
+                                tidsstempel = this.tidsstempel
+                            )
+                        Inntektsopplysningskilde.IKKE_RAPPORTERT ->
+                            InntektsopplysningInnDto.IkkeRapportertDto(
+                                id = this.id,
+                                hendelseId = this.hendelseId,
+                                dato = this.dato,
+                                tidsstempel = this.tidsstempel
+                            )
+                        Inntektsopplysningskilde.SAKSBEHANDLER ->
+                            InntektsopplysningInnDto.SaksbehandlerDto(
+                                id = this.id,
+                                hendelseId = this.hendelseId,
+                                dato = this.dato,
+                                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                                tidsstempel = this.tidsstempel,
+                                overstyrtInntekt = this.overstyrtInntektId!!,
+                                forklaring = this.forklaring,
+                                subsumsjon = this.subsumsjon?.tilDto()
+                            )
+                        Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT ->
+                            InntektsopplysningInnDto.SkjønnsmessigFastsattDto(
+                                id = this.id,
+                                hendelseId = this.hendelseId,
+                                dato = this.dato,
+                                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                                tidsstempel = this.tidsstempel,
+                                overstyrtInntekt = this.overstyrtInntektId!!
+                            )
+                        Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
+                            InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
+                                id = this.id,
+                                hendelseId = this.hendelseId,
+                                dato = this.dato,
+                                tidsstempel = this.tidsstempel,
+                                inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() },
+                                ansattPerioder = emptyList()
+                            )
+                        else -> error("Fant $kilde. Det er ugyldig for sykepengegrunnlag")
+                    }
 
                 data class SubsumsjonData(
                     val paragraf: String,
@@ -404,26 +439,33 @@ data class PersonData(
             val opptjeningTom: LocalDate,
             val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
-            fun tilDto() = OpptjeningInnDto(
-                arbeidsforhold = this.arbeidsforhold.map { it.tilDto() },
-                opptjeningsperiode = PeriodeDto(fom = this.opptjeningFom, tom = this.opptjeningTom)
-            )
+            fun tilDto() =
+                OpptjeningInnDto(
+                    arbeidsforhold = this.arbeidsforhold.map { it.tilDto() },
+                    opptjeningsperiode = PeriodeDto(fom = this.opptjeningFom, tom = this.opptjeningTom)
+                )
+
             data class ArbeidsgiverOpptjeningsgrunnlagData(
                 val orgnummer: String,
                 val ansattPerioder: List<ArbeidsforholdData>
             ) {
-                fun tilDto() = ArbeidsgiverOpptjeningsgrunnlagDto(
-                    orgnummer = this.orgnummer,
-                    ansattPerioder = this.ansattPerioder.map { it.tilDto() }
-                )
+                fun tilDto() =
+                    ArbeidsgiverOpptjeningsgrunnlagDto(
+                        orgnummer = this.orgnummer,
+                        ansattPerioder = this.ansattPerioder.map { it.tilDto() }
+                    )
+
                 data class ArbeidsforholdData(
                     val ansattFom: LocalDate,
                     val ansattTom: LocalDate?,
                     val deaktivert: Boolean
                 ) {
-                    fun tilDto() = ArbeidsforholdDto(
-                        ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = deaktivert
-                    )
+                    fun tilDto() =
+                        ArbeidsforholdDto(
+                            ansattFom = ansattFom,
+                            ansattTom = ansattTom,
+                            deaktivert = deaktivert
+                        )
                 }
             }
         }
@@ -442,19 +484,20 @@ data class PersonData(
         val refusjonshistorikk: List<RefusjonData>,
         val ubrukteRefusjonsopplysninger: Map<LocalDate, BeløpstidslinjeData>
     ) {
-        fun tilDto() = ArbeidsgiverInnDto(
-            id = this.id,
-            organisasjonsnummer = this.organisasjonsnummer,
-            inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
-            sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),
-            sykmeldingsperioder = SykmeldingsperioderDto(this.sykmeldingsperioder.map { it.tilDto() }),
-            vedtaksperioder = this.vedtaksperioder.map { it.tilDto() },
-            forkastede = this.forkastede.map { it.tilDto() },
-            utbetalinger = this.utbetalinger.map { it.tilDto() },
-            feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilDto() },
-            refusjonshistorikk = RefusjonshistorikkInnDto(this.refusjonshistorikk.map { it.tilDto() }),
-            ubrukteRefusjonsopplysninger = RefusjonsservitørDto(this.ubrukteRefusjonsopplysninger.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilDto() })
-        )
+        fun tilDto() =
+            ArbeidsgiverInnDto(
+                id = this.id,
+                organisasjonsnummer = this.organisasjonsnummer,
+                inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
+                sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),
+                sykmeldingsperioder = SykmeldingsperioderDto(this.sykmeldingsperioder.map { it.tilDto() }),
+                vedtaksperioder = this.vedtaksperioder.map { it.tilDto() },
+                forkastede = this.forkastede.map { it.tilDto() },
+                utbetalinger = this.utbetalinger.map { it.tilDto() },
+                feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilDto() },
+                refusjonshistorikk = RefusjonshistorikkInnDto(this.refusjonshistorikk.map { it.tilDto() }),
+                ubrukteRefusjonsopplysninger = RefusjonsservitørDto(this.ubrukteRefusjonsopplysninger.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilDto() })
+            )
 
         data class InntektsmeldingData(
             val id: UUID,
@@ -464,19 +507,21 @@ data class PersonData(
             val kilde: InntektsmeldingKildeDto?, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
             val tidsstempel: LocalDateTime
         ) {
-            fun tilDto() = InntektsopplysningInnDto.InntektsmeldingDto(
-                id = this.id,
-                hendelseId = this.hendelseId,
-                dato = this.dato,
-                beløp = InntektbeløpDto.MånedligDouble(beløp = this.beløp),
-                kilde = kilde?.let {
-                    when (it) {
-                        InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
-                        InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
-                    }
-                } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver,
-                tidsstempel = this.tidsstempel
-            )
+            fun tilDto() =
+                InntektsopplysningInnDto.InntektsmeldingDto(
+                    id = this.id,
+                    hendelseId = this.hendelseId,
+                    dato = this.dato,
+                    beløp = InntektbeløpDto.MånedligDouble(beløp = this.beløp),
+                    kilde =
+                        kilde?.let {
+                            when (it) {
+                                InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
+                            }
+                        } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver,
+                    tidsstempel = this.tidsstempel
+                )
         }
 
         data class RefusjonsopplysningData(
@@ -487,29 +532,35 @@ data class PersonData(
             val avsender: AvsenderData,
             val tidsstempel: LocalDateTime
         ) {
-            fun tilDto() = RefusjonsopplysningInnDto(
-                meldingsreferanseId = this.meldingsreferanseId,
-                fom = this.fom,
-                tom = this.tom,
-                beløp = InntektbeløpDto.MånedligDouble(beløp),
-                avsender = avsender.tilDto(),
-                tidsstempel = tidsstempel
-            )
+            fun tilDto() =
+                RefusjonsopplysningInnDto(
+                    meldingsreferanseId = this.meldingsreferanseId,
+                    fom = this.fom,
+                    tom = this.tom,
+                    beløp = InntektbeløpDto.MånedligDouble(beløp),
+                    avsender = avsender.tilDto(),
+                    tidsstempel = tidsstempel
+                )
         }
 
-        data class PeriodeData(val fom: LocalDate, val tom: LocalDate) {
+        data class PeriodeData(
+            val fom: LocalDate,
+            val tom: LocalDate
+        ) {
             fun tilDto() = PeriodeDto(fom = this.fom, tom = this.tom)
         }
+
         data class SykdomstidslinjeData(
             val dager: List<DagData>,
             val periode: PeriodeData?,
             val låstePerioder: List<PeriodeData>?
         ) {
-            fun tilDto() = SykdomstidslinjeDto(
-                dager = this.dager.flatMap { it.tilDto() },
-                periode = this.periode?.tilDto(),
-                låstePerioder = this.låstePerioder?.map { it.tilDto() } ?: emptyList()
-            )
+            fun tilDto() =
+                SykdomstidslinjeDto(
+                    dager = this.dager.flatMap { it.tilDto() },
+                    periode = this.periode?.tilDto(),
+                    låstePerioder = this.låstePerioder?.map { it.tilDto() } ?: emptyList()
+                )
 
             data class DagData(
                 val type: JsonDagType,
@@ -522,7 +573,7 @@ data class PersonData(
                 val dato: LocalDate?
             ) {
                 init {
-                    check (dato != null || (fom != null && tom != null)) {
+                    check(dato != null || (fom != null && tom != null)) {
                         "enten må dato være satt eller så må både fom og tom være satt"
                     }
                 }
@@ -533,22 +584,30 @@ data class PersonData(
                     val kilde = this.kilde.tilDto()
                     return datoer.map { tilDto(it, kilde) }
                 }
-                private fun tilDto(dagen: LocalDate, kilde: HendelseskildeDto) = when (type) {
+
+                private fun tilDto(
+                    dagen: LocalDate,
+                    kilde: HendelseskildeDto
+                ) = when (type) {
                     JsonDagType.ARBEIDSDAG -> SykdomstidslinjeDagDto.ArbeidsdagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.ARBEIDSGIVERDAG -> if (dagen.erHelg())
-                        SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
-                    else
-                        SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    JsonDagType.ARBEIDSGIVERDAG ->
+                        if (dagen.erHelg()) {
+                            SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        } else {
+                            SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        }
                     JsonDagType.FERIEDAG -> SykdomstidslinjeDagDto.FeriedagDto(dato = dagen, kilde = kilde)
                     JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG -> SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato = dagen, kilde = kilde)
                     JsonDagType.FRISK_HELGEDAG -> SykdomstidslinjeDagDto.FriskHelgedagDto(dato = dagen, kilde = kilde)
                     JsonDagType.FORELDET_SYKEDAG -> SykdomstidslinjeDagDto.ForeldetSykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.PERMISJONSDAG -> SykdomstidslinjeDagDto.PermisjonsdagDto(dato = dagen, kilde = kilde)
                     JsonDagType.PROBLEMDAG -> SykdomstidslinjeDagDto.ProblemDagDto(dato = dagen, kilde = kilde, other = this.other!!.tilDto(), melding = this.melding!!)
-                    JsonDagType.SYKEDAG -> if (dagen.erHelg())
-                        SykdomstidslinjeDagDto.SykHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
-                    else
-                        SykdomstidslinjeDagDto.SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    JsonDagType.SYKEDAG ->
+                        if (dagen.erHelg()) {
+                            SykdomstidslinjeDagDto.SykHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        } else {
+                            SykdomstidslinjeDagDto.SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        }
                     JsonDagType.SYKEDAG_NAV -> SykdomstidslinjeDagDto.SykedagNavDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.ANDRE_YTELSER_FORELDREPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Foreldrepenger)
                     JsonDagType.ANDRE_YTELSER_AAP -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP)
@@ -589,11 +648,12 @@ data class PersonData(
                 val id: UUID,
                 val tidsstempel: LocalDateTime
             ) {
-                fun tilDto() = HendelseskildeDto(
-                    type = this.type,
-                    meldingsreferanseId = this.id,
-                    tidsstempel = this.tidsstempel
-                )
+                fun tilDto() =
+                    HendelseskildeDto(
+                        type = this.type,
+                        meldingsreferanseId = this.id,
+                        tidsstempel = this.tidsstempel
+                    )
             }
         }
 
@@ -615,54 +675,61 @@ data class PersonData(
             val feriepengedager: List<UtbetaltDagData>,
             val utbetalingId: UUID,
             val sendTilOppdrag: Boolean,
-            val sendPersonoppdragTilOS: Boolean,
+            val sendPersonoppdragTilOS: Boolean
         ) {
-            fun tilDto() = FeriepengeInnDto(
-                feriepengeberegner = FeriepengeberegnerDto(
-                    opptjeningsår = this.opptjeningsår,
-                    utbetalteDager = this.utbetalteDager.map { it.tilDto() },
-                    feriepengedager = this.feriepengedager.map { it.tilDto() }
-                ),
-                infotrygdFeriepengebeløpPerson = this.infotrygdFeriepengebeløpPerson,
-                infotrygdFeriepengebeløpArbeidsgiver = this.infotrygdFeriepengebeløpArbeidsgiver,
-                spleisFeriepengebeløpPerson = this.spleisFeriepengebeløpPerson,
-                spleisFeriepengebeløpArbeidsgiver = this.spleisFeriepengebeløpArbeidsgiver,
-                oppdrag = this.oppdrag.tilDto(),
-                personoppdrag = this.personoppdrag.tilDto(),
-                utbetalingId = this.utbetalingId,
-                sendTilOppdrag = this.sendTilOppdrag,
-                sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
-            )
+            fun tilDto() =
+                FeriepengeInnDto(
+                    feriepengeberegner =
+                        FeriepengeberegnerDto(
+                            opptjeningsår = this.opptjeningsår,
+                            utbetalteDager = this.utbetalteDager.map { it.tilDto() },
+                            feriepengedager = this.feriepengedager.map { it.tilDto() }
+                        ),
+                    infotrygdFeriepengebeløpPerson = this.infotrygdFeriepengebeløpPerson,
+                    infotrygdFeriepengebeløpArbeidsgiver = this.infotrygdFeriepengebeløpArbeidsgiver,
+                    spleisFeriepengebeløpPerson = this.spleisFeriepengebeløpPerson,
+                    spleisFeriepengebeløpArbeidsgiver = this.spleisFeriepengebeløpArbeidsgiver,
+                    oppdrag = this.oppdrag.tilDto(),
+                    personoppdrag = this.personoppdrag.tilDto(),
+                    utbetalingId = this.utbetalingId,
+                    sendTilOppdrag = this.sendTilOppdrag,
+                    sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
+                )
 
             data class UtbetaltDagData(
                 val type: String,
                 val orgnummer: String,
                 val dato: LocalDate,
-                val beløp: Int,
+                val beløp: Int
             ) {
-                fun tilDto(): UtbetaltDagDto = when (type) {
-                    "InfotrygdPersonDag" -> UtbetaltDagDto.InfotrygdPerson(
-                        orgnummer = orgnummer,
-                        dato = dato,
-                        beløp = beløp
-                    )
-                    "InfotrygdArbeidsgiverDag" -> UtbetaltDagDto.InfotrygdArbeidsgiver(
-                        orgnummer = orgnummer,
-                        dato = dato,
-                        beløp = beløp
-                    )
-                    "SpleisArbeidsgiverDag" -> UtbetaltDagDto.SpleisArbeidsgiver(
-                        orgnummer = orgnummer,
-                        dato = dato,
-                        beløp = beløp
-                    )
-                    "SpleisPersonDag" -> UtbetaltDagDto.SpleisPerson(
-                        orgnummer = orgnummer,
-                        dato = dato,
-                        beløp = beløp
-                    )
-                    else -> error("Ukjent utbetaltdag-type: $type")
-                }
+                fun tilDto(): UtbetaltDagDto =
+                    when (type) {
+                        "InfotrygdPersonDag" ->
+                            UtbetaltDagDto.InfotrygdPerson(
+                                orgnummer = orgnummer,
+                                dato = dato,
+                                beløp = beløp
+                            )
+                        "InfotrygdArbeidsgiverDag" ->
+                            UtbetaltDagDto.InfotrygdArbeidsgiver(
+                                orgnummer = orgnummer,
+                                dato = dato,
+                                beløp = beløp
+                            )
+                        "SpleisArbeidsgiverDag" ->
+                            UtbetaltDagDto.SpleisArbeidsgiver(
+                                orgnummer = orgnummer,
+                                dato = dato,
+                                beløp = beløp
+                            )
+                        "SpleisPersonDag" ->
+                            UtbetaltDagDto.SpleisPerson(
+                                orgnummer = orgnummer,
+                                dato = dato,
+                                beløp = beløp
+                            )
+                        else -> error("Ukjent utbetaltdag-type: $type")
+                    }
             }
         }
 
@@ -703,36 +770,43 @@ data class PersonData(
                 AVVENTER_GODKJENNING_REVURDERING
             }
 
-            fun tilDto() = VedtaksperiodeInnDto(
-                id = this.id,
-                tilstand = when (tilstand) {
-                    TilstandTypeData.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
-                    TilstandTypeData.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
-                    TilstandTypeData.AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING
-                    TilstandTypeData.TIL_UTBETALING -> VedtaksperiodetilstandDto.TIL_UTBETALING
-                    TilstandTypeData.TIL_INFOTRYGD -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
-                    TilstandTypeData.AVSLUTTET -> VedtaksperiodetilstandDto.AVSLUTTET
-                    TilstandTypeData.AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
-                    TilstandTypeData.REVURDERING_FEILET -> VedtaksperiodetilstandDto.REVURDERING_FEILET
-                    TilstandTypeData.START -> VedtaksperiodetilstandDto.START
-                    TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
-                    TilstandTypeData.AVVENTER_INNTEKTSMELDING -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
-                    TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
-                    TilstandTypeData.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
-                    TilstandTypeData.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
-                    TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING
-                    TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
-                    TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
-                    TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
-                },
-                behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
-                egenmeldingsperioder = egenmeldingsperioder.map { it.tilDto() },
-                opprettet = opprettet,
-                oppdatert = oppdatert
-            )
+            fun tilDto() =
+                VedtaksperiodeInnDto(
+                    id = this.id,
+                    tilstand =
+                        when (tilstand) {
+                            TilstandTypeData.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
+                            TilstandTypeData.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
+                            TilstandTypeData.AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING
+                            TilstandTypeData.TIL_UTBETALING -> VedtaksperiodetilstandDto.TIL_UTBETALING
+                            TilstandTypeData.TIL_INFOTRYGD -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
+                            TilstandTypeData.AVSLUTTET -> VedtaksperiodetilstandDto.AVSLUTTET
+                            TilstandTypeData.AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
+                            TilstandTypeData.REVURDERING_FEILET -> VedtaksperiodetilstandDto.REVURDERING_FEILET
+                            TilstandTypeData.START -> VedtaksperiodetilstandDto.START
+                            TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
+                            TilstandTypeData.AVVENTER_INNTEKTSMELDING -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
+                            TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
+                            TilstandTypeData.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
+                            TilstandTypeData.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
+                            TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING
+                            TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
+                            TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
+                            TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
+                        },
+                    behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
+                    egenmeldingsperioder = egenmeldingsperioder.map { it.tilDto() },
+                    opprettet = opprettet,
+                    oppdatert = oppdatert
+                )
+
             enum class MaksdatobestemmelseData {
-                IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR
+                IKKE_VURDERT,
+                ORDINÆR_RETT,
+                BEGRENSET_RETT,
+                SYTTI_ÅR
             }
+
             data class MaksdatoresultatData(
                 val vurdertTilOgMed: LocalDate,
                 val bestemmelse: MaksdatobestemmelseData,
@@ -745,47 +819,53 @@ data class PersonData(
                 val gjenståendeDager: Int,
                 val grunnlag: UtbetalingstidslinjeData
             ) {
-                fun tilDto() = MaksdatoresultatInnDto(
-                    vurdertTilOgMed = vurdertTilOgMed,
-                    bestemmelse = when (bestemmelse) {
-                        MaksdatobestemmelseData.IKKE_VURDERT -> MaksdatobestemmelseDto.IKKE_VURDERT
-                        MaksdatobestemmelseData.ORDINÆR_RETT -> MaksdatobestemmelseDto.ORDINÆR_RETT
-                        MaksdatobestemmelseData.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
-                        MaksdatobestemmelseData.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
-                    },
-                    startdatoTreårsvindu = startdatoTreårsvindu,
-                    startdatoSykepengerettighet = startdatoSykepengerettighet,
-                    forbrukteDager = forbrukteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
-                    oppholdsdager = oppholdsdager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
-                    avslåtteDager = avslåtteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
-                    maksdato = maksdato,
-                    gjenståendeDager = gjenståendeDager,
-                    grunnlag = grunnlag.tilDto()
-                )
+                fun tilDto() =
+                    MaksdatoresultatInnDto(
+                        vurdertTilOgMed = vurdertTilOgMed,
+                        bestemmelse =
+                            when (bestemmelse) {
+                                MaksdatobestemmelseData.IKKE_VURDERT -> MaksdatobestemmelseDto.IKKE_VURDERT
+                                MaksdatobestemmelseData.ORDINÆR_RETT -> MaksdatobestemmelseDto.ORDINÆR_RETT
+                                MaksdatobestemmelseData.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
+                                MaksdatobestemmelseData.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
+                            },
+                        startdatoTreårsvindu = startdatoTreårsvindu,
+                        startdatoSykepengerettighet = startdatoSykepengerettighet,
+                        forbrukteDager = forbrukteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
+                        oppholdsdager = oppholdsdager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
+                        avslåtteDager = avslåtteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
+                        maksdato = maksdato,
+                        gjenståendeDager = gjenståendeDager,
+                        grunnlag = grunnlag.tilDto()
+                    )
             }
+
             data class DokumentsporingData(
                 val dokumentId: UUID,
                 val dokumenttype: DokumentTypeData
             ) {
-                fun tilDto() = DokumentsporingDto(
-                    id = this.dokumentId,
-                    type = when (dokumenttype) {
-                        DokumentTypeData.Sykmelding -> DokumenttypeDto.Sykmelding
-                        DokumentTypeData.Søknad -> DokumenttypeDto.Søknad
-                        DokumentTypeData.InntektsmeldingInntekt -> DokumenttypeDto.InntektsmeldingInntekt
-                        DokumentTypeData.InntektsmeldingRefusjon -> DokumenttypeDto.InntektsmeldingRefusjon
-                        DokumentTypeData.InntektsmeldingDager -> DokumenttypeDto.InntektsmeldingDager
-                        DokumentTypeData.InntektFraAOrdningen -> DokumenttypeDto.InntektFraAOrdningen
-                        DokumentTypeData.OverstyrTidslinje -> DokumenttypeDto.OverstyrTidslinje
-                        DokumentTypeData.OverstyrInntekt -> DokumenttypeDto.OverstyrInntekt
-                        DokumentTypeData.OverstyrRefusjon -> DokumenttypeDto.OverstyrRefusjon
-                        DokumentTypeData.OverstyrArbeidsgiveropplysninger -> DokumenttypeDto.OverstyrArbeidsgiveropplysninger
-                        DokumentTypeData.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
-                        DokumentTypeData.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
-                        DokumentTypeData.AndreYtelser -> DokumenttypeDto.AndreYtelser
-                    }
-                )
+                fun tilDto() =
+                    DokumentsporingDto(
+                        id = this.dokumentId,
+                        type =
+                            when (dokumenttype) {
+                                DokumentTypeData.Sykmelding -> DokumenttypeDto.Sykmelding
+                                DokumentTypeData.Søknad -> DokumenttypeDto.Søknad
+                                DokumentTypeData.InntektsmeldingInntekt -> DokumenttypeDto.InntektsmeldingInntekt
+                                DokumentTypeData.InntektsmeldingRefusjon -> DokumenttypeDto.InntektsmeldingRefusjon
+                                DokumentTypeData.InntektsmeldingDager -> DokumenttypeDto.InntektsmeldingDager
+                                DokumentTypeData.InntektFraAOrdningen -> DokumenttypeDto.InntektFraAOrdningen
+                                DokumentTypeData.OverstyrTidslinje -> DokumenttypeDto.OverstyrTidslinje
+                                DokumentTypeData.OverstyrInntekt -> DokumenttypeDto.OverstyrInntekt
+                                DokumentTypeData.OverstyrRefusjon -> DokumenttypeDto.OverstyrRefusjon
+                                DokumentTypeData.OverstyrArbeidsgiveropplysninger -> DokumenttypeDto.OverstyrArbeidsgiveropplysninger
+                                DokumentTypeData.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
+                                DokumentTypeData.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
+                                DokumentTypeData.AndreYtelser -> DokumenttypeDto.AndreYtelser
+                            }
+                    )
             }
+
             enum class DokumentTypeData {
                 Sykmelding,
                 Søknad,
@@ -808,41 +888,60 @@ data class PersonData(
                 val vedtakFattet: LocalDateTime?,
                 val avsluttet: LocalDateTime?,
                 val kilde: KildeData,
-                val endringer: List<EndringData>,
+                val endringer: List<EndringData>
             ) {
-                fun tilDto() = BehandlingInnDto(
-                    id = this.id,
-                    tilstand = when (tilstand) {
-                        TilstandData.UBEREGNET -> BehandlingtilstandDto.UBEREGNET
-                        TilstandData.UBEREGNET_OMGJØRING -> BehandlingtilstandDto.UBEREGNET_OMGJØRING
-                        TilstandData.UBEREGNET_REVURDERING -> BehandlingtilstandDto.UBEREGNET_REVURDERING
-                        TilstandData.BEREGNET -> BehandlingtilstandDto.BEREGNET
-                        TilstandData.BEREGNET_OMGJØRING -> BehandlingtilstandDto.BEREGNET_OMGJØRING
-                        TilstandData.BEREGNET_REVURDERING -> BehandlingtilstandDto.BEREGNET_REVURDERING
-                        TilstandData.VEDTAK_FATTET -> BehandlingtilstandDto.VEDTAK_FATTET
-                        TilstandData.REVURDERT_VEDTAK_AVVIST -> BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST
-                        TilstandData.VEDTAK_IVERKSATT -> BehandlingtilstandDto.VEDTAK_IVERKSATT
-                        TilstandData.AVSLUTTET_UTEN_VEDTAK -> BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK
-                        TilstandData.ANNULLERT_PERIODE -> BehandlingtilstandDto.ANNULLERT_PERIODE
-                        TilstandData.TIL_INFOTRYGD -> BehandlingtilstandDto.TIL_INFOTRYGD
-                    },
-                    vedtakFattet = this.vedtakFattet,
-                    avsluttet = this.avsluttet,
-                    kilde = this.kilde.tilDto(),
-                    endringer = this.endringer.map { it.tilDto() },
-                )
+                fun tilDto() =
+                    BehandlingInnDto(
+                        id = this.id,
+                        tilstand =
+                            when (tilstand) {
+                                TilstandData.UBEREGNET -> BehandlingtilstandDto.UBEREGNET
+                                TilstandData.UBEREGNET_OMGJØRING -> BehandlingtilstandDto.UBEREGNET_OMGJØRING
+                                TilstandData.UBEREGNET_REVURDERING -> BehandlingtilstandDto.UBEREGNET_REVURDERING
+                                TilstandData.BEREGNET -> BehandlingtilstandDto.BEREGNET
+                                TilstandData.BEREGNET_OMGJØRING -> BehandlingtilstandDto.BEREGNET_OMGJØRING
+                                TilstandData.BEREGNET_REVURDERING -> BehandlingtilstandDto.BEREGNET_REVURDERING
+                                TilstandData.VEDTAK_FATTET -> BehandlingtilstandDto.VEDTAK_FATTET
+                                TilstandData.REVURDERT_VEDTAK_AVVIST -> BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST
+                                TilstandData.VEDTAK_IVERKSATT -> BehandlingtilstandDto.VEDTAK_IVERKSATT
+                                TilstandData.AVSLUTTET_UTEN_VEDTAK -> BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK
+                                TilstandData.ANNULLERT_PERIODE -> BehandlingtilstandDto.ANNULLERT_PERIODE
+                                TilstandData.TIL_INFOTRYGD -> BehandlingtilstandDto.TIL_INFOTRYGD
+                            },
+                        vedtakFattet = this.vedtakFattet,
+                        avsluttet = this.avsluttet,
+                        kilde = this.kilde.tilDto(),
+                        endringer = this.endringer.map { it.tilDto() }
+                    )
+
                 enum class TilstandData {
-                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
-                    VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
+                    UBEREGNET,
+                    UBEREGNET_OMGJØRING,
+                    UBEREGNET_REVURDERING,
+                    BEREGNET,
+                    BEREGNET_OMGJØRING,
+                    BEREGNET_REVURDERING,
+                    VEDTAK_FATTET,
+                    REVURDERT_VEDTAK_AVVIST,
+                    VEDTAK_IVERKSATT,
+                    AVSLUTTET_UTEN_VEDTAK,
+                    ANNULLERT_PERIODE,
+                    TIL_INFOTRYGD
                 }
+
                 enum class AvsenderData {
-                    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
-                    fun tilDto() = when (this) {
-                        SYKMELDT -> AvsenderDto.SYKMELDT
-                        ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
-                        SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
-                        SYSTEM -> AvsenderDto.SYSTEM
-                    }
+                    SYKMELDT,
+                    ARBEIDSGIVER,
+                    SAKSBEHANDLER,
+                    SYSTEM;
+
+                    fun tilDto() =
+                        when (this) {
+                            SYKMELDT -> AvsenderDto.SYKMELDT
+                            ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
+                            SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
+                            SYSTEM -> AvsenderDto.SYSTEM
+                        }
                 }
 
                 data class KildeData(
@@ -851,13 +950,15 @@ data class PersonData(
                     val registrert: LocalDateTime,
                     val avsender: AvsenderData
                 ) {
-                    fun tilDto() = BehandlingkildeDto(
-                        meldingsreferanseId = this.meldingsreferanseId,
-                        innsendt = this.innsendt,
-                        registert = this.registrert,
-                        avsender = this.avsender.tilDto()
-                    )
+                    fun tilDto() =
+                        BehandlingkildeDto(
+                            meldingsreferanseId = this.meldingsreferanseId,
+                            innsendt = this.innsendt,
+                            registert = this.registrert,
+                            avsender = this.avsender.tilDto()
+                        )
                 }
+
                 data class EndringData(
                     val id: UUID,
                     val tidsstempel: LocalDateTime,
@@ -875,45 +976,46 @@ data class PersonData(
                     val arbeidsgiverperioder: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData
                 ) {
-                    fun tilDto() = BehandlingendringInnDto(
-                        id = this.id,
-                        tidsstempel = this.tidsstempel,
-                        sykmeldingsperiode = PeriodeDto(fom = sykmeldingsperiodeFom, tom = sykmeldingsperiodeTom),
-                        periode = PeriodeDto(fom = this.fom, tom = this.tom),
-                        vilkårsgrunnlagId = this.vilkårsgrunnlagId,
-                        utbetalingId = this.utbetalingId,
-                        dokumentsporing = this.dokumentsporing.tilDto(),
-                        sykdomstidslinje = this.sykdomstidslinje.tilDto(),
-                        utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
-                        refusjonstidslinje = this.refusjonstidslinje.tilDto(),
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
-                        maksdatoresultat = maksdatoresultat.tilDto()
-                    )
+                    fun tilDto() =
+                        BehandlingendringInnDto(
+                            id = this.id,
+                            tidsstempel = this.tidsstempel,
+                            sykmeldingsperiode = PeriodeDto(fom = sykmeldingsperiodeFom, tom = sykmeldingsperiodeTom),
+                            periode = PeriodeDto(fom = this.fom, tom = this.tom),
+                            vilkårsgrunnlagId = this.vilkårsgrunnlagId,
+                            utbetalingId = this.utbetalingId,
+                            dokumentsporing = this.dokumentsporing.tilDto(),
+                            sykdomstidslinje = this.sykdomstidslinje.tilDto(),
+                            utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
+                            refusjonstidslinje = this.refusjonstidslinje.tilDto(),
+                            skjæringstidspunkt = skjæringstidspunkt,
+                            arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
+                            maksdatoresultat = maksdatoresultat.tilDto()
+                        )
                 }
             }
+
             data class DataForSimuleringData(
                 val totalbeløp: Int,
                 val perioder: List<SimulertPeriode>
             ) {
-                internal fun tilDto() = SimuleringResultatDto(
-                    totalbeløp = totalbeløp,
-                    perioder = perioder.map { it.tilDto() }
-                )
+                internal fun tilDto() =
+                    SimuleringResultatDto(
+                        totalbeløp = totalbeløp,
+                        perioder = perioder.map { it.tilDto() }
+                    )
 
                 data class SimulertPeriode(
                     val fom: LocalDate,
                     val tom: LocalDate,
                     val utbetalinger: List<SimulertUtbetaling>
                 ) {
-
-                    internal fun tilDto(): SimuleringResultatDto.SimulertPeriode {
-                        return SimuleringResultatDto.SimulertPeriode(
+                    internal fun tilDto(): SimuleringResultatDto.SimulertPeriode =
+                        SimuleringResultatDto.SimulertPeriode(
                             fom = fom,
                             tom = tom,
                             utbetalinger = utbetalinger.map { it.tilDto() }
                         )
-                    }
                 }
 
                 data class SimulertUtbetaling(
@@ -922,17 +1024,17 @@ data class PersonData(
                     val feilkonto: Boolean,
                     val detaljer: List<Detaljer>
                 ) {
-                    internal fun tilDto(): SimuleringResultatDto.SimulertUtbetaling {
-                        return SimuleringResultatDto.SimulertUtbetaling(
+                    internal fun tilDto(): SimuleringResultatDto.SimulertUtbetaling =
+                        SimuleringResultatDto.SimulertUtbetaling(
                             forfallsdato = forfallsdato,
-                            utbetalesTil = SimuleringResultatDto.Mottaker(
-                                id = utbetalesTil.id,
-                                navn = utbetalesTil.navn
-                            ),
+                            utbetalesTil =
+                                SimuleringResultatDto.Mottaker(
+                                    id = utbetalesTil.id,
+                                    navn = utbetalesTil.navn
+                                ),
                             feilkonto = feilkonto,
                             detaljer = detaljer.map { it.tilDto() }
                         )
-                    }
                 }
 
                 data class Detaljer(
@@ -947,27 +1049,28 @@ data class PersonData(
                     val sats: Sats,
                     val refunderesOrgnummer: String
                 ) {
-                    internal fun tilDto(): SimuleringResultatDto.Detaljer {
-                        return SimuleringResultatDto.Detaljer(
+                    internal fun tilDto(): SimuleringResultatDto.Detaljer =
+                        SimuleringResultatDto.Detaljer(
                             fom = fom,
                             tom = tom,
                             konto = konto,
                             beløp = beløp,
-                            klassekode = SimuleringResultatDto.Klassekode(
-                                kode = klassekode.kode,
-                                beskrivelse = klassekode.beskrivelse
-                            ),
+                            klassekode =
+                                SimuleringResultatDto.Klassekode(
+                                    kode = klassekode.kode,
+                                    beskrivelse = klassekode.beskrivelse
+                                ),
                             uføregrad = uføregrad,
                             utbetalingstype = utbetalingstype,
                             tilbakeføring = tilbakeføring,
-                            sats = SimuleringResultatDto.Sats(
-                                sats = sats.sats,
-                                antall = sats.antall,
-                                type = sats.type
-                            ),
+                            sats =
+                                SimuleringResultatDto.Sats(
+                                    sats = sats.sats,
+                                    antall = sats.antall,
+                                    type = sats.type
+                                ),
                             refunderesOrgnummer = refunderesOrgnummer
                         )
-                    }
                 }
 
                 data class Sats(
@@ -997,15 +1100,16 @@ data class PersonData(
             val endringerIRefusjon: List<EndringIRefusjonData>,
             val tidsstempel: LocalDateTime
         ) {
-            fun tilDto() = RefusjonInnDto(
-                meldingsreferanseId = this.meldingsreferanseId,
-                førsteFraværsdag = this.førsteFraværsdag,
-                arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilDto() },
-                beløp = this.beløp?.let { InntektbeløpDto.MånedligDouble(it) },
-                sisteRefusjonsdag = this.sisteRefusjonsdag,
-                endringerIRefusjon = this.endringerIRefusjon.map { it.tilDto() },
-                tidsstempel = this.tidsstempel
-            )
+            fun tilDto() =
+                RefusjonInnDto(
+                    meldingsreferanseId = this.meldingsreferanseId,
+                    førsteFraværsdag = this.førsteFraværsdag,
+                    arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilDto() },
+                    beløp = this.beløp?.let { InntektbeløpDto.MånedligDouble(it) },
+                    sisteRefusjonsdag = this.sisteRefusjonsdag,
+                    endringerIRefusjon = this.endringerIRefusjon.map { it.tilDto() },
+                    tidsstempel = this.tidsstempel
+                )
 
             data class EndringIRefusjonData(
                 val beløp: Double,
@@ -1023,13 +1127,14 @@ data class PersonData(
         val hendelseSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData,
         val beregnetSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData
     ) {
-        fun tilDto() = SykdomshistorikkElementDto(
-            id = this.id,
-            hendelseId = this.hendelseId,
-            tidsstempel = this.tidsstempel,
-            hendelseSykdomstidslinje = hendelseSykdomstidslinje.tilDto(),
-            beregnetSykdomstidslinje = beregnetSykdomstidslinje.tilDto()
-        )
+        fun tilDto() =
+            SykdomshistorikkElementDto(
+                id = this.id,
+                hendelseId = this.hendelseId,
+                tidsstempel = this.tidsstempel,
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje.tilDto(),
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje.tilDto()
+            )
     }
 
     data class UtbetalingData(
@@ -1054,6 +1159,7 @@ data class PersonData(
         val oppdatert: LocalDateTime
     ) {
         enum class UtbetalingtypeData { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+
         enum class UtbetalingstatusData {
             NY,
             IKKE_UTBETALT,
@@ -1065,42 +1171,46 @@ data class PersonData(
             ANNULLERT,
             FORKASTET
         }
-        fun tilDto() = UtbetalingInnDto(
-            id = this.id,
-            korrelasjonsId = this.korrelasjonsId,
-            periode = PeriodeDto(fom = this.fom, tom = this.tom),
-            utbetalingstidslinje = this.utbetalingstidslinje.tilDto(),
-            arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.tilDto(),
-            personOppdrag = this.personOppdrag.tilDto(),
-            tidsstempel = this.tidsstempel,
-            tilstand = when (status) {
-                UtbetalingstatusData.NY -> UtbetalingTilstandDto.NY
-                UtbetalingstatusData.IKKE_UTBETALT -> UtbetalingTilstandDto.IKKE_UTBETALT
-                UtbetalingstatusData.IKKE_GODKJENT -> UtbetalingTilstandDto.IKKE_GODKJENT
-                UtbetalingstatusData.OVERFØRT -> UtbetalingTilstandDto.OVERFØRT
-                UtbetalingstatusData.UTBETALT -> UtbetalingTilstandDto.UTBETALT
-                UtbetalingstatusData.GODKJENT -> UtbetalingTilstandDto.GODKJENT
-                UtbetalingstatusData.GODKJENT_UTEN_UTBETALING -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
-                UtbetalingstatusData.ANNULLERT -> UtbetalingTilstandDto.ANNULLERT
-                UtbetalingstatusData.FORKASTET -> UtbetalingTilstandDto.FORKASTET
-            },
-            type = when (type) {
-                UtbetalingtypeData.UTBETALING -> UtbetalingtypeDto.UTBETALING
-                UtbetalingtypeData.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
-                UtbetalingtypeData.ANNULLERING -> UtbetalingtypeDto.ANNULLERING
-                UtbetalingtypeData.REVURDERING -> UtbetalingtypeDto.REVURDERING
-                UtbetalingtypeData.FERIEPENGER -> UtbetalingtypeDto.FERIEPENGER
-            },
-            maksdato = this.maksdato,
-            forbrukteSykedager = this.forbrukteSykedager,
-            gjenståendeSykedager = this.gjenståendeSykedager,
-            annulleringer = this.annulleringer ?: emptyList(),
-            vurdering = this.vurdering?.tilDto(),
-            overføringstidspunkt = overføringstidspunkt,
-            avstemmingsnøkkel = avstemmingsnøkkel,
-            avsluttet = avsluttet,
-            oppdatert = oppdatert
-        )
+
+        fun tilDto() =
+            UtbetalingInnDto(
+                id = this.id,
+                korrelasjonsId = this.korrelasjonsId,
+                periode = PeriodeDto(fom = this.fom, tom = this.tom),
+                utbetalingstidslinje = this.utbetalingstidslinje.tilDto(),
+                arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.tilDto(),
+                personOppdrag = this.personOppdrag.tilDto(),
+                tidsstempel = this.tidsstempel,
+                tilstand =
+                    when (status) {
+                        UtbetalingstatusData.NY -> UtbetalingTilstandDto.NY
+                        UtbetalingstatusData.IKKE_UTBETALT -> UtbetalingTilstandDto.IKKE_UTBETALT
+                        UtbetalingstatusData.IKKE_GODKJENT -> UtbetalingTilstandDto.IKKE_GODKJENT
+                        UtbetalingstatusData.OVERFØRT -> UtbetalingTilstandDto.OVERFØRT
+                        UtbetalingstatusData.UTBETALT -> UtbetalingTilstandDto.UTBETALT
+                        UtbetalingstatusData.GODKJENT -> UtbetalingTilstandDto.GODKJENT
+                        UtbetalingstatusData.GODKJENT_UTEN_UTBETALING -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
+                        UtbetalingstatusData.ANNULLERT -> UtbetalingTilstandDto.ANNULLERT
+                        UtbetalingstatusData.FORKASTET -> UtbetalingTilstandDto.FORKASTET
+                    },
+                type =
+                    when (type) {
+                        UtbetalingtypeData.UTBETALING -> UtbetalingtypeDto.UTBETALING
+                        UtbetalingtypeData.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
+                        UtbetalingtypeData.ANNULLERING -> UtbetalingtypeDto.ANNULLERING
+                        UtbetalingtypeData.REVURDERING -> UtbetalingtypeDto.REVURDERING
+                        UtbetalingtypeData.FERIEPENGER -> UtbetalingtypeDto.FERIEPENGER
+                    },
+                maksdato = this.maksdato,
+                forbrukteSykedager = this.forbrukteSykedager,
+                gjenståendeSykedager = this.gjenståendeSykedager,
+                annulleringer = this.annulleringer ?: emptyList(),
+                vurdering = this.vurdering?.tilDto(),
+                overføringstidspunkt = overføringstidspunkt,
+                avstemmingsnøkkel = avstemmingsnøkkel,
+                avsluttet = avsluttet,
+                oppdatert = oppdatert
+            )
 
         data class VurderingData(
             val godkjent: Boolean,
@@ -1109,13 +1219,14 @@ data class PersonData(
             val tidspunkt: LocalDateTime,
             val automatiskBehandling: Boolean
         ) {
-            fun tilDto() = UtbetalingVurderingDto(
-                godkjent = godkjent,
-                ident = ident,
-                epost = epost,
-                tidspunkt = tidspunkt,
-                automatiskBehandling = automatiskBehandling
-            )
+            fun tilDto() =
+                UtbetalingVurderingDto(
+                    godkjent = godkjent,
+                    ident = ident,
+                    epost = epost,
+                    tidspunkt = tidspunkt,
+                    automatiskBehandling = automatiskBehandling
+                )
         }
     }
 
@@ -1134,36 +1245,41 @@ data class PersonData(
         val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
     ) {
         enum class OppdragstatusData { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }
-        fun tilDto() = OppdragInnDto(
-            mottaker = this.mottaker,
-            fagområde = when (fagområde) {
-                "SPREF" -> FagområdeDto.SPREF
-                "SP" -> FagområdeDto.SP
-                else -> error("Ukjent fagområde: $fagområde")
-            },
-            linjer = this.linjer.map { it.tilDto() },
-            fagsystemId = this.fagsystemId,
-            endringskode = when (endringskode) {
-                "NY" -> EndringskodeDto.NY
-                "ENDR" -> EndringskodeDto.ENDR
-                "UEND" -> EndringskodeDto.UEND
-                else -> error("Ukjent endringskode: $endringskode")
-            },
-            nettoBeløp = this.nettoBeløp,
-            overføringstidspunkt = this.overføringstidspunkt,
-            avstemmingsnøkkel = this.avstemmingsnøkkel,
-            status = when (status) {
-                OppdragstatusData.OVERFØRT -> OppdragstatusDto.OVERFØRT
-                OppdragstatusData.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
-                OppdragstatusData.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
-                OppdragstatusData.AVVIST -> OppdragstatusDto.AVVIST
-                OppdragstatusData.FEIL -> OppdragstatusDto.FEIL
-                null -> null
-            },
-            tidsstempel = this.tidsstempel,
-            erSimulert = this.erSimulert,
-            simuleringsResultat = this.simuleringsResultat?.tilDto()
-        )
+
+        fun tilDto() =
+            OppdragInnDto(
+                mottaker = this.mottaker,
+                fagområde =
+                    when (fagområde) {
+                        "SPREF" -> FagområdeDto.SPREF
+                        "SP" -> FagområdeDto.SP
+                        else -> error("Ukjent fagområde: $fagområde")
+                    },
+                linjer = this.linjer.map { it.tilDto() },
+                fagsystemId = this.fagsystemId,
+                endringskode =
+                    when (endringskode) {
+                        "NY" -> EndringskodeDto.NY
+                        "ENDR" -> EndringskodeDto.ENDR
+                        "UEND" -> EndringskodeDto.UEND
+                        else -> error("Ukjent endringskode: $endringskode")
+                    },
+                nettoBeløp = this.nettoBeløp,
+                overføringstidspunkt = this.overføringstidspunkt,
+                avstemmingsnøkkel = this.avstemmingsnøkkel,
+                status =
+                    when (status) {
+                        OppdragstatusData.OVERFØRT -> OppdragstatusDto.OVERFØRT
+                        OppdragstatusData.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
+                        OppdragstatusData.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
+                        OppdragstatusData.AVVIST -> OppdragstatusDto.AVVIST
+                        OppdragstatusData.FEIL -> OppdragstatusDto.FEIL
+                        null -> null
+                    },
+                tidsstempel = this.tidsstempel,
+                erSimulert = this.erSimulert,
+                simuleringsResultat = this.simuleringsResultat?.tilDto()
+            )
     }
 
     data class UtbetalingslinjeData(
@@ -1179,34 +1295,38 @@ data class PersonData(
         val klassekode: String,
         val datoStatusFom: LocalDate?
     ) {
-        fun tilDto() = UtbetalingslinjeInnDto(
-            fom = this.fom,
-            tom = this.tom,
-            satstype = when (this.satstype) {
-                "ENG" -> SatstypeDto.Engang
-                "DAG" -> SatstypeDto.Daglig
-                else -> error("Ukjent satstype: $satstype")
-            },
-            beløp = this.sats,
-            grad = this.grad,
-            refFagsystemId = this.refFagsystemId,
-            delytelseId = this.delytelseId,
-            refDelytelseId = this.refDelytelseId,
-            endringskode = when (this.endringskode) {
-                "NY" -> EndringskodeDto.NY
-                "ENDR" -> EndringskodeDto.ENDR
-                "UEND" -> EndringskodeDto.UEND
-                else -> error("Ukjent endringskode: $endringskode")
-            },
-            klassekode = when (this.klassekode) {
-                "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
-                "SPREFAGFER-IOP" -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
-                "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
-                "SPATFER" -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
-                else -> error("Ukjent klassekode: ${this.klassekode}")
-            },
-            datoStatusFom = this.datoStatusFom
-        )
+        fun tilDto() =
+            UtbetalingslinjeInnDto(
+                fom = this.fom,
+                tom = this.tom,
+                satstype =
+                    when (this.satstype) {
+                        "ENG" -> SatstypeDto.Engang
+                        "DAG" -> SatstypeDto.Daglig
+                        else -> error("Ukjent satstype: $satstype")
+                    },
+                beløp = this.sats,
+                grad = this.grad,
+                refFagsystemId = this.refFagsystemId,
+                delytelseId = this.delytelseId,
+                refDelytelseId = this.refDelytelseId,
+                endringskode =
+                    when (this.endringskode) {
+                        "NY" -> EndringskodeDto.NY
+                        "ENDR" -> EndringskodeDto.ENDR
+                        "UEND" -> EndringskodeDto.UEND
+                        else -> error("Ukjent endringskode: $endringskode")
+                    },
+                klassekode =
+                    when (this.klassekode) {
+                        "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
+                        "SPREFAGFER-IOP" -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
+                        "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
+                        "SPATFER" -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
+                        else -> error("Ukjent klassekode: ${this.klassekode}")
+                    },
+                datoStatusFom = this.datoStatusFom
+            )
     }
 
     data class UtbetalingstidslinjeData(
@@ -1234,26 +1354,27 @@ data class PersonData(
             Over70,
             NyVilkårsprøvingNødvendig;
 
-            fun tilDto() = when (this) {
-                SykepengedagerOppbrukt -> BegrunnelseDto.SykepengedagerOppbrukt
-                SykepengedagerOppbruktOver67 -> BegrunnelseDto.SykepengedagerOppbruktOver67
-                MinimumInntekt -> BegrunnelseDto.MinimumInntekt
-                MinimumInntektOver67 -> BegrunnelseDto.MinimumInntektOver67
-                EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode
-                MinimumSykdomsgrad -> BegrunnelseDto.MinimumSykdomsgrad
-                AndreYtelserAap -> BegrunnelseDto.AndreYtelserAap
-                AndreYtelserDagpenger -> BegrunnelseDto.AndreYtelserDagpenger
-                AndreYtelserForeldrepenger -> BegrunnelseDto.AndreYtelserForeldrepenger
-                AndreYtelserOmsorgspenger -> BegrunnelseDto.AndreYtelserOmsorgspenger
-                AndreYtelserOpplaringspenger -> BegrunnelseDto.AndreYtelserOpplaringspenger
-                AndreYtelserPleiepenger -> BegrunnelseDto.AndreYtelserPleiepenger
-                AndreYtelserSvangerskapspenger -> BegrunnelseDto.AndreYtelserSvangerskapspenger
-                EtterDødsdato -> BegrunnelseDto.EtterDødsdato
-                ManglerMedlemskap -> BegrunnelseDto.ManglerMedlemskap
-                ManglerOpptjening -> BegrunnelseDto.ManglerOpptjening
-                Over70 -> BegrunnelseDto.Over70
-                NyVilkårsprøvingNødvendig -> BegrunnelseDto.NyVilkårsprøvingNødvendig
-            }
+            fun tilDto() =
+                when (this) {
+                    SykepengedagerOppbrukt -> BegrunnelseDto.SykepengedagerOppbrukt
+                    SykepengedagerOppbruktOver67 -> BegrunnelseDto.SykepengedagerOppbruktOver67
+                    MinimumInntekt -> BegrunnelseDto.MinimumInntekt
+                    MinimumInntektOver67 -> BegrunnelseDto.MinimumInntektOver67
+                    EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode
+                    MinimumSykdomsgrad -> BegrunnelseDto.MinimumSykdomsgrad
+                    AndreYtelserAap -> BegrunnelseDto.AndreYtelserAap
+                    AndreYtelserDagpenger -> BegrunnelseDto.AndreYtelserDagpenger
+                    AndreYtelserForeldrepenger -> BegrunnelseDto.AndreYtelserForeldrepenger
+                    AndreYtelserOmsorgspenger -> BegrunnelseDto.AndreYtelserOmsorgspenger
+                    AndreYtelserOpplaringspenger -> BegrunnelseDto.AndreYtelserOpplaringspenger
+                    AndreYtelserPleiepenger -> BegrunnelseDto.AndreYtelserPleiepenger
+                    AndreYtelserSvangerskapspenger -> BegrunnelseDto.AndreYtelserSvangerskapspenger
+                    EtterDødsdato -> BegrunnelseDto.EtterDødsdato
+                    ManglerMedlemskap -> BegrunnelseDto.ManglerMedlemskap
+                    ManglerOpptjening -> BegrunnelseDto.ManglerOpptjening
+                    Over70 -> BegrunnelseDto.Over70
+                    NyVilkårsprøvingNødvendig -> BegrunnelseDto.NyVilkårsprøvingNødvendig
+                }
         }
 
         enum class TypeData {
@@ -1302,8 +1423,9 @@ data class PersonData(
             }
 
             fun tilDto() = datoer.map { tilDto(it) }
-            private fun tilDto(dato: LocalDate): UtbetalingsdagInnDto {
-                return when (type) {
+
+            private fun tilDto(dato: LocalDate): UtbetalingsdagInnDto =
+                when (type) {
                     TypeData.ArbeidsgiverperiodeDag -> UtbetalingsdagInnDto.ArbeidsgiverperiodeDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.NavDag -> UtbetalingsdagInnDto.NavDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.NavHelgDag -> UtbetalingsdagInnDto.NavHelgDagDto(dato = dato, økonomi = økonomiDto)
@@ -1314,30 +1436,47 @@ data class PersonData(
                     TypeData.ForeldetDag -> UtbetalingsdagInnDto.ForeldetDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.ArbeidsgiverperiodedagNav -> UtbetalingsdagInnDto.ArbeidsgiverperiodeDagNavDto(dato = dato, økonomi = økonomiDto)
                 }
-            }
         }
     }
-    data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>) {
-        fun tilDto() = BeløpstidslinjeDto(perioder.map {
-            BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                fom = it.fom,
-                tom = it.tom,
-                dagligBeløp = it.dagligBeløp,
-                kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                    meldingsreferanseId = it.meldingsreferanseId,
-                    avsender = it.avsender.tilDto(),
-                    tidsstempel = it.tidsstempel
-                )
-            )
-        })
 
+    data class BeløpstidslinjeData(
+        val perioder: List<BeløpstidslinjeperiodeData>
+    ) {
+        fun tilDto() =
+            BeløpstidslinjeDto(
+                perioder.map {
+                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                        fom = it.fom,
+                        tom = it.tom,
+                        dagligBeløp = it.dagligBeløp,
+                        kilde =
+                            BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+                                meldingsreferanseId = it.meldingsreferanseId,
+                                avsender = it.avsender.tilDto(),
+                                tidsstempel = it.tidsstempel
+                            )
+                    )
+                }
+            )
     }
-    data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
+
+    data class BeløpstidslinjeperiodeData(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagligBeløp: Double,
+        val meldingsreferanseId: UUID,
+        val avsender: AvsenderData,
+        val tidsstempel: LocalDateTime
+    )
 }
 
 private fun LocalDate.erHelg() = dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
-private fun datosekvens(dato: LocalDate?, fom: LocalDate?, tom: LocalDate?): Sequence<LocalDate> {
+private fun datosekvens(
+    dato: LocalDate?,
+    fom: LocalDate?,
+    tom: LocalDate?
+): Sequence<LocalDate> {
     check(dato != null || (fom != null && tom != null)) {
         "må ha <dato> eller både <fom> og <tom>. Fikk dato=$dato, fom = $fom, tom = $tom"
     }

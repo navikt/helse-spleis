@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -49,9 +48,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() {
-
     @Test
     fun `revurdering for periode som start samme dag som en førstegangsvurdering`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a2)
@@ -64,10 +63,11 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             orgnummer = a2,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 20000.månedlig, a2 to 20000.månedlig), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
+                )
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
@@ -197,14 +197,23 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
     }
 
-    private fun assertDag(dato: LocalDate, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+    private fun assertDag(
+        dato: LocalDate,
+        orgnummer: String,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt
+    ) {
         inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
             if (it is NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }
     }
-    private fun assertPeriode(periode: Periode, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN) =
-        periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
 
+    private fun assertPeriode(
+        periode: Periode,
+        orgnummer: String,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = INGEN
+    ) = periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.inspectors
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -16,11 +15,14 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
 import kotlin.reflect.KClass
 
 internal val Sykdomstidslinje.inspektør get() = SykdomstidslinjeInspektør(this)
 
-internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
+internal class SykdomstidslinjeInspektør(
+    tidslinje: Sykdomstidslinje
+) {
     internal val dager = mutableMapOf<LocalDate, Dag>()
     internal val kilder = mutableMapOf<LocalDate, Hendelseskilde>()
     internal val grader = mutableMapOf<LocalDate, Int>()
@@ -51,23 +53,38 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
         }
     }
 
-    internal operator fun get(dato: LocalDate) = dager[dato]
-        ?: throw IllegalArgumentException("No dag for $dato")
+    internal operator fun get(dato: LocalDate) =
+        dager[dato]
+            ?: throw IllegalArgumentException("No dag for $dato")
 
     internal val size get() = dager.size
 
-    private fun set(dag: Dag, dato: LocalDate, kilde: Hendelseskilde) {
+    private fun set(
+        dag: Dag,
+        dato: LocalDate,
+        kilde: Hendelseskilde
+    ) {
         dager[dato] = dag
         kilder[dato] = kilde
         dagteller.compute(dag::class) { _, value -> 1 + (value ?: 0) }
     }
 
-    private fun set(dag: Dag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+    private fun set(
+        dag: Dag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) {
         this.grader[dato] = økonomi.inspektør.gradProsent.toInt()
         set(dag, dato, kilde)
     }
 
-    private fun set(dag: Dag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {
+    private fun set(
+        dag: Dag,
+        dato: LocalDate,
+        kilde: Hendelseskilde,
+        melding: String
+    ) {
         problemdagmeldinger[dato] = melding
         set(dag, dato, kilde)
     }

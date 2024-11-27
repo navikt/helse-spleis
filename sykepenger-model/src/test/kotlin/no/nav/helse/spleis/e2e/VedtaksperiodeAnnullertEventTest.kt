@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
-
     @Test
     fun `vi sender vedtaksperiode annullert-hendelse når saksbehandler annullerer en vedtaksperiode`() {
         nyttVedtak(januar)
@@ -93,12 +92,14 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((februar).map {
-            ManuellOverskrivingDag(
-                it,
-                Dagtype.ArbeidIkkeGjenopptattDag
-            )
-        })
+        håndterOverstyrTidslinje(
+            (februar).map {
+                ManuellOverskrivingDag(
+                    it,
+                    Dagtype.ArbeidIkkeGjenopptattDag
+                )
+            }
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -129,5 +130,4 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
-
 }

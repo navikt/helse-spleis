@@ -7,13 +7,13 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import java.time.LocalDate
+import java.util.UUID
 
 // Understands a JSON message representing an Inntektsmelding
 internal open class InntektsmeldingMessage(
@@ -21,16 +21,18 @@ internal open class InntektsmeldingMessage(
     val personopplysninger: Personopplysninger,
     override val meldingsporing: Meldingsporing
 ) : HendelseMessage(packet) {
-    private val refusjon = Inntektsmelding.Refusjon(
-        beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
-        opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
-        endringerIRefusjon = packet["endringIRefusjoner"].map {
-            Inntektsmelding.Refusjon.EndringIRefusjon(
-                it.path("beloep").asDouble().månedlig,
-                it.path("endringsdato").asLocalDate()
-            )
-        }
-    )
+    private val refusjon =
+        Inntektsmelding.Refusjon(
+            beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
+            opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
+            endringerIRefusjon =
+                packet["endringIRefusjoner"].map {
+                    Inntektsmelding.Refusjon.EndringIRefusjon(
+                        it.path("beloep").asDouble().månedlig,
+                        it.path("endringsdato").asLocalDate()
+                    )
+                }
+        )
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
     private val orgnummer = packet["virksomhetsnummer"].asText()
 
@@ -46,41 +48,50 @@ internal open class InntektsmeldingMessage(
     private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato, førsteFraværsdag)
 
     protected val inntektsmelding
-        get() = Inntektsmelding(
-            meldingsreferanseId = meldingsporing.id,
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            beregnetInntekt = beregnetInntekt.månedlig,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem,
-            mottatt = mottatt
-        )
+        get() =
+            Inntektsmelding(
+                meldingsreferanseId = meldingsporing.id,
+                refusjon = refusjon,
+                orgnummer = orgnummer,
+                beregnetInntekt = beregnetInntekt.månedlig,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+                avsendersystem = avsendersystem,
+                mottatt = mottatt
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: MessageContext
+    ) {
         mediator.behandle(personopplysninger, this, inntektsmelding, context)
     }
 
     internal companion object {
-        internal fun JsonNode.tilAvsendersystem(vedtaksperiodeId: UUID?, inntektsdato: LocalDate?, førsteFraværsdag: LocalDate?): Inntektsmelding.Avsendersystem {
+        internal fun JsonNode.tilAvsendersystem(
+            vedtaksperiodeId: UUID?,
+            inntektsdato: LocalDate?,
+            førsteFraværsdag: LocalDate?
+        ): Inntektsmelding.Avsendersystem {
             val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             return when (navn) {
-                "NAV_NO" -> Inntektsmelding.Avsendersystem.NavPortal(
-                    vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO skal ha vedtaksperiodeId " },
-                    inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO skal ha inntektsdato " },
-                    forespurt = true
-                )
-                "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NavPortal(
-                    vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha vedtaksperiodeId " },
-                    inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha inntektsdato " },
-                    forespurt = false
-                )
+                "NAV_NO" ->
+                    Inntektsmelding.Avsendersystem.NavPortal(
+                        vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO skal ha vedtaksperiodeId " },
+                        inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO skal ha inntektsdato " },
+                        forespurt = true
+                    )
+                "NAV_NO_SELVBESTEMT" ->
+                    Inntektsmelding.Avsendersystem.NavPortal(
+                        vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha vedtaksperiodeId " },
+                        inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha inntektsdato " },
+                        forespurt = false
+                    )
                 "AltinnPortal" -> Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag)
                 else -> Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             }
         }
     }
 }
-

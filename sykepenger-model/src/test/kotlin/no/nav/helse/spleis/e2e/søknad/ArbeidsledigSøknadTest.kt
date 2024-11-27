@@ -17,8 +17,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class ArbeidsledigSøknadTest: AbstractDslTest() {
-
+internal class ArbeidsledigSøknadTest : AbstractDslTest() {
     @Test
     fun `støtter arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt`() {
         a1 {
@@ -28,6 +27,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
             assertVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())
         }
     }
+
     @Test
     fun `trenger ikke varsel ved forlengelse hvis det ikke er refusjon`() {
         a1 {

@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -17,9 +15,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class BehandlingOpprettetEventTest : AbstractDslTest() {
-
     @Test
     fun `event om opprettet behandling`() {
         a1 {
@@ -30,21 +29,23 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             val behandlingOpprettetEvent = observatør.behandlingOpprettetEventer.last()
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 val behandlingId = behandlinger.single().id
-                val forventetBehandlingEvent = PersonObserver.BehandlingOpprettetEvent(
-                    organisasjonsnummer = a1,
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    søknadIder = setOf(søknadId),
-                    behandlingId = behandlingId,
-                    type = PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
-                    fom = 1.januar,
-                    tom = 20.januar,
-                    kilde = PersonObserver.BehandlingOpprettetEvent.Kilde(
-                        meldingsreferanseId = søknadId,
-                        innsendt = innsendt,
-                        registert = registrert,
-                        avsender = Avsender.SYKMELDT
+                val forventetBehandlingEvent =
+                    PersonObserver.BehandlingOpprettetEvent(
+                        organisasjonsnummer = a1,
+                        vedtaksperiodeId = 1.vedtaksperiode,
+                        søknadIder = setOf(søknadId),
+                        behandlingId = behandlingId,
+                        type = PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
+                        fom = 1.januar,
+                        tom = 20.januar,
+                        kilde =
+                            PersonObserver.BehandlingOpprettetEvent.Kilde(
+                                meldingsreferanseId = søknadId,
+                                innsendt = innsendt,
+                                registert = registrert,
+                                avsender = Avsender.SYKMELDT
+                            )
                     )
-                )
                 assertEquals(forventetBehandlingEvent, behandlingOpprettetEvent)
             }
         }

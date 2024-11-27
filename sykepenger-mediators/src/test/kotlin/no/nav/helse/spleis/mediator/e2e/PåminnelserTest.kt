@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `påminnelse når person ikke finnes`() {
         sendNyPåminnelse()
@@ -73,7 +72,17 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendNyUtbetalingpåminnelse(0, Utbetalingstatus.OVERFØRT)
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT")
-        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
+        assertEquals(
+            2,
+            (0 until testRapid.inspektør.antall())
+                .filter {
+                    "Utbetaling" in
+                        testRapid.inspektør
+                            .melding(it)
+                            .path("@behov")
+                            .map(JsonNode::asText)
+                }.size
+        )
     }
 
     private fun assertVedtaksperiodePåminnet(melding: JsonNode) {
@@ -100,5 +109,3 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 }
-
-

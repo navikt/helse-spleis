@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
-
     @Test
     fun `endring av refusjonsopplysninger skal ikke vilkårsprøve opptjening`() {
         a1 {
@@ -29,11 +28,20 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
 
             nyttVedtak(januar)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "ingen endring", null, listOf(
-                    Triple(25.januar, null, INGEN)
-                ))
-            ))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        "ingen endring",
+                        null,
+                        listOf(
+                            Triple(25.januar, null, INGEN)
+                        )
+                    )
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
         }

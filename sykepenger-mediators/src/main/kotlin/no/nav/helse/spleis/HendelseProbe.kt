@@ -6,7 +6,8 @@ import no.nav.helse.meterRegistry
 
 object HendelseProbe {
     fun onPåminnelse(påminnelse: Påminnelse) {
-        Counter.builder("paminnet_totals")
+        Counter
+            .builder("paminnet_totals")
             .description("Antall ganger vi har mottatt en påminnelse")
             .tag("tilstand", påminnelse.tilstand().toString())
             .register(meterRegistry)
@@ -99,7 +100,8 @@ object HendelseProbe {
     }
 
     private fun tell(navn: String) {
-        Counter.builder("hendelser_totals")
+        Counter
+            .builder("hendelser_totals")
             .description("Antall hendelser mottatt")
             .tag("hendelse", navn)
             .register(meterRegistry)

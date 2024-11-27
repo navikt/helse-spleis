@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
-import java.sql.SQLException
 import no.nav.helse.serde.DeserializationException
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
@@ -49,6 +48,7 @@ import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
+import java.sql.SQLException
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
 
@@ -113,7 +113,10 @@ internal class MessageMediator(
         riverErrors.clear()
     }
 
-    override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
+    override fun onRecognizedMessage(
+        message: HendelseMessage,
+        context: MessageContext
+    ) {
         try {
             measureTime {
                 messageRecognized = true
@@ -129,13 +132,14 @@ internal class MessageMediator(
                 hendelseRepository.markerSomBehandlet(message.meldingsporing.id)
             }.also { result ->
                 val antallSekunder = result.toDouble(DurationUnit.SECONDS)
-                val label = when {
-                    antallSekunder < 1.0 -> "under ett sekund"
-                    antallSekunder <= 2.0 -> "mer enn ett sekund"
-                    antallSekunder <= 5.0 -> "mer enn to sekunder"
-                    antallSekunder <= 10.0 -> "mer enn fem sekunder"
-                    else -> "mer enn 10 sekunder"
-                }
+                val label =
+                    when {
+                        antallSekunder < 1.0 -> "under ett sekund"
+                        antallSekunder <= 2.0 -> "mer enn ett sekund"
+                        antallSekunder <= 5.0 -> "mer enn to sekunder"
+                        antallSekunder <= 10.0 -> "mer enn fem sekunder"
+                        else -> "mer enn 10 sekunder"
+                    }
                 sikkerLogg.info("brukte $label ($antallSekunder s) på å prosessere meldingen")
             }
         } catch (err: DeserializationException) {
@@ -149,7 +153,12 @@ internal class MessageMediator(
         }
     }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+    override fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata
+    ) {
         riverErrors.add(riverName to problems)
     }
 
@@ -158,29 +167,44 @@ internal class MessageMediator(
         sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
-    private fun severeErrorHandler(err: Exception, message: HendelseMessage) {
+    private fun severeErrorHandler(
+        err: Exception,
+        message: HendelseMessage
+    ) {
         errorHandler(err, message)
         throw err
     }
 
-    private fun errorHandler(err: Exception, message: HendelseMessage) {
+    private fun errorHandler(
+        err: Exception,
+        message: HendelseMessage
+    ) {
         errorHandler(err, message.toJson(), message.secureDiagnosticinfo())
     }
 
-    private fun errorHandler(err: Exception, message: String, context: Map<String, String> = emptyMap()) {
+    private fun errorHandler(
+        err: Exception,
+        message: String,
+        context: Map<String, String> = emptyMap()
+    ) {
         log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
         withMDC(context) { sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err) }
     }
 
     private inner class DelegatedRapid(
         private val rapidsConnection: RapidsConnection
-    ) : RapidsConnection(), RapidsConnection.MessageListener {
-
+    ) : RapidsConnection(),
+        RapidsConnection.MessageListener {
         init {
             rapidsConnection.register(this)
         }
 
-        override fun onMessage(message: String, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+        override fun onMessage(
+            message: String,
+            context: MessageContext,
+            metadata: MessageMetadata,
+            meterRegistry: MeterRegistry
+        ) {
             beforeRiverHandling()
             notifyMessage(message, context, metadata, meterRegistry)
             afterRiverHandling(message)
@@ -190,18 +214,31 @@ internal class MessageMediator(
             rapidsConnection.publish(message)
         }
 
-        override fun publish(key: String, message: String) {
+        override fun publish(
+            key: String,
+            message: String
+        ) {
             rapidsConnection.publish(key, message)
         }
 
         override fun rapidName() = rapidsConnection.rapidName()
 
         override fun start() = throw IllegalStateException()
+
         override fun stop() = throw IllegalStateException()
     }
 }
 
 internal interface IMessageMediator {
-    fun onRecognizedMessage(message: HendelseMessage, context: MessageContext)
-    fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata)
+    fun onRecognizedMessage(
+        message: HendelseMessage,
+        context: MessageContext
+    )
+
+    fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata
+    )
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -55,9 +54,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class DelvisRefusjonTest : AbstractEndToEndTest() {
-
     @Test
     fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() {
         nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
@@ -100,7 +99,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(25000.månedlig, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(25000.månedlig, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -123,7 +122,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -145,7 +144,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -184,7 +183,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
 
-
         assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
         inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.sisteUtbetaling().personOppdrag.isEmpty())
@@ -198,7 +196,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -220,7 +218,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 20.januar))),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 20.januar)))
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -242,7 +240,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 1.februar))),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 1.februar)))
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -266,7 +264,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, 24.januar, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 24.januar, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -309,12 +307,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                        )
                 )
-            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -393,12 +393,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                        )
                 )
-            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -476,12 +478,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a2,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                        )
                 )
-            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -554,7 +558,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -576,12 +580,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT+100.månedlig,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
+            beregnetInntekt = INNTEKT + 100.månedlig,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -599,9 +603,17 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)
         assertNotNull(vilkårsgrunnlag)
-        val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
-        assertEquals(INNTEKT+100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
-        assertEquals(INNTEKT/2, inntektsopplysninger.refusjonsopplysninger.single().inspektør.beløp)
+        val inntektsopplysninger =
+            vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+                .getValue(ORGNUMMER)
+                .inspektør
+        assertEquals(INNTEKT + 100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
+        assertEquals(
+            INNTEKT / 2,
+            inntektsopplysninger.refusjonsopplysninger
+                .single()
+                .inspektør.beløp
+        )
     }
 
     @Test
@@ -613,18 +625,23 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 20.januar),
-            orgnummer = a2,
+            refusjon =
+                Inntektsmelding.Refusjon(
+                    INNTEKT,
+                    20.januar
+                ),
+            orgnummer = a2
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                )
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                        )
+                ),
             orgnummer = a1
         )
 
@@ -664,7 +681,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 assertEquals(22.januar til 31.januar, linje.fom til linje.tom)
             }
         }
-
     }
 
     @Test
@@ -685,7 +701,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             listOf(
                 Refusjonsopplysning(inntektsmeldingId, 1.januar, 16.januar, INNTEKT, ARBEIDSGIVER),
                 Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT, ARBEIDSGIVER)
-            ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
+            ),
+            inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
         )
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
@@ -735,9 +752,13 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 15.januar, emptyList()),
-            orgnummer = a2,
+            refusjon =
+                Inntektsmelding.Refusjon(
+                    INNTEKT,
+                    15.januar,
+                    emptyList()
+                ),
+            orgnummer = a2
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -765,6 +786,11 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger
+    private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(
+        skjæringstidspunkt: LocalDate,
+        orgnr: String = ORGNUMMER
+    ) = vilkårsgrunnlag(skjæringstidspunkt)!!
+        .inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+        .single { it.gjelder(orgnr) }
+        .inspektør.refusjonsopplysninger
 }

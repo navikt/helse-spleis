@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
-
     @Test
     fun `Trenger nye refusjonsopplysninger ved oppholdsdager på arbeidsgiver`() {
         listOf(a1, a2).nyeVedtak(januar)
@@ -35,7 +34,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden`(){
+    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden`() {
         a1 {
             nyttVedtak(førsteFraværsdag = 17.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar), periode = januar)
             assertIngenInfoSomInneholder("Mangler refusjonsopplysninger på orgnummer")
@@ -43,7 +42,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg`(){
+    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg`() {
         a1 {
             nyttVedtak(førsteFraværsdag = 22.januar, arbeidsgiverperiode = listOf(4.januar til 19.januar), periode = 4.januar til 31.januar)
             assertIngenInfoSomInneholder("Mangler refusjonsopplysninger på orgnummer")
@@ -78,6 +77,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
         }
     }
+
     @Test
     fun `Duplikat inntektsmelding`() {
         a1 {
@@ -97,7 +97,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterInntektsmelding(
                 id = inntektsmeldingId,
-                arbeidsgiverperioder = arbeidsgiverperiode,
+                arbeidsgiverperioder = arbeidsgiverperiode
             )
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
@@ -125,7 +125,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }
-
 
     @Test
     fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten take two`() {
@@ -155,7 +154,10 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun List<Refusjonsopplysning>.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
+    private fun List<Refusjonsopplysning>.assertRefusjonsbeløp(
+        periode: Periode,
+        beløp: Inntekt
+    ) {
         periode.forEach { dag ->
             assertEquals(beløp, singleOrNull { dag in it.periode }?.beløp)
         }

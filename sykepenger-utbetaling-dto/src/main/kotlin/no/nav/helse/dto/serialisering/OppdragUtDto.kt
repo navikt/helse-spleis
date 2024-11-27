@@ -1,10 +1,10 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDateTime
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.SimuleringResultatDto
+import java.time.LocalDateTime
 
 data class OppdragUtDto(
     val mottaker: String,

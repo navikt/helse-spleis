@@ -13,21 +13,18 @@ internal data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal companion object {
+        internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sammenligningsgrunnlag(): Inntekt = map { it.rapportertInntekt }.summer()
 
-        internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sammenligningsgrunnlag(): Inntekt {
-            return map { it.rapportertInntekt }.summer()
-        }
-
-        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto): ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag {
-            return ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto): ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag =
+            ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                 orgnummer = dto.orgnummer,
                 inntektsopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
             )
-        }
     }
 
-    internal fun dto() = ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
-        orgnummer = this.orgnummer,
-        inntektsopplysninger = this.inntektsopplysninger.map { it.dto() }
-    )
+    internal fun dto() =
+        ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
+            orgnummer = this.orgnummer,
+            inntektsopplysninger = this.inntektsopplysninger.map { it.dto() }
+        )
 }

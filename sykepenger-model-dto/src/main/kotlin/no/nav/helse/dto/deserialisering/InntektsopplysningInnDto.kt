@@ -1,12 +1,12 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SubsumsjonDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 sealed class InntektsopplysningInnDto {
     abstract val id: UUID
@@ -40,7 +40,7 @@ sealed class InntektsopplysningInnDto {
         override val tidsstempel: LocalDateTime,
         val forklaring: String?,
         val subsumsjon: SubsumsjonDto?,
-        val overstyrtInntekt: UUID,
+        val overstyrtInntekt: UUID
     ) : InntektsopplysningInnDto()
 
     data class SkjønnsmessigFastsattDto(
@@ -49,7 +49,7 @@ sealed class InntektsopplysningInnDto {
         override val dato: LocalDate,
         override val beløp: InntektbeløpDto.MånedligDouble,
         override val tidsstempel: LocalDateTime,
-        val overstyrtInntekt: UUID,
+        val overstyrtInntekt: UUID
     ) : InntektsopplysningInnDto()
 
     data class InntektsmeldingDto(
@@ -65,6 +65,7 @@ sealed class InntektsopplysningInnDto {
             AOrdningen
         }
     }
+
     data class SkattSykepengegrunnlagDto(
         override val id: UUID,
         override val hendelseId: UUID,

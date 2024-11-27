@@ -1,42 +1,46 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.somEksterneSkatteinntekter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
     private val inntekter: List<MånedligInntekt>
 ) {
-    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
-        SkattSykepengegrunnlag(
-            hendelseId = meldingsreferanseId,
-            dato = skjæringstidspunkt,
-            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
-            ansattPerioder = emptyList(),
-            tidsstempel = LocalDateTime.now()
-        )
+    internal fun tilSykepengegrunnlag(
+        skjæringstidspunkt: LocalDate,
+        meldingsreferanseId: UUID
+    ) = SkattSykepengegrunnlag(
+        hendelseId = meldingsreferanseId,
+        dato = skjæringstidspunkt,
+        inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
+        ansattPerioder = emptyList(),
+        tidsstempel = LocalDateTime.now()
+    )
 
-    internal fun somInntektsmelding(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
-        Inntektsmelding(
-            dato = skjæringstidspunkt,
-            hendelseId = meldingsreferanseId,
-            beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }),
-            kilde = Inntektsmelding.Kilde.AOrdningen
-        )
+    internal fun somInntektsmelding(
+        skjæringstidspunkt: LocalDate,
+        meldingsreferanseId: UUID
+    ) = Inntektsmelding(
+        dato = skjæringstidspunkt,
+        hendelseId = meldingsreferanseId,
+        beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }),
+        kilde = Inntektsmelding.Kilde.AOrdningen
+    )
 
     internal fun somEksterneSkatteinntekter() = inntekter.somEksterneSkatteinntekter()
 
@@ -62,14 +66,14 @@ class ArbeidsgiverInntekt(
             )
         }
 
-        internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String, måned: YearMonth) =
-            this.any { it.arbeidsgiver == orgnummer && it.inntekter.harInntektFor(måned) }
+        internal fun List<ArbeidsgiverInntekt>.harInntektFor(
+            orgnummer: String,
+            måned: YearMonth
+        ) = this.any { it.arbeidsgiver == orgnummer && it.inntekter.harInntektFor(måned) }
 
-        internal fun List<ArbeidsgiverInntekt>.harInntektI(måned: YearMonth) =
-            this.any { it.inntekter.harInntektFor(måned) }
+        internal fun List<ArbeidsgiverInntekt>.harInntektI(måned: YearMonth) = this.any { it.inntekter.harInntektFor(måned) }
 
-        internal fun List<ArbeidsgiverInntekt>.antallMåneder() =
-            MånedligInntekt.antallMåneder(flatMap { it.inntekter })
+        internal fun List<ArbeidsgiverInntekt>.antallMåneder() = MånedligInntekt.antallMåneder(flatMap { it.inntekter })
     }
 
     class MånedligInntekt(
@@ -79,23 +83,23 @@ class ArbeidsgiverInntekt(
         private val fordel: String,
         private val beskrivelse: String
     ) {
-        internal fun somInntekt(meldingsreferanseId: UUID) = Skatteopplysning(
-            meldingsreferanseId,
-            inntekt,
-            yearMonth,
-            enumValueOf(type.name),
-            fordel,
-            beskrivelse
-        )
+        internal fun somInntekt(meldingsreferanseId: UUID) =
+            Skatteopplysning(
+                meldingsreferanseId,
+                inntekt,
+                yearMonth,
+                enumValueOf(type.name),
+                fordel,
+                beskrivelse
+            )
 
         companion object {
-            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN }
 
-            internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
-                return map {
+            internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> =
+                map {
                     PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.månedlig)
                 }
-            }
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0
@@ -103,6 +107,7 @@ class ArbeidsgiverInntekt(
             }
 
             private fun List<MånedligInntekt>.minMonth() = minOfOrNull { it.yearMonth }
+
             private fun List<MånedligInntekt>.maxMonth() = maxOfOrNull { it.yearMonth }
         }
 
@@ -114,4 +119,3 @@ class ArbeidsgiverInntekt(
         }
     }
 }
-

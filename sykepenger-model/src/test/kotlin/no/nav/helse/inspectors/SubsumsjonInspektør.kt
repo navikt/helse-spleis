@@ -1,7 +1,5 @@
 package no.nav.helse.inspectors
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.KontekstType
@@ -16,10 +14,12 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.time.LocalDate
+import java.util.UUID
 
-
-internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
-
+internal class SubsumsjonInspektør(
+    jurist: SubsumsjonsListLog
+) {
     private val subsumsjoner = mutableListOf<Subsumsjon>()
 
     private data class Subsumsjon(
@@ -39,18 +39,20 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
 
     init {
         jurist.subsumsjoner.forEach { subsumsjon ->
-            subsumsjoner.add(Subsumsjon(
-                lovverk = subsumsjon.lovverk,
-                paragraf = subsumsjon.paragraf,
-                ledd = subsumsjon.ledd,
-                punktum = subsumsjon.punktum,
-                bokstav = subsumsjon.bokstav,
-                versjon = subsumsjon.versjon,
-                sporing = subsumsjon.kontekster,
-                utfall = subsumsjon.utfall,
-                input = subsumsjon.input,
-                output = subsumsjon.output
-            ))
+            subsumsjoner.add(
+                Subsumsjon(
+                    lovverk = subsumsjon.lovverk,
+                    paragraf = subsumsjon.paragraf,
+                    ledd = subsumsjon.ledd,
+                    punktum = subsumsjon.punktum,
+                    bokstav = subsumsjon.bokstav,
+                    versjon = subsumsjon.versjon,
+                    sporing = subsumsjon.kontekster,
+                    utfall = subsumsjon.utfall,
+                    input = subsumsjon.input,
+                    output = subsumsjon.output
+                )
+            )
         }
     }
 
@@ -63,17 +65,16 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         bokstav: Bokstav?,
         utfall: Utfall? = null,
         vedtaksperiodeId: UUID? = null
-    ) =
-        subsumsjoner.filter {
-            lovverk == it.lovverk
-                && it.paragraf == paragraf
-                && versjon?.equals(it.versjon) ?: true
-                && utfall?.equals(it.utfall) ?: true
-                && ledd?.equals(it.ledd) ?: true
-                && punktum?.equals(it.punktum) ?: true
-                && bokstav?.equals(it.bokstav) ?: true
-                && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
-        }
+    ) = subsumsjoner.filter {
+        lovverk == it.lovverk &&
+            it.paragraf == paragraf &&
+            versjon?.equals(it.versjon) ?: true &&
+            utfall?.equals(it.utfall) ?: true &&
+            ledd?.equals(it.ledd) ?: true &&
+            punktum?.equals(it.punktum) ?: true &&
+            bokstav?.equals(it.bokstav) ?: true &&
+            vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
+    }
 
     internal fun antallSubsumsjoner(
         lovverk: String = "folketrygdloven",
@@ -207,9 +208,10 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer)).also {
-            assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
-        }
+        val resultat =
+            finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer)).also {
+                assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
+            }
         resultat.forEach {
             assertResultat(input, output, it)
         }
@@ -243,7 +245,11 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         assertEquals(0, resultat.size, "Forventer ingen subsumsjoner. Subsumsjoner funnet: $resultat")
     }
 
-    private fun assertResultat(inputdata: Map<String, Any>?, outputdata: Map<String, Any>?, resultat: Subsumsjon) {
+    private fun assertResultat(
+        inputdata: Map<String, Any>?,
+        outputdata: Map<String, Any>?,
+        resultat: Subsumsjon
+    ) {
         assertEquals(inputdata, resultat.input)
         assertEquals(outputdata, resultat.output)
     }

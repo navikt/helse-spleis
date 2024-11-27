@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
@@ -13,6 +10,9 @@ import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class ManuellOverskrivingDag(
     val dato: LocalDate,
@@ -27,8 +27,20 @@ data class ManuellOverskrivingDag(
 }
 
 enum class Dagtype {
-    Sykedag, Feriedag, ArbeidIkkeGjenopptattDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
-    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag;
+    Sykedag,
+    Feriedag,
+    ArbeidIkkeGjenopptattDag,
+    Egenmeldingsdag,
+    Permisjonsdag,
+    Arbeidsdag,
+    SykedagNav,
+    Foreldrepengerdag,
+    AAPdag,
+    Omsorgspengerdag,
+    Pleiepengerdag,
+    Svangerskapspengerdag,
+    Opplaringspengerdag,
+    Dagpengerdag;
 
     companion object {
         val gyldigeTyper = entries.map { it.name }
@@ -40,116 +52,136 @@ class OverstyrTidslinje(
     meldingsreferanseId: UUID,
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
-    opprettet: LocalDateTime,
+    opprettet: LocalDateTime
 ) : SykdomstidslinjeHendelse() {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer
-    )
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = Avsender.SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = false
-    )
+    override val behandlingsporing =
+        Behandlingsporing.Arbeidsgiver(
+            organisasjonsnummer = organisasjonsnummer
+        )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = Avsender.SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = false
+        )
     private val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class, metadata.meldingsreferanseId, metadata.innsendt)
 
     private val periode: Periode
     private var sykdomstidslinje: Sykdomstidslinje
 
     init {
-        sykdomstidslinje = dager.map {
-            when (it.type) {
-                Dagtype.Sykedag -> Sykdomstidslinje.sykedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    grad = it.grad!!.prosent, // Sykedager må ha grad
-                    kilde = kilde
-                )
-                Dagtype.Feriedag -> Sykdomstidslinje.feriedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde
-                )
-                Dagtype.ArbeidIkkeGjenopptattDag -> Sykdomstidslinje.arbeidIkkeGjenopptatt(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde
-                )
-                Dagtype.Permisjonsdag -> Sykdomstidslinje.permisjonsdager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde
-                )
-                Dagtype.Arbeidsdag -> Sykdomstidslinje.arbeidsdager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde
-                )
-                Dagtype.Egenmeldingsdag -> Sykdomstidslinje.arbeidsgiverdager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    grad = 100.prosent,
-                    kilde = kilde
-                )
-                Dagtype.SykedagNav -> Sykdomstidslinje.sykedagerNav(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    grad = it.grad!!.prosent, // Sykedager må ha grad
-                    kilde = kilde
-                )
-                Dagtype.Foreldrepengerdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = Foreldrepenger
-                )
-                Dagtype.AAPdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = AAP
-                )
-                Dagtype.Omsorgspengerdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = Omsorgspenger
-                )
-                Dagtype.Pleiepengerdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = Pleiepenger
-                )
-                Dagtype.Svangerskapspengerdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = Svangerskapspenger
-                )
-                Dagtype.Opplaringspengerdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = Opplæringspenger
-                )
-                Dagtype.Dagpengerdag -> Sykdomstidslinje.andreYtelsedager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    kilde = kilde,
-                    ytelse = Dagpenger
-                )
+        sykdomstidslinje =
+            dager
+                .map {
+                    when (it.type) {
+                        Dagtype.Sykedag ->
+                            Sykdomstidslinje.sykedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                grad = it.grad!!.prosent, // Sykedager må ha grad
+                                kilde = kilde
+                            )
+                        Dagtype.Feriedag ->
+                            Sykdomstidslinje.feriedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde
+                            )
+                        Dagtype.ArbeidIkkeGjenopptattDag ->
+                            Sykdomstidslinje.arbeidIkkeGjenopptatt(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde
+                            )
+                        Dagtype.Permisjonsdag ->
+                            Sykdomstidslinje.permisjonsdager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde
+                            )
+                        Dagtype.Arbeidsdag ->
+                            Sykdomstidslinje.arbeidsdager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde
+                            )
+                        Dagtype.Egenmeldingsdag ->
+                            Sykdomstidslinje.arbeidsgiverdager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                grad = 100.prosent,
+                                kilde = kilde
+                            )
+                        Dagtype.SykedagNav ->
+                            Sykdomstidslinje.sykedagerNav(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                grad = it.grad!!.prosent, // Sykedager må ha grad
+                                kilde = kilde
+                            )
+                        Dagtype.Foreldrepengerdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = Foreldrepenger
+                            )
+                        Dagtype.AAPdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = AAP
+                            )
+                        Dagtype.Omsorgspengerdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = Omsorgspenger
+                            )
+                        Dagtype.Pleiepengerdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = Pleiepenger
+                            )
+                        Dagtype.Svangerskapspengerdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = Svangerskapspenger
+                            )
+                        Dagtype.Opplaringspengerdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = Opplæringspenger
+                            )
+                        Dagtype.Dagpengerdag ->
+                            Sykdomstidslinje.andreYtelsedager(
+                                førsteDato = it.dato,
+                                sisteDato = it.dato,
+                                kilde = kilde,
+                                ytelse = Dagpenger
+                            )
+                    }
+                }.reduce(Sykdomstidslinje::plus)
+        periode =
+            checkNotNull(sykdomstidslinje.periode()) {
+                "Overstyr tidslinje må ha minst én overstyrt dag"
             }
-        }.reduce(Sykdomstidslinje::plus)
-        periode = checkNotNull(sykdomstidslinje.periode()) {
-            "Overstyr tidslinje må ha minst én overstyrt dag"
-        }
     }
 
     override fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
 
     override fun sykdomstidslinje() = sykdomstidslinje
+
     override fun trimSykdomstidslinje(fom: LocalDate) {
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }

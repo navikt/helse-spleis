@@ -5,16 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.azure.AzureTokenProvider
 import com.github.navikt.tbd_libs.result_object.getOrThrow
+import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.spleis.speil.SpekematDTO
+import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.spleis.speil.SpekematDTO
-import org.intellij.lang.annotations.Language
-import org.slf4j.LoggerFactory
 
 class SpekematClient(
     private val httpClient: HttpClient = HttpClient.newHttpClient(),
@@ -24,13 +24,17 @@ class SpekematClient(
     baseUrl: String? = null
 ) {
     private val baseUrl = baseUrl ?: "http://spekemat"
+
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private const val CALL_ID_HEADER = "callId"
     }
 
-    fun hentSpekemat(fnr: String, callId: String): SpekematDTO {
+    fun hentSpekemat(
+        fnr: String,
+        callId: String
+    ): SpekematDTO {
         "Henter data fra spekemat med {}".also {
             logg.info(it, kv("callId", callId))
             sikkerlogg.info(it, kv("callId", callId), kv("fødselsnummer", fnr))
@@ -44,42 +48,49 @@ class SpekematClient(
         return parsePølsefabrikker(responseBody)
     }
 
-    private fun parsePølsefabrikker(body: String): SpekematDTO {
-        return try {
+    private fun parsePølsefabrikker(body: String): SpekematDTO =
+        try {
             val response = objectMapper.readValue<PølserResponse>(body)
             SpekematDTO(
-                pakker = response.yrkesaktiviteter.map { pakke ->
-                    SpekematDTO.PølsepakkeDTO(
-                        yrkesaktivitetidentifikator = pakke.yrkesaktivitetidentifikator,
-                        rader = pakke.rader.map { rad ->
-                            SpekematDTO.PølsepakkeDTO.PølseradDTO(
-                                kildeTilRad = rad.kildeTilRad,
-                                pølser = rad.pølser.map { pølse ->
-                                    SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
-                                        vedtaksperiodeId = pølse.vedtaksperiodeId,
-                                        behandlingId = pølse.behandlingId,
-                                        kilde = pølse.kilde,
-                                        status = when (pølse.status) {
-                                            Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
-                                            Pølsestatus.LUKKET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.LUKKET
-                                            Pølsestatus.FORKASTET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.FORKASTET
-                                        }
+                pakker =
+                    response.yrkesaktiviteter.map { pakke ->
+                        SpekematDTO.PølsepakkeDTO(
+                            yrkesaktivitetidentifikator = pakke.yrkesaktivitetidentifikator,
+                            rader =
+                                pakke.rader.map { rad ->
+                                    SpekematDTO.PølsepakkeDTO.PølseradDTO(
+                                        kildeTilRad = rad.kildeTilRad,
+                                        pølser =
+                                            rad.pølser.map { pølse ->
+                                                SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
+                                                    vedtaksperiodeId = pølse.vedtaksperiodeId,
+                                                    behandlingId = pølse.behandlingId,
+                                                    kilde = pølse.kilde,
+                                                    status =
+                                                        when (pølse.status) {
+                                                            Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
+                                                            Pølsestatus.LUKKET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.LUKKET
+                                                            Pølsestatus.FORKASTET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.FORKASTET
+                                                        }
+                                                )
+                                            }
                                     )
                                 }
-                            )
-                        }
-                    )
-                }
+                        )
+                    }
             )
         } catch (err: Exception) {
             throw SpekematClientException("Feil ved deserialisering av spekemat-responsen", err)
         }
-    }
 
-    private fun lagRequest(fnr: String, callId: String): HttpRequest {
+    private fun lagRequest(
+        fnr: String,
+        callId: String
+    ): HttpRequest {
         @Language("JSON")
         val requestBody = """{ "fnr": "$fnr" }"""
-        return HttpRequest.newBuilder(URI("$baseUrl/api/pølser"))
+        return HttpRequest
+            .newBuilder(URI("$baseUrl/api/pølser"))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .header(CALL_ID_HEADER, callId)
@@ -88,18 +99,27 @@ class SpekematClient(
             .build()
     }
 }
-class SpekematClientException(override val message: String, override val cause: Throwable? = null) : RuntimeException()
+
+class SpekematClientException(
+    override val message: String,
+    override val cause: Throwable? = null
+) : RuntimeException()
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-private data class PølserResponse(val yrkesaktiviteter: List<YrkesaktivitetDto>)
+private data class PølserResponse(
+    val yrkesaktiviteter: List<YrkesaktivitetDto>
+)
+
 private data class YrkesaktivitetDto(
     val yrkesaktivitetidentifikator: String,
     val rader: List<PølseradDto>
 )
+
 private data class PølseradDto(
     val pølser: List<PølseDto>,
     val kildeTilRad: UUID
 )
+
 private data class PølseDto(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
@@ -107,4 +127,5 @@ private data class PølseDto(
     // tingen som gjorde at behandlingen ble opprettet
     val kilde: UUID
 )
+
 private enum class Pølsestatus { ÅPEN, LUKKET, FORKASTET }

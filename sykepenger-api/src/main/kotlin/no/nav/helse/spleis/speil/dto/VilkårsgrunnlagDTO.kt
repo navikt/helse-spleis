@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.speil.dto
 
+import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
 
 interface Vilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
@@ -59,7 +59,11 @@ data class Refusjonselement(
 )
 
 enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert
+    Saksbehandler,
+    Inntektsmelding,
+    Infotrygd,
+    AOrdningen,
+    IkkeRapportert
 }
 
 data class SkjønnsmessigFastsattDTO(
@@ -71,7 +75,7 @@ data class Inntekt(
     val kilde: Inntektkilde,
     val beløp: Double,
     val månedsbeløp: Double,
-    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
+    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>? = null // kun gyldig for A-ordningen
 )
 
 data class InntekterFraAOrdningen(

@@ -19,7 +19,7 @@ data class GraphQLInntekterFraAOrdningen(
 
 data class GraphQLSkjonnsmessigFastsatt(
     val belop: Double,
-    val manedsbelop: Double,
+    val manedsbelop: Double
 )
 
 data class GraphQLOmregnetArsinntekt(
@@ -36,7 +36,7 @@ data class GraphQLArbeidsgiverinntekt(
     val skjonnsmessigFastsattAarlig: Double?,
     val fom: LocalDate,
     val tom: LocalDate?,
-    val deaktivert: Boolean? = null,
+    val deaktivert: Boolean? = null
 )
 
 data class GraphQLArbeidsgiverrefusjon(

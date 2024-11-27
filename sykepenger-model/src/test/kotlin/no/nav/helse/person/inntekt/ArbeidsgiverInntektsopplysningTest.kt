@@ -1,14 +1,11 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.SubsumsjonsListLog
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
@@ -28,15 +25,21 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class ArbeidsgiverInntektsopplysningTest {
-
     private val subsumsjonslogg = SubsumsjonsListLog()
-    private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    private val jurist =
+        BehandlingSubsumsjonslogg(
+            subsumsjonslogg,
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}")
+            )
+        )
 
     @Test
     fun `overstyr inntekter`() {
@@ -51,32 +54,44 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val expected = listOf(a1Opplysning, a2Opplysning)
         val new = listOf(a1Overstyrt)
 
-        assertEquals(expected, original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            listOf(a1Overstyrt, a1Overstyrt),
-            EmptyLog
-        )) { "kan ikke velge mellom inntekter for samme orgnr" }
+        assertEquals(
+            expected,
+            original.overstyrInntekter(
+                skjæringstidspunkt,
+                opptjening,
+                listOf(a1Overstyrt, a1Overstyrt),
+                EmptyLog
+            )
+        ) { "kan ikke velge mellom inntekter for samme orgnr" }
 
-        assertEquals(expected, original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            emptyList(),
-            EmptyLog
-        ))
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog
-        ))
+        assertEquals(
+            expected,
+            original.overstyrInntekter(
+                skjæringstidspunkt,
+                opptjening,
+                emptyList(),
+                EmptyLog
+            )
+        )
+        assertEquals(
+            listOf(a1Overstyrt, a2Opplysning),
+            original.overstyrInntekter(
+                skjæringstidspunkt,
+                opptjening,
+                new,
+                EmptyLog
+            )
+        )
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            forMange,
-            EmptyLog
-        ))
+        assertEquals(
+            listOf(a1Overstyrt, a2Opplysning),
+            original.overstyrInntekter(
+                skjæringstidspunkt,
+                opptjening,
+                forMange,
+                EmptyLog
+            )
+        )
     }
 
     @Test
@@ -99,12 +114,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
         val new = listOf(overstyrtA1Opplysning)
 
-        val actual = original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog
-        )
+        val actual =
+            original.overstyrInntekter(
+                skjæringstidspunkt,
+                opptjening,
+                new,
+                EmptyLog
+            )
         assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
@@ -112,11 +128,18 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
         val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt)
-        val skattA1 = SkattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, listOf(
-            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
-            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
-            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
-        ), emptyList(), LocalDateTime.now())
+        val skattA1 =
+            SkattSykepengegrunnlag(
+                UUID.randomUUID(),
+                skjæringstidspunkt,
+                listOf(
+                    Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
+                    Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
+                    Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
+                ),
+                emptyList(),
+                LocalDateTime.now()
+            )
         val inntektsmeldingA2 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig)
         val inntektsmeldingA3 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
 
@@ -132,12 +155,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
         val new = listOf(overstyrtA1Opplysning)
 
-        val actual = original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog
-        )
+        val actual =
+            original.overstyrInntekter(
+                skjæringstidspunkt,
+                opptjening,
+                new,
+                EmptyLog
+            )
         assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
@@ -147,16 +171,22 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val ansattFom = 1.januar
         val orgnummer = "a1"
 
-        val opptjening = Opptjening.nyOpptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
-                    ansattFom,
-                    null,
-                    false
-                )
-            ))
-        ), skjæringstidspunkt)
-
+        val opptjening =
+            Opptjening.nyOpptjening(
+                listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        orgnummer,
+                        listOf(
+                            Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
+                                ansattFom,
+                                null,
+                                false
+                            )
+                        )
+                    )
+                ),
+                skjæringstidspunkt
+            )
 
         val paragraf = Paragraf.PARAGRAF_8_28
         val ledd = Ledd.LEDD_3
@@ -174,17 +204,19 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ledd = ledd,
             punktum = null,
             bokstav = bokstav,
-            input = mapOf(
-                "organisasjonsnummer" to orgnummer,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "startdatoArbeidsforhold" to ansattFom,
-                "overstyrtInntektFraSaksbehandler" to mapOf("dato" to skjæringstidspunkt, "beløp" to overstyrtBeløp.månedlig),
-                "forklaring" to "Jeg bare måtte gjøre det"
-            ),
-            output = mapOf(
-                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.årlig,
-                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.månedlig
-            )
+            input =
+                mapOf(
+                    "organisasjonsnummer" to orgnummer,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "startdatoArbeidsforhold" to ansattFom,
+                    "overstyrtInntektFraSaksbehandler" to mapOf("dato" to skjæringstidspunkt, "beløp" to overstyrtBeløp.månedlig),
+                    "forklaring" to "Jeg bare måtte gjøre det"
+                ),
+            output =
+                mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.årlig,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.månedlig
+                )
         )
     }
 
@@ -223,12 +255,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ledd = null,
             punktum = null,
             bokstav = null,
-            input = mapOf(
-                "organisasjonsnummer" to "a2",
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "inntekterSisteTreMåneder" to emptyList<Any>(),
-                "forklaring" to "Denne må bort"
-            ),
+            input =
+                mapOf(
+                    "organisasjonsnummer" to "a2",
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "inntekterSisteTreMåneder" to emptyList<Any>(),
+                    "forklaring" to "Denne må bort"
+                ),
             output = mapOf("arbeidsforholdAvbrutt" to "a2")
         )
     }
@@ -251,12 +284,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ledd = null,
             punktum = null,
             bokstav = null,
-            input = mapOf(
-                "organisasjonsnummer" to "a2",
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "inntekterSisteTreMåneder" to emptyList<Any>(),
-                "forklaring" to "Denne må tilbake"
-            ),
+            input =
+                mapOf(
+                    "organisasjonsnummer" to "a2",
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "inntekterSisteTreMåneder" to emptyList<Any>(),
+                    "forklaring" to "Denne må tilbake"
+                ),
             output = mapOf("aktivtArbeidsforhold" to "a2")
         )
     }
@@ -266,30 +300,33 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val inntektsopplysning1 = ArbeidsgiverInntektsopplysning(
-            orgnummer = "orgnummer",
-            gjelder = 1.januar til LocalDate.MAX,
-            inntektsopplysning = Infotrygd(
-                id = inntektID,
-                dato = 1.januar,
-                hendelseId = hendelseId,
-                beløp = 25000.månedlig,
-                tidsstempel = tidsstempel
-            ),
-            refusjonsopplysninger = Refusjonsopplysninger()
-        )
+        val inntektsopplysning1 =
+            ArbeidsgiverInntektsopplysning(
+                orgnummer = "orgnummer",
+                gjelder = 1.januar til LocalDate.MAX,
+                inntektsopplysning =
+                    Infotrygd(
+                        id = inntektID,
+                        dato = 1.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    ),
+                refusjonsopplysninger = Refusjonsopplysninger()
+            )
         assertEquals(
             inntektsopplysning1,
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "orgnummer",
                 gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = Infotrygd(
-                    id = inntektID,
-                    dato = 1.januar,
-                    hendelseId = hendelseId,
-                    beløp = 25000.månedlig,
-                    tidsstempel = tidsstempel
-                ),
+                inntektsopplysning =
+                    Infotrygd(
+                        id = inntektID,
+                        dato = 1.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    ),
                 refusjonsopplysninger = Refusjonsopplysninger()
             )
         )
@@ -298,13 +335,14 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "orgnummer2",
                 gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = Infotrygd(
-                    id = inntektID,
-                    dato = 1.januar,
-                    hendelseId = hendelseId,
-                    beløp = 25000.månedlig,
-                    tidsstempel = tidsstempel
-                ),
+                inntektsopplysning =
+                    Infotrygd(
+                        id = inntektID,
+                        dato = 1.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    ),
                 refusjonsopplysninger = Refusjonsopplysninger()
             )
         )
@@ -313,13 +351,14 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "orgnummer",
                 gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = Infotrygd(
-                    id = inntektID,
-                    dato = 5.januar,
-                    hendelseId = hendelseId,
-                    beløp = 25000.månedlig,
-                    tidsstempel = tidsstempel
-                ),
+                inntektsopplysning =
+                    Infotrygd(
+                        id = inntektID,
+                        dato = 5.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    ),
                 refusjonsopplysninger = Refusjonsopplysninger()
             )
         )

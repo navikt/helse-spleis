@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
@@ -40,26 +37,34 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class SøknadTest {
-
     private companion object {
-        private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321"
-        )
+        private val ungPersonFnr2018Hendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = "987654321"
+            )
         private val november2 = 2.november(2000)
-        private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321"
-        )
+        private val fyller18År2NovemberHendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = "987654321"
+            )
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var søknad: Søknad
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    private val jurist =
+        BehandlingSubsumsjonslogg(
+            EmptyLog,
+            listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}")
+            )
+        )
 
     @Test
     fun `søknad med bare sykdom`() {
@@ -100,7 +105,11 @@ internal class SøknadTest {
         `utlandsopphold og ferie`(Ferie(5.januar, 9.januar), Utlandsopphold(2.januar, 4.januar), true)
     }
 
-    private fun `utlandsopphold og ferie`(ferie: Ferie, utlandsopphold: Utlandsopphold, skalHaWarning: Boolean) {
+    private fun `utlandsopphold og ferie`(
+        ferie: Ferie,
+        utlandsopphold: Utlandsopphold,
+        skalHaWarning: Boolean
+    ) {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), ferie, utlandsopphold)
         assertEquals(skalHaWarning, søknad.valider(aktivitetslogg, null, jurist).harVarslerEllerVerre())
         assertEquals(10, søknad.sykdomstidslinje().count())
@@ -291,16 +300,17 @@ internal class SøknadTest {
         tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
     ) {
         aktivitetslogg = Aktivitetslogg()
-        søknad = hendelsefabrikk.lagSøknad(
-            perioder = perioder,
-            andreInntektskilder = andreInntektskilder,
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
-            sykmeldingSkrevet = LocalDateTime.now(),
-            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
-            merknaderFraSykmelding = merknaderFraSykmelding,
-            permittert = permittert,
-            egenmeldinger = egenmeldinger,
-            tilkomneInntekter = tilkomneInntekter
-        )
+        søknad =
+            hendelsefabrikk.lagSøknad(
+                perioder = perioder,
+                andreInntektskilder = andreInntektskilder,
+                sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
+                sykmeldingSkrevet = LocalDateTime.now(),
+                ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
+                merknaderFraSykmelding = merknaderFraSykmelding,
+                permittert = permittert,
+                egenmeldinger = egenmeldinger,
+                tilkomneInntekter = tilkomneInntekter
+            )
     }
 }

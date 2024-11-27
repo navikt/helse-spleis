@@ -1,10 +1,10 @@
 package no.nav.helse.spleis
 
-import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.person.Person
+import java.time.LocalDate
 
 internal class Personopplysninger internal constructor(
     private val personidentifikator: Personidentifikator,

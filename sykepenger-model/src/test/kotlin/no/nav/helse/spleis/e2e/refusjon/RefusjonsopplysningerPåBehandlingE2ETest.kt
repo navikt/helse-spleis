@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -49,9 +46,11 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
-
     @Test
     fun `Perioder i avsluttet uten utbetling må alltid håndtere refusjonsopplysninger`() {
         a1 {
@@ -100,10 +99,21 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, listOf(
-                Triple(1.januar, 28.februar, INGEN),
-                Triple(1.mars, null, INNTEKT)
-            ))))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        "forklaring",
+                        null,
+                        listOf(
+                            Triple(1.januar, 28.februar, INGEN),
+                            Triple(1.mars, null, INNTEKT)
+                        )
+                    )
+                )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -133,7 +143,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             val forventetUbruktEtterJanuarSøknad =
                 Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT, Kilde(im, ARBEIDSGIVER, mottatt)) +
-                Beløpstidslinje.fra(1.mars.somPeriode(), INGEN, Kilde(im, ARBEIDSGIVER, mottatt))
+                    Beløpstidslinje.fra(1.mars.somPeriode(), INGEN, Kilde(im, ARBEIDSGIVER, mottatt))
 
             assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
             assertEquals(forventetUbruktEtterJanuarSøknad, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar))
@@ -155,7 +165,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertEquals(forventetBruktForMars, inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje)
         }
     }
-
 
     @Test
     fun `saksbehandler opplyser om endring i refusjon frem i tid`() {
@@ -213,10 +222,11 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.januar,
-                refusjon = Inntektsmelding.Refusjon(
-                    beløp = INNTEKT / 2,
-                    opphørsdato = null
-                )
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        beløp = INNTEKT / 2,
+                        opphørsdato = null
+                    )
             )
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
@@ -238,10 +248,11 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.januar,
-                refusjon = Inntektsmelding.Refusjon(
-                    beløp = INNTEKT / 2,
-                    opphørsdato = 30.april
-                )
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        beløp = INNTEKT / 2,
+                        opphørsdato = 30.april
+                    )
             )
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
@@ -259,7 +270,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT*1.1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.1)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -267,12 +278,12 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
-            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT*1.1)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
 
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
-            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT*1.1)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
         }
     }
 
@@ -522,7 +533,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         val imGammel = nyttVedtak(januar, tidsstempelGammel)
         val kildeGammel = Kilde(imGammel, ARBEIDSGIVER, tidsstempelGammel)
         // Trigg en revurdering
-        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT*1.1, mottatt = LocalDateTime.now())
+        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 1.1, mottatt = LocalDateTime.now())
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         nullstillTilstandsendringer()
@@ -613,14 +624,27 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val kilde = Kilde(im, ARBEIDSGIVER, tidsstempel)
             forlengVedtak(februar)
 
-            val refusjonstidslinjeVedtaksperiode1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
-            val refusjonstidslinjeVedtaksperiode2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode1 =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode2 =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
             assertEquals(Beløpstidslinje.fra(februar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode2)
         }
     }
-
 
     @Test
     fun `Må kunne videreføre refusjonsopplysninger når det kommer søknad som bridger gap'et som før var der`() {
@@ -660,7 +684,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             assertSisteTilstand(vedtaksperiodeFebruar, AVVENTER_HISTORIKK)
             assertTrue(inspektør.vedtaksperioder(vedtaksperiodeFebruar).refusjonstidslinje.isNotEmpty())
-
         }
     }
 
@@ -677,7 +700,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `Refusjonsopplysninger på en periode som kiler seg midt mellom to strekker opplysningene fra perioden før seg`() {
         a1 {
             nyttVedtak(januar, beregnetInntekt = INNTEKT)
-            nyttVedtak(mars, beregnetInntekt = INNTEKT*1.1)
+            nyttVedtak(mars, beregnetInntekt = INNTEKT * 1.1)
             nyPeriode(februar)
 
             assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.all { it.beløp == INNTEKT })
@@ -692,12 +715,25 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val kilde = Kilde(im, ARBEIDSGIVER, tidsstempel)
             forlengVedtak(februar)
 
-            val refusjonstidslinjeVedtaksperiode1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
-            val refusjonstidslinjeVedtaksperiode2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode1 =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode2 =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
             assertEquals(Beløpstidslinje.fra(februar, INGEN, kilde), refusjonstidslinjeVedtaksperiode2)
-
         }
     }
 
@@ -705,15 +741,35 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `Forlengelser bruker refusjonsopplysninger fra perioden før, men må hensynta eventuelle endringer i refusjonshistorikken`() {
         a1 {
             val tidsstempel = LocalDateTime.now()
-            val im = nyttVedtak(januar, tidsstempel, endringerIRefusjon = listOf(
-                Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.8, 1.februar),
-                Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.5, 20.februar)
-            ))
+            val im =
+                nyttVedtak(
+                    januar,
+                    tidsstempel,
+                    endringerIRefusjon =
+                        listOf(
+                            Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.8, 1.februar),
+                            Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.5, 20.februar)
+                        )
+                )
             val kilde = Kilde(im, ARBEIDSGIVER, tidsstempel)
             forlengVedtak(februar)
 
-            val refusjonstidslinjeVedtaksperiode1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
-            val refusjonstidslinjeVedtaksperiode2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode1 =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinjeVedtaksperiode2 =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode1)
             assertEquals(Beløpstidslinje.fra(1.februar til 19.februar, INNTEKT * 0.8, kilde) + Beløpstidslinje.fra(20.februar til 28.februar, INNTEKT * 0.5, kilde), refusjonstidslinjeVedtaksperiode2)
@@ -726,23 +782,42 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val tidsstempel = LocalDateTime.now()
             val im = nyttVedtak(januar, tidsstempel)
 
-            val refusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().endringer.last().refusjonstidslinje
+            val refusjonstidslinje =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .single()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
             val kilde = Kilde(im, ARBEIDSGIVER, tidsstempel)
 
             assertEquals(Beløpstidslinje.fra(januar, INNTEKT, kilde), refusjonstidslinje)
 
             val tidsstempel2 = LocalDateTime.now()
-            val saksbehandlerOverstyring = håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "forklaring",
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN)))),
-                tidsstempel = tidsstempel2
-            )
+            val saksbehandlerOverstyring =
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer =
+                        listOf(
+                            OverstyrtArbeidsgiveropplysning(
+                                orgnummer = a1,
+                                inntekt = INNTEKT,
+                                forklaring = "forklaring",
+                                refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN))
+                            )
+                        ),
+                    tidsstempel = tidsstempel2
+                )
 
-            val refusjonstidslinje2 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinje2 =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
             val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel2)
 
             assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinje2)
@@ -757,28 +832,67 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val im = nyttVedtak(mars, tidsstempel, vedtaksperiode = 2)
             val kildeIm = Kilde(im, ARBEIDSGIVER, tidsstempel)
             val tidsstempel2 = LocalDateTime.now()
-            val saksbehandlerOverstyring = håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "forklaring",
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN)))),
-                tidsstempel = tidsstempel2
-            )
+            val saksbehandlerOverstyring =
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer =
+                        listOf(
+                            OverstyrtArbeidsgiveropplysning(
+                                orgnummer = a1,
+                                inntekt = INNTEKT,
+                                forklaring = "forklaring",
+                                refusjonsopplysninger = listOf(Triple(1.januar, null, INGEN))
+                            )
+                        ),
+                    tidsstempel = tidsstempel2
+                )
             val kildeSaksbehandler = Kilde(saksbehandlerOverstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel2)
 
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger.let {
-                assertEquals(1.januar til LocalDate.MAX, it.inspektør.refusjonsopplysninger.single().periode)
-                assertEquals(INGEN, it.inspektør.refusjonsopplysninger.single().beløp)
+                assertEquals(
+                    1.januar til LocalDate.MAX,
+                    it.inspektør.refusjonsopplysninger
+                        .single()
+                        .periode
+                )
+                assertEquals(
+                    INGEN,
+                    it.inspektør.refusjonsopplysninger
+                        .single()
+                        .beløp
+                )
             }
             inspektør.vilkårsgrunnlag(1.mars)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger.let {
-                assertEquals(1.mars til LocalDate.MAX, it.inspektør.refusjonsopplysninger.single().periode)
-                assertEquals(INNTEKT, it.inspektør.refusjonsopplysninger.single().beløp)
+                assertEquals(
+                    1.mars til LocalDate.MAX,
+                    it.inspektør.refusjonsopplysninger
+                        .single()
+                        .periode
+                )
+                assertEquals(
+                    INNTEKT,
+                    it.inspektør.refusjonsopplysninger
+                        .single()
+                        .beløp
+                )
             }
 
-            val refusjonstidslinje1 = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
-            val refusjonstidslinje2 = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinje1 =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinje2 =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
             assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinje1)
             assertEquals(Beløpstidslinje.fra(mars, INNTEKT, kildeIm), refusjonstidslinje2)
         }
@@ -790,18 +904,37 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
             val tidsstempel = LocalDateTime.now()
-            val overstyring = håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "forklaring",
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT / 2)))),
-                tidsstempel = tidsstempel
-            )
+            val overstyring =
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer =
+                        listOf(
+                            OverstyrtArbeidsgiveropplysning(
+                                orgnummer = a1,
+                                inntekt = INNTEKT,
+                                forklaring = "forklaring",
+                                refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT / 2))
+                            )
+                        ),
+                    tidsstempel = tidsstempel
+                )
             val kildeSaksbehandler = Kilde(overstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel)
-            val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
-            val refusjonstidslinjeFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeJanuar =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinjeFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(januar, INGEN, kildeSaksbehandler), refusjonstidslinjeJanuar)
             assertEquals(Beløpstidslinje.fra(februar, INNTEKT / 2, kildeSaksbehandler), refusjonstidslinjeFebruar)
@@ -813,17 +946,29 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val tidsstempel = LocalDateTime.now()
-            val overstyring = håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "forklaring",
-                    refusjonsopplysninger = listOf(Triple(1.januar, 15.januar, INGEN), Triple(16.januar, null, INNTEKT / 2)))),
-                tidsstempel = tidsstempel
-            )
+            val overstyring =
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer =
+                        listOf(
+                            OverstyrtArbeidsgiveropplysning(
+                                orgnummer = a1,
+                                inntekt = INNTEKT,
+                                forklaring = "forklaring",
+                                refusjonsopplysninger = listOf(Triple(1.januar, 15.januar, INGEN), Triple(16.januar, null, INNTEKT / 2))
+                            )
+                        ),
+                    tidsstempel = tidsstempel
+                )
             val kildeSaksbehandler = Kilde(overstyring.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, tidsstempel)
-            val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeJanuar =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
             val expected = Beløpstidslinje.fra(1.januar til 15.januar, INGEN, kildeSaksbehandler) + Beløpstidslinje.fra(16.januar til 31.januar, INNTEKT / 2, kildeSaksbehandler)
             assertEquals(expected, refusjonstidslinjeJanuar)
         }
@@ -840,33 +985,64 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 hendelseId = meldingsreferanseId,
                 skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = INNTEKT,
-                        forklaring = "forklaring",
-                        refusjonsopplysninger = listOf(
-                            Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT/2),
+                overstyringer =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a1,
+                            inntekt = INNTEKT,
+                            forklaring = "forklaring",
+                            refusjonsopplysninger =
+                                listOf(
+                                    Triple(1.januar, 31.januar, INGEN),
+                                    Triple(1.februar, null, INNTEKT / 2)
+                                )
+                        ),
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a2,
+                            inntekt = INNTEKT,
+                            forklaring = "forklaring",
+                            refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT / 2))
                         )
                     ),
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a2,
-                        inntekt = INNTEKT,
-                        forklaring = "forklaring",
-                        refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INGEN), Triple(1.februar, null, INNTEKT / 2))
-                    )
-                ),
                 tidsstempel = tidsstempel
             )
-            val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
-            val refusjonstidslinjeFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeJanuar =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinjeFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(1.januar til 31.januar, INGEN, kildeSaksbehandler), refusjonstidslinjeJanuar)
             assertEquals(Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT / 2, kildeSaksbehandler), refusjonstidslinjeFebruar)
         }
         a2 {
-            val refusjonstidslinjeJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
-            val refusjonstidslinjeFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().refusjonstidslinje
+            val refusjonstidslinjeJanuar =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
+            val refusjonstidslinjeFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer
+                    .last()
+                    .refusjonstidslinje
 
             assertEquals(Beløpstidslinje.fra(1.januar til 31.januar, INGEN, kildeSaksbehandler), refusjonstidslinjeJanuar)
             assertEquals(Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT / 2, kildeSaksbehandler), refusjonstidslinjeFebruar)
@@ -884,10 +1060,11 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                         a1,
                         INNTEKT,
                         "forklaring",
-                        refusjonsopplysninger = listOf(
-                            Triple(1.januar, 31.januar, INNTEKT / 2),
-                            Triple(1.februar, null, INNTEKT)
-                        )
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, 31.januar, INNTEKT / 2),
+                                Triple(1.februar, null, INNTEKT)
+                            )
                     )
                 )
             )
@@ -981,13 +1158,14 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
     ): UUID {
         håndterSøknad(periode)
-        val im = håndterInntektsmelding(
-            arbeidsgiverperiode,
-            INNTEKT,
-            førsteFraværsdag = periode.start,
-            mottatt = tidsstempel,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
-        )
+        val im =
+            håndterInntektsmelding(
+                arbeidsgiverperiode,
+                INNTEKT,
+                førsteFraværsdag = periode.start,
+                mottatt = tidsstempel,
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
+            )
         håndterVilkårsgrunnlag(vedtaksperiode.vedtaksperiode)
         håndterYtelser(vedtaksperiode.vedtaksperiode)
         håndterSimulering(vedtaksperiode.vedtaksperiode)
@@ -996,5 +1174,12 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         return im
     }
 
-    private fun gjenopprettBeløpstislinjeFor(dato: LocalDate) = dto().tilPersonData().arbeidsgivere.single().ubrukteRefusjonsopplysninger[dato]?.tilDto()?.let { Beløpstidslinje.gjenopprett(it) } ?: Beløpstidslinje()
+    private fun gjenopprettBeløpstislinjeFor(dato: LocalDate) =
+        dto()
+            .tilPersonData()
+            .arbeidsgivere
+            .single()
+            .ubrukteRefusjonsopplysninger[dato]
+            ?.tilDto()
+            ?.let { Beløpstidslinje.gjenopprett(it) } ?: Beløpstidslinje()
 }

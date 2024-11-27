@@ -8,7 +8,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-
 internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     private companion object {
         private const val FNR1 = "12029240045"

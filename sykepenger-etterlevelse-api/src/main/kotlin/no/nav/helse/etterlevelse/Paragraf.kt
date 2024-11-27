@@ -2,7 +2,9 @@ package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
 
-enum class Paragraf(val ref: String) {
+enum class Paragraf(
+    val ref: String
+) {
     PARAGRAF_2("2"),
     PARAGRAF_8_2("8-2"),
     PARAGRAF_8_3("8-3"),
@@ -24,12 +26,12 @@ enum class Paragraf(val ref: String) {
     PARAGRAF_35("35"),
     KJENNELSE_2006_4023("2006-4023");
 
-    override fun toString(): String {
-        return "§ $ref"
-    }
+    override fun toString(): String = "§ $ref"
 }
 
-enum class Ledd(val nummer: Int) {
+enum class Ledd(
+    val nummer: Int
+) {
     LEDD_1(1),
     LEDD_2(2),
     LEDD_3(3),
@@ -37,16 +39,16 @@ enum class Ledd(val nummer: Int) {
     LEDD_5(5),
     LEDD_6(6);
 
-    override fun toString(): String {
-        return "$nummer. ledd"
-    }
+    override fun toString(): String = "$nummer. ledd"
 
     companion object {
         val Int.ledd get() = enumValues<Ledd>().first { it.nummer == this }
     }
 }
 
-enum class Punktum(val nummer: Int) {
+enum class Punktum(
+    val nummer: Int
+) {
     PUNKTUM_1(1),
     PUNKTUM_2(2),
     PUNKTUM_3(3),
@@ -59,9 +61,7 @@ enum class Punktum(val nummer: Int) {
         require(nummer > 0) { "Et punktum på være et tall større enn 0" }
     }
 
-    override fun toString(): String {
-        return "$nummer. punktum"
-    }
+    override fun toString(): String = "$nummer. punktum"
 
     companion object {
         val Int.punktum get() = enumValues<Punktum>().first { it.nummer == this }
@@ -69,7 +69,9 @@ enum class Punktum(val nummer: Int) {
     }
 }
 
-enum class Bokstav(val ref: Char) {
+enum class Bokstav(
+    val ref: Char
+) {
     BOKSTAV_A('a'),
     BOKSTAV_B('b'),
     BOKSTAV_C('c');
@@ -79,9 +81,7 @@ enum class Bokstav(val ref: Char) {
         require(regex.matches(ref.toString())) { "En bokstav må være en bokstav i det norske alfabetet" }
     }
 
-    override fun toString(): String {
-        return "bokstav $ref"
-    }
+    override fun toString(): String = "bokstav $ref"
 }
 
 val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)

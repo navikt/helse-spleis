@@ -2,11 +2,11 @@ package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
@@ -15,15 +15,16 @@ internal class YtelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(
-        Foreldrepenger,
-        Pleiepenger,
-        Omsorgspenger,
-        Opplæringspenger,
-        Institusjonsopphold,
-        Arbeidsavklaringspenger,
-        Dagpenger
-    )
+    override val behov =
+        listOf(
+            Foreldrepenger,
+            Pleiepenger,
+            Omsorgspenger,
+            Opplæringspenger,
+            Institusjonsopphold,
+            Arbeidsavklaringspenger,
+            Dagpenger
+        )
     override val riverName = "Ytelser"
 
     override fun validate(message: JsonMessage) {
@@ -73,8 +74,12 @@ internal class YtelserRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = YtelserMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        YtelserMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText()
+            )
+        )
 }

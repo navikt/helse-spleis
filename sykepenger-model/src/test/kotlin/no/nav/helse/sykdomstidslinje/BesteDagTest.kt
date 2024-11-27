@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BesteDagTest {
-
     companion object {
         private val ukjentDag = Dag.UkjentDag(1.januar, TestEvent.søknad)
         private val arbeidsdagFraSøknad = Dag.Arbeidsdag(1.januar, TestEvent.søknad)
@@ -170,8 +169,12 @@ internal class BesteDagTest {
     }
 
     private infix fun Dag.slår(taper: Dag) = Pair(Dagturnering.TURNERING::beste, this) slår taper
+
     private infix fun Pair<BesteStrategy, Dag>.slår(taper: Dag) = assertWinnerBidirectional(this.second, taper, this.second, this.first)
+
     private infix fun Dag.mot(høyre: Dag) = Pair(this, høyre)
+
     private infix fun Pair<Dag, Dag>.gir(vinner: Dag) = assertWinner(this.first, this.second, vinner)
+
     private infix fun BesteStrategy.betyr_at(dag: Dag) = Pair(this, dag)
 }

@@ -11,7 +11,6 @@ import java.time.LocalDate
 import java.util.*
 
 internal class RefusjonTest {
-
     @Test
     fun `refusjonsbeløp uten endringer i refusjon`() {
         assertEquals(31000.månedlig, refusjon().beløp(1.januar))
@@ -35,10 +34,15 @@ internal class RefusjonTest {
 
     @Test
     fun `refusjonsbeløp med endringer i refusjon med opphørsdato`() {
-        val refusjon = refusjon(sisteRefusjonsdag = 6.januar, endringerIRefusjon = listOf(
-            Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp = 28000.månedlig, endringsdato = 3.januar),
-            Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp = 20000.månedlig, endringsdato = 5.januar)
-        ))
+        val refusjon =
+            refusjon(
+                sisteRefusjonsdag = 6.januar,
+                endringerIRefusjon =
+                    listOf(
+                        Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp = 28000.månedlig, endringsdato = 3.januar),
+                        Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp = 20000.månedlig, endringsdato = 5.januar)
+                    )
+            )
 
         assertEquals(31000.månedlig, refusjon.beløp(2.januar))
         assertEquals(28000.månedlig, refusjon.beløp(3.januar))
@@ -47,7 +51,12 @@ internal class RefusjonTest {
         assertEquals(Inntekt.INGEN, refusjon.beløp(7.januar))
     }
 
-    private fun refusjon(endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon> = emptyList(), sisteRefusjonsdag: LocalDate? = null, førsteFraværsdag: LocalDate? = 1.januar, arbeidsgiverperioder: List<Periode> = emptyList()) = Refusjonshistorikk.Refusjon(
+    private fun refusjon(
+        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon> = emptyList(),
+        sisteRefusjonsdag: LocalDate? = null,
+        førsteFraværsdag: LocalDate? = 1.januar,
+        arbeidsgiverperioder: List<Periode> = emptyList()
+    ) = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = UUID.randomUUID(),
         førsteFraværsdag = førsteFraværsdag,
         arbeidsgiverperioder = arbeidsgiverperioder,

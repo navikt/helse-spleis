@@ -19,7 +19,9 @@ import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
 val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
 // Understands how to build our application server
-class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
+class ApplicationBuilder(
+    env: Map<String, String>
+) : RapidsConnection.StatusListener {
     private val factory = ConsumerProducerFactory(AivenConfig.default)
     private val rapidsConnection = RapidApplication.create(env, factory, meterRegistry = meterRegistry)
 
@@ -31,13 +33,14 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
 
     private val subsumsjonsproducer = Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
 
-    private val hendelseMediator = HendelseMediator(
-        hendelseRepository = hendelseRepository,
-        personDao = personDao,
-        versjonAvKode = versjonAvKode(env),
-        støtterIdentbytte = STØTTER_IDENTBYTTE,
-        subsumsjonsproducer = subsumsjonsproducer
-    )
+    private val hendelseMediator =
+        HendelseMediator(
+            hendelseRepository = hendelseRepository,
+            personDao = personDao,
+            versjonAvKode = versjonAvKode(env),
+            støtterIdentbytte = STØTTER_IDENTBYTTE,
+            subsumsjonsproducer = subsumsjonsproducer
+        )
 
     init {
         rapidsConnection.register(this)
@@ -50,13 +53,12 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     }
 
     fun start() = rapidsConnection.start()
+
     fun stop() = rapidsConnection.stop()
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
     }
 
-    private fun versjonAvKode(env: Map<String, String>): String {
-        return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
-    }
+    private fun versjonAvKode(env: Map<String, String>): String = env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
 }

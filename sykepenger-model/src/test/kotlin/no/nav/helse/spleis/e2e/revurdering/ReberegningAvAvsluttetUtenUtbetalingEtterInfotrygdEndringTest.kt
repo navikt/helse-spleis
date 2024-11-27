@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : AbstractEndToEndTest() {
-
     @Test
     fun `AUU med infotrygdperiode rett før skal omgjøres`() {
         nyPeriode(5.januar til 20.januar)
@@ -165,7 +164,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
-    private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter, tilstand: String) {
+    private fun assertOverlappendeInfotrygdutbetalingIAUU(
+        vedtaksperiode: IdInnhenter,
+        tilstand: String
+    ) {
         val overlapp = observatør.overlappendeInfotrygdperioder.last()
         val vedtaksperiodeId = vedtaksperiode.id(ORGNUMMER)
         assertEquals(vedtaksperiodeId, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodeId)

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class TidslinjefusjonTest {
-
     @Test
     fun `slå sammen tilstøtende betalingstider`() {
         val inspektør = (tidslinjeOf(10.NAV) + tidslinjeOf(10.UTELATE, 10.NAV)).inspektør
@@ -55,9 +54,11 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `bli med i flere utbetalingstidslinjer`() {
-        val inspektør = (tidslinjeOf(15.NAV) +
-            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
-            tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV)
+        val inspektør =
+            (
+                tidslinjeOf(15.NAV) +
+                    tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
+                    tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV)
             ).inspektør
         assertEquals(59, inspektør.size)
         assertEquals(33, inspektør.navDagTeller)
@@ -80,10 +81,13 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `NAV-utbetalinger for flere arbeidsgivere`() {
-        val inspektør = (tidslinjeOf(
-            15.NAV,
-            15.ARB
-        ) + tidslinjeOf(10.ARB, 10.NAV, 10.ARB, 10.NAV)).inspektør
+        val inspektør =
+            (
+                tidslinjeOf(
+                    15.NAV,
+                    15.ARB
+                ) + tidslinjeOf(10.ARB, 10.NAV, 10.ARB, 10.NAV)
+            ).inspektør
         assertEquals(40, inspektør.size)
         assertEquals(23, inspektør.navDagTeller)
         assertEquals(7, inspektør.navHelgDagTeller)
@@ -99,39 +103,41 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `dagens forrang`() {
-        val inspektør = (tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
-            tidslinjeOf(
-                1.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            ) +
-            tidslinjeOf(
-                2.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            ) +
-            tidslinjeOf(
-                3.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            ) +
-            tidslinjeOf(
-                4.UTELATE,
-                1.FRI,
-                1.ARB,
-                1.AP,
-                1.HELG,
-                1.NAV
-            )
+        val inspektør =
+            (
+                tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+                    tidslinjeOf(
+                        1.UTELATE,
+                        1.FRI,
+                        1.ARB,
+                        1.AP,
+                        1.HELG,
+                        1.NAV
+                    ) +
+                    tidslinjeOf(
+                        2.UTELATE,
+                        1.FRI,
+                        1.ARB,
+                        1.AP,
+                        1.HELG,
+                        1.NAV
+                    ) +
+                    tidslinjeOf(
+                        3.UTELATE,
+                        1.FRI,
+                        1.ARB,
+                        1.AP,
+                        1.HELG,
+                        1.NAV
+                    ) +
+                    tidslinjeOf(
+                        4.UTELATE,
+                        1.FRI,
+                        1.ARB,
+                        1.AP,
+                        1.HELG,
+                        1.NAV
+                    )
             ).inspektør
         assertEquals(9, inspektør.size)
         assertEquals(3, inspektør.navDagTeller)
@@ -162,5 +168,4 @@ internal class TidslinjefusjonTest {
         val inspektør = (tidslinjeOf() + tidslinjeOf()).inspektør
         assertEquals(0, inspektør.size)
     }
-
 }

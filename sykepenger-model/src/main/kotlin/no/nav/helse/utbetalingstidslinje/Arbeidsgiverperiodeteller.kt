@@ -34,6 +34,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
     }
 
     fun inc() = sykedagteller.inc()
+
     fun dec() = oppholdsteller.inc()
 
     fun fullfør() {
@@ -75,21 +76,30 @@ internal class Arbeidsgiverperiodeteller private constructor(
         companion object {
             val nullObserver = object : Observatør {}
         }
+
         fun arbeidsgiverperiodeFerdig() {}
+
         fun arbeidsgiverperiodeAvbrutt() {}
+
         fun arbeidsgiverperiodedag() {}
+
         fun sykedag() {}
     }
 
     private interface Tilstand {
         fun entering(teller: Arbeidsgiverperiodeteller) {}
+
         fun sykedag(teller: Arbeidsgiverperiodeteller) {}
+
         fun ferdig(teller: Arbeidsgiverperiodeteller) {}
+
         fun reset(teller: Arbeidsgiverperiodeteller) {
             teller.state(Initiell)
         }
+
         fun leaving(teller: Arbeidsgiverperiodeteller) {}
     }
+
     private object Initiell : Tilstand {
         override fun entering(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodeAvbrutt()
@@ -100,14 +110,17 @@ internal class Arbeidsgiverperiodeteller private constructor(
             teller.state(PåbegyntArbeidsgiverperiode)
         }
     }
+
     private object PåbegyntArbeidsgiverperiode : Tilstand {
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodedag()
         }
+
         override fun ferdig(teller: Arbeidsgiverperiodeteller) {
             teller.state(ArbeidsgiverperiodeFerdig)
         }
     }
+
     private object ArbeidsgiverperiodeFerdig : Tilstand {
         override fun entering(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodeFerdig()
@@ -117,6 +130,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
             teller.observatør.sykedag()
         }
     }
+
     private object IngenTelling : Tilstand {
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.sykedag()

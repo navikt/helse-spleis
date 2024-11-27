@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `revurdering feilet med ett oppdrag status avvist som bygger på tidligere`() {
         nyttVedtak(januar)
@@ -103,7 +102,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -111,11 +110,19 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
+            fagsystemId =
+                inspektør
+                    .utbetaling(0)
+                    .arbeidsgiverOppdrag.inspektør
+                    .fagsystemId()
         )
         håndterUtbetalt(
             status = Oppdragstatus.AVVIST,
-            fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
+            fagsystemId =
+                inspektør
+                    .utbetaling(0)
+                    .personOppdrag.inspektør
+                    .fagsystemId()
         )
         nullstillTilstandsendringer()
 
@@ -123,7 +130,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         assertEquals(1, hendelselogg.behov.size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
+            fagsystemId =
+                inspektør
+                    .utbetaling(0)
+                    .personOppdrag.inspektør
+                    .fagsystemId()
         )
 
         assertEquals(1, inspektør.antallUtbetalinger)
@@ -138,7 +149,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -146,11 +157,19 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(
             status = Oppdragstatus.AVVIST,
-            fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
+            fagsystemId =
+                inspektør
+                    .utbetaling(0)
+                    .arbeidsgiverOppdrag.inspektør
+                    .fagsystemId()
         )
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId()
+            fagsystemId =
+                inspektør
+                    .utbetaling(0)
+                    .personOppdrag.inspektør
+                    .fagsystemId()
         )
         nullstillTilstandsendringer()
 
@@ -158,7 +177,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         assertEquals(1, hendelselogg.behov.size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
-            fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
+            fagsystemId =
+                inspektør
+                    .utbetaling(0)
+                    .arbeidsgiverOppdrag.inspektør
+                    .fagsystemId()
         )
 
         assertEquals(1, inspektør.antallUtbetalinger)

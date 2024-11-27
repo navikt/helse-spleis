@@ -1,8 +1,8 @@
 package no.nav.helse.dto.serialisering
 
+import no.nav.helse.dto.MedlemskapsvurderingDto
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.dto.MedlemskapsvurderingDto
 
 sealed class VilkårsgrunnlagUtDto {
     abstract val vilkårsgrunnlagId: UUID
@@ -18,6 +18,7 @@ sealed class VilkårsgrunnlagUtDto {
         val vurdertOk: Boolean,
         val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagUtDto()
+
     data class Infotrygd(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,

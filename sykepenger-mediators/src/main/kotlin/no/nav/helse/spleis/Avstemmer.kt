@@ -6,57 +6,63 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
-class Avstemmer(private val person: PersonUtDto) {
+class Avstemmer(
+    private val person: PersonUtDto
+) {
     private companion object {
-        private val mapper = jacksonObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val mapper =
+            jacksonObjectMapper()
+                .registerKotlinModule()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
+
     private val melding = mapTilMelding(person)
 
     fun tilJsonMessage() = JsonMessage.newMessage("person_avstemt", mapper.convertValue(melding))
 
-    private fun mapTilMelding(person: PersonUtDto): AvstemmerDto {
-        return AvstemmerDto(
+    private fun mapTilMelding(person: PersonUtDto): AvstemmerDto =
+        AvstemmerDto(
             fødselsnummer = person.fødselsnummer,
-            arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
-                AvstemtArbeidsgiver(
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { mapTilVedtaksperiode(it) },
-                    forkastedeVedtaksperioder = arbeidsgiver.forkastede.map { mapTilVedtaksperiode(it.vedtaksperiode) },
-                    utbetalinger = arbeidsgiver.utbetalinger.map { utbetaling ->
-                        AvstemtUtbetaling(
-                            id = utbetaling.id,
-                            type = utbetaling.type.toString(),
-                            status = utbetaling.tilstand.toString(),
-                            opprettet = utbetaling.tidsstempel,
-                            oppdatert = utbetaling.oppdatert,
-                            avsluttet = utbetaling.avsluttet,
-                            vurdering = utbetaling.vurdering?.let { vurdering ->
-                                AvstemtVurdering(
-                                    ident = vurdering.ident,
-                                    tidspunkt = vurdering.tidspunkt,
-                                    automatiskBehandling = vurdering.automatiskBehandling,
-                                    godkjent = vurdering.godkjent
+            arbeidsgivere =
+                person.arbeidsgivere.map { arbeidsgiver ->
+                    AvstemtArbeidsgiver(
+                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                        vedtaksperioder = arbeidsgiver.vedtaksperioder.map { mapTilVedtaksperiode(it) },
+                        forkastedeVedtaksperioder = arbeidsgiver.forkastede.map { mapTilVedtaksperiode(it.vedtaksperiode) },
+                        utbetalinger =
+                            arbeidsgiver.utbetalinger.map { utbetaling ->
+                                AvstemtUtbetaling(
+                                    id = utbetaling.id,
+                                    type = utbetaling.type.toString(),
+                                    status = utbetaling.tilstand.toString(),
+                                    opprettet = utbetaling.tidsstempel,
+                                    oppdatert = utbetaling.oppdatert,
+                                    avsluttet = utbetaling.avsluttet,
+                                    vurdering =
+                                        utbetaling.vurdering?.let { vurdering ->
+                                            AvstemtVurdering(
+                                                ident = vurdering.ident,
+                                                tidspunkt = vurdering.tidspunkt,
+                                                automatiskBehandling = vurdering.automatiskBehandling,
+                                                godkjent = vurdering.godkjent
+                                            )
+                                        }
                                 )
                             }
-                        )
-                    }
-                )
-            }
+                    )
+                }
         )
-    }
 
-    private fun mapTilVedtaksperiode(vedtaksperiode: VedtaksperiodeUtDto): AvstemtVedtaksperiode {
-        return AvstemtVedtaksperiode(
+    private fun mapTilVedtaksperiode(vedtaksperiode: VedtaksperiodeUtDto): AvstemtVedtaksperiode =
+        AvstemtVedtaksperiode(
             id = vedtaksperiode.id,
             fom = vedtaksperiode.fom,
             tom = vedtaksperiode.tom,
@@ -64,13 +70,13 @@ class Avstemmer(private val person: PersonUtDto) {
             tilstand = vedtaksperiode.tilstand.toString(),
             opprettet = vedtaksperiode.opprettet,
             oppdatert = vedtaksperiode.oppdatert,
-            utbetalinger = vedtaksperiode.behandlinger.behandlinger.flatMap { generasjon ->
-                generasjon.endringer
-                    .filterNot { endring -> endring.utbetalingstatus === UtbetalingTilstandDto.FORKASTET }
-                    .mapNotNull { endring -> endring.utbetalingId }
-            }
+            utbetalinger =
+                vedtaksperiode.behandlinger.behandlinger.flatMap { generasjon ->
+                    generasjon.endringer
+                        .filterNot { endring -> endring.utbetalingstatus === UtbetalingTilstandDto.FORKASTET }
+                        .mapNotNull { endring -> endring.utbetalingId }
+                }
         )
-    }
 }
 
 data class AvstemmerDto(
@@ -95,6 +101,7 @@ data class AvstemtVedtaksperiode(
     val skjæringstidspunkt: LocalDate,
     val utbetalinger: List<UUID>
 )
+
 data class AvstemtUtbetaling(
     val id: UUID,
     val type: String,
@@ -104,6 +111,7 @@ data class AvstemtUtbetaling(
     val avsluttet: LocalDateTime?,
     val vurdering: AvstemtVurdering?
 )
+
 data class AvstemtVurdering(
     val ident: String,
     val tidspunkt: LocalDateTime,

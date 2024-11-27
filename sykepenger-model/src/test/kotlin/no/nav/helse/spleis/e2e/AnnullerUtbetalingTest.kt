@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -34,9 +33,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.UUID
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
-
     @Test
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
@@ -84,6 +83,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertIngenFunksjonelleFeil()
         val behov = person.personLogg.sisteBehov(Behovtype.Utbetaling)
+
         @Suppress("UNCHECKED_CAST")
         val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
         assertEquals("OPPH", statusForUtbetaling)
@@ -165,7 +165,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     private fun Aktivitet.Behov.hentLinjer() =
         @Suppress("UNCHECKED_CAST")
         (detaljer()["linjer"] as List<Map<String, Any>>)
-
 
     @Test
     fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {
@@ -340,13 +339,27 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annullering = inspektør.utbetaling(2)
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertTrue(annullering.erAnnullering)
-        assertEquals(26.januar, annullering.arbeidsgiverOppdrag.inspektør.periode?.endInclusive)
-        assertEquals(19.januar, annullering.arbeidsgiverOppdrag.first().inspektør.fom)
-        assertEquals(26.januar, annullering.arbeidsgiverOppdrag.last().inspektør.tom)
+        assertEquals(
+            26.januar,
+            annullering.arbeidsgiverOppdrag.inspektør.periode
+                ?.endInclusive
+        )
+        assertEquals(
+            19.januar,
+            annullering.arbeidsgiverOppdrag
+                .first()
+                .inspektør.fom
+        )
+        assertEquals(
+            26.januar,
+            annullering.arbeidsgiverOppdrag
+                .last()
+                .inspektør.tom
+        )
     }
 
     @Test
-    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`(){
+    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)

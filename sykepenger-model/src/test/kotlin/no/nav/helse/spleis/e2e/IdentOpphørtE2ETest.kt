@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class IdentOpphørtE2ETest : AbstractDslTest() {
-
     @Test
     fun `endrer fødselsnummer ved ident opphørt`() {
         val nyttFnr = Personidentifikator("12345678911")

@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
-
+internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `mottak av vedtak fattet fungerer på samme måte som godkjenningsbehov med tommel opp`() {
         a1 {
@@ -112,9 +111,10 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
-            }
+            val nyeFunksjonelleFeil =
+                nyeFunksjonelleFeil {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                }
 
             assertForventetFeil(
                 forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
@@ -131,9 +131,10 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
             assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
-            }
+            val nyeFunksjonelleFeil =
+                nyeFunksjonelleFeil {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                }
 
             assertForventetFeil(
                 forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
@@ -152,9 +153,10 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
             assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
-            }
+            val nyeFunksjonelleFeil =
+                nyeFunksjonelleFeil {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
+                }
 
             assertForventetFeil(
                 forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",

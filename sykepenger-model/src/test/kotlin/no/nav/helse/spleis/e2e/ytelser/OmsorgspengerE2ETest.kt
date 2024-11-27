@@ -37,7 +37,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `Periode for person der det ikke foreligger pleiepengeromsorgse blir behandlet og sendt til godkjenning`() {
         håndterSykmelding(januar)

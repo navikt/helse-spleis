@@ -15,13 +15,15 @@ data class Subsumsjon(
     val output: Map<String, Any>,
     val kontekster: List<Subsumsjonskontekst>
 ) {
-    val lovreferanse = Lovreferanse(
-        lovverk = lovverk,
-        paragraf = paragraf,
-        ledd = ledd,
-        punktum = punktum,
-        bokstav = bokstav
-    )
+    val lovreferanse =
+        Lovreferanse(
+            lovverk = lovverk,
+            paragraf = paragraf,
+            ledd = ledd,
+            punktum = punktum,
+            bokstav = bokstav
+        )
+
     companion object {
         fun enkelSubsumsjon(
             utfall: Utfall,
@@ -34,8 +36,8 @@ data class Subsumsjon(
             input: Map<String, Any>,
             output: Map<String, Any>,
             kontekster: List<Subsumsjonskontekst>
-        ): Subsumsjon {
-            return Subsumsjon(
+        ): Subsumsjon =
+            Subsumsjon(
                 type = Subsumsjonstype.ENKEL,
                 lovverk = lovverk,
                 utfall = utfall,
@@ -48,7 +50,7 @@ data class Subsumsjon(
                 output = output,
                 kontekster = kontekster
             )
-        }
+
         fun periodisertSubsumsjon(
             perioder: Collection<ClosedRange<LocalDate>>,
             lovverk: String,
@@ -62,14 +64,17 @@ data class Subsumsjon(
             input: Map<String, Any>,
             kontekster: List<Subsumsjonskontekst>
         ): Subsumsjon {
-            val outputMedPerioder = output + mapOf(
-                "perioder" to perioder.map {
+            val outputMedPerioder =
+                output +
                     mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
+                        "perioder" to
+                            perioder.map {
+                                mapOf(
+                                    "fom" to it.start,
+                                    "tom" to it.endInclusive
+                                )
+                            }
                     )
-                }
-            )
             return Subsumsjon(
                 type = Subsumsjonstype.PERIODISERT,
                 lovverk = lovverk,
@@ -87,20 +92,29 @@ data class Subsumsjon(
     }
 
     enum class Subsumsjonstype {
-        ENKEL, PERIODISERT
+        ENKEL,
+        PERIODISERT
     }
+
     enum class Utfall {
-        VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
+        VILKAR_OPPFYLT,
+        VILKAR_IKKE_OPPFYLT,
+        VILKAR_UAVKLART,
+        VILKAR_BEREGNET
     }
 
     fun er(lovreferanse: Lovreferanse) = this.lovreferanse == lovreferanse
 
-    override fun toString(): String {
-        return "$lovreferanse [$utfall]"
-    }
+    override fun toString(): String = "$lovreferanse [$utfall]"
 }
 
-data class Lovreferanse(val lovverk: String, val paragraf: Paragraf?, val ledd: Ledd?, val punktum: Punktum?, val bokstav: Bokstav?) {
+data class Lovreferanse(
+    val lovverk: String,
+    val paragraf: Paragraf?,
+    val ledd: Ledd?,
+    val punktum: Punktum?,
+    val bokstav: Bokstav?
+) {
     override fun toString(): String {
         val parts = listOfNotNull(lovverk, paragraf?.toString(), ledd?.toString(), punktum?.toString(), bokstav?.toString())
         return parts.joinToString(separator = " ")

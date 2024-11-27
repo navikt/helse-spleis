@@ -3,16 +3,15 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal object KontraktAssertions {
-
     internal fun TestRapid.assertUtgåendeMelding(
         forventetMelding: String,
         faktiskMelding: (aktuelle: List<JsonNode>) -> JsonNode = { it.last() },
@@ -32,7 +31,10 @@ internal object KontraktAssertions {
         return kopi
     }
 
-    internal fun TestRapid.assertAntallUtgåendeMeldinger(eventName: String, forventetAntall: Int) {
+    internal fun TestRapid.assertAntallUtgåendeMeldinger(
+        eventName: String,
+        forventetAntall: Int
+    ) {
         assertEquals(forventetAntall, inspektør.meldinger(eventName).size)
     }
 
@@ -44,7 +46,10 @@ internal object KontraktAssertions {
         assertOgFjern("system_participating_services") { check(it.isArray) }
     }
 
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernTemplates(template: String, assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit) {
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernTemplates(
+        template: String,
+        assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit
+    ) {
         val (faktiskJson, forventetJson) = this
         val uuidTemplates = forventetJson.properties().filter { it.value.asText() == template }.map { it.key }
         uuidTemplates.forEach {
@@ -52,19 +57,27 @@ internal object KontraktAssertions {
             assertOgFjern(faktiskJson, it)
         }
     }
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() = assertOgFjernTemplates("<uuid>") { faktiskJson, key ->
-        faktiskJson.assertOgFjernUUID(key)
-    }
 
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernLocalDateTimeTemplates() = assertOgFjernTemplates("<timestamp>") { faktiskJson, key ->
-        faktiskJson.assertOgFjernLocalDateTime(key)
-    }
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() =
+        assertOgFjernTemplates("<uuid>") { faktiskJson, key ->
+            faktiskJson.assertOgFjernUUID(key)
+        }
+
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernLocalDateTimeTemplates() =
+        assertOgFjernTemplates("<timestamp>") { faktiskJson, key ->
+            faktiskJson.assertOgFjernLocalDateTime(key)
+        }
 
     private fun ObjectNode.assertOgFjernUUID(key: String) = assertOgFjern(key) { UUID.fromString(it.asText()) }
+
     private fun ObjectNode.assertOgFjernLocalDateTime(key: String) = assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
-    internal fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
+
+    internal fun ObjectNode.assertOgFjern(
+        key: String,
+        validation: (value: JsonNode) -> Unit
+    ) {
         if (!key.contains(".")) {
-            assertDoesNotThrow({ validation(path(key))}, "$key er ikke på forventet format!")
+            assertDoesNotThrow({ validation(path(key)) }, "$key er ikke på forventet format!")
             remove(key)
             return
         }

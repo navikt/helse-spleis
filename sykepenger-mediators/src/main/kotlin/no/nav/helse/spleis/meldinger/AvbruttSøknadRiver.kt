@@ -13,7 +13,6 @@ internal class AvbruttSøknadRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
     override val eventName = "avbrutt_søknad"
     override val riverName = "avbrutt_søknad"
 
@@ -23,8 +22,12 @@ internal class AvbruttSøknadRiver(
         message.require("tom", JsonNode::asLocalDate)
     }
 
-    override fun createMessage(packet: JsonMessage) = AvbruttSøknadMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        AvbruttSøknadMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fnr"].asText()
+            )
+        )
 }

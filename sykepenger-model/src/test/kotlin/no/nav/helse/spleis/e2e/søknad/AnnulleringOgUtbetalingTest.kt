@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -44,229 +43,234 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
+    @Test
+    fun `annullere revurdering til godkjenning etter annen revurdering`() =
+        a1 {
+            nyttVedtak(januar)
+            nyttVedtak(mars)
+
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterYtelser(2.vedtaksperiode)
+
+            assertEquals(4, inspektør.antallUtbetalinger)
+            val marsutbetalingen = inspektør.utbetaling(1)
+            håndterAnnullering(marsutbetalingen.utbetalingId)
+
+            assertEquals(5, inspektør.antallUtbetalinger)
+            val annulleringen = inspektør.utbetaling(4)
+            assertTrue(annulleringen.erAnnullering)
+            assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        }
 
     @Test
-    fun `annullere revurdering til godkjenning etter annen revurdering`() = a1 {
-        nyttVedtak(januar)
-        nyttVedtak(mars)
+    fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() =
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
 
-        håndterYtelser(2.vedtaksperiode)
+            nyttVedtak(mars)
 
-        assertEquals(4, inspektør.antallUtbetalinger)
-        val marsutbetalingen = inspektør.utbetaling(1)
-        håndterAnnullering(marsutbetalingen.utbetalingId)
+            håndterSøknad(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
 
-        assertEquals(5, inspektør.antallUtbetalinger)
-        val annulleringen = inspektør.utbetaling(4)
-        assertTrue(annulleringen.erAnnullering)
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-    }
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
+
+            assertEquals(5, inspektør.antallUtbetalinger)
+            val januarutbetaling = inspektør.utbetaling(0)
+            val marsutbetaling = inspektør.utbetaling(1)
+            val annulleringAvJanuar = inspektør.utbetaling(2)
+            val februarutbetaling = inspektør.utbetaling(3)
+            val revurderingAvMars = inspektør.utbetaling(4)
+
+            assertEquals(13, observatør.utbetaltEndretEventer.size)
+            assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, GODKJENT_UTEN_UTBETALING)
+            assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+            assertUtbetalingtilstander(annulleringAvJanuar.utbetalingId, NY, IKKE_UTBETALT, ANNULLERT)
+            assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+            assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+
+            assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
+            assertEquals(januarutbetaling.korrelasjonsId, annulleringAvJanuar.korrelasjonsId)
+            assertEquals(marsutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+            assertEquals(revurderingAvMars.korrelasjonsId, februarutbetaling.korrelasjonsId)
+
+            assertEquals(0, annulleringAvJanuar.arbeidsgiverOppdrag.size)
+            assertEquals(0, annulleringAvJanuar.personOppdrag.size)
+
+            assertEquals(2, februarutbetaling.arbeidsgiverOppdrag.size)
+            assertEquals(0, februarutbetaling.personOppdrag.size)
+            assertEquals(Endringskode.ENDR, februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode)
+            februarutbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(1.februar, linje.fom)
+                assertEquals(28.februar, linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+            februarutbetaling.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+                assertEquals(17.mars, linje.fom)
+                assertEquals(30.mars, linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+
+            assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
+            assertEquals(0, revurderingAvMars.personOppdrag.size)
+            assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+            revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(1.februar, linje.fom)
+                assertEquals(30.mars, linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+        }
 
     @Test
-    fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() = a1 {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() =
+        a1 {
+            nyttVedtak(januar)
+            nyttVedtak(mars)
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
+            nullstillTilstandsendringer()
+            nyPeriode(5.februar til 15.februar, a1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
 
-        nyttVedtak(mars)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        håndterSøknad(februar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsoppholdsperiode(5.februar, 15.februar)))
 
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
+            inspektør.utbetaling(0).let {
+                assertEquals(januar, it.periode)
+                assertEquals(UTBETALT, it.tilstand)
+            }
+            inspektør.utbetaling(1).let {
+                assertEquals(mars, it.periode)
+                assertEquals(UTBETALT, it.tilstand)
+            }
+            inspektør.utbetaling(2).let {
+                assertEquals(mars, it.periode)
+                assertEquals(ANNULLERT, it.tilstand)
+            }
 
-        assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
+            inspektør.utbetaling(3).let {
+                assertEquals(januar, it.periode)
+                assertEquals(GODKJENT_UTEN_UTBETALING, it.tilstand)
+            }
 
-        assertEquals(5, inspektør.antallUtbetalinger)
-        val januarutbetaling = inspektør.utbetaling(0)
-        val marsutbetaling = inspektør.utbetaling(1)
-        val annulleringAvJanuar = inspektør.utbetaling(2)
-        val februarutbetaling = inspektør.utbetaling(3)
-        val revurderingAvMars = inspektør.utbetaling(4)
+            inspektør.utbetaling(4).let {
+                assertEquals(1.januar til 15.februar, it.periode)
+                assertEquals(FORKASTET, it.tilstand)
+            }
 
-        assertEquals(13, observatør.utbetaltEndretEventer.size)
-        assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, GODKJENT_UTEN_UTBETALING)
-        assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(annulleringAvJanuar.utbetalingId, NY, IKKE_UTBETALT, ANNULLERT)
-        assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-
-        assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
-        assertEquals(januarutbetaling.korrelasjonsId, annulleringAvJanuar.korrelasjonsId)
-        assertEquals(marsutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
-        assertEquals(revurderingAvMars.korrelasjonsId, februarutbetaling.korrelasjonsId)
-
-        assertEquals(0, annulleringAvJanuar.arbeidsgiverOppdrag.size)
-        assertEquals(0, annulleringAvJanuar.personOppdrag.size)
-
-        assertEquals(2, februarutbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, februarutbetaling.personOppdrag.size)
-        assertEquals(Endringskode.ENDR, februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode)
-        februarutbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(1.februar, linje.fom)
-            assertEquals(28.februar, linje.tom)
-            assertEquals(Endringskode.NY, linje.endringskode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
         }
-        februarutbetaling.arbeidsgiverOppdrag[1].inspektør.also { linje ->
-            assertEquals(17.mars, linje.fom)
-            assertEquals(30.mars, linje.tom)
-            assertEquals(Endringskode.NY, linje.endringskode)
-        }
-
-        assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
-        assertEquals(0, revurderingAvMars.personOppdrag.size)
-        assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
-        revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(1.februar, linje.fom)
-            assertEquals(30.mars, linje.tom)
-            assertEquals(Endringskode.NY, linje.endringskode)
-        }
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
-    }
-    @Test
-    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() = a1 {
-        nyttVedtak(januar)
-        nyttVedtak(mars)
-
-        nullstillTilstandsendringer()
-        nyPeriode(5.februar til 15.februar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsoppholdsperiode(5.februar, 15.februar)))
-
-
-        inspektør.utbetaling(0).let {
-            assertEquals(januar, it.periode)
-            assertEquals(UTBETALT, it.tilstand)
-        }
-        inspektør.utbetaling(1).let {
-            assertEquals(mars, it.periode)
-            assertEquals(UTBETALT, it.tilstand)
-        }
-        inspektør.utbetaling(2).let {
-            assertEquals(mars, it.periode)
-            assertEquals(ANNULLERT, it.tilstand)
-        }
-
-        inspektør.utbetaling(3).let {
-            assertEquals(januar, it.periode)
-            assertEquals(GODKJENT_UTEN_UTBETALING, it.tilstand)
-        }
-
-        inspektør.utbetaling(4).let {
-            assertEquals(1.januar til 15.februar, it.periode)
-            assertEquals(FORKASTET, it.tilstand)
-        }
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-    }
 
     @Test
-    fun `reberegne og forkaste utbetaling som inneholder annulleringer`() = a1 {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+    fun `reberegne og forkaste utbetaling som inneholder annulleringer`() =
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
 
-        nyttVedtak(mars)
+            nyttVedtak(mars)
 
-        assertEquals(2, inspektør.antallUtbetalinger)
+            assertEquals(2, inspektør.antallUtbetalinger)
 
-        håndterSøknad(februar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
-        håndterYtelser(2.vedtaksperiode)
+            håndterSøknad(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
+            håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(6, inspektør.antallUtbetalinger)
-        val januarutbetaling = inspektør.utbetaling(0)
-        val marsutbetaling = inspektør.utbetaling(1)
-        val annulleringAvJanuarForkastet = inspektør.utbetaling(2)
-        val februarutbetalingForkastet = inspektør.utbetaling(3)
+            assertEquals(6, inspektør.antallUtbetalinger)
+            val januarutbetaling = inspektør.utbetaling(0)
+            val marsutbetaling = inspektør.utbetaling(1)
+            val annulleringAvJanuarForkastet = inspektør.utbetaling(2)
+            val februarutbetalingForkastet = inspektør.utbetaling(3)
 
-        val annulleringAvJanuarReberegnet = inspektør.utbetaling(4)
-        val februarutbetalingReberegnet = inspektør.utbetaling(5)
+            val annulleringAvJanuarReberegnet = inspektør.utbetaling(4)
+            val februarutbetalingReberegnet = inspektør.utbetaling(5)
 
-        assertEquals(GODKJENT_UTEN_UTBETALING, januarutbetaling.tilstand)
-        assertEquals(UTBETALT, marsutbetaling.tilstand)
+            assertEquals(GODKJENT_UTEN_UTBETALING, januarutbetaling.tilstand)
+            assertEquals(UTBETALT, marsutbetaling.tilstand)
 
-        assertEquals(FORKASTET, annulleringAvJanuarForkastet.tilstand)
-        assertEquals(FORKASTET, februarutbetalingForkastet.tilstand)
+            assertEquals(FORKASTET, annulleringAvJanuarForkastet.tilstand)
+            assertEquals(FORKASTET, februarutbetalingForkastet.tilstand)
 
-        assertEquals(IKKE_UTBETALT, annulleringAvJanuarReberegnet.tilstand)
-        assertEquals(IKKE_UTBETALT, februarutbetalingReberegnet.tilstand)
-    }
-
-    @Test
-    fun `korrigerer periode med bare ferie`() = a1 {
-        nyttVedtak(3.januar til 26.januar)
-        nyttVedtak(3.mars til 26.mars)
-        nullstillTilstandsendringer()
-
-        håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent), Ferie(3.mars, 26.mars))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertEquals(3, inspektør.antallUtbetalinger)
-        val januarutbetaling = inspektør.utbetaling(0)
-        val marsutbetaling = inspektør.utbetaling(1)
-        val revurderingAvMars = inspektør.utbetaling(2)
-
-        assertEquals(9, observatør.utbetaltEndretEventer.size)
-        assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-
-        assertEquals(revurderingAvMars.korrelasjonsId, marsutbetaling.korrelasjonsId)
-        assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
-
-        assertEquals(UTBETALT, revurderingAvMars.tilstand)
-
-        assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
-        assertEquals(0, revurderingAvMars.personOppdrag.size)
-        revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(19.mars, linje.fom)
-            assertEquals(26.mars, linje.tom)
-            assertEquals(19.mars, linje.datoStatusFom)
-            assertEquals("OPPH", linje.statuskode)
+            assertEquals(IKKE_UTBETALT, annulleringAvJanuarReberegnet.tilstand)
+            assertEquals(IKKE_UTBETALT, februarutbetalingReberegnet.tilstand)
         }
 
-        assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
-    }
+    @Test
+    fun `korrigerer periode med bare ferie`() =
+        a1 {
+            nyttVedtak(3.januar til 26.januar)
+            nyttVedtak(3.mars til 26.mars)
+            nullstillTilstandsendringer()
+
+            håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent), Ferie(3.mars, 26.mars))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(3, inspektør.antallUtbetalinger)
+            val januarutbetaling = inspektør.utbetaling(0)
+            val marsutbetaling = inspektør.utbetaling(1)
+            val revurderingAvMars = inspektør.utbetaling(2)
+
+            assertEquals(9, observatør.utbetaltEndretEventer.size)
+            assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+            assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+            assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+
+            assertEquals(revurderingAvMars.korrelasjonsId, marsutbetaling.korrelasjonsId)
+            assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
+
+            assertEquals(UTBETALT, revurderingAvMars.tilstand)
+
+            assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
+            assertEquals(0, revurderingAvMars.personOppdrag.size)
+            revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(19.mars, linje.fom)
+                assertEquals(26.mars, linje.tom)
+                assertEquals(19.mars, linje.datoStatusFom)
+                assertEquals("OPPH", linje.statuskode)
+            }
+
+            assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+        }
 
     @Test
     fun `to uavhengige arbeidsgiverperioder blir til en som følge av overstyring`() {
@@ -364,9 +368,14 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             nyttVedtak(juni)
             nyttVedtak(august)
             nullstillTilstandsendringer()
-            håndterOverstyrTidslinje(1.juli.til(30.juli).map {
-                ManuellOverskrivingDag(it, Dagtype.Feriedag)
-            }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
+            håndterOverstyrTidslinje(
+                1
+                    .juli
+                    .til(30.juli)
+                    .map {
+                        ManuellOverskrivingDag(it, Dagtype.Feriedag)
+                    }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag))
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -411,9 +420,14 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             nyttVedtak(1.juni til lørdag.den(30.juni))
             nyttVedtak(august)
             nullstillTilstandsendringer()
-            håndterOverstyrTidslinje(lørdag.den(30.juni).til(30.juli).map {
-                ManuellOverskrivingDag(it, Dagtype.Feriedag)
-            }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
+            håndterOverstyrTidslinje(
+                lørdag
+                    .den(30.juni)
+                    .til(30.juli)
+                    .map {
+                        ManuellOverskrivingDag(it, Dagtype.Feriedag)
+                    }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag))
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -482,9 +496,14 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.juni til lørdag.den(30.juni))
             nyttVedtak(august)
-            håndterOverstyrTidslinje(lørdag.den(30.juni).til(30.juli).map {
-                ManuellOverskrivingDag(it, Dagtype.Feriedag)
-            }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
+            håndterOverstyrTidslinje(
+                lørdag
+                    .den(30.juni)
+                    .til(30.juli)
+                    .map {
+                        ManuellOverskrivingDag(it, Dagtype.Feriedag)
+                    }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag))
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -522,7 +541,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         }
     }
 
-    private fun assertUtbetalingtilstander(utbetalingId: UUID, vararg status: Utbetalingstatus) {
+    private fun assertUtbetalingtilstander(
+        utbetalingId: UUID,
+        vararg status: Utbetalingstatus
+    ) {
         observatør.utbetaltEndretEventer
             .filter { it.utbetalingId == utbetalingId }
             .also { events ->

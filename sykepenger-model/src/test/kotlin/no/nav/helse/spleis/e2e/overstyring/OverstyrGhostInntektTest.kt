@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -40,9 +39,9 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
-
     private companion object {
         const val a1 = "987654321"
         const val a2 = "654321987"
@@ -52,10 +51,11 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
     fun `Overstyrer ghost-inntekt -- happy case`() {
         tilOverstyring(
             sykepengegrunnlag = mapOf(a1 to 30000.månedlig, a2 to 1000.månedlig),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold =
+                listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
+                )
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
@@ -76,7 +76,6 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
 
-
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -87,10 +86,11 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
     fun `Ved overstyring av inntekt til under krav til minste sykepengegrunnlag skal vi lage en utbetaling uten utbetaling`() {
         tilOverstyring(
             sykepengegrunnlag = mapOf(a1 to 3750.månedlig, a2 to 416.månedlig),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            ),
+            arbeidsforhold =
+                listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
+                ),
             beregnetInntekt = 3750.månedlig
         )
         håndterOverstyrInntekt(INGEN, a2, 1.januar)
@@ -102,17 +102,17 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
         Assertions.assertTrue(inspektør.utbetaling(1).erAvsluttet)
         Assertions.assertTrue(inspektør.utbetaling(0).erForkastet)
-
     }
 
     @Test
     fun `Overstyr ghost-inntekt -- ghost har ingen inntekt fra før av`() {
         tilOverstyring(
             sykepengegrunnlag = mapOf(a1 to 30000.månedlig),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold =
+                listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
+                )
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
@@ -150,9 +150,10 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), beregnetInntekt = beregnetInntekt, orgnummer = a1)
 
-        val inntektForSykepengegrunnlag = sykepengegrunnlag.keys.map { orgnummer ->
-            grunnlag(orgnummer, fom, sykepengegrunnlag[orgnummer]!!.repeat(3))
-        }
+        val inntektForSykepengegrunnlag =
+            sykepengegrunnlag.keys.map { orgnummer ->
+                grunnlag(orgnummer, fom, sykepengegrunnlag[orgnummer]!!.repeat(3))
+            }
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektForSykepengegrunnlag),

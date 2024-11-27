@@ -5,7 +5,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
 internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `utkast til vedtak`() {
         @Language("JSON")
@@ -31,5 +30,3 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         testRapid.assertUtgåendeMelding(forventet)
     }
 }
-
-

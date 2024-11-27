@@ -4,10 +4,6 @@ import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotliquery.Session
@@ -21,6 +17,10 @@ import no.nav.helse.serde.tilSerialisertPerson
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -59,9 +59,10 @@ fun main(cliArgs: Array<String>) {
 private fun vacuumTask() {
     val ds = DataSourceConfiguration(DbUser.SPLEIS).dataSource()
     log.info("Commencing VACUUM FULL")
-    val duration = measureTime {
-        sessionOf(ds).use { session -> session.run(queryOf(("VACUUM FULL person")).asExecute) }
-    }
+    val duration =
+        measureTime {
+            sessionOf(ds).use { session -> session.run(queryOf(("VACUUM FULL person")).asExecute) }
+        }
     log.info(
         "VACUUM FULL completed after {} hour(s), {} minute(s) and {} second(s)",
         duration.toInt(DurationUnit.HOURS),
@@ -83,23 +84,35 @@ private fun migrateV2Task(arbeidId: String) {
             if (data != null) {
                 migreringCounter += 1
                 log.info("[$migreringCounter] Utfører migrering")
-                val time = measureTimeMillis {
-                    val dto = SerialisertPerson(data).tilPersonDto()
-                    val gjenopprettetPerson = Person.gjenopprett(EmptyLog, dto)
-                    val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
-                    check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
-                        "skjemaversjon" to resultat.skjemaVersjon,
-                        "data" to resultat.json,
-                        "ident" to fnr
-                    )).asUpdate))
-                }
+                val time =
+                    measureTimeMillis {
+                        val dto = SerialisertPerson(data).tilPersonDto()
+                        val gjenopprettetPerson = Person.gjenopprett(EmptyLog, dto)
+                        val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
+                        check(
+                            1 ==
+                                txSession.run(
+                                    queryOf(
+                                        "UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident",
+                                        mapOf(
+                                            "skjemaversjon" to resultat.skjemaVersjon,
+                                            "data" to resultat.json,
+                                            "ident" to fnr
+                                        )
+                                    ).asUpdate
+                                )
+                        )
+                    }
                 log.info("[$migreringCounter] Utført på $time ms")
             }
         }
     }
 }
 
-private fun fåLås(session: Session, arbeidId: String): Boolean {
+private fun fåLås(
+    session: Session,
+    arbeidId: String
+): Boolean {
     // oppretter en lås som varer ut levetiden til sesjonen.
     // returnerer umiddelbart med true/false avhengig om vi fikk låsen eller ikke
     @Language("PostgreSQL")
@@ -107,7 +120,10 @@ private fun fåLås(session: Session, arbeidId: String): Boolean {
     return session.run(queryOf(query).map { it.boolean(1) }.asSingle)!!
 }
 
-private fun fyllArbeidstabell(session: Session, arbeidId: String) {
+private fun fyllArbeidstabell(
+    session: Session,
+    arbeidId: String
+) {
     @Language("PostgreSQL")
     val query = """
         INSERT INTO arbeidstabell (arbeid_id,fnr,arbeid_startet,arbeid_ferdig)
@@ -116,11 +132,17 @@ private fun fyllArbeidstabell(session: Session, arbeidId: String) {
     """
     session.run(queryOf(query, arbeidId).asExecute)
 }
-private fun hentArbeid(session: Session, arbeidId: String, size: Int = 500): List<Long> {
+
+private fun hentArbeid(
+    session: Session,
+    arbeidId: String,
+    size: Int = 500
+): List<Long> {
     @Language("PostgreSQL")
     val query = """
     select fnr from arbeidstabell where arbeid_startet IS NULL and arbeid_id = ? limit $size for update skip locked; 
     """
+
     @Language("PostgreSQL")
     val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr IN(%s)"
     return session.transaction { txSession ->
@@ -131,19 +153,31 @@ private fun hentArbeid(session: Session, arbeidId: String, size: Int = 500): Lis
         }
     }
 }
-private fun arbeidFullført(session: Session, arbeidId: String, fnr: Long) {
+
+private fun arbeidFullført(
+    session: Session,
+    arbeidId: String,
+    fnr: Long
+) {
     @Language("PostgreSQL")
     val query = "update arbeidstabell set arbeid_ferdig=now() where arbeid_id=? and fnr=?"
     session.run(queryOf(query, arbeidId, fnr).asUpdate)
 }
-private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
+
+private fun arbeidFinnes(
+    session: Session,
+    arbeidId: String
+): Boolean {
     @Language("PostgreSQL")
     val query = "SELECT COUNT(1) as antall FROM arbeidstabell where arbeid_id=?"
     val antall = session.run(queryOf(query, arbeidId).map { it.long("antall") }.asSingle) ?: 0
     return antall > 0
 }
 
-private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: String) {
+private fun klargjørEllerVentPåTilgjengeligArbeid(
+    session: Session,
+    arbeidId: String
+) {
     if (fåLås(session, arbeidId)) {
         if (arbeidFinnes(session, arbeidId)) return
         return fyllArbeidstabell(session, arbeidId)
@@ -156,23 +190,27 @@ private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: 
     }
 }
 
-fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
+fun opprettOgUtførArbeid(
+    arbeidId: String,
+    size: Int = 1,
+    arbeider: (session: Session, fnr: Long) -> Unit
+) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(maximumPoolSize = 1).use { ds ->
         sessionOf(ds).use { session ->
             klargjørEllerVentPåTilgjengeligArbeid(session, arbeidId)
             do {
                 log.info("Forsøker å hente arbeid")
-                val arbeidsliste = hentArbeid(session, arbeidId, size)
-                    .also {
-                        if (it.isNotEmpty()) log.info("Fikk ${it.size} stk")
-                    }
-                    .onEach { fnr ->
-                        try {
-                            arbeider(session, fnr)
-                        } finally {
-                            arbeidFullført(session, arbeidId, fnr)
+                val arbeidsliste =
+                    hentArbeid(session, arbeidId, size)
+                        .also {
+                            if (it.isNotEmpty()) log.info("Fikk ${it.size} stk")
+                        }.onEach { fnr ->
+                            try {
+                                arbeider(session, fnr)
+                            } finally {
+                                arbeidFullført(session, arbeidId, fnr)
+                            }
                         }
-                    }
             } while (arbeidsliste.isNotEmpty())
             log.info("Fant ikke noe arbeid, avslutter")
         }
@@ -194,23 +232,32 @@ private fun testSpeilJsonTask(arbeidId: String) {
     }*/
 }
 
-fun hentPerson(session: Session, fnr: Long) =
-    session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
-        it.string("data")
-    }.asSingle)
+fun hentPerson(
+    session: Session,
+    fnr: Long
+) = session.run(
+    queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr)
+        .map {
+            it.string("data")
+        }.asSingle
+)
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         var count = 0L
         factory.createProducer().use { producer ->
-            sessionOf(ds).use { session ->
-                session.run(queryOf("SELECT fnr FROM person").map { row ->
-                    row.string("fnr").padStart(11, '0')
-                }.asList)
-            }.forEach { fnr ->
-                count += 1
-                producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagMigrate(fnr)))
-            }
+            sessionOf(ds)
+                .use { session ->
+                    session.run(
+                        queryOf("SELECT fnr FROM person")
+                            .map { row ->
+                                row.string("fnr").padStart(11, '0')
+                            }.asList
+                    )
+                }.forEach { fnr ->
+                    count += 1
+                    producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagMigrate(fnr)))
+                }
             producer.flush()
         }
         println()
@@ -219,11 +266,13 @@ private fun migrateTask(factory: ConsumerProducerFactory) {
         println("==============================")
         println()
     }
-
 }
 
 @ExperimentalTime
-private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
+private fun avstemmingTask(
+    factory: ConsumerProducerFactory,
+    customDayOfMonth: Int? = null
+) {
     // Håndter on-prem og gcp database tilkobling forskjellig
     val ds = DataSourceConfiguration(DbUser.AVSTEMMING).dataSource()
     val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
@@ -240,19 +289,24 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
             FROM person
             WHERE (1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
             """
-        session.run(queryOf(statement, mapOf("dayOfMonth" to dayOfMonth)).map { row ->
-            row.string("fnr")
-        }.asList).forEach { fnr ->
-            val fnrStr = fnr.padStart(11, '0')
-            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnrStr)))
-        }
+        session
+            .run(
+                queryOf(statement, mapOf("dayOfMonth" to dayOfMonth))
+                    .map { row ->
+                        row.string("fnr")
+                    }.asList
+            ).forEach { fnr ->
+                val fnrStr = fnr.padStart(11, '0')
+                producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnrStr)))
+            }
     }
 
     producer.flush()
     log.info("Avstemming completed")
 }
 
-private fun lagMigrate(fnr: String) = """
+private fun lagMigrate(fnr: String) =
+    """
 {
   "@id": "${UUID.randomUUID()}",
   "@event_name": "json_migrate",
@@ -261,7 +315,8 @@ private fun lagMigrate(fnr: String) = """
 }
 """
 
-private fun lagAvstemming(fnr: String) = """
+private fun lagAvstemming(fnr: String) =
+    """
 {
   "@id": "${UUID.randomUUID()}",
   "@event_name": "person_avstemming",
@@ -270,41 +325,52 @@ private fun lagAvstemming(fnr: String) = """
 }
 """
 
-private class DataSourceConfiguration(dbUsername: DbUser) {
+private class DataSourceConfiguration(
+    dbUsername: DbUser
+) {
     private val env = System.getenv()
 
     private val gcpProjectId = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
     private val databaseRegion = requireNotNull(env["DATABASE_REGION"]) { "database region must be set" }
     private val databaseInstance = requireNotNull(env["DATABASE_INSTANCE"]) { "database instance must be set" }
     private val databaseUsername = requireNotNull(env["${dbUsername}_USERNAME"]) { "database username must be set" }
-    private val databasePassword = requireNotNull(env["${dbUsername}_PASSWORD"]) { "database password must be set"}
-    private val databaseName = requireNotNull(env["${dbUsername}_DATABASE"]) { "database name must be set"}
+    private val databasePassword = requireNotNull(env["${dbUsername}_PASSWORD"]) { "database password must be set" }
+    private val databaseName = requireNotNull(env["${dbUsername}_DATABASE"]) { "database name must be set" }
 
-    private val hikariConfig = HikariConfig().apply {
-        jdbcUrl = String.format(
-            "jdbc:postgresql:///%s?%s&%s",
-            databaseName,
-            "cloudSqlInstance=$gcpProjectId:$databaseRegion:$databaseInstance",
-            "socketFactory=com.google.cloud.sql.postgres.SocketFactory"
+    private val hikariConfig =
+        HikariConfig().apply {
+            jdbcUrl =
+                String.format(
+                    "jdbc:postgresql:///%s?%s&%s",
+                    databaseName,
+                    "cloudSqlInstance=$gcpProjectId:$databaseRegion:$databaseInstance",
+                    "socketFactory=com.google.cloud.sql.postgres.SocketFactory"
+                )
+
+            username = databaseUsername
+            password = databasePassword
+
+            maximumPoolSize = 2
+            initializationFailTimeout = Duration.ofMinutes(1).toMillis()
+            connectionTimeout = Duration.ofSeconds(5).toMillis()
+            maxLifetime = Duration.ofMinutes(30).toMillis()
+            idleTimeout = Duration.ofMinutes(10).toMillis()
+        }
+
+    fun dataSource(maximumPoolSize: Int = 2) =
+        HikariDataSource(
+            hikariConfig.apply {
+                this.maximumPoolSize = maximumPoolSize
+            }
         )
-
-        username = databaseUsername
-        password = databasePassword
-
-        maximumPoolSize = 2
-        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
-        connectionTimeout = Duration.ofSeconds(5).toMillis()
-        maxLifetime = Duration.ofMinutes(30).toMillis()
-        idleTimeout = Duration.ofMinutes(10).toMillis()
-    }
-
-    fun dataSource(maximumPoolSize: Int = 2) = HikariDataSource(hikariConfig.apply {
-        this.maximumPoolSize = maximumPoolSize
-    })
 }
 
-private enum class DbUser(private val dbUserPrefix: String) {
-    SPLEIS("DATABASE"), AVSTEMMING("DATABASE_SPLEIS_AVSTEMMING"), MIGRATE("DATABASE_SPLEIS_MIGRATE");
+private enum class DbUser(
+    private val dbUserPrefix: String
+) {
+    SPLEIS("DATABASE"),
+    AVSTEMMING("DATABASE_SPLEIS_AVSTEMMING"),
+    MIGRATE("DATABASE_SPLEIS_MIGRATE");
 
     override fun toString() = dbUserPrefix
 }

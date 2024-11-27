@@ -1,8 +1,8 @@
 package no.nav.helse.dto.deserialisering
 
 import no.nav.helse.dto.MaksdatobestemmelseDto
-import java.time.LocalDate
 import no.nav.helse.dto.PeriodeDto
+import java.time.LocalDate
 
 data class MaksdatoresultatInnDto(
     val vurdertTilOgMed: LocalDate,

@@ -56,8 +56,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
-
+internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere første periode - flere ag - ag 1`() {
         nyeVedtak(januar, a1, a2)
@@ -332,12 +331,12 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt for ag 1 mens senere periode for ag 1 er til utbetaling`() {
         /* Rekkefølge ting burde skje i:
-        * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
-        * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
-        * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
-        * */
+         * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
+         * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
+         * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
+         * */
         nyttVedtak(januar, orgnummer = a1)
-        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null )
+        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
@@ -485,15 +484,21 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(17.januar, Feriedag),
-            ManuellOverskrivingDag(18.januar, Feriedag)
-        ), a1)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(17.januar, Feriedag),
+                ManuellOverskrivingDag(18.januar, Feriedag)
+            ),
+            a1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(18.januar, Sykedag, 100)
-        ), a1)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(18.januar, Sykedag, 100)
+            ),
+            a1
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -510,7 +515,13 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         }
         inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
             assertEquals(3, utbetalinger.size)
-            assertEquals(100, utbetalinger.last().inspektør.utbetalingstidslinje[18.januar].økonomi.inspektør.totalGrad)
+            assertEquals(
+                100,
+                utbetalinger
+                    .last()
+                    .inspektør.utbetalingstidslinje[18.januar]
+                    .økonomi.inspektør.totalGrad
+            )
         }
         inspektør(a2).utbetalinger(2.vedtaksperiode).also { utbetalinger ->
             assertEquals(1, utbetalinger.size)

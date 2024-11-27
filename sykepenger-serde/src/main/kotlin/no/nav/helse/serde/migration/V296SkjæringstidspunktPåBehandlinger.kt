@@ -3,10 +3,13 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V296SkjæringstidspunktPåBehandlinger: JsonMigration(version = 296) {
+internal class V296SkjæringstidspunktPåBehandlinger : JsonMigration(version = 296) {
     override val description = "skjæringstidspunkt på behandlinger"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 migrerVedtaksperiode(periode)
@@ -20,9 +23,10 @@ internal class V296SkjæringstidspunktPåBehandlinger: JsonMigration(version = 2
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
         var gjeldendeSkjæringstidspunkt: String = vedtaksperiode.path("skjæringstidspunkt").asText()
         vedtaksperiode.path("behandlinger").reversed().forEach { behandling ->
-            val skjæringstidspunkt = behandling.path("endringer").reversed().firstNotNullOfOrNull { endring ->
-                endring.path("skjæringstidspunkt").takeIf(JsonNode::isTextual)?.asText()
-            }
+            val skjæringstidspunkt =
+                behandling.path("endringer").reversed().firstNotNullOfOrNull { endring ->
+                    endring.path("skjæringstidspunkt").takeIf(JsonNode::isTextual)?.asText()
+                }
 
             if (skjæringstidspunkt != null) {
                 gjeldendeSkjæringstidspunkt = skjæringstidspunkt

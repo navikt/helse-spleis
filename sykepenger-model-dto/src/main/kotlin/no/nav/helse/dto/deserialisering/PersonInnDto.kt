@@ -1,7 +1,7 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDateTime
 import no.nav.helse.dto.AlderDto
+import java.time.LocalDateTime
 
 data class PersonInnDto(
     val fødselsnummer: String,

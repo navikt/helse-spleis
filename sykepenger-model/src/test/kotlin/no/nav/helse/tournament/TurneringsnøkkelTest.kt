@@ -1,8 +1,5 @@
 package no.nav.helse.tournament
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
@@ -37,6 +34,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class TurneringsnøkkelTest {
     private val enDag = LocalDate.now()
@@ -63,7 +63,7 @@ internal class TurneringsnøkkelTest {
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
     }
 
-    private sealed class TestHendelse() : SykdomshistorikkHendelse {
+    private sealed class TestHendelse : SykdomshistorikkHendelse {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde
@@ -73,6 +73,7 @@ internal class TurneringsnøkkelTest {
 
         // Objects impersonating real-life sources of sickness timeline days
         object Inntektsmelding : TestHendelse()
+
         object Søknad : TestHendelse()
 
         override fun oppdaterFom(other: Periode): Periode {

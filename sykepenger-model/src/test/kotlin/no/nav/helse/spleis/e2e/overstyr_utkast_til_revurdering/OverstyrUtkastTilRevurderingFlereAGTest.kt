@@ -26,7 +26,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Test
 
 internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() {
-
     private companion object {
         private val AG1 = "123456789"
         private val AG2 = "987612345"

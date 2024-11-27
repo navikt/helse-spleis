@@ -38,8 +38,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
-
+internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
     @Test
     fun `overstyr utkast til revurdering av periode`() {
         nyttVedtak(januar)
@@ -109,7 +108,8 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         // 12694 = round((25000 * 12) / 260) * 11 (11 nav-dager i januar)
         assertEquals(12694, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
@@ -128,7 +128,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 50000.årlig,
+            beregnetInntekt = 50000.årlig
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

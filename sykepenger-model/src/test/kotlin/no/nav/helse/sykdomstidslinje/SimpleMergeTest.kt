@@ -114,14 +114,17 @@ internal class SimpleMergeTest {
         assertEquals(6, actual.filterIsInstance<UkjentDag>().size)
     }
 
-    private fun assertSize(expected: Int, sykdomstidslinje: Sykdomstidslinje) {
+    private fun assertSize(
+        expected: Int,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {
         var count = 0
         sykdomstidslinje.forEach { _ -> count++ }
         assertEquals(expected, count)
 
         count = 0
         for (dag: Dag in sykdomstidslinje) {
-             count++
+            count++
         }
         assertEquals(expected, count)
     }

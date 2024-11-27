@@ -1,8 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Infotrygd
@@ -14,9 +11,11 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class InfotrygdInntektsopplysningTest {
-
     private companion object {
         private const val ORGNR = "123456789"
         private val DATO = 1.januar
@@ -44,11 +43,18 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(Inntektsopplysning("ag1", DATO, 123.6667.månedlig, true, null), Inntektsopplysning("ag1", DATO, 123.6667.månedlig, true, null))
     }
 
-    private fun assertEquals(one: Inntektsopplysning, two: Inntektsopplysning) {
+    private fun assertEquals(
+        one: Inntektsopplysning,
+        two: Inntektsopplysning
+    ) {
         assertTrue(one.funksjoneltLik(two))
         assertTrue(two.funksjoneltLik(one))
     }
-    private fun assertNotEquals(one: Inntektsopplysning, two: Inntektsopplysning) {
+
+    private fun assertNotEquals(
+        one: Inntektsopplysning,
+        two: Inntektsopplysning
+    ) {
         assertFalse(one.funksjoneltLik(two))
         assertFalse(two.funksjoneltLik(one))
     }
@@ -58,13 +64,14 @@ internal class InfotrygdInntektsopplysningTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val inntektsopplysning1 = Infotrygd(
-            id = inntektID,
-            dato = 1.januar,
-            hendelseId = hendelseId,
-            beløp = 25000.månedlig,
-            tidsstempel = tidsstempel
-        )
+        val inntektsopplysning1 =
+            Infotrygd(
+                id = inntektID,
+                dato = 1.januar,
+                hendelseId = hendelseId,
+                beløp = 25000.månedlig,
+                tidsstempel = tidsstempel
+            )
         assertEquals(
             inntektsopplysning1,
             Infotrygd(
@@ -127,6 +134,5 @@ internal class InfotrygdInntektsopplysningTest {
         )
     }
 
-    private fun inntektsopplysning(refusjonTom: LocalDate? = null) =
-        Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
+    private fun inntektsopplysning(refusjonTom: LocalDate? = null) = Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
 }

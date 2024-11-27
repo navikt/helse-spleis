@@ -23,45 +23,49 @@ internal class DatadelingMediator(
             keyValue("hendelseId", message.meldingsporing.id),
             keyValue("fødselsnummer", message.meldingsporing.fødselsnummer)
         )
-        val aktivitetMap = aktivitetslogg.aktiviteter.map { aktivitet ->
-            when (aktivitet) {
-                is Aktivitet.Behov -> aktivitetMap("BEHOV", aktivitet)
-                is Aktivitet.Info -> aktivitetMap("INFO", aktivitet)
-                is Aktivitet.LogiskFeil -> aktivitetMap("LOGISK_FEIL", aktivitet)
-                is Aktivitet.FunksjonellFeil -> {
-                    if (aktivitet.kode.avviklet) sikkerlogg.warn("${aktivitet.kode} er ikke avviklet, men i bruk i spleis. Endre?")
-                    aktivitetMap("FUNKSJONELL_FEIL", aktivitet) + mapOf("varselkode" to aktivitet.kode.name)
-                }
-                is Aktivitet.Varsel -> {
-                    if (aktivitet.kode.avviklet) sikkerlogg.warn("${aktivitet.kode} er ikke avviklet, men i bruk i spleis. Endre?")
-                    aktivitetMap("VARSEL", aktivitet) + mapOf("varselkode" to aktivitet.kode.name)
+        val aktivitetMap =
+            aktivitetslogg.aktiviteter.map { aktivitet ->
+                when (aktivitet) {
+                    is Aktivitet.Behov -> aktivitetMap("BEHOV", aktivitet)
+                    is Aktivitet.Info -> aktivitetMap("INFO", aktivitet)
+                    is Aktivitet.LogiskFeil -> aktivitetMap("LOGISK_FEIL", aktivitet)
+                    is Aktivitet.FunksjonellFeil -> {
+                        if (aktivitet.kode.avviklet) sikkerlogg.warn("${aktivitet.kode} er ikke avviklet, men i bruk i spleis. Endre?")
+                        aktivitetMap("FUNKSJONELL_FEIL", aktivitet) + mapOf("varselkode" to aktivitet.kode.name)
+                    }
+                    is Aktivitet.Varsel -> {
+                        if (aktivitet.kode.avviklet) sikkerlogg.warn("${aktivitet.kode} er ikke avviklet, men i bruk i spleis. Endre?")
+                        aktivitetMap("VARSEL", aktivitet) + mapOf("varselkode" to aktivitet.kode.name)
+                    }
                 }
             }
-        }
         context.publish(message.meldingsporing.fødselsnummer, aktivitetMap.toJson())
     }
 
-    private fun aktivitetMap(nivå: String, aktivitet: Aktivitet) =
-        mapOf(
-            "id" to aktivitet.id,
-            "nivå" to nivå,
-            "melding" to aktivitet.melding,
-            "tidsstempel" to aktivitet.tidsstempel,
-            "kontekster" to aktivitet.kontekster.map {
+    private fun aktivitetMap(
+        nivå: String,
+        aktivitet: Aktivitet
+    ) = mapOf(
+        "id" to aktivitet.id,
+        "nivå" to nivå,
+        "melding" to aktivitet.melding,
+        "tidsstempel" to aktivitet.tidsstempel,
+        "kontekster" to
+            aktivitet.kontekster.map {
                 mapOf(
                     "konteksttype" to it.kontekstType,
                     "kontekstmap" to it.kontekstMap
                 )
             }
-        )
+    )
 
-    private fun Collection<Map<String, Any>>.toJson(): String {
-        return JsonMessage.newMessage(
-            "aktivitetslogg_ny_aktivitet",
-            mapOf(
-                "fødselsnummer" to message.meldingsporing.fødselsnummer,
-                "aktiviteter" to this
-            )
-        ).toJson()
-    }
+    private fun Collection<Map<String, Any>>.toJson(): String =
+        JsonMessage
+            .newMessage(
+                "aktivitetslogg_ny_aktivitet",
+                mapOf(
+                    "fødselsnummer" to message.meldingsporing.fødselsnummer,
+                    "aktiviteter" to this
+                )
+            ).toJson()
 }

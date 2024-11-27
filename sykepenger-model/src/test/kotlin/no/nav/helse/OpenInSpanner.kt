@@ -1,6 +1,15 @@
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.dto.tilSpannerPersonDto
+import no.nav.helse.inspectors.personLogg
+import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.TestWatcher
 import java.awt.Desktop
 import java.io.IOException
 import java.net.URI
@@ -11,15 +20,6 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.dto.tilSpannerPersonDto
-import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.TestWatcher
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
@@ -27,14 +27,17 @@ import org.junit.jupiter.api.extension.TestWatcher
 annotation class OpenInSpanner
 
 class SpannerEtterTestInterceptor : TestWatcher {
-
     companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
+        private val objectMapper =
+            jacksonObjectMapper()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
     }
 
-    override fun testFailed(context: ExtensionContext?, cause: Throwable?) {
+    override fun testFailed(
+        context: ExtensionContext?,
+        cause: Throwable?
+    ) {
         val errorMsg = cause.toString()
         openTheSpanner(context, errorMsg)
     }
@@ -43,7 +46,10 @@ class SpannerEtterTestInterceptor : TestWatcher {
         openTheSpanner(context)
     }
 
-    internal fun openTheSpanner(context: ExtensionContext?, errorMsg: String? = null) {
+    internal fun openTheSpanner(
+        context: ExtensionContext?,
+        errorMsg: String? = null
+    ) {
         // fisk ut person på et vis og opprett SpannerDto
         val person = context!!.testInstance.get().get("person") as Person
         val spannerPerson = person.dto().tilSpannerPersonDto()
@@ -63,28 +69,36 @@ class SpannerEtterTestInterceptor : TestWatcher {
         åpneBrowser(uri)
     }
 
-    private fun lastOppTilSpannerish(json: String, testnavn: String, errorMsg: String?): URI {
+    private fun lastOppTilSpannerish(
+        json: String,
+        testnavn: String,
+        errorMsg: String?
+    ): URI {
         val uuid = UUID.randomUUID()
         HttpClient.newHttpClient().use { client ->
             // Må laste opp mot intern.dev pga. en Microsoft-redirect på ansatt.dev. Så må ha naisdevicen på
-            val request = HttpRequest.newBuilder(URI("https://spannerish.intern.dev.nav.no/api/person/$uuid"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build()
+            val request =
+                HttpRequest
+                    .newBuilder(URI("https://spannerish.intern.dev.nav.no/api/person/$uuid"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build()
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-            check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?"}
+            check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?" }
         }
         // Litt gøyale query parametre til Spannerish
         val queryString = mapOf("testnavn" to testnavn, "error" to errorMsg).queryString
 
         // Men vi kan se på den i ansatt.dev da, så kan den deles med folk uten naisdevice
-        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid${queryString}")
+        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid$queryString")
     }
 
-    private val Map<String, String?>.queryString get() = this
-        .filterNot { (_, value) -> value.isNullOrBlank() }.entries
-        .joinToString("&") { (key, value) -> "${key}=${URLEncoder.encode(value, "UTF-8")}" }
-        .let { if (it.isBlank()) "" else "?$it" }
+    private val Map<String, String?>.queryString get() =
+        this
+            .filterNot { (_, value) -> value.isNullOrBlank() }
+            .entries
+            .joinToString("&") { (key, value) -> "$key=${URLEncoder.encode(value, "UTF-8")}" }
+            .let { if (it.isBlank()) "" else "?$it" }
 
     private fun åpneBrowser(uri: URI) {
         if (Desktop.isDesktopSupported()) {
@@ -103,45 +117,51 @@ class SpannerEtterTestInterceptor : TestWatcher {
 
     private fun SugUtAlleAktivitetene(aktivitetslogg: Aktivitetslogg): String {
         val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-        val liste = aktivitetslogg.aktiviteter.map {
-            when (it) {
-                is Aktivitet.Behov -> AktivitetDto(
-                    id = 0,
-                    nivå = "BEHOV",
-                    tekst = it.melding,
-                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                )
-                is Aktivitet.FunksjonellFeil -> AktivitetDto(
-                    id = 0,
-                    nivå = "FUNKSJONELL_FEIL",
-                    tekst = it.melding,
-                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                )
-                is Aktivitet.Info -> AktivitetDto(
-                    id = 0,
-                    nivå = "INFO",
-                    tekst = it.melding,
-                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                )
-                is Aktivitet.LogiskFeil -> AktivitetDto(
-                    id = 0,
-                    nivå = "LOGISK_FEIL",
-                    tekst = it.melding,
-                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                )
-                is Aktivitet.Varsel -> AktivitetDto(
-                    id = 0,
-                    nivå = "VARSEL",
-                    tekst = it.melding,
-                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, {it.kontekstMap})
-                )
+        val liste =
+            aktivitetslogg.aktiviteter.map {
+                when (it) {
+                    is Aktivitet.Behov ->
+                        AktivitetDto(
+                            id = 0,
+                            nivå = "BEHOV",
+                            tekst = it.melding,
+                            tidsstempel = it.tidsstempel.format(tidsstempelformat),
+                            kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
+                        )
+                    is Aktivitet.FunksjonellFeil ->
+                        AktivitetDto(
+                            id = 0,
+                            nivå = "FUNKSJONELL_FEIL",
+                            tekst = it.melding,
+                            tidsstempel = it.tidsstempel.format(tidsstempelformat),
+                            kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
+                        )
+                    is Aktivitet.Info ->
+                        AktivitetDto(
+                            id = 0,
+                            nivå = "INFO",
+                            tekst = it.melding,
+                            tidsstempel = it.tidsstempel.format(tidsstempelformat),
+                            kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
+                        )
+                    is Aktivitet.LogiskFeil ->
+                        AktivitetDto(
+                            id = 0,
+                            nivå = "LOGISK_FEIL",
+                            tekst = it.melding,
+                            tidsstempel = it.tidsstempel.format(tidsstempelformat),
+                            kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
+                        )
+                    is Aktivitet.Varsel ->
+                        AktivitetDto(
+                            id = 0,
+                            nivå = "VARSEL",
+                            tekst = it.melding,
+                            tidsstempel = it.tidsstempel.format(tidsstempelformat),
+                            kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
+                        )
+                }
             }
-        }
 
         val aktiviteter = mapOf("aktiviteter" to liste)
         val aktivitetsloggV2 = mapOf("aktivitetsloggV2" to aktiviteter)
@@ -156,5 +176,4 @@ class SpannerEtterTestInterceptor : TestWatcher {
         val tidsstempel: String,
         val kontekster: Map<String, Any>
     )
-
 }

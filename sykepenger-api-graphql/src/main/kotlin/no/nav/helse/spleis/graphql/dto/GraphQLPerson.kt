@@ -10,4 +10,3 @@ data class GraphQLPerson(
     val versjon: Int,
     val vilkarsgrunnlag: List<GraphQLVilkarsgrunnlag>
 )
-

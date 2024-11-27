@@ -6,8 +6,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -21,41 +19,48 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import java.time.LocalDate
+import java.util.UUID
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
-
+internal class UtbetalingshistorikkMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : BehovMessage(packet) {
     companion object {
         internal fun JsonMessage.harStatslønn() = this["@løsning.${Sykepengehistorikk.name}"].any { it["statslønn"].asBoolean() }
-        internal fun JsonMessage.utbetalinger() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { it.path("utbetalteSykeperioder") }
-            .filter(::erGyldigPeriode)
-            .mapNotNull { utbetaling ->
-                val fom = utbetaling["fom"].asLocalDate()
-                val tom = utbetaling["tom"].asLocalDate()
-                when (utbetaling["typeKode"].asText()) {
-                    "0", "1" -> {
-                        val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                        val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
-                        val orgnummer = utbetaling["orgnummer"].asText()
-                        PersonUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
-                    }
-                    "5", "6" -> {
-                        val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                        val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
-                        val orgnummer = utbetaling["orgnummer"].asText()
-                        ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
-                    }
-                    "9" -> Friperiode(fom, tom)
-                    else -> null
-                }
-            }
 
-        private fun erGyldigPeriode(node: JsonNode): Boolean {
-            return if (erUtbetalingsperiode(node)) {
+        internal fun JsonMessage.utbetalinger() =
+            this["@løsning.${Sykepengehistorikk.name}"]
+                .flatMap { it.path("utbetalteSykeperioder") }
+                .filter(::erGyldigPeriode)
+                .mapNotNull { utbetaling ->
+                    val fom = utbetaling["fom"].asLocalDate()
+                    val tom = utbetaling["tom"].asLocalDate()
+                    when (utbetaling["typeKode"].asText()) {
+                        "0", "1" -> {
+                            val grad = utbetaling["utbetalingsGrad"].asInt().prosent
+                            val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
+                            val orgnummer = utbetaling["orgnummer"].asText()
+                            PersonUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
+                        }
+                        "5", "6" -> {
+                            val grad = utbetaling["utbetalingsGrad"].asInt().prosent
+                            val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
+                            val orgnummer = utbetaling["orgnummer"].asText()
+                            ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
+                        }
+                        "9" -> Friperiode(fom, tom)
+                        else -> null
+                    }
+                }
+
+        private fun erGyldigPeriode(node: JsonNode): Boolean =
+            if (erUtbetalingsperiode(node)) {
                 harGyldigUtbetalingsgrad(node) && harGyldigTidsintervall(node)
-            } else harGyldigTidsintervall(node)
-        }
+            } else {
+                harGyldigTidsintervall(node)
+            }
 
         private fun harGyldigUtbetalingsgrad(node: JsonNode): Boolean {
             val utbetalingsGrad = node["utbetalingsGrad"].asInt()
@@ -70,26 +75,29 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
             return fom != null && tom != null && tom >= fom
         }
 
-        internal fun JsonMessage.arbeidskategorikoder() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { element ->
-                element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
-                    utbetaling["fom"].asOptionalLocalDate()?.let {
-                        element.path("arbeidsKategoriKode").asText() to it
+        internal fun JsonMessage.arbeidskategorikoder() =
+            this["@løsning.${Sykepengehistorikk.name}"]
+                .flatMap { element ->
+                    element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
+                        utbetaling["fom"].asOptionalLocalDate()?.let {
+                            element.path("arbeidsKategoriKode").asText() to it
+                        }
                     }
-                }
-            }.sortedBy { (_, dato) -> dato }.toMap()
+                }.sortedBy { (_, dato) -> dato }
+                .toMap()
 
-        internal fun JsonMessage.inntektshistorikk() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { it.path("inntektsopplysninger") }
-            .map { opplysning ->
-                Inntektsopplysning(
-                    sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-                    inntekt = opplysning["inntekt"].asDouble().månedlig,
-                    orgnummer = opplysning["orgnummer"].asText(),
-                    refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
-                    refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
-                )
-            }
+        internal fun JsonMessage.inntektshistorikk() =
+            this["@løsning.${Sykepengehistorikk.name}"]
+                .flatMap { it.path("inntektsopplysninger") }
+                .map { opplysning ->
+                    Inntektsopplysning(
+                        sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
+                        inntekt = opplysning["inntekt"].asDouble().månedlig,
+                        orgnummer = opplysning["orgnummer"].asText(),
+                        refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
+                        refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
+                    )
+                }
     }
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
@@ -120,7 +128,10 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
             besvart = besvart
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: MessageContext
+    ) {
         mediator.behandle(this, utbetalingshistorikk(), context)
     }
 }

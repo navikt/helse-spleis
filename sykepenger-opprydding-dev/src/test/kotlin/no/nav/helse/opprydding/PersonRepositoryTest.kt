@@ -2,9 +2,6 @@ package no.nav.helse.opprydding
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
@@ -13,10 +10,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest: DBTest() {
-
+internal class PersonRepositoryTest : DBTest() {
     private lateinit var personRepository: PersonRepository
 
     @BeforeEach
@@ -36,7 +35,8 @@ internal class PersonRepositoryTest: DBTest() {
 
     private fun runMigration(psql: PostgreSQLContainer<Nothing>): DataSource {
         val dataSource = HikariDataSource(createHikariConfig(psql))
-        Flyway.configure()
+        Flyway
+            .configure()
             .dataSource(dataSource)
             .cleanDisabled(false)
             .locations("classpath:db/migration")
@@ -59,17 +59,15 @@ internal class PersonRepositoryTest: DBTest() {
             maxLifetime = 30001
         }
 
-    private fun finnPerson(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
+    private fun finnPerson(fødselsnummer: String): Int =
+        sessionOf(dataSource).use { session ->
             session.run(queryOf("SELECT COUNT(1) FROM person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
         } ?: 0
-    }
 
-    private fun finnMelding(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
+    private fun finnMelding(fødselsnummer: String): Int =
+        sessionOf(dataSource).use { session ->
             session.run(queryOf("SELECT COUNT(1) FROM melding WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
         } ?: 0
-    }
 
     private fun opprettDummyPerson(fødselsnummer: String) {
         sessionOf(dataSource).transaction {

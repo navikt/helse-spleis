@@ -27,8 +27,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.UtbetalingInntektskilde
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverTest : AbstractDslTest() {
-
     @Test
     fun `ingen historie med inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
@@ -594,7 +593,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 28.desember(2020) til 28.desember(2020),
                 13.januar(2021) til 15.januar(2021),
                 27.januar(2021) til 7.februar(2021)
-            ), INNTEKT
+            ),
+            INNTEKT
         )
 
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
@@ -623,7 +623,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 27.desember(2020) til 27.desember(2020),
                 12.januar(2021) til 14.januar(2021),
                 27.januar(2021) til 7.februar(2021)
-            ), INNTEKT
+            ),
+            INNTEKT
         )
 
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
@@ -652,7 +653,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             listOf(
                 1.januar(2021) til 10.januar(2021),
                 20.januar(2021) til 25.januar(2021)
-            ), INNTEKT, førsteFraværsdag = 5.februar(2021)
+            ),
+            INNTEKT,
+            førsteFraværsdag = 5.februar(2021)
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
@@ -710,6 +713,11 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
+        assertTrue(
+            inspektør
+                .vedtaksperioder(2.vedtaksperiode)
+                .inspektør.utbetalingstidslinje.inspektør
+                .erNavdag(18.oktober(2021))
+        )
     }
 }

@@ -17,7 +17,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class SendTilGosysFlaggSattE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `søknad med flagg sendTilGosys ignoreres og kastes ut`() {
         håndterSykmelding(januar)

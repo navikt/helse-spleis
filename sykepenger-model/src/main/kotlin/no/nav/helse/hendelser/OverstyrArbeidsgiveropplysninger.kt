@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -14,6 +11,9 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.over
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.refusjon.Refusjonsservitør
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class OverstyrArbeidsgiveropplysninger(
     meldingsreferanseId: UUID,
@@ -21,15 +21,17 @@ class OverstyrArbeidsgiveropplysninger(
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime,
     private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
-) : Hendelse, OverstyrInntektsgrunnlag {
+) : Hendelse,
+    OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = Avsender.SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = false
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = Avsender.SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = false
+        )
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
@@ -42,7 +44,11 @@ class OverstyrArbeidsgiveropplysninger(
         return arbeidsgiveropplysninger.overstyrTilkommendeInntekter(nyInntektUnderveis, skjæringstidspunkt, kilde)
     }
 
-    internal fun arbeidsgiveropplysningerKorrigert(person: Person, orgnummer: String, hendelseId: UUID) {
+    internal fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        orgnummer: String,
+        hendelseId: UUID
+    ) {
         if (arbeidsgiveropplysninger.any { it.gjelder(orgnummer) }) {
             person.arbeidsgiveropplysningerKorrigert(
                 PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
@@ -62,8 +68,11 @@ class OverstyrArbeidsgiveropplysninger(
         val (refusjonstidslinjeFraOverstyring, strekkbar) = refusjonstidslinjer[orgnummer] ?: return null
         if (refusjonstidslinjeFraOverstyring.isEmpty()) return null
         val refusjonstidslinje =
-            if (strekkbar) refusjonstidslinjeFraOverstyring
-            else refusjonstidslinjeFraOverstyring + eksisterendeRefusjonstidslinje.fraOgMed(refusjonstidslinjeFraOverstyring.last().dato.nesteDag)
+            if (strekkbar) {
+                refusjonstidslinjeFraOverstyring
+            } else {
+                refusjonstidslinjeFraOverstyring + eksisterendeRefusjonstidslinje.fraOgMed(refusjonstidslinjeFraOverstyring.last().dato.nesteDag)
+            }
         return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = refusjonstidslinje)
     }
 }

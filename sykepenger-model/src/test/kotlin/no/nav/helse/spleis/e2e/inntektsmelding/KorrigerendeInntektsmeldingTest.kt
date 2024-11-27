@@ -49,8 +49,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
-
+internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
         nyttVedtak(januar)
@@ -73,7 +72,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList())
         )
 
         assertVarsel(RV_IM_4)
@@ -111,9 +110,11 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-        assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-            it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-        })
+        assertTrue(
+            utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
+            }
+        )
         assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
         assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
@@ -133,9 +134,11 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-        assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-            it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-        })
+        assertTrue(
+            utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
+            }
+        )
         assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
     }
 
@@ -155,9 +158,11 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje[1.januar] is Utbetalingsdag.Arbeidsdag)
         assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
-        assertTrue(utbetalingstidslinje.subset(2.januar til 17.januar).all {
-            it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-        })
+        assertTrue(
+            utbetalingstidslinje.subset(2.januar til 17.januar).all {
+                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
+            }
+        )
         assertEquals(1431.daglig, utbetalingstidslinje[18.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
         assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
@@ -166,7 +171,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`()  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
@@ -182,7 +187,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`()  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`() {
         nyttVedtak(10.januar til 31.januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
@@ -301,7 +306,12 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-        assertEquals(INNTEKT * 1.1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.omregnetÅrsinntekt)
+        assertEquals(
+            INNTEKT * 1.1,
+            inspektør
+                .vilkårsgrunnlag(1.vedtaksperiode)!!
+                .inspektør.inntektsgrunnlag.inspektør.omregnetÅrsinntekt
+        )
     }
 
     @Test

@@ -1,7 +1,5 @@
 package no.nav.helse.person.beløp
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Arbeidsgiver
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Saksbehandler
@@ -29,9 +27,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class BeløpstidslinjeTest {
-
     @Test
     fun `fylle en hullete beløpstidslinje`() {
         val beløpstidslinje1 = (Arbeidsgiver oppgir 1000.daglig hele januar)
@@ -100,15 +99,15 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
-    fun `Du haver to stykk beløpstidslinje, som du ønsker forent`()  {
+    fun `Du haver to stykk beløpstidslinje, som du ønsker forent`() {
         val gammelTidslinje = (Arbeidsgiver oppgir 31000.månedlig hele januar) og (Arbeidsgiver oppgir 0.daglig hele mars)
 
         val nyTidslinje = (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars)
 
         val forventetTidslinje =
             (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 19.januar) og
-            (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
-            (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
+                (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
+                (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
 
         assertEquals(forventetTidslinje, gammelTidslinje og nyTidslinje)
     }
@@ -214,37 +213,47 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun dto() {
-        val tidslinje = (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
+        val tidslinje =
+            (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
                 (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
                 (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
 
         val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId, Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
-        assertEquals(BeløpstidslinjeDto(
-            perioder = listOf(
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 1.februar,
-                    tom = 1.februar,
-                    dagligBeløp = 500.0,
-                    kilde = kilde
-                ),
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 2.februar,
-                    tom = 10.februar,
-                    dagligBeløp = 250.0,
-                    kilde = kilde
-                ),
-                BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                    fom = 11.februar,
-                    tom = 12.februar,
-                    dagligBeløp = 500.0,
-                    kilde = kilde
-                )
-            )
-        ), tidslinje.dto())
+        assertEquals(
+            BeløpstidslinjeDto(
+                perioder =
+                    listOf(
+                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                            fom = 1.februar,
+                            tom = 1.februar,
+                            dagligBeløp = 500.0,
+                            kilde = kilde
+                        ),
+                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                            fom = 2.februar,
+                            tom = 10.februar,
+                            dagligBeløp = 250.0,
+                            kilde = kilde
+                        ),
+                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                            fom = 11.februar,
+                            tom = 12.februar,
+                            dagligBeløp = 500.0,
+                            kilde = kilde
+                        )
+                    )
+            ),
+            tidslinje.dto()
+        )
     }
 
     internal companion object {
-        internal fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
+        internal fun assertBeløpstidslinje(
+            beløpstidslinje: Beløpstidslinje,
+            periode: Periode,
+            beløp: Inntekt,
+            meldingsreferanseId: UUID? = null
+        ) {
             assertTrue(beløpstidslinje.isNotEmpty())
             assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
             assertTrue(beløpstidslinje.all { it.beløp == beløp })

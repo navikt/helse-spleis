@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -22,11 +22,11 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Test
 
-internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
+internal class AvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
     /*
         Hvis vi har en kort periode som har endt opp i AVSLUTTET_UTEN_UTBETALING vil alle etterkommende perioder
         bli stuck med å vente på den korte perioden. Da vil de aldri komme seg videre og til slutt time ut
-    */
+     */
 
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
@@ -37,7 +37,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
@@ -70,13 +70,13 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
-        håndterSøknad(3.januar  til 10.januar)
+        håndterSøknad(3.januar til 10.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars))
@@ -126,10 +126,10 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
         håndterInntektsmelding(
             listOf(
-                1.januar til 3.januar, //3
+                1.januar til 3.januar, // 3
                 4.januar til 5.januar, // 2
                 // 6. og 7. januar er helg
-                8.januar til 12.januar,// 5
+                8.januar til 12.januar, // 5
                 13.januar til 18.januar // 6
             ),
             8.januar,

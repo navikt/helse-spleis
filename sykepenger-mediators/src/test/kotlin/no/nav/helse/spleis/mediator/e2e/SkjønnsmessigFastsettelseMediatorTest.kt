@@ -8,7 +8,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Test
 
 internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `skjønnsmessig fastsettelse uten endring i beløp`() {
         vedtaOgSkjønnsmessigFastsett(INNTEKT * 12)
@@ -62,12 +61,13 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
         sendUtbetaling()
         sendSkjønnsmessigFastsettelse(
             skjæringstidspunkt = 1.januar,
-            skjønnsmessigFastsatt = listOf(
-                SkjønnsmessigFastsatt(
-                    organisasjonsnummer = ORGNUMMER,
-                    årlig = årlig
+            skjønnsmessigFastsatt =
+                listOf(
+                    SkjønnsmessigFastsatt(
+                        organisasjonsnummer = ORGNUMMER,
+                        årlig = årlig
+                    )
                 )
-            )
         )
         sendYtelser(0)
     }

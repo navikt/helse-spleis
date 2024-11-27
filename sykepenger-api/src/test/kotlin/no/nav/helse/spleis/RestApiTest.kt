@@ -2,10 +2,6 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.http.HttpStatusCode
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
@@ -24,6 +20,10 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class RestApiTest {
     private companion object {
@@ -42,27 +42,32 @@ internal class RestApiTest {
     }
 
     @Test
-    fun sporingapi() = blackboxTestApplication {
-        "/api/vedtaksperioder".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
-    }
+    fun sporingapi() =
+        blackboxTestApplication {
+            "/api/vedtaksperioder".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
+        }
 
     @Test
-    fun `hent personJson med fnr`() = blackboxTestApplication{
-        "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
-    }
+    fun `hent personJson med fnr`() =
+        blackboxTestApplication {
+            "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
+        }
 
     @Test
-    fun `finner ikke melding`() = blackboxTestApplication {
-        "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
-    }
+    fun `finner ikke melding`() =
+        blackboxTestApplication {
+            "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
+        }
 
     @Test
-    fun `finner melding`() = blackboxTestApplication {
-        "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
-    }
+    fun `finner melding`() =
+        blackboxTestApplication {
+            "/api/hendelse-json/$MELDINGSREFERANSE".httpGet(HttpStatusCode.OK)
+        }
 
     @Test
-    fun `request med manglende eller feil access token`() = blackboxTestApplication {
+    fun `request med manglende eller feil access token`() =
+        blackboxTestApplication {
             val query = """
             {
                 person(fnr: \"${UNG_PERSON_FNR}\") { } 
@@ -73,11 +78,11 @@ internal class RestApiTest {
 
             val annenIssuer = Issuer("annen")
 
-        post(body, HttpStatusCode.Unauthorized, accessToken = null)
-        post(body, HttpStatusCode.Unauthorized, accessToken = issuer.createToken("feil_audience"))
-        post(body, HttpStatusCode.Unauthorized, accessToken = annenIssuer.createToken())
-        post(body, HttpStatusCode.OK, accessToken = issuer.createToken(Issuer.AUDIENCE))
-    }
+            post(body, HttpStatusCode.Unauthorized, accessToken = null)
+            post(body, HttpStatusCode.Unauthorized, accessToken = issuer.createToken("feil_audience"))
+            post(body, HttpStatusCode.Unauthorized, accessToken = annenIssuer.createToken())
+            post(body, HttpStatusCode.OK, accessToken = issuer.createToken(Issuer.AUDIENCE))
+        }
 
     private fun blackboxTestApplication(testblokk: suspend Applikasjonsservere.BlackboxTestContext.() -> Unit) {
         appservere.kjørTest(::opprettTestdata, testblokk)
@@ -88,26 +93,29 @@ internal class RestApiTest {
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
         val vedtaksperiodeId = UUID.randomUUID()
-        val sykmelding = Sykmelding(
-            meldingsreferanseId = vedtaksperiodeId,
-            orgnummer = ORGNUMMER,
-            sykeperioder = sykeperioder
-        )
-        val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = vedtaksperiodeId,
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = 12000.månedlig,
-                opphørsdato = null
-            ),
-            orgnummer = ORGNUMMER,
-            beregnetInntekt = 12000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harFlereInntektsmeldinger = false,
-            harOpphørAvNaturalytelser = false,
-            avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
-            mottatt = LocalDateTime.now()
-        )
+        val sykmelding =
+            Sykmelding(
+                meldingsreferanseId = vedtaksperiodeId,
+                orgnummer = ORGNUMMER,
+                sykeperioder = sykeperioder
+            )
+        val inntektsmelding =
+            Inntektsmelding(
+                meldingsreferanseId = vedtaksperiodeId,
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        beløp = 12000.månedlig,
+                        opphørsdato = null
+                    ),
+                orgnummer = ORGNUMMER,
+                beregnetInntekt = 12000.månedlig,
+                arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+                harFlereInntektsmeldinger = false,
+                harOpphørAvNaturalytelser = false,
+                avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
+                mottatt = LocalDateTime.now()
+            )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.håndter(sykmelding, Aktivitetslogg())
         person.håndter(inntektsmelding, Aktivitetslogg())
@@ -115,14 +123,28 @@ internal class RestApiTest {
         testDataSource.ds.lagreHendelse(MELDINGSREFERANSE)
     }
 
-    private fun DataSource.lagrePerson(fødselsnummer: String, person: Person) {
+    private fun DataSource.lagrePerson(
+        fødselsnummer: String,
+        person: Person
+    ) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(this, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
-            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
-                fødselsnummer.toLong(), personId!!).asExecute)
-
+            val personId =
+                it.run(
+                    queryOf(
+                        "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                        fødselsnummer.toLong(),
+                        serialisertPerson.skjemaVersjon,
+                        serialisertPerson.json
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            it.run(
+                queryOf(
+                    "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
+                    fødselsnummer.toLong(),
+                    personId!!
+                ).asExecute
+            )
         }
     }
 

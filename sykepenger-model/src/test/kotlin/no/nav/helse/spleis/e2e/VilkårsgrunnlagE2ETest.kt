@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -26,9 +25,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `skjæringstidspunkt måneden før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(26.januar, 8.februar), orgnummer = a1)
@@ -37,26 +36,36 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar), orgnummer = a2)
         håndterSøknad(6.februar til 28.februar, orgnummer = a2)
         håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a2,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    ArbeidsgiverInntekt(a1, listOf(
-                        desember(2017).lønnsinntekt(),
-                        november(2017).lønnsinntekt(),
-                        oktober(2017).lønnsinntekt()
-                    )),
-                    ArbeidsgiverInntekt(a2, listOf(
-                        desember(2017).lønnsinntekt(),
-                        november(2017).lønnsinntekt(),
-                        oktober(2017).lønnsinntekt(),
-                    )),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            ArbeidsgiverInntekt(
+                                a1,
+                                listOf(
+                                    desember(2017).lønnsinntekt(),
+                                    november(2017).lønnsinntekt(),
+                                    oktober(2017).lønnsinntekt()
+                                )
+                            ),
+                            ArbeidsgiverInntekt(
+                                a2,
+                                listOf(
+                                    desember(2017).lønnsinntekt(),
+                                    november(2017).lønnsinntekt(),
+                                    oktober(2017).lønnsinntekt()
+                                )
+                            )
+                        )
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
                 )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
@@ -67,25 +76,35 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    ArbeidsgiverInntekt(a1, listOf(
-                        desember(2017).lønnsinntekt(INNTEKT),
-                        november(2017).lønnsinntekt(INNTEKT),
-                        oktober(2017).lønnsinntekt(INNTEKT)
-                    )),
-                    ArbeidsgiverInntekt(a2, listOf(
-                        desember(2017).lønnsinntekt(2500.månedlig),
-                        november(2017).lønnsinntekt((-3000).månedlig),
-                    )),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            ArbeidsgiverInntekt(
+                                a1,
+                                listOf(
+                                    desember(2017).lønnsinntekt(INNTEKT),
+                                    november(2017).lønnsinntekt(INNTEKT),
+                                    oktober(2017).lønnsinntekt(INNTEKT)
+                                )
+                            ),
+                            ArbeidsgiverInntekt(
+                                a2,
+                                listOf(
+                                    desember(2017).lønnsinntekt(2500.månedlig),
+                                    november(2017).lønnsinntekt((-3000).månedlig)
+                                )
+                            )
+                        )
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
                 )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
@@ -96,15 +115,16 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
         håndterSøknad(1.januar til 17.januar)
 
-        val arbeidsgiverperioder = listOf(
-            1.januar til 16.januar
-        )
+        val arbeidsgiverperioder =
+            listOf(
+                1.januar til 16.januar
+            )
 
         håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList())
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -118,8 +138,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK
         )
 
         assertTilstander(
@@ -128,7 +148,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE
         )
     }
-    
+
     @Test
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
@@ -164,5 +184,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     private fun assertVilkårsgrunnlagFraSpleisFor(vararg skjæringstidspunkt: LocalDate) {
         assertEquals(skjæringstidspunkt.toSet(), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
     }
+
     private fun assertIngenVilkårsgrunnlagFraSpleis() = assertVilkårsgrunnlagFraSpleisFor()
 }

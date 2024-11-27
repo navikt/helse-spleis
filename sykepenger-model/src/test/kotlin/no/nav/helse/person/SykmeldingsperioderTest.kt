@@ -1,7 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -17,15 +15,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class SykmeldingsperioderTest {
+    private val hendelsefabrikk =
+        ArbeidsgiverHendelsefabrikk(
+            organisasjonsnummer = "ORGNUMMER"
+        )
 
-    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "ORGNUMMER"
-    )
-
-    private fun Sykmeldingsperioder.lagre(periode: Periode) =
-        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
+    private fun Sykmeldingsperioder.lagre(periode: Periode) = lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
 
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {
@@ -220,20 +219,25 @@ internal class SykmeldingsperioderTest {
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate
-    ): Inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beregnetInntekt = Inntekt.INGEN,
-        førsteFraværsdag = førsteFraværsdag,
-        refusjon = Inntektsmelding.Refusjon(null, null),
-        harOpphørAvNaturalytelser = false,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, Aktivitetslogg())
+    ): Inntektsmelding =
+        hendelsefabrikk
+            .lagInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = Inntekt.INGEN,
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = Inntektsmelding.Refusjon(null, null),
+                harOpphørAvNaturalytelser = false,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            ).also {
+                it.valider(
+                    object : Inntektsmelding.Valideringsgrunnlag {
+                        override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
 
-    }
+                        override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+                    },
+                    Aktivitetslogg()
+                )
+            }
 
     fun Sykmeldingsperioder.perioder() = view().perioder
 }

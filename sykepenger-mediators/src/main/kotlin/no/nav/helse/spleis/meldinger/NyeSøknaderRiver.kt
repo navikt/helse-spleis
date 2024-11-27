@@ -20,8 +20,12 @@ internal class NyeSøknaderRiver(
         message.interestedIn("fremtidig_søknad")
     }
 
-    override fun createMessage(packet: JsonMessage) = NySøknadMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fnr"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        NySøknadMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fnr"].asText()
+            )
+        )
 }

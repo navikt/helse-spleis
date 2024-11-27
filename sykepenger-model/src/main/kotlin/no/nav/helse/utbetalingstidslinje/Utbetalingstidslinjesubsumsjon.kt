@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`Trygderettens kjennelse 2006-4023`
@@ -23,6 +22,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserPleiepenger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserSvangerskapspenger
 import no.nav.helse.økonomi.Dekningsgrunnlagsubsumsjon
 import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
 import kotlin.collections.last
 
 internal class Utbetalingstidslinjesubsumsjon(
@@ -30,7 +30,6 @@ internal class Utbetalingstidslinjesubsumsjon(
     private val sykdomstidslinje: Sykdomstidslinje,
     utbetalingstidslinje: Utbetalingstidslinje
 ) {
-
     // private val tidslinjesubsumsjonsformat = mutableListOf<Tidslinjedag>()
     private val tidslinjesubsumsjonsformat = sykdomstidslinje.subsumsjonsformat()
     private val arbeidsgiverperiodedager = mutableListOf<Periode>()
@@ -54,9 +53,15 @@ internal class Utbetalingstidslinjesubsumsjon(
                 }
                 is Utbetalingsdag.AvvistDag -> {
                     if (AndreYtelserAap in dag.begrunnelser) aap.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
-                    val andreYtelser = setOf(
-                        AndreYtelserDagpenger, AndreYtelserForeldrepenger, AndreYtelserOmsorgspenger, AndreYtelserOpplaringspenger, AndreYtelserSvangerskapspenger, AndreYtelserPleiepenger
-                    )
+                    val andreYtelser =
+                        setOf(
+                            AndreYtelserDagpenger,
+                            AndreYtelserForeldrepenger,
+                            AndreYtelserOmsorgspenger,
+                            AndreYtelserOpplaringspenger,
+                            AndreYtelserSvangerskapspenger,
+                            AndreYtelserPleiepenger
+                        )
                     if (dag.begrunnelser.any { it in andreYtelser }) {
                         this.andreYtelser.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     }
@@ -81,7 +86,10 @@ internal class Utbetalingstidslinjesubsumsjon(
         }
     }
 
-    fun subsummer(vedtaksperiode: Periode, regler: ArbeidsgiverRegler) {
+    fun subsummer(
+        vedtaksperiode: Periode,
+        regler: ArbeidsgiverRegler
+    ) {
         subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`§ 8-19 andre ledd`(arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`§ 8-17 ledd 1`(arbeidsgiverperiodeNavdager))
@@ -115,7 +123,11 @@ internal class Utbetalingstidslinjesubsumsjon(
                 nyttElement = { dato.somPeriode() }
             )
         }
-        private fun MutableList<Dekningsgrunnlag>.utvidForrigeDatoperiodeEllerLeggTil(dato: LocalDate, økonomi: Økonomi) {
+
+        private fun MutableList<Dekningsgrunnlag>.utvidForrigeDatoperiodeEllerLeggTil(
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             utvidForrigeDatoperiodeEllerLeggTil(
                 dato = dato,
                 finnPeriode = { it.periode },
@@ -123,6 +135,7 @@ internal class Utbetalingstidslinjesubsumsjon(
                 nyttElement = { Dekningsgrunnlag(periode = dato.somPeriode(), inntekt = økonomi.subsumsjonsdata()) }
             )
         }
+
         private fun <E> MutableList<E>.utvidForrigeDatoperiodeEllerLeggTil(
             dato: LocalDate,
             finnPeriode: (E) -> Periode,

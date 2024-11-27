@@ -3,23 +3,34 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.util.UUID
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
-internal class V282HengendeRevurderinger: JsonMigration(282) {
+internal class V282HengendeRevurderinger : JsonMigration(282) {
     override val description = "fjerner hengende uberegnede revurderinger på perioder som også har en beregnet revurdering"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier
+    ) {
         migrer(jsonNode, jsonNode.path("aktørId").asText())
     }
 
-    private fun migrer(jsonNode: ObjectNode, aktørId: String) {
+    private fun migrer(
+        jsonNode: ObjectNode,
+        aktørId: String
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            arbeidsgiver.path("vedtaksperioder")
+            arbeidsgiver
+                .path("vedtaksperioder")
                 .onEach { periode -> migrerVedtaksperiode(aktørId, periode) }
         }
     }
-    private fun migrerVedtaksperiode(aktørId: String, periode: JsonNode) {
+
+    private fun migrerVedtaksperiode(
+        aktørId: String,
+        periode: JsonNode
+    ) {
         val tilstandForVedtaksperiode = periode.path("tilstand").asText()
         if (tilstandForVedtaksperiode !in setOf("AVVENTER_REVURDERING", "AVVENTER_HISTORIKK_REVURDERING", "AVVENTER_SIMULERING_REVURDERING", "AVVENTER_GODKJENNING_REVURDERING")) return
         val generasjoner = periode.path("generasjoner") as ArrayNode
@@ -50,10 +61,11 @@ internal class V282HengendeRevurderinger: JsonMigration(282) {
         val type: String
     ) {
         companion object {
-            val JsonNode.dokumentsporing get() = Dokumentsporing(
-                id = this.path("dokumentId").asText().uuid,
-                type = this.path("dokumenttype").asText()
-            )
+            val JsonNode.dokumentsporing get() =
+                Dokumentsporing(
+                    id = this.path("dokumentId").asText().uuid,
+                    type = this.path("dokumenttype").asText()
+                )
         }
     }
 

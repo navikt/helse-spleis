@@ -28,8 +28,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
-
+internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
     @Test
     fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
         nyttVedtak(januar)
@@ -50,7 +49,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
     fun `periode med bare ferie - tidligere sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  10.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
@@ -71,15 +70,17 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterInntektsmelding(listOf(25.januar til 10.februar), beregnetInntekt = 16000.månedlig, orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
-        val inntekter = listOf(
-            grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
-            grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
+                grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter
+                ),
             orgnummer = a1
         )
 
@@ -108,12 +109,14 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
-                    grunnlag(a2, 24.februar, 16000.månedlig.repeat(3))
-                )
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter =
+                        listOf(
+                            grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
+                            grunnlag(a2, 24.februar, 16000.månedlig.repeat(3))
+                        )
+                ),
             orgnummer = a1
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
@@ -138,15 +141,17 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.månedlig, orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterInntektsmelding(listOf(25.januar til 10.februar), beregnetInntekt = 16000.månedlig, orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
-        val inntekter = listOf(
-            grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
-            grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
+                grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
+            )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            ),
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntekter = inntekter
+                ),
             orgnummer = a1
         )
 

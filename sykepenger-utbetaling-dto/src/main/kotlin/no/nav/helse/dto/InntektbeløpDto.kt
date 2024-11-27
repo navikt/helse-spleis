@@ -10,8 +10,19 @@ data class InntektDto(
 sealed class InntektbeløpDto {
     abstract val beløp: Number
 
-    data class Årlig(override val beløp: Double) : InntektbeløpDto()
-    data class MånedligDouble(override val beløp: Double) : InntektbeløpDto()
-    data class DagligDouble(override val beløp: Double) : InntektbeløpDto()
-    data class DagligInt(override val beløp: Int) : InntektbeløpDto()
+    data class Årlig(
+        override val beløp: Double
+    ) : InntektbeløpDto()
+
+    data class MånedligDouble(
+        override val beløp: Double
+    ) : InntektbeløpDto()
+
+    data class DagligDouble(
+        override val beløp: Double
+    ) : InntektbeløpDto()
+
+    data class DagligInt(
+        override val beløp: Int
+    ) : InntektbeløpDto()
 }

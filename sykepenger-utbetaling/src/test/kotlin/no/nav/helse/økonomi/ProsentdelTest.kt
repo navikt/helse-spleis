@@ -12,22 +12,22 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ProsentdelTest {
-
     @Test
     fun `total sykdomsgrad - flyttall`() {
-        val inntekter = listOf(
-            100.prosent to 502400.04,
-            100.prosent to 70065.12
-        )
+        val inntekter =
+            listOf(
+                100.prosent to 502400.04,
+                100.prosent to 70065.12
+            )
         val result = inntekter.average(tilkommet = 0.0, total = inntekter.sumOf { it.second })
         assertEquals(100.prosent, result)
     }
 
     @Test fun equality() {
-        assertEquals(ratio(1.0, 4.0), 25.0.prosent )
-        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent )
-        assertNotEquals(ratio(1.0, 4.0), Any() )
-        assertNotEquals(ratio(1.0, 4.0), null )
+        assertEquals(ratio(1.0, 4.0), 25.0.prosent)
+        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent)
+        assertNotEquals(ratio(1.0, 4.0), Any())
+        assertNotEquals(ratio(1.0, 4.0), null)
     }
 
     @Test
@@ -51,7 +51,10 @@ internal class ProsentdelTest {
         assertEquals(ratio(100.0, 100.0), 0.prosent.not())
     }
 
-    private fun assertEquals(n: Int, prosentdel: Prosentdel) {
+    private fun assertEquals(
+        n: Int,
+        prosentdel: Prosentdel
+    ) {
         val forventet = ratio(n.toDouble(), 100.0)
         assertEquals(forventet, prosentdel)
         assertEquals(n, prosentdel.toDouble().toInt())

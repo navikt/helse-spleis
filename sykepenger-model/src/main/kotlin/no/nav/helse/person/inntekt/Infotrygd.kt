@@ -1,11 +1,11 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class Infotrygd(
     id: UUID,
@@ -14,19 +14,16 @@ internal class Infotrygd(
     beløp: Inntekt,
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-
     override fun kanOverstyresAv(ny: Inntektsopplysning) = false
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        throw IllegalStateException("Infotrygd kan ikke bli overstyrt")
-    }
+
+    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning = throw IllegalStateException("Infotrygd kan ikke bli overstyrt")
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         if (other !is Infotrygd) return false
         return this.dato == other.dato && this.beløp == other.beløp
     }
 
-    override fun dto() =
-        InntektsopplysningUtDto.InfotrygdDto(id, hendelseId, dato, beløp.dto(), tidsstempel)
+    override fun dto() = InntektsopplysningUtDto.InfotrygdDto(id, hendelseId, dato, beløp.dto(), tidsstempel)
 
     internal companion object {
         fun gjenopprett(dto: InntektsopplysningInnDto.InfotrygdDto) =

@@ -1,7 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.erRettFør
@@ -43,9 +41,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class SkjæringstidspunktTest {
-
     @BeforeEach
     fun setup() {
         resetSeed()
@@ -114,8 +113,10 @@ internal class SkjæringstidspunktTest {
         assertEquals(7.januar, beregnSkjæringstidspunkt(2.S + 2.YF + 2.F + 2.S, 7.januar til 8.januar))
     }
 
-    private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
-        Skjæringstidspunkt(tidslinje).beregnSkjæringstidspunkt(søkeperiode)
+    private fun beregnSkjæringstidspunkt(
+        tidslinje: Sykdomstidslinje,
+        søkeperiode: Periode
+    ) = Skjæringstidspunkt(tidslinje).beregnSkjæringstidspunkt(søkeperiode)
 
     @Test
     fun `skjæringstidspunkt er null for ugyldige situasjoner`() {
@@ -245,12 +246,14 @@ internal class SkjæringstidspunktTest {
     fun `sykeperiode starter på skjæringstidspunkt`() {
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(20.januar(2020), 20.januar(2020)),
-                Periode(4.februar(2020), 18.februar(2020))
-            ), førsteFraværsdag = skjæringstidspunkt
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(20.januar(2020), 20.januar(2020)),
+                    Periode(4.februar(2020), 18.februar(2020))
+                ),
+                førsteFraværsdag = skjæringstidspunkt
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -258,26 +261,29 @@ internal class SkjæringstidspunktTest {
     fun `skjæringstidspunkt er riktig selv om første fraværsdag er satt for tidlig`() {
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(20.januar(2020), 20.januar(2020)),
-                Periode(4.februar(2020), 18.februar(2020))
-            ), førsteFraværsdag = 20.januar(2020)
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(20.januar(2020), 20.januar(2020)),
+                    Periode(4.februar(2020), 18.februar(2020))
+                ),
+                førsteFraværsdag = 20.januar(2020)
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
-
 
     @Test
     fun `skjæringstidspunkt er riktig selv om første fraværsdag er satt for sent`() {
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(20.januar(2020), 20.januar(2020)),
-                Periode(4.februar(2020), 18.februar(2020))
-            ), førsteFraværsdag = 18.februar(2020)
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(20.januar(2020), 20.januar(2020)),
+                    Periode(4.februar(2020), 18.februar(2020))
+                ),
+                førsteFraværsdag = 18.februar(2020)
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -285,12 +291,14 @@ internal class SkjæringstidspunktTest {
     fun `sykeperioden starter etter skjæringstidspunkt`() {
         val søknad = søknad(Søknadsperiode.Sykdom(29.januar(2020), 16.februar(2020), 100.prosent))
         val skjæringstidspunkt = 20.januar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(13.januar(2020), 17.januar(2020)),
-                Periode(20.januar(2020), 30.januar(2020))
-            ), førsteFraværsdag = skjæringstidspunkt
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(13.januar(2020), 17.januar(2020)),
+                    Periode(20.januar(2020), 30.januar(2020))
+                ),
+                førsteFraværsdag = skjæringstidspunkt
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -298,13 +306,15 @@ internal class SkjæringstidspunktTest {
     fun `arbeidsgiverperiode med enkeltdager før skjæringstidspunkt`() {
         val søknad = søknad(Søknadsperiode.Sykdom(12.februar(2020), 19.februar(2020), 100.prosent))
         val skjæringstidspunkt = 3.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(14.januar(2020), 14.januar(2020)),
-                Periode(28.januar(2020), 28.januar(2020)),
-                Periode(3.februar(2020), 16.februar(2020))
-            ), førsteFraværsdag = skjæringstidspunkt
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(14.januar(2020), 14.januar(2020)),
+                    Periode(28.januar(2020), 28.januar(2020)),
+                    Periode(3.februar(2020), 16.februar(2020))
+                ),
+                førsteFraværsdag = skjæringstidspunkt
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -327,7 +337,7 @@ internal class SkjæringstidspunktTest {
     fun `arbeidsgivertidslinjer med arbeidsdager i helg`() {
         val arbeidsgiver1tidslinje = 12.S + 1.A
         val arbeidsgiver2tidslinje = 1.A + 14.S
-        assertSkjæringstidspunkt(15.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(15.januar, 1.januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -342,14 +352,14 @@ internal class SkjæringstidspunktTest {
     fun `arbeidsgivertidslinjer med helgegap og arbeidsdag på fredag`() {
         val arbeidsgiver1tidslinje = 11.S + 1.A + 2.opphold
         val arbeidsgiver2tidslinje = 14.S
-        assertSkjæringstidspunkt(15.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(15.januar, 1.januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med helgegap og arbeidsdag på mandag`() {
         val arbeidsgiver1tidslinje = 12.S + 2.opphold
         val arbeidsgiver2tidslinje = 1.A + 13.S
-        assertSkjæringstidspunkt(16.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(16.januar, 1.januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -357,7 +367,7 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 6.S + 6.A
         resetSeed()
         val arbeidsgiver2tidslinje = 14.S
-        assertSkjæringstidspunkt(1.januar, 1. januar til 14.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 14.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -367,14 +377,14 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver2tidslinje = 14.A + 14.S
         resetSeed()
         val arbeidsgiver3tidslinje = 7.A + 7.S
-        assertSkjæringstidspunkt(1.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje, arbeidsgiver3tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje, arbeidsgiver3tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med ferie som gap blir sammenhengende`() {
         val arbeidsgiver1tidslinje = 7.S + 1.F
         val arbeidsgiver2tidslinje = 1.F + 14.S
-        assertSkjæringstidspunkt(1.januar, 1. januar til 23.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 23.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -382,9 +392,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.A + 7.S
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1.januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -392,9 +402,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.A + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.F + 7.S
-        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -402,9 +412,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.UK + 7.S
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1.januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -412,9 +422,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.UK + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.F + 7.S
-        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -422,22 +432,22 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.A + 7.S
-        assertSkjæringstidspunkt(8.januar, 1. januar til 14.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(8.januar, 1. januar til 14.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(8.januar, 1. januar til 14.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(8.januar, 1.januar til 14.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(8.januar, 1.januar til 14.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(8.januar, 1.januar til 14.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
     fun `gir kun skjæringstidspunkt som er relevant for perioden`() {
         val tidslinje = 7.S + 2.opphold + 3.S + 5.opphold + 3.F
         assertSkjæringstidspunkt(1.januar, 1.januar til 7.januar, tidslinje)
-        assertSkjæringstidspunkt(10.januar, 10. januar til 12.januar, tidslinje)
+        assertSkjæringstidspunkt(10.januar, 10.januar til 12.januar, tidslinje)
         assertSkjæringstidspunkt(18.januar, 18.januar til 20.januar, tidslinje)
         assertSkjæringstidspunkt(10.januar, 1.januar til 20.januar, tidslinje)
     }
 
     @Test
-    fun `Sykedager Nav`(){
+    fun `Sykedager Nav`() {
         val tidslinje = 5.N
         assertFørsteDagErSkjæringstidspunkt(tidslinje)
     }
@@ -455,12 +465,16 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
-    fun `andre ytelser etter sykdom skal bruke sykdommens skjæringstidspunkt` () {
+    fun `andre ytelser etter sykdom skal bruke sykdommens skjæringstidspunkt`() {
         val tidslinje = 31.S + 28.YF
         assertSkjæringstidspunkt(1.januar, februar, tidslinje)
     }
 
-    private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
+    private fun assertSkjæringstidspunkt(
+        forventetSkjæringstidspunkt: LocalDate?,
+        periode: Periode,
+        vararg tidslinje: Sykdomstidslinje
+    ) {
         assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).beregnSkjæringstidspunkt(periode))
     }
 
@@ -481,12 +495,11 @@ internal class SkjæringstidspunktTest {
         }
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode): Søknad {
-        return hendelsefabrikk.lagSøknad(
+    private fun søknad(vararg perioder: Søknadsperiode): Søknad =
+        hendelsefabrikk.lagSøknad(
             perioder = perioder,
             sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         )
-    }
 
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
@@ -496,31 +509,38 @@ internal class SkjæringstidspunktTest {
         refusjonOpphørsdato: LocalDate = 31.desember,
         endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
     ): DagerFraInntektsmelding.BitAvInntektsmelding {
-        val inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
-        )
+        val inntektsmelding =
+            hendelsefabrikk.lagInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            )
         val aktivitetslogg = Aktivitetslogg()
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, aktivitetslogg)
+        inntektsmelding.valider(
+            object : Inntektsmelding.Valideringsgrunnlag {
+                override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
+
+                override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
+            },
+            aktivitetslogg
+        )
 
         return inntektsmelding.dager().bitAvInntektsmelding(
             aktivitetslogg,
-            arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
+            arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!
+        )!!
     }
 
     private companion object {
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
-        private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER
-        )
+        private val hendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = ORGNUMMER
+            )
 
         private fun assertDagenErSkjæringstidspunkt(
             dagen: LocalDate,

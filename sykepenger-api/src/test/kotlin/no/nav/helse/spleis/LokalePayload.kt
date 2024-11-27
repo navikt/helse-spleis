@@ -5,58 +5,56 @@ import com.auth0.jwt.interfaces.Payload
 import java.time.Instant
 import java.util.Date
 
-class LokalePayload(claims: Map<String, String>) : Payload {
+class LokalePayload(
+    claims: Map<String, String>
+) : Payload {
     private val claims = claims.mapValues { LokaleClaim(it.value) }
-    override fun getIssuer(): String {
-        return "lokal utsteder"
-    }
 
-    override fun getSubject(): String {
-        return "lokal subjekt"
-    }
+    override fun getIssuer(): String = "lokal utsteder"
 
-    override fun getAudience(): List<String> {
-        return listOf("lokal publikum")
-    }
+    override fun getSubject(): String = "lokal subjekt"
 
-    override fun getExpiresAt(): Date {
-        return Date.from(Instant.MAX)
-    }
+    override fun getAudience(): List<String> = listOf("lokal publikum")
 
-    override fun getNotBefore(): Date {
-        return Date.from(Instant.EPOCH)
-    }
+    override fun getExpiresAt(): Date = Date.from(Instant.MAX)
 
-    override fun getIssuedAt(): Date {
-        return Date.from(Instant.now())
-    }
+    override fun getNotBefore(): Date = Date.from(Instant.EPOCH)
 
-    override fun getId(): String {
-        return "lokal id"
-    }
+    override fun getIssuedAt(): Date = Date.from(Instant.now())
 
-    override fun getClaim(name: String): Claim {
-        return claims.getValue(name)
-    }
+    override fun getId(): String = "lokal id"
 
-    override fun getClaims(): Map<String, Claim> {
-        return claims
-    }
+    override fun getClaim(name: String): Claim = claims.getValue(name)
+
+    override fun getClaims(): Map<String, Claim> = claims
 }
 
-private class LokaleClaim(private val verdi: String) : Claim {
+private class LokaleClaim(
+    private val verdi: String
+) : Claim {
     override fun isNull() = false
+
     override fun isMissing() = false
+
     override fun asBoolean() = true
+
     override fun asInt() = 0
+
     override fun asLong() = 0L
+
     override fun asDouble() = 0.0
+
     override fun asString() = verdi
+
     override fun asDate() = Date.from(Instant.EPOCH)
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any?> asArray(clazz: Class<T>?) = emptyArray<Any>() as Array<T>
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any?> asList(clazz: Class<T>?) = emptyList<Any>() as List<T>
+
     override fun asMap() = emptyMap<String, Any>()
+
     override fun <T : Any?> `as`(clazz: Class<T>?) = throw NotImplementedError()
 }

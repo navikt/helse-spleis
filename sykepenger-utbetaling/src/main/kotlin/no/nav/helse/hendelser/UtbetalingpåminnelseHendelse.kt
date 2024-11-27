@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import java.util.UUID
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import java.util.UUID
 
 interface UtbetalingpåminnelseHendelse {
     val utbetalingId: UUID

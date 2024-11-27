@@ -1,10 +1,10 @@
 package no.nav.helse.dto.deserialisering
 
+import no.nav.helse.dto.AvsenderDto
+import no.nav.helse.dto.InntektbeløpDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.AvsenderDto
-import no.nav.helse.dto.InntektbeløpDto
 
 data class RefusjonsopplysningInnDto(
     val meldingsreferanseId: UUID,

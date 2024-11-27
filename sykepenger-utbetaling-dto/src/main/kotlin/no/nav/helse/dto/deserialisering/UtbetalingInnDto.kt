@@ -1,13 +1,12 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
-import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.dto.UtbetalingtypeDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class UtbetalingInnDto(
     val id: UUID,

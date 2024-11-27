@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
-
     @Test
     fun `inntektsmelding avslutter to korte perioder og flytter nav-perioden uten å utføre vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar))

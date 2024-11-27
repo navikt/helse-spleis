@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SatstypeTest {
-
     @Test
     fun daglig() {
         assertEquals(Satstype.Daglig, Satstype.fromString("dag"))

@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class KodetAktivitetTest {
-
-
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var person: TestKontekst
 
@@ -33,7 +31,7 @@ class KodetAktivitetTest {
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

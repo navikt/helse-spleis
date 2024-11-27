@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `friskmeldt førstegangsbehandling`() {
         håndterSykmelding(januar)

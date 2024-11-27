@@ -1,11 +1,11 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class VedtaksperiodeUtDto(
     val id: UUID,

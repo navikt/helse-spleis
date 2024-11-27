@@ -1,10 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-
-import java.util.UUID
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import java.util.UUID
 
 internal class EtterspurtBehov(
     private val type: Aktivitet.Behov.Behovtype,
@@ -13,7 +12,11 @@ internal class EtterspurtBehov(
     private val vedtaksperiodeId: UUID
 ) {
     companion object {
-        internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: String, type: Aktivitet.Behov.Behovtype) {
+        internal fun fjern(
+            liste: MutableList<EtterspurtBehov>,
+            orgnummer: String,
+            type: Aktivitet.Behov.Behovtype
+        ) {
             liste.removeIf { it.orgnummer == orgnummer && it.type == type }
         }
 
@@ -36,8 +39,7 @@ internal class EtterspurtBehov(
             type: Aktivitet.Behov.Behovtype,
             vedtaksperiodeIdInnhenter: IdInnhenter,
             orgnummer: String
-        ) =
-            ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) }
+        ) = ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) }
 
         internal fun finnEtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
@@ -45,14 +47,15 @@ internal class EtterspurtBehov(
             vedtaksperiodeIdInnhenter: IdInnhenter,
             orgnummer: String,
             tilstand: TilstandType
-        ) =
-            ikkeBesvarteBehov.firstOrNull {
-                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) && it.tilstand == tilstand
-            }
+        ) = ikkeBesvarteBehov.firstOrNull {
+            it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) && it.tilstand == tilstand
+        }
     }
 
     override fun toString() = "$type ($tilstand)"
 }
 
-internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =
-    inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
+internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(
+    orgnummer: String,
+    vedtaksperiodeIdInnhenter: IdInnhenter
+) = inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)

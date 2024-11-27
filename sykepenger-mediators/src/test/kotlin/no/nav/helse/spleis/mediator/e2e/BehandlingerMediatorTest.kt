@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -10,9 +9,9 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `vedtak iverksatt`() {
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
@@ -76,7 +75,11 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak annulleres`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
+        val utbetalingId =
+            testRapid.inspektør
+                .siste("utbetaling_utbetalt")
+                .path("utbetalingId")
+                .asText()
         sendAnnullering(utbetalingId)
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet")

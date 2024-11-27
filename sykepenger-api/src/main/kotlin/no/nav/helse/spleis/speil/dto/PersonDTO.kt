@@ -12,7 +12,10 @@ data class PersonDTO(
     val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
 )
 
-data class AlderDTO(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
+data class AlderDTO(
+    val fødselsdato: LocalDate,
+    val dødsdato: LocalDate?
+) {
     fun alderPåDato(dagen: LocalDate): Int {
         val alderPåDagen = ChronoUnit.YEARS.between(fødselsdato, dagen)
         if (dødsdato == null || dagen < dødsdato) return alderPåDagen.toInt()

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -12,8 +11,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
@@ -81,15 +81,17 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(1))
-        )
+        val inntekter =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(1))
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017), Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017), Arbeidsforholdtype.ORDINÆRT)
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -130,26 +132,51 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser()
 
-        assertEquals(0, inspektør.utbetaling(0).utbetalingstidslinje.inspektør.avvistDagTeller)
+        assertEquals(
+            0,
+            inspektør
+                .utbetaling(0)
+                .utbetalingstidslinje.inspektør.avvistDagTeller
+        )
     }
 
-    private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
+    private fun personMedArbeidsforhold(
+        vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
+    ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = a1)
         håndterSøknad(fom til tom, orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
+
     companion object {
-        fun AbstractEndToEndTest.assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
+        fun AbstractEndToEndTest.assertHarArbeidsforhold(
+            skjæringstidspunkt: LocalDate,
+            arbeidsforhold: String
+        ) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
             assertNotNull(vilkårsgrunnlag)
-            assertTrue(vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.any { it.orgnummer == arbeidsforhold })
+            assertTrue(
+                vilkårsgrunnlag.inspektør.opptjening!!
+                    .arbeidsforhold
+                    .any { it.orgnummer == arbeidsforhold }
+            )
         }
 
-        fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
+        fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(
+            skjæringstidspunkt: LocalDate,
+            arbeidsforhold: String
+        ) {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
             assertNotNull(vilkårsgrunnlag)
-            assertFalse(vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.any { it.orgnummer == arbeidsforhold })
+            assertFalse(
+                vilkårsgrunnlag.inspektør.opptjening!!
+                    .arbeidsforhold
+                    .any { it.orgnummer == arbeidsforhold }
+            )
         }
     }
 }

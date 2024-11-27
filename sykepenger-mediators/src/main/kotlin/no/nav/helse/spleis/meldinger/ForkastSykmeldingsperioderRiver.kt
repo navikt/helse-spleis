@@ -13,7 +13,6 @@ internal class ForkastSykmeldingsperioderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
     override val eventName = "forkast_sykmeldingsperioder"
     override val riverName = "forkast_sykmeldingsperioder"
 
@@ -23,8 +22,12 @@ internal class ForkastSykmeldingsperioderRiver(
         message.require("tom", JsonNode::asLocalDate)
     }
 
-    override fun createMessage(packet: JsonMessage) = ForkastSykmeldingsperioderMessage(packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    override fun createMessage(packet: JsonMessage) =
+        ForkastSykmeldingsperioderMessage(
+            packet,
+            Meldingsporing(
+                id = packet["@id"].asText().toUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText()
+            )
+        )
 }

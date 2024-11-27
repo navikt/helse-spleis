@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
-
     @Test
     fun `Out of order AUUer- skal beholde perioden som kom først som låst i tillegg til den nye`() {
         håndterSøknad(Sykdom(9.januar, 16.januar, 100.prosent))
@@ -57,7 +56,13 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         tilSimulering(3.mars til 26.mars, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(5.januar, 19.januar, 80.prosent))
-        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertEquals(
+            Utbetalingstatus.FORKASTET,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .single()
+                .inspektør.tilstand
+        )
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }

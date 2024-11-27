@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -73,9 +71,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
-
     private val INNTEKT_FLERE_AG = 20000.månedlig
 
     @Test
@@ -149,15 +148,22 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                    a1 to INNTEKT,
-                    a2 to INNTEKT
-            ), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag =
+                lagStandardSykepengegrunnlag(
+                    listOf(
+                        a1 to INNTEKT,
+                        a2 to INNTEKT
+                    ),
+                    1.januar
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                ),
+            orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -206,10 +212,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-            PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig)))
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+                PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig)))
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -237,11 +244,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
         nyPeriode(17.februar til 17.mars)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-            PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig))),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+                PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig))),
+                PersonObserver.Arbeidsgiverperiode
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -263,10 +271,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(17.januar til 31.januar)
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        val expectedSykmeldingsperioder = listOf(
-            1.januar til 16.januar,
-            17.januar til 31.januar
-        )
+        val expectedSykmeldingsperioder =
+            listOf(
+                1.januar til 16.januar,
+                17.januar til 31.januar
+            )
         assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -290,20 +299,22 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(9.januar til 14.januar)
         nyPeriode(16.januar til 21.januar)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
+            )
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
 
-        val expectedSykmeldingsperioder = listOf(
-            1.januar til 7.januar,
-            9.januar til 14.januar,
-            16.januar til 21.januar
-        )
+        val expectedSykmeldingsperioder =
+            listOf(
+                1.januar til 7.januar,
+                9.januar til 14.januar,
+                16.januar til 21.januar
+            )
         assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
@@ -324,11 +335,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-            PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig))),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+                PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig))),
+                PersonObserver.Arbeidsgiverperiode
+            )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
@@ -346,10 +358,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-            PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig)))
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+                PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig)))
+            )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
@@ -368,39 +381,45 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
         val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-            PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig))),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+                PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig))),
+                PersonObserver.Arbeidsgiverperiode
+            )
 
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 
     @Test
     fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`() {
-        nyeVedtakMedUlikFom(mapOf(
-            a1 to (januar),
-            a2 to (2.januar til 31.januar)
-        ))
-        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = a2,
-            vedtaksperiodeId = 1.vedtaksperiode.id(a2),
-            skjæringstidspunkt = 1.januar,
-            sykmeldingsperioder = listOf(2.januar til 31.januar),
-            egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(
-                PersonObserver.FørsteFraværsdag(a1, 1.januar),
-                PersonObserver.FørsteFraværsdag(a2, 2.januar)
-            ),
-            forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-                PersonObserver.Arbeidsgiverperiode
+        nyeVedtakMedUlikFom(
+            mapOf(
+                a1 to (januar),
+                a2 to (2.januar til 31.januar)
             )
         )
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        val expectedForespørsel =
+            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = a2,
+                vedtaksperiodeId = 1.vedtaksperiode.id(a2),
+                skjæringstidspunkt = 1.januar,
+                sykmeldingsperioder = listOf(2.januar til 31.januar),
+                egenmeldingsperioder = emptyList(),
+                førsteFraværsdager =
+                    listOf(
+                        PersonObserver.FørsteFraværsdag(a1, 1.januar),
+                        PersonObserver.FørsteFraværsdag(a2, 2.januar)
+                    ),
+                forespurteOpplysninger =
+                    listOf(
+                        PersonObserver.Inntekt(null),
+                        PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                        PersonObserver.Arbeidsgiverperiode
+                    )
+            )
         assertEquals(expectedForespørsel, actualForespørsel)
     }
 
@@ -425,11 +444,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val actualForespurtOpplysning =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-        val expectedForespurteOpplysninger = listOf(
-        PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-            PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig))),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+                PersonObserver.Refusjon(listOf(Refusjonsforslag(1.januar, null, INNTEKT_FLERE_AG.månedlig))),
+                PersonObserver.Arbeidsgiverperiode
+            )
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 
@@ -439,11 +459,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(17.januar til 31.januar)
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
+            )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -456,11 +477,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
+            )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -483,17 +505,23 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `blir syk fra ghost`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag =
+                InntektForSykepengegrunnlag(
+                    inntektperioderForSykepengegrunnlag {
+                        1.oktober(2017) til 1.desember(2017) inntekter {
+                            a1 inntekt INNTEKT
+                            a2 inntekt INNTEKT
+                        }
+                    }
+                ),
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                ),
+            orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -507,11 +535,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, arbeidsgiveropplysningerEvents.size)
         val trengerArbeidsgiveropplysningerEvent = arbeidsgiveropplysningerEvents.last()
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT),
-            PersonObserver.Refusjon(emptyList<Refusjonsforslag>()),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.FastsattInntekt(INNTEKT),
+                PersonObserver.Refusjon(emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
+            )
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
 
         nullstillTilstandsendringer()
@@ -530,22 +559,24 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT_FLERE_AG,
-            orgnummer = a1,
+            orgnummer = a1
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT_FLERE_AG,
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT_FLERE_AG,
-                opphørsdato = null,
-                endringerIRefusjon = listOf(
-                    Inntektsmelding.Refusjon.EndringIRefusjon(18000.månedlig, 10.februar),
-                    Inntektsmelding.Refusjon.EndringIRefusjon(17000.månedlig, 1.mars),
-                    Inntektsmelding.Refusjon.EndringIRefusjon(16000.månedlig, 10.mars),
-                    Inntektsmelding.Refusjon.EndringIRefusjon(15000.månedlig, 1.april)
-                )
-            ),
-            orgnummer = a2,
+            refusjon =
+                Inntektsmelding.Refusjon(
+                    beløp = INNTEKT_FLERE_AG,
+                    opphørsdato = null,
+                    endringerIRefusjon =
+                        listOf(
+                            Inntektsmelding.Refusjon.EndringIRefusjon(18000.månedlig, 10.februar),
+                            Inntektsmelding.Refusjon.EndringIRefusjon(17000.månedlig, 1.mars),
+                            Inntektsmelding.Refusjon.EndringIRefusjon(16000.månedlig, 10.mars),
+                            Inntektsmelding.Refusjon.EndringIRefusjon(15000.månedlig, 1.april)
+                        )
+                ),
+            orgnummer = a2
         )
         fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
         forlengVedtak(februar, orgnummer = a1)
@@ -577,17 +608,18 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 val trengerArbeidsgiveropplysningerEvent = arbeidsgiveropplysningerEvents.last()
                 val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()
 
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                    PersonObserver.Refusjon(
-                        listOf(
-                            Refusjonsforslag(1.mars, 9.mars, 17000.månedlig.månedlig),
-                            Refusjonsforslag(10.mars, 31.mars, 16000.månedlig.månedlig),
-                            Refusjonsforslag(1.april, null, 15000.månedlig.månedlig)
-                        )
-                    ),
-                    PersonObserver.Arbeidsgiverperiode
-                )
+                val expectedForespurteOpplysninger =
+                    listOf(
+                        PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+                        PersonObserver.Refusjon(
+                            listOf(
+                                Refusjonsforslag(1.mars, 9.mars, 17000.månedlig.månedlig),
+                                Refusjonsforslag(10.mars, 31.mars, 16000.månedlig.månedlig),
+                                Refusjonsforslag(1.april, null, 15000.månedlig.månedlig)
+                            )
+                        ),
+                        PersonObserver.Arbeidsgiverperiode
+                    )
 
                 assertEquals(
                     expectedForespurteOpplysninger,
@@ -604,16 +636,17 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT_FLERE_AG,
-            orgnummer = a1,
+            orgnummer = a1
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT_FLERE_AG,
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT_FLERE_AG,
-                opphørsdato = 15.mars
-            ),
-            orgnummer = a2,
+            refusjon =
+                Inntektsmelding.Refusjon(
+                    beløp = INNTEKT_FLERE_AG,
+                    opphørsdato = 15.mars
+                ),
+            orgnummer = a2
         )
         fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
         forlengVedtak(februar, orgnummer = a1)
@@ -647,16 +680,17 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
                 val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()
 
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                    PersonObserver.Refusjon(
-                        listOf(
-                            Refusjonsforslag(1.januar, 15.mars, INNTEKT_FLERE_AG.månedlig),
-                            Refusjonsforslag(16.mars, null, INGEN.månedlig)
-                        )
-                    ),
-                    PersonObserver.Arbeidsgiverperiode
-                )
+                val expectedForespurteOpplysninger =
+                    listOf(
+                        PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+                        PersonObserver.Refusjon(
+                            listOf(
+                                Refusjonsforslag(1.januar, 15.mars, INNTEKT_FLERE_AG.månedlig),
+                                Refusjonsforslag(16.mars, null, INGEN.månedlig)
+                            )
+                        ),
+                        PersonObserver.Arbeidsgiverperiode
+                    )
 
                 assertEquals(
                     expectedForespurteOpplysninger,
@@ -730,10 +764,10 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt` () {
+    fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt`() {
         val inntektsmeldingId = UUID.randomUUID()
         nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT *2)))
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT * 2)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -743,35 +777,38 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-            PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig))),
-
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+                PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig)))
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
     @Test
-    fun `Skal sende med saksbehandlerinntekt som inntektForrigeSkjæringstidspunkt` () {
+    fun `Skal sende med saksbehandlerinntekt som inntektForrigeSkjæringstidspunkt`() {
         nyttVedtak(januar)
-        val id = håndterOverstyrArbeidsgiveropplysninger(
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(ORGNUMMER, 32000.månedlig, "", null, listOf(Triple(1.januar, null, 32000.månedlig)))
+        val id =
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(ORGNUMMER, 32000.månedlig, "", null, listOf(Triple(1.januar, null, 32000.månedlig)))
+                    )
             )
-        )
         håndterYtelser(1.vedtaksperiode)
 
         nyPeriode(16.februar til 15.mars)
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER, 32000.0)),
-            PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, 32000.månedlig.månedlig))),
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER, 32000.0)),
+                PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, 32000.månedlig.månedlig)))
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -784,11 +821,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -797,26 +835,36 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Sender kun med refusjonsopplysninger som overlapper med eller er nyere enn forespørselsperioden`() {
         nyPeriode(januar)
-        val id = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 1.april, endringerIRefusjon = listOf(
-                Inntektsmelding.Refusjon.EndringIRefusjon(29000.månedlig, 20.januar),
-                Inntektsmelding.Refusjon.EndringIRefusjon(28000.månedlig, 30.januar),
-                Inntektsmelding.Refusjon.EndringIRefusjon(27000.månedlig, 20.februar)
-            )),
-        )
+        val id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        INNTEKT,
+                        1.april,
+                        endringerIRefusjon =
+                            listOf(
+                                Inntektsmelding.Refusjon.EndringIRefusjon(29000.månedlig, 20.januar),
+                                Inntektsmelding.Refusjon.EndringIRefusjon(28000.månedlig, 30.januar),
+                                Inntektsmelding.Refusjon.EndringIRefusjon(27000.månedlig, 20.februar)
+                            )
+                    )
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
         nyPeriode(15.februar til 28.februar)
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-            PersonObserver.Refusjon(forslag = listOf(
-                Refusjonsforslag(30.januar, 19.februar, 28000.månedlig.månedlig),
-                Refusjonsforslag(20.februar, 1.april, 27000.månedlig.månedlig),
-                Refusjonsforslag(2.april, null, INGEN.månedlig)
-            )),
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+                PersonObserver.Refusjon(
+                    forslag =
+                        listOf(
+                            Refusjonsforslag(30.januar, 19.februar, 28000.månedlig.månedlig),
+                            Refusjonsforslag(20.februar, 1.april, 27000.månedlig.månedlig),
+                            Refusjonsforslag(2.april, null, INGEN.månedlig)
+                        )
+                )
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -825,19 +873,24 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Sender med riktige refusjonsopplysninger ved opphør av refusjon før perioden`() {
         nyPeriode(januar)
-        val id = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, 10.februar, endringerIRefusjon = emptyList()),
-        )
+        val id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, 10.februar, endringerIRefusjon = emptyList())
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
         nyPeriode(15.februar til 28.februar)
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-            PersonObserver.Refusjon(forslag = listOf(
-                Refusjonsforslag(11.februar, null, INGEN.månedlig)
-            ))
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+                PersonObserver.Refusjon(
+                    forslag =
+                        listOf(
+                            Refusjonsforslag(11.februar, null, INGEN.månedlig)
+                        )
+                )
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -848,10 +901,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(januar)
         nyPeriode(15.februar til 28.februar)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -862,8 +916,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(februar)
         nyPeriode(januar)
 
-       assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-       assertEquals(1, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
@@ -907,16 +961,16 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(21.januar til 31.januar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-            PersonObserver.Arbeidsgiverperiode
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Arbeidsgiverperiode
+            )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
-
 
     @Test
     fun `Kort periode som blir lang pga korrigerende søknad med egenmeldingsdager skal sende ut forespørsel`() {
@@ -927,18 +981,20 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+        val expectedForespørsel =
+            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
                 skjæringstidspunkt = 2.januar,
                 sykmeldingsperioder = listOf(2.januar til 17.januar),
                 egenmeldingsperioder = listOf(1.januar til 1.januar),
                 førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 2.januar)),
-                forespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(null),
-                    PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
-                    PersonObserver.Arbeidsgiverperiode
-                )
+                forespurteOpplysninger =
+                    listOf(
+                        PersonObserver.Inntekt(null),
+                        PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                        PersonObserver.Arbeidsgiverperiode
+                    )
             )
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -1002,19 +1058,21 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            )
+            arbeidsforhold =
+                listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         nyPeriode(21.januar til 31.januar, orgnummer = a2)
 
-        val expectedForespurteOpplysninger  = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT),
-            PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig)))
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.FastsattInntekt(INNTEKT),
+                PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig)))
+            )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
     }
@@ -1025,10 +1083,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         nyPeriode(18.januar til 31.januar)
 
-        val expectedForespurteOpplysninger  = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
-        )
+        val expectedForespurteOpplysninger =
+            listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
+            )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
     }
@@ -1048,13 +1107,13 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT_FLERE_AG,
-            orgnummer = a1,
+            orgnummer = a1
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT_FLERE_AG,
             refusjon = refusjon,
-            orgnummer = a2,
+            orgnummer = a2
         )
 
         fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
@@ -1087,15 +1146,17 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     private fun fraVilkårsprøvingTilGodkjent(inntekt: Inntekt) {
-        val sykepengegrunnlag = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
-        )
+        val sykepengegrunnlag =
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
+            )
 
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
+        val arbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

@@ -57,7 +57,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KorrigertSøknadTest : AbstractEndToEndTest() {
-
     @Test
     fun `korrigerer med arbeid gjenopptatt etter utbetalt`() {
         nyttVedtak(januar)
@@ -82,7 +81,13 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         tilSimulering(3.januar til 26.januar, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
-        assertEquals(FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertEquals(
+            FORKASTET,
+            inspektør
+                .utbetalinger(1.vedtaksperiode)
+                .single()
+                .inspektør.tilstand
+        )
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
@@ -101,6 +106,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
+
     @Test
     fun `Overlappende søknad som er lengre frem støttes ikke`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
@@ -287,7 +293,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-
         inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Feriedag)
         }
@@ -330,7 +335,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING
         )
@@ -470,18 +475,42 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     fun `Ikke foreld dager ved sen korrigerende søknad om original søknad var innenfor avskjæringsdag`() {
         håndterSykmelding(januar)
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals(
+            "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk
+                .sykdomstidslinje()
+                .toShortString()
+                .trim()
+        )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 30.september, korrigerer = søknadId, opprinneligSendt = 31.januar)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals(
+            "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF",
+            inspektør.sykdomshistorikk
+                .sykdomstidslinje()
+                .toShortString()
+                .trim()
+        )
     }
 
     @Test
     fun `Foreld dager ved sen søknad, selv om vi mottar korrigerende søknad`() {
         håndterSykmelding(januar)
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals(
+            "KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK",
+            inspektør.sykdomshistorikk
+                .sykdomstidslinje()
+                .toShortString()
+                .trim()
+        )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 2.mai, korrigerer = søknadId, opprinneligSendt = 1.mai)
-        assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals(
+            "KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF",
+            inspektør.sykdomshistorikk
+                .sykdomstidslinje()
+                .toShortString()
+                .trim()
+        )
     }
 
     @Test

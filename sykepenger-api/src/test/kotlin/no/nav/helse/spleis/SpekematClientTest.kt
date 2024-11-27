@@ -8,19 +8,22 @@ import com.github.navikt.tbd_libs.result_object.Result
 import com.github.navikt.tbd_libs.result_object.ok
 import io.mockk.every
 import io.mockk.mockk
-import java.net.http.HttpClient
-import java.time.LocalDateTime
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.net.http.HttpClient
+import java.time.LocalDateTime
 
 class SpekematClientTest {
-    private val azureTokenProvider = object : AzureTokenProvider {
-        override fun bearerToken(scope: String) = AzureToken("liksom-token", LocalDateTime.MAX).ok()
-        override fun onBehalfOfToken(scope: String, token: String): Result<AzureToken> {
-            throw NotImplementedError("ikke implementert i mock")
+    private val azureTokenProvider =
+        object : AzureTokenProvider {
+            override fun bearerToken(scope: String) = AzureToken("liksom-token", LocalDateTime.MAX).ok()
+
+            override fun onBehalfOfToken(
+                scope: String,
+                token: String
+            ): Result<AzureToken> = throw NotImplementedError("ikke implementert i mock")
         }
-    }
     private var httpClientMock = mockk<HttpClient>()
     private val client = SpekematClient(httpClientMock, azureTokenProvider, "scope-til-spekemat", jacksonObjectMapper())
 
@@ -29,8 +32,20 @@ class SpekematClientTest {
         every { httpClientMock.send<String>(any(), any()) } returns MockHttpResponse(responsFraSpekemat, 200, mapOf("callId" to "liksom call id"))
         val result = client.hentSpekemat("fnr", "callId")
         assertEquals(1, result.pakker.size)
-        assertEquals(1, result.pakker.single().rader.size)
-        assertEquals(2, result.pakker.single().rader.single().pølser.size)
+        assertEquals(
+            1,
+            result.pakker
+                .single()
+                .rader.size
+        )
+        assertEquals(
+            2,
+            result.pakker
+                .single()
+                .rader
+                .single()
+                .pølser.size
+        )
     }
 }
 

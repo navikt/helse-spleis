@@ -5,13 +5,13 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -46,7 +46,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
-
     @Test
     fun `Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen`() {
         håndterSøknad(25.juni til 5.juli)
@@ -87,7 +86,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`(){
+    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`() {
         nyttVedtak(5.desember(2017) til 5.januar)
         val korrelasjonsIdAugust2017 = inspektør.utbetaling(0).korrelasjonsId
 
@@ -104,7 +103,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(5.desember(2017) til 5.januar, inspektør.utbetaling(0).periode)
-        assertEquals(korrelasjonsIdAugust2017,inspektør.utbetaling(0).korrelasjonsId)
+        assertEquals(korrelasjonsIdAugust2017, inspektør.utbetaling(0).korrelasjonsId)
         val korrelasjonsIdFebruar2018 = inspektør.utbetaling(1).korrelasjonsId
         assertEquals(5.februar til 24.februar, inspektør.utbetaling(1).periode)
         assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)
@@ -156,7 +155,11 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(4.vedtaksperiode))
     }
 
-    private fun utbetalingIder(vedtaksperiode: IdInnhenter) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
+    private fun utbetalingIder(vedtaksperiode: IdInnhenter) =
+        inspektør
+            .vedtaksperioder(vedtaksperiode)
+            .inspektør.behandlinger
+            .flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
 
     @Test
     fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`() {
@@ -501,7 +504,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Kort periode med en tidligere kort periode som har lagret inntekt for første fraværsdag`() {
-        /* skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP */
+        // skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar))
 

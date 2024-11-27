@@ -30,7 +30,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class KlippTest : AbstractEndToEndTest() {
-
     @Test
     fun `drawio -- HAPPY CASE`() {
         håndterSykmelding(januar)

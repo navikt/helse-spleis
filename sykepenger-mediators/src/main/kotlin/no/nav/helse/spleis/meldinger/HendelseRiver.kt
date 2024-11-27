@@ -10,13 +10,16 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
-import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
-internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
+internal abstract class HendelseRiver(
+    rapidsConnection: RapidsConnection,
+    private val messageMediator: IMessageMediator
+) : River.PacketValidation {
     protected val river = River(rapidsConnection)
     protected abstract val eventName: String
     protected abstract val riverName: String
@@ -27,7 +30,9 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
     protected abstract fun createMessage(packet: JsonMessage): HendelseMessage
 
-    private inner class RiverImpl(river: River) : River.PacketListener {
+    private inner class RiverImpl(
+        river: River
+    ) : River.PacketListener {
         init {
             river.precondition { it.requireValue("@event_name", eventName) }
             river.validate { packet ->
@@ -40,13 +45,19 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
         override fun name() = this@HendelseRiver::class.simpleName ?: "ukjent"
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
-            withMDC(mapOf(
-                "river_name" to riverName,
-                "melding_type" to eventName,
-                "melding_id" to packet["@id"].asText()
-            )) {
-
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+            metadata: MessageMetadata,
+            meterRegistry: MeterRegistry
+        ) {
+            withMDC(
+                mapOf(
+                    "river_name" to riverName,
+                    "melding_type" to eventName,
+                    "melding_id" to packet["@id"].asText()
+                )
+            ) {
                 val timer = Timer.start(meterRegistry)
 
                 try {
@@ -56,7 +67,8 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                     throw e
                 } finally {
                     timer.stop(
-                        Timer.builder("behandlingstid_seconds")
+                        Timer
+                            .builder("behandlingstid_seconds")
                             .description("hvor lang tid spleis bruker på behandling av en melding")
                             .tag("river_name", riverName)
                             .tag("event_name", eventName)
@@ -66,7 +78,11 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             }
         }
 
-        override fun onError(problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+        override fun onError(
+            problems: MessageProblems,
+            context: MessageContext,
+            metadata: MessageMetadata
+        ) {
             messageMediator.onRiverError(riverName, problems, context, metadata)
         }
     }

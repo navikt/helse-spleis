@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverperiodeTest {
-
     @Test
     fun `itererer over periode`() {
         val periode1 = 1.januar til 5.januar

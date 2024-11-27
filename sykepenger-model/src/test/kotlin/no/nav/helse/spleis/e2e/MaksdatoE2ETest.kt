@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractEndToEndTest() {
-
     @Test
     fun `hensyntar tidligere arbeidsgivere fra IT`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))

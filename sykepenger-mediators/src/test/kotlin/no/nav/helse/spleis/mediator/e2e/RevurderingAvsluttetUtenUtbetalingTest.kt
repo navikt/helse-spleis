@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `revurdering ved inntektsmelding for korte perioder`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
@@ -54,8 +53,9 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendInntektsmelding(
             listOf(
                 Periode(fom = 1.januar, tom = 6.januar),
-                Periode(fom = 11.januar, tom = 21.januar),
-            ), førsteFraværsdag = 11.januar
+                Periode(fom = 11.januar, tom = 21.januar)
+            ),
+            førsteFraværsdag = 11.januar
         )
         sendVilkårsgrunnlag(1)
         sendYtelser(1)
@@ -68,16 +68,22 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
 
     private val logCollector = LogCollector()
 
-    private fun catchErrors(vararg filter: String, block: () -> Any): List<ILoggingEvent> {
+    private fun catchErrors(
+        vararg filter: String,
+        block: () -> Any
+    ): List<ILoggingEvent> {
         val logger = (LoggerFactory.getLogger("tjenestekall") as Logger)
         logger.addAppender(logCollector)
         logCollector.start()
         block()
         logger.detachAppender(logCollector)
         logCollector.stop()
-        return logCollector.iterator().asSequence().filter { event ->
-            filter.toList().any { filterText -> event.formattedMessage.contains(filterText) }
-        }.toList()
+        return logCollector
+            .iterator()
+            .asSequence()
+            .filter { event ->
+                filter.toList().any { filterText -> event.formattedMessage.contains(filterText) }
+            }.toList()
     }
 
     @AfterEach
@@ -86,7 +92,10 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         logger.detachAndStopAllAppenders()
     }
 
-    private class LogCollector private constructor(private val messages: MutableList<ILoggingEvent>): AppenderBase<ILoggingEvent>(), Iterable<ILoggingEvent> by (messages) {
+    private class LogCollector private constructor(
+        private val messages: MutableList<ILoggingEvent>
+    ) : AppenderBase<ILoggingEvent>(),
+        Iterable<ILoggingEvent> by (messages) {
         constructor() : this(mutableListOf())
 
         override fun append(eventObject: ILoggingEvent) {

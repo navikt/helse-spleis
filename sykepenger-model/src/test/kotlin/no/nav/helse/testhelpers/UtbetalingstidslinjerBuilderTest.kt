@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjerBuilderTest {
-
     @BeforeEach
     fun setup() {
         resetSeed()
@@ -56,7 +55,7 @@ internal class UtbetalingstidslinjerBuilderTest {
     fun `starte på fredag`() {
         val tidslinje = tidslinjeOf(14.NAVDAGER, startDato = 5.januar)
         assertRekkefølge(tidslinje)
-        assertEquals(5.januar til 24.januar,tidslinje.periode())
+        assertEquals(5.januar til 24.januar, tidslinje.periode())
         assertEquals(6, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(14, tidslinje.inspektør.navDagTeller)
     }
@@ -76,6 +75,6 @@ internal class UtbetalingstidslinjerBuilderTest {
     }
 
     private fun assertRekkefølge(tidslinje: Utbetalingstidslinje) {
-        tidslinje.zipWithNext { left, right -> assertEquals(left.dato.plusDays(1L), right.dato)}
+        tidslinje.zipWithNext { left, right -> assertEquals(left.dato.plusDays(1L), right.dato) }
     }
 }

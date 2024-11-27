@@ -24,8 +24,8 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
-    private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
+internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
+    private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
     private val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
     @Test
@@ -58,7 +58,10 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
-    private fun periodeTilGodkjenning(perioder: List<Infotrygdperiode> = emptyList(), inntektsopplysning: List<Inntektsopplysning> = emptyList()) {
+    private fun periodeTilGodkjenning(
+        perioder: List<Infotrygdperiode> = emptyList(),
+        inntektsopplysning: List<Inntektsopplysning> = emptyList()
+    ) {
         håndterUtbetalingshistorikkEtterInfotrygdendring(*perioder.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)

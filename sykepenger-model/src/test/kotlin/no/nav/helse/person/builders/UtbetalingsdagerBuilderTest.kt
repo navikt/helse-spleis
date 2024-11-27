@@ -2,6 +2,7 @@ package no.nav.helse.person.builders
 
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.Utbetalingsdag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AvvistDag
@@ -11,8 +12,8 @@ import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -20,7 +21,6 @@ import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.HELG
-import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.P
@@ -33,7 +33,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingsdagerBuilderTest {
-
     @BeforeEach
     fun reset() {
         resetSeed()
@@ -52,7 +51,8 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(5.januar, Fridag),
                 Utbetalingsdag(6.januar, ForeldetDag),
                 Utbetalingsdag(7.januar, AvvistDag, listOf(Utbetalingsdag.EksternBegrunnelseDTO.SykepengedagerOppbrukt))
-            ), builder.result()
+            ),
+            builder.result()
         )
     }
 
@@ -68,7 +68,8 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(4.januar, Feriedag),
                 Utbetalingsdag(5.januar, ArbeidIkkeGjenopptattDag),
                 Utbetalingsdag(6.januar, Fridag)
-            ), builder.result()
+            ),
+            builder.result()
         )
     }
 
@@ -84,7 +85,8 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(4.januar, ArbeidsgiverperiodeDag),
                 Utbetalingsdag(5.januar, ArbeidsgiverperiodeDag),
                 Utbetalingsdag(6.januar, ArbeidsgiverperiodeDag)
-            ), builder.result()
+            ),
+            builder.result()
         )
     }
 }

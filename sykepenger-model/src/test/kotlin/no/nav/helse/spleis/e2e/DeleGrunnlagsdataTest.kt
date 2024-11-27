@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
-
     @Test
     fun `vilkårsgrunnlag deles med påfølgende tilstøtende perioder`() {
         håndterSykmelding(januar)
@@ -41,11 +40,12 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(mars)
         håndterSøknad(5.april til 30.april)
         val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val inntektsmelding2Id = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 5.april,
-            vedtaksperiodeIdInnhenter = 4.vedtaksperiode
-        )
+        val inntektsmelding2Id =
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                førsteFraværsdag = 5.april,
+                vedtaksperiodeIdInnhenter = 4.vedtaksperiode
+            )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

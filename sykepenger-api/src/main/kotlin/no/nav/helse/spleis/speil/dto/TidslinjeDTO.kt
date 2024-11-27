@@ -10,17 +10,17 @@ data class SammenslåttDag(
     val kilde: Sykdomstidslinjedag.SykdomstidslinjedagKilde,
     val grad: Int? = null,
     val utbetalingsinfo: Utbetalingsinfo? = null,
-    val begrunnelser: List<BegrunnelseDTO>? = null,
+    val begrunnelser: List<BegrunnelseDTO>? = null
 ) {
     /*
         sammenligner ikke utbetalingsinfo (siden endring av beløp dekkes av sjekk på vilkårsgrunnlagId),
         ei heller utbetalingstidslinjedagtypen siden den reflekterer både endring av sykdomstidslinje+vilkårsgrunnlag (og dekkes dermed fra før)
      */
     fun sammeGrunnlag(other: SammenslåttDag) =
-        this.dagen == other.dagen
-                && this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype
-                && this.kilde == other.kilde
-                && this.grad == grad
+        this.dagen == other.dagen &&
+            this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype &&
+            this.kilde == other.kilde &&
+            this.grad == grad
 }
 
 enum class SykdomstidslinjedagType {
@@ -41,7 +41,7 @@ enum class SykdomstidslinjedagType {
     ANDRE_YTELSER_PLEIEPENGER,
     ANDRE_YTELSER_SVANGERSKAPSPENGER,
     ANDRE_YTELSER_OPPLÆRINGSPENGER,
-    ANDRE_YTELSER_DAGPENGER,
+    ANDRE_YTELSER_DAGPENGER
 }
 
 enum class SykdomstidslinjedagKildetype {
@@ -68,9 +68,9 @@ enum class UtbetalingstidslinjedagType {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
-    Helgedag,   // SpeilBuilder only code breakout of Fridag
+    Helgedag, // SpeilBuilder only code breakout of Fridag
     Arbeidsdag,
-    Feriedag,   // SpeilBuilder only code breakout of Fridag
+    Feriedag, // SpeilBuilder only code breakout of Fridag
     AvvistDag,
     UkjentDag,
     ForeldetDag
