@@ -59,8 +59,15 @@ internal abstract class AbstractObservableTest {
     protected lateinit var person: Person
     internal lateinit var observatør: TestObservatør
 
-    private val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this.vedtaksperiode(orgnummer) }
-    private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
+    private val Int.vedtaksperiode: IdInnhenter
+        get() = IdInnhenter { orgnummer ->
+            this.vedtaksperiode(
+                orgnummer
+            )
+        }
+
+    private fun Int.vedtaksperiode(orgnummer: String) =
+        observatør.vedtaksperiode(orgnummer, this - 1)
 
     protected fun sykmelding(
         id: UUID = SYKMELDING_ID,
@@ -117,8 +124,16 @@ internal abstract class AbstractObservableTest {
         id: UUID = INNTEKTSMELDING_ID,
         arbeidsgiverperioder: List<Periode> = listOf(Periode(FOM, TOM)),
         beregnetInntekt: Inntekt = INNTEKT,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(
+            2018,
+            1,
+            1
+        ),
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
+            beregnetInntekt,
+            null,
+            emptyList()
+        ),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
         harFlereInntektsmeldinger: Boolean = false,
@@ -139,17 +154,34 @@ internal abstract class AbstractObservableTest {
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1), type = Arbeidsforholdtype.ORDINÆRT)),
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(
+                orgnummer,
+                FOM.minusYears(1),
+                type = Arbeidsforholdtype.ORDINÆRT
+            )
+        ),
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = inntektperioderForSykepengegrunnlag {
-                        Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
-                            ORGNUMMER inntekt INNTEKT
-                        }
-                    }),
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(listOf(
-            ArbeidsgiverInntekt(ORGNUMMER, listOf(ArbeidsgiverInntekt.MånedligInntekt(YearMonth.from(FOM.minusMonths(1)),
-                INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "kontantytelse", "fastloenn")))
-        ))
+            inntekter = inntektperioderForSykepengegrunnlag {
+                Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }),
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(
+            listOf(
+                ArbeidsgiverInntekt(
+                    ORGNUMMER, listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(
+                        YearMonth.from(FOM.minusMonths(1)),
+                        INNTEKT,
+                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                        "kontantytelse",
+                        "fastloenn"
+                    )
+                )
+                )
+            )
+        )
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),

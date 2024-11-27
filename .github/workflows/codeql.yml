@@ -2,7 +2,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
 
 env:
   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["kotlin"]
+        language: [ "kotlin" ]
 
     steps:
       - name: Checkout repository
@@ -30,7 +30,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      - name: Setup Java 
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'

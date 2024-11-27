@@ -3,10 +3,10 @@ name: Aiven config
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - 'deploy/aiven-dev.yml'
-    - 'deploy/aiven-prod.yml'
+      - 'deploy/aiven-dev.yml'
+      - 'deploy/aiven-prod.yml'
 
 jobs:
   deployDev:

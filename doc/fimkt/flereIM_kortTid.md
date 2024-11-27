@@ -29,6 +29,7 @@
 | Ikke satt             | Satt til noe        | RV_IM_4 og RV_IM_22 | IM 2            | IM 2                       |
 | Satt til noe          | Satt til noe        | RV_IM_4 og RV_IM_22 | IM 2            | IM 2                       |
 
-Vi ønsker altså at de tilfellene der begge/alle IM _ikke_ har satt arbeidsforholdID, så skal vi _ikke_ sette varsler og dermed automatisere. Dette forutsetter at vi bruker dager fra IM 2 / den sist mottatte inntektsmeldingen.
+Vi ønsker altså at de tilfellene der begge/alle IM _ikke_ har satt arbeidsforholdID, så skal vi _ikke_ sette varsler og
+dermed automatisere. Dette forutsetter at vi bruker dager fra IM 2 / den sist mottatte inntektsmeldingen.
 
 Rel. venting: vi vil _i alle tilfeller_ vente i 30 minutter før vi sender IM fra spedisjon til spleis.

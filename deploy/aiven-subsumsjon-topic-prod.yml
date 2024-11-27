@@ -2,23 +2,23 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-    name: subsumsjon.v1
-    namespace: tbd
-    labels:
-        team: tbd
+  name: subsumsjon.v1
+  namespace: tbd
+  labels:
+    team: tbd
 spec:
-    pool: nav-prod
-    config:  # optional; all fields are optional too; defaults shown
-        cleanupPolicy: delete  # delete, compact
-        minimumInSyncReplicas: 1
-        partitions: 6
-        replication: 3  # see min/max requirements
-        retentionBytes: -1  # -1 means unlimited
-        retentionHours: 168  # -1 means unlimited
-    acl:
-        - team: tbd
-          application: spleis
-          access: write
-        - team: tbd
-          application: spre-subsumsjon
-          access: read
+  pool: nav-prod
+  config: # optional; all fields are optional too; defaults shown
+    cleanupPolicy: delete  # delete, compact
+    minimumInSyncReplicas: 1
+    partitions: 6
+    replication: 3  # see min/max requirements
+    retentionBytes: -1  # -1 means unlimited
+    retentionHours: 168  # -1 means unlimited
+  acl:
+    - team: tbd
+      application: spleis
+      access: write
+    - team: tbd
+      application: spre-subsumsjon
+      access: read

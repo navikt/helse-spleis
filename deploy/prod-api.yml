@@ -10,7 +10,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-   - https://spleis-api.intern.nav.no
+    - https://spleis-api.intern.nav.no
   liveness:
     path: /isalive
     initialDelay: 5
@@ -65,12 +65,12 @@ spec:
     - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
       mountPath: /var/run/secrets/spleis_sql
   env:
-  - name: DATABASE_INSTANCE
-    value: "spleis2"
-  - name: SPEKEMAT_SCOPE
-    value: "api://prod-gcp.tbd.spekemat/.default"
-  - name: SPEED_API_URL
-    value: http://speed-api
-  - name: TOKEN_ENDPOINT_ENV_KEY
-    value: AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
+    - name: DATABASE_INSTANCE
+      value: "spleis2"
+    - name: SPEKEMAT_SCOPE
+      value: "api://prod-gcp.tbd.spekemat/.default"
+    - name: SPEED_API_URL
+      value: http://speed-api
+    - name: TOKEN_ENDPOINT_ENV_KEY
+      value: AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
 

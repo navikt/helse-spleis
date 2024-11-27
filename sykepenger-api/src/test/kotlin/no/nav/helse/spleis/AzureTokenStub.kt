@@ -23,7 +23,8 @@ internal class AzureTokenStub(
             wireMockServer.start()
             ventPåServeroppstart()
             wireMockServer.stubFor(
-                WireMock.get(WireMock.urlPathEqualTo(jwksPath)).willReturn(WireMock.okJson(issuer.jwks))
+                WireMock.get(WireMock.urlPathEqualTo(jwksPath))
+                    .willReturn(WireMock.okJson(issuer.jwks))
             )
             continuation.resume(true) // returnerer true bare for å ha en verdi
         }

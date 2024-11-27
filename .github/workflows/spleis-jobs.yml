@@ -3,15 +3,15 @@ name: Spleis-jobs
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - 'jobs/**'
-    - 'sykepenger-model/**'
-    - 'sykepenger-serde/**'
-    - 'build.gradle.kts'
-    - '.github/workflows/**'
-    - 'deploy/dev-avstemming-job.yml'
-    - 'deploy/prod-avstemming-job.yml'
+      - 'jobs/**'
+      - 'sykepenger-model/**'
+      - 'sykepenger-serde/**'
+      - 'build.gradle.kts'
+      - '.github/workflows/**'
+      - 'deploy/dev-avstemming-job.yml'
+      - 'deploy/prod-avstemming-job.yml'
 
 env:
   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -48,27 +48,27 @@ jobs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
   deployDev:
-      name: deploy to dev
-      needs: build
-      runs-on: ubuntu-latest
-      steps:
-          - uses: actions/checkout@v4
-          - uses: nais/deploy/actions/deploy@v2
-            env:
-                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-                CLUSTER: dev-gcp
-                RESOURCE: deploy/dev-avstemming-job.yml
-                IMAGE: ${{ needs.build.outputs.image }}
+    name: deploy to dev
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/dev-avstemming-job.yml
+          IMAGE: ${{ needs.build.outputs.image }}
 
   deployProd:
-      name: deploy to prod
-      needs: build
-      runs-on: ubuntu-latest
-      steps:
-          - uses: actions/checkout@v4
-          - uses: nais/deploy/actions/deploy@v2
-            env:
-                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-                CLUSTER: prod-gcp
-                RESOURCE: deploy/prod-avstemming-job.yml
-                IMAGE: ${{ needs.build.outputs.image }}
+    name: deploy to prod
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/prod-avstemming-job.yml
+          IMAGE: ${{ needs.build.outputs.image }}

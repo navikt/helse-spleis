@@ -24,6 +24,7 @@ class SpekematClient(
     baseUrl: String? = null
 ) {
     private val baseUrl = baseUrl ?: "http://spekemat"
+
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -36,10 +37,15 @@ class SpekematClient(
             sikkerlogg.info(it, kv("callId", callId), kv("fødselsnummer", fnr))
         }
         val request = lagRequest(fnr, callId)
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+        val response =
+            httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
         val responseBody = response.body()
         val statusCode = response.statusCode()
-        sikkerlogg.info("mottok $statusCode:\n$responseBody", kv("fødselsnummer", fnr), kv("callId", callId))
+        sikkerlogg.info(
+            "mottok $statusCode:\n$responseBody",
+            kv("fødselsnummer", fnr),
+            kv("callId", callId)
+        )
         if (statusCode != 200) throw SpekematClientException("Fikk uventet http statuskode fra spekemat: $statusCode. Forventet HTTP 200 OK")
         return parsePølsefabrikker(responseBody)
     }
@@ -83,12 +89,17 @@ class SpekematClient(
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .header(CALL_ID_HEADER, callId)
-            .header("Authorization", "Bearer ${tokenProvider.bearerToken(scope).getOrThrow().token}")
+            .header(
+                "Authorization",
+                "Bearer ${tokenProvider.bearerToken(scope).getOrThrow().token}"
+            )
             .POST(HttpRequest.BodyPublishers.ofString(requestBody))
             .build()
     }
 }
-class SpekematClientException(override val message: String, override val cause: Throwable? = null) : RuntimeException()
+
+class SpekematClientException(override val message: String, override val cause: Throwable? = null) :
+    RuntimeException()
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PølserResponse(val yrkesaktiviteter: List<YrkesaktivitetDto>)
@@ -96,10 +107,12 @@ private data class YrkesaktivitetDto(
     val yrkesaktivitetidentifikator: String,
     val rader: List<PølseradDto>
 )
+
 private data class PølseradDto(
     val pølser: List<PølseDto>,
     val kildeTilRad: UUID
 )
+
 private data class PølseDto(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
@@ -107,4 +120,5 @@ private data class PølseDto(
     // tingen som gjorde at behandlingen ble opprettet
     val kilde: UUID
 )
+
 private enum class Pølsestatus { ÅPEN, LUKKET, FORKASTET }

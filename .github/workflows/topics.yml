@@ -3,12 +3,12 @@ name: Aiven config for de andre topicene våre
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - 'deploy/aiven-teknisk-topic-dev.yml'
-    - 'deploy/aiven-teknisk-topic-prod.yml'
-    - 'deploy/aiven-subsumsjon-topic-dev.yml'
-    - 'deploy/aiven-subsumsjon-topic-prod.yml'
+      - 'deploy/aiven-teknisk-topic-dev.yml'
+      - 'deploy/aiven-teknisk-topic-prod.yml'
+      - 'deploy/aiven-subsumsjon-topic-dev.yml'
+      - 'deploy/aiven-subsumsjon-topic-prod.yml'
 
 jobs:
   deployDev:

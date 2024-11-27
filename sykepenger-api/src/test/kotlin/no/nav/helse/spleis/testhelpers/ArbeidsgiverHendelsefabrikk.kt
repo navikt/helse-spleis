@@ -116,7 +116,11 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
+            beregnetInntekt,
+            null,
+            emptyList()
+        ),
         harOpphørAvNaturalytelser: Boolean = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
@@ -141,7 +145,11 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         return inntektsmeldinggenerator()
     }
 
-    internal fun lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>): SykepengegrunnlagForArbeidsgiver {
+    internal fun lagSykepengegrunnlagForArbeidsgiver(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>
+    ): SykepengegrunnlagForArbeidsgiver {
         return SykepengegrunnlagForArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -155,7 +163,11 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         vedtaksperiodeId: UUID,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
+            beregnetInntekt,
+            null,
+            emptyList()
+        ),
         harOpphørAvNaturalytelser: Boolean = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
@@ -172,7 +184,11 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
+                avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(
+                    vedtaksperiodeId,
+                    LocalDate.EPOCH,
+                    true
+                ),
                 mottatt = mottatt
             )
         }
@@ -181,7 +197,12 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     }
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
-        InntektsmeldingerReplay(UUID.randomUUID(), organisasjonsnummer, vedtaksperiodeId, emptyList())
+        InntektsmeldingerReplay(
+            UUID.randomUUID(),
+            organisasjonsnummer,
+            vedtaksperiodeId,
+            emptyList()
+        )
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
@@ -336,6 +357,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         automatisert = automatisert
     )
+
     internal fun lagKanIkkeBehandlesHer(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -383,7 +405,12 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             meldingsreferanseId = UUID.randomUUID()
         )
 
-    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, reberegning: Boolean = false) =
+    internal fun lagPåminnelse(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        tilstandsendringstidspunkt: LocalDateTime,
+        reberegning: Boolean = false
+    ) =
         Påminnelse(
             UUID.randomUUID(),
             organisasjonsnummer,
@@ -419,7 +446,10 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             force = force
         )
 
-    internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
+    internal fun lagHåndterOverstyrTidslinje(
+        overstyringsdager: List<ManuellOverskrivingDag>,
+        meldingsreferanseId: UUID = UUID.randomUUID()
+    ) =
         OverstyrTidslinje(
             meldingsreferanseId = meldingsreferanseId,
             organisasjonsnummer = organisasjonsnummer,

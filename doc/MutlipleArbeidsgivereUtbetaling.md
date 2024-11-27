@@ -9,7 +9,7 @@ This design guide applies to multiple Arbeidsgivere; initial implementations wil
 scaled back to a single Arbeidsgiver.
 
 The Utbetalingslinje itself is a structure representing a payment amount and a range
-of dates  over which the payment applies. This range should covers weekends (which are
+of dates over which the payment applies. This range should covers weekends (which are
 ignored by subsequent NAV systems) if payment days exist on Fredag and Mandag around
 the weekend.
 
@@ -41,16 +41,16 @@ Using the various HistorikUtbetalinger, we need to calculate a Utbetalingstidsli
 for each Arbeidsgivere:
 
 * Consolidate the Sykdomstidslinjer for each Vedtaksperiode in time order. *Plus*
-is already defined on Sykdomstidslinje for this purpose. Note that these
-Sykdomstidslinje will never overlap.
+  is already defined on Sykdomstidslinje for this purpose. Note that these
+  Sykdomstidslinje will never overlap.
 * Determine if there is a need to allocated some of the Sykdag as paid by the
-Arbeidsgiver. This is done by finding the closest prior HistorikUtbetalinger,
-and determining is a sufficient gap (generally 16 dager) to require the Arbeidsgiver
-must pay for the sickness.
+  Arbeidsgiver. This is done by finding the closest prior HistorikUtbetalinger,
+  and determining is a sufficient gap (generally 16 dager) to require the Arbeidsgiver
+  must pay for the sickness.
 * Generate the Utbetalingstidslinje from the Sykdomstidslinje, taking into account
-whether the Arbeidsgiver has already covered their utbetaling obligation or not. A
-specific UtbetalingBuilder walks through each dag in the Sykdomstidslinje,
-assisted by its internal State Machine.
+  whether the Arbeidsgiver has already covered their utbetaling obligation or not. A
+  specific UtbetalingBuilder walks through each dag in the Sykdomstidslinje,
+  assisted by its internal State Machine.
 
 So while we are interested in payments for a single Arbeidsgiver, we need the
 Utbetalingstidslinje for all the other Arbeidsgivere for the subsequent steps.
@@ -95,11 +95,11 @@ Alder class). The following summarizes the rules:
 * Benefits are not paid on the 70th birthday or later
 * Only 60 days of benefits are paid after the 67th birthday
 * Otherwise maximum benefits depend upon the type of employment and whether NAV
-insurance has been purchased. This is captured in ArbeidsgiverRegler (EmployerRules)
-  * 248 days are typical with arbeidsgivere, and is the only ArbeidsgiverRegler currently
-  implemented
-  * When conflicts exist with which ArbeidsgiverRegler to use (amongst different
-  inntekt sources), a primary ArbeidsgiverRegler is selected for limit analysis.
+  insurance has been purchased. This is captured in ArbeidsgiverRegler (EmployerRules)
+    * 248 days are typical with arbeidsgivere, and is the only ArbeidsgiverRegler currently
+      implemented
+    * When conflicts exist with which ArbeidsgiverRegler to use (amongst different
+      inntekt sources), a primary ArbeidsgiverRegler is selected for limit analysis.
 * Benefits reset after a 26-week period of no NAV payments.
 
 These limits apply to a rolling, three-year window. Hence, each time we transition
@@ -139,19 +139,19 @@ we need to check for the 6G (maximum allowed daily payment) limit. Several facto
 are at play here:
 
 * The 6G limit is adjusted by the overall sickness grade. The full 6G payment is
-only awarded for 100% sick.
+  only awarded for 100% sick.
 * The revised 6G limit is then to be distributed across all arbeidsgivere:
-  * Maximum repayment is the lesser of the usual inntekt for that day, or revised
-  6G limit.
-  * Only arbeidsgivere who paid employees directly on a particular day are entitled
-  for repayment.
-  * Repayment to a particular arbeidsgiver is limited to the payment they made that
-  day to the sick employee.
-  * When multiple arbeidsgivere are entitled to rebates, the rebate is proportioned
-  by daily inntekt for each arbeidsgiver.
-  * Any remaining portion of the partial 6G limit is given directly to the claimant.
+    * Maximum repayment is the lesser of the usual inntekt for that day, or revised
+      6G limit.
+    * Only arbeidsgivere who paid employees directly on a particular day are entitled
+      for repayment.
+    * Repayment to a particular arbeidsgiver is limited to the payment they made that
+      day to the sick employee.
+    * When multiple arbeidsgivere are entitled to rebates, the rebate is proportioned
+      by daily inntekt for each arbeidsgiver.
+    * Any remaining portion of the partial 6G limit is given directly to the claimant.
 * Any reductions in the daily utbetaling are reflected in an updated Utbetalingstidslinje
-for that Arbeidsgiver.
+  for that Arbeidsgiver.
 
 We now have the final, calculated Utbetalingstidslinje for each Arbeidsgiver. These
 revised Utbetalingstidslinje are pushed onto the stack of prior Utbetalingstidslinje

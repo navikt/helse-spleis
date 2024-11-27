@@ -3,22 +3,22 @@ name: Spleis-api
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - 'sykepenger-api/**'
-    - 'sykepenger-api-dto/**'
-    - 'sykepenger-model/**'
-    - 'sykepenger-aktivitetslogg-dto/**'
-    - 'sykepenger-model-dto/**'
-    - 'sykepenger-primitiver-dto/**'
-    - 'sykepenger-serde/**'
-    - 'sykepenger-utbetaling-dto/**'
-    - 'sykepenger-utbetaling/**'
-    - 'build.gradle.kts'
-    - 'settings.gradle.kts'
-    - '.github/workflows/**'
-    - 'deploy/dev-api.yml'
-    - 'deploy/prod-api.yml'
+      - 'sykepenger-api/**'
+      - 'sykepenger-api-dto/**'
+      - 'sykepenger-model/**'
+      - 'sykepenger-aktivitetslogg-dto/**'
+      - 'sykepenger-model-dto/**'
+      - 'sykepenger-primitiver-dto/**'
+      - 'sykepenger-serde/**'
+      - 'sykepenger-utbetaling-dto/**'
+      - 'sykepenger-utbetaling/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - '.github/workflows/**'
+      - 'deploy/dev-api.yml'
+      - 'deploy/prod-api.yml'
 
 env:
   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}

@@ -21,15 +21,15 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
-import kotlin.text.get
 
-internal val nyObjectmapper get() = jacksonObjectMapper()
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    .registerModule(JavaTimeModule())
-    .setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-        indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-        indentObjectsWith(DefaultIndenter("  ", "\n"))
-    })
+internal val nyObjectmapper
+    get() = jacksonObjectMapper()
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .registerModule(JavaTimeModule())
+        .setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
+            indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+            indentObjectsWith(DefaultIndenter("  ", "\n"))
+        })
 
 internal val objectMapper = nyObjectmapper
 internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
@@ -41,7 +41,13 @@ fun main() {
 
     val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val config = ApplicationConfiguration(meterRegistry)
-    val app = createApp(config.azureConfig, config.speedClient, config.spekematClient, { config.dataSource }, meterRegistry)
+    val app = createApp(
+        config.azureConfig,
+        config.speedClient,
+        config.spekematClient,
+        { config.dataSource },
+        meterRegistry
+    )
     app.start(wait = true)
 }
 
@@ -81,7 +87,10 @@ internal fun Application.lagApplikasjonsmodul(
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry
 ) {
-    requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), meterRegistry)
+    requestResponseTracing(
+        LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"),
+        meterRegistry
+    )
 
     val hendelseDao = HendelseDao(dataSourceProvider, meterRegistry)
     val personDao = PersonDao(dataSourceProvider, meterRegistry)
