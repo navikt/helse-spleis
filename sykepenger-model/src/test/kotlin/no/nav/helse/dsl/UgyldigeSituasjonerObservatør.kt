@@ -23,6 +23,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import kotlin.check
@@ -195,6 +200,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         validerSykdomstidslinjePåBehandlinger()
         validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
         validerRefusjonsopplysningerPåBehandlinger()
+        validerUtbetalingOgVilkårsgrunnlagPåBehandlinger()
         IM.bekreftEntydighåndtering()
     }
 
@@ -277,6 +283,43 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                         val perioder = endring.refusjonstidslinje.perioderMedBeløp
                         check(perioder.size == 1) { "Burde ikke være noen hull i refusjonstidslinjen." }
                         check(perioder.single() == endring.periode) { "Refusjonstidslinjen skal dekke hele perioden. Perioden er ${endring.periode}, refusjonsopplysninger for $perioder" }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun validerUtbetalingOgVilkårsgrunnlagPåBehandlinger() {
+        arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
+            arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
+                    behandling.endringer.last().let { endring ->
+                        when (behandling.tilstand) {
+                            BehandlingView.TilstandView.BEREGNET,
+                            BehandlingView.TilstandView.BEREGNET_OMGJØRING,
+                            BehandlingView.TilstandView.BEREGNET_REVURDERING,
+                            BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST,
+                            BehandlingView.TilstandView.VEDTAK_FATTET,
+                            BehandlingView.TilstandView.VEDTAK_IVERKSATT,
+                            BehandlingView.TilstandView.ANNULLERT_PERIODE -> {
+                                assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}"}
+                                assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}"}
+                            }
+                            BehandlingView.TilstandView.TIL_INFOTRYGD,
+                            BehandlingView.TilstandView.UBEREGNET,
+                            UBEREGNET_OMGJØRING,
+                            BehandlingView.TilstandView.UBEREGNET_REVURDERING -> {
+                                assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}"}
+                                assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}"}
+                                assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}"}
+                                assertTrue(endring.utbetalingstidslinje.isEmpty()) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}"}
+                            }
+                            AVSLUTTET_UTEN_VEDTAK -> {
+                                assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}"}
+                                assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}"}
+                                assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}"}
+                            }
+                        }
                     }
                 }
             }
