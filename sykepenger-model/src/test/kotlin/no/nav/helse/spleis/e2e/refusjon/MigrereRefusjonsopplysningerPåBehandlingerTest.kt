@@ -6,7 +6,6 @@ import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
 import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
 import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -418,17 +417,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
             migrerRefusjonsopplysningerPåBehandlinger()
 
             val refusjonEtterMigrering = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
-            assertForventetFeil(
-                forklaring = "behandlinger som opprettes i uberegnet revurdering pga refusjonsopplysninger arver feilaktig vilkårsgrunnlag og utbetaling fra forrige endring",
-                nå = {
-                    refusjonEtterMigrering.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT / 2)
-                    refusjonEtterMigrering.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT)
-                },
-                ønsket = {
-                    refusjonEtterMigrering.assertBeløpstidslinje(1.januar til 28.februar to INNTEKT / 2)
-                }
-            )
-
+            refusjonEtterMigrering.assertBeløpstidslinje(1.januar til 28.februar to INNTEKT / 2)
         }
     }
 
