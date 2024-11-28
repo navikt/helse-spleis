@@ -63,27 +63,38 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
     fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
-        nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
-        val korrigertIm = håndterInntektsmelding(arbeidsgiverperioder = listOf(), førsteFraværsdag = 10.januar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        a1 {
+            nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
+            val korrigertIm = håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(),
+                førsteFraværsdag = 10.januar,
+                beregnetInntekt = INNTEKT,
+                refusjon = Inntektsmelding.Refusjon(INGEN, null)
+            )
+            assertInfo("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-01")
+            // Per i dag blir det en revurdering uten endring og varsel om flere IM'er
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("IngenUtbetaling"))
+            assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
 
-        // Per i dag blir det en revurdering uten endring og varsel om flere IM'er
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("IngenUtbetaling"))
-        assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
+            val dagensRefusjonsopplysninger =
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
+            val dagensRefusjonsopplysningerPeriode =
+                dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
+            assertEquals(16.januar til LocalDate.MAX, dagensRefusjonsopplysningerPeriode)
+            assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INNTEKT })
 
-        val dagensRefusjonsopplysninger = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
-        val dagensRefusjonsopplysningerPeriode = dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
-        assertEquals(16.januar til LocalDate.MAX, dagensRefusjonsopplysningerPeriode)
-        assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INNTEKT })
-
-        // Med nye refusjonsopplysnigner vil det tolkes som 0,- i refusjon
-        val nyeRefusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
-        val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.perioderMedBeløp.single()
-        assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode)
-        assertTrue(nyeRefusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
-        assertTrue(nyeRefusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
+            // Med nye refusjonsopplysnigner vil det tolkes som 0,- i refusjon
+            val nyeRefusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
+            val nyeRefusjonsopplysningerPeriode = nyeRefusjonsopplysninger.perioderMedBeløp.single()
+            assertEquals(1.januar til 31.januar, nyeRefusjonsopplysningerPeriode)
+            assertTrue(nyeRefusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
+            assertTrue(
+                nyeRefusjonsopplysninger.subset(10.januar til 31.januar)
+                    .all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
+        }
     }
 
     @Test
