@@ -6,6 +6,7 @@ import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
 import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
 import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -19,6 +20,8 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -332,7 +335,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
         }
     }
 
-    private fun setup13og14() {
+    private fun setup13og14og15() {
         a1 {
             nyPeriode(januar)
             nyPeriode(februar)
@@ -352,7 +355,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     @Order(13)
     fun `flere arbeidsgivere med bare en inntektsmelding- med toggle`() = LagreRefusjonsopplysningerPåBehandling.enable {
         a1 {
-            setup13og14()
+            setup13og14og15()
             forrigeRefusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
             forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
             forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
@@ -363,7 +366,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     @Order(14)
     fun `flere arbeidsgivere med bare en inntektsmelding- uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
-            setup13og14()
+            setup13og14og15()
             migrerRefusjonsopplysningerPåBehandlinger()
             val faktiskBeløpstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
             faktiskBeløpstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
@@ -375,7 +378,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     @Order(15)
     fun `flere arbeidsgivere med bare en inntektsmelding - med toggle alltid på`() = LagreRefusjonsopplysningerPåBehandling.enable {
         a1 {
-            setup13og14()
+            setup13og14og15()
             forrigeRefusjonstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
             forrigeRefusjonstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
             forrigeRefusjonstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
@@ -383,6 +386,49 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
             val faktiskBeløpstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
             faktiskBeløpstidslinje.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT)
             faktiskBeløpstidslinje.assertBeløpstidslinje(1.februar til 28.februar to INGEN)
+        }
+    }
+
+    @Test
+    @Order(16)
+    fun `igangsatt revurdering pga refusjon - toggle alltid på`() = LagreRefusjonsopplysningerPåBehandling.enable {
+        a1 {
+            håndterSøknad(januar)
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+            tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(1.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalt() }
+
+            tillatUgyldigSituasjon { håndterSøknad(februar) }
+            tillatUgyldigSituasjon { håndterYtelser(2.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterSimulering(2.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(2.vedtaksperiode) }
+            tillatUgyldigSituasjon { håndterUtbetalt() }
+
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null)) }
+
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+            val refusjonFørMigrering = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+            refusjonFørMigrering.assertBeløpstidslinje(1.januar til 28.februar to INNTEKT / 2)
+
+            migrerRefusjonsopplysningerPåBehandlinger()
+
+            val refusjonEtterMigrering = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje + inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje
+            assertForventetFeil(
+                forklaring = "behandlinger som opprettes i uberegnet revurdering pga refusjonsopplysninger arver feilaktig vilkårsgrunnlag og utbetaling fra forrige endring",
+                nå = {
+                    refusjonEtterMigrering.assertBeløpstidslinje(1.januar til 31.januar to INNTEKT / 2)
+                    refusjonEtterMigrering.assertBeløpstidslinje(1.februar til 28.februar to INNTEKT)
+                },
+                ønsket = {
+                    refusjonEtterMigrering.assertBeløpstidslinje(1.januar til 28.februar to INNTEKT / 2)
+                }
+            )
+
         }
     }
 
