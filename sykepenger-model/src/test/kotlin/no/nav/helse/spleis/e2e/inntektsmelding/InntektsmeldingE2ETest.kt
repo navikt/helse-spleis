@@ -55,7 +55,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -116,6 +115,26 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Padder vedtaksperiode unødvendig med arbeidsdager ved out-of-order-søknader og begrunnelse for reduksjon er oppgitt når det ikke er ny arbeidsgiverperiode`() {
+        nyPeriode(5.februar til 28.februar)
+        nyPeriode(januar)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+            førsteFraværsdag = 5.februar
+        )
+        assertForventetFeil(
+            forklaring = "Padder arbeidsgiverdager. Påvirker ikke beregningen, skjæringstidpunktet blir fortsatt riktig.",
+            nå = { assertEquals(1.februar til 28.februar, inspektør.periode(1.vedtaksperiode)) },
+            ønsket = { assertEquals(5.februar til 28.februar, inspektør.periode(1.vedtaksperiode)) }
+        )
+    }
 
     @Test
     fun `Skal ikke håndtere selvbestemte inntektsmeldinger som treffer en forlengelse`() {
