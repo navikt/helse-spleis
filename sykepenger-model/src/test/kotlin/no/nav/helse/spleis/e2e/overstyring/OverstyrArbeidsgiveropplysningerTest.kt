@@ -264,46 +264,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer refusjon på Infotrygdvilkårsgrunnlag`() {
-        createOvergangFraInfotrygdPerson()
-        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.infotrygd)
-        val antallHistorikkInnslag = inspektør.vilkårsgrunnlagHistorikkInnslag().size
-        val gammelInntekt = inspektør.inntektIInntektsgrunnlaget(1.januar)
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, gammelInntekt, "Bare nye refusjonsopplysninger her", null, listOf(
-                Triple(1.januar, null, gammelInntekt/2)
-            ))
-        ), meldingsreferanseId = overstyringId)
-
-        assertForventetFeil(
-            forklaring = "restene blir ikke servert ettersom vi har ikke noen vedtaksperiode på 1. januar",
-            nå = {
-                assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, februar, gammelInntekt)
-            },
-            ønsket = {
-                // Vet ikke om dette trenger å støttes egentlig
-                assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, februar, gammelInntekt/2, overstyringId)
-            }
-        )
-
-        håndterYtelser(1.vedtaksperiode)
-        assertEquals(antallHistorikkInnslag + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(gammelInntekt, inspektør.inntektIInntektsgrunnlaget(1.januar))
-        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, gammelInntekt/2, SAKSBEHANDLER)), inspektør.refusjonsopplysningerIInntektsgrunnlaget(1.januar))
-
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        val revurdering = inspektør.utbetaling(1)
-        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-
-        assertEquals(1431, førsteUtbetaling.arbeidsgiverOppdrag.single().inspektør.beløp)
-        assertEquals(0, førsteUtbetaling.personOppdrag.size)
-
-        assertEquals(715, revurdering.arbeidsgiverOppdrag.single().inspektør.beløp)
-        assertEquals(716, revurdering.personOppdrag.single().inspektør.beløp)
-    }
-
-    @Test
     fun `skal være idempotente greier`() {
         nyttVedtak(januar)
 

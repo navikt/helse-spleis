@@ -1768,6 +1768,17 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerInntektsmeldingReplay()
         }
 
+        override fun lagUtbetalingstidslinje(
+            vedtaksperiode: Vedtaksperiode,
+            inntekt: ArbeidsgiverFaktaavklartInntekt?
+        ): Utbetalingstidslinje {
+            inntekt ?: error("Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
+                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?")
+
+            val refusjonstidslinje = Beløpstidslinje.fra(vedtaksperiode.periode, Inntekt.INGEN, Kilde(UUID.randomUUID(), Avsender.SYSTEM, LocalDateTime.now()))
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntekt, vedtaksperiode.jurist, refusjonstidslinje)
+        }
+
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             hendelse: OverstyrTidslinje,
