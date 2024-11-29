@@ -139,7 +139,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
-    internal fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt, subsumsjonslogg: Subsumsjonslogg) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter, subsumsjonslogg)
+    internal fun lagUtbetalingstidslinje(
+        faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt,
+        subsumsjonslogg: Subsumsjonslogg,
+        refusjonstidslinje: Beløpstidslinje
+    ) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter, subsumsjonslogg, refusjonstidslinje)
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
 
@@ -459,12 +463,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             builder.behandlingVenter(id)
         }
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt, subsumsjonslogg: Subsumsjonslogg): Utbetalingstidslinje {
+        fun lagUtbetalingstidslinje(
+            faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt,
+            subsumsjonslogg: Subsumsjonslogg,
+            refusjonstidslinje: Beløpstidslinje
+        ): Utbetalingstidslinje {
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
                 faktaavklarteInntekter = faktaavklarteInntekter,
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 arbeidsgiverperiode = arbeidsgiverperiode,
-                refusjonstidslinje = refusjonstidslinje()
+                refusjonstidslinje = refusjonstidslinje
             )
             return builder.result(sykdomstidslinje())
         }
