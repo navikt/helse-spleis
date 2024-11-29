@@ -92,6 +92,10 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         }
     }
 
+    internal fun diff(other: Beløpstidslinje): Beløpstidslinje {
+        return Beløpstidslinje(other.dager.filterValues { it.beløp != this.dager[it.dato]?.beløp })
+    }
+
     internal fun dto() = BeløpstidslinjeDto(
         perioder = dager
             .map { (_, dag) ->

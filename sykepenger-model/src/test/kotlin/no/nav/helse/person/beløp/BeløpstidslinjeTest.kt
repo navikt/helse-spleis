@@ -34,6 +34,22 @@ import org.junit.jupiter.api.assertThrows
 internal class BeløpstidslinjeTest {
 
     @Test
+    fun diff() {
+        val fraInntektsmelding =
+            (Arbeidsgiver oppgir 1000.daglig fra 2.januar til 30.januar)
+
+        val overstyring =
+            (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar) og
+            (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar)
+
+        val forventetDiff =
+            (Saksbehandler oppgir 1000.daglig kun 1.januar) og
+            (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar)
+
+        assertEquals(forventetDiff, fraInntektsmelding.diff(overstyring))
+    }
+
+    @Test
     fun `fylle en hullete beløpstidslinje`() {
         val beløpstidslinje1 = (Arbeidsgiver oppgir 1000.daglig hele januar)
         val beløpstidslinje2 = (Saksbehandler oppgir 2000.daglig hele mars)
