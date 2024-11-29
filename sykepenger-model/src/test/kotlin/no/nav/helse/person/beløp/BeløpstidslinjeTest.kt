@@ -16,6 +16,7 @@ import no.nav.helse.dsl.BeløpstidslinjeDsl.til
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class BeløpstidslinjeTest {
 
@@ -280,6 +282,24 @@ internal class BeløpstidslinjeTest {
             meldingsreferanseId?.let { kildeId ->
                 assertTrue(beløpstidslinje.all { it.kilde.meldingsreferanseId == kildeId })
             }
+        }
+        internal fun assertBeløpstidslinje(expected: Beløpstidslinje, actual: Beløpstidslinje, ignoreMeldingsreferanseId: Boolean = false) {
+            val tidsstempel: (_: LocalDateTime) -> LocalDateTime = { LocalDate.EPOCH.atStartOfDay() }
+            val meldingsreferanseId: (ekte: UUID) -> UUID = if (ignoreMeldingsreferanseId) { _ -> UUID.randomUUID() } else { ekte -> ekte }
+            assertEquals(expected.besudlet(tidsstempel, meldingsreferanseId), actual.besudlet(tidsstempel, meldingsreferanseId))
+        }
+        internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
+        internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
+
+        private fun Beløpstidslinje.besudlet(
+            tidsstempel: (ekte: LocalDateTime) -> LocalDateTime = { it },
+            meldingsreferanseId: (ekte: UUID) -> UUID = { it }
+        ): Beløpstidslinje {
+            val beløpsdager = filterIsInstance<Beløpsdag>().map { it.copy(kilde = it.kilde.copy(
+                tidsstempel = tidsstempel(it.kilde.tidsstempel),
+                meldingsreferanseId = meldingsreferanseId(it.kilde.meldingsreferanseId))
+            )}
+            return Beløpstidslinje(beløpsdager)
         }
     }
 }
