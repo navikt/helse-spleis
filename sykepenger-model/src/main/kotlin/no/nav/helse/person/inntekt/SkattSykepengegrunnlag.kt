@@ -70,8 +70,6 @@ internal class SkattSykepengegrunnlag private constructor(
         ))
     }
 
-    override fun erSkatteopplysning(): Boolean = true
-
     override fun subsumerArbeidsforhold(
         subsumsjonslogg: Subsumsjonslogg,
         organisasjonsnummer: String,

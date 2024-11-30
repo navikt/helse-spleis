@@ -231,7 +231,14 @@ data class ArbeidsgiverInntektsopplysning(
                     omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
                     skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt() else null,
                     gjelder = arbeidsgiver.gjelder,
-                    skatteopplysning = arbeidsgiver.inntektsopplysning.erSkatteopplysning()
+                    skatteopplysning = when (arbeidsgiver.inntektsopplysning) {
+                        is IkkeRapportert,
+                        is SkattSykepengegrunnlag -> true
+                        is no.nav.helse.person.inntekt.Inntektsmelding -> arbeidsgiver.inntektsopplysning.fraAOrdningen()
+                        is Infotrygd,
+                        is Saksbehandler,
+                        is SkjønnsmessigFastsatt -> false
+                    }
                 )
             }
 

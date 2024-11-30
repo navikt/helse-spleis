@@ -28,6 +28,8 @@ class Inntektsmelding internal constructor(
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
 
+    internal fun fraAOrdningen() = kilde == Kilde.AOrdningen
+
     internal fun view() = InntektsmeldingView(
         id = id,
         dato = dato,
@@ -75,8 +77,6 @@ class Inntektsmelding internal constructor(
     ) {
         saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
     }
-
-    override fun erSkatteopplysning(): Boolean = kilde == Kilde.AOrdningen
 
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
