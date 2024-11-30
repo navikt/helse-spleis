@@ -28,7 +28,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     val inntektvurderingsperiode = utgangspunkt.minusMonths(MAKS_INNTEKT_GAP.toLong()) .. utgangspunkt.minusMonths(1)
     val harInntekterToMånederFørSkjæringstidspunkt = inntektsopplysninger.any { it.måned in inntektvurderingsperiode }
 
-    fun avklarSomSykepengegrunnlag(skjæringstidspunkt: LocalDate): AvklarbarSykepengegrunnlag? {
+    fun avklarSomSykepengegrunnlag(skjæringstidspunkt: LocalDate): SkatteopplysningSykepengegrunnlag? {
         if (this.skjæringstidspunkt != skjæringstidspunkt) return null
         if (ansattPerioder.isEmpty()) return null
         // ser bort fra skatteinntekter om man ikke er ansatt på skjæringstidspunktet:

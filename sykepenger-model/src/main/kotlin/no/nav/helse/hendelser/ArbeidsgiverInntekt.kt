@@ -1,43 +1,16 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
-import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.somEksterneSkatteinntekter
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
+import java.time.YearMonth
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 data class ArbeidsgiverInntekt(
     val arbeidsgiver: String,
     val inntekter: List<MånedligInntekt>
 ) {
-    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
-        SkattSykepengegrunnlag(
-            hendelseId = meldingsreferanseId,
-            dato = skjæringstidspunkt,
-            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
-            ansattPerioder = emptyList(),
-            tidsstempel = LocalDateTime.now()
-        )
-
-    internal fun somInntektsmelding(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
-        Inntektsmelding(
-            dato = skjæringstidspunkt,
-            hendelseId = meldingsreferanseId,
-            beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }),
-            kilde = Inntektsmelding.Kilde.AOrdningen
-        )
-
-    internal fun somEksterneSkatteinntekter() = inntekter.somEksterneSkatteinntekter()
-
-    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).årlig
-
     internal companion object {
         internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String, måned: YearMonth) =
             this.any { it.arbeidsgiver == orgnummer && it.inntekter.harInntektFor(måned) }
@@ -67,12 +40,6 @@ data class ArbeidsgiverInntekt(
 
         companion object {
             internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
-
-            internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
-                return map {
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.månedlig)
-                }
-            }
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0

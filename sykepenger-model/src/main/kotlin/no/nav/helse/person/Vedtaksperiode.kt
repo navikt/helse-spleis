@@ -48,6 +48,7 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -1877,9 +1878,15 @@ internal class Vedtaksperiode private constructor(
         ) {
             aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
             aktivitetslogg.varsel(Varselkode.RV_IV_10)
-            vedtaksperiode.arbeidsgiver.lagreInntekt(sykepengegrunnlagForArbeidsgiver)
-            vedtaksperiode.behandlinger.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver, vedtaksperiode.person)
-            vedtaksperiode.behandlinger.oppdaterDokumentsporing(Dokumentsporing.inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId))
+
+            val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
+            val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
+
+            vedtaksperiode.arbeidsgiver.lagreInntektFraAOrdningen(
+                meldingsreferanseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
             val ingenRefusjon = Beløpstidslinje.fra(
                 periode = vedtaksperiode.periode,
                 beløp = Inntekt.INGEN,
@@ -1897,6 +1904,19 @@ internal class Vedtaksperiode private constructor(
                 beregnArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist),
                 refusjonstidslinje = ingenRefusjon
             )
+
+            val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+                organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiode.id,
+                behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
+                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                skatteinntekter = skatteopplysninger.map {
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
+                },
+                omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger).årlig
+            )
+            vedtaksperiode.person.sendSkatteinntekterLagtTilGrunn(event)
+
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
         }
 
@@ -2993,9 +3013,6 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.arbeidsgiverperioder() = map { it.behandlinger.arbeidsgiverperiode() }
         internal fun List<Vedtaksperiode>.refusjonstidslinje() = fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
             beløpstidslinje + vedtaksperiode.refusjonstidslinje
-        }
-        internal fun List<Vedtaksperiode>.finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
-            return firstOrNull { it.id == vedtaksperiodeId }?.skjæringstidspunkt
         }
         internal fun List<Vedtaksperiode>.finn(vedtaksperiodeId: UUID): Vedtaksperiode? = firstOrNull { it.id == vedtaksperiodeId }
         internal fun List<Vedtaksperiode>.startdatoerPåSammenhengendeVedtaksperioder(): Set<LocalDate> {

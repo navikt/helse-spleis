@@ -122,6 +122,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     private val observatører = mutableListOf<BehandlingObserver>()
 
+    val sisteBehandlingId get() = behandlinger.last().id
+
     internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) {
         check(behandlinger.isEmpty())
         val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)
@@ -345,13 +347,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ?.let { revurderingseventyr -> person.igangsettOverstyring(revurderingseventyr, aktivitetslogg) }
     }
 
-    internal fun sendSkatteinntekterLagtTilGrunn(
-        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-        person: Person
-    ) {
-        behandlinger.last().sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver, person)
-    }
-
     fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
         behandlinger.last().beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
     }
@@ -398,7 +393,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
 
     internal class Behandling private constructor(
-        private val id: UUID,
+        val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
@@ -475,13 +470,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 refusjonstidslinje = refusjonstidslinje
             )
             return builder.result(sykdomstidslinje())
-        }
-
-        internal fun sendSkatteinntekterLagtTilGrunn(
-            sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-            person: Person
-        ) {
-            person.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver.skatteinntekterLagtTilGrunnEvent(this.id))
         }
 
         internal fun håndterRefusjonsopplysninger(

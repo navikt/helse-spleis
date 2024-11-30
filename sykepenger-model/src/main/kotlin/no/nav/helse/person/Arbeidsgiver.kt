@@ -103,6 +103,8 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.f
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
@@ -571,8 +573,17 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun lagreInntekt(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
-        sykepengegrunnlagForArbeidsgiver.lagreInntekt(inntektshistorikk, refusjonshistorikk)
+    internal fun lagreInntektFraAOrdningen(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, omregnetÅrsinntekt: Inntekt) {
+        val im = no.nav.helse.person.inntekt.Inntektsmelding(
+            dato = skjæringstidspunkt,
+            hendelseId = meldingsreferanseId,
+            beløp = omregnetÅrsinntekt,
+            kilde = no.nav.helse.person.inntekt.Inntektsmelding.Kilde.AOrdningen
+        )
+
+        inntektshistorikk.leggTil(im)
+        val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
+        refusjonshistorikk.leggTilRefusjon(refusjon)
     }
 
     internal fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
