@@ -867,7 +867,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(aktivitetslogg: IAktivitetslogg) {
-        behandlinger.godkjenning(aktivitetslogg, utkastTilVedtakBuilder(), arbeidsgiver.organisasjonsnummer)
+        behandlinger.godkjenning(aktivitetslogg, utkastTilVedtakBuilder())
     }
 
     private fun utkastTilVedtakBuilder(): UtkastTilVedtakBuilder {
