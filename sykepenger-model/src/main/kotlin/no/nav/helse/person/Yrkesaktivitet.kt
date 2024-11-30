@@ -10,7 +10,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 
 const val Frilans = "FRILANS"
 const val Selvstendig = "SELVSTENDIG"
@@ -30,7 +30,7 @@ internal sealed interface Yrkesaktivitet {
         skjæringstidspunkt: LocalDate,
         førsteFraværsdag: LocalDate?,
         inntektshistorikk: Inntektshistorikk,
-        skattSykepengegrunnlag: SkattSykepengegrunnlag?,
+        skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         refusjonshistorikk: Refusjonshistorikk,
         aktivitetslogg: IAktivitetslogg?
     ): ArbeidsgiverInntektsopplysning? {
@@ -53,11 +53,11 @@ internal sealed interface Yrkesaktivitet {
             skjæringstidspunkt: LocalDate,
             førsteFraværsdag: LocalDate?,
             inntektshistorikk: Inntektshistorikk,
-            skattSykepengegrunnlag: SkattSykepengegrunnlag?,
+            skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
             refusjonshistorikk: Refusjonshistorikk,
             aktivitetslogg: IAktivitetslogg?
         ): ArbeidsgiverInntektsopplysning? {
-            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
+            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skatteopplysning) ?: return null
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = organisasjonsnummer,
                 gjelder = skjæringstidspunkt til LocalDate.MAX,
@@ -128,12 +128,12 @@ internal sealed interface Yrkesaktivitet {
             skjæringstidspunkt: LocalDate,
             førsteFraværsdag: LocalDate?,
             inntektshistorikk: Inntektshistorikk,
-            skattSykepengegrunnlag: SkattSykepengegrunnlag?,
+            skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
             refusjonshistorikk: Refusjonshistorikk,
             aktivitetslogg: IAktivitetslogg?
         ): ArbeidsgiverInntektsopplysning? {
-            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
-            return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
+            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skatteopplysning) ?: return null
+            return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skatteopplysning, refusjonshistorikk, aktivitetslogg)
         }
 
         override fun hashCode(): Int {

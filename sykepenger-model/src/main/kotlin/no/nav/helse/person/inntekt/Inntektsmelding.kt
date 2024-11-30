@@ -1,9 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.InntektsmeldingDto.KildeDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
@@ -15,6 +11,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 class Inntektsmelding internal constructor(
     id: UUID,
@@ -141,9 +141,13 @@ class Inntektsmelding internal constructor(
             return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.tidsstempel }
         }
 
-        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? {
+        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?,
+            skatteopplysning: SkatteopplysningerForSykepengegrunnlag?
+        ): Inntektsopplysning? {
             val inntektsmelding = finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
-            val skatt = skattSykepengegrunnlag?.takeIf { it.kanBrukes(skjæringstidspunkt) }?.somSykepengegrunnlag() ?: return inntektsmelding
+            val skatt = skatteopplysning?.avklarSomSykepengegrunnlag(skjæringstidspunkt) ?: return inntektsmelding
             return inntektsmelding?.avklarSykepengegrunnlag(skatt) ?: skatt
         }
     }

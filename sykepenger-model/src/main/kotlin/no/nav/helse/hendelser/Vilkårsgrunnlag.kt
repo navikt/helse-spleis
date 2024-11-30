@@ -5,20 +5,18 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
-import no.nav.helse.person.inntekt.AnsattPeriode
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode
 import no.nav.helse.yearMonth
 
 class Vilkårsgrunnlag(
@@ -65,16 +63,26 @@ class Vilkårsgrunnlag(
         )
     }
 
-    internal fun avklarSykepengegrunnlag(person: Person, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
-        val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
-            SkattSykepengegrunnlag(
+    internal fun skatteopplysninger(): List<SkatteopplysningerForSykepengegrunnlag> {
+        // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
+        return opptjeningsgrunnlag.map { (orgnummer, arbeidsforhold) ->
+            val inntekter = inntektsvurderingForSykepengegrunnlag.inntekter
+                .firstOrNull { inntekt -> inntekt.arbeidsgiver == orgnummer }
+                ?.let { inntekt ->
+                    inntekt.inntekter.map { månedligInntekt ->
+                        månedligInntekt.somInntekt(metadata.meldingsreferanseId)
+                    }
+                }
+                ?: emptyList()
+            SkatteopplysningerForSykepengegrunnlag(
+                arbeidsgiver = orgnummer,
                 hendelseId = metadata.meldingsreferanseId,
-                dato = skjæringstidspunkt,
-                inntektsopplysninger = emptyList(),
-                ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
+                skjæringstidspunkt = skjæringstidspunkt,
+                inntektsopplysninger = inntekter,
+                ansattPerioder = arbeidsforhold.map { it.somAnsattPeriode() },
+                tidsstempel = LocalDateTime.now()
             )
         }
-        return inntektsvurderingForSykepengegrunnlag.inntekter.avklarSykepengegrunnlag(aktivitetslogg, person, rapporterteArbeidsforhold, skjæringstidspunkt, metadata.meldingsreferanseId, subsumsjonslogg)
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {

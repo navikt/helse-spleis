@@ -5,21 +5,17 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.somEksterneSkatteinntekter
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
-class ArbeidsgiverInntekt(
-    private val arbeidsgiver: String,
-    private val inntekter: List<MånedligInntekt>
+data class ArbeidsgiverInntekt(
+    val arbeidsgiver: String,
+    val inntekter: List<MånedligInntekt>
 ) {
     internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         SkattSykepengegrunnlag(
@@ -43,25 +39,6 @@ class ArbeidsgiverInntekt(
     internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).årlig
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
-            aktivitetslogg: IAktivitetslogg,
-            person: Person,
-            rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
-            skjæringstidspunkt: LocalDate,
-            meldingsreferanseId: UUID,
-            subsumsjonslogg: Subsumsjonslogg
-        ): Inntektsgrunnlag {
-            val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
-            // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
-            val inntekterMedOpptjening = rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
-            return person.avklarSykepengegrunnlag(
-                aktivitetslogg,
-                skjæringstidspunkt,
-                inntekterMedOpptjening,
-                subsumsjonslogg
-            )
-        }
-
         internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String, måned: YearMonth) =
             this.any { it.arbeidsgiver == orgnummer && it.inntekter.harInntektFor(måned) }
 
@@ -72,12 +49,12 @@ class ArbeidsgiverInntekt(
             MånedligInntekt.antallMåneder(flatMap { it.inntekter })
     }
 
-    class MånedligInntekt(
-        private val yearMonth: YearMonth,
-        private val inntekt: Inntekt,
-        private val type: Inntekttype,
-        private val fordel: String,
-        private val beskrivelse: String
+    data class MånedligInntekt(
+        val yearMonth: YearMonth,
+        val inntekt: Inntekt,
+        val type: Inntekttype,
+        val fordel: String,
+        val beskrivelse: String
     ) {
         internal fun somInntekt(meldingsreferanseId: UUID) = Skatteopplysning(
             meldingsreferanseId,

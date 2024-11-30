@@ -78,7 +78,7 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsservitør
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -234,8 +234,18 @@ internal class Arbeidsgiver private constructor(
                 PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, førsteFraværsdag)
             }
 
-        internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =
-            mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer], aktivitetslogg) }
+        internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(
+            aktivitetslogg: IAktivitetslogg,
+            skjæringstidspunkt: LocalDate,
+            skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
+        ) =
+            mapNotNull { arbeidsgiver ->
+                arbeidsgiver.avklarSykepengegrunnlag(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    skatteopplysning = skatteopplysninger.firstOrNull { it -> it.arbeidsgiver == arbeidsgiver.organisasjonsnummer },
+                    aktivitetslogg = aktivitetslogg
+                )
+            }
 
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) = forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
 
@@ -343,9 +353,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = avklarSykepengegrunnlag(skjæringstidspunkt) != null
 
-    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
+    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skatteopplysning: SkatteopplysningerForSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
+        return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skatteopplysning, refusjonshistorikk, aktivitetslogg)
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer

@@ -14,7 +14,7 @@ fun <T: Any> assertNotNull(value: T?) {
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <reified T: Any> assertInstanceOf(actual: Any) {
+inline fun <reified T: Any> assertInstanceOf(actual: Any?) {
     contract {
         returns() implies (actual is T)
     }
