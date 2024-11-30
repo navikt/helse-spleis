@@ -59,7 +59,7 @@ internal class SubsumsjonMediator(
         check(kritiskeTyper.all { kritiskType ->
             subsumsjon.kontekster.count { it.type == kritiskType } == 1
         }) {
-            "en av $kritiskeTyper mangler/har duplikat:\n${subsumsjon.kontekster.joinToString(separator = "\n")}"
+            "en av $kritiskeTyper mangler, eller forekommer mer enn én gang. Følgende kontekster er registert:\n${subsumsjon.kontekster.joinToString(separator = "\n")}\nSubsumsjonen: $subsumsjon"
         }
         // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
         // alt kan subsummeres i kontekst av en behandling.
@@ -75,7 +75,7 @@ internal class SubsumsjonMediator(
             .map { subsumsjonMelding(it) }
             .forEach {
                 val jsonbody = it.toJson()
-                sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $message")
+                sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $jsonbody")
                 producer.send(message.meldingsporing.fødselsnummer, jsonbody)
             }
     }

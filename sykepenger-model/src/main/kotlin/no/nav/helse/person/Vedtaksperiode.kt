@@ -612,7 +612,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg,
             skjæringstidspunkt,
             skatteopplysninger,
-            subsumsjonslogg
+            jurist
         )
         vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, jurist)
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
