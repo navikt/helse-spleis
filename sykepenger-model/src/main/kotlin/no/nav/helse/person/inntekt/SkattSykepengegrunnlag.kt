@@ -21,7 +21,7 @@ internal class SkattSykepengegrunnlag private constructor(
     val inntektsopplysninger: List<Skatteopplysning>,
     val ansattPerioder: List<AnsattPeriode>,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
+) : SkatteopplysningSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal companion object {
         internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
             val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }

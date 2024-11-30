@@ -12,7 +12,7 @@ internal class IkkeRapportert(
     hendelseId: UUID,
     dato: LocalDate,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, Inntekt.INGEN, tidsstempel) {
+) : SkatteopplysningSykepengegrunnlag(id, hendelseId, dato, Inntekt.INGEN, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), hendelseId, dato, tidsstempel)
 
     override fun kanOverstyresAv(ny: Inntektsopplysning) = true

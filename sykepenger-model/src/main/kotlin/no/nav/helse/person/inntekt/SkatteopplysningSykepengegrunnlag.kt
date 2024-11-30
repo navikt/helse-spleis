@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.økonomi.Inntekt
 
-sealed class AvklarbarSykepengegrunnlag(
+sealed class SkatteopplysningSykepengegrunnlag(
     id: UUID,
     hendelseId: UUID,
     dato: LocalDate,

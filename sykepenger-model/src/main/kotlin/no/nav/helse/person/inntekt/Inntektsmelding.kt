@@ -46,7 +46,7 @@ class Inntektsmelding internal constructor(
         if (erOmregnetÅrsinntektEndret(this, gammel)) this
         else gammel.overstyrer(this)
 
-    internal fun avklarSykepengegrunnlag(skatt: AvklarbarSykepengegrunnlag): Inntektsopplysning {
+    internal fun avklarSykepengegrunnlag(skatt: SkatteopplysningSykepengegrunnlag): Inntektsopplysning {
         if (skatt.dato.yearMonth < this.dato.yearMonth) return skatt
         return this
     }
