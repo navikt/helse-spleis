@@ -1,6 +1,5 @@
 package no.nav.helse.person.refusjon
 
-import no.nav.helse.assertForventetFeil
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 internal class RefusjonsservitørTest {
 
     @Test
-    fun `Ubrukte refusjonsopplysninger velger feil om vi har nyere opplysninger tilbake i tid`() {
+    fun `Ubrukte refusjonsopplysninger håndterer om vi har nyere opplysninger tilbake i tid`() {
         val tidspunkt1 = LocalDateTime.now()
         val ubrukteRefusjonsopplysninger = Refusjonsservitør()
 
@@ -34,18 +33,8 @@ internal class RefusjonsservitørTest {
         Refusjonsservitør.fra(beløpstidslinje2).servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
 
         val refusjonstidslinjeJanuar = ubrukteRefusjonsopplysninger.servér(1.januar, januar)
-
-        assertForventetFeil(
-            forklaring = "Velger informasjon med eldre tidsstempel",
-            nå = {
-                val forventet = Beløpstidslinje.fra(1.januar til 4.januar, 2000.daglig, im2) + Beløpstidslinje.fra(5.januar til 31.januar, 1000.daglig, im1)
-                assertEquals(forventet, refusjonstidslinjeJanuar)
-            },
-            ønsket = {
-                val forventet = Beløpstidslinje.fra(januar, 2000.daglig, im2)
-                assertEquals(forventet, refusjonstidslinjeJanuar)
-            }
-        )
+        val forventet = Beløpstidslinje.fra(januar, 2000.daglig, im2)
+        assertEquals(forventet, refusjonstidslinjeJanuar)
     }
 
     @Test
