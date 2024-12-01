@@ -834,6 +834,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.forkastVedtaksperiode(this, arbeidsgiver, hendelse, aktivitetslogg)
         }
 
+        private fun burdeIkkeHaGrunnlagsdata() = tilstand is Tilstand.Uberegnet || tilstand is Tilstand.UberegnetOmgjøring || tilstand is Tilstand.UberegnetRevurdering || tilstand is Tilstand.AvsluttetUtenVedtak
         internal fun migrerRefusjonsopplysninger(
             aktivitetslogg: IAktivitetslogg,
             orgnummer: String,
@@ -842,7 +843,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ) {
             val sisteEndringId = endringer.last().id
             endringer.forEach { endring ->
-                val vilkårsgrunnlag = endring.grunnlagsdata ?: vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet(skjæringstidspunkt)
+                val vilkårsgrunnlag = endring.grunnlagsdata?.takeUnless {
+                    this.burdeIkkeHaGrunnlagsdata().also { if (it) aktivitetslogg.info("Endring ${endring.id} i ${tilstand::class.simpleName} peker feilaktig på et vilkårsgrunnlag.") }
+                } ?: vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet(skjæringstidspunkt)
                 val refusjonstidslinje = when {
                     vilkårsgrunnlag == null && endring.id == sisteEndringId -> vedManglendeInntektsgrunnlagPåSisteEndring().also {
                         if (this.tilstand !is Tilstand.AvsluttetUtenVedtak) {
