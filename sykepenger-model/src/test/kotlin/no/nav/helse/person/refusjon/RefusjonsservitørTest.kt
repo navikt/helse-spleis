@@ -1,8 +1,11 @@
 package no.nav.helse.person.refusjon
 
+import no.nav.helse.assertForventetFeil
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -17,33 +20,62 @@ import org.junit.jupiter.api.Test
 internal class RefusjonsservitørTest {
 
     @Test
+    fun `Ubrukte refusjonsopplysninger velger feil om vi har nyere opplysninger tilbake i tid`() {
+        val tidspunkt1 = LocalDateTime.now()
+        val ubrukteRefusjonsopplysninger = Refusjonsservitør()
+
+        val im1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidspunkt1)
+        val im2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidspunkt1.plusSeconds(1))
+
+        val beløpstidslinje1 = Beløpstidslinje.fra(5.januar.somPeriode(), 1000.daglig, im1)
+        val beløpstidslinje2 = Beløpstidslinje.fra(1.januar.somPeriode(), 2000.daglig, im2)
+
+        Refusjonsservitør.fra(beløpstidslinje1).servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
+        Refusjonsservitør.fra(beløpstidslinje2).servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
+
+        val refusjonstidslinjeJanuar = ubrukteRefusjonsopplysninger.servér(1.januar, januar)
+
+        assertForventetFeil(
+            forklaring = "Velger informasjon med eldre tidsstempel",
+            nå = {
+                val forventet = Beløpstidslinje.fra(1.januar til 4.januar, 2000.daglig, im2) + Beløpstidslinje.fra(5.januar til 31.januar, 1000.daglig, im1)
+                assertEquals(forventet, refusjonstidslinjeJanuar)
+            },
+            ønsket = {
+                val forventet = Beløpstidslinje.fra(januar, 2000.daglig, im2)
+                assertEquals(forventet, refusjonstidslinjeJanuar)
+            }
+        )
+    }
+
+    @Test
     fun `rester etter servering`() {
         val refusjonstidslinje = Beløpstidslinje.fra(januar, 100.daglig, kilde)
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
-        val suppekjøkken = Refusjonsservitør()
+        val ubrukteRefusjonsopplysninger = Refusjonsservitør()
         servitør.servér(1.januar, 10.januar til 15.januar)
-        servitør.servér(suppekjøkken, Aktivitetslogg())
-        assertNotNull(suppekjøkken[1.januar])
-        assertNull(suppekjøkken[2.januar])
-        assertEquals(listOf(1.januar til 9.januar, 16.januar til 31.januar), suppekjøkken[1.januar]!!.perioderMedBeløp)
+        servitør.servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
+        assertNotNull(ubrukteRefusjonsopplysninger[1.januar])
+        assertNull(ubrukteRefusjonsopplysninger[2.januar])
+        assertEquals(listOf(1.januar til 9.januar, 16.januar til 31.januar), ubrukteRefusjonsopplysninger[1.januar]!!.perioderMedBeløp)
     }
 
     @Test
     fun `rester etter servering med fler startdatoer`() {
         val refusjonstidslinje = Beløpstidslinje.fra(januar, 100.daglig, kilde)
         val servitør = Refusjonsservitør.fra(refusjonstidslinje, setOf(5.januar, 16.januar))
-        val suppekjøkken = Refusjonsservitør()
+        val ubrukteRefusjonsopplysninger = Refusjonsservitør()
         servitør.servér(2.januar, 10.januar til 12.januar)
         servitør.servér(16.januar, 23.januar til 25.januar)
-        servitør.servér(suppekjøkken, Aktivitetslogg())
+        servitør.servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
 
-        assertNull(suppekjøkken[4.januar])
-        assertNotNull(suppekjøkken[5.januar])
-        assertNotNull(suppekjøkken[16.januar])
-        assertNull(suppekjøkken[17.januar])
+        assertNull(ubrukteRefusjonsopplysninger[4.januar])
+        assertNotNull(ubrukteRefusjonsopplysninger[5.januar])
+        assertNotNull(ubrukteRefusjonsopplysninger[16.januar])
+        assertNull(ubrukteRefusjonsopplysninger[17.januar])
 
-        assertEquals(listOf(5.januar til 9.januar, 13.januar til 15.januar), suppekjøkken[5.januar]!!.perioderMedBeløp)
-        assertEquals(listOf(16.januar til 22.januar, 26.januar til 31.januar), suppekjøkken[16.januar]!!.perioderMedBeløp)
+        assertEquals(listOf(5.januar til 9.januar, 13.januar til 15.januar), ubrukteRefusjonsopplysninger[5.januar]!!.perioderMedBeløp)
+        assertEquals(listOf(16.januar til 22.januar, 26.januar til 31.januar), ubrukteRefusjonsopplysninger[16.januar]!!.perioderMedBeløp)
     }
 
     private companion object {
