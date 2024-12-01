@@ -34,12 +34,13 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         }
     }
 
-    operator fun plus(other: Beløpstidslinje) = merge(other, BevareEksisterendeOpplysningHvisLikeBeløp)
-
-    private fun merge(other: Beløpstidslinje, strategi: BesteRefusjonsopplysningstrategi): Beløpstidslinje {
+    operator fun plus(other: Beløpstidslinje): Beløpstidslinje {
         val results = this.dager.toMutableMap()
         other.dager.forEach { (key, dag) ->
-            results.merge(key, dag, strategi)
+            results.merge(key, dag) { champion, challenger ->
+                if (challenger.kilde.tidsstempel >= champion.kilde.tidsstempel) challenger
+                else champion
+            }
         }
         return Beløpstidslinje(results)
     }
@@ -113,13 +114,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     )
 
     companion object {
-        private val BevareEksisterendeOpplysningHvisLikeBeløp: BesteRefusjonsopplysningstrategi = { venstre: Beløpsdag, høyre: Beløpsdag ->
-            when {
-                venstre.beløp == høyre.beløp -> venstre
-                venstre.kilde.tidsstempel > høyre.kilde.tidsstempel -> venstre
-                else -> høyre
-            }
-        }
         fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
         internal fun gjenopprett(dto: BeløpstidslinjeDto) = Beløpstidslinje(
             dager = dto.perioder
@@ -139,8 +133,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         )
     }
 }
-
-internal typealias BesteRefusjonsopplysningstrategi = (Beløpsdag, Beløpsdag) -> Beløpsdag
 
 sealed interface Dag {
     val dato: LocalDate

@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
@@ -61,9 +60,16 @@ class OverstyrArbeidsgiveropplysninger(
     ): Refusjonsservitør? {
         val (refusjonstidslinjeFraOverstyring, strekkbar) = refusjonstidslinjer[orgnummer] ?: return null
         if (refusjonstidslinjeFraOverstyring.isEmpty()) return null
+        if (eksisterendeRefusjonstidslinje.isEmpty()) return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = refusjonstidslinjeFraOverstyring)
+
         val refusjonstidslinje =
-            if (strekkbar) refusjonstidslinjeFraOverstyring
-            else refusjonstidslinjeFraOverstyring + eksisterendeRefusjonstidslinje.fraOgMed(refusjonstidslinjeFraOverstyring.last().dato.nesteDag)
-        return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = refusjonstidslinje)
+            if (strekkbar) refusjonstidslinjeFraOverstyring.fyll(maxOf(eksisterendeRefusjonstidslinje.last().dato, refusjonstidslinjeFraOverstyring.last().dato))
+            else refusjonstidslinjeFraOverstyring
+
+        val nyInformasjon = refusjonstidslinje - eksisterendeRefusjonstidslinje
+        if (nyInformasjon.isEmpty()) return null
+
+        return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = eksisterendeRefusjonstidslinje + nyInformasjon)
     }
+
 }

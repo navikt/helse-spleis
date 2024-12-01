@@ -116,29 +116,17 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `ignorer inntektsmelding som er lik tidligere`() {
         val agp = listOf(1.januar til 16.januar)
-        val im1 = håndterInntektsmelding(agp, førsteFraværsdag = 1.januar, refusjon = Refusjon(10_000.månedlig, null), avsendersystem = ALTINN)
-        val im2 = håndterInntektsmelding(agp, førsteFraværsdag = 5.januar, refusjon = Refusjon(20_000.månedlig, null), avsendersystem = ALTINN)
+        håndterInntektsmelding(agp, førsteFraværsdag = 1.januar, refusjon = Refusjon(10_000.månedlig, null), avsendersystem = ALTINN)
+        håndterInntektsmelding(agp, førsteFraværsdag = 5.januar, refusjon = Refusjon(20_000.månedlig, null), avsendersystem = ALTINN)
         val im3 = håndterInntektsmelding(agp, førsteFraværsdag = 1.januar, refusjon = Refusjon(10_000.månedlig, null), avsendersystem = ALTINN)
         håndterSøknad(januar)
-        assertForventetFeil(
-            forklaring = "Siste inntektsmeldingen blir ikke lagt til i ubrukte refusjonsopplysninger pga samme beløp og første fraværsdag som første",
-            ønsket = {
-                assertBeløpstidslinje(Beløpstidslinje.fra(januar, 10_000.månedlig, im3.arbeidsgiver), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
-            },
-            nå = {
-                assertBeløpstidslinje(
-                    Beløpstidslinje.fra(1.januar til 4.januar, 10_000.månedlig, im1.arbeidsgiver) + Beløpstidslinje.fra(5.januar til 31.januar, 20_000.månedlig, im2.arbeidsgiver),
-                    inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
-                )
-            }
-        )
+        assertBeløpstidslinje(Beløpstidslinje.fra(januar, 10_000.månedlig, im3.arbeidsgiver), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
     }
 
     @Test

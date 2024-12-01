@@ -165,7 +165,7 @@ internal class BeløpstidslinjeTest {
         val gammelTidslinje = Beløpstidslinje.fra(januar, beløp, kilde1)
         val nyTidslinje = Beløpstidslinje.fra(januar, beløp, kilde2)
 
-        assertEquals(gammelTidslinje, gammelTidslinje + nyTidslinje)
+        assertEquals(nyTidslinje, gammelTidslinje + nyTidslinje)
         assertEquals(nyTidslinje, nyTidslinje + gammelTidslinje)
     }
 
@@ -179,8 +179,8 @@ internal class BeløpstidslinjeTest {
         val gammelTidslinje = Beløpstidslinje.fra(januar, beløp, kilde1)
         val nyTidslinje = Beløpstidslinje.fra(januar, beløp, kilde2)
 
-        assertEquals(gammelTidslinje, gammelTidslinje + nyTidslinje)
-        assertEquals(nyTidslinje, nyTidslinje + gammelTidslinje)
+        assertEquals(nyTidslinje, gammelTidslinje + nyTidslinje)
+        assertEquals(gammelTidslinje, nyTidslinje + gammelTidslinje)
     }
 
     @Test
