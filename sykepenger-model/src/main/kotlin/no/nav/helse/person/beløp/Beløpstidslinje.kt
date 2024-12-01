@@ -46,6 +46,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
+    internal operator fun minus(other: Beløpstidslinje) = Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
 
     internal fun subset(periode: Periode): Beløpstidslinje {
         if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()
@@ -86,10 +87,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
             else if (dennes is UkjentDag || andres is UkjentDag) true
             else dennes.beløp != andres.beløp
         }
-    }
-
-    internal fun diff(other: Beløpstidslinje): Beløpstidslinje {
-        return Beløpstidslinje(other.dager.filterValues { it.beløp != this.dager[it.dato]?.beløp })
     }
 
     internal fun dto() = BeløpstidslinjeDto(

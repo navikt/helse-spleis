@@ -36,7 +36,7 @@ import java.time.LocalDate
 internal class BeløpstidslinjeTest {
 
     @Test
-    fun diff() {
+    fun `trekke fra en beløpstidslinje`() {
         val fraInntektsmelding =
             (Arbeidsgiver oppgir 1000.daglig fra 2.januar til 30.januar)
 
@@ -48,7 +48,7 @@ internal class BeløpstidslinjeTest {
             (Saksbehandler oppgir 1000.daglig kun 1.januar) og
             (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar)
 
-        assertEquals(forventetDiff, fraInntektsmelding.diff(overstyring))
+        assertEquals(forventetDiff, overstyring - fraInntektsmelding)
     }
 
     @Test
