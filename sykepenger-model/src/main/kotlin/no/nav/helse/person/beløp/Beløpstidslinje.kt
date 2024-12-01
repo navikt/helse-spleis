@@ -45,10 +45,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     }
 
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
-    internal operator fun minus(other: Beløpstidslinje): Beløpstidslinje {
-        if (other.periode == null) return this
-        return this - other.periode
-    }
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
 
     internal fun subset(periode: Periode): Beløpstidslinje {
