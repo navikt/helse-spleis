@@ -230,17 +230,17 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `Finne første endring i beløp`() {
-        assertNull(Beløpstidslinje().førsteEndring(Beløpstidslinje()))
-        assertNull((Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig hele januar))
-        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 101.daglig hele januar))
-        assertEquals(15.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring((Arbeidsgiver oppgir 100.daglig fra 1.januar til 14.januar) og (Arbeidsgiver oppgir 101.daglig kun 15.januar)))
+        assertNull(Beløpstidslinje().førsteDagMedUliktBeløp(Beløpstidslinje()))
+        assertNull((Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 100.daglig hele januar))
+        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 101.daglig hele januar))
+        assertEquals(15.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp((Arbeidsgiver oppgir 100.daglig fra 1.januar til 14.januar) og (Arbeidsgiver oppgir 101.daglig kun 15.januar)))
 
-        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig fra 2.januar til 31.januar))
-        assertEquals(31.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteEndring(Arbeidsgiver oppgir 100.daglig fra 1.januar til 30.januar))
+        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 100.daglig fra 2.januar til 31.januar))
+        assertEquals(31.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 100.daglig fra 1.januar til 30.januar))
         val hulleteSaksbehandler = (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 31.januar)
         val hulleteArbeidsgiver = (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 30.januar)
-        assertEquals(30.januar, hulleteSaksbehandler.førsteEndring(hulleteArbeidsgiver))
-        assertEquals(30.januar, hulleteArbeidsgiver.førsteEndring(hulleteSaksbehandler))
+        assertEquals(30.januar, hulleteSaksbehandler.førsteDagMedUliktBeløp(hulleteArbeidsgiver))
+        assertEquals(30.januar, hulleteArbeidsgiver.førsteDagMedUliktBeløp(hulleteSaksbehandler))
     }
 
     @Test

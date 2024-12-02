@@ -78,16 +78,10 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
     private fun strekkFrem(til: LocalDate) = this + hale(til)
 
-    internal fun førsteEndring(other: Beløpstidslinje): LocalDate? {
+    internal fun førsteDagMedUliktBeløp(other: Beløpstidslinje): LocalDate? {
         val fom = setOfNotNull(periode?.start, other.periode?.start).minOrNull() ?: return null
         val tom = setOfNotNull(periode?.endInclusive, other.periode?.endInclusive).max()
-        return (fom til tom).firstOrNull { dato ->
-            val dennes = get(dato)
-            val andres = other[dato]
-            if (dennes is UkjentDag && andres is UkjentDag) false
-            else if (dennes is UkjentDag || andres is UkjentDag) true
-            else dennes.beløp != andres.beløp
-        }
+        return (fom til tom).firstOrNull { this.dager[it]?.beløp != other.dager[it]?.beløp }
     }
 
     internal fun dto() = BeløpstidslinjeDto(

@@ -33,7 +33,7 @@ data class NyInntektUnderveis(
         private fun List<NyInntektUnderveis>.førsteEndring(others: List<NyInntektUnderveis>): LocalDate? {
             val datoer = mapNotNull { nyInntektUnderveis ->
                     val other = others.find { it.orgnummer == nyInntektUnderveis.orgnummer } ?: return@mapNotNull null
-                    nyInntektUnderveis.beløpstidslinje.førsteEndring(other.beløpstidslinje)
+                    nyInntektUnderveis.beløpstidslinje.førsteDagMedUliktBeløp(other.beløpstidslinje)
                 }
             return datoer.minOrNull()
         }
