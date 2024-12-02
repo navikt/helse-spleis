@@ -98,7 +98,7 @@ class Inntektsmelding(
         tidsstempel = metadata.registrert
     )
 
-    internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(type.refusjonsdato(this), arbeidsgiverperioder, metadata.meldingsreferanseId, metadata.innsendt))
+    internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(type.refusjonsdato(this), metadata.meldingsreferanseId, metadata.innsendt))
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
@@ -139,18 +139,18 @@ class Inntektsmelding(
         val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
 
-        internal fun refusjonstidslinje(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, meldingsreferanseId: UUID, tidsstempel: LocalDateTime): Beløpstidslinje {
+        internal fun refusjonstidslinje(refusjonsdato: LocalDate, meldingsreferanseId: UUID, tidsstempel: LocalDateTime): Beløpstidslinje {
             val kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER, tidsstempel)
-            val startskuddet = startskuddet(førsteFraværsdag, arbeidsgiverperioder)
+
             val opphørIRefusjon = opphørsdato?.let {
-                val sisteRefusjonsdag = maxOf(it, startskuddet.forrigeDag)
+                val sisteRefusjonsdag = maxOf(it, refusjonsdato.forrigeDag)
                 EndringIRefusjon(Inntekt.INGEN, sisteRefusjonsdag.nesteDag)
             }
 
-            val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, startskuddet).takeUnless { it.endringsdato == opphørIRefusjon?.endringsdato }
+            val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, refusjonsdato).takeUnless { it.endringsdato == opphørIRefusjon?.endringsdato }
             val alleRefusjonsopplysninger = listOfNotNull(opphørIRefusjon, hovedopplysning, *endringerIRefusjon.toTypedArray())
                 .sortedBy { it.endringsdato }
-                .filter { it.endringsdato >= startskuddet }
+                .filter { it.endringsdato >= refusjonsdato }
                 .filter { it.endringsdato <= (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
 
             check(alleRefusjonsopplysninger.isNotEmpty()) {"Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?"}
@@ -164,10 +164,6 @@ class Inntektsmelding(
 
             return refusjonstidslinje
         }
-
-        private fun startskuddet(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>) =
-            if (førsteFraværsdag == null) arbeidsgiverperioder.maxOf { it.start }
-            else arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
 
         class EndringIRefusjon(
             internal val beløp: Inntekt,
@@ -283,7 +279,8 @@ class Inntektsmelding(
             return skjæringstidspunkt
         }
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
-        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.skjæringstidspunkt
+        // TODO: Slutte å bruke vedtaksperiode.førsteFraværsdag i det hele tatt. Bare bruke vedtaksperiode.periode().start
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.periode().start
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.førsteFraværsdag
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = vedtaksperiode.skjæringstidspunkt
 

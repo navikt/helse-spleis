@@ -45,6 +45,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.serde.tilPersonData
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -62,9 +63,9 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             håndterSøknad(17.januar til 21.januar)
-            assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_VILKÅRSPRØVING") {
-                håndterInntektsmeldingPortal(listOf(tirsdag(23.januar) til 7.februar), vedtaksperiodeId = 2.vedtaksperiode)
-            }
+            håndterInntektsmeldingPortal(listOf(tirsdag(23.januar) til 7.februar), vedtaksperiodeId = 2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertIngenVarsler(2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel
         }
     }
 
