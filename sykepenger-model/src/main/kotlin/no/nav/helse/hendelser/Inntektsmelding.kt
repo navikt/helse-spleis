@@ -215,20 +215,16 @@ class Inntektsmelding(
 
     private lateinit var type: Type
 
-
     internal fun valider(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, inntektsmeldingIkkeHåndtert: (inntektsmelding: Inntektsmelding, orgnr: String, harPeriodeInnenfor16Dager: Boolean) -> Unit): Boolean {
         val førsteValidering = !::type.isInitialized
         this.type = when (avsendersystem) {
             is Avsendersystem.Altinn -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
             is Avsendersystem.LPS -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
             is Avsendersystem.NavPortal -> {
-                vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)?.let {
-                    if (avsendersystem.forespurt) {
-                        ForespurtPortalinntektsmelding(it, avsendersystem.inntektsdato)
-                    } else {
-                        SelvbestemtPortalinntektsmelding(it, avsendersystem.inntektsdato)
-                    }
-                } ?: ForkastetPortalinntektsmelding
+                val vedtaksperiode = vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)
+                if (vedtaksperiode == null) PortalinntektsmeldingForForkastetPeriode
+                else if (!avsendersystem.forespurt && vedtaksperiode.erForlengelse()) SelvbestemtPortalinntektsmeldingForForlengelse
+                else Portalinntektsmelding(vedtaksperiode, avsendersystem.inntektsdato)
             }
         }
         if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
@@ -272,20 +268,8 @@ class Inntektsmelding(
             person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato(inntektsmelding).somPeriode())
     }
 
-    private data object ForkastetPortalinntektsmelding: Type {
-        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
-            return false
-        }
-        override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun inntektsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = error("Forventer ikke videre behandling av portalinntektsmelding for forkastet periode")
-    }
-
-    private abstract class PortalInntektsmeldings(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Type {
+    private class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate): Type {
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) = true
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
@@ -305,23 +289,31 @@ class Inntektsmelding(
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-            private val logger = LoggerFactory.getLogger(ForespurtPortalinntektsmelding::class.java)
+            private val logger = LoggerFactory.getLogger(Portalinntektsmelding::class.java)
         }
     }
 
-    private data class ForespurtPortalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : PortalInntektsmeldings(vedtaksperiode, inntektsdato) {
-        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean = true
+    private abstract class ForkastetPortalinntektsmelding: Type {
+        override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
+        override fun inntektsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
+        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
+        override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
+        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
+        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
     }
 
-    private data class SelvbestemtPortalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : PortalInntektsmeldings(vedtaksperiode, inntektsdato) {
+    private data object PortalinntektsmeldingForForkastetPeriode: ForkastetPortalinntektsmelding() {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
-            if (!vedtaksperiode.erForlengelse()) return true
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
+            return false
+        }
+    }
+
+    private data object SelvbestemtPortalinntektsmeldingForForlengelse: ForkastetPortalinntektsmelding() {
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
             sikkerlogg.info("Håndterer ikke selvbestemt inntektsmelding siden den traff en forlengelse. InntektsmeldingId: ${inntektsmelding.metadata.meldingsreferanseId}")
             return false
         }
-
-        private companion object {
-            private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        }
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
