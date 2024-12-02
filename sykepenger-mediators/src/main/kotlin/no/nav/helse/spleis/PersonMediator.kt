@@ -132,11 +132,13 @@ internal class PersonMediator(
                 "overlappende_infotrygdperioder", mutableMapOf(
                     "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
                     "vedtaksperioder" to event.overlappendeInfotrygdperioder.map { it ->
-                        mapOf("organisasjonsnummer" to it.organisasjonsnummer,
+                        mapOf(
+                            "organisasjonsnummer" to it.organisasjonsnummer,
                             "vedtaksperiodeId" to it.vedtaksperiodeId,
                             "vedtaksperiodeFom" to it.vedtaksperiodeFom,
                             "vedtaksperiodeTom" to it.vedtaksperiodeTom,
                             "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
+                            "kanForkastes" to it.kanForkastes,
                             "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
                                 mapOf(
                                     "fom" to infotrygdperiode.fom,

@@ -56,8 +56,24 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
                 )
             )
         )
-        val overlappendeInfotrygdperiodeEtterInfotrygdendringEvent = testRapid.inspektør.siste("overlappende_infotrygdperioder")
-        assertNotNull(overlappendeInfotrygdperiodeEtterInfotrygdendringEvent)
+        val event = testRapid.inspektør.siste("overlappende_infotrygdperioder")
+        assertNotNull(event)
+        assertTrue(event.path("infotrygdhistorikkHendelseId").isTextual)
+        assertTrue(event.path("vedtaksperioder").isArray)
+        event.path("vedtaksperioder").forEach { child ->
+            assertTrue(child.path("organisasjonsnummer").isTextual)
+            assertTrue(child.path("vedtaksperiodeId").isTextual)
+            assertDato(child.path("vedtaksperiodeFom").asText())
+            assertDato(child.path("vedtaksperiodeTom").asText())
+            assertTrue(child.path("vedtaksperiodetilstand").isTextual)
+            assertTrue(child.path("kanForkastes").isBoolean)
+            child.path("infotrygdperioder").forEach {
+                assertDato(it.path("fom").asText())
+                assertDato(it.path("tom").asText())
+                assertTrue(it.path("type").isTextual)
+                assertTrue(it.path("organisasjonsnummer").isTextual)
+            }
+        }
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {

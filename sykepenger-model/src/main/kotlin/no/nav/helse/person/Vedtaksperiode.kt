@@ -3280,6 +3280,7 @@ internal class Vedtaksperiode private constructor(
             PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 vedtaksperiodeId = this.id,
+                kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
                 vedtaksperiodeFom = this.periode.start,
                 vedtaksperiodeTom = this.periode.endInclusive,
                 vedtaksperiodetilstand = tilstand.type.name,

@@ -470,6 +470,7 @@ interface PersonObserver {
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
+        val kanForkastes: Boolean,
         val vedtaksperiodeFom: LocalDate,
         val vedtaksperiodeTom: LocalDate,
         val vedtaksperiodetilstand: String,
