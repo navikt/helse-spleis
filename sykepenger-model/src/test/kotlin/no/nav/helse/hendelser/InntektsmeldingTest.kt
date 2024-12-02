@@ -1,14 +1,12 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
-import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -17,7 +15,6 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -489,38 +486,7 @@ internal class InntektsmeldingTest {
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, aktivitetslogg)
-        dager = inntektsmelding.dager()
-    }
-
-    private fun inntektsmeldingPortal(
-        arbeidsgiverperioder: List<Periode>,
-        refusjonBeløp: Inntekt = 1000.månedlig,
-        beregnetInntekt: Inntekt = 1000.månedlig,
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        refusjonOpphørsdato: LocalDate? = null,
-        endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: Avsenderutleder = NAV_NO,
-        erForlengelse: Boolean = false
-    ) {
-        aktivitetslogg = Aktivitetslogg()
-        inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            vedtaksperiodeId = vedtaksperiodeId,
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            avsenderSystem = avsenderSystem
-        )
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = Inntektsmelding.Valideringsgrunnlag.ForenkletVedtaksperiode({ null }, { LocalDate.EPOCH }, { erForlengelse })
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, aktivitetslogg)
-
+        inntektsmelding.validert()
         dager = inntektsmelding.dager()
     }
 }

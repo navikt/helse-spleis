@@ -5,11 +5,11 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.InntektshistorikkInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
 
 internal class InntektshistorikkTest {
 
@@ -87,11 +86,5 @@ internal class InntektshistorikkTest {
         førsteFraværsdag = førsteFraværsdag,
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, Aktivitetslogg())
-
-    }
+    ).validert()
 }

@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.erRettFør
@@ -13,6 +12,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -504,10 +504,7 @@ internal class SkjæringstidspunktTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         val aktivitetslogg = Aktivitetslogg()
-        inntektsmelding.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, aktivitetslogg)
+        inntektsmelding.validert()
 
         return inntektsmelding.dager().bitAvInntektsmelding(
             aktivitetslogg,

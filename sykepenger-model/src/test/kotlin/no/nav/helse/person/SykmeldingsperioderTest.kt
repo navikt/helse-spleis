@@ -1,13 +1,13 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -227,13 +227,7 @@ internal class SykmeldingsperioderTest {
         refusjon = Inntektsmelding.Refusjon(null, null),
         harOpphørAvNaturalytelser = false,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).also {
-        it.valider(object: Inntektsmelding.Valideringsgrunnlag {
-            override fun vedtaksperiode(vedtaksperiodeId: UUID) = null
-            override fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {}
-        }, Aktivitetslogg())
-
-    }
+    ).validert()
 
     fun Sykmeldingsperioder.perioder() = view().perioder
 }
