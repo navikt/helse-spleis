@@ -472,22 +472,6 @@ internal class InntektsmeldingTest {
         aktivitetslogg.assertVarsel(RV_IM_3)
     }
 
-    @Test
-    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
-        inntektsmeldingPortal(listOf(2.januar til 17.januar))
-        dager.vurdertTilOgMed(17.januar)
-        dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
-        aktivitetslogg.assertVarsel(RV_IM_3)
-    }
-
-    @Test
-    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
-        inntektsmeldingPortal(emptyList())
-        dager.vurdertTilOgMed(17.januar)
-        dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
-        aktivitetslogg.assertIngenVarsel(RV_IM_3)
-    }
-
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         refusjonBeløp: Inntekt = 1000.månedlig,
