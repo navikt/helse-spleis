@@ -15,6 +15,7 @@ import no.nav.helse.dsl.BeløpstidslinjeDsl.oppgir
 import no.nav.helse.dsl.BeløpstidslinjeDsl.til
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Periode
@@ -285,11 +286,13 @@ internal class BeløpstidslinjeTest {
         }
         internal fun assertBeløpstidslinje(expected: Beløpstidslinje, actual: Beløpstidslinje, ignoreMeldingsreferanseId: Boolean = false) {
             val tidsstempel: (_: LocalDateTime) -> LocalDateTime = { LocalDate.EPOCH.atStartOfDay() }
-            val meldingsreferanseId: (ekte: UUID) -> UUID = if (ignoreMeldingsreferanseId) { _ -> UUID.randomUUID() } else { ekte -> ekte }
+            val tøyseteMeldingsreferanseId = UUID.randomUUID()
+            val meldingsreferanseId: (ekte: UUID) -> UUID = if (ignoreMeldingsreferanseId) { _ -> tøyseteMeldingsreferanseId } else { ekte -> ekte }
             assertEquals(expected.besudlet(tidsstempel, meldingsreferanseId), actual.besudlet(tidsstempel, meldingsreferanseId))
         }
         internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
         internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
+        internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(UUID.randomUUID(), this, LocalDateTime.now()))
 
         private fun Beløpstidslinje.besudlet(
             tidsstempel: (ekte: LocalDateTime) -> LocalDateTime = { it },
