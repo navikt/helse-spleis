@@ -8,6 +8,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
@@ -44,6 +45,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.serde.tilPersonData
+import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -54,6 +56,17 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `En forespurt portalinntektsmelding som setter arbeidsgiverperioden _etter_ søknaden - virkedag mellom siste søknadsdag og første agp-dag`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            håndterSøknad(17.januar til 21.januar)
+            assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_VILKÅRSPRØVING") {
+                håndterInntektsmeldingPortal(listOf(tirsdag(23.januar) til 7.februar), vedtaksperiodeId = 2.vedtaksperiode)
+            }
+        }
+    }
 
     @Test
     fun `En situasjon med gjenbruk hvor refusjonsopplysningene på vilkårsgrunnlaget blir feil, men vil løse seg med refusjonsopplysniger på behandlingene`() {
