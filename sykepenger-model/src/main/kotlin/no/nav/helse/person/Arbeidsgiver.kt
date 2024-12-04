@@ -244,7 +244,7 @@ internal class Arbeidsgiver private constructor(
             mapNotNull { arbeidsgiver ->
                 arbeidsgiver.avklarSykepengegrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    skatteopplysning = skatteopplysninger.firstOrNull { it -> it.arbeidsgiver == arbeidsgiver.organisasjonsnummer },
+                    skatteopplysning = skatteopplysninger.firstOrNull { it.arbeidsgiver == arbeidsgiver.organisasjonsnummer },
                     aktivitetslogg = aktivitetslogg
                 )
             }
@@ -990,11 +990,6 @@ internal class Arbeidsgiver private constructor(
             .takeUnless { index -> index == 0 }
             ?.let { vedtaksperioder[it - 1] }
 
-    internal fun finnVedtaksperiodeEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.indexOf(vedtaksperiode)
-            .takeUnless { index -> index == vedtaksperioder.lastIndex }
-            ?.let { vedtaksperioder[it + 1] }
-
     internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->
             vedtaksperiode.erVedtaksperiodeRettFør(other)
@@ -1040,12 +1035,6 @@ internal class Arbeidsgiver private constructor(
     private fun <Hendelsetype : Hendelse> énHarHåndtert(hendelse: Hendelsetype, håndterer: Vedtaksperiode.(Hendelsetype) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
-        return håndtert
-    }
-
-    private fun <Hendelsetype : Hendelse> noenHarHåndtert(hendelse: Hendelsetype, håndterer: Vedtaksperiode.(Hendelsetype) -> Boolean): Boolean {
-        var håndtert = false
-        looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert
     }
 

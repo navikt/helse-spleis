@@ -131,7 +131,7 @@ internal class PersonMediator(
             JsonMessage.newMessage(
                 "overlappende_infotrygdperioder", mutableMapOf(
                     "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
-                    "vedtaksperioder" to event.overlappendeInfotrygdperioder.map { it ->
+                    "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
                         mapOf(
                             "organisasjonsnummer" to it.organisasjonsnummer,
                             "vedtaksperiodeId" to it.vedtaksperiodeId,

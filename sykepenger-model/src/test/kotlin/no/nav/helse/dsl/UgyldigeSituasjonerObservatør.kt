@@ -116,7 +116,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             behandlingOpprettetEventer.singleOrNull { it.behandlingId == id } != null
         }
         // gjelder tester som tar utgangspunkt i en serialisert personjson
-        val behandlingFinnesHosArbeidsgiver = { id: UUID ->
+        val behandlingFinnesHosArbeidsgiver = { _: UUID ->
             person.inspektør.vedtaksperioder().any { (_, perioder) ->
                 perioder.any { periode ->
                     periode.inspektør.behandlinger.any { behandling ->
@@ -204,27 +204,27 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg: Aktivitetslogg) {
-        aktivitetslogg.aktiviteter.forEach {
-            when (it) {
+        aktivitetslogg.aktiviteter.forEach { aktivitet ->
+            when (aktivitet) {
                 is Aktivitet.Behov -> {}
                 is Aktivitet.FunksjonellFeil -> {}
                 is Aktivitet.Info -> {}
                 is Aktivitet.LogiskFeil -> {}
                 is Aktivitet.Varsel -> {
                     // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
-                    if (it.kode in setOf(RV_SV_1, Varselkode.RV_RV_7, Varselkode.RV_UT_2)) return@forEach
+                    if (aktivitet.kode in setOf(RV_SV_1, Varselkode.RV_RV_7, Varselkode.RV_UT_2)) return@forEach
 
-                    val vedtaksperiodekontekst = checkNotNull(it.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
-                        "Det er opprettet et varsel utenom Vedtaksperiode:\n${it}"
+                    val vedtaksperiodekontekst = checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
+                        "Det er opprettet et varsel utenom Vedtaksperiode:\n${aktivitet}"
                     }
                     val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
                     val behandlingstatusPåTidspunkt = gjeldendeBehandlingstatus
                         .getValue(vedtaksperiodeId)
                         .first { (tidspunkt, _) ->
-                            tidspunkt < it.tidsstempel
+                            tidspunkt < aktivitet.tidsstempel
                         }.second
                     check(behandlingstatusPåTidspunkt == Behandlingstatus.ÅPEN) {
-                        "Det er opprettet et varsel (${it.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
+                        "Det er opprettet et varsel (${aktivitet.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
                     }
                 }
             }
@@ -243,11 +243,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun validerSykdomstidslinjePåBehandlinger() {
-        arbeidsgivere.forEach {
-            it.view().aktiveVedtaksperioder.forEach {
-                it.behandlinger.behandlinger.forEach {
-                    it.endringer.forEach {
-                        val førsteIkkeUkjenteDag = it.sykdomstidslinje.firstOrNull { it !is UkjentDag }
+        arbeidsgivere.forEach { arbeidsgiver ->
+            arbeidsgiver.view().aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
+                aktivVedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
+                    behandling.endringer.forEach {
+                        val førsteIkkeUkjenteDag = it.sykdomstidslinje.firstOrNull { dag -> dag !is UkjentDag }
                         val førsteDag = it.sykdomstidslinje[it.periode.start]
                         val normalSykdomstidslinje = førsteDag === førsteIkkeUkjenteDag
                         if (normalSykdomstidslinje) return

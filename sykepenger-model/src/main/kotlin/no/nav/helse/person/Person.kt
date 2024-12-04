@@ -223,7 +223,7 @@ class Person private constructor(
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler minimum sykdomsgradvurdering")
         melding.oppdater(this.minimumSykdomsgradsvurdering)
-        this.igangsettOverstyring(Revurderingseventyr.Companion.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()), aktivitetslogg)
+        this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()), aktivitetslogg)
         håndterGjenoppta(melding, aktivitetslogg)
     }
 
@@ -291,7 +291,7 @@ class Person private constructor(
         val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())) { result, vedtaksperiode ->
             vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
         }
-        emitOverlappendeInfotrygdperioder(event)
+        observers.forEach { it.overlappendeInfotrygdperioder(event) }
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger, aktivitetslogg: IAktivitetslogg) {
@@ -561,10 +561,6 @@ class Person private constructor(
         observers.forEach { it.overstyringIgangsatt(event) }
     }
 
-    internal fun emitOverlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
-        observers.forEach { it.overlappendeInfotrygdperioder(event) }
-    }
-
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
@@ -752,7 +748,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(aktivitetslogg, grunnlag.overstyrArbeidsforhold(hendelse, aktivitetslogg, subsumsjonslogg))
-        igangsettOverstyring(Revurderingseventyr.Companion.arbeidsforhold(hendelse, skjæringstidspunkt), aktivitetslogg)
+        igangsettOverstyring(Revurderingseventyr.arbeidsforhold(hendelse, skjæringstidspunkt), aktivitetslogg)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -764,7 +760,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
         grunnlag.grunnbeløpsregulering(hendelse, aktivitetslogg, subsumsjonslogg)?.let { grunnbeløpsregulert ->
             nyttVilkårsgrunnlag(aktivitetslogg, grunnbeløpsregulert)
-            igangsettOverstyring(Revurderingseventyr.Companion.grunnbeløpsregulering(hendelse, skjæringstidspunkt), aktivitetslogg)
+            igangsettOverstyring(Revurderingseventyr.grunnbeløpsregulering(hendelse, skjæringstidspunkt), aktivitetslogg)
         }
     }
 
