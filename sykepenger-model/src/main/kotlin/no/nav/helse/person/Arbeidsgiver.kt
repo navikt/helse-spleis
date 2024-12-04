@@ -630,7 +630,7 @@ internal class Arbeidsgiver private constructor(
         val annullering = utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
         nyUtbetaling(aktivitetslogg, annullering)
         annullering.håndter(hendelse, aktivitetslogg)
-        looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg, annullering) }
+        looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg) }
         return annullering
     }
 
