@@ -23,7 +23,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -360,13 +359,15 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private fun bekreftIngenOverlappende() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            var forrigePeriode: VedtaksperiodeView? = null
+            var kanskjeForrigePeriode: VedtaksperiodeView? = null
             val view = arbeidsgiver.view()
             view.aktiveVedtaksperioder.forEach { current ->
-                if (forrigePeriode?.periode?.overlapperMed(current.periode) == true) {
-                    error("For Arbeidsgiver ${view.organisasjonsnummer} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")
+                kanskjeForrigePeriode?.also { forrigePeriode ->
+                    if (forrigePeriode.periode.overlapperMed(current.periode)) {
+                        error("For Arbeidsgiver ${view.organisasjonsnummer} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")
+                    }
                 }
-                forrigePeriode = current
+                kanskjeForrigePeriode = current
             }
         }
     }
