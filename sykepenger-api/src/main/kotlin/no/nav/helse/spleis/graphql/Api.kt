@@ -3,6 +3,7 @@ package no.nav.helse.spleis.graphql
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.jsontype.NamedType
 import com.github.navikt.tbd_libs.result_object.getOrThrow
+import com.github.navikt.tbd_libs.retry.retryBlocking
 import com.github.navikt.tbd_libs.speed.SpeedClient
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Json
@@ -57,7 +58,9 @@ internal object Api {
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val (_, aktørId) = speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
+                        val (_, aktørId) = retryBlocking {
+                            speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow()
+                        }
 
                         val person = personResolver(spekematClient, personDao, hendelseDao, ident, aktørId, callId, meterRegistry)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
