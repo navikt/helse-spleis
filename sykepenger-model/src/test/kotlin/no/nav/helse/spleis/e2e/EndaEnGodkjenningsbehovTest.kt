@@ -20,6 +20,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -67,10 +68,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 240000.0
+                        "omregnetÅrsinntekt" to 240000.0,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver
                     ), mapOf(
                         "arbeidsgiver" to a2,
-                        "omregnetÅrsinntekt" to 240000.0
+                        "omregnetÅrsinntekt" to 240000.0,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
                 )
             )
@@ -91,7 +94,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 240_000.0
+                        "omregnetÅrsinntekt" to 240_000.0,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
                 )
             )
@@ -124,7 +128,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 1200000.0
+                        "omregnetÅrsinntekt" to 1200000.0,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
                 )
             )
@@ -159,7 +164,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 120000.0
+                        "omregnetÅrsinntekt" to 120000.0,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
                 )
             )
@@ -319,7 +325,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to INNTEKT.årlig
+                        "omregnetÅrsinntekt" to INNTEKT.årlig,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     )
                 )
             )
@@ -373,11 +380,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 20000.månedlig.årlig
+                        "omregnetÅrsinntekt" to 20000.månedlig.årlig,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     ),
                     mapOf (
                         "arbeidsgiver" to a2,
-                        "omregnetÅrsinntekt" to 20000.månedlig.årlig
+                        "omregnetÅrsinntekt" to 20000.månedlig.årlig,
+                        "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     )
                 )
             )
@@ -514,11 +523,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 240000.0,
+                        "inntektskilde" to Inntektskilde.Saksbehandler,
                         "skjønnsfastsatt" to 492000.0
                     ),
                     mapOf(
                         "arbeidsgiver" to a2,
                         "omregnetÅrsinntekt" to 240000.0,
+                        "inntektskilde" to Inntektskilde.Saksbehandler,
                         "skjønnsfastsatt" to 360000.0
                     )
                 ),
@@ -578,7 +589,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to a1,
-                    "omregnetÅrsinntekt" to INNTEKT.årlig
+                    "omregnetÅrsinntekt" to INNTEKT.årlig,
+                    "inntektskilde" to Inntektskilde.Arbeidsgiver
                 )
             )
         )

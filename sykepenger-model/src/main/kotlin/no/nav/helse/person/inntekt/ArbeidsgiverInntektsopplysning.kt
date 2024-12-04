@@ -12,6 +12,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpsdag
@@ -231,13 +232,13 @@ data class ArbeidsgiverInntektsopplysning(
                     omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
                     skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt() else null,
                     gjelder = arbeidsgiver.gjelder,
-                    skatteopplysning = when (arbeidsgiver.inntektsopplysning) {
+                    inntektskilde = when (arbeidsgiver.inntektsopplysning) {
                         is IkkeRapportert,
-                        is SkattSykepengegrunnlag -> true
-                        is no.nav.helse.person.inntekt.Inntektsmelding -> arbeidsgiver.inntektsopplysning.fraAOrdningen()
-                        is Infotrygd,
+                        is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
+                        is no.nav.helse.person.inntekt.Inntektsmelding -> arbeidsgiver.inntektsopplysning.inntektskilde()
+                        is Infotrygd -> Inntektskilde.Infotrygd
                         is Saksbehandler,
-                        is SkjønnsmessigFastsatt -> false
+                        is SkjønnsmessigFastsatt -> Inntektskilde.Saksbehandler
                     }
                 )
             }

@@ -763,7 +763,7 @@ internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
     skjæringstidspunkt: LocalDate = 1.januar,
     orgnummer: String = ORGNUMMER
 ): UUID {
-    val inntektFraAOrdningen : SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt)
+    val inntektFraAOrdningen : SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt, orgnummer)
     inntektFraAOrdningen.håndter(Person::håndter)
     return inntektFraAOrdningen.metadata.meldingsreferanseId
 }

@@ -19,6 +19,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -48,22 +49,21 @@ import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
-    private fun omregnedeÅrsinntedekter(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<List<Map<String, Any>>>(
-        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
-        behov = Aktivitet.Behov.Behovtype.Godkjenning,
-        felt = "omregnedeÅrsinntekter"
-    )!!.map {
-        OmregnetÅrsinntektFraGodkjenningsbehov(
-            orgnummer = it.getValue("organisasjonsnummer") as String,
-            beløp = (it.getValue("beløp") as Double).årlig
-        )
+    @Test
+    fun `sender med inntektskilder i sykepengegrunnlaget i godkjenningsbehovet`() {
+        nyPeriode(januar, orgnummer = a1)
+        nyPeriode(januar, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a2)
+        håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(listOf(Arbeidsgiver, AOrdningen), inntektskilder)
+
     }
 
-    private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, Any>>(
-        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
-        behov = Aktivitet.Behov.Behovtype.Godkjenning,
-        felt = "sykepengegrunnlagsfakta"
-    )!!["sykepengegrunnlag"]
     @Test
     fun `sender med sykepengegrunnlag i godkjenningsbehovet`() {
         tilGodkjenning(januar, beregnetInntekt = INNTEKT*6, organisasjonsnummere = arrayOf(a1))
@@ -334,4 +334,16 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1)
         = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
-}
+
+    private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, Any>>(
+        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
+        behov = Aktivitet.Behov.Behovtype.Godkjenning,
+        felt = "sykepengegrunnlagsfakta"
+    )!!["sykepengegrunnlag"]
+
+
+    private fun inntektskilder(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, List<Map<String, Any>>>>(
+        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
+        behov = Aktivitet.Behov.Behovtype.Godkjenning,
+        felt = "sykepengegrunnlagsfakta"
+    )!!["arbeidsgivere"]!!.map { it["inntektskilde"] }}

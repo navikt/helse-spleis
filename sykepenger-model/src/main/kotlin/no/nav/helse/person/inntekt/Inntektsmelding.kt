@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 
 class Inntektsmelding internal constructor(
     id: UUID,
@@ -28,7 +29,10 @@ class Inntektsmelding internal constructor(
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
 
-    internal fun fraAOrdningen() = kilde == Kilde.AOrdningen
+    internal fun inntektskilde() : Inntektskilde = when (kilde) {
+        Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
+        Kilde.AOrdningen -> Inntektskilde.AOrdningen
+    }
 
     internal fun view() = InntektsmeldingView(
         id = id,
