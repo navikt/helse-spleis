@@ -99,10 +99,7 @@ private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() = PersonD
     dato = this.dato,
     hendelseId = this.hendelseId,
     beløp = this.beløp.månedligDouble.beløp,
-    kilde = when (this.kilde) {
-        InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
-        InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
-    },
+    kilde = this.kilde,
     tidsstempel = this.tidsstempel
 )
 
@@ -826,13 +823,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> this.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
         else -> null
     },
-    inntektsmeldingkilde = when (this) {
-        is InntektsopplysningUtDto.InntektsmeldingDto -> when (this.kilde) {
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
-        }
-        else -> null
-    }
+    inntektsmeldingkilde = this.kilde
 )
 
 private fun RefusjonsopplysningUtDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonsopplysningData(

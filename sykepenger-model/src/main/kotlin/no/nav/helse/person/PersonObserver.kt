@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -546,18 +547,12 @@ interface PersonObserver {
         }
         data class FastsattEtterHovedregel(override val omregnetÅrsinntekt: Double, val sykepengegrunnlag: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
             override val fastsatt = "EtterHovedregel"
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val inntektskilde: Inntektskilde)
+            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val inntektskilde: Inntektsopplysning.Inntektskilde?)
         }
         data class FastsattEtterSkjønn(override val omregnetÅrsinntekt: Double, val sykepengegrunnlag: Double, val `6G`: Double, val arbeidsgivere: List<Arbeidsgiver>) : Sykepengegrunnlagsfakta {
             override val fastsatt = "EtterSkjønn"
             val skjønnsfastsatt = arbeidsgivere.sumOf { it.skjønnsfastsatt }
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double, val inntektskilde: Inntektskilde)
-        }
-        enum class Inntektskilde{
-            Arbeidsgiver,
-            AOrdningen,
-            Saksbehandler,
-            Infotrygd
+            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double, val inntektskilde: Inntektsopplysning.Inntektskilde?)
         }
     }
 

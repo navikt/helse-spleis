@@ -22,6 +22,7 @@ import no.nav.helse.etterlevelse.førstePunktum
 import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
+import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -41,7 +42,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
-import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull

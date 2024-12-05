@@ -19,7 +19,6 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -35,6 +34,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
+import no.nav.helse.person.inntekt.Inntektsopplysning.Inntektskilde
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
@@ -60,8 +60,46 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
-        assertEquals(listOf(Arbeidsgiver, AOrdningen), inntektskilder)
+        assertEquals(listOf(Inntektskilde.Arbeidsgiver, Inntektskilde.AOrdningen), inntektskilder)
+    }
 
+    @Test
+    fun `sender med inntektskilde a-ordningen i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse`() {
+        nyPeriode(januar, a1)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a1)
+        håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT * 2
+            )
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(listOf(Inntektskilde.AOrdningen), inntektskilder)
+    }
+
+    @Test
+    fun `sender med inntektskilde arbeidsgiver i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse`() {
+        tilGodkjenning(januar, a1)
+
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT * 2
+            )
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(listOf(Inntektskilde.Arbeidsgiver), inntektskilder)
     }
 
     @Test
@@ -207,7 +245,13 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering kan ikke avvises`() {
         nyttVedtak(januar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.05, "forklaring", null, emptyList())))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
+            a1,
+            INNTEKT * 1.05,
+            "forklaring",
+            null,
+            emptyList()
+        )))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)

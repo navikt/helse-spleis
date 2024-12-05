@@ -15,10 +15,10 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.inntekt.Inntektsopplysning.Inntektskilde
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -152,7 +152,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
+        håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(
+            a2,
+            45000.månedlig
+        )))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -173,8 +176,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
             `6G` = 599_148.0,
             sykepengegrunnlag = 599_148.0,
             arbeidsgivere = listOf(
-                FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0, Inntektskilde.Saksbehandler),
-                FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0, Inntektskilde.Saksbehandler),
+                FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0, Inntektskilde.Arbeidsgiver),
+                FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0, Inntektskilde.Arbeidsgiver),
             )
         )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -18,7 +17,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -58,9 +56,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT, "Noo", null, listOf(
-                Triple(1.januar,null, INNTEKT / 2),
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, INNTEKT, "Noo", null, listOf(
+                    Triple(1.januar,null, INNTEKT / 2),
+                )
+            )
         ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -75,10 +75,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT, "Noo", null, listOf(
-                Triple(1.januar, 31.januar, INNTEKT),
-                Triple(1.februar, null, INNTEKT / 2)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, INNTEKT, "Noo", null, listOf(
+                    Triple(1.januar, 31.januar, INNTEKT),
+                    Triple(1.februar, null, INNTEKT / 2)
+                )
+            )
         ))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
@@ -90,9 +92,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val nyInntekt = INNTEKT * 2
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
-                Triple(1.januar, null, nyInntekt)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
+                    Triple(1.januar, null, nyInntekt)
+                )
+            )
         ), meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)
         val førsteUtbetaling = inspektør.utbetaling(0)
@@ -129,9 +133,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val nyIMInntekt = INNTEKT * 3
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, nySaksbehandlerInntekt, "Det var jo alt for lite!", null, listOf(
-                Triple(1.januar, null, nySaksbehandlerInntekt)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, nySaksbehandlerInntekt, "Det var jo alt for lite!", null, listOf(
+                    Triple(1.januar, null, nySaksbehandlerInntekt)
+                )
+            )
         ), meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -149,9 +155,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val nyInntekt = INNTEKT * 2
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
-                Triple(1.januar, null, nyInntekt)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
+                    Triple(1.januar, null, nyInntekt)
+                )
+            )
         ), meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -159,9 +167,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         val overstyring2Id = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
-                Triple(1.januar, null, nyInntekt)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
+                    Triple(1.januar, null, nyInntekt)
+                )
+            )
         ), meldingsreferanseId = overstyring2Id)
         håndterYtelser(1.vedtaksperiode)
 
@@ -201,9 +211,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT, "Vi bruker det samme som før", null, listOf(
-                Triple(1.mars, null, INNTEKT/2)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER, INNTEKT, "Vi bruker det samme som før", null, listOf(
+                    Triple(1.mars, null, INNTEKT/2)
+                )
+            )
         ), meldingsreferanseId = overstyringId)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -255,7 +267,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val gammelInntekt = inspektør.inntektIInntektsgrunnlaget(1.januar)
         val nyInntekt = INNTEKT*2
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, nyInntekt, "Prøver å overstyre Infotrygd-inntekt", null, emptyList())
+            OverstyrtArbeidsgiveropplysning(
+                ORGNUMMER,
+                nyInntekt,
+                "Prøver å overstyre Infotrygd-inntekt",
+                null,
+                emptyList()
+            )
         ))
         håndterYtelser(1.vedtaksperiode)
         assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -271,9 +289,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
                 meldingsreferanseId = UUID.randomUUID(),
-                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT/2, "noe", null, refusjonsopplysninger = listOf(
-                    Triple(1.januar, null, INNTEKT/2)
-                )))
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(
+                    ORGNUMMER, INNTEKT/2, "noe", null, refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, INNTEKT/2)
+                    )
+                ))
             )
             håndterYtelser(1.vedtaksperiode)
         }
@@ -717,9 +737,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(5.februar, meldingsreferanseId = overstyringId, arbeidsgiveropplysninger = listOf(
-            OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "endre refusjon", null, listOf(
-                Triple(5.februar, null, INNTEKT)
-            ))
+            OverstyrtArbeidsgiveropplysning(
+                a1, INNTEKT, "endre refusjon", null, listOf(
+                    Triple(5.februar, null, INNTEKT)
+                )
+            )
         ))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

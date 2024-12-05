@@ -73,6 +73,7 @@ import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsopplysning.Inntektskilde
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
@@ -578,7 +579,7 @@ internal class Arbeidsgiver private constructor(
             dato = skjæringstidspunkt,
             hendelseId = meldingsreferanseId,
             beløp = omregnetÅrsinntekt,
-            kilde = no.nav.helse.person.inntekt.Inntektsmelding.Kilde.AOrdningen
+            kilde = Inntektskilde.AOrdningen
         )
 
         inntektshistorikk.leggTil(im)

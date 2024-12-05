@@ -1,15 +1,15 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.årlig

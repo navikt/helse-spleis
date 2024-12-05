@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
@@ -13,8 +15,6 @@ import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 internal class PersonMediator(
     private val message: HendelseMessage
@@ -390,7 +390,8 @@ internal class PersonMediator(
                     "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
                         mapOf(
                             "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
+                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                            "inntektskilde" to arbeidsgiver.inntektskilde
                         )
                     }
                 )
@@ -402,7 +403,8 @@ internal class PersonMediator(
                         mapOf(
                             "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
                             "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt
+                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
+                            "inntektskilde" to arbeidsgiver.inntektskilde
                         )
                     },
                     "skjønnsfastsatt" to fakta.skjønnsfastsatt

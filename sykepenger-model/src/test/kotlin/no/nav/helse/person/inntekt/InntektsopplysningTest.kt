@@ -1,19 +1,25 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.Inntektsmelding.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding.Companion.finnInntektsmeldingForSkjæringstidspunkt
+import no.nav.helse.person.inntekt.Inntektsopplysning.Inntektskilde
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class InntektsopplysningTest {
     private companion object {
@@ -89,8 +95,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - inntektsmelding vs inntektsmelding`() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now())
-        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektskilde.Arbeidsgiver, LocalDateTime.now())
+        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektskilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
 
         assertEquals(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
     }

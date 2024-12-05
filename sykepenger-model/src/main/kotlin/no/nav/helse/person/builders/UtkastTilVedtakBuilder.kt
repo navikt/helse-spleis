@@ -7,7 +7,11 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.*
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -128,9 +132,9 @@ internal class UtkastTilVedtakBuilder(
         if (inngangsvilkårFraInfotrygd) tags.add(Tag.InngangsvilkårFraInfotrygd)
     }
 
-    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode, val inntektskilde: Inntektskilde)
+    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode, val inntektskilde: Inntektsopplysning.Inntektskilde?)
     private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
-    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode, inntektskilde: Inntektskilde) = apply {
+    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode, inntektskilde: Inntektsopplysning.Inntektskilde?) = apply {
         arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder, inntektskilde))
     }
 
@@ -155,7 +159,7 @@ internal class UtkastTilVedtakBuilder(
             check(arbeidsgiverinntekter.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
             if (tilkomneArbeidsgivere.isNotEmpty()) tags.add(Tag.TilkommenInntekt)
             if (arbeidsgiverinntekter.size + tilkomneArbeidsgivere.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
-            if (arbeidsgiverinntekter.single { it.arbeidsgiver == arbeidsgiver }.inntektskilde == Inntektskilde.AOrdningen) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
+            if (arbeidsgiverinntekter.single { it.arbeidsgiver == arbeidsgiver }.inntektskilde == Inntektsopplysning.Inntektskilde.AOrdningen) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
         }
 
         private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = when {
@@ -170,7 +174,7 @@ internal class UtkastTilVedtakBuilder(
                     arbeidsgiver = it.arbeidsgiver,
                     omregnetÅrsinntekt = it.omregnedeÅrsinntekt,
                     skjønnsfastsatt = it.skjønnsfastsatt!!,
-                    inntektskilde = Inntektskilde.Saksbehandler
+                    inntektskilde = it.inntektskilde
                 )}
             )
             else -> FastsattEtterHovedregel(
@@ -252,7 +256,7 @@ internal class UtkastTilVedtakBuilder(
                             "arbeidsgiver" to it.arbeidsgiver,
                             "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
                             "skjønnsfastsatt" to it.skjønnsfastsatt,
-                            "inntektskilde" to Inntektskilde.Saksbehandler,
+                            "inntektskilde" to it.inntektskilde
                         )
                     },
                     "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt
