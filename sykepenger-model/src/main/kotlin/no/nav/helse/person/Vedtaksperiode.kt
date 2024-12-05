@@ -1048,6 +1048,10 @@ internal class Vedtaksperiode private constructor(
         return Refusjonsservitør(mapOf(startdatoPåSammenhengendeVedtaksperioder to ubruktDel))
     }
 
+    internal fun hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger: Refusjonsservitør): Beløpstidslinje {
+        return refusjonstidslinje + ubrukteRefusjonsopplysninger.meny(startdatoPåSammenhengendeVedtaksperioder, periode).fraOgMed(periode.endInclusive.nesteDag)
+    }
+
     private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
