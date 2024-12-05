@@ -23,6 +23,7 @@ import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.Periodetilstand
 import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.dto.SammenslåttDag
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
@@ -252,7 +253,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `endring i refusjon`() {
+    fun `endring i refusjon frem i tid`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -280,6 +281,48 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         assertEquals(null, refusjonsopplysninger.last().tom)
         assertEquals(INGEN, refusjonsopplysninger.last().beløp.månedlig)
         assertEquals(inntektsmeldingId, refusjonsopplysninger.last().meldingsreferanseId)
+    }
+
+    @Test
+    fun `saksbehandler endrer refusjon frem i tid`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            opplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    a1,
+                    INNTEKT,
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN)),
+                    forklaring = "Opphør"
+                )
+            )
+        )
+        var personDto = speilApi()
+        val beregnetPeriode = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
+        assertEquals(Periodetilstand.Utbetalt, beregnetPeriode.periodetilstand)
+        val speilVilkårsgrunnlagId = beregnetPeriode.vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
+        val refusjon = vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single()
+        val refusjonsopplysninger = refusjon.refusjonsopplysninger
+        assertEquals(1, refusjonsopplysninger.size)
+        assertEquals(1.januar, refusjonsopplysninger.single().fom)
+        assertEquals(null, refusjonsopplysninger.single().tom)
+
+        forlengTilGodkjenning(1.februar, 28.februar)
+        personDto = speilApi()
+        val beregnetPeriode2 = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
+        assertEquals(Periodetilstand.TilGodkjenning, beregnetPeriode2.periodetilstand)
+        val speilVilkårsgrunnlagId2 = beregnetPeriode2.vilkårsgrunnlagId
+        val vilkårsgrunnlag2 = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId2] as? SpleisVilkårsgrunnlag
+        val refusjon2 = vilkårsgrunnlag2!!.arbeidsgiverrefusjoner.single()
+        val refusjonsopplysninger2 = refusjon2.refusjonsopplysninger
+        assertEquals(2, refusjonsopplysninger2.size)
+        assertEquals(1.januar, refusjonsopplysninger2.first().fom)
+        assertEquals(31.januar, refusjonsopplysninger2.first().tom)
+        assertEquals(INNTEKT, refusjonsopplysninger2.first().beløp.månedlig)
+        assertEquals(1.februar, refusjonsopplysninger2.last().fom)
+        assertEquals(null, refusjonsopplysninger2.last().tom)
+        assertEquals(INGEN, refusjonsopplysninger2.last().beløp.månedlig)
     }
 
     @Test
