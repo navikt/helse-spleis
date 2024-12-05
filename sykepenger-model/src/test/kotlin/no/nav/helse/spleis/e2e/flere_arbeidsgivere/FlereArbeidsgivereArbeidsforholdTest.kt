@@ -46,7 +46,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -80,7 +79,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -118,7 +116,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.juli(2021), 31.juli(2021), 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.juli(2021) til 16.juli(2021)),
-            førsteFraværsdag = 1.juli(2021),
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -148,7 +145,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `arbeidsgivere med sammenligningsgrunnlag, men uten inntekt, skal ikke anses som ekstra arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
         val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)))
@@ -185,7 +182,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars(2017), 31.mars(2017), 50.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars(2017) til 16.mars(2017)),
-            førsteFraværsdag = 1.mars(2017),
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -212,7 +208,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 50.prosent), orgnummer = a2)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a2,
         )
@@ -254,7 +249,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -285,7 +279,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 11400.månedlig,
             orgnummer = a1
         )
@@ -315,7 +308,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.februar, 20.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
             listOf(2.februar til 17.februar),
-            førsteFraværsdag = 2.februar,
             beregnetInntekt = 45000.månedlig,
             orgnummer = a2
         )
@@ -347,7 +339,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 11400.månedlig,
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
@@ -386,7 +377,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             orgnummer = a1,
         )
 
@@ -418,7 +408,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             orgnummer = a1,
         )
 
@@ -448,7 +437,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
             orgnummer = a1,
         )

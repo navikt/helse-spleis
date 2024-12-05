@@ -507,7 +507,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar))
 
         håndterSøknad(1.januar til 2.januar)
-        håndterInntektsmelding(listOf(1.januar til 2.januar, 10.januar til 23.januar), førsteFraværsdag = 10.januar)
+        håndterInntektsmelding(listOf(1.januar til 2.januar, 10.januar til 23.januar))
         håndterSøknad(10.januar til 11.januar)
 
         assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

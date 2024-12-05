@@ -44,7 +44,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 19.januar til 26.januar,
                 29.januar til 29.januar
             ),
-            29.januar,
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -87,7 +86,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 8.januar til 8.januar,
                 24.januar til 2.februar
             ),
-            24.januar,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertEquals(1.januar til 5.januar, inspektør.periode(1.vedtaksperiode))

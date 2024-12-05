@@ -239,7 +239,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 50000.årlig,
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
@@ -268,7 +267,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = OverMinstegrense,
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))

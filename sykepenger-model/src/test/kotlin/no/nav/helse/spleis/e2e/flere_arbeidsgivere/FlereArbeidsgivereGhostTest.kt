@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -499,7 +498,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -545,7 +543,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -586,7 +583,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -629,7 +625,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -674,7 +669,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -718,7 +712,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -770,7 +763,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -810,7 +802,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -853,7 +844,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
@@ -907,7 +897,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -952,7 +941,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -995,7 +983,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -1047,7 +1034,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
@@ -1257,7 +1243,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         // IM for tidligere ghost a2 sparker igang revurdering på a1
         håndterInntektsmelding(
             listOf(16.mars til 31.mars),
-            førsteFraværsdag = 16.mars,
             refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -1276,7 +1261,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 50.prosent), orgnummer = a2)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1321,7 +1305,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )

@@ -102,7 +102,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.månedlig,
             refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
         )

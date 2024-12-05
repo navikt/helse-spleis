@@ -135,8 +135,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(5.februar til 28.februar)
         nyPeriode(januar)
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar
+            arbeidsgiverperioder = listOf(1.januar til 16.januar)
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -301,7 +300,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.februar, 27.februar, 100.prosent))
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.januar)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
@@ -395,7 +394,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -481,8 +480,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(
             emptyList(),
-            17.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet",
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet"
         )
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
@@ -709,8 +707,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020)))
         håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020),
+            listOf(Periode(1.november(2020), 16.november(2020)))
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -733,7 +730,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList()),
+            refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList()),
         )
 
         håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020)))
@@ -758,8 +755,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020)))
         håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020),
+            listOf(Periode(1.november(2020), 16.november(2020)))
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -771,7 +767,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.november(2020), 10.desember(2020), 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList()),
+            refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList()),
         )
 
         assertTilstander(
@@ -835,7 +831,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(10.desember(2020), 10.desember(2020)),
                 Periode(15.desember(2020), 19.desember(2020))
             ),
-            førsteFraværsdag = 15.desember(2020),
             beregnetInntekt = 30000.månedlig,
             refusjon = Refusjon(30000.månedlig, null, emptyList()),
             vedtaksperiodeIdInnhenter = 4.vedtaksperiode
@@ -897,7 +892,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(8.desember(2020), 10.desember(2020)),
                 Periode(15.desember(2020), 17.desember(2020))
             ),
-            førsteFraværsdag = 15.desember(2020),
             beregnetInntekt = 30000.månedlig,
             refusjon = Refusjon(30000.månedlig, null, emptyList()),
             vedtaksperiodeIdInnhenter = 4.vedtaksperiode
@@ -939,7 +933,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(10.desember(2020), 10.desember(2020)),
                 Periode(15.desember(2020), 19.desember(2020))
             ),
-            førsteFraværsdag = 15.desember(2020),
             beregnetInntekt = 30000.månedlig,
             refusjon = Refusjon(30000.månedlig, null, emptyList()),
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
@@ -962,7 +955,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
 
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -1058,7 +1051,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `replay strekker periode tilbake og lager overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent, null))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1180,7 +1173,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_REVURDERING)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
@@ -1263,7 +1256,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 42000.månedlig,
             avsendersystem = LPS
         )
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
@@ -1335,7 +1328,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.oktober, 8.november, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.november, 22.november))
         håndterSøknad(Sykdom(9.november, 22.november, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(27.oktober, 8.november)), 27.oktober)
+        håndterInntektsmelding(listOf(Periode(27.oktober, 8.november)))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -1421,7 +1414,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(9.januar, 10.januar),
                 Periode(12.januar, 20.januar)
             ),
-            12.januar,
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -1507,7 +1499,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Opphør av naturalytelser kaster periode til infotrygd`() {
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.januar, harOpphørAvNaturalytelser = true)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harOpphørAvNaturalytelser = true)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
@@ -1612,7 +1604,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
@@ -1632,10 +1624,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(27.januar, 7.februar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(27.januar, 7.februar, 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(3.januar, 18.januar)),
-            3.januar,
-        )
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         assertFalse(person.personLogg.harVarslerEllerVerre())
         assertTilstander(
             1.vedtaksperiode,
@@ -1800,7 +1789,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
         assertIngenFunksjonelleFeil()
         assertIngenVarsler()
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1981,7 +1970,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val førsteDagIArbeidsgiverperioden = 28.februar
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(førsteDagIArbeidsgiverperioden til 15.mars),
-            førsteFraværsdag = 28.februar,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertEquals("R AAAAARR AAAAARR AAAAARR AAAAARR AASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
@@ -2203,7 +2191,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.februar til 25.februar, orgnummer = a2)
         håndterInntektsmelding(
             listOf(25.januar til 9.februar),
-            førsteFraværsdag = 25.januar,
             beregnetInntekt = INNTEKT,
             orgnummer = a1,
         )
@@ -2232,7 +2219,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(5.februar til 28.februar)
         håndterInntektsmelding(
             arbeidsgiverperioder = emptyList(),
-            førsteFraværsdag = 1.februar,
             refusjon = Refusjon(INNTEKT / 2, null, emptyList()),
             avsendersystem = NAV_NO,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode

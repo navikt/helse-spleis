@@ -275,13 +275,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 18000.månedlig,
             orgnummer = a2,
         )
@@ -707,25 +705,21 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
-            førsteFraværsdag = 2.januar,
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
-            førsteFraværsdag = 3.januar,
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
-            førsteFraværsdag = 4.januar,
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
         )
@@ -806,25 +800,21 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
-            førsteFraværsdag = 2.januar,
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
-            førsteFraværsdag = 3.januar,
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
-            førsteFraværsdag = 4.januar,
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
         )
@@ -900,25 +890,21 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
-            førsteFraværsdag = 2.januar,
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
-            førsteFraværsdag = 3.januar,
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
-            førsteFraværsdag = 4.januar,
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
         )
@@ -1002,25 +988,21 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
-            førsteFraværsdag = 2.januar,
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
-            førsteFraværsdag = 3.januar,
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
-            førsteFraværsdag = 4.januar,
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
         )
@@ -1144,14 +1126,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
         )
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 19000.månedlig,
             orgnummer = a2,
         )
@@ -1310,13 +1290,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(5.mars til 20.mars),
-            førsteFraværsdag = 5.mars,
             beregnetInntekt = 21000.månedlig,
             orgnummer = a2,
         )

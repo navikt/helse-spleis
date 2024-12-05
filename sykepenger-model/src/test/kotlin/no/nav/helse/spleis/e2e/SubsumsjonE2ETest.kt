@@ -1009,7 +1009,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1083,7 +1082,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1139,7 +1137,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1254,7 +1251,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1724,7 +1720,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1793,7 +1788,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1857,7 +1851,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1919,7 +1912,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -1982,7 +1974,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
         )
@@ -2173,7 +2164,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = personOver67år)
         håndterSøknad(januar, fnr = personOver67år)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = personOver67år)
         håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
@@ -2297,7 +2288,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar), fnr = personOver67år)
         håndterSøknad(1.januar til 1.februar, fnr = personOver67år)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = personOver67år)
         håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterSimulering(1.vedtaksperiode, fnr = personOver67år)

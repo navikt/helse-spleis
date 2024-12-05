@@ -501,8 +501,12 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     førReplay: () -> Unit = {}
 ): UUID {
     if (erNavPortal(avsendersystem)) {
-        if (førsteFraværsdag != null && førsteFraværsdag > (arbeidsgiverperioder.lastOrNull()?.start ?: førsteFraværsdag)) {
-            error("Denne testen ser ut til å ha satt førsteFraværsdag til noe viktig, så det kan ikke være Portal-IM")
+        check(førsteFraværsdag == null) {
+            """
+            Du har satt første fraværsdag $førsteFraværsdag på en portalinntektsmelding!
+            Denne brukes ikke til noe i portalinntektsmeldinger, så du må sette avsendersystem
+            til LPS/ALTINN om det er en viktig detalj i testen din at første fraværsdag er satt.
+            """
         }
         return håndterInntektsmelding(
             inntektsmeldingPortal(

@@ -154,7 +154,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     @Test
     fun `kort periode så gap til neste - korrigert inntektsmelding opplyser om ikke-utbetalt AGP`() {
         nyPeriode(1.januar til 15.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(20.januar til 30.januar)
@@ -212,6 +212,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             emptyList(),
             førsteFraværsdag = lørdag den 6.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
+            avsendersystem = LPS
         )
         assertEquals("HH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -361,7 +362,6 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(),
-            førsteFraværsdag = 1.januar,
             refusjon = Refusjon(INGEN, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
         )
@@ -384,7 +384,6 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(),
-            førsteFraværsdag = 1.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
         )
         assertEquals(SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)

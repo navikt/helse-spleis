@@ -694,8 +694,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-        håndterInntektsmelding(emptyList(), førsteFraværsdag = 17.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(emptyList())
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

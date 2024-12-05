@@ -127,7 +127,6 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
             beregnetInntekt = 50000.årlig,
         )
         håndterVilkårsgrunnlag(
