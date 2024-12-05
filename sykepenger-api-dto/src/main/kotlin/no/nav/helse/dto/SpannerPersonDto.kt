@@ -321,14 +321,15 @@ data class SpannerPersonDto(
             val skjæringstidspunkt: LocalDate?,
             val sykdomstidslinje: List<DagData>,
             val refusjonstidslinje: List<BeløpstidslinjeperiodeData>,
-            val utbetalingstidslinje: List<UtbetalingsdagData>,
+            val refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger: List<BeløpstidslinjeperiodeData>,
+            val utbetalingstidslinje: List<Any>,
             val arbeidsgiverperiode: List<PeriodeData>,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val forbrukteDager: Long,
             val gjenståendeDager: Int,
             val maksdato: LocalDate,
             val arbeidsgiverOppdrag: OppdragData?,
-            val personOppdrag: OppdragData?
+            val personOppdrag: OppdragData?,
         )
         data class VedtaksperiodeData(
             val id: UUID,
@@ -344,21 +345,29 @@ data class SpannerPersonDto(
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime,
             private val vilkårsgrunnlag: VilkårsgrunnlagElementData?,
-            private val utbetaling: UtbetalingData?
+            private val utbetaling: UtbetalingData?,
+            val sisteBehandlingId: UUID?,
+            val sisteRefusjonstidslinje: BeløpstidslinjeData?
         ) {
-            val gjeldende = behandlinger.last().endringer.last().let { gjeldendeEndring -> Gjeldende(
-                skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiverperiode = gjeldendeEndring.arbeidsgiverperiode,
-                refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
-                utbetalingstidslinje = gjeldendeEndring.utbetalingstidslinje.dager,
-                forbrukteDager = gjeldendeEndring.maksdatoresultat.forbrukteDagerAntall,
-                gjenståendeDager = gjeldendeEndring.maksdatoresultat.gjenståendeDager,
-                maksdato = gjeldendeEndring.maksdatoresultat.maksdato,
-                sykdomstidslinje = gjeldendeEndring.sykdomstidslinje.dager,
-                arbeidsgiverInntektsopplysninger = vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger ?: emptyList(),
-                personOppdrag = utbetaling?.personOppdrag?.takeUnless { it.linjer.isEmpty() },
-                arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() }
-            ) }
+            val gjeldende = behandlinger.last().let { behandling ->
+                behandling.endringer.last().let { gjeldendeEndring ->
+                    Gjeldende(
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        arbeidsgiverperiode = gjeldendeEndring.arbeidsgiverperiode,
+                        refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
+                        refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger = if (behandling.id == sisteBehandlingId) sisteRefusjonstidslinje!!.perioder else emptyList(),
+                        utbetalingstidslinje = gjeldendeEndring.utbetalingstidslinje.dager,
+                        forbrukteDager = gjeldendeEndring.maksdatoresultat.forbrukteDagerAntall,
+                        gjenståendeDager = gjeldendeEndring.maksdatoresultat.gjenståendeDager,
+                        maksdato = gjeldendeEndring.maksdatoresultat.maksdato,
+                        sykdomstidslinje = gjeldendeEndring.sykdomstidslinje.dager,
+                        arbeidsgiverInntektsopplysninger = vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger
+                            ?: emptyList(),
+                        personOppdrag = utbetaling?.personOppdrag?.takeUnless { it.linjer.isEmpty() },
+                        arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() }
+                    )
+                }
+            }
 
             enum class TilstandType {
                 AVVENTER_HISTORIKK,
@@ -716,13 +725,13 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
             val gjeldendeEndring = vedtaksperiode.behandlinger.behandlinger.last().endringer.last()
             val vilkårsgrunnlag = gjeldendeEndring.vilkårsgrunnlagId?.let { vilkårsgrunnlagId -> vilkårsgrunnlagHistorikk.flatMap { it.vilkårsgrunnlag }.first { it.vilkårsgrunnlagId == vilkårsgrunnlagId } }
             val utbetaling = gjeldendeEndring.utbetalingId?.let { utbetalingId -> utbetalingerDto.first { it.id == utbetalingId } }
-            vedtaksperiode.tilPersonData(vilkårsgrunnlag, utbetaling)
+            vedtaksperiode.tilPersonData(vilkårsgrunnlag, utbetaling, ubrukteRefusjonsopplysninger.sisteBehandlingId, ubrukteRefusjonsopplysninger.sisteRefusjonstidslinje?.tilPersonData())
         },
         forkastede = this.forkastede.map { it.tilPersonData() },
         utbetalinger = utbetalingerDto,
         feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
         refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() },
-        ubrukteRefusjonsopplysninger = RefusjonservitørData(this.ubrukteRefusjonsopplysninger.refusjonstidslinjer.mapValues { (_, dto) -> dto.tilPersonData() })
+        ubrukteRefusjonsopplysninger = RefusjonservitørData(this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.refusjonstidslinjer.mapValues { (_, dto) -> dto.tilPersonData() })
     )
 }
 
@@ -972,7 +981,9 @@ private fun ForkastetVedtaksperiodeUtDto.tilPersonData() =
     )
 private fun VedtaksperiodeUtDto.tilPersonData(
     vilkårsgrunnlag: VilkårsgrunnlagElementData? = null,
-    utbetaling: UtbetalingData? = null
+    utbetaling: UtbetalingData? = null,
+    sisteBehandlingId: UUID? = null,
+    sisteRefusjonstidslinje: SpannerPersonDto.BeløpstidslinjeData? = null
 ) = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData(
     id = id,
     tilstand = when (tilstand) {
@@ -1006,7 +1017,9 @@ private fun VedtaksperiodeUtDto.tilPersonData(
     opprettet = opprettet,
     oppdatert = oppdatert,
     vilkårsgrunnlag = vilkårsgrunnlag,
-    utbetaling = utbetaling
+    utbetaling = utbetaling,
+    sisteBehandlingId,
+    sisteRefusjonstidslinje
 )
 
 private fun utledVenteårsak(venteårsak: LazyVedtaksperiodeVenterDto): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {

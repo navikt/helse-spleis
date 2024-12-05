@@ -63,6 +63,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.*
+import no.nav.helse.nesteDag
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -1158,6 +1159,12 @@ internal class Vedtaksperiode private constructor(
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
     }
+
+    internal fun hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger: Refusjonsservitør): Beløpstidslinje {
+        val menyBakHalen = ubrukteRefusjonsopplysninger.dessertmeny(startdatoPåSammenhengendeVedtaksperioder, periode).fraOgMed(periode.endInclusive.nesteDag)
+        return refusjonstidslinje + menyBakHalen
+    }
+
 
     internal sealed class ArbeidsgiveropplysningerStrategi {
         abstract fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg): Boolean

@@ -6,6 +6,7 @@ import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 
@@ -17,6 +18,14 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
     private fun leggTil(dato: LocalDate, beløpstidslinje: Beløpstidslinje) {
         refusjonstidslinjer[dato] = refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
         refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
+    }
+
+    // jeg vil bare se hva som kommer etterpå
+    internal fun dessertmeny(startdato: LocalDate, periode: Periode): Beløpstidslinje {
+        val søkevindu = startdato til periode.endInclusive
+        val aktuelle = refusjonstidslinjer.filterKeys { it in søkevindu }.values.map { it.fraOgMed(periode.endInclusive.nesteDag) }.filter { it.isNotEmpty() }
+        val sisteKjenteDag = aktuelle.maxOfOrNull { it.last().dato } ?: return Beløpstidslinje()
+        return aktuelle.map { it.fyll(sisteKjenteDag) }.fold(Beløpstidslinje(), Beløpstidslinje::plus)
     }
 
     // Serverer refusjonstidslinjer til perioder
