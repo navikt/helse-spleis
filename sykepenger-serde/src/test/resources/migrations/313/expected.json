@@ -1,0 +1,82 @@
+{
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "ubrukteRefusjonsopplysninger": {
+        "2018-01-01": {
+          "perioder": [
+            {
+              "fom": "2018-02-01",
+              "tom": "2018-02-01",
+              "dagligBeløp": 0,
+              "meldingsreferanseId": "4ca546b0-633a-4707-bd6d-95287fe12c1a",
+              "avsender": "ARBEIDSGIVER",
+              "tidsstempel": "2024-12-04T12:46:44.063478"
+            }
+          ]
+        },
+        "2018-03-01": {
+          "perioder": [
+            {
+              "fom": "2018-03-01",
+              "tom": "2018-03-01",
+              "dagligBeløp": 1430.7692307692307,
+              "meldingsreferanseId": "4ca546b0-633a-4707-bd6d-95287fe12c1a",
+              "avsender": "ARBEIDSGIVER",
+              "tidsstempel": "2024-12-04T12:46:44.063478"
+            }
+          ]
+        }
+      },
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ubrukteRefusjonsopplysninger": {
+        "2018-01-01": {
+          "perioder": [
+            {
+              "fom": "2018-02-01",
+              "tom": "2018-02-15",
+              "dagligBeløp": 1430.7692307692307,
+              "meldingsreferanseId": "4ca546b0-633a-4707-bd6d-95287fe12c1a",
+              "avsender": "ARBEIDSGIVER",
+              "tidsstempel": "2024-12-04T12:46:44.063478"
+            }
+          ]
+        }
+      },
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ubrukteRefusjonsopplysninger": [],
+      "vedtaksperioder": []
+    }
+  ],
+  "skjemaVersjon": 313
+}
