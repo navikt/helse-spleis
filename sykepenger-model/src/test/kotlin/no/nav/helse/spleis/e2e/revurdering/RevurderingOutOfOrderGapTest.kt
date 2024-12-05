@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -202,7 +203,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         nyPeriode(10.februar til 28.februar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 10.februar, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 10.februar, avsendersystem = LPS)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -416,7 +417,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 16.januar)
 
         nyPeriode(29.januar til 15.februar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 29.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 29.januar, avsendersystem = LPS)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -866,7 +867,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, avsendersystem = LPS)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -982,7 +983,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, avsendersystem = LPS)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

@@ -56,6 +56,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
@@ -827,7 +828,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             Sykdom(1.januar(2019), 31.januar(2019), 100.prosent),
             sendtTilNAVEllerArbeidsgiver = 31.januar(2019)
         )
-        håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))), førsteFraværsdag = 1.januar(2019), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))), førsteFraværsdag = 1.januar(2019), avsendersystem = LPS)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -2181,7 +2182,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar), fnr = personOver67år)
         håndterSøknad(2.februar til 28.februar, fnr = personOver67år)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar, fnr = personOver67år, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar, fnr = personOver67år, avsendersystem = LPS)
 
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
@@ -2305,7 +2306,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar), fnr = personOver67år)
         håndterSøknad(3.februar til 28.februar, fnr = personOver67år)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 3.februar, fnr = personOver67år, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 3.februar, fnr = personOver67år, avsendersystem = LPS)
 
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)

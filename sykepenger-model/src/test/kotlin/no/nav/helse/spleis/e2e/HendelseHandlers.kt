@@ -244,7 +244,7 @@ internal fun AbstractEndToEndTest.forlengVedtak(periode: Periode, vararg organis
 internal fun AbstractEndToEndTest.nyttVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
-    førsteFraværsdag: LocalDate = periode.start,
+    førsteFraværsdag: LocalDate? = null,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -262,7 +262,7 @@ internal fun AbstractEndToEndTest.nyttVedtak(
 internal fun AbstractEndToEndTest.tilGodkjent(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate,
+    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -292,7 +292,7 @@ internal fun AbstractEndToEndTest.tilGodkjent(
 internal fun AbstractEndToEndTest.tilGodkjenning(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate,
+    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -310,7 +310,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
 internal fun AbstractEndToEndTest.tilSimulering(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate,
+    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -326,7 +326,7 @@ internal fun AbstractEndToEndTest.tilSimulering(
 internal fun AbstractEndToEndTest.tilYtelser(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate,
+    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -499,7 +499,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsgiverperioder: List<Periode>,
-    førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
+    førsteFraværsdag: LocalDate? = null,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = ORGNUMMER,
@@ -513,6 +513,9 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     førReplay: () -> Unit = {}
 ): UUID {
     if (erNavPortal(avsendersystem)) {
+        if (førsteFraværsdag != null && førsteFraværsdag > (arbeidsgiverperioder.lastOrNull()?.start ?: førsteFraværsdag)) {
+            error("Denne testen ser ut til å ha satt førsteFraværsdag til noe viktig, så det kan ikke være Portal-IM")
+        }
         return håndterInntektsmelding(
             inntektsmeldingPortal(
                 id,

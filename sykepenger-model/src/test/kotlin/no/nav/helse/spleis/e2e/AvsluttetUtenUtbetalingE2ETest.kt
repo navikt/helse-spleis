@@ -4,6 +4,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -132,8 +133,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
                 8.januar til 12.januar,// 5
                 13.januar til 18.januar // 6
             ),
-            8.januar,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            førsteFraværsdag = 8.januar,
+            avsendersystem = LPS
         )
         assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

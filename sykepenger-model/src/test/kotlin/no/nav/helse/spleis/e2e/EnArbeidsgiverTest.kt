@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -51,7 +52,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen`() {
         håndterSøknad(25.juni til 5.juli)
         håndterSøknad(31.juli til 18.august)
-        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 1.august, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(listOf(25.juni til 5.juli, 8.juli til 12.juli), førsteFraværsdag = 1.august, avsendersystem = LPS)
         assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
         assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
 
@@ -590,7 +591,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 10.februar, 100.prosent, INNTEKT)),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
         )
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar, avsendersystem = LPS)
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(20.februar til 28.februar)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)

@@ -96,6 +96,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
+import no.nav.helse.hendelser.inntektsmelding.LPS
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
@@ -416,14 +417,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 32000.månedlig,
             refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
             orgnummer = a2,
-            avsendersystem = NAV_NO_SELVBESTEMT
+            avsendersystem = LPS
         )
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         assertLikeRefusjonsopplysninger(
             listOf(
                 Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, 32000.månedlig, ARBEIDSGIVER),
-                Refusjonsopplysning(korrigerendeInntektsmelding, 1.februar, null, 30000.månedlig, ARBEIDSGIVER)
+                Refusjonsopplysning(inntektsmelding, 1.februar, 19.februar, 32000.månedlig, ARBEIDSGIVER),
+                Refusjonsopplysning(korrigerendeInntektsmelding, 20.februar, null, 30000.månedlig, ARBEIDSGIVER)
             ),
             inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         )
@@ -451,7 +453,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             førsteFraværsdag = 26.mars,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            avsendersystem = LPS
         )
 
         val inntekter = listOf(

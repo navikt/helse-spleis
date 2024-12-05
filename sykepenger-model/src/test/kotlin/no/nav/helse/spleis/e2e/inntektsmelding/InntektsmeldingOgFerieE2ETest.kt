@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -128,7 +129,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `bare ferie (forlengelse) - etter tilbakevennende sykdom`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, avsendersystem = LPS)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
@@ -152,7 +153,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `bare ferie (sykdomsforlengelse) - etter tilbakevennende sykdom`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, avsendersystem = LPS)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
@@ -175,7 +176,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, avsendersystem = LPS)
         håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
