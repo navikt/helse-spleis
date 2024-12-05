@@ -862,7 +862,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `korrigerer agp langt tilbake i tid`() {
         nyPeriode(5.januar til 16.januar)
-        nyttVedtak(17.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), førsteFraværsdag = 5.januar)
+        nyttVedtak(17.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(februar)
         forlengVedtak(mars)
         nyPeriode(10.april til 30.april)

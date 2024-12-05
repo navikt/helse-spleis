@@ -461,7 +461,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering av eldre skjæringstidspunkt mens nyere skjæringstidspunkt utbetales`() {
         nyttVedtak(januar)
-        tilGodkjent(mars, 100.prosent, førsteFraværsdag = 1.mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        tilGodkjent(mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
@@ -605,7 +605,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `periode til utbetaling blir overstyrt`() {
-        tilGodkjent(januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -637,7 +637,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer simulering`() {
         nyttVedtak(januar)
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
-        tilSimulering(mars, 100.prosent, 1.mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        tilSimulering(mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
@@ -655,7 +655,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer godkjenning`() {
         nyttVedtak(januar)
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
-        tilGodkjenning(mars, 100.prosent, 1.mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        tilGodkjenning(mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)

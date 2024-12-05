@@ -71,7 +71,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert søknad i til utbetaling - utbetaler først, så revurdere`() {
-        tilGodkjent(3.januar til 26.januar, 100.prosent, 3.januar)
+        tilGodkjent(3.januar til 26.januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -79,7 +79,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert søknad i avventer simulering - forkaster utbetalingen`() {
-        tilSimulering(3.januar til 26.januar, 100.prosent, 3.januar)
+        tilSimulering(3.januar til 26.januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
         assertEquals(FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)

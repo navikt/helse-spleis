@@ -52,7 +52,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         // Hva gjør vi egentlig med overstyring? Skal man kunne sette opp inntekten uten å ha mottatt en ny inntektsmelding med nye refusjonsopplysninger?
         val fom = 1.januar(2021)
         val overstyrtInntekt = 32000.månedlig
-        tilGodkjenning(fom til 31.januar(2021), 100.prosent, fom)
+        tilGodkjenning(fom til 31.januar(2021), 100.prosent)
 
         assertInntektForDato(INNTEKT, fom, inspektør = inspektør)
 

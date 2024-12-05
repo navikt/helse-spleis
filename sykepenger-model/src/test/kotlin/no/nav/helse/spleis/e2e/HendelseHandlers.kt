@@ -74,7 +74,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilSkjønnsmessigFastsatt
-import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -244,30 +243,26 @@ internal fun AbstractEndToEndTest.forlengVedtak(periode: Periode, vararg organis
 internal fun AbstractEndToEndTest.nyttVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
-    førsteFraværsdag: LocalDate? = null,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ) {
-    tilGodkjent(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
+    tilGodkjent(periode, grad, fnr = fnr, orgnummer = orgnummer, beregnetInntekt = beregnetInntekt, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
     håndterUtbetalt(status = status, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjent(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
@@ -275,11 +270,9 @@ internal fun AbstractEndToEndTest.tilGodkjent(
     val id = tilGodkjenning(
         periode = periode,
         grad = grad,
-        førsteFraværsdag = førsteFraværsdag,
         fnr = fnr,
         orgnummer = orgnummer,
         refusjon = refusjon,
-        inntekterBlock = inntekterBlock,
         arbeidsgiverperiode = arbeidsgiverperiode,
         beregnetInntekt = beregnetInntekt,
         inntektsmeldingId = inntektsmeldingId,
@@ -292,17 +285,15 @@ internal fun AbstractEndToEndTest.tilGodkjent(
 internal fun AbstractEndToEndTest.tilGodkjenning(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ): IdInnhenter {
-    val id = tilSimulering(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
+    val id = tilSimulering(periode, grad, fnr = fnr, orgnummer = orgnummer, beregnetInntekt = beregnetInntekt, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     return id
 }
@@ -310,23 +301,20 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
 internal fun AbstractEndToEndTest.tilSimulering(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
 ): IdInnhenter {
-    return tilYtelser(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
+    return tilYtelser(periode, grad, fnr = fnr, orgnummer = orgnummer, beregnetInntekt = beregnetInntekt, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, inntektsmeldingId = inntektsmeldingId, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
     periode: Periode,
     grad: Prosentdel,
-    førsteFraværsdag: LocalDate?,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -346,7 +334,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = orgnummer)
     håndterInntektsmelding(
         arbeidsgiverperiode ?: listOf(Periode(periode.start, periode.start.plusDays(15))),
-        førsteFraværsdag = førsteFraværsdag,
+        førsteFraværsdag = null,
         beregnetInntekt = beregnetInntekt,
         refusjon = refusjon,
         orgnummer = orgnummer,
@@ -650,7 +638,6 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     fagsystemId: String,
     fagområde: Fagområde,
     simuleringOK: Boolean = true,
-    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = ORGNUMMER,
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) {

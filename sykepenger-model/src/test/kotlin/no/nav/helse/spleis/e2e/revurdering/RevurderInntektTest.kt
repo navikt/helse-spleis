@@ -456,7 +456,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling`() {
-        tilGodkjent(januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
@@ -466,7 +466,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling - utbetalingen feiler`() {
-        tilGodkjent(januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent)
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)

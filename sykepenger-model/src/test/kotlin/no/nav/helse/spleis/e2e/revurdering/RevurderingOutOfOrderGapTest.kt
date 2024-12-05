@@ -781,7 +781,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `første periode i til utbetaling når det dukker opp en out of order-periode`() {
-        tilGodkjent(mars, 100.prosent, 1.mars)
+        tilGodkjent(mars, 100.prosent)
         nullstillTilstandsendringer()
         nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
@@ -818,7 +818,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `første periode i til utbetaling når det dukker opp en out of order-periode - utbetalingen feiler`() {
-        tilGodkjent(mars, 100.prosent, 1.mars)
+        tilGodkjent(mars, 100.prosent)
         nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()

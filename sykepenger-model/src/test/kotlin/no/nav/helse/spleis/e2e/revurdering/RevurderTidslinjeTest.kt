@@ -108,7 +108,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en førstegangsbehandling er til utbetaling`() {
-        tilGodkjent(januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterUtbetalt()
@@ -118,7 +118,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en førstegangsbehandling er til utbetaling - utbetalingen feiler`() {
-        tilGodkjent(januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
@@ -464,7 +464,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `forsøk på å revurdere eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
         nyttVedtak(3.januar til 26.januar)
-        tilGodkjenning(mai, 100.prosent, 1.mai, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        tilGodkjenning(mai, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
