@@ -320,10 +320,6 @@ class Inntektsmelding(
     }
 
     private data object SelvbestemtPortalinntektsmeldingForForlengelse: ForkastetPortalinntektsmelding() {
-        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
-            sikkerlogg.info("Håndterer ikke selvbestemt inntektsmelding siden den traff en forlengelse. InntektsmeldingId: ${inntektsmelding.metadata.meldingsreferanseId}")
-            return false
-        }
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) = false
     }
 }
