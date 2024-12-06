@@ -30,9 +30,9 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndMediatorTest() {
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(19000.0, a1),
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(81000.0, a2),
-                )
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(19000.0, a1),
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(81000.0, a2),
+            )
             )
         )
         sendYtelser(0, orgnummer = a1)

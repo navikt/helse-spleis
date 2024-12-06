@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -19,19 +21,17 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
@@ -40,8 +40,8 @@ import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
+import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
@@ -289,7 +289,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: InntektsmeldingerReplayMessage,
         replays: InntektsmeldingerReplay,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
         lestDødsmeldingVerdi.set(true)
@@ -301,7 +302,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         identOpphørt: IdentOpphørt,
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
         lestutbetalingpåminnelseVerdi.set(true)
@@ -407,23 +409,27 @@ internal class TestHendelseMediator : IHendelseMediator {
         avbruttSøknadMessage: AvbruttSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(
         avbruttArbeidsledigSøknadMessage: AvbruttArbeidsledigSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(
         message: SkjønnsmessigFastsettelseMessage,
         skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
         context: MessageContext
-    ) {}
+    ) {
+    }
 
     override fun behandle(
         message: MinimumSykdomsgradVurdertMessage,
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
         context: MessageContext
-    ) {}
+    ) {
+    }
 }

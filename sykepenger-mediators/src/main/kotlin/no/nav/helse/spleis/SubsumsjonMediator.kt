@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -13,7 +13,6 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 interface Subsumsjonproducer {
     fun send(fnr: String, melding: String)
@@ -24,6 +23,7 @@ interface Subsumsjonproducer {
         }
     }
 }
+
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,
     private val versjonAvKode: String
@@ -51,7 +51,8 @@ internal class SubsumsjonMediator(
             input = subsumsjon.input,
             output = subsumsjon.output,
             utfall = subsumsjon.utfall.name
-        ))
+        )
+        )
     }
 
     private fun bekreftAtSubsumsjonerHarKnytningTilBehandling(subsumsjon: Subsumsjon) {
@@ -102,14 +103,20 @@ internal class SubsumsjonMediator(
                 this["input"] = event.input
                 this["output"] = event.output
                 this["utfall"] = event.utfall
-                if (event.ledd != null) { this["ledd"] = event.ledd }
-                if (event.punktum != null) { this["punktum"] = event.punktum }
-                if (event.bokstav != null) { this["bokstav"] = event.bokstav }
+                if (event.ledd != null) {
+                    this["ledd"] = event.ledd
+                }
+                if (event.punktum != null) {
+                    this["punktum"] = event.punktum
+                }
+                if (event.bokstav != null) {
+                    this["bokstav"] = event.bokstav
+                }
             }
         ))
     }
 
-    private fun KontekstType.tilEkstern() = when(this) {
+    private fun KontekstType.tilEkstern() = when (this) {
         KontekstType.Fødselsnummer -> "fodselsnummer"
         KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
         KontekstType.Vedtaksperiode -> "vedtaksperiode"

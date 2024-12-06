@@ -60,8 +60,10 @@ internal open class InntektsmeldingerReplayRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 }

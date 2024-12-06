@@ -41,8 +41,10 @@ internal class SendtNavSøknaderRiver(
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fnr"].asText()
-    ))
+    )
+    )
 }

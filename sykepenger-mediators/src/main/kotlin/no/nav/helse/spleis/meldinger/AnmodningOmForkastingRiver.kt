@@ -21,8 +21,10 @@ internal open class AnmodningOmForkastingRiver(
         message.interestedIn("force")
     }
 
-    override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 }

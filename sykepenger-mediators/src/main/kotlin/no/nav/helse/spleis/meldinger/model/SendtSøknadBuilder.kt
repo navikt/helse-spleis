@@ -62,6 +62,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     override fun utenlandskSykmelding(utenlandsk: Boolean) = apply {
         utenlandskSykmelding = utenlandsk
     }
+
     override fun sendTilGosys(tilGosys: Boolean) = apply {
         sendTilGosys = tilGosys
     }

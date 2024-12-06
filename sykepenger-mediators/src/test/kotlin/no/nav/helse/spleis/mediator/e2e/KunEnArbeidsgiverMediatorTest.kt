@@ -374,13 +374,14 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK")
+            "AVVENTER_HISTORIKK"
+        )
     }
 
     @Test
     fun `Behandler ikke melding hvis den allerede er behandlet`() {
         val hendelseRepository: HendelseRepository = mockk(relaxed = true)
-        every { hendelseRepository.erBehandlet(any()) } returnsMany(listOf(false, true))
+        every { hendelseRepository.erBehandlet(any()) } returnsMany (listOf(false, true))
 
         MessageMediator(
             rapidsConnection = testRapid,
@@ -398,7 +399,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Behandler melding hvis den tidligere har prøvd å behandle melding, men kræsjet`() {
         val hendelseRepository: HendelseRepository = mockk(relaxed = true)
-        every { hendelseRepository.erBehandlet(any()) } returnsMany(listOf(false, false, true))
+        every { hendelseRepository.erBehandlet(any()) } returnsMany (listOf(false, false, true))
 
         MessageMediator(
             rapidsConnection = testRapid,

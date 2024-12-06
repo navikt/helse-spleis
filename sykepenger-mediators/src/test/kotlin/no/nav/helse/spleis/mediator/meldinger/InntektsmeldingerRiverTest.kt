@@ -1,16 +1,17 @@
 package no.nav.helse.spleis.mediator.meldinger
 
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mai
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
@@ -22,7 +23,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import org.junit.jupiter.api.Test
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class InntektsmeldingerRiverTest : RiverTest() {
 
@@ -108,6 +108,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
         assertNoErrors(ValidInntektsmeldingMedVedtaksperiodeId)
     }
+
     private fun ObjectNode.toJson(): String = put("fødselsdato", "$fødselsdato").toString()
 }
 

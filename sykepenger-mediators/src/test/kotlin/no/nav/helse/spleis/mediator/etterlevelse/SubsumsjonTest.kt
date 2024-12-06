@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.mediator.TestMessageFactory.Subsumsjon
@@ -25,12 +25,15 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringArbeidsforhold(1.januar, listOf(
+        sendOverstyringArbeidsforhold(
+            1.januar, listOf(
             TestMessageFactory.ArbeidsforholdOverstyrt(
-            a2,
-            true,
-            "Jeg, en saksbehandler, overstyrte pga 8-15"
-        )))
+                a2,
+                true,
+                "Jeg, en saksbehandler, overstyrte pga 8-15"
+            )
+        )
+        )
 
         val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
@@ -59,20 +62,26 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringArbeidsforhold(1.januar, listOf(
+        sendOverstyringArbeidsforhold(
+            1.januar, listOf(
             TestMessageFactory.ArbeidsforholdOverstyrt(
-            a2,
-            true,
-            "Jeg, en saksbehandler, deaktiverer pga 8-15"
-        )))
+                a2,
+                true,
+                "Jeg, en saksbehandler, deaktiverer pga 8-15"
+            )
+        )
+        )
         sendYtelser(0, orgnummer = "ag1")
         sendSimulering(0, orgnummer = "ag1", status = OK)
-        sendOverstyringArbeidsforhold(1.januar, listOf(
+        sendOverstyringArbeidsforhold(
+            1.januar, listOf(
             TestMessageFactory.ArbeidsforholdOverstyrt(
-            a2,
-            false,
-            "Jeg, en saksbehandler, overstyrte pga 8-15"
-        )))
+                a2,
+                false,
+                "Jeg, en saksbehandler, overstyrte pga 8-15"
+            )
+        )
+        )
 
         val subsumsjon = subsumsjoner
             .map { it["subsumsjon"] }
@@ -153,6 +162,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         assertEquals(13200.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrÅr"].asDouble())
         assertEquals(1100.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrMåned"].asDouble())
     }
+
     @Test
     fun `Sender § 8-28 (3) c ved overstyring av ghost-inntekt`() {
 
@@ -251,9 +261,9 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 fom, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(1000.0, a2),
-                )
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(1000.0, a2),
+            )
             )
         )
         sendYtelser(0, orgnummer = a1)

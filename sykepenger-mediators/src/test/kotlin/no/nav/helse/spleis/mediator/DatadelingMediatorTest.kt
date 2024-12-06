@@ -67,7 +67,8 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.funksjonellFeil(RV_VT_1)
         try {
             aktivitetslogg.logiskFeil("Dette er en severe")
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         datadelingMediator.ferdigstill(testRapid)
 
         assertEquals(1, testRapid.inspektør.antall())
@@ -88,7 +89,10 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        try { aktivitetslogg.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
+        try {
+            aktivitetslogg.logiskFeil("Dette er en infomelding")
+        } catch (_: Exception) {
+        }
         datadelingMediator.ferdigstill(testRapid)
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
@@ -101,7 +105,7 @@ internal class DatadelingMediatorTest {
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 }

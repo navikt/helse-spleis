@@ -39,9 +39,10 @@ internal class MessageMediatorTest {
     fun inntektsmeldinger() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagInntektsmelding(
-            listOf(Periode(LocalDate.now(), LocalDate.now())),
-            LocalDate.now()
-        ))
+                listOf(Periode(LocalDate.now(), LocalDate.now())),
+                LocalDate.now()
+            )
+        )
         assertTrue(hendelseMediator.lestInntektsmelding)
     }
 
@@ -121,13 +122,17 @@ internal class MessageMediatorTest {
                     TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
                         måned = YearMonth.of(2017, 12),
                         inntekter = listOf(
-                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
+                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
+                                32000.0,
                                 AbstractEndToEndMediatorTest.ORGNUMMER
-                            ))
-                    )),
+                            )
+                        )
+                    )
+                ),
                 arbeidsforhold = emptyList(),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
-            ))
+            )
+        )
         assertTrue(hendelseMediator.lestVilkårsgrunnlag)
     }
 
@@ -141,16 +146,17 @@ internal class MessageMediatorTest {
     fun utbetalingsgodkjenning() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingsgodkjenning(
-            vedtaksperiodeId = UUID.randomUUID(),
-            utbetalingId = UUID.randomUUID(),
-            tilstand = TilstandType.START,
-            utbetalingGodkjent = true,
-            saksbehandlerIdent = "en_saksbehandler",
-            saksbehandlerEpost = "en_saksbehandler@ikke.no",
-            automatiskBehandling = false,
-            makstidOppnådd = false,
-            godkjenttidspunkt = LocalDateTime.now()
-        ))
+                vedtaksperiodeId = UUID.randomUUID(),
+                utbetalingId = UUID.randomUUID(),
+                tilstand = TilstandType.START,
+                utbetalingGodkjent = true,
+                saksbehandlerIdent = "en_saksbehandler",
+                saksbehandlerEpost = "en_saksbehandler@ikke.no",
+                automatiskBehandling = false,
+                makstidOppnådd = false,
+                godkjenttidspunkt = LocalDateTime.now()
+            )
+        )
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
     }
 
@@ -158,10 +164,11 @@ internal class MessageMediatorTest {
     fun utbetaling() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
-            fagsystemId = "qwer1234",
-            utbetalingId = UUID.randomUUID().toString(),
-            utbetalingOK = true
-        ))
+                fagsystemId = "qwer1234",
+                utbetalingId = UUID.randomUUID().toString(),
+                utbetalingOK = true
+            )
+        )
         assertTrue(hendelseMediator.lestUtbetaling)
     }
 

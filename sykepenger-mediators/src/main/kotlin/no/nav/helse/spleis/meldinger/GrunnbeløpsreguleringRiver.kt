@@ -19,8 +19,10 @@ internal class GrunnbeløpsreguleringRiver(
         message.requireKey("fødselsnummer", "skjæringstidspunkt")
     }
 
-    override fun createMessage(packet: JsonMessage) = GrunnbeløpsreguleringMessage(packet, Meldingsporing(
+    override fun createMessage(packet: JsonMessage) = GrunnbeløpsreguleringMessage(
+        packet, Meldingsporing(
         id = packet["@id"].asText().toUUID(),
         fødselsnummer = packet["fødselsnummer"].asText()
-    ))
+    )
+    )
 }

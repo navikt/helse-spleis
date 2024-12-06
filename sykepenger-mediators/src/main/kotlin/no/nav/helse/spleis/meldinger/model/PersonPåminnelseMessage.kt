@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.PersonPåminnelse
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 

@@ -19,6 +19,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
+
     fun hentEllerOpprettPerson(
         subsumsjonslogg: Subsumsjonslogg,
         personidentifikator: Personidentifikator,
@@ -96,7 +97,8 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte
         // flere ulike person-rader til samme person, og personen må merges manuelt
         return session.run(queryOf(statement, *historiskeFolkeregisteridenter.map { it.toLong() }.toTypedArray())
-            .map { it.long("id") to SerialisertPerson(it.string("data")) }.asList)
+            .map { it.long("id") to SerialisertPerson(it.string("data")) }.asList
+        )
             .distinctBy { (id, _) -> id }
             .filterNot { (id, _) -> id == personId }
             .map { (_, person) -> person }
@@ -115,6 +117,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     private fun hentPersonFraHistoriskeIdenter(session: Session, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
         if (!STØTTER_IDENTBYTTE) return null
         val identer = historiskeFolkeregisteridenter.plusElement(personidentifikator)
+
         @Language("PostgreSQL")
         val statement = """
             SELECT p.id, p.data FROM person p
@@ -134,6 +137,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
     private fun knyttPersonTilHistoriskeIdenter(session: Session, personId: Long, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
         val identer = if (STØTTER_IDENTBYTTE) historiskeFolkeregisteridenter.plusElement(personidentifikator) else setOf(personidentifikator)
+
         @Language("PostgreSQL")
         val statement = """INSERT INTO person_alias(fnr, person_id) VALUES ${identer.joinToString { "(?, $personId)" }} ON CONFLICT DO NOTHING;"""
         session.run(queryOf(statement, *identer.map { it.toLong() }.toTypedArray()).asExecute)
@@ -146,11 +150,17 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String): Long {
         @Language("PostgreSQL")
         val statement = """ INSERT INTO person (fnr, skjema_versjon, data) VALUES (:fnr, :skjemaversjon, :data) """
-        return checkNotNull(session.run(queryOf(statement, mapOf(
-            "fnr" to personidentifikator.toLong(),
-            "skjemaversjon" to skjemaVersjon,
-            "data" to personJson
-        )).asUpdateAndReturnGeneratedKey)) { "klarte ikke inserte person" }
+        return checkNotNull(
+            session.run(
+                queryOf(
+                    statement, mapOf(
+                    "fnr" to personidentifikator.toLong(),
+                    "skjemaversjon" to skjemaVersjon,
+                    "data" to personJson
+                )
+                ).asUpdateAndReturnGeneratedKey
+            )
+        ) { "klarte ikke inserte person" }
     }
 
     private fun oppdaterAvstemmingtidspunkt(session: Session, message: HendelseMessage, personidentifikator: Personidentifikator) {
@@ -171,11 +181,17 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     private fun oppdaterPersonversjon(session: Session, personId: Long, skjemaVersjon: Int, personJson: String) {
         @Language("PostgreSQL")
         val statement = """ UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE id=:personId; """
-        check(1 == session.run(queryOf(statement, mapOf(
-            "skjemaversjon" to skjemaVersjon,
-            "data" to personJson,
-            "personId" to personId
-        )).asUpdate)) {
+        check(
+            1 == session.run(
+                queryOf(
+                    statement, mapOf(
+                    "skjemaversjon" to skjemaVersjon,
+                    "data" to personJson,
+                    "personId" to personId
+                )
+                ).asUpdate
+            )
+        ) {
             "Forventet å påvirke én og bare én rad!"
         }
     }

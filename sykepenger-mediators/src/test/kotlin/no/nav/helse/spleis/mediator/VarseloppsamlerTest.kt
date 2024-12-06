@@ -54,11 +54,13 @@ internal class VarseloppsamlerTest {
         internal data class Varsel(
             private val id: UUID,
             private val varselkode: Varselkode,
-            private val kontekster: Map<String, String>) {
+            private val kontekster: Map<String, String>
+        ) {
             internal companion object {
                 internal val List<Varsel>.unike get() = distinctBy { it.id }
                 internal fun List<Varsel>.finn(vedtaksperiodeId: UUID, varselkode: Varselkode) =
                     firstOrNull { it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } && it.varselkode == varselkode }
+
                 internal fun List<Varsel>.finn(vedtaksperiodeId: UUID) =
                     filter { it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } }
             }
@@ -66,17 +68,18 @@ internal class VarseloppsamlerTest {
 
         internal val List<JsonNode>.varsler get() = flatMap { it.varsler }.unike
 
-        private val JsonNode.varsler get() = path("aktiviteter")
-            .filter { aktivitet -> aktivitet.path("nivå").asText() == "VARSEL" }
-            .map { varsel ->
-                val id = UUID.fromString(varsel.path("id").asText())
-                val varselkode = Varselkode.valueOf(varsel.path("varselkode").asText())
-                val kontekster = varsel.path("kontekster")
-                    .map { it.path("kontekstmap") as ObjectNode }
-                    .flatMap { kontekstmap -> kontekstmap.properties().map { it.key to it.value.asText() } }
-                    .toMap()
-                Varsel(id, varselkode, kontekster)
-            }
+        private val JsonNode.varsler
+            get() = path("aktiviteter")
+                .filter { aktivitet -> aktivitet.path("nivå").asText() == "VARSEL" }
+                .map { varsel ->
+                    val id = UUID.fromString(varsel.path("id").asText())
+                    val varselkode = Varselkode.valueOf(varsel.path("varselkode").asText())
+                    val kontekster = varsel.path("kontekster")
+                        .map { it.path("kontekstmap") as ObjectNode }
+                        .flatMap { kontekstmap -> kontekstmap.properties().map { it.key to it.value.asText() } }
+                        .toMap()
+                    Varsel(id, varselkode, kontekster)
+                }
 
         @Language("JSON")
         private val aktivitetsloggNyAktivitetTemplate = """

@@ -6,6 +6,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import java.sql.SQLException
+import kotlin.time.DurationUnit
+import kotlin.time.measureTime
 import no.nav.helse.serde.DeserializationException
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
@@ -49,8 +51,6 @@ import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import kotlin.time.DurationUnit
-import kotlin.time.measureTime
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,

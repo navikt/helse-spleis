@@ -72,11 +72,13 @@ internal open class InntektsmeldingMessage(
                     inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO skal ha inntektsdato " },
                     forespurt = true
                 )
+
                 "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NavPortal(
                     vedtaksperiodeId = checkNotNull(vedtaksperiodeId) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha vedtaksperiodeId " },
                     inntektsdato = checkNotNull(inntektsdato) { "Inntektsmelding med avsender NAV_NO_SELVBESTEMT skal ha inntektsdato " },
                     forespurt = false
                 )
+
                 "AltinnPortal" -> Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag)
                 else -> Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             }

@@ -4,9 +4,7 @@ import com.github.navikt.tbd_libs.naisful.postgres.ConnectionConfigFactory
 import com.github.navikt.tbd_libs.naisful.postgres.defaultJdbcUrl
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.time.Duration
 import org.flywaydb.core.Flyway
-import org.flywaydb.core.api.MigrationVersion
 import org.slf4j.LoggerFactory
 
 // Understands how to create a data source from environment variables

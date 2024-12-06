@@ -49,34 +49,34 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved to arbeidsgivere og gap kun hos den ene`() {
-            val a1 = "ag1"
-            val a2 = "ag2"
-            nyeVedtakForJanuar(a1, a2)
-            forlengMedFebruar(a1)
+        val a1 = "ag1"
+        val a2 = "ag2"
+        nyeVedtakForJanuar(a1, a2)
+        forlengMedFebruar(a1)
 
-            sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), orgnummer = a2)
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
-                orgnummer = a2
-            )
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), orgnummer = a2)
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
+            orgnummer = a2
+        )
 
-            val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
-            Assertions.assertEquals(5, meldinger.size)
-            val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+        val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(5, meldinger.size)
+        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-            val faktiskResultat = trengerOpplysningerEvent.json(
-                "@event_name",
-                "organisasjonsnummer",
-                "skjæringstidspunkt",
-                "førsteFraværsdager",
-                "sykmeldingsperioder",
-                "egenmeldingsperioder",
-                "forespurteOpplysninger",
-                "fødselsnummer"
-            )
+        val faktiskResultat = trengerOpplysningerEvent.json(
+            "@event_name",
+            "organisasjonsnummer",
+            "skjæringstidspunkt",
+            "førsteFraværsdager",
+            "sykmeldingsperioder",
+            "egenmeldingsperioder",
+            "forespurteOpplysninger",
+            "fødselsnummer"
+        )
 
-            JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
-        }
+        JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
+    }
 
     @Test
     fun `sender med inntekt fra forrige skjæringstidspunkt`() {
@@ -485,9 +485,9 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
-                )
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
+            )
             )
         )
         sendYtelser(0, orgnummer = a1)

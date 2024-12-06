@@ -2,6 +2,11 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -12,11 +17,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -107,17 +107,17 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
                     (opplysning as ObjectNode).put("årMåned", måned.path("årMåned").asText())
                 }
             }
-            .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
-                ArbeidsgiverInntekt.MånedligInntekt(
-                    yearMonth = inntekt["årMåned"].asYearMonth(),
-                    inntekt = inntekt["beløp"].asDouble().månedlig,
-                    type = inntekt["inntektstype"].asInntekttype(),
-                    fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
-                    beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
-                )
-            }
-            .map { (arbeidsgiver, inntekter) ->
-                ArbeidsgiverInntekt(arbeidsgiver, inntekter)
-            }
+                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
+                    ArbeidsgiverInntekt.MånedligInntekt(
+                        yearMonth = inntekt["årMåned"].asYearMonth(),
+                        inntekt = inntekt["beløp"].asDouble().månedlig,
+                        type = inntekt["inntektstype"].asInntekttype(),
+                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
+                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
+                    )
+                }
+                .map { (arbeidsgiver, inntekter) ->
+                    ArbeidsgiverInntekt(arbeidsgiver, inntekter)
+                }
     }
 }

@@ -40,12 +40,14 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
                         val orgnummer = utbetaling["orgnummer"].asText()
                         PersonUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }
+
                     "5", "6" -> {
                         val grad = utbetaling["utbetalingsGrad"].asInt().prosent
                         val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
                         val orgnummer = utbetaling["orgnummer"].asText()
                         ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }
+
                     "9" -> Friperiode(fom, tom)
                     else -> null
                 }

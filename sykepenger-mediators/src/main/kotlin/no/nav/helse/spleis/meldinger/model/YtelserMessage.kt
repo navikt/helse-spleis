@@ -38,10 +38,10 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)?: emptyList()
+        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode) ?: emptyList()
     private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
         .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)
-         ?: emptyList()
+        ?: emptyList()
 
     private val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     private val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)

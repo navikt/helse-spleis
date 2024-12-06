@@ -136,8 +136,9 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun antallPersoner() = sessionOf(dataSource.ds).use {
         it.run(queryOf("SELECT COUNT(1) FROM person").map { it.long(1) }.asSingle) ?: 0
     }
+
     protected fun antallPersonalias(fnr: String? = null) = sessionOf(dataSource.ds).use {
-        it.run(queryOf("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: "" }").map { it.long(1) }.asSingle) ?: 0
+        it.run(queryOf("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: ""}").map { it.long(1) }.asSingle) ?: 0
     }
 
     protected fun sendNySøknad(
@@ -257,6 +258,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
         }
         return id.toUUID()
     }
+
     protected fun sendArbeidsledigsøknad(
         fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
@@ -529,9 +531,11 @@ internal abstract class AbstractEndToEndMediatorTest() {
                 TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
                     måned = YearMonth.from(skjæringstidspunktFraBehov.minusMonths(1)),
                     inntekter = listOf(
-                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
+                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
+                            32000.0,
                             ORGNUMMER
-                        )),
+                        )
+                    ),
                 )
             ),
             arbeidsforhold = (arbeidsforhold),
@@ -735,8 +739,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
         assertEquals(emptyList<Varsel>(), testRapid.inspektør.varsler())
     }
 
-    private class InntektsmeldingerReplayObserver(private val testRapid: TestRapid, private val dataSource: HikariDataSource)
-        : TestRapid.TestRapidObserver {
+    private class InntektsmeldingerReplayObserver(private val testRapid: TestRapid, private val dataSource: HikariDataSource) : TestRapid.TestRapidObserver {
         private companion object {
             private val log = LoggerFactory.getLogger(InntektsmeldingerReplayObserver::class.java)
             private val objectMapper = jacksonObjectMapper()

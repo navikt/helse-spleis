@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.meldinger.model
 
-import java.util.UUID
-import no.nav.helse.hendelser.AnmodningOmForkasting
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import java.util.UUID
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 

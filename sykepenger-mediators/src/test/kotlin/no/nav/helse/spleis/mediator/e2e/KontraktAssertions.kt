@@ -52,6 +52,7 @@ internal object KontraktAssertions {
             assertOgFjern(faktiskJson, it)
         }
     }
+
     private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() = assertOgFjernTemplates("<uuid>") { faktiskJson, key ->
         faktiskJson.assertOgFjernUUID(key)
     }
@@ -62,9 +63,9 @@ internal object KontraktAssertions {
 
     private fun ObjectNode.assertOgFjernUUID(key: String) = assertOgFjern(key) { UUID.fromString(it.asText()) }
     private fun ObjectNode.assertOgFjernLocalDateTime(key: String) = assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
-    internal fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
+    internal fun ObjectNode.assertOgFjern(key: String, validation: (value: JsonNode) -> Unit) {
         if (!key.contains(".")) {
-            assertDoesNotThrow({ validation(path(key))}, "$key er ikke på forventet format!")
+            assertDoesNotThrow({ validation(path(key)) }, "$key er ikke på forventet format!")
             remove(key)
             return
         }

@@ -2,8 +2,8 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.Periode
 import kotlin.properties.Delegates
+import no.nav.helse.hendelser.Periode
 
 internal abstract class SøknadBuilder {
     protected lateinit var sykmeldingSkrevet: LocalDateTime

@@ -16,6 +16,7 @@ internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
         )
         assertTilstander(0, "TIL_INFOTRYGD")
     }
+
     @Test
     fun `overgang til arbeidsledig`() {
         nyttVedtak(1.januar, 31.januar)

@@ -24,17 +24,21 @@ internal class OverstyrArbeidsgiveropplysningerMediatorTest : AbstractEndToEndMe
         sendUtbetaling()
         sendOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(Arbeidsgiveropplysning(
-                organisasjonsnummer = ORGNUMMER,
-                månedligInntekt = INNTEKT *1.25,
-                forklaring = "forklaring",
-                subsumsjon = null,
-                refusjonsopplysninger = listOf(Refusjonsopplysning(
-                    fom = 1.januar,
-                    tom = null,
-                    beløp = INNTEKT *1.25
-                ))
-            ))
+            arbeidsgiveropplysninger = listOf(
+                Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
+                    månedligInntekt = INNTEKT * 1.25,
+                    forklaring = "forklaring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Refusjonsopplysning(
+                            fom = 1.januar,
+                            tom = null,
+                            beløp = INNTEKT * 1.25
+                        )
+                    )
+                )
+            )
         )
         sendYtelser(0)
         assertTilstander(

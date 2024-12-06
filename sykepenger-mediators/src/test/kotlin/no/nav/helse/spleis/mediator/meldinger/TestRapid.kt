@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.util.UUID
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
 import org.junit.jupiter.api.fail
@@ -168,10 +168,12 @@ internal class TestRapid : RapidsConnection() {
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtilstander[utbetalingId]?.toList()
             } ?: emptyList()
+
         fun utbetalingtype(utbetalingIndeks: Int) =
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtyper[utbetalingId]
             } ?: fail { "Finner ikke utbetaling" }
+
         fun utbetalingId(utbetalingIndeks: Int) = utbetalinger.elementAt(utbetalingIndeks)
 
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
