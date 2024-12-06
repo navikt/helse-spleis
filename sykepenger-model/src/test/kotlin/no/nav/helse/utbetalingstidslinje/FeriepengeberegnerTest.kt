@@ -1,12 +1,16 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.*
+import java.time.Year
+import no.nav.helse.Alder
+import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.april
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.Year
-import no.nav.helse.Alder.Companion.alder
 
 internal class FeriepengeberegnerTest {
     private companion object {

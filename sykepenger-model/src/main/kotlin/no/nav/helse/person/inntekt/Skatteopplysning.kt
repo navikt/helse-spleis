@@ -25,6 +25,7 @@ data class Skatteopplysning(
         NÆRINGSINNTEKT,
         PENSJON_ELLER_TRYGD,
         YTELSE_FRA_OFFENTLIGE;
+
         fun somStreng() = when (this) {
             LØNNSINNTEKT -> "LØNNSINNTEKT"
             NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"

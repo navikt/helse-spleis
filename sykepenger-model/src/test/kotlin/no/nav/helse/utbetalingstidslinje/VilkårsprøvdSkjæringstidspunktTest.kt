@@ -31,25 +31,31 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             tilkommendeInntekter = emptyList()
         )
 
-        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
-            "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
-        )).also { result ->
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
+            mapOf(
+                "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
+            )
+        ).also { result ->
             assertEquals(1, result.size)
             assertEquals(24, result["a1"]?.size)
         }
 
-        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
-            "a1" to listOf(tidslinjeOf(16.AP, 15.NAV))
-        )).also { result ->
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
+            mapOf(
+                "a1" to listOf(tidslinjeOf(16.AP, 15.NAV))
+            )
+        ).also { result ->
             assertEquals(2, result.size)
             assertEquals(31, result["a1"]?.size)
             assertEquals(7, result["a2"]?.size)
             assertEquals(25.januar til 31.januar, result["a2"]?.periode())
         }
 
-        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
-            "a2" to listOf(tidslinjeOf(31.UTELATE, 28.NAV))
-        )).also { result ->
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
+            mapOf(
+                "a2" to listOf(tidslinjeOf(31.UTELATE, 28.NAV))
+            )
+        ).also { result ->
             assertEquals(2, result.size)
             assertEquals(28, result["a1"]?.size)
             assertEquals(1.februar til 28.februar, result["a1"]?.periode())
@@ -71,9 +77,11 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             )
         )
 
-        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(mapOf(
-            "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
-        )).also { result ->
+        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
+            mapOf(
+                "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
+            )
+        ).also { result ->
             assertEquals(2, result.size)
             assertEquals(24, result["a1"]?.size)
             assertEquals(24, result["a2"]?.size)

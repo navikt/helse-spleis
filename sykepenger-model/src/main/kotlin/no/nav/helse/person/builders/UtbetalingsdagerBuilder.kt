@@ -18,6 +18,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
             is Utbetalingsdag.Arbeidsdag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag)
             is Utbetalingsdag.ArbeidsgiverperiodeDag,
             is Utbetalingsdag.ArbeidsgiverperiodedagNav -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag)
+
             is Utbetalingsdag.NavDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavDag)
             is Utbetalingsdag.NavHelgDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag)
             is Utbetalingsdag.Fridag -> {
@@ -39,22 +40,24 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                 }
                 PersonObserver.Utbetalingsdag(dag.dato, dagtype, begrunnelse)
             }
+
             is Utbetalingsdag.AvvistDag -> {
                 PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.AvvistDag, dag.begrunnelser.map {
                     PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
                 })
             }
+
             is Utbetalingsdag.ForeldetDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag)
             is Utbetalingsdag.UkjentDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.UkjentDag)
         }
     }
 
-    internal fun result() : List<PersonObserver.Utbetalingsdag> {
+    internal fun result(): List<PersonObserver.Utbetalingsdag> {
         return utbetalingsdager
     }
 
     private fun eksternBegrunnelse(dag: Dag): PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO? {
-        return when(dag) {
+        return when (dag) {
             is Dag.AndreYtelser -> dag.tilEksternBegrunnelse()
             else -> null
         }

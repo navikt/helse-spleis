@@ -8,13 +8,10 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -40,6 +37,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     internal fun assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {
         assertTrue(inspektør.hendelseIder(vedtaksperiodeId).containsAll(hendelseIder.toSet()))
     }
+
     internal fun assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {
         assertEquals(emptySet<UUID>(), inspektør.hendelseIder(vedtaksperiodeId).intersect(hendelseIder.toSet()))
     }
@@ -98,6 +96,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         val warnings = collectVarsler(*filtre)
         assertFalse(warnings.contains(warning), "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
+
     internal fun assertIngenVarsel(warning: Varselkode, vararg filtre: AktivitetsloggFilter) {
         val varselkoder = collectVarselkoder(*filtre)
         assertTrue(warning !in varselkoder, "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
@@ -107,23 +106,27 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
+
     internal fun assertIngenBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
-        assertTrue(personInspektør.aktivitetslogg.etterspurteBehov(vedtaksperiode).none { it.type == behovtype } )
-    }
-    internal fun assertBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
-        assertTrue(personInspektør.aktivitetslogg.etterspurteBehov(vedtaksperiode).any { it.type == behovtype } )
+        assertTrue(personInspektør.aktivitetslogg.etterspurteBehov(vedtaksperiode).none { it.type == behovtype })
     }
 
-    private fun funksjonelleFeilFørOgEtter(block: () -> Unit): Pair<Map<String,Int>, Map<String, Int>>{
+    internal fun assertBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
+        assertTrue(personInspektør.aktivitetslogg.etterspurteBehov(vedtaksperiode).any { it.type == behovtype })
+    }
+
+    private fun funksjonelleFeilFørOgEtter(block: () -> Unit): Pair<Map<String, Int>, Map<String, Int>> {
         val funksjonelleFeilFør = collectFunksjonelleFeil().groupBy { it }.mapValues { it.value.size }
         block()
         val funksjonelleFeilEtter = collectFunksjonelleFeil().groupBy { it }.mapValues { it.value.size }
         return funksjonelleFeilFør to funksjonelleFeilEtter
     }
+
     internal fun ingenNyeFunksjonelleFeil(block: () -> Unit) {
         val (før, etter) = funksjonelleFeilFørOgEtter(block)
         assertEquals(før, etter) { "Det er tilkommet nye funksjonelle feil, eller fler tilfeller av funksjonelle feil!" }
     }
+
     internal fun nyeFunksjonelleFeil(block: () -> Unit): Boolean {
         val (før, etter) = funksjonelleFeilFørOgEtter(block)
         return før != etter

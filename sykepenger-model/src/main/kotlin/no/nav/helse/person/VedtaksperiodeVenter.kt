@@ -15,7 +15,8 @@ internal class VedtaksperiodeVenter private constructor(
     private val venterTil: LocalDateTime,
     private val venterPå: VenterPå,
     private val organisasjonsnummer: String,
-    private val hendelseIder: Set<UUID>) {
+    private val hendelseIder: Set<UUID>
+) {
 
     internal fun event() =
         PersonObserver.VedtaksperiodeVenterEvent(
@@ -27,7 +28,7 @@ internal class VedtaksperiodeVenter private constructor(
             venterTil = venterTil,
             venterPå = venterPå.event(),
             hendelser = hendelseIder
-    )
+        )
 
     fun dto() = VedtaksperiodeVenterDto(
         ventetSiden = ventetSiden,
@@ -41,7 +42,7 @@ internal class VedtaksperiodeVenter private constructor(
         private lateinit var skjæringstidspunkt: LocalDate
         private lateinit var ventetSiden: LocalDateTime
         private lateinit var venterTil: LocalDateTime
-        private lateinit var orgnanisasjonsnummer : String
+        private lateinit var orgnanisasjonsnummer: String
         private lateinit var venterPå: VenterPå
         private val hendelseIder = mutableSetOf<UUID>()
 
@@ -81,12 +82,14 @@ internal class VenterPå(
         organisasjonsnummer = organisasjonsnummer,
         venteårsak = venteårsak.dto()
     )
+
     internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
         vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkt,
         organisasjonsnummer = organisasjonsnummer,
         venteårsak = venteårsak.event()
     )
+
     override fun toString() =
         "vedtaksperiode $vedtaksperiodeId med skjæringstidspunkt $skjæringstidspunkt for arbeidsgiver $organisasjonsnummer som venter på $venteårsak"
 }
@@ -94,15 +97,17 @@ internal class VenterPå(
 internal class Venteårsak private constructor(
     private val hva: Hva,
     private val hvorfor: Hvorfor?,
-){
+) {
     fun dto() = VenteårsakDto(hva.name, hvorfor?.name)
 
     internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
         hva = hva.name,
         hvorfor = hvorfor?.name
     )
+
     override fun toString() =
-        hva.name + if(hvorfor == null) "" else " fordi ${hvorfor.name}"
+        hva.name + if (hvorfor == null) "" else " fordi ${hvorfor.name}"
+
     enum class Hva {
         GODKJENNING,
         SØKNAD,

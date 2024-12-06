@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 
 data class Maksdatoresultat(

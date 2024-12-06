@@ -88,7 +88,8 @@ class AndreYtelserOppdatereHistorikkTest {
         val foreldrepenger = Foreldrepenger(
             listOf(
                 GradertPeriode(1.januar til 10.januar, 100),
-                GradertPeriode(20.januar til 31.januar, 100))
+                GradertPeriode(20.januar til 31.januar, 100)
+            )
         )
         assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
@@ -99,7 +100,8 @@ class AndreYtelserOppdatereHistorikkTest {
         val foreldrepenger = Foreldrepenger(
             listOf(
                 GradertPeriode(5.januar til 10.januar, 100),
-                GradertPeriode(11.januar til 31.januar, 100))
+                GradertPeriode(11.januar til 31.januar, 100)
+            )
         )
         assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
@@ -110,7 +112,8 @@ class AndreYtelserOppdatereHistorikkTest {
         val foreldrepenger = Foreldrepenger(
             listOf(
                 GradertPeriode(1.januar til 10.januar, 100),
-                GradertPeriode(11.januar til 31.januar, 100))
+                GradertPeriode(11.januar til 31.januar, 100)
+            )
         )
         assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }

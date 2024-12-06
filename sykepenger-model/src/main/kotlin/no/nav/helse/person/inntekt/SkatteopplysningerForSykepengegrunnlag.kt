@@ -1,10 +1,10 @@
 package no.nav.helse.person.inntekt
 
-import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
-import no.nav.helse.yearMonth
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
+import no.nav.helse.yearMonth
 
 // § 8-28-inntekter fra skatteetaten
 internal data class SkatteopplysningerForSykepengegrunnlag(
@@ -18,14 +18,15 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     val utgangspunkt = skjæringstidspunkt.yearMonth
 
     // inntekter tre måneder før skjæringstidspunktet brukes for å regne om til årsinntekt
-    val beregningsperiode = utgangspunkt.minusMonths(3) .. utgangspunkt.minusMonths(1)
+    val beregningsperiode = utgangspunkt.minusMonths(3)..utgangspunkt.minusMonths(1)
     val treMånederFørSkjæringstidspunkt = inntektsopplysninger.filter { it.måned in beregningsperiode }
     val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(treMånederFørSkjæringstidspunkt)
 
     val ansattVedSkjæringstidspunkt = ansattVedSkjæringstidspunkt(skjæringstidspunkt)
     val nyoppstartetArbeidsforhold = nyoppstartetArbeidsforhold(skjæringstidspunkt)
+
     // må ha inntekter innenfor to måneder før skjæringstidspunktet for at vi skal hensynta skatteinntektene
-    val inntektvurderingsperiode = utgangspunkt.minusMonths(MAKS_INNTEKT_GAP.toLong()) .. utgangspunkt.minusMonths(1)
+    val inntektvurderingsperiode = utgangspunkt.minusMonths(MAKS_INNTEKT_GAP.toLong())..utgangspunkt.minusMonths(1)
     val harInntekterToMånederFørSkjæringstidspunkt = inntektsopplysninger.any { it.måned in inntektvurderingsperiode }
 
     fun avklarSomSykepengegrunnlag(skjæringstidspunkt: LocalDate): SkatteopplysningSykepengegrunnlag? {
@@ -40,6 +41,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
                 dato = this.skjæringstidspunkt,
                 tidsstempel = this.tidsstempel
             )
+
             harInntekterToMånederFørSkjæringstidspunkt -> SkattSykepengegrunnlag(
                 hendelseId = this.hendelseId,
                 dato = this.skjæringstidspunkt,
@@ -47,6 +49,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
                 ansattPerioder = emptyList(),
                 tidsstempel = this.tidsstempel
             )
+
             else -> null
         }
     }
@@ -64,6 +67,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
         fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
         fun harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
             ansattFom >= skjæringstidspunkt.withDayOfMonth(1).minusMonths(antallMåneder.toLong())
+
         companion object {
             fun List<AnsattPeriode>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
                 harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()

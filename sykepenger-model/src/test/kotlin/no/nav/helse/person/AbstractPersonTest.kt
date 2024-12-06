@@ -60,6 +60,7 @@ internal abstract class AbstractPersonTest {
                 Aktivitetslogg()
             )
         }
+
         private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
@@ -92,23 +93,26 @@ internal abstract class AbstractPersonTest {
         createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO)
     }
 
-    private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object: ArbeidsgiverRegler {
+    private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
         override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
         override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
         override fun dekningsgrad() = 1.0
         override fun maksSykepengedager() = maksSykedager
         override fun maksSykepengedagerOver67() = maksSykedager
     }
+
     protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
         Person(personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
     }
+
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, dødsdato: LocalDate? = null) = createTestPerson { jurist ->
         Person(personidentifikator, Alder(fødseldato, dødsdato), jurist)
     }
+
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }
 
-    protected fun createTestPerson(block: (jurist: Subsumsjonslogg) -> Person) : Person {
+    protected fun createTestPerson(block: (jurist: Subsumsjonslogg) -> Person): Person {
         jurist = SubsumsjonsListLog()
         person = block(jurist)
         observatør = TestObservatør(person)

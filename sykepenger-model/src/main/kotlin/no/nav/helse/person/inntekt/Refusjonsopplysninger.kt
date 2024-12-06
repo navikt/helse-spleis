@@ -28,7 +28,7 @@ data class Refusjonsopplysning(
     val tidsstempel: LocalDateTime
 ) {
     init {
-        check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) "}
+        check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) " }
     }
 
     val periode = fom til (tom ?: LocalDate.MAX)
@@ -106,7 +106,8 @@ data class Refusjonsopplysning(
         val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
 
         internal val erTom = validerteRefusjonsopplysninger.isEmpty()
-        constructor(): this(emptyList())
+
+        constructor() : this(emptyList())
 
         init {
             check(!validerteRefusjonsopplysninger.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon: $refusjonsopplysninger" }
@@ -160,7 +161,7 @@ data class Refusjonsopplysning(
 
         private fun hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden: LocalDate?) = when (sisteOppholdsdagFørPerioden) {
             null -> this
-            else -> Refusjonsopplysninger(validerteRefusjonsopplysninger.mapNotNull { it.begrensTil(sisteOppholdsdagFørPerioden )})
+            else -> Refusjonsopplysninger(validerteRefusjonsopplysninger.mapNotNull { it.begrensTil(sisteOppholdsdagFørPerioden) })
         }
 
         private fun harNødvendigRefusjonsopplysninger(
@@ -186,6 +187,7 @@ data class Refusjonsopplysning(
             aktivitetslogg: IAktivitetslogg,
             organisasjonsnummer: String
         ) = hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, aktivitetslogg, organisasjonsnummer)
+
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
 
         private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
@@ -199,9 +201,11 @@ data class Refusjonsopplysning(
                 other.validerteRefusjonsopplysninger.none { it.meldingsreferanseId == opplysning.meldingsreferanseId }
             }
             // fjerner de hvor perioden og beløpet dekkes av forrige
-            val nyeUlik = nye.filterNot { opplysning -> other.validerteRefusjonsopplysninger.any {
-                opplysning.periode in it.periode && opplysning.beløp == it.beløp
-            } }
+            val nyeUlik = nye.filterNot { opplysning ->
+                other.validerteRefusjonsopplysninger.any {
+                    opplysning.periode in it.periode && opplysning.beløp == it.beløp
+                }
+            }
             // første nye ulike opplysning eller bare første nye opplysning
             return nyeUlik.firstOrNull()?.fom ?: nye.firstOrNull()?.fom
         }

@@ -76,7 +76,7 @@ internal class Sykdomshistorikk private constructor(
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
         companion object {
-            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg) : Sykdomstidslinje? {
+            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje? {
                 if (hendelse.sykdomstidslinje().periode() == null) return null // tom sykdomstidslinje
                 val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
                 val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
@@ -85,7 +85,7 @@ internal class Sykdomshistorikk private constructor(
                 val uhåndtertSykdomstidslinje = hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
                 if (uhåndtertSykdomstidslinje.periode() == null) return null // Tom sykdomstidslinje, ikke noe nytt
                 return uhåndtertSykdomstidslinje.also {
-                    aktivitetslogg.info("Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken")
+                    aktivitetslogg.info("Legger til bit nummer ${tidligere.size + 1} for ${it.periode()} i sykdomshistorikken")
                 }
             }
 
@@ -139,6 +139,7 @@ internal class Sykdomshistorikk private constructor(
     internal fun dto() = SykdomshistorikkDto(
         elementer = elementer.map { it.dto() }
     )
+
     internal companion object {
 
         internal fun gjenopprett(dto: SykdomshistorikkDto): Sykdomshistorikk {

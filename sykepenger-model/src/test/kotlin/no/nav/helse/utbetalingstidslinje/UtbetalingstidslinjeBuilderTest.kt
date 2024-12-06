@@ -56,14 +56,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(15, inspektør.size)
         assertEquals(15, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 15.januar,
-            arbeidsgiverperiode = listOf(1.januar til 15.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 15.januar,
+                arbeidsgiverperiode = listOf(1.januar til 15.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -73,14 +75,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(4, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, inspektør.arbeidsgiverperiodedagNavTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 15.januar,
-            arbeidsgiverperiode = listOf(1.januar til 15.januar),
-            utbetalingsperioder = listOf(1.januar til 5.januar, 8.januar til 12.januar, 15.januar.somPeriode()),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 15.januar,
+                arbeidsgiverperiode = listOf(1.januar til 15.januar),
+                utbetalingsperioder = listOf(1.januar til 5.januar, 8.januar til 12.januar, 15.januar.somPeriode()),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
         assertTrue(perioder.first().somArbeidsgiverperiode().forventerInntekt(1.januar til 15.januar))
     }
 
@@ -92,14 +96,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 31.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(17.januar til 31.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 31.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(17.januar til 31.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -111,14 +117,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 31.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(1.januar til 5.januar, 8.januar til 12.januar, 15.januar til 31.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 31.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(1.januar til 5.januar, 8.januar til 12.januar, 15.januar til 31.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
         utbetalingstidslinje[1.januar].økonomi.inspektør.also {
             assertEquals(31000.månedlig, it.aktuellDagsinntekt)
         }
@@ -132,14 +140,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 15.januar,
-            arbeidsgiverperiode = emptyList(),
-            utbetalingsperioder = listOf(1.januar til 15.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 15.januar,
+                arbeidsgiverperiode = emptyList(),
+                utbetalingsperioder = listOf(1.januar til 15.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
         assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
@@ -152,14 +162,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(4, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 15.januar,
-            arbeidsgiverperiode = listOf(1.januar til 9.januar),
-            utbetalingsperioder = listOf(10.januar til 15.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 15.januar,
+                arbeidsgiverperiode = listOf(1.januar til 9.januar),
+                utbetalingsperioder = listOf(10.januar til 15.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -171,14 +183,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 15.januar,
-            arbeidsgiverperiode = emptyList(),
-            utbetalingsperioder = listOf(1.januar til 15.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 15.januar,
+                arbeidsgiverperiode = emptyList(),
+                utbetalingsperioder = listOf(1.januar til 15.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
         assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
@@ -192,22 +206,26 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(1, inspektør.navHelgDagTeller)
         assertEquals(16, inspektør.arbeidsdagTeller)
         assertEquals(2, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 17.januar,
-            arbeidsgiverperiode = emptyList(),
-            utbetalingsperioder = listOf(1.januar.somPeriode()),
-            oppholdsperioder = listOf(2.januar til 17.januar),
-            fullstendig = false,
-            sisteDag = 17.januar
-        ), perioder.first())
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 18.januar til 3.februar,
-            arbeidsgiverperiode = listOf(18.januar til 2.februar),
-            utbetalingsperioder = listOf(3.februar.somPeriode()),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.last())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 17.januar,
+                arbeidsgiverperiode = emptyList(),
+                utbetalingsperioder = listOf(1.januar.somPeriode()),
+                oppholdsperioder = listOf(2.januar til 17.januar),
+                fullstendig = false,
+                sisteDag = 17.januar
+            ), perioder.first()
+        )
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 18.januar til 3.februar,
+                arbeidsgiverperiode = listOf(18.januar til 2.februar),
+                utbetalingsperioder = listOf(3.februar.somPeriode()),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.last()
+        )
         assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
@@ -221,14 +239,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(5, inspektør.navHelgDagTeller)
         assertEquals(15, inspektør.arbeidsdagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 3.februar,
-            arbeidsgiverperiode = emptyList(),
-            utbetalingsperioder = listOf(1.januar.somPeriode(), 17.januar til 3.februar),
-            oppholdsperioder = listOf(2.januar til 16.januar),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 3.februar,
+                arbeidsgiverperiode = emptyList(),
+                utbetalingsperioder = listOf(1.januar.somPeriode(), 17.januar til 3.februar),
+                oppholdsperioder = listOf(2.januar til 16.januar),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
         assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
@@ -240,14 +260,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(9, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, inspektør.navDagTeller)
         assertEquals(6, inspektør.navHelgDagTeller)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 1.februar,
-            arbeidsgiverperiode = listOf(1.januar til 9.januar),
-            utbetalingsperioder = listOf(11.januar til 1.februar),
-            oppholdsperioder = listOf(10.januar.somPeriode()),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 1.februar,
+                arbeidsgiverperiode = listOf(1.januar til 9.januar),
+                utbetalingsperioder = listOf(11.januar til 1.februar),
+                oppholdsperioder = listOf(10.januar.somPeriode()),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -300,14 +322,16 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `ferie etter arbeid etter fullført agp`() {
         undersøke(31.S + 4.A + 24.F)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 16.februar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(17.januar til 31.januar),
-            oppholdsperioder = listOf(1.februar til 16.februar),
-            fullstendig = true,
-            sisteDag = 16.februar
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 16.februar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(17.januar til 31.januar),
+                oppholdsperioder = listOf(1.februar til 16.februar),
+                fullstendig = true,
+                sisteDag = 16.februar
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -317,14 +341,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(2, inspektør.navDagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 18.januar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 18.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 18.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(17.januar til 18.januar),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -336,14 +362,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(4, inspektør.navDagTeller)
             assertEquals(2, inspektør.navHelgDagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 22.januar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 22.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 22.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(17.januar til 22.januar),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -357,14 +385,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(1, inspektør.fridagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 22.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(18.januar til 22.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 22.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(18.januar til 22.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -374,14 +404,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 31.januar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 31.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -392,14 +424,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.avvistDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 31.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 31.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -409,14 +443,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, inspektør.avvistDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 11.februar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(2.februar til 11.februar),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 11.februar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(2.februar til 11.februar),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -429,14 +465,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(15, inspektør.avvistDagTeller)
         assertEquals(1, inspektør.arbeidsdagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 11.februar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(2.februar til 11.februar),
-            oppholdsperioder = listOf(1.februar.somPeriode()),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 11.februar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(2.februar til 11.februar),
+                oppholdsperioder = listOf(1.februar.somPeriode()),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -449,14 +487,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, inspektør.arbeidsdagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 11.februar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(2.februar til 11.februar),
-                oppholdsperioder = listOf(1.februar.somPeriode()),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 11.februar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(2.februar til 11.februar),
+                    oppholdsperioder = listOf(1.februar.somPeriode()),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -470,14 +510,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, inspektør.arbeidsdagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 11.februar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar.somPeriode(), 3.februar til 11.februar),
-                oppholdsperioder = listOf(2.februar.somPeriode()),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 11.februar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(17.januar.somPeriode(), 3.februar til 11.februar),
+                    oppholdsperioder = listOf(2.februar.somPeriode()),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -489,14 +531,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(3, inspektør.navDagTeller)
             assertEquals(2, inspektør.navHelgDagTeller)
             assertEquals(10, inspektør.fridagTeller)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 31.januar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(27.januar til 31.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 31.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(27.januar til 31.januar),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -508,22 +552,26 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, inspektør.arbeidsdagTeller)
             assertEquals(2, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 17.januar,
-                arbeidsgiverperiode = listOf(1.januar.somPeriode()),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(2.januar til 17.januar),
-                fullstendig = false,
-                sisteDag = 17.januar
-            ), perioder.first())
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 18.januar til 2.februar,
-                arbeidsgiverperiode = listOf(18.januar til 2.februar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.last())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 17.januar,
+                    arbeidsgiverperiode = listOf(1.januar.somPeriode()),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = listOf(2.januar til 17.januar),
+                    fullstendig = false,
+                    sisteDag = 17.januar
+                ), perioder.first()
+            )
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 18.januar til 2.februar,
+                    arbeidsgiverperiode = listOf(18.januar til 2.februar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.last()
+            )
         }
     }
 
@@ -537,14 +585,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(12, inspektør.navDagTeller)
             assertEquals(4, inspektør.navHelgDagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 2.februar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(18.januar til 2.februar),
-                oppholdsperioder = listOf(17.januar.somPeriode()),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 2.februar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(18.januar til 2.februar),
+                    oppholdsperioder = listOf(17.januar.somPeriode()),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -556,22 +606,26 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, inspektør.arbeidsdagTeller)
             assertEquals(2, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 17.januar,
-                arbeidsgiverperiode = listOf(1.januar.somPeriode()),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(2.januar til 17.januar),
-                fullstendig = false,
-                sisteDag = 17.januar
-            ), perioder.first())
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 18.januar til 2.februar,
-                arbeidsgiverperiode = listOf(18.januar til 2.februar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.last())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 17.januar,
+                    arbeidsgiverperiode = listOf(1.januar.somPeriode()),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = listOf(2.januar til 17.januar),
+                    fullstendig = false,
+                    sisteDag = 17.januar
+                ), perioder.first()
+            )
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 18.januar til 2.februar,
+                    arbeidsgiverperiode = listOf(18.januar til 2.februar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.last()
+            )
         }
     }
 
@@ -583,22 +637,26 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, inspektør.arbeidsdagTeller)
             assertEquals(2, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 22.januar,
-                arbeidsgiverperiode = listOf(1.januar til 6.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(7.januar til 22.januar),
-                fullstendig = false,
-                sisteDag = 22.januar
-            ), perioder.first())
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 23.januar til 7.februar,
-                arbeidsgiverperiode = listOf(23.januar til 7.februar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.last())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 22.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 6.januar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = listOf(7.januar til 22.januar),
+                    fullstendig = false,
+                    sisteDag = 22.januar
+                ), perioder.first()
+            )
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 23.januar til 7.februar,
+                    arbeidsgiverperiode = listOf(23.januar til 7.februar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.last()
+            )
         }
     }
 
@@ -610,22 +668,26 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, inspektør.arbeidsdagTeller)
             assertEquals(2, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 21.januar,
-                arbeidsgiverperiode = listOf(1.januar til 5.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(6.januar til 21.januar),
-                fullstendig = false,
-                sisteDag = 21.januar
-            ), perioder.first())
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 22.januar til 6.februar,
-                arbeidsgiverperiode = listOf(22.januar til 6.februar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.last())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 21.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 5.januar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = listOf(6.januar til 21.januar),
+                    fullstendig = false,
+                    sisteDag = 21.januar
+                ), perioder.first()
+            )
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 22.januar til 6.februar,
+                    arbeidsgiverperiode = listOf(22.januar til 6.februar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.last()
+            )
         }
     }
 
@@ -639,14 +701,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(12, inspektør.navDagTeller)
             assertEquals(4, inspektør.navHelgDagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 6.februar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(22.januar til 6.februar),
-                oppholdsperioder = listOf(21.januar.somPeriode()),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 6.februar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(22.januar til 6.februar),
+                    oppholdsperioder = listOf(21.januar.somPeriode()),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -657,14 +721,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(15, inspektør.fridagTeller)
             assertEquals(1, perioder.size)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 16.januar til 31.januar,
-                arbeidsgiverperiode = listOf(16.januar til 31.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 16.januar til 31.januar,
+                    arbeidsgiverperiode = listOf(16.januar til 31.januar),
+                    utbetalingsperioder = emptyList(),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -701,14 +767,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(4, inspektør.fridagTeller)
         assertEquals(1, inspektør.navDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 29.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(29.januar.somPeriode()),
-            oppholdsperioder = listOf(17.januar til 28.januar),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 29.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(29.januar.somPeriode()),
+                oppholdsperioder = listOf(17.januar til 28.januar),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -725,14 +793,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 16.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 16.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -742,14 +812,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(3, inspektør.foreldetDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 19.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = listOf(17.januar til 19.januar),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 19.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = listOf(17.januar til 19.januar),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -759,14 +831,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(8, inspektør.navDagTeller)
             assertEquals(2, inspektør.navHelgDagTeller)
-            assertEquals(Arbeidsgiverperioderesultat(
-                omsluttendePeriode = 1.januar til 26.januar,
-                arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 26.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
-                sisteDag = null
-            ), perioder.single())
+            assertEquals(
+                Arbeidsgiverperioderesultat(
+                    omsluttendePeriode = 1.januar til 26.januar,
+                    arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                    utbetalingsperioder = listOf(17.januar til 26.januar),
+                    oppholdsperioder = emptyList(),
+                    fullstendig = true,
+                    sisteDag = null
+                ), perioder.single()
+            )
         }
     }
 
@@ -777,14 +851,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(14, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(2, inspektør.arbeidsdagTeller)
         assertEquals(2, inspektør.fridagTeller)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 18.januar,
-            arbeidsgiverperiode = listOf(1.januar til 12.januar, 17.januar til 18.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = listOf(13.januar til 16.januar),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 18.januar,
+                arbeidsgiverperiode = listOf(1.januar til 12.januar, 17.januar til 18.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = listOf(13.januar til 16.januar),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -793,14 +869,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(17, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, inspektør.avvistDagTeller)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 17.januar,
-            arbeidsgiverperiode = listOf(1.januar til 16.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 17.januar,
+                arbeidsgiverperiode = listOf(1.januar til 16.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -811,14 +889,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(0, inspektør.avvistDagTeller)
         assertEquals(1, inspektør.navHelgDagTeller)
         assertEquals(3, inspektør.arbeidsdagTeller)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 4.januar til 20.januar,
-            arbeidsgiverperiode = listOf(4.januar til 19.januar),
-            utbetalingsperioder = listOf(20.januar.somPeriode()),
-            oppholdsperioder = emptyList(),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 4.januar til 20.januar,
+                arbeidsgiverperiode = listOf(4.januar til 19.januar),
+                utbetalingsperioder = listOf(20.januar.somPeriode()),
+                oppholdsperioder = emptyList(),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -828,14 +908,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(14, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(2, inspektør.arbeidsdagTeller)
         assertEquals(2, inspektør.fridagTeller)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 18.januar,
-            arbeidsgiverperiode = listOf(1.januar til 12.januar, 17.januar til 18.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = listOf(13.januar til 16.januar),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 18.januar,
+                arbeidsgiverperiode = listOf(1.januar til 12.januar, 17.januar til 18.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = listOf(13.januar til 16.januar),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -847,14 +929,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(15, inspektør.arbeidsdagTeller)
         assertEquals(0, inspektør.fridagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 1.februar,
-            arbeidsgiverperiode = listOf(1.januar til 10.januar, 26.januar til 31.januar),
-            utbetalingsperioder = listOf(1.februar.somPeriode()),
-            oppholdsperioder = listOf(11.januar til 25.januar),
-            fullstendig = true,
-            sisteDag = null
-        ), perioder.single())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 1.februar,
+                arbeidsgiverperiode = listOf(1.januar til 10.januar, 26.januar til 31.januar),
+                utbetalingsperioder = listOf(1.februar.somPeriode()),
+                oppholdsperioder = listOf(11.januar til 25.januar),
+                fullstendig = true,
+                sisteDag = null
+            ), perioder.single()
+        )
     }
 
     @Test
@@ -866,22 +950,26 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsdagTeller)
         assertEquals(0, inspektør.fridagTeller)
         assertEquals(2, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 26.januar,
-            arbeidsgiverperiode = listOf(1.januar til 10.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = listOf(11.januar til 26.januar),
-            fullstendig = false,
-            sisteDag = 26.januar
-        ), perioder.first())
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 27.januar til 2.februar,
-            arbeidsgiverperiode = listOf(27.januar til 2.februar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.last())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 26.januar,
+                arbeidsgiverperiode = listOf(1.januar til 10.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = listOf(11.januar til 26.januar),
+                fullstendig = false,
+                sisteDag = 26.januar
+            ), perioder.first()
+        )
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 27.januar til 2.februar,
+                arbeidsgiverperiode = listOf(27.januar til 2.februar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.last()
+        )
     }
 
     @Test
@@ -893,22 +981,26 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(31, inspektør.arbeidsdagTeller)
         assertEquals(0, inspektør.fridagTeller)
         assertEquals(2, perioder.size)
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 1.januar til 26.januar,
-            arbeidsgiverperiode = listOf(1.januar til 10.januar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = listOf(11.januar til 26.januar),
-            fullstendig = false,
-            sisteDag = 26.januar
-        ), perioder.first())
-        assertEquals(Arbeidsgiverperioderesultat(
-            omsluttendePeriode = 11.februar til 17.februar,
-            arbeidsgiverperiode = listOf(11.februar til 17.februar),
-            utbetalingsperioder = emptyList(),
-            oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
-        ), perioder.last())
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 26.januar,
+                arbeidsgiverperiode = listOf(1.januar til 10.januar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = listOf(11.januar til 26.januar),
+                fullstendig = false,
+                sisteDag = 26.januar
+            ), perioder.first()
+        )
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 11.februar til 17.februar,
+                arbeidsgiverperiode = listOf(11.februar til 17.februar),
+                utbetalingsperioder = emptyList(),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.last()
+        )
     }
 
     @Test

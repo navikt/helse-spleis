@@ -68,13 +68,15 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
                 forlengelseperiode.start,
                 forlengelseperiode.endInclusive,
                 100.prosent
-            ), orgnummer = a1)
+            ), orgnummer = a1
+        )
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(
                 forlengelseperiode.start,
                 forlengelseperiode.endInclusive,
                 100.prosent
-            ), orgnummer = a2)
+            ), orgnummer = a2
+        )
 
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)

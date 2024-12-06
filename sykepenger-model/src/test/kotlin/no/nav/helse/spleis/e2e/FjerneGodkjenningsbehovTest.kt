@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
+internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
 
     @Test
     fun `mottak av vedtak fattet fungerer på samme måte som godkjenningsbehov med tommel opp`() {

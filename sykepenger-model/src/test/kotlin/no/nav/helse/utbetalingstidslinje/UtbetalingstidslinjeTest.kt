@@ -80,11 +80,15 @@ internal class UtbetalingstidslinjeTest {
     @Test
     fun `samlet periode`() {
         assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))
-        assertEquals(1.desember(2017) til 7.mars, Utbetalingstidslinje.periode(listOf(
-            tidslinjeOf(7.NAV),
-            tidslinjeOf(7.NAV, startDato = 1.mars),
-            tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
-        )))
+        assertEquals(
+            1.desember(2017) til 7.mars, Utbetalingstidslinje.periode(
+            listOf(
+                tidslinjeOf(7.NAV),
+                tidslinjeOf(7.NAV, startDato = 1.mars),
+                tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
+            )
+        )
+        )
     }
 
     @Test
@@ -114,6 +118,7 @@ internal class UtbetalingstidslinjeTest {
             }
         }
     }
+
     @Test
     fun `total sykdomsgrad med ukjent dag`() {
         val ag1 = tidslinjeOf(1.NAV(dekningsgrunnlag = 1000, grad = 50))

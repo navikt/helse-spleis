@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.ReflectiveInvocationContext
 @ExtendWith(EnableFeriepengerInterceptor::class)
 internal annotation class EnableFeriepenger
 
-private class EnableFeriepengerInterceptor: InvocationInterceptor {
+private class EnableFeriepengerInterceptor : InvocationInterceptor {
     override fun interceptTestMethod(
         invocation: InvocationInterceptor.Invocation<Void>,
         invocationContext: ReflectiveInvocationContext<Method>,

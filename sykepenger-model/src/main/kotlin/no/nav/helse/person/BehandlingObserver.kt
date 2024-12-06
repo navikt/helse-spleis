@@ -16,11 +16,13 @@ internal interface BehandlingObserver {
         periode: Periode,
         dokumentsporing: Set<UUID>
     )
+
     fun vedtakIverksatt(
         aktivitetslogg: IAktivitetslogg,
         vedtakFattetTidspunkt: LocalDateTime,
         behandling: Behandlinger.Behandling
     )
+
     fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
     fun behandlingLukket(behandlingId: UUID)
     fun behandlingForkastet(behandlingId: UUID, hendelse: Hendelse)

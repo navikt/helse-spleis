@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 
 internal class MinimumInntektE2E : AbstractDslTest() {
     private companion object {
-        private val fødseldato67år =  31.januar(1951)
+        private val fødseldato67år = 31.januar(1951)
     }
 
     @Test
@@ -32,7 +32,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
@@ -60,7 +61,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(22.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(22.januar til 6.februar), inntekt)
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
@@ -89,7 +91,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(februar, a1)
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
@@ -117,7 +120,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(15.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(15.januar til 30.januar), inntekt)
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))

@@ -84,6 +84,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertIngenFunksjonelleFeil()
         val behov = person.personLogg.sisteBehov(Behovtype.Utbetaling)
+
         @Suppress("UNCHECKED_CAST")
         val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
         assertEquals("OPPH", statusForUtbetaling)
@@ -346,7 +347,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`(){
+    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)

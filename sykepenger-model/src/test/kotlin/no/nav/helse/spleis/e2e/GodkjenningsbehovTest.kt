@@ -19,7 +19,8 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.*
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.AOrdningen
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.Arbeidsgiver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -70,7 +71,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med sykepengegrunnlag i godkjenningsbehovet`() {
-        tilGodkjenning(januar, beregnetInntekt = INNTEKT*6, organisasjonsnummere = arrayOf(a1))
+        tilGodkjenning(januar, beregnetInntekt = INNTEKT * 6, organisasjonsnummere = arrayOf(a1))
         assertEquals(Grunnbeløp.`6G`.beløp(1.januar).årlig, sykepengegrunnlag(1.vedtaksperiode))
     }
 
@@ -327,7 +328,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
@@ -375,8 +377,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         felt = "vilkårsgrunnlagId"
     )!!.let { UUID.fromString(it) }
 
-    private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1)
-        = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
+    private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1) = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
 
     private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, Any>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
@@ -389,4 +390,5 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "sykepengegrunnlagsfakta"
-    )!!["arbeidsgivere"]!!.map { it["inntektskilde"] }}
+    )!!["arbeidsgivere"]!!.map { it["inntektskilde"] }
+}

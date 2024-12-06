@@ -1,6 +1,8 @@
 package no.nav.helse
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -83,7 +85,7 @@ internal class TellerTest {
         repeat(grenseverdi) { teller.inc() }
         teller.reset()
         repeat(grenseverdi) { teller.inc() }
-        assertEquals(2*grenseverdi, observatør.increments)
+        assertEquals(2 * grenseverdi, observatør.increments)
         assertEquals(2, observatør.grenserNådd)
         assertTrue(observatør.grenseNådd)
         assertTrue(observatør.reset)
@@ -102,11 +104,17 @@ internal class TellerTest {
         var grenseNådd = false
         var reset = false
 
-        override fun onInc() { increments +=1 }
+        override fun onInc() {
+            increments += 1
+        }
+
         override fun onGrense() {
             grenseNådd = true
             grenserNådd += 1
         }
-        override fun onReset() { reset = true }
+
+        override fun onReset() {
+            reset = true
+        }
     }
 }

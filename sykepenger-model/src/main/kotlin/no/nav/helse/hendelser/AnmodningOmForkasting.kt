@@ -9,7 +9,7 @@ class AnmodningOmForkasting(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     internal val force: Boolean
-): Hendelse {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = organisasjonsnummer
     )

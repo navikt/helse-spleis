@@ -612,7 +612,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT+100.månedlig,
+            beregnetInntekt = INNTEKT + 100.månedlig,
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -632,8 +632,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)
         assertNotNull(vilkårsgrunnlag)
         val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
-        assertEquals(INNTEKT+100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
-        assertEquals(INNTEKT/2, inntektsopplysninger.refusjonsopplysninger.single().inspektør.beløp)
+        assertEquals(INNTEKT + 100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
+        assertEquals(INNTEKT / 2, inntektsopplysninger.refusjonsopplysninger.single().inspektør.beløp)
     }
 
     @Test
@@ -650,7 +650,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 20.januar),
+                INNTEKT, 20.januar
+            ),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
@@ -783,7 +784,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(
-                INNTEKT, 15.januar, emptyList()),
+                INNTEKT, 15.januar, emptyList()
+            ),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )

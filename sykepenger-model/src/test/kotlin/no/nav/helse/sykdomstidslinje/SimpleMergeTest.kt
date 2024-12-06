@@ -4,9 +4,21 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.testhelpers.ferieTil
+import no.nav.helse.testhelpers.jobbTil
+import no.nav.helse.testhelpers.merge
+import no.nav.helse.testhelpers.permisjonTil
+import no.nav.helse.testhelpers.sykTil
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SimpleMergeTest {
@@ -121,7 +133,7 @@ internal class SimpleMergeTest {
 
         count = 0
         for (dag: Dag in sykdomstidslinje) {
-             count++
+            count++
         }
         assertEquals(expected, count)
     }

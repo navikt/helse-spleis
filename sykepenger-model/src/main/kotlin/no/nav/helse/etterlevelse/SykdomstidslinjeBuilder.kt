@@ -8,7 +8,8 @@ import no.nav.helse.økonomi.Økonomi
 internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
     private val navdager = sykdomstidslinje.mapNotNull { dag ->
         when (dag) {
-            is Dag.AndreYtelser -> visit(dag.dato, when(dag.ytelse) {
+            is Dag.AndreYtelser -> visit(
+                dag.dato, when (dag.ytelse) {
                 Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> "FORELDREPENGER"
                 Dag.AndreYtelser.AnnenYtelse.AAP -> "ARBEIDSAVKLARINGSPENGER"
                 Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> "OMSORGSPENGER"
@@ -16,7 +17,9 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
                 Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> "SVANGERSKAPSPENGER"
                 Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> "OPPLÆRINGSPENGER"
                 Dag.AndreYtelser.AnnenYtelse.Dagpenger -> "DAGPENGER"
-            }, null)
+            }, null
+            )
+
             is Dag.Feriedag -> visit(dag.dato, "FERIEDAG", null)
             is Dag.Permisjonsdag -> visit(dag.dato, "PERMISJONSDAG", null)
             is Dag.SykHelgedag -> visit(dag.dato, "SYKEDAG", dag.økonomi)
@@ -36,7 +39,7 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
     fun dager() = navdager.toList()
 
     private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?): Tidslinjedag {
-        val grad = økonomi?.brukAvrundetGrad { grad-> grad }
+        val grad = økonomi?.brukAvrundetGrad { grad -> grad }
         return Tidslinjedag(dato, dagtype, grad)
     }
 }

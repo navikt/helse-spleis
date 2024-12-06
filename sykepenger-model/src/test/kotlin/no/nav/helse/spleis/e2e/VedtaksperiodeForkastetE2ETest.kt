@@ -292,7 +292,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender forventede sykmeldingsperioder når søknad blir kastet ut pga delvis overlapp` () {
+    fun `Sender forventede sykmeldingsperioder når søknad blir kastet ut pga delvis overlapp`() {
         nyPeriode(1.januar til 25.januar)
 
         håndterSykmelding(januar)
@@ -303,7 +303,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forventer arbeidsgiveropplysninger når søknad delvis overlapper med en kort periode` () {
+    fun `Forventer arbeidsgiveropplysninger når søknad delvis overlapper med en kort periode`() {
         nyPeriode(1.januar til 15.januar)
 
         håndterSykmelding(januar)
@@ -313,7 +313,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes` () {
+    fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes`() {
         nyPeriode(januar)
         nyPeriode(februar)
         forkastAlle()

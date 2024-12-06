@@ -76,7 +76,7 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         if (!harHistorikk()) return false
-        val sisteElementSomFantesFørUtbetaling = _elementer.firstOrNull{
+        val sisteElementSomFantesFørUtbetaling = _elementer.firstOrNull {
             it.erEldreEnn(utbetaling)
         } ?: return siste.erNyopprettet()
         return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)

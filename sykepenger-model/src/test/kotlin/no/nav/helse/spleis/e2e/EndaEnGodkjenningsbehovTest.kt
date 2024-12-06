@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
@@ -65,16 +64,16 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "sykepengegrunnlag" to 480_000.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 240000.0,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver
                     ), mapOf(
-                        "arbeidsgiver" to a2,
-                        "omregnetÅrsinntekt" to 240000.0,
-                        "inntektskilde" to Inntektskilde.Arbeidsgiver
-                    )
+                    "arbeidsgiver" to a2,
+                    "omregnetÅrsinntekt" to 240000.0,
+                    "inntektskilde" to Inntektskilde.Arbeidsgiver
+                )
                 )
             )
         )
@@ -91,7 +90,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "sykepengegrunnlag" to 240_000.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 240_000.0,
@@ -125,7 +124,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "sykepengegrunnlag" to 561_804.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 1200000.0,
@@ -148,7 +147,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 10000.månedlig.årlig)),
             behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             tags = setOf("IngenNyArbeidsgiverperiode", "SykepengegrunnlagUnder2G"),
-            perioderMedSammeSkjæringstidspunkt= listOf(
+            perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf(
                     "vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(),
                     "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
@@ -161,7 +160,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "6G" to 561_804.0,
                 "sykepengegrunnlag" to 10000.månedlig.årlig,
                 "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 120000.0,
@@ -293,7 +292,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         nyPeriode(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = null),
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT / 2, opphørsdato = null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -324,7 +323,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "sykepengegrunnlag" to INNTEKT.årlig,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
@@ -379,13 +378,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "sykepengegrunnlag" to 40_000.månedlig.årlig,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 20000.månedlig.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     ),
-                    mapOf (
+                    mapOf(
                         "arbeidsgiver" to a2,
                         "omregnetÅrsinntekt" to 20000.månedlig.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
@@ -482,7 +481,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `legger til hendelses ID'er og dokumenttype på godkjenningsbehovet` () {
+    fun `legger til hendelses ID'er og dokumenttype på godkjenningsbehovet`() {
         håndterSykmelding(januar)
         val søknadId = håndterSøknad(januar)
         val inntektsmeldingId = håndterInntektsmelding(
@@ -501,11 +500,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `markerer sykepengegrunnlagsfakta som skjønnsfastsatt dersom én arbeidsgiver har fått skjønnmessig fastsatt sykepengegrunnlaget`() {
-        tilGodkjenning(januar, a1, a2,  beregnetInntekt = 20000.månedlig)
-        håndterSkjønnsmessigFastsettelse(1.januar, arbeidsgiveropplysninger = listOf(
+        tilGodkjenning(januar, a1, a2, beregnetInntekt = 20000.månedlig)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, arbeidsgiveropplysninger = listOf(
             OverstyrtArbeidsgiveropplysning(a1, 41000.månedlig),
             OverstyrtArbeidsgiveropplysning(a2, 30000.månedlig)
-        ))
+        )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -515,7 +516,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "omregnetÅrsinntektTotalt" to 480000.0,
                 "6G" to 561804.0,
                 "fastsatt" to "EtterSkjønn",
-                "arbeidsgivere" to listOf (
+                "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 240000.0,
@@ -540,12 +541,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
     }
+
     private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1)) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         assertFalse(actualtags.contains(tag))
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertFalse(utkastTilVedtak.tags.contains(tag))
     }
+
     private fun assertSykepengegrunnlagsfakta(
         vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),
         sykepengegrunnlagsfakta: Map<String, Any>

@@ -8,7 +8,6 @@ import no.nav.helse.etterlevelse.`§ 8-19 fjerde ledd`
 import no.nav.helse.etterlevelse.`§ 8-19 første ledd`
 import no.nav.helse.etterlevelse.`§ 8-19 tredje ledd`
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -104,6 +103,7 @@ data class Arbeidsgiverperioderesultat(
             // dagen utvider siste periode
             else -> dropLast(1) + listOf(last().oppdaterTom(dato))
         }
+
         internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
         }

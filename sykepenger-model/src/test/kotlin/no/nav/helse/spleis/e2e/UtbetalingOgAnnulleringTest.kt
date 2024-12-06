@@ -92,7 +92,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(
             (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
-            listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
+                listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
         )
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)

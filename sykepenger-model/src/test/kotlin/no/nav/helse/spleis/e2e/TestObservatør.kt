@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
@@ -22,6 +21,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     init {
         person?.addObserver(this)
     }
+
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
@@ -120,7 +120,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
-       avsluttetUtenVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
+        avsluttetUtenVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
     }
 
     override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
@@ -173,17 +173,19 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         trengerArbeidsgiverperiode: Boolean,
         erPotensiellForespørsel: Boolean
     ) {
-        inntektsmeldingReplayEventer.add(Forespørsel(
-            fnr = personidentifikator.toString(),
-            orgnr = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
-            sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-            egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-            harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
-            erPotensiellForespørsel = erPotensiellForespørsel
-        ))
+        inntektsmeldingReplayEventer.add(
+            Forespørsel(
+                fnr = personidentifikator.toString(),
+                orgnr = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
+                sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
+                erPotensiellForespørsel = erPotensiellForespørsel
+            )
+        )
     }
 
     override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {

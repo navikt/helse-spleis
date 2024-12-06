@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
+internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Grunnbeløpsregulering med allerede riktig G-beløp`() {

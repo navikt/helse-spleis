@@ -7,6 +7,7 @@ internal interface Arbeidsgiverperiodeoppsamler {
     // det er sykdom på begge kanter av ferien, og dagen er mens vi teller de første 16 dagene, eller:
     // vi har telt 16 dager, og det er sykdom før ferien
     fun fridag(dato: LocalDate)
+
     // en fridag som teller som påvirker oppholdstellingen; om vi f.eks. har 16 slike etter hverandre så ville
     // vi ha tilbakestilt arbeidsgiverperioden.
     fun fridagOppholdsdag(dato: LocalDate)

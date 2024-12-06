@@ -93,7 +93,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`(){
+    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`() {
         nyttVedtak(5.desember(2017) til 5.januar)
         val korrelasjonsIdAugust2017 = inspektør.utbetaling(0).korrelasjonsId
 
@@ -112,7 +112,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(5.desember(2017) til 5.januar, inspektør.utbetaling(0).periode)
-        assertEquals(korrelasjonsIdAugust2017,inspektør.utbetaling(0).korrelasjonsId)
+        assertEquals(korrelasjonsIdAugust2017, inspektør.utbetaling(0).korrelasjonsId)
         val korrelasjonsIdFebruar2018 = inspektør.utbetaling(1).korrelasjonsId
         assertEquals(5.februar til 24.februar, inspektør.utbetaling(1).periode)
         assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)

@@ -121,7 +121,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `sender ikke ut signal om at inntektsmelding ikke er håndtert om annen vedtaksperiode har håndtert inntektsmelding før`() {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
-        assertEquals(emptyList<UUID>(),  observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
     }
 
     @Test
@@ -224,9 +224,11 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         val hendelserHåndtertFør = inspektør.hendelser(1.vedtaksperiode)
-        assertEquals(listOf(
-            im1 to 1.vedtaksperiode.id(ORGNUMMER), // pga inntekt
-        ), observatør.inntektsmeldingHåndtert)
+        assertEquals(
+            listOf(
+                im1 to 1.vedtaksperiode.id(ORGNUMMER), // pga inntekt
+            ), observatør.inntektsmeldingHåndtert
+        )
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         val søknad = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         val im = håndterInntektsmelding(
@@ -235,12 +237,14 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         )
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(hendelserHåndtertFør, inspektør.hendelser(1.vedtaksperiode))
-        assertEquals(setOf(
-            Dokumentsporing.søknad(søknad),
-            Dokumentsporing.inntektsmeldingDager(im),
-            Dokumentsporing.inntektsmeldingRefusjon(im),
-            Dokumentsporing.inntektsmeldingInntekt(im)
-        ), inspektør.hendelser(2.vedtaksperiode))
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(søknad),
+                Dokumentsporing.inntektsmeldingDager(im),
+                Dokumentsporing.inntektsmeldingRefusjon(im),
+                Dokumentsporing.inntektsmeldingInntekt(im)
+            ), inspektør.hendelser(2.vedtaksperiode)
+        )
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
         assertEquals(im to 2.vedtaksperiode.id(ORGNUMMER), observatør.inntektsmeldingHåndtert.last())
     }
@@ -267,6 +271,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
         assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingHåndtert)
     }
+
     @Test
     fun `Inntektsmelding noen dager håndtert - IM før søknad`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
@@ -288,38 +293,50 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
 
-        assertEquals(setOf(
-            Dokumentsporing.søknad(søknad1),
-            Dokumentsporing.inntektsmeldingDager(im),
-            Dokumentsporing.inntektsmeldingRefusjon(im)
-        ), inspektør.hendelser(1.vedtaksperiode))
-        assertEquals(setOf(
-            Dokumentsporing.søknad(søknad2),
-            Dokumentsporing.inntektsmeldingDager(im),
-            Dokumentsporing.inntektsmeldingRefusjon(im)
-        ), inspektør.hendelser(2.vedtaksperiode))
-        assertEquals(setOf(
-            Dokumentsporing.søknad(søknad3),
-            Dokumentsporing.inntektsmeldingRefusjon(im),
-            Dokumentsporing.inntektsmeldingInntekt(im)
-        ), inspektør.hendelser(3.vedtaksperiode))
-        assertEquals(setOf(
-            Dokumentsporing.søknad(søknad4),
-            Dokumentsporing.inntektsmeldingRefusjon(im),
-            Dokumentsporing.inntektsmeldingInntekt(im)
-        ), inspektør.hendelser(4.vedtaksperiode))
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(søknad1),
+                Dokumentsporing.inntektsmeldingDager(im),
+                Dokumentsporing.inntektsmeldingRefusjon(im)
+            ), inspektør.hendelser(1.vedtaksperiode)
+        )
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(søknad2),
+                Dokumentsporing.inntektsmeldingDager(im),
+                Dokumentsporing.inntektsmeldingRefusjon(im)
+            ), inspektør.hendelser(2.vedtaksperiode)
+        )
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(søknad3),
+                Dokumentsporing.inntektsmeldingRefusjon(im),
+                Dokumentsporing.inntektsmeldingInntekt(im)
+            ), inspektør.hendelser(3.vedtaksperiode)
+        )
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(søknad4),
+                Dokumentsporing.inntektsmeldingRefusjon(im),
+                Dokumentsporing.inntektsmeldingInntekt(im)
+            ), inspektør.hendelser(4.vedtaksperiode)
+        )
 
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(listOf(
-            søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
-            søknad2 to 2.vedtaksperiode.id(ORGNUMMER),
-            søknad3 to 3.vedtaksperiode.id(ORGNUMMER),
-            søknad4 to 4.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.søknadHåndtert)
-        assertEquals(listOf(
-            im to 3.vedtaksperiode.id(ORGNUMMER), // inntekt
-            im to 4.vedtaksperiode.id(ORGNUMMER) // inntekt
-        ), observatør.inntektsmeldingHåndtert)
+        assertEquals(
+            listOf(
+                søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
+                søknad2 to 2.vedtaksperiode.id(ORGNUMMER),
+                søknad3 to 3.vedtaksperiode.id(ORGNUMMER),
+                søknad4 to 4.vedtaksperiode.id(ORGNUMMER)
+            ), observatør.søknadHåndtert
+        )
+        assertEquals(
+            listOf(
+                im to 3.vedtaksperiode.id(ORGNUMMER), // inntekt
+                im to 4.vedtaksperiode.id(ORGNUMMER) // inntekt
+            ), observatør.inntektsmeldingHåndtert
+        )
     }
 
     @Test
@@ -413,8 +430,10 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
                 sykmeldingsperioder = listOf(januar, 28.januar til 28.februar)
-            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        )
     }
+
     @Test
     fun `har vedtaksperiode som påvirker arbeidsgiverperioden`() {
         tilGodkjenning(januar, ORGNUMMER)
@@ -434,7 +453,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = true,
                 sykmeldingsperioder = listOf(januar, 10.februar til 28.februar)
-            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        )
     }
 
     @Test
@@ -456,7 +476,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = true,
                 sykmeldingsperioder = listOf(januar, 15.februar til 28.februar)
-            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        )
     }
 
     @Test
@@ -464,10 +485,12 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad1 = håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
         val søknad2 = håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent))
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(listOf(
-            søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
-            søknad2 to 1.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.søknadHåndtert)
+        assertEquals(
+            listOf(
+                søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
+                søknad2 to 1.vedtaksperiode.id(ORGNUMMER)
+            ), observatør.søknadHåndtert
+        )
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 organisasjonsnummer = ORGNUMMER,
@@ -481,21 +504,24 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
                 sykmeldingsperioder = listOf(11.januar til 16.januar, 10.januar til 15.januar)
-            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        )
     }
 
     @Test
-    fun `sender ut søknad håndtert for forlengelse av forkastet periode`(){
+    fun `sender ut søknad håndtert for forlengelse av forkastet periode`() {
         håndterSykmelding(januar)
         val søknadId1 = håndterSøknad(januar)
         forkastAlle()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val søknadId2 = håndterSøknad(februar)
-        assertEquals(listOf(
-            søknadId1 to 1.vedtaksperiode.id(ORGNUMMER),
-            søknadId2 to 2.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.søknadHåndtert)
+        assertEquals(
+            listOf(
+                søknadId1 to 1.vedtaksperiode.id(ORGNUMMER),
+                søknadId2 to 2.vedtaksperiode.id(ORGNUMMER)
+            ), observatør.søknadHåndtert
+        )
     }
 
     @Test
@@ -520,7 +546,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
         håndterSøknad(februar)
-        assertFalse(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID,*>::first))
+        assertFalse(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
         assertTrue(im2 in observatør.inntektsmeldingIkkeHåndtert)
     }
 
@@ -533,7 +559,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             førsteFraværsdag = 27.januar
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertFalse(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID,*>::first))
+        assertFalse(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
         assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
     }
 

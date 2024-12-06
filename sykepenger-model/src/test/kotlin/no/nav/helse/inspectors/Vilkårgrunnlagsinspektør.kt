@@ -1,10 +1,10 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkView
 import no.nav.helse.person.VilkårsgrunnlagView
-import no.nav.helse.person.UtbetalingInntektskilde
 import org.junit.jupiter.api.fail
 
 internal val VilkårsgrunnlagHistorikk.inspektør get() = this.view().inspektør

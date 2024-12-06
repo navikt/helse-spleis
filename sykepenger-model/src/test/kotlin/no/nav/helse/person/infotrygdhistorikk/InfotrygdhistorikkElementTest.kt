@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.math.roundToInt
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.math.roundToInt
 
 internal class InfotrygdhistorikkElementTest {
 

@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.testhelpers.ferieTil
-import no.nav.helse.januar
 import no.nav.helse.testhelpers.jobbTil
 import no.nav.helse.testhelpers.merge
 import org.junit.jupiter.api.Assertions.assertEquals

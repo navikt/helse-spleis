@@ -1,16 +1,16 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
+import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
@@ -163,8 +163,10 @@ internal class Opptjening private constructor(
 
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
                 flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
+
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.inngårIOpptjening(opptjeningsperiode: Periode) =
                 mapNotNull { it.inngårIOpptjening(opptjeningsperiode) }
+
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
                 flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
 

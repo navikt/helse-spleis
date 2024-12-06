@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
+internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
@@ -164,7 +164,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`()  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
@@ -182,7 +182,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`()  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`() {
         nyttVedtak(10.januar til 31.januar)
         forlengVedtak(februar)
         forlengVedtak(mars)

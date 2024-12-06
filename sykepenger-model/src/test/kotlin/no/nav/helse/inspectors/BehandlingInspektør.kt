@@ -68,10 +68,10 @@ internal class BehandlingInspektør(view: BehandlingView) {
         )
 
         data class Behandlingkilde(
-           val meldingsreferanseId: UUID,
-           val innsendt: LocalDateTime,
-           val registert: LocalDateTime,
-           val avsender: Avsender
+            val meldingsreferanseId: UUID,
+            val innsendt: LocalDateTime,
+            val registert: LocalDateTime,
+            val avsender: Avsender
         )
     }
 }

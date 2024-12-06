@@ -36,11 +36,13 @@ internal class PersonInspektør(person: Person) {
             vedtaksperiode.inspektør.id == vedtaksperiodeId
         }
     }
+
     internal fun forkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
         arbeidsgiver.view().forkastetVedtaksperioder.firstOrNull { vedtaksperiode ->
             vedtaksperiode.inspektør.id == vedtaksperiodeId
         }
     }
+
     internal fun sisteVedtaksperiodeTilstander() = arbeidsgivere
         .flatMap { (_, arbeidsgiver) -> arbeidsgiver.view().aktiveVedtaksperioder.map { it.id to it.tilstand } }
         .toMap()

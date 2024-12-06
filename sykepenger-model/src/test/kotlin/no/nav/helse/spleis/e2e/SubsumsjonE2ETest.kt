@@ -83,7 +83,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -1114,22 +1115,22 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "organisasjonsnummer" to a2,
                 "skjæringstidspunkt" to 1.januar,
                 "inntekterSisteTreMåneder" to
-                        listOf(
-                            mapOf(
-                                "beløp" to 1000.0,
-                                "årMåned" to YearMonth.of(2017, 11),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "Juidy inntekt",
-                                "beskrivelse" to "Juidy fordel"
-                            ),
-                            mapOf(
-                                "beløp" to 1000.0,
-                                "årMåned" to YearMonth.of(2017, 12),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "Juidy inntekt",
-                                "beskrivelse" to "Juidy fordel"
-                            )
+                    listOf(
+                        mapOf(
+                            "beløp" to 1000.0,
+                            "årMåned" to YearMonth.of(2017, 11),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "Juidy inntekt",
+                            "beskrivelse" to "Juidy fordel"
                         ),
+                        mapOf(
+                            "beløp" to 1000.0,
+                            "årMåned" to YearMonth.of(2017, 12),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "Juidy inntekt",
+                            "beskrivelse" to "Juidy fordel"
+                        )
+                    ),
 
                 "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
             ),
@@ -1285,22 +1286,22 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "organisasjonsnummer" to a2,
                 "skjæringstidspunkt" to 1.januar,
                 "inntekterSisteTreMåneder" to
-                        listOf(
-                            mapOf(
-                                "beløp" to 1000.0,
-                                "årMåned" to YearMonth.of(2017, 11),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "Juidy inntekt",
-                                "beskrivelse" to "Juidy fordel"
-                            ),
-                            mapOf(
-                                "beløp" to 1000.0,
-                                "årMåned" to YearMonth.of(2017, 12),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "Juidy inntekt",
-                                "beskrivelse" to "Juidy fordel"
-                            )
+                    listOf(
+                        mapOf(
+                            "beløp" to 1000.0,
+                            "årMåned" to YearMonth.of(2017, 11),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "Juidy inntekt",
+                            "beskrivelse" to "Juidy fordel"
                         ),
+                        mapOf(
+                            "beløp" to 1000.0,
+                            "årMåned" to YearMonth.of(2017, 12),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "Juidy inntekt",
+                            "beskrivelse" to "Juidy fordel"
+                        )
+                    ),
 
                 "forklaring" to "Jeg, en saksbehandler, aktiverte pga 8-15"
             ),
@@ -1944,7 +1945,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`(){
+    fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
         håndterInntektsmelding(
@@ -2244,13 +2245,15 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
 
         forlengVedtak(mars)
-        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(
+        assertEquals(
+            1, SubsumsjonInspektør(jurist).antallSubsumsjoner(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
             punktum = 1.punktum,
             versjon = 16.desember(2011),
             bokstav = null
-        ))
+        )
+        )
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 0,
             forventetAntall = 1,
@@ -2879,16 +2882,18 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `andre ytelser i snuten`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        håndterOverstyrTidslinje(overstyringsdager = listOf(
-            ManuellOverskrivingDag(1.februar, Dagtype.Foreldrepengerdag),
-            ManuellOverskrivingDag(2.februar, Dagtype.Pleiepengerdag),
-            ManuellOverskrivingDag(3.februar, Dagtype.Omsorgspengerdag),
-            ManuellOverskrivingDag(4.februar, Dagtype.Svangerskapspengerdag),
-            ManuellOverskrivingDag(5.februar, Dagtype.Opplaringspengerdag),
-            ManuellOverskrivingDag(6.februar, Dagtype.AAPdag),
-            ManuellOverskrivingDag(7.februar, Dagtype.Dagpengerdag),
-            ManuellOverskrivingDag(8.februar, Dagtype.AAPdag),
-        ))
+        håndterOverstyrTidslinje(
+            overstyringsdager = listOf(
+                ManuellOverskrivingDag(1.februar, Dagtype.Foreldrepengerdag),
+                ManuellOverskrivingDag(2.februar, Dagtype.Pleiepengerdag),
+                ManuellOverskrivingDag(3.februar, Dagtype.Omsorgspengerdag),
+                ManuellOverskrivingDag(4.februar, Dagtype.Svangerskapspengerdag),
+                ManuellOverskrivingDag(5.februar, Dagtype.Opplaringspengerdag),
+                ManuellOverskrivingDag(6.februar, Dagtype.AAPdag),
+                ManuellOverskrivingDag(7.februar, Dagtype.Dagpengerdag),
+                ManuellOverskrivingDag(8.februar, Dagtype.AAPdag),
+            )
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -2911,10 +2916,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 2.mars(2007),
             paragraf = KJENNELSE_2006_4023,
             input = forventetInput,
-            output = mapOf("perioder" to listOf(
-                mapOf("fom" to 1.februar, "tom" to 5.februar),
-                mapOf("fom" to 7.februar, "tom" to 7.februar),
-            ))
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf("fom" to 1.februar, "tom" to 5.februar),
+                    mapOf("fom" to 7.februar, "tom" to 7.februar),
+                )
+            )
         )
         // Arbeidsavklaringspenger
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -2922,26 +2929,30 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 21.mai(2021),
             paragraf = PARAGRAF_8_48,
             input = forventetInput,
-            output = mapOf("perioder" to listOf(
-                mapOf("fom" to 6.februar, "tom" to 6.februar),
-                mapOf("fom" to 8.februar, "tom" to 8.februar),
-            ))
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf("fom" to 6.februar, "tom" to 6.februar),
+                    mapOf("fom" to 8.februar, "tom" to 8.februar),
+                )
+            )
         )
     }
 
     @Test
     fun `andre ytelser i halen`() {
         nyttVedtak(januar)
-        håndterOverstyrTidslinje(overstyringsdager = listOf(
-            ManuellOverskrivingDag(24.januar, Dagtype.Foreldrepengerdag),
-            ManuellOverskrivingDag(25.januar, Dagtype.Pleiepengerdag),
-            ManuellOverskrivingDag(26.januar, Dagtype.Omsorgspengerdag),
-            ManuellOverskrivingDag(27.januar, Dagtype.Svangerskapspengerdag),
-            ManuellOverskrivingDag(28.januar, Dagtype.Opplaringspengerdag),
-            ManuellOverskrivingDag(29.januar, Dagtype.AAPdag),
-            ManuellOverskrivingDag(30.januar, Dagtype.Dagpengerdag),
-            ManuellOverskrivingDag(31.januar, Dagtype.AAPdag),
-        ))
+        håndterOverstyrTidslinje(
+            overstyringsdager = listOf(
+                ManuellOverskrivingDag(24.januar, Dagtype.Foreldrepengerdag),
+                ManuellOverskrivingDag(25.januar, Dagtype.Pleiepengerdag),
+                ManuellOverskrivingDag(26.januar, Dagtype.Omsorgspengerdag),
+                ManuellOverskrivingDag(27.januar, Dagtype.Svangerskapspengerdag),
+                ManuellOverskrivingDag(28.januar, Dagtype.Opplaringspengerdag),
+                ManuellOverskrivingDag(29.januar, Dagtype.AAPdag),
+                ManuellOverskrivingDag(30.januar, Dagtype.Dagpengerdag),
+                ManuellOverskrivingDag(31.januar, Dagtype.AAPdag),
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         val forventetInput = mapOf(
             "sykdomstidslinje" to listOf(
@@ -2962,10 +2973,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 2.mars(2007),
             paragraf = KJENNELSE_2006_4023,
             input = forventetInput,
-            output = mapOf("perioder" to listOf(
-                mapOf("fom" to 24.januar, "tom" to 28.januar),
-                mapOf("fom" to 30.januar, "tom" to 30.januar),
-            ))
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf("fom" to 24.januar, "tom" to 28.januar),
+                    mapOf("fom" to 30.januar, "tom" to 30.januar),
+                )
+            )
         )
         // Arbeidsavklaringspenger
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -2973,10 +2986,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 21.mai(2021),
             paragraf = PARAGRAF_8_48,
             input = forventetInput,
-            output = mapOf("perioder" to listOf(
-                mapOf("fom" to 29.januar, "tom" to 29.januar),
-                mapOf("fom" to 31.januar, "tom" to 31.januar),
-            ))
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf("fom" to 29.januar, "tom" to 29.januar),
+                    mapOf("fom" to 31.januar, "tom" to 31.januar),
+                )
+            )
         )
     }
 }

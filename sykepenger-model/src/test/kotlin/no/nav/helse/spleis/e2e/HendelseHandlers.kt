@@ -115,7 +115,8 @@ internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
     orgnummer: String,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    AvbruttSøknad(periode,
+    AvbruttSøknad(
+        periode,
         meldingsreferanseId,
         orgnummer
     ).håndter(Person::håndter)
@@ -126,7 +127,8 @@ internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
     orgnummer: String,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    AvbruttSøknad(periode,
+    AvbruttSøknad(
+        periode,
         meldingsreferanseId,
         Arbeidsledig
     ).håndter(Person::håndter)
@@ -530,7 +532,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             )
         )
     }
-    check(vedtaksperiodeIdInnhenter == null)  { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
+    check(vedtaksperiodeIdInnhenter == null) { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
     return håndterInntektsmelding(
         klassiskInntektsmelding(
             id,
@@ -575,7 +577,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     return håndterInntektsmelding(portalinntektsmelding)
 }
 
-internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}) : UUID {
+internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}): UUID {
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndter)
         førReplay()
@@ -766,7 +768,7 @@ internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
     skjæringstidspunkt: LocalDate = 1.januar,
     orgnummer: String = ORGNUMMER
 ): UUID {
-    val inntektFraAOrdningen : SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt, orgnummer)
+    val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt, orgnummer)
     inntektFraAOrdningen.håndter(Person::håndter)
     return inntektFraAOrdningen.metadata.meldingsreferanseId
 }
@@ -938,12 +940,13 @@ internal class OverstyrtArbeidsgiveropplysning(
     internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, "forklaring", null, emptyList(), null)
     internal constructor(orgnummer: String, inntekt: Inntekt, subsumsjon: Subsumsjon) : this(orgnummer, inntekt, "forklaring", subsumsjon, emptyList(), null)
     internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, "forklaring", null, emptyList(), gjelder)
+
     internal companion object {
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
-                    it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, LocalDateTime.now()), LocalDateTime.now())}
+                    it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, LocalDateTime.now()), LocalDateTime.now()) }
                 }.build())
             }
 
@@ -951,15 +954,15 @@ internal class OverstyrtArbeidsgiveropplysning(
             map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
-                    it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, LocalDateTime.now()), LocalDateTime.now())}
+                    it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp, SAKSBEHANDLER, LocalDateTime.now()), LocalDateTime.now()) }
                 }.build())
             }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
-            val strekkbar = opplysning.refusjonsopplysninger.any { (_,tom) -> tom == null }
+            val strekkbar = opplysning.refusjonsopplysninger.any { (_, tom) -> tom == null }
             opplysning.refusjonsopplysninger.fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
                 acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet))
-            }to strekkbar
+            } to strekkbar
         }
     }
 }

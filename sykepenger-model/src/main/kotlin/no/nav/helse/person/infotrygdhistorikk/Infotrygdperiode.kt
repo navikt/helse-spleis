@@ -56,9 +56,9 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
 
     internal companion object {
         internal fun sorter(perioder: List<Infotrygdperiode>) =
-            perioder.sortedWith(compareBy( { it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
+            perioder.sortedWith(compareBy({ it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
 
-        internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) =  this
+        internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) = this
             .filterIsInstance<Utbetalingsperiode>()
             .filter { organisasjonsnummer == null || it.gjelder(organisasjonsnummer) }
             .map { it.periode }

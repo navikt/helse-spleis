@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
+internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `hele perioden avvises`() {

@@ -13,10 +13,10 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
+internal class ForkastSykmeldingsperioderTest : AbstractDslTest() {
 
     @Test
-    fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren kan behandles`(){
+    fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren kan behandles`() {
         a1 {
             håndterSykmelding(januar)
         }

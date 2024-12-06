@@ -30,11 +30,13 @@ import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
-    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+    private val jurist = BehandlingSubsumsjonslogg(
+        EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
         Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    ))
+    )
+    )
 
     private companion object {
         private val ALDER = 12.februar(1992).alder
@@ -105,29 +107,31 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     private fun grunnlagsdata(skjæringstidspunkt: LocalDate, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true): VilkårsgrunnlagHistorikk.Grunnlagsdata {
         val opptjening = if (!harOpptjening) emptyList() else listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("orgnr", listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnr", listOf(
                 Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(skjæringstidspunkt.minusYears(1), null, false)
-            ))
+            )
+            )
         )
         val inntekt = if (!harMinimumInntekt) 2000.månedlig else 25000.månedlig
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = Inntektsgrunnlag.opprett(
                 ALDER, listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        "orgnr",
-                        skjæringstidspunkt til LocalDate.MAX,
-                        Saksbehandler(
-                            skjæringstidspunkt,
-                            UUID.randomUUID(),
-                            inntekt,
-                            "",
-                            null,
-                            LocalDateTime.now()
-                        ),
-                        Refusjonsopplysninger()
-                    )
-                ), skjæringstidspunkt, jurist
+                ArbeidsgiverInntektsopplysning(
+                    "orgnr",
+                    skjæringstidspunkt til LocalDate.MAX,
+                    Saksbehandler(
+                        skjæringstidspunkt,
+                        UUID.randomUUID(),
+                        inntekt,
+                        "",
+                        null,
+                        LocalDateTime.now()
+                    ),
+                    Refusjonsopplysninger()
+                )
+            ), skjæringstidspunkt, jurist
             ),
             opptjening = Opptjening.nyOpptjening(opptjening, 1.januar),
             medlemskapstatus = when (erMedlem) {

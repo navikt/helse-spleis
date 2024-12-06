@@ -12,7 +12,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 class Foreldrepenger(
     private val foreldrepengeytelse: List<GradertPeriode>
-): AnnenYtelseSomKanOppdatereHistorikk() {
+) : AnnenYtelseSomKanOppdatereHistorikk() {
     private val perioder get() = foreldrepengeytelse.map { it.periode }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean) {
@@ -40,7 +40,7 @@ class Foreldrepenger(
 
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
         if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
-        require(foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder().size == 1) {"Ikke trygt å kalle sykdomstidslinjen til ${this.javaClass.simpleName} når det er huller i ytelser"}
+        require(foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder().size == 1) { "Ikke trygt å kalle sykdomstidslinjen til ${this.javaClass.simpleName} når det er huller i ytelser" }
         val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
         val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }

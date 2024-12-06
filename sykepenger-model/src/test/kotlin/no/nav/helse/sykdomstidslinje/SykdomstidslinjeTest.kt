@@ -116,7 +116,7 @@ internal class SykdomstidslinjeTest {
     @Test
     fun `unik dagtype short string `() {
         assertEquals("Tom tidslinje", Sykdomstidslinje().toUnikDagtypeShortString())
-        val tidslinje = 5.S + 5.F+ 5.UK + 5.P
+        val tidslinje = 5.S + 5.F + 5.UK + 5.P
         assertEquals("SSSSSFF FFF???? ?PPPPP", tidslinje.toShortString())
         assertEquals("?FPS", tidslinje.toUnikDagtypeShortString())
     }
@@ -151,7 +151,7 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    fun `er rett før for andre ytelser`(){
+    fun `er rett før for andre ytelser`() {
         assertTrue(1.S.erRettFør(1.YF))
         assertTrue(1.YF.erRettFør(1.YF))
         assertTrue(1.YF.erRettFør(1.YF + 1.S))
@@ -216,9 +216,11 @@ internal class SykdomstidslinjeTest {
         assertEquals(1.mars, tidslinje.fremTilOgMed(1.mars).sisteDag())
         assertEquals(1.mars, tidslinje.fremTilOgMed(1.april).sisteDag())
         assertEquals(1.februar, tidslinje.fremTilOgMed(1.februar).sisteDag())
-        assertEquals(1.februar, Sykdomstidslinje.sykedager(1.februar, 1.februar, 100.prosent, TestEvent.testkilde)
+        assertEquals(
+            1.februar, Sykdomstidslinje.sykedager(1.februar, 1.februar, 100.prosent, TestEvent.testkilde)
             .fremTilOgMed(1.februar)
-            .sisteDag())
+            .sisteDag()
+        )
         assertEquals(0, tidslinje.fremTilOgMed(tidslinje.førsteDag().minusDays(1)).count())
         assertEquals(0, Sykdomstidslinje().fremTilOgMed(1.januar).count())
     }
@@ -270,7 +272,7 @@ internal class SykdomstidslinjeTest {
         val tidslinje2 = 29.S // mangler 1.januar og 31.januar
         val resultat = tidslinje1 - tidslinje2
         assertEquals(setOf(1.januar, 31.januar), resultat.inspektør.dager.filterValues { it !is Dag.UkjentDag }.keys)
-        assertEquals(tidslinje1,tidslinje2 + resultat)
+        assertEquals(tidslinje1, tidslinje2 + resultat)
         assertEquals(Sykdomstidslinje(), tidslinje2 - tidslinje1)
     }
 

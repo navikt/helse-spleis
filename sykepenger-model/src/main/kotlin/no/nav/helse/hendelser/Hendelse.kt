@@ -13,6 +13,7 @@ enum class Avsender {
         SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
         SYSTEM -> AvsenderDto.SYSTEM
     }
+
     companion object {
         fun gjenopprett(dto: AvsenderDto): Avsender {
             return when (dto) {

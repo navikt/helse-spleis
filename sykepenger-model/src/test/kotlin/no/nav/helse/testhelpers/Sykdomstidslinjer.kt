@@ -4,9 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Melding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
@@ -200,7 +197,7 @@ internal val Int.PROBLEM get() = PROBLEM("Problemdag", INGEN)
 internal fun Int.PROBLEM(melding: String, kilde: Hendelseskilde) = Sykdomstidslinje(
     dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
         .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.FORELDET
     get() = Sykdomstidslinje(

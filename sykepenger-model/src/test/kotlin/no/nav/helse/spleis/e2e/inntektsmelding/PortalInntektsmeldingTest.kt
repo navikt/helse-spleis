@@ -11,7 +11,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Test
 
-internal class PortalInntektsmeldingTest: AbstractDslTest() {
+internal class PortalInntektsmeldingTest : AbstractDslTest() {
 
     @Test
     fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {

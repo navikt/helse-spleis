@@ -2,10 +2,10 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 import java.util.SortedMap
-import no.nav.helse.erHelg
+import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto
-import no.nav.helse.dto.HendelseskildeDto
+import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Melding
 import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.person.PersonObserver
@@ -53,6 +53,7 @@ sealed class Dag(
                 is SykHelgedag,
                 is Arbeidsgiverdag,
                 is ArbeidsgiverHelgedag -> venstre
+
                 is Feriedag,
                 is Permisjonsdag -> when (høyre) {
                     is Sykedag,
@@ -60,8 +61,10 @@ sealed class Dag(
                     is SykHelgedag,
                     is Arbeidsgiverdag,
                     is ArbeidsgiverHelgedag -> høyre
+
                     else -> venstre
                 }
+
                 else -> høyre
             }
         }
@@ -120,6 +123,7 @@ sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.UkjentDagDto(dato, kilde)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.UkjentDagDto): UkjentDag {
                 return UkjentDag(
@@ -135,6 +139,7 @@ sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsdagDto(dato, kilde)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsdagDto): Arbeidsdag {
                 return Arbeidsdag(
@@ -152,6 +157,7 @@ sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is Arbeidsgiverdag && sammeGrad(økonomi, other.økonomi)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato, kilde, økonomi.dto().grad)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverdagDto): Arbeidsgiverdag {
                 return Arbeidsgiverdag(
@@ -168,6 +174,7 @@ sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FeriedagDto(dato, kilde)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.FeriedagDto): Feriedag {
                 return Feriedag(
@@ -183,6 +190,7 @@ sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato, kilde)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto): ArbeidIkkeGjenopptattDag {
                 return ArbeidIkkeGjenopptattDag(
@@ -198,6 +206,7 @@ sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FriskHelgedagDto(dato, kilde)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.FriskHelgedagDto): FriskHelgedag {
                 return FriskHelgedag(
@@ -215,6 +224,7 @@ sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ArbeidsgiverHelgedag && sammeGrad(økonomi, other.økonomi)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato, kilde, økonomi.dto().grad)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto): ArbeidsgiverHelgedag {
                 return ArbeidsgiverHelgedag(
@@ -233,6 +243,7 @@ sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is Sykedag && sammeGrad(økonomi, other.økonomi)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagDto(dato, kilde, økonomi.dto().grad)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagDto): Sykedag {
                 return Sykedag(
@@ -251,6 +262,7 @@ sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ForeldetSykedag && sammeGrad(økonomi, other.økonomi)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ForeldetSykedagDto(dato, kilde, økonomi.dto().grad)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ForeldetSykedagDto): ForeldetSykedag {
                 return ForeldetSykedag(
@@ -269,6 +281,7 @@ sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is SykHelgedag && sammeGrad(økonomi, other.økonomi)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykHelgedagDto(dato, kilde, økonomi.dto().grad)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykHelgedagDto): SykHelgedag {
                 return SykHelgedag(
@@ -287,6 +300,7 @@ sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is SykedagNav && sammeGrad(økonomi, other.økonomi)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagNavDto(dato, kilde, økonomi.dto().grad)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagNavDto): SykedagNav {
                 return SykedagNav(
@@ -303,6 +317,7 @@ sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.PermisjonsdagDto(dato, kilde)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.PermisjonsdagDto): Permisjonsdag {
                 return Permisjonsdag(
@@ -320,8 +335,10 @@ sealed class Dag(
         val melding: String
     ) : Dag(dato, kilde) {
         internal constructor(dato: LocalDate, kilde: Hendelseskilde, melding: String) : this(dato, kilde, kilde, melding)
+
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ProblemDag && melding == other.melding
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ProblemDagDto(dato, kilde, other.dto(), melding)
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ProblemDagDto): ProblemDag {
                 return ProblemDag(
@@ -352,6 +369,7 @@ sealed class Dag(
                 Dagpenger -> YtelseDto.Dagpenger
             }
         }
+
         internal fun tilEksternBegrunnelse(): PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO {
             return when (ytelse) {
                 Foreldrepenger -> AndreYtelserForeldrepenger
@@ -363,8 +381,10 @@ sealed class Dag(
                 Dagpenger -> AndreYtelserDagpenger
             }
         }
+
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is AndreYtelser && ytelse == other.ytelse
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.AndreYtelserDto(dato, kilde, ytelse.dto())
+
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.AndreYtelserDto): AndreYtelser {
                 return AndreYtelser(

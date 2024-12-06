@@ -1,13 +1,13 @@
 package no.nav.helse.testhelpers
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.BesteStrategy
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 
 internal class TestSykdomstidslinje(
     private val førsteDato: LocalDate,
@@ -41,7 +41,7 @@ internal infix fun LocalDate.permisjonTil(sisteDato: LocalDate) = TestSykdomstid
     Sykdomstidslinje.permisjonsdager(førstedato, sistedato, kilde)
 }
 
-internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager )
+internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager)
 
 internal fun Sykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): Sykdomstidslinje = this.merge(testTidslinje.asSykdomstidslinje())
 

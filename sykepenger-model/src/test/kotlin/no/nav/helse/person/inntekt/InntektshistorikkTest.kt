@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class InntektshistorikkTest {
 
@@ -42,11 +42,13 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
+        assertEquals(
+            INNTEKT, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
             null
-        )?.inspektør?.beløp)
+        )?.inspektør?.beløp
+        )
     }
 
     @Test

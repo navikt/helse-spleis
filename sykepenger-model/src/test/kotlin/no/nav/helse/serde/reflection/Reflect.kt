@@ -1,11 +1,11 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.serde.reflection.ReflectClass.Companion.getReflectClass
 import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
+import no.nav.helse.serde.reflection.ReflectClass.Companion.getReflectClass
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> Any?.castAsList() = this as List<T>

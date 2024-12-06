@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class RevurderArbeidsforholdTest: AbstractDslTest() {
+internal class RevurderArbeidsforholdTest : AbstractDslTest() {
 
     @Test
     fun `revurder arbeidsforhold i Avsluttet`() {
@@ -99,6 +99,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `overstyrer forlengelse, førstegangsbehandling revurderes`() {
         a1 {
@@ -482,10 +483,12 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, true, "test"))
 
         a1 {
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            håndterSkjønnsmessigFastsettelse(
+                1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, 31000.månedlig),
                 OverstyrtArbeidsgiveropplysning(a2, 31000.månedlig)
-            ))
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -631,10 +634,12 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            håndterSkjønnsmessigFastsettelse(
+                1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, inntekt),
                 OverstyrtArbeidsgiveropplysning(a2, inntekt)
-            ))
+            )
+            )
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is SkjønnsmessigFastsatt)
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkjønnsmessigFastsatt)
         }
@@ -668,6 +673,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }
     }
+
     private fun TestPerson.TestArbeidsgiver.assertPeriode(
         periode: Periode,
         arbeidsgiverbeløp: Inntekt,

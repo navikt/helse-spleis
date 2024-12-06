@@ -1,12 +1,11 @@
 package no.nav.helse.testhelpers
 
-import org.junit.jupiter.api.Assertions
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
-import kotlin.reflect.KClass
+import org.junit.jupiter.api.Assertions
 
 @OptIn(ExperimentalContracts::class)
-fun <T: Any> assertNotNull(value: T?) {
+fun <T : Any> assertNotNull(value: T?) {
     contract {
         returns() implies (value != null)
     }
@@ -14,7 +13,7 @@ fun <T: Any> assertNotNull(value: T?) {
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <reified T: Any> assertInstanceOf(actual: Any?) {
+inline fun <reified T : Any> assertInstanceOf(actual: Any?) {
     contract {
         returns() implies (actual is T)
     }

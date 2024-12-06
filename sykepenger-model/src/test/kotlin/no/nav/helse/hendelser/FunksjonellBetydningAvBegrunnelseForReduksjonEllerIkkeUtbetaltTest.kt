@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEll
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.januar
 import no.nav.helse.mars
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetaltTest {

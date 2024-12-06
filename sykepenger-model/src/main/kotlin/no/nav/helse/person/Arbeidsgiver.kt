@@ -154,13 +154,17 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
-        internal fun List<Arbeidsgiver>.finn(yrkesaktivitet: Yrkesaktivitet) = find { it.erSammeYrkesaktivitet(yrkesaktivitet) }
+        internal fun List<Arbeidsgiver>.finn(yrkesaktivitet: Yrkesaktivitet) =
+            find { it.erSammeYrkesaktivitet(yrkesaktivitet) }
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
         }
 
-        internal fun List<Arbeidsgiver>.igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+        internal fun List<Arbeidsgiver>.igangsettOverstyring(
+            revurdering: Revurderingseventyr,
+            aktivitetslogg: IAktivitetslogg
+        ) {
             forEach { arbeidsgiver ->
                 arbeidsgiver.looper {
                     it.igangsettOverstyring(revurdering, aktivitetslogg)
@@ -175,12 +179,18 @@ internal class Arbeidsgiver private constructor(
             forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg) }
         }
 
-        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
-            infotrygdhistorikk.skjæringstidspunkt(map(Arbeidsgiver::sykdomstidslinje))
-        }
+        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): () -> Skjæringstidspunkt =
+            {
+                infotrygdhistorikk.skjæringstidspunkt(map(Arbeidsgiver::sykdomstidslinje))
+            }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk), it.beregnArbeidsgiverperiode(Subsumsjonslogg.EmptyLog)) }
+            forEach {
+                it.vedtaksperioder.beregnSkjæringstidspunkter(
+                    beregnSkjæringstidspunkt(infotrygdhistorikk),
+                    it.beregnArbeidsgiverperiode(Subsumsjonslogg.EmptyLog)
+                )
+            }
         }
 
         internal fun List<Arbeidsgiver>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
@@ -197,15 +207,24 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg) =
+        internal fun List<Arbeidsgiver>.håndter(
+            overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag,
+            aktivitetslogg: IAktivitetslogg
+        ) =
             any { it.håndter(overstyrInntektsgrunnlag, aktivitetslogg) }
 
-        internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
+        internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(
+            hendelse: OverstyrArbeidsgiveropplysninger,
+            aktivitetslogg: IAktivitetslogg
+        ) {
             forEach { arbeidsgiver ->
-                val vedtaksperioderPåSkjæringstidspunkt = arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
+                val vedtaksperioderPåSkjæringstidspunkt =
+                    arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
                 val refusjonstidslinje = vedtaksperioderPåSkjæringstidspunkt.refusjonstidslinje()
                 val startdatoer = vedtaksperioderPåSkjæringstidspunkt.startdatoerPåSammenhengendeVedtaksperioder()
-                val servitør = hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje) ?: return@forEach
+                val servitør =
+                    hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje)
+                        ?: return@forEach
                 arbeidsgiver.håndter(hendelse, aktivitetslogg, servitør)
             }
         }
@@ -235,7 +254,8 @@ internal class Arbeidsgiver private constructor(
                 )
             }
 
-        internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) = forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
+        internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
+            forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             personidentifikator: Personidentifikator,
@@ -243,21 +263,29 @@ internal class Arbeidsgiver private constructor(
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
             aktivitetslogg: IAktivitetslogg
         ) {
-            forEach { it.utbetalFeriepenger(
-                personidentifikator,
-                feriepengeberegner,
-                utbetalingshistorikkForFeriepenger,
-                aktivitetslogg
-            ) }
+            forEach {
+                it.utbetalFeriepenger(
+                    personidentifikator,
+                    feriepengeberegner,
+                    utbetalingshistorikkForFeriepenger,
+                    aktivitetslogg
+                )
+            }
         }
 
 
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
-        private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
-        private fun Iterable<Arbeidsgiver>.harPågåeneUtbetaling() = any { it.utbetalinger.any { utbetaling -> utbetaling.erInFlight() } }
-        private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() = nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
+        private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() =
+            vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
+
+        private fun Iterable<Arbeidsgiver>.harPågåeneUtbetaling() =
+            any { it.utbetalinger.any { utbetaling -> utbetaling.erInFlight() } }
+
+        private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() =
+            nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
+
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
             if (harPågåeneUtbetaling()) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
@@ -265,10 +293,14 @@ internal class Arbeidsgiver private constructor(
             periodeSomSkalGjenopptas.gjenopptaBehandling(hendelse, aktivitetslogg)
         }
 
-        internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
+        internal fun Iterable<Arbeidsgiver>.nestemann() =
+            sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
 
-        private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() = flatMap { it.vedtaksperioder }.nestePeriodeSomSkalGjenopptas()
-        private fun Iterable<Arbeidsgiver>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) = flatMap { it.vedtaksperioder }.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas)
+        private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() =
+            flatMap { it.vedtaksperioder }.nestePeriodeSomSkalGjenopptas()
+
+        private fun Iterable<Arbeidsgiver>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) =
+            flatMap { it.vedtaksperioder }.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas)
 
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
@@ -301,15 +333,34 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder = vedtaksperioder,
                 forkastede = forkastede,
                 utbetalinger = utbetalinger.toMutableList(),
-                feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(alder, it) }.toMutableList(),
+                feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(alder, it) }
+                    .toMutableList(),
                 refusjonshistorikk = Refusjonshistorikk.gjenopprett(dto.refusjonshistorikk),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
                 yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
                 subsumsjonslogg = subsumsjonslogg
             )
             val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
-            vedtaksperioder.addAll(dto.vedtaksperioder.map { Vedtaksperiode.gjenopprett(person, arbeidsgiver, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
-            forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, arbeidsgiver, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
+            vedtaksperioder.addAll(dto.vedtaksperioder.map {
+                Vedtaksperiode.gjenopprett(
+                    person,
+                    arbeidsgiver,
+                    it,
+                    subsumsjonslogg,
+                    grunnlagsdata,
+                    utbetalingerMap
+                )
+            })
+            forkastede.addAll(dto.forkastede.map {
+                ForkastetVedtaksperiode.gjenopprett(
+                    person,
+                    arbeidsgiver,
+                    it,
+                    subsumsjonslogg,
+                    grunnlagsdata,
+                    utbetalingerMap
+                )
+            })
             return arbeidsgiver
         }
     }
@@ -319,13 +370,26 @@ internal class Arbeidsgiver private constructor(
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
 
-    internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
+    internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =
+        refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
-    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = avklarSykepengegrunnlag(skjæringstidspunkt) != null
+    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        avklarSykepengegrunnlag(skjæringstidspunkt) != null
 
-    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skatteopplysning: SkatteopplysningerForSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
+    internal fun avklarSykepengegrunnlag(
+        skjæringstidspunkt: LocalDate,
+        skatteopplysning: SkatteopplysningerForSykepengegrunnlag? = null,
+        aktivitetslogg: IAktivitetslogg? = null
+    ): ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skatteopplysning, refusjonshistorikk, aktivitetslogg)
+        return yrkesaktivitet.avklarSykepengegrunnlag(
+            skjæringstidspunkt,
+            førsteFraværsdag,
+            inntektshistorikk,
+            skatteopplysning,
+            refusjonshistorikk,
+            aktivitetslogg
+        )
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
@@ -344,7 +408,15 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
-    ) = lagNyUtbetaling(aktivitetslogg, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+    ) = lagNyUtbetaling(
+        aktivitetslogg,
+        utbetalingstidslinje,
+        maksdato,
+        forbrukteSykedager,
+        gjenståendeSykedager,
+        periode,
+        Utbetalingtype.UTBETALING
+    )
 
     internal fun lagRevurdering(
         aktivitetslogg: IAktivitetslogg,
@@ -354,7 +426,15 @@ internal class Arbeidsgiver private constructor(
         gjenståendeSykedager: Int,
         periode: Periode
     ): Utbetaling {
-        return lagNyUtbetaling(aktivitetslogg, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.REVURDERING)
+        return lagNyUtbetaling(
+            aktivitetslogg,
+            utbetalingstidslinje,
+            maksdato,
+            forbrukteSykedager,
+            gjenståendeSykedager,
+            periode,
+            Utbetalingtype.REVURDERING
+        )
     }
 
     private fun lagNyUtbetaling(
@@ -388,7 +468,11 @@ internal class Arbeidsgiver private constructor(
         return utbetalingen
     }
 
-    private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetalingen: Utbetaling, annulleringer: List<Utbetaling> = emptyList()) {
+    private fun nyUtbetaling(
+        aktivitetslogg: IAktivitetslogg,
+        utbetalingen: Utbetaling,
+        annulleringer: List<Utbetaling> = emptyList()
+    ) {
         utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
         annulleringer.plus(utbetalingen).forEach { utbetaling ->
             check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
@@ -442,26 +526,51 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun vurderOmSøknadIkkeKanHåndteres(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
+    internal fun vurderOmSøknadIkkeKanHåndteres(
+        aktivitetslogg: IAktivitetslogg,
+        vedtaksperiode: Vedtaksperiode,
+        arbeidsgivere: List<Arbeidsgiver>
+    ): Boolean {
         // sjekker først egen arbeidsgiver først
-        return yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(aktivitetslogg) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg, vedtaksperiode)
-                || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg, vedtaksperiode) }
+        return yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(aktivitetslogg) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(
+            aktivitetslogg,
+            vedtaksperiode
+        )
+                || arbeidsgivere.any {
+            it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(
+                aktivitetslogg,
+                vedtaksperiode
+            )
+        }
                 || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, aktivitetslogg, vedtaksperiode)
     }
 
-    private fun harForkastetVedtaksperiodeSomBlokkererBehandling(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
+    private fun harForkastetVedtaksperiodeSomBlokkererBehandling(
+        aktivitetslogg: IAktivitetslogg,
+        vedtaksperiode: Vedtaksperiode
+    ): Boolean {
         return ForkastetVedtaksperiode.forlengerForkastet(forkastede, aktivitetslogg, vedtaksperiode)
                 || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
                 || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
     }
 
-    internal fun håndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
+    internal fun håndter(
+        søknad: Søknad,
+        aktivitetslogg: IAktivitetslogg,
+        arbeidsgivere: List<Arbeidsgiver>,
+        infotrygdhistorikk: Infotrygdhistorikk
+    ) {
         aktivitetslogg.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
         opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
-    private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
+    private fun opprettVedtaksperiodeOgHåndter(
+        søknad: Søknad,
+        aktivitetslogg: IAktivitetslogg,
+        arbeidsgivere: List<Arbeidsgiver>,
+        infotrygdhistorikk: Infotrygdhistorikk
+    ) {
         håndter(søknad) { håndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk) }
         if (søknad.noenHarHåndtert() && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
@@ -479,7 +588,11 @@ internal class Arbeidsgiver private constructor(
         håndter(replays) { håndter(replays, aktivitetslogg) }
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID? = null) {
+    internal fun håndter(
+        inntektsmelding: Inntektsmelding,
+        aktivitetslogg: IAktivitetslogg,
+        vedtaksperiodeIdForReplay: UUID? = null
+    ) {
         aktivitetslogg.kontekst(this)
         if (vedtaksperiodeIdForReplay != null) aktivitetslogg.info("Replayer inntektsmelding.")
 
@@ -488,11 +601,19 @@ internal class Arbeidsgiver private constructor(
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
         if (!inntektsmelding.valider(vedtaksperioder, aktivitetslogg, person::emitInntektsmeldingIkkeHåndtert)) return
 
-        if (vedtaksperiodeIdForReplay == null) håndter(inntektsmelding, aktivitetslogg, inntektsmelding.refusjonsservitør)
+        if (vedtaksperiodeIdForReplay == null) håndter(
+            inntektsmelding,
+            aktivitetslogg,
+            inntektsmelding.refusjonsservitør
+        )
 
         val dagoverstyring = dager.revurderingseventyr()
         val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
-        addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
+        addInntektsmelding(
+            inntektsmelding,
+            aktivitetslogg,
+            Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring)
+        )
 
         inntektsmelding.ferdigstill(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder)
     }
@@ -534,7 +655,11 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun lagreInntektFraAOrdningen(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, omregnetÅrsinntekt: Inntekt) {
+    internal fun lagreInntektFraAOrdningen(
+        meldingsreferanseId: UUID,
+        skjæringstidspunkt: LocalDate,
+        omregnetÅrsinntekt: Inntekt
+    ) {
         val im = no.nav.helse.person.inntekt.Inntektsmelding(
             dato = skjæringstidspunkt,
             hendelseId = meldingsreferanseId,
@@ -543,11 +668,15 @@ internal class Arbeidsgiver private constructor(
         )
 
         inntektshistorikk.leggTil(im)
-        val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
+        val refusjon =
+            Refusjonshistorikk.Refusjon(meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
         refusjonshistorikk.leggTilRefusjon(refusjon)
     }
 
-    internal fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndter(
+        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
+        aktivitetslogg: IAktivitetslogg
+    ) {
         aktivitetslogg.kontekst(this)
         håndter(sykepengegrunnlagForArbeidsgiver) {
             håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
@@ -571,7 +700,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetalingHendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.kontekst(this)
-        if (feriepengeutbetalinger.gjelderFeriepengeutbetaling(utbetalingHendelse)) return håndterFeriepengeUtbetaling(utbetalingHendelse, aktivitetslogg)
+        if (feriepengeutbetalinger.gjelderFeriepengeutbetaling(utbetalingHendelse)) return håndterFeriepengeUtbetaling(
+            utbetalingHendelse,
+            aktivitetslogg
+        )
         håndterUtbetaling(utbetalingHendelse, aktivitetslogg)
     }
 
@@ -587,8 +719,13 @@ internal class Arbeidsgiver private constructor(
         person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    internal fun nyAnnullering(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling? {
-        val annullering = utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
+    internal fun nyAnnullering(
+        hendelse: AnnullerUtbetaling,
+        aktivitetslogg: IAktivitetslogg,
+        utbetalingSomSkalAnnulleres: Utbetaling
+    ): Utbetaling? {
+        val annullering =
+            utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
         nyUtbetaling(aktivitetslogg, annullering)
         annullering.håndter(hendelse, aktivitetslogg)
         looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg) }
@@ -644,7 +781,9 @@ internal class Arbeidsgiver private constructor(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
+                arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
+                    arbeidsgiverOppdrag
+                ),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
                 ident = ident
@@ -684,7 +823,9 @@ internal class Arbeidsgiver private constructor(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
+                arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
+                    arbeidsgiverOppdrag
+                ),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
                 ident = ident,
@@ -777,7 +918,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun sykdomstidslinjeInkludertForkastet(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-        return  forkastede
+        return forkastede
             .slåSammenSykdomstidslinjer(sykdomstidslinje)
             .merge(sykdomstidslinje(), replace)
     }
@@ -789,7 +930,10 @@ internal class Arbeidsgiver private constructor(
         val samletTidslinje = person.infotrygdhistorikk
             .sykdomstidslinje(organisasjonsnummer)
             .merge(sykdomstidslinje, replace)
-        return arbeidsgiverperiodeberegner.resultat(samletTidslinje, person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer))
+        return arbeidsgiverperiodeberegner.resultat(
+            samletTidslinje,
+            person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer)
+        )
     }
 
     internal fun beregnArbeidsgiverperiode(jurist: Subsumsjonslogg) = { vedtaksperiode: Periode ->
@@ -805,8 +949,10 @@ internal class Arbeidsgiver private constructor(
         val arbeidsgiverperioder = arbeidsgiverperiodeFor(sykdomstidslinje)
         return arbeidsgiverperioder.finn(periode)?.somArbeidsgiverperiode()
     }
+
     internal fun arbeidsgiverperiode(periode: Periode) =
         arbeidsgiverperiode(periode, sykdomstidslinje())
+
     internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje) =
         arbeidsgiverperiode(periode, sykdomstidslinjeInkludertForkastet(sykdomstidslinje))
 
@@ -814,7 +960,8 @@ internal class Arbeidsgiver private constructor(
         val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
         if (egenmeldingsperioder.isEmpty()) return arbeidsgiverperiode(periode)
 
-        val tøyseteKilde = SykdomshistorikkHendelse.Hendelseskilde(Søknad::class, UUID.randomUUID(), LocalDateTime.now())
+        val tøyseteKilde =
+            SykdomshistorikkHendelse.Hendelseskilde(Søknad::class, UUID.randomUUID(), LocalDateTime.now())
         val egenmeldingstidslinje = egenmeldingsperioder
             .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, 100.prosent, tøyseteKilde) }
             .merge()
@@ -843,9 +990,14 @@ internal class Arbeidsgiver private constructor(
         return sammenhengendePerioder
     }
 
-    internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) = finnSammenhengendeVedtaksperioder(vedtaksperiode).periode().start
+    internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
+        finnSammenhengendeVedtaksperioder(vedtaksperiode).periode().start
 
-    private fun addInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, overstyring: Revurderingseventyr?) {
+    private fun addInntektsmelding(
+        inntektsmelding: Inntektsmelding,
+        aktivitetslogg: IAktivitetslogg,
+        overstyring: Revurderingseventyr?
+    ) {
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
 
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
@@ -886,7 +1038,10 @@ internal class Arbeidsgiver private constructor(
             subsumsjonsloggMedInntektsmeldingkontekst
         )
         val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring)
-        if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
+        if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(
+            overstyringFraInntektsmelding,
+            aktivitetslogg
+        )
         håndter(inntektsmelding) {
             håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg)
         }
@@ -916,11 +1071,17 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun søppelbøtte(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, filter: VedtaksperiodeFilter): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {
+    private fun søppelbøtte(
+        hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
+        filter: VedtaksperiodeFilter
+    ): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {
         aktivitetslogg.kontekst(this)
         val perioder: List<Pair<Vedtaksperiode, Vedtaksperiode.VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
             .filter(filter)
-            .mapNotNull { vedtaksperiode -> vedtaksperiode.forkast(hendelse, aktivitetslogg, utbetalinger)?.let { vedtaksperiode to it } }
+            .mapNotNull { vedtaksperiode ->
+                vedtaksperiode.forkast(hendelse, aktivitetslogg, utbetalinger)?.let { vedtaksperiode to it }
+            }
 
         vedtaksperioder.removeAll(perioder.map { it.first })
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first) })
@@ -933,7 +1094,11 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.sort()
     }
 
-    private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse, aktivitetslogg: IAktivitetslogg) {
+    private fun registrerForkastetVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        hendelse: SykdomstidslinjeHendelse,
+        aktivitetslogg: IAktivitetslogg
+    ) {
         aktivitetslogg.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
         val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.forkast(hendelse, aktivitetslogg, utbetalinger)
         vedtaksperiodeForkastetEventBuilder!!.buildAndEmit()
@@ -966,20 +1131,27 @@ internal class Arbeidsgiver private constructor(
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
+
     internal fun låsOpp(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
     }
+
     internal fun bekreftErLåst(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().bekreftErLåst(periode)
     }
+
     internal fun bekreftErÅpen(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
     }
 
-    internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate, vedtaksperiodeFilter: VedtaksperiodeFilter = { true }): LocalDate? {
-        val førstePeriodeMedUtbetaling = vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
-            ?: vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            ?: return null
+    internal fun finnFørsteFraværsdag(
+        skjæringstidspunkt: LocalDate,
+        vedtaksperiodeFilter: VedtaksperiodeFilter = { true }
+    ): LocalDate? {
+        val førstePeriodeMedUtbetaling =
+            vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
+                ?: vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+                ?: return null
         return sykdomstidslinje().sisteSkjæringstidspunkt(førstePeriodeMedUtbetaling.periode())
     }
 
@@ -988,11 +1160,17 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje().sisteSkjæringstidspunkt(inntektsdato.somPeriode())?.takeUnless { it == inntektsdato }
     }
 
-    private fun <Hendelsetype : Hendelse> håndter(hendelse: Hendelsetype, håndterer: Vedtaksperiode.(Hendelsetype) -> Unit) {
+    private fun <Hendelsetype : Hendelse> håndter(
+        hendelse: Hendelsetype,
+        håndterer: Vedtaksperiode.(Hendelsetype) -> Unit
+    ) {
         looper { håndterer(it, hendelse) }
     }
 
-    private fun <Hendelsetype : Hendelse> énHarHåndtert(hendelse: Hendelsetype, håndterer: Vedtaksperiode.(Hendelsetype) -> Boolean): Boolean {
+    private fun <Hendelsetype : Hendelse> énHarHåndtert(
+        hendelse: Hendelsetype,
+        håndterer: Vedtaksperiode.(Hendelsetype) -> Boolean
+    ): Boolean {
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
         return håndtert
@@ -1016,8 +1194,14 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.filter { it.periode() in arbeidsgiverperiode }
     }
 
-    internal fun sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperioder.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode, aktivitetslogg)
+    internal fun sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
+        vedtaksperiode: Vedtaksperiode,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        vedtaksperioder.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
+            vedtaksperiode,
+            aktivitetslogg
+        )
     }
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
@@ -1031,7 +1215,8 @@ internal class Arbeidsgiver private constructor(
         val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann) }
         val refusjonsopplysningerPåSisteBehandling = vedtaksperioder.lastOrNull()?.let { sisteVedtaksperiode ->
             val sisteBehandlingId = vedtaksperioderDto.last().behandlinger.behandlinger.last().id
-            val sisteRefusjonstidslinje = sisteVedtaksperiode.hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger)
+            val sisteRefusjonstidslinje =
+                sisteVedtaksperiode.hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger)
             sisteBehandlingId to sisteRefusjonstidslinje
         }
         return ArbeidsgiverUtDto(

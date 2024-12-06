@@ -37,7 +37,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
+internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
     fun `over 6G -- revurder inntekt ned på a1 når begge er i Avsluttet`() {
@@ -83,6 +83,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
 
     }
+
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker ikke utbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
@@ -102,6 +103,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
+
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker utbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
@@ -150,6 +152,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
+
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir brukerutbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
@@ -170,6 +173,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
+
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir økt arbeidsgiverutbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
@@ -421,6 +425,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
+
     @Test
     fun `revurder inntekt når a1 står i AvventerSimuleringRevurdering`() {
         (a1 og a2).nyeVedtak(januar)
@@ -450,6 +455,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
+
     @Test
     fun `revurder inntekt når a1 står i AvventerGodkjenningRevurdering`() {
         (a1 og a2).nyeVedtak(januar)
@@ -508,6 +514,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
+
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
         a2 {

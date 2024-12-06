@@ -32,10 +32,12 @@ class ForespurtOpplysningTest {
         val forespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(30000.månedlig),
             PersonObserver.Arbeidsgiverperiode,
-            PersonObserver.Refusjon(listOf(
-                Refusjonsforslag(fom = 1.januar, tom = 31.mars, 30000.månedlig.månedlig),
-                Refusjonsforslag(fom = 1.april, tom = null, INGEN.månedlig)
-            ))
+            PersonObserver.Refusjon(
+                listOf(
+                    Refusjonsforslag(fom = 1.januar, tom = 31.mars, 30000.månedlig.månedlig),
+                    Refusjonsforslag(fom = 1.april, tom = null, INGEN.månedlig)
+                )
+            )
         )
 
         val expectedJson = forespurteOpplysningerMedFastsattInntektMap()
@@ -64,9 +66,9 @@ class ForespurtOpplysningTest {
             "opplysningstype" to "Inntekt",
             "forslag" to mapOf(
                 "forrigeInntekt" to mapOf(
-                        "skjæringstidspunkt" to 1.januar,
-                        "kilde" to PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING.name,
-                        "beløp" to 31000.0
+                    "skjæringstidspunkt" to 1.januar,
+                    "kilde" to PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING.name,
+                    "beløp" to 31000.0
                 )
             ),
         ),

@@ -1,11 +1,11 @@
 package no.nav.helse.hendelser
 
+import java.time.YearMonth
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
-import java.util.*
 
 data class ArbeidsgiverInntekt(
     val arbeidsgiver: String,
@@ -39,7 +39,8 @@ data class ArbeidsgiverInntekt(
         )
 
         companion object {
-            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) =
+                this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN }
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0

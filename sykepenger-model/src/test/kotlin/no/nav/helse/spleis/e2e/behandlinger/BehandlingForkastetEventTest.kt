@@ -8,7 +8,8 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.BehandlingView.TilstandView.*
+import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
+import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -38,6 +39,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
+
     @Test
     fun `uberegnet behandling forkastes manuelt`() {
         a1 {

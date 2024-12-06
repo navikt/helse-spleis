@@ -96,7 +96,7 @@ class InfotrygdhistorikkElement private constructor(
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
+    private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg) {
         if (!harBetaltRettFør(periode)) return
         aktivitetslogg.funksjonellFeil(RV_IT_14)
     }

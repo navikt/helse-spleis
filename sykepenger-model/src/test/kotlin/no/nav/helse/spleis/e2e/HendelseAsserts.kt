@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.reflect.KClass
 import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.etterspurtBehov
@@ -26,12 +27,12 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import kotlin.reflect.KClass
 
 
 internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
     assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato)?.sykepengegrunnlag)
 }
+
 internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
     val grunnlagsdataInspektør = inspektør.vilkårsgrunnlaghistorikk().grunnlagsdata(dato).inspektør
     val sykepengegrunnlagInspektør = grunnlagsdataInspektør.inntektsgrunnlag.inspektør
@@ -204,7 +205,7 @@ internal fun Aktivitetslogg.assertVarsler(vararg filtre: AktivitetsloggFilter) {
 internal fun Aktivitetslogg.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) {
     assertVarsler(*filtre)
     val ekteWarnings = collectVarsler(*filtre)
-    assertTrue(warnings.containsAll(ekteWarnings)) { "Forventet ikke warnings: ${ekteWarnings.filterNot { it in warnings }}"}
+    assertTrue(warnings.containsAll(ekteWarnings)) { "Forventet ikke warnings: ${ekteWarnings.filterNot { it in warnings }}" }
 }
 
 internal fun Aktivitetslogg.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
@@ -227,7 +228,7 @@ internal fun Aktivitetslogg.assertIngenVarsel(varselkode: Varselkode, vararg fil
     assertFalse(varselkoder.contains(varselkode), "\nFant en varselkode vi ikke forventet:\n\t$varselkode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
 }
 
-internal fun Aktivitetslogg.assertHarTag( vedtaksperiode: IdInnhenter, orgnummer: String = ORGNUMMER, forventetTag: String){
+internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = ORGNUMMER, forventetTag: String) {
     val tags = this.etterspurtBehov<Set<String>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
@@ -282,6 +283,7 @@ internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter):
         .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
         .map { it.kode.toString() }
 }
+
 internal fun Aktivitetslogg.collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
     return varsel
         .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
@@ -307,6 +309,7 @@ internal fun interface AktivitetsloggFilter {
         internal fun vedtaksperiode(vedtaksperiodeId: UUID): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstType == "Vedtaksperiode" && kontekst.kontekstMap["vedtaksperiodeId"] == vedtaksperiodeId.toString()
         }
+
         internal fun vedtaksperiode(idInnhenter: IdInnhenter, orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstType == "Vedtaksperiode" && kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
         }
@@ -314,6 +317,7 @@ internal fun interface AktivitetsloggFilter {
         internal fun person(personidentifikator: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstMap["fødselsnummer"] == personidentifikator.toString()
         }
+
         internal fun arbeidsgiver(orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstType == "Arbeidsgiver" && kontekst.kontekstMap["organisasjonsnummer"] == orgnummer
         }

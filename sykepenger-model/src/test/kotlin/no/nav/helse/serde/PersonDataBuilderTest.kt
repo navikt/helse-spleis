@@ -87,14 +87,19 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     fun `serialisering av person`() {
         a1 {
             håndterSøknad(Sykdom(5.januar, 17.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT/2,
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(
+                beløp = INNTEKT / 2,
                 opphørsdato = 31.januar
-            ))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                    a1 to INNTEKT
-                ), 1.januar),
+            )
+            )
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(
+                        a1 to INNTEKT
+                    ), 1.januar
+                ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
@@ -124,19 +129,26 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
         a3 {
             håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
-            håndterInntektsmelding(listOf(1.juni til 16.juni),
+            håndterInntektsmelding(
+                listOf(1.juni til 16.juni),
                 beregnetInntekt = INNTEKT,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "IngenOpptjening",
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                a3 to INNTEKT
-            ), 1.juni))
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a3 to INNTEKT
+                ), 1.juni
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(1.juni, listOf(
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.juni, listOf(
                 OverstyrtArbeidsgiveropplysning(a3, INNTEKT + 1.daglig, "for lite inntekt")
-            ))
+            )
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -185,12 +197,14 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(2.januar, dag.dato)
             assertEquals(100.0, dag.økonomi.grad.prosent)
             assertEquals(100.0, dag.økonomi.totalGrad.prosent)
-            assertEquals(InntektDto(
-                InntektbeløpDto.Årlig(beløp = 312000.0),
-                InntektbeløpDto.MånedligDouble(beløp = 26000.0),
-                InntektbeløpDto.DagligDouble(beløp = 1200.0),
-                InntektbeløpDto.DagligInt(beløp = 1200)
-            ), dag.økonomi.arbeidsgiverbeløp)
+            assertEquals(
+                InntektDto(
+                    InntektbeløpDto.Årlig(beløp = 312000.0),
+                    InntektbeløpDto.MånedligDouble(beløp = 26000.0),
+                    InntektbeløpDto.DagligDouble(beløp = 1200.0),
+                    InntektbeløpDto.DagligInt(beløp = 1200)
+                ), dag.økonomi.arbeidsgiverbeløp
+            )
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
             assertInstanceOf<UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto>(dag)
         }
@@ -198,32 +212,38 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(3.januar, dag.dato)
             assertEquals(100.0, dag.økonomi.grad.prosent)
             assertEquals(100.0, dag.økonomi.totalGrad.prosent)
-            assertEquals(InntektDto(
-                InntektbeløpDto.Årlig(beløp = 156000.0),
-                InntektbeløpDto.MånedligDouble(beløp = 13000.0),
-                InntektbeløpDto.DagligDouble(beløp = 600.0),
-                InntektbeløpDto.DagligInt(beløp = 600)
-            ), dag.økonomi.arbeidsgiverbeløp)
-            assertEquals(InntektDto(
-                InntektbeløpDto.Årlig(beløp = 156000.0),
-                InntektbeløpDto.MånedligDouble(beløp = 13000.0),
-                InntektbeløpDto.DagligDouble(beløp = 600.0),
-                InntektbeløpDto.DagligInt(beløp = 600)
-            ), dag.økonomi.personbeløp)
+            assertEquals(
+                InntektDto(
+                    InntektbeløpDto.Årlig(beløp = 156000.0),
+                    InntektbeløpDto.MånedligDouble(beløp = 13000.0),
+                    InntektbeløpDto.DagligDouble(beløp = 600.0),
+                    InntektbeløpDto.DagligInt(beløp = 600)
+                ), dag.økonomi.arbeidsgiverbeløp
+            )
+            assertEquals(
+                InntektDto(
+                    InntektbeløpDto.Årlig(beløp = 156000.0),
+                    InntektbeløpDto.MånedligDouble(beløp = 13000.0),
+                    InntektbeløpDto.DagligDouble(beløp = 600.0),
+                    InntektbeløpDto.DagligInt(beløp = 600)
+                ), dag.økonomi.personbeløp
+            )
             assertInstanceOf<UtbetalingsdagUtDto.NavDagDto>(dag)
         }
         dto.dager[3].also { dag ->
             assertEquals(4.januar, dag.dato)
             assertEquals(100.0, dag.økonomi.grad.prosent)
             assertEquals(100.0, dag.økonomi.totalGrad.prosent)
-            assertEquals(InntektDto(
-                InntektbeløpDto.Årlig(beløp = 312000.0),
-                InntektbeløpDto.MånedligDouble(beløp = 26000.0),
-                InntektbeløpDto.DagligDouble(beløp = 1200.0),
-                InntektbeløpDto.DagligInt(beløp = 1200)
-            ), dag.økonomi.arbeidsgiverbeløp)
+            assertEquals(
+                InntektDto(
+                    InntektbeløpDto.Årlig(beløp = 312000.0),
+                    InntektbeløpDto.MånedligDouble(beløp = 26000.0),
+                    InntektbeløpDto.DagligDouble(beløp = 1200.0),
+                    InntektbeløpDto.DagligInt(beløp = 1200)
+                ), dag.økonomi.arbeidsgiverbeløp
+            )
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagUtDto. NavHelgDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.NavHelgDagDto>(dag)
         }
         dto.dager[4].also { dag ->
             assertEquals(5.januar, dag.dato)
@@ -351,6 +371,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             }
         }
     }
+
     private fun assertVilkårsgrunnlaghistorikk(historikk: VilkårsgrunnlaghistorikkUtDto) {
         assertEquals(6, historikk.historikk.size)
         historikk.historikk[5].also { innslag ->
@@ -359,12 +380,14 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
                     assertInstanceOf<InntektsopplysningUtDto.InntektsmeldingDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
-                    assertEquals(InntektDto(
-                        InntektbeløpDto.Årlig(beløp = 372000.0),
-                        InntektbeløpDto.MånedligDouble(beløp = 31000.0),
-                        InntektbeløpDto.DagligDouble(beløp = 1430.7692307692307),
-                        InntektbeløpDto.DagligInt(beløp = 1430)
-                    ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
+                    assertEquals(
+                        InntektDto(
+                            InntektbeløpDto.Årlig(beløp = 372000.0),
+                            InntektbeløpDto.MånedligDouble(beløp = 31000.0),
+                            InntektbeløpDto.DagligDouble(beløp = 1430.7692307692307),
+                            InntektbeløpDto.DagligInt(beløp = 1430)
+                        ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp
+                    )
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
                     assertInstanceOf<InntektsopplysningUtDto.IkkeRapportertDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)

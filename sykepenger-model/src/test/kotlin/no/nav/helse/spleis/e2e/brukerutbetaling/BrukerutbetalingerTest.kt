@@ -67,7 +67,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)

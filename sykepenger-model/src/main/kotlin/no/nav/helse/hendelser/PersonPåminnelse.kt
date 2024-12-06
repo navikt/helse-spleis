@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class PersonPåminnelse(meldingsreferanseId: UUID) : Hendelse {

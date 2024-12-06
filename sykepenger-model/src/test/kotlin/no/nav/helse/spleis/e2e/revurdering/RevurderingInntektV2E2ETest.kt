@@ -118,7 +118,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertDiff(-3047)
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
@@ -169,7 +170,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
@@ -195,7 +197,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
@@ -691,12 +694,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
 
-    private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
+    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
         inspektør.sykdomshistorikk.tidslinje(0)[dato].let {
-            assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}"}
+            assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}" }
         }
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
-            assertTrue(it is UD) { "Forventet ${UD::class.simpleName} men var ${it::class.simpleName}"}
+            assertTrue(it is UD) { "Forventet ${UD::class.simpleName} men var ${it::class.simpleName}" }
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
             assertEquals(aktuellDagsinntekt, it.økonomi.inspektør.aktuellDagsinntekt)

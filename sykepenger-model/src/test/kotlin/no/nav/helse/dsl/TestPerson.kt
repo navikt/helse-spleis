@@ -98,6 +98,7 @@ internal class TestPerson(
     init {
         UgyldigeSituasjonerObservatør(person)
     }
+
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
@@ -114,7 +115,9 @@ internal class TestPerson(
 
     private fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg()
-        try { person.håndter(this, forrigeAktivitetslogg) } finally {
+        try {
+            person.håndter(this, forrigeAktivitetslogg)
+        } finally {
             behovsamler.registrerBehov(forrigeAktivitetslogg)
         }
         return this
@@ -204,7 +207,7 @@ internal class TestPerson(
                         tilkomneInntekter = tilkomneInntekter
                     ).håndter(Person::håndter)
                 }?.also {
-                    if (behovsamler.harBehov(it, Sykepengehistorikk)){
+                    if (behovsamler.harBehov(it, Sykepengehistorikk)) {
                         arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(it).håndter(Person::håndter)
                     }
                 }
@@ -345,6 +348,7 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, utbetalingId, automatisert, vedtakFattetTidspunkt)
                 .håndter(Person::håndter)
         }
+
         internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.sisteUtbetalingId { vedtaksperiodeId }, automatisert: Boolean = true) {
             arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, utbetalingId, automatisert)
                 .håndter(Person::håndter)
@@ -456,6 +460,7 @@ internal class TestPerson(
 
 internal fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     lagStandardSykepengegrunnlag(listOf(orgnummer to inntekt), skjæringstidspunkt)
+
 internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate) =
     InntektForSykepengegrunnlag(
         inntekter = inntektperioderForSykepengegrunnlag {
@@ -552,6 +557,7 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode
 }
+
 internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
@@ -580,7 +586,7 @@ internal fun TestPerson.TestArbeidsgiver.forlengVedtak(
     return vedtaksperiode
 }
 
-internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent, søknadId : UUID = UUID.randomUUID()): UUID {
+internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent, søknadId: UUID = UUID.randomUUID()): UUID {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
     return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId) ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }
 }

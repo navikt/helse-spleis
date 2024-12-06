@@ -49,6 +49,7 @@ class Sykmelding(
 
 class Sykmeldingsperiode(fom: LocalDate, tom: LocalDate) {
     private val periode = fom til tom
+
     internal companion object {
         internal fun periode(perioder: List<Sykmeldingsperiode>) = perioder.map { it.periode }.periode()
     }

@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
-import no.nav.helse.Toggle
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -27,13 +27,19 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingkilde
-import no.nav.helse.person.BehandlingView.TilstandView.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView
+import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
+import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.BehandlingView.TilstandView.BEREGNET_OMGJØRING
+import no.nav.helse.person.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
+import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_REVURDERING
+import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
+import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -207,6 +213,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere iverksatt vedtak`() {
         a1 {
@@ -231,6 +238,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `annullere flere iverksatte vedtak`() {
         a1 {
@@ -587,7 +595,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT), Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT))
             )
@@ -724,9 +733,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            ))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                )
+            )
 
             nyttVedtak(mars)
             forlengVedtak(april)

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
+internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
 
     @Test
     fun `Først sier sykmeldte at det var egenmeldingsdag, så ombestemmer de seg`() {

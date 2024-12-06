@@ -45,15 +45,17 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
 
     private fun setup1og2() {
         håndterSøknad(januar)
-        tillatUgyldigSituasjon {  håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
-            beregnetInntekt = INNTEKT,
-            id = meldingsreferanseId1,
-            mottatt = mottatt1
-        ) }
-        tillatUgyldigSituasjon {  håndterVilkårsgrunnlag(1.vedtaksperiode) }
-        tillatUgyldigSituasjon {  håndterYtelser(1.vedtaksperiode) }
+        tillatUgyldigSituasjon {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
+                beregnetInntekt = INNTEKT,
+                id = meldingsreferanseId1,
+                mottatt = mottatt1
+            )
+        }
+        tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
+        tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
     }
 
     @Test
@@ -79,30 +81,34 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     private fun setup3og4() {
         a1 {
             håndterSøknad(januar)
-            tillatUgyldigSituasjon { håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
-                beregnetInntekt = INNTEKT,
-                id = meldingsreferanseId1,
-                mottatt = mottatt1
-            ) }
+            tillatUgyldigSituasjon {
+                håndterInntektsmelding(
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = 25.januar),
+                    beregnetInntekt = INNTEKT,
+                    id = meldingsreferanseId1,
+                    mottatt = mottatt1
+                )
+            }
             tillatUgyldigSituasjon { håndterVilkårsgrunnlag(1.vedtaksperiode) }
             tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
             tillatUgyldigSituasjon { håndterSimulering(1.vedtaksperiode) }
-            tillatUgyldigSituasjon { håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = INNTEKT,
-                        forklaring = "foo",
-                        subsumsjon = null,
-                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.25))
-                    )
-                ),
-                hendelseId = meldingsreferanseId2,
-                tidsstempel = mottatt2
-            ) }
+            tillatUgyldigSituasjon {
+                håndterOverstyrArbeidsgiveropplysninger(
+                    skjæringstidspunkt = 1.januar,
+                    overstyringer = listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a1,
+                            inntekt = INNTEKT,
+                            forklaring = "foo",
+                            subsumsjon = null,
+                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.25))
+                        )
+                    ),
+                    hendelseId = meldingsreferanseId2,
+                    tidsstempel = mottatt2
+                )
+            }
             tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
         }
     }
@@ -183,7 +189,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
             tillatUgyldigSituasjon { håndterUtbetalingsgodkjenning(2.vedtaksperiode) }
             tillatUgyldigSituasjon { håndterUtbetalt() }
 
-            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null)) }
+            tillatUgyldigSituasjon { håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null)) }
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -201,8 +207,8 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     private fun Beløpstidslinje.assertBeløpstidslinje(vararg forventetBeløp: Pair<Periode, Inntekt>) {
         forventetBeløp.forEach { (periode, inntekt) ->
             val subset = subset(periode)
-            assertEquals(periode, subset.perioderMedBeløp.singleOrNull()) {"Vi har ikke beløp i hele $periode"}
-            assertTrue(subset.all { it.beløp == inntekt }) {"Vi forventet at inntekten skulle være ${inntekt.dagligInt} i $periode, men var: ${subset.map { it.beløp.dagligInt }}"}
+            assertEquals(periode, subset.perioderMedBeløp.singleOrNull()) { "Vi har ikke beløp i hele $periode" }
+            assertTrue(subset.all { it.beløp == inntekt }) { "Vi forventet at inntekten skulle være ${inntekt.dagligInt} i $periode, men var: ${subset.map { it.beløp.dagligInt }}" }
         }
     }
 }

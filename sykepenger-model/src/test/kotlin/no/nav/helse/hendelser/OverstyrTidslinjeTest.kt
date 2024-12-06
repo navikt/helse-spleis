@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
+import java.util.UUID
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
-import java.util.*
 
 internal class OverstyrTidslinjeTest {
 

@@ -397,6 +397,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         automatisert = automatisert
     )
+
     internal fun lagKanIkkeBehandlesHer(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -496,9 +497,11 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         )
 
     internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String, tidsstempel: LocalDateTime = LocalDateTime.now()) =
-        PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
+        PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
-        ), meldingsreferanseId = hendelseId, tidsstempel)
+        ), meldingsreferanseId = hendelseId, tidsstempel
+        )
 
 
 }

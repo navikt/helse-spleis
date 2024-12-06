@@ -87,7 +87,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlag.toMutableMap()
         )
 
-        internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(other?.vilkårsgrunnlag?.toMap()?: emptyMap()) {
+        internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(other?.vilkårsgrunnlag?.toMap() ?: emptyMap()) {
             elementer.forEach { it.add(this) }
         }
 
@@ -238,12 +238,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val eventyr = Revurderingseventyr.Companion.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr
         }
+
         internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, opptjening, subsumsjonslogg)
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag)
             val eventyr = Revurderingseventyr.Companion.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr
         }
+
         protected abstract fun kopierMed(
             aktivitetslogg: IAktivitetslogg,
             inntektsgrunnlag: Inntektsgrunnlag,
@@ -282,7 +284,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             inntektsmelding: Inntektsmelding,
             aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
-        ): Pair<VilkårsgrunnlagElement, Revurderingseventyr>  {
+        ): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(
                 person,
                 inntektsmelding,
@@ -348,6 +350,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun dto(): VilkårsgrunnlagUtDto =
             dto(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag.dto())
+
         protected abstract fun dto(
             vilkårsgrunnlagId: UUID,
             skjæringstidspunkt: LocalDate,

@@ -97,6 +97,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             AVSLUTTET
         )
     }
+
     @Test
     fun `foreldet dag innenfor agp -- kan lukkes uten manuell behandling`() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 16.februar))

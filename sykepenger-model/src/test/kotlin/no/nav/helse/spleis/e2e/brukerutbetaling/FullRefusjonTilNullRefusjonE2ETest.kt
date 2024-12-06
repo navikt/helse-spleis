@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
+internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `starter med ingen refusjon`() {

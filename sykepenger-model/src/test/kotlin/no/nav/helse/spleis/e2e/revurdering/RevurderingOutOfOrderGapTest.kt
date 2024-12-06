@@ -279,7 +279,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val antallSykedagerIFebruar2018 = 20
         val nettoBeløpForFebruarMedStandardInntektUtenAgp = 1431 * antallSykedagerIFebruar2018
         val revurdering = inspektør.sisteUtbetaling()
-        assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp -nettoBeløpForFebruarMedStandardInntektOgAgp, revurdering.nettobeløp)
+        assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp - nettoBeløpForFebruarMedStandardInntektOgAgp, revurdering.nettobeløp)
     }
 
     @Test
@@ -1255,8 +1255,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     private fun håndterVilkårsgrunnlagMedGhost(vedtaksperiode: IdInnhenter, skjæringstidspunkt: LocalDate, arbeidsgiver: String, ghost: String) {
-        håndterVilkårsgrunnlag(vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(arbeidsgiver to INNTEKT, ghost to INNTEKT),skjæringstidspunkt),
+        håndterVilkårsgrunnlag(
+            vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(arbeidsgiver to INNTEKT, ghost to INNTEKT), skjæringstidspunkt),
             arbeidsforhold = listOf(
                 Arbeidsforhold(arbeidsgiver, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
                 Arbeidsforhold(ghost, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),

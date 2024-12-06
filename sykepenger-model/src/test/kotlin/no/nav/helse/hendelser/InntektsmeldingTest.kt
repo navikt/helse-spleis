@@ -323,8 +323,8 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-       dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
-       assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test

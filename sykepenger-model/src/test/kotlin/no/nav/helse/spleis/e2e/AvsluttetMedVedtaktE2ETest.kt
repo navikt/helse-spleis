@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -75,7 +75,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(setOf(søknadId, inntektsmeldingId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
     }
 
     @Test
@@ -219,7 +219,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val liste = (1..16).map{
+        val liste = (1..16).map {
             ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
         }
         val overstyringId = UUID.randomUUID()

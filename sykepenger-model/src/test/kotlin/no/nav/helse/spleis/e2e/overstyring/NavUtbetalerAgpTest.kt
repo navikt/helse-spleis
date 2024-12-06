@@ -82,7 +82,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
+internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal aldri foreslå sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt`() {
@@ -418,7 +418,8 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             juni, arbeidsgiverperiode = listOf(
             1.juni til 5.juni,
             8.juni til 18.juni
-        ))
+        )
+        )
         håndterSøknad(Sykdom(1.august, 10.august, 100.prosent))
         nullstillTilstandsendringer()
         håndterInntektsmelding(

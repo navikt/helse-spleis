@@ -52,8 +52,8 @@ internal class RefusjonsopplysningerTest {
         val beløpstidslinje = refusjonsopplysninger.beløpstidslinje()
         val forventet =
             Beløpstidslinje.fra(1.januar til 9.januar, 500.daglig, Kilde(meldingsreferanseId1, ARBEIDSGIVER, LocalDateTime.MIN)) +
-            Beløpstidslinje.fra(10.januar til 28.februar, INGEN, Kilde(meldingsreferanseId2, SAKSBEHANDLER, LocalDate.EPOCH.atStartOfDay())) +
-            Beløpstidslinje.fra(1.mars til 1.mars, 250.daglig, Kilde(meldingsreferanseId3, SYSTEM, LocalDateTime.MAX))
+                Beløpstidslinje.fra(10.januar til 28.februar, INGEN, Kilde(meldingsreferanseId2, SAKSBEHANDLER, LocalDate.EPOCH.atStartOfDay())) +
+                Beløpstidslinje.fra(1.mars til 1.mars, 250.daglig, Kilde(meldingsreferanseId3, SYSTEM, LocalDateTime.MAX))
 
         assertEquals(forventet, beløpstidslinje)
     }
@@ -66,11 +66,13 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId1, 1.mars, null, 250.daglig),
         ).refusjonsopplysninger()
 
-        assertEquals(listOf(
-            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 9.januar, 500.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 10.januar, 28.februar, INGEN),
-            Refusjonsopplysning(meldingsreferanseId1, 1.mars, null, 250.daglig),
-        ).refusjonsopplysninger(), refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId1, 1.januar, 9.januar, 500.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 10.januar, 28.februar, INGEN),
+                Refusjonsopplysning(meldingsreferanseId1, 1.mars, null, 250.daglig),
+            ).refusjonsopplysninger(), refusjonsopplysninger
+        )
     }
 
     @Test
@@ -81,11 +83,13 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId1, 13.januar, null, 250.daglig),
         ).refusjonsopplysninger()
 
-        assertEquals(listOf(
-            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 4.januar, 500.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 5.januar, 12.januar, INGEN),
-            Refusjonsopplysning(meldingsreferanseId1, 13.januar, null, 250.daglig),
-        ).refusjonsopplysninger(), refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId1, 1.januar, 4.januar, 500.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 5.januar, 12.januar, INGEN),
+                Refusjonsopplysning(meldingsreferanseId1, 13.januar, null, 250.daglig),
+            ).refusjonsopplysninger(), refusjonsopplysninger
+        )
     }
 
     @Test
@@ -138,12 +142,14 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId2, 9.mai, null, INGEN)
         ).refusjonsopplysninger()
 
-        assertEquals(listOf(
-            Refusjonsopplysning(meldingsreferanseId2, 6.mars, 16.april, 2000.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 17.april, 20.april, INGEN),
-            Refusjonsopplysning(meldingsreferanseId1, 21.april, 8.mai, 2000.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 9.mai, null, INGEN) // <-
-        ).refusjonsopplysninger(), gamleRefusjonsopplysninger.merge(nyeRefusjonsopplysninger))
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId2, 6.mars, 16.april, 2000.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 17.april, 20.april, INGEN),
+                Refusjonsopplysning(meldingsreferanseId1, 21.april, 8.mai, 2000.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 9.mai, null, INGEN) // <-
+            ).refusjonsopplysninger(), gamleRefusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+        )
     }
 
     @Test
@@ -306,7 +312,7 @@ internal class RefusjonsopplysningerTest {
         val tidspunkt = LocalDateTime.now()
         val januar = Refusjonsopplysning(meldingsreferanseId1, 1.januar, 1.mars, 2000.daglig)
         val mars = Refusjonsopplysning(meldingsreferanseId2, 1.mars, 31.mars, 2000.daglig)
-        val marsFørst = RefusjonsopplysningerBuilder().leggTil(mars, tidspunkt).leggTil(januar,tidspunkt).build()
+        val marsFørst = RefusjonsopplysningerBuilder().leggTil(mars, tidspunkt).leggTil(januar, tidspunkt).build()
         val januarFørst = RefusjonsopplysningerBuilder().leggTil(januar, tidspunkt).leggTil(mars, tidspunkt).build()
         assertEquals(marsFørst, januarFørst)
     }
@@ -334,25 +340,31 @@ internal class RefusjonsopplysningerTest {
         assertGjenopprettetRefusjonsopplysninger(emptyList())
         assertGjenopprettetRefusjonsopplysninger(listOf(Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig)))
         assertGjenopprettetRefusjonsopplysninger(listOf(Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 1000.daglig)))
-        assertGjenopprettetRefusjonsopplysninger(listOf(
-            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 1.mars, 31.mars, 2000.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 1.april, null, 3000.daglig),
-        ))
+        assertGjenopprettetRefusjonsopplysninger(
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 1.mars, 31.mars, 2000.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 1.april, null, 3000.daglig),
+            )
+        )
     }
 
     @Test
     fun `kan ikke gjenopprette refusjonsopplysningr som overlapper`() {
-        assertThrows<IllegalStateException> { listOf(
-            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig),
-            Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig),
-            Refusjonsopplysning(meldingsreferanseId3, 1.april, 30.april, 3000.daglig),
-        ).gjennopprett() }
+        assertThrows<IllegalStateException> {
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig),
+                Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig),
+                Refusjonsopplysning(meldingsreferanseId3, 1.april, 30.april, 3000.daglig),
+            ).gjennopprett()
+        }
 
-        assertThrows<IllegalStateException> { listOf(
-            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig),
-            Refusjonsopplysning(meldingsreferanseId2, 1.januar, 28.februar, 2000.daglig)
-        ).gjennopprett() }
+        assertThrows<IllegalStateException> {
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 1000.daglig),
+                Refusjonsopplysning(meldingsreferanseId2, 1.januar, 28.februar, 2000.daglig)
+            ).gjennopprett()
+        }
     }
 
     @Test
@@ -437,13 +449,15 @@ internal class RefusjonsopplysningerTest {
             .leggTil(Refusjonsopplysning(overstyringId, 1.mai, null, 1700.daglig))
             .build()
 
-        assertEquals(listOf(
-            Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig),
-            Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig),
-            Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig),
-            Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig),
-            Refusjonsopplysning(inntektsmeldingId, 1.mai, null, 1700.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig),
+                Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig),
+                Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig),
+                Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig),
+                Refusjonsopplysning(inntektsmeldingId, 1.mai, null, 1700.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -454,10 +468,12 @@ internal class RefusjonsopplysningerTest {
         val overstyringId = meldingsreferanseId2
         val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 10.januar, null, 1000.daglig).refusjonsopplysninger
 
-        assertEquals(listOf(
-            Refusjonsopplysning(inntektsmeldingId, 1.januar, 9.januar, 1000.daglig),
-            Refusjonsopplysning(overstyringId, 10.januar, null, 1000.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 9.januar, 1000.daglig),
+                Refusjonsopplysning(overstyringId, 10.januar, null, 1000.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -468,10 +484,12 @@ internal class RefusjonsopplysningerTest {
         val overstyringId = meldingsreferanseId2
         val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig).refusjonsopplysninger
 
-        assertEquals(listOf(
-            Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig),
-            Refusjonsopplysning(inntektsmeldingId, 21.januar, 31.januar, 1000.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingId, 21.januar, 31.januar, 1000.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -482,10 +500,12 @@ internal class RefusjonsopplysningerTest {
         val overstyringId = meldingsreferanseId2
         val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig).refusjonsopplysninger
 
-        assertEquals(listOf(
-            Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig),
-            Refusjonsopplysning(inntektsmeldingId, 21.januar, null, 1000.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingId, 21.januar, null, 1000.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -496,11 +516,13 @@ internal class RefusjonsopplysningerTest {
         val overstyringId = meldingsreferanseId2
         val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 2.januar, 30.januar, 1000.daglig).refusjonsopplysninger
 
-        assertEquals(listOf(
-            Refusjonsopplysning(inntektsmeldingId, 1.januar, 1.januar, 1000.daglig),
-            Refusjonsopplysning(overstyringId, 2.januar, 30.januar, 1000.daglig),
-            Refusjonsopplysning(inntektsmeldingId, 31.januar, 31.januar, 1000.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 1.januar, 1000.daglig),
+                Refusjonsopplysning(overstyringId, 2.januar, 30.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingId, 31.januar, 31.januar, 1000.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -517,11 +539,13 @@ internal class RefusjonsopplysningerTest {
             .leggTil(Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)) // Hull 1-9.februar
             .build()
 
-        assertEquals(listOf(
-            Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig),
-            Refusjonsopplysning(inntektsmeldingId, 1.februar, 9.februar, 1200.daglig),
-            Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig),
+                Refusjonsopplysning(inntektsmeldingId, 1.februar, 9.februar, 1200.daglig),
+                Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -534,11 +558,13 @@ internal class RefusjonsopplysningerTest {
         val ønskedeRefusjonsopplysninger =
             Refusjonsopplysning(overstyringId, 13.januar, 1.desember, 1600.daglig).refusjonsopplysninger
 
-        assertEquals(listOf(
-            Refusjonsopplysning(inntektsmeldingId, 1.januar, 12.januar, 1200.daglig),
-            Refusjonsopplysning(overstyringId, 13.januar, 1.desember, 1600.daglig),
-            Refusjonsopplysning(inntektsmeldingId, 2.desember, null, 1200.daglig)
-        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 12.januar, 1200.daglig),
+                Refusjonsopplysning(overstyringId, 13.januar, 1.desember, 1600.daglig),
+                Refusjonsopplysning(inntektsmeldingId, 2.desember, null, 1200.daglig)
+            ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger
+        )
     }
 
     @Test
@@ -556,6 +582,7 @@ internal class RefusjonsopplysningerTest {
 
         assertEquals(ønskedeRefusjonsopplysninger, eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger))
     }
+
     @Test
     fun `saksbehandler forsøker å fjerne alle refusjonsopplysninger`() {
         val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 1000.daglig).refusjonsopplysninger
@@ -574,10 +601,12 @@ internal class RefusjonsopplysningerTest {
         ).refusjonsopplysninger()
 
         val resultat = refusjonsopplysninger.merge(nyeRefusjonsopplysninger)
-        assertEquals(listOf(
-            Refusjonsopplysning(meldingsreferanseId2, 1.januar, 10.januar, 2000.daglig),
-            Refusjonsopplysning(meldingsreferanseId1, 11.januar, null, 2000.daglig)
-        ).refusjonsopplysninger(), resultat)
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId2, 1.januar, 10.januar, 2000.daglig),
+                Refusjonsopplysning(meldingsreferanseId1, 11.januar, null, 2000.daglig)
+            ).refusjonsopplysninger(), resultat
+        )
         assertEquals(1.januar, resultat.finnFørsteDatoForEndring(refusjonsopplysninger))
     }
 
@@ -592,9 +621,11 @@ internal class RefusjonsopplysningerTest {
         gamleRefusjonsopplysninger.lagreTidsnær(1.juli, historikk)
 
         val resultat = historikk.refusjonsopplysninger(1.juli)
-        assertLikeRefusjonsopplysninger(listOf(
-            Refusjonsopplysning(meldingsreferanseId2, 1.juli, null, INGEN, ARBEIDSGIVER)
-        ), resultat.inspektør.refusjonsopplysninger)
+        assertLikeRefusjonsopplysninger(
+            listOf(
+                Refusjonsopplysning(meldingsreferanseId2, 1.juli, null, INGEN, ARBEIDSGIVER)
+            ), resultat.inspektør.refusjonsopplysninger
+        )
     }
 
     internal companion object {
@@ -607,9 +638,11 @@ internal class RefusjonsopplysningerTest {
 
         private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
             harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
+
         private fun assertGjenopprettetRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>) {
             assertEquals(refusjonsopplysninger, refusjonsopplysninger.gjennopprett().inspektør.refusjonsopplysninger)
         }
+
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(skjæringstidspunkt, dager, null, Aktivitetslogg(), "")
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode.toList(), null, Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())

@@ -97,42 +97,48 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(3, overstyringerIgangsatt.size)
 
         overstyringerIgangsatt[0].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.januar til 1.januar,
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), februar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a2, 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
-                ),
-                meldingsreferanseId = im1
-            ), event)
+            assertEquals(
+                PersonObserver.OverstyringIgangsatt(
+                    årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
+                    skjæringstidspunkt = 1.januar,
+                    periodeForEndring = 1.januar til 1.januar,
+                    berørtePerioder = listOf(
+                        VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
+                        VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), februar, 1.januar, "REVURDERING"),
+                        VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
+                        VedtaksperiodeData(a2, 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
+                    ),
+                    meldingsreferanseId = im1
+                ), event
+            )
         }
 
         overstyringerIgangsatt[1].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "NY_PERIODE",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars til 20.mars,
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
-                ),
-                meldingsreferanseId = søknad
-            ), event)
+            assertEquals(
+                PersonObserver.OverstyringIgangsatt(
+                    årsak = "NY_PERIODE",
+                    skjæringstidspunkt = 1.januar,
+                    periodeForEndring = 1.mars til 20.mars,
+                    berørtePerioder = listOf(
+                        VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                    ),
+                    meldingsreferanseId = søknad
+                ), event
+            )
         }
 
         overstyringerIgangsatt[2].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars.somPeriode(),
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
-                ),
-                meldingsreferanseId = im2
-            ), event)
+            assertEquals(
+                PersonObserver.OverstyringIgangsatt(
+                    årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
+                    skjæringstidspunkt = 1.januar,
+                    periodeForEndring = 1.mars.somPeriode(),
+                    berørtePerioder = listOf(
+                        VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                    ),
+                    meldingsreferanseId = im2
+                ), event
+            )
         }
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
@@ -151,7 +157,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
@@ -196,7 +203,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
@@ -221,11 +229,13 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT, imId)
 
-        assertEquals(setOf(
-            Dokumentsporing.søknad(søknadId),
-            Dokumentsporing.inntektsmeldingDager(imId),
-            Dokumentsporing.inntektsmeldingInntekt(imId)
-        ), inspektør(a2).hendelser(1.vedtaksperiode))
+        assertEquals(
+            setOf(
+                Dokumentsporing.søknad(søknadId),
+                Dokumentsporing.inntektsmeldingDager(imId),
+                Dokumentsporing.inntektsmeldingInntekt(imId)
+            ), inspektør(a2).hendelser(1.vedtaksperiode)
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -263,7 +273,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),

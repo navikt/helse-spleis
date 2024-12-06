@@ -52,7 +52,7 @@ class Påminnelse(
         }
     }
 
-    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >=  tilstandsendringstidspunkt
+    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >= tilstandsendringstidspunkt
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(

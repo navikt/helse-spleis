@@ -1,5 +1,10 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
+import java.time.LocalDate.EPOCH
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -11,20 +16,14 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDate.EPOCH
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.UUID
 
 class SkatteopplysningerForSykepengegrunnlagTest {
 
     @Test
-    fun  `ikke ansatt på skjæringstidspunktet`() {
+    fun `ikke ansatt på skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = listOf(
@@ -38,7 +37,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `nyoppstartet arbeidsforhold og ingen inntekter - mer enn to måneder fra skjæringstidspunktet`() {
+    fun `nyoppstartet arbeidsforhold og ingen inntekter - mer enn to måneder fra skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = emptyList(),
@@ -53,7 +52,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `nyoppstartet arbeidsforhold og ingen inntekter - innen to måneder fra skjæringstidspunktet`() {
+    fun `nyoppstartet arbeidsforhold og ingen inntekter - innen to måneder fra skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = emptyList(),
@@ -68,7 +67,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `nyoppstartet arbeidsforhold - uten inntekt innen to måneder fra skjæringstidspunktet`() {
+    fun `nyoppstartet arbeidsforhold - uten inntekt innen to måneder fra skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = listOf(
@@ -85,7 +84,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `nyoppstartet arbeidsforhold - med inntekt innen to måneder fra skjæringstidspunktet`() {
+    fun `nyoppstartet arbeidsforhold - med inntekt innen to måneder fra skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = listOf(
@@ -102,7 +101,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `med inntekt innen to måneder fra skjæringstidspunktet`() {
+    fun `med inntekt innen to måneder fra skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = listOf(
@@ -119,7 +118,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `uten inntekt innen to måneder fra skjæringstidspunktet`() {
+    fun `uten inntekt innen to måneder fra skjæringstidspunktet`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = listOf(
@@ -136,7 +135,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     }
 
     @Test
-    fun  `ingen inntekter`() {
+    fun `ingen inntekter`() {
         val skatt = opplysninger(
             skjæringstidspunkt = 10.april,
             skatteopplysninger = emptyList(),

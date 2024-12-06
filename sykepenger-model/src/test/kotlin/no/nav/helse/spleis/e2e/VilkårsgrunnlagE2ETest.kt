@@ -41,20 +41,25 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a2,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    ArbeidsgiverInntekt(a1, listOf(
+                    ArbeidsgiverInntekt(
+                        a1, listOf(
                         desember(2017).lønnsinntekt(),
                         november(2017).lønnsinntekt(),
                         oktober(2017).lønnsinntekt()
-                    )),
-                    ArbeidsgiverInntekt(a2, listOf(
+                    )
+                    ),
+                    ArbeidsgiverInntekt(
+                        a2, listOf(
                         desember(2017).lønnsinntekt(),
                         november(2017).lønnsinntekt(),
                         oktober(2017).lønnsinntekt(),
-                    )),
+                    )
+                    ),
                 )
             ),
             arbeidsforhold = listOf(
@@ -75,19 +80,24 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode,
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    ArbeidsgiverInntekt(a1, listOf(
+                    ArbeidsgiverInntekt(
+                        a1, listOf(
                         desember(2017).lønnsinntekt(INNTEKT),
                         november(2017).lønnsinntekt(INNTEKT),
                         oktober(2017).lønnsinntekt(INNTEKT)
-                    )),
-                    ArbeidsgiverInntekt(a2, listOf(
+                    )
+                    ),
+                    ArbeidsgiverInntekt(
+                        a2, listOf(
                         desember(2017).lønnsinntekt(2500.månedlig),
                         november(2017).lønnsinntekt((-3000).månedlig),
-                    )),
+                    )
+                    ),
                 )
             ),
             arbeidsforhold = listOf(
@@ -126,7 +136,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
         )
 
@@ -136,7 +146,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE
         )
     }
-    
+
     @Test
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
@@ -176,5 +186,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     private fun assertVilkårsgrunnlagFraSpleisFor(vararg skjæringstidspunkt: LocalDate) {
         assertEquals(skjæringstidspunkt.toSet(), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
     }
+
     private fun assertIngenVilkårsgrunnlagFraSpleis() = assertVilkårsgrunnlagFraSpleisFor()
 }

@@ -257,9 +257,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - avventer simulering revurdering`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
@@ -271,9 +273,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - avventer godkjenning revurdering`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         forkastAlle()
@@ -286,9 +290,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - til utbetaling`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -302,9 +308,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke revurderinger - revurdering feilet`() {
         nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(
-            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-        ))
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
