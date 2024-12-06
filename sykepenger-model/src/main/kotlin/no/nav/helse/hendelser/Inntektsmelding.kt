@@ -192,7 +192,6 @@ class Inntektsmelding(
         dager: DagerFraInntektsmelding
     ) {
         if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
-        aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${type::class.simpleName}. Avsendersystem $avsendersystem")
         type.ikkeHåndtert(
             inntektsmelding = this,
             aktivitetslogg = aktivitetslogg,
@@ -267,8 +266,9 @@ class Inntektsmelding(
         override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
             if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
                 person.emitInntektsmeldingFørSøknadEvent(inntektsmelding.metadata.meldingsreferanseId, relevanteSykmeldingsperioder, inntektsmelding.behandlingsporing.organisasjonsnummer)
-                return aktivitetslogg.info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
+                return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
             }
+            aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
             person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
     }
@@ -292,6 +292,7 @@ class Inntektsmelding(
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.periode().start
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = vedtaksperiode.skjæringstidspunkt
         override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
+            aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
             person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
 
