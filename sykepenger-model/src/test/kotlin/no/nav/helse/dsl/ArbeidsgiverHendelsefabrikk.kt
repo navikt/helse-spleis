@@ -46,7 +46,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -208,19 +207,22 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now(),
-        avsenderSystem: Avsenderutleder
-    ) = Inntektsmelding(
-        meldingsreferanseId = id,
-        refusjon = refusjon,
-        orgnummer = organisasjonsnummer,
-        beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, arbeidsgiverperioder.lastOrNull()?.start ?: LocalDate.EPOCH, avsenderSystem == NAV_NO),
-        mottatt = mottatt
-    )
+        avsendersystem: Avsenderutleder
+    ): Inntektsmelding {
+        check(erNavPortal(avsendersystem)) { "Du kan ikke klage en portalinntektsmelding når avsenderen er ALTINN/LPS!" }
+        return Inntektsmelding(
+            meldingsreferanseId = id,
+            refusjon = refusjon,
+            orgnummer = organisasjonsnummer,
+            beregnetInntekt = beregnetInntekt,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = avsendersystem(vedtaksperiodeId, arbeidsgiverperioder.lastOrNull()?.start ?: LocalDate.EPOCH, null),
+            mottatt = mottatt
+        )
+    }
 
     internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
         InntektsmeldingerReplay(

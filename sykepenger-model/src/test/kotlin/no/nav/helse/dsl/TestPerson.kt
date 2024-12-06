@@ -247,7 +247,7 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             orgnummer: String = "",
             mottatt: LocalDateTime = LocalDateTime.now(),
-            avsenderSystem: Avsenderutleder = NAV_NO
+            avsendersystem: Avsenderutleder = NAV_NO
         ): UUID {
             arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
                 arbeidsgiverperioder,
@@ -258,7 +258,7 @@ internal class TestPerson(
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
                 mottatt = mottatt,
-                avsenderSystem = avsenderSystem
+                avsendersystem = avsendersystem
             ).håndter(Person::håndter)
             return id
         }

@@ -35,7 +35,7 @@ internal class PortalInntektsmeldingTest: AbstractDslTest() {
     fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
-            håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsenderSystem = NAV_NO_SELVBESTEMT)
+            håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)
             assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }

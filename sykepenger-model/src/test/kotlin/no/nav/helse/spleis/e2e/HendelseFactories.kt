@@ -44,7 +44,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
-import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -233,7 +232,7 @@ internal fun AbstractEndToEndTest.portalInntektsmelding(
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         id = id,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsenderSystem = avsendersystem
+        avsendersystem = avsendersystem
     )
 }
 
