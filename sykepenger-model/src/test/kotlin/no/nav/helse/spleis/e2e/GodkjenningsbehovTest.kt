@@ -8,7 +8,9 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
@@ -294,6 +296,22 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 forventetTag = "InntektFraAOrdningenLagtTilGrunn"
             )
         }
+
+    @Test
+    fun `tagger perioder innenfor arbeidsgiverperioden`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+        nyPeriode(1.januar til 10.januar)
+        håndterInntektsmelding(emptyList(), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        hendelselogg.assertHarTag(
+            vedtaksperiode = 1.vedtaksperiode,
+            forventetTag = "InnenforArbeidsgiverperioden"
+        )
+    }
 
     @Test
     fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
