@@ -44,7 +44,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(6.januar til 15.januar)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(16.januar til 31.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -252,7 +252,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger fra periode der arbeidsgiver har sendt inntektsmelding før vi mottar søknad`() {
-        håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            avsendersystem = ALTINN
+        )
         nyPeriode(januar)
         forkastAlle()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)

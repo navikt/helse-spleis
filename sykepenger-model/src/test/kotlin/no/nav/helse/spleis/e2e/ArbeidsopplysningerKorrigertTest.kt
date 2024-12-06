@@ -26,12 +26,14 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         val korrigerendeInntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(29000.månedlig, null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
@@ -46,14 +48,20 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer agp`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val korrigertInntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        val korrigerendeInntektsmeldingId = håndterInntektsmelding(listOf(2.januar til 17.januar))
+        val korrigerendeInntektsmeldingId = håndterInntektsmelding(
+            listOf(2.januar til 17.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
             korrigertInntektsmeldingId = korrigertInntektsmeldingId,
@@ -67,7 +75,10 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved saksbehandleroverstyring som endrer inntekt og refusjon`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val korrigertInntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -101,8 +112,16 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val tom = 31.januar
         nyPeriode(fom til tom, orgnummer = a1)
         nyPeriode(fom til tom, orgnummer = a2)
-        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
-        val korrigertInntektsmeldingIdA2 = håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a2)
+        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        val korrigertInntektsmeldingIdA2 = håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -161,8 +180,16 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val tom = 31.januar
         nyPeriode(fom til tom, orgnummer = a1)
         nyPeriode(fom til tom, orgnummer = a2)
-        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
-        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a2)
+        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -205,7 +232,10 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved saksbehandleroverstyring som endrer agp`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val korrigertInntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -253,12 +283,14 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
@@ -291,7 +323,11 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             )
         )
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 41000.månedlig)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 41000.månedlig,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
     }
 }

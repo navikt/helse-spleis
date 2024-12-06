@@ -381,7 +381,11 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer, vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter)
+        håndterInntektsmelding(
+            listOf(arbeidsgiverperiode),
+            orgnummer = orgnummer,
+            vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter
+        )
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
@@ -399,7 +403,11 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
+        håndterInntektsmelding(
+            listOf(arbeidsgiverperiode),
+            orgnummer = orgnummer,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
@@ -417,8 +425,16 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = a2)
         håndterSøknad(Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(arbeidsgiverperiode),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(arbeidsgiverperiode),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

@@ -73,6 +73,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig,
             refusjon = Refusjon(32000.månedlig, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -120,6 +121,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig,
             refusjon = Refusjon(32000.månedlig, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         håndterYtelser(1.vedtaksperiode)
@@ -131,6 +133,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             refusjon = Refusjon(31000.månedlig, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -240,6 +243,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 50000.årlig,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
@@ -268,6 +272,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = OverMinstegrense,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
@@ -317,6 +322,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -361,7 +367,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -434,6 +440,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
             refusjon = Refusjon(25000.månedlig, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)

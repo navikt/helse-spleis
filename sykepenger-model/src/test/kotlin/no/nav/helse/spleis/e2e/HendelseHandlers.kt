@@ -205,7 +205,8 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
             beregnetInntekt = 20000.månedlig,
             orgnummer = it.first,
             avsendersystem = if (it.second == null) ALTINN else NAV_NO,
-            vedtaksperiodeIdInnhenter = it.second ?: 1.vedtaksperiode
+            førsteFraværsdag = if (it.second == null) periode.start else null,
+            vedtaksperiodeIdInnhenter = it.second
         )
     }
 
@@ -497,7 +498,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder = NAV_NO,
-    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    vedtaksperiodeIdInnhenter: IdInnhenter? = null,
     førReplay: () -> Unit = {}
 ): UUID {
     if (erNavPortal(avsendersystem)) {
@@ -508,12 +509,13 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             til LPS/ALTINN om det er en viktig detalj i testen din at første fraværsdag er satt.
             """
         }
+
         return håndterInntektsmelding(
             inntektsmeldingPortal(
                 id,
                 arbeidsgiverperioder,
                 beregnetInntekt = beregnetInntekt,
-                vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
+                vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" }),
                 refusjon = refusjon,
                 orgnummer = orgnummer,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
@@ -523,6 +525,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             )
         )
     }
+    check(vedtaksperiodeIdInnhenter == null)  { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
     return håndterInntektsmelding(
         inntektsmelding(
             id,

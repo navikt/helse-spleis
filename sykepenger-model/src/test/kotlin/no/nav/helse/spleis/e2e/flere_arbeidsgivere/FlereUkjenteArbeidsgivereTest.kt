@@ -66,11 +66,21 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         forlengVedtak(februar, orgnummer = a1)
         forlengVedtak(mars, orgnummer = a1)
 
-        val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1, orgnummer = a1)
+        val im1 = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = inntektA1,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val im2 = håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = inntektA2, orgnummer = a2, avsendersystem = ALTINN)
+        val im2 = håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            beregnetInntekt = inntektA2,
+            orgnummer = a2,
+            avsendersystem = ALTINN
+        )
         nullstillTilstandsendringer()
         val søknad = UUID.randomUUID()
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), id = søknad, orgnummer = a2)
@@ -139,7 +149,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var ansett som ghost`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -181,7 +195,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var ansett som ghost - a1 revurderes`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -246,7 +264,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(

@@ -65,7 +65,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     fun `tomt simuleringsresultat`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar))
         håndterSøknad(1.januar til 21.januar)
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringsresultat = null)

@@ -62,7 +62,12 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `ferie med gap til forrige, men samme skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -88,7 +93,11 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
@@ -129,7 +138,11 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `bare ferie (forlengelse) - etter tilbakevennende sykdom`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 5.februar,
+            avsendersystem = LPS
+        )
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
@@ -153,7 +166,11 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `bare ferie (sykdomsforlengelse) - etter tilbakevennende sykdom`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 5.februar,
+            avsendersystem = LPS
+        )
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
@@ -176,7 +193,11 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 5.februar,
+            avsendersystem = LPS
+        )
         håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))

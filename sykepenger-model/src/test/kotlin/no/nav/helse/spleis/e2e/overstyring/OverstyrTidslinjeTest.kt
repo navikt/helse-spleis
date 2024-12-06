@@ -117,7 +117,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `sendes ikke ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertEquals(0, observatør.overstyringIgangsatt.size)
     }
 
@@ -153,12 +153,18 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
         håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
         håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
-        håndterInntektsmelding(listOf(6.mars til 21.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(6.mars til 21.mars),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(2.februar til 17.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(2.februar til 17.februar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
@@ -181,14 +187,17 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `overstyring av tidslinje i avventer inntektsmelding2`() {
         håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
         håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.februar til 21.mars))
+        håndterInntektsmelding(listOf(3.februar til 21.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
     }
 
     @Test
     fun `overstyring av tidslinje som flytter skjæringstidspunkt blant annet - da gjenbruker vi tidsnære opplysninger`() {
         nyPeriode(1.januar til 10.januar)
         nyPeriode(15.januar til 20.januar)
-        håndterInntektsmelding(listOf(15.januar til 30.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(15.januar til 30.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
@@ -210,7 +219,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
@@ -244,7 +256,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
         assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_INNTEKTSMELDING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!"){
-            håndterInntektsmelding(listOf(16.januar til 31.januar), avsendersystem = ALTINN)
+            håndterInntektsmelding(
+                listOf(16.januar til 31.januar),
+                avsendersystem = ALTINN
+            )
         }
         observatør.assertVenter(1.vedtaksperiode.id(ORGNUMMER), venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
 
@@ -265,7 +280,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyre ferie til sykdom`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterOverstyrTidslinje(
             (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) }
         )
@@ -370,7 +385,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `vedtaksperiode strekker seg ikke tilbake hvis det er en periode foran`() {
         nyPeriode(1.januar til 9.januar, a1)
         nyPeriode(10.januar til 31.januar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -395,7 +410,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `overstyr tidslinje endrer to perioder samtidig`() {
         nyPeriode(1.januar til 9.januar, a1)
         nyPeriode(10.januar til 31.januar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -421,7 +436,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `kan ikke utbetale overstyrt utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterInntektsmelding(listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(2.januar, 18.januar)),
+            førsteFraværsdag = 2.januar,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -434,7 +453,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `grad over grensen overstyres på enkeltdag`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-        håndterInntektsmelding(listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(2.januar, 17.januar)),
+            førsteFraværsdag = 2.januar,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -455,7 +478,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `grad under grensen blir ikke utbetalt etter overstyring av grad`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-        håndterInntektsmelding(listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(2.januar, 17.januar)),
+            førsteFraværsdag = 2.januar,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -475,7 +502,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyrt til fridager i midten av en periode blir ikke utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-        håndterInntektsmelding(listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(2.januar, 17.januar)),
+            førsteFraværsdag = 2.januar,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -495,7 +526,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `Overstyring oppdaterer sykdomstidlinjene`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(3.januar, 18.januar)),
+            førsteFraværsdag = 3.januar,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -513,7 +548,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `Overstyring av sykHelgDag`() {
         håndterSykmelding(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 21.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -574,7 +612,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyrer fra SykedagNav til Sykedag`(){
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "Saerregler")
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "Saerregler",
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -608,7 +650,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `overstyring av egenmeldingsdager til arbeidsdager`(){
         nyttVedtak(januar)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
-        håndterInntektsmelding(listOf(10.februar til 26.februar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(10.februar til 26.februar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

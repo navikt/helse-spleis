@@ -87,7 +87,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     @Test
     fun `Gjenbruk av tidsnære opplysninger slår ikke til ved skatteinntekt i inntektsgrunnlaget`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -102,7 +106,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSøknad(februar, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            orgnummer = a2,
+            avsendersystem = LPS
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -142,8 +150,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 31.mars, 100.prosent), orgnummer = a3)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
@@ -154,7 +170,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     fun `kort periode hos en ag2 forkaster utbetaling`() {
         nyPeriode(1.januar til 20.januar, a1)
         nyPeriode(5.januar til 20.januar, a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -170,8 +190,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     fun `ag2 forkaster ikke utbetaling tildelt av ag1`() {
         nyPeriode(1.januar til 20.januar, a1)
         nyPeriode(1.januar til 20.januar, a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT / 2, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT / 2, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT / 2,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT / 2,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -190,8 +220,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     fun `ag2 forkaster utbetaling tildelt av ag1 om det har skjedd endringer i mellomtiden`() {
         nyPeriode(1.januar til 20.januar, a1)
         nyPeriode(1.januar til 20.januar, a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT / 2, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT / 2, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT / 2,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT / 2,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -218,7 +258,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(28.februar til 15.mars), førsteFraværsdag = 28.februar, orgnummer = a1, avsendersystem = ALTINN) // ff 1 mars
+        håndterInntektsmelding(
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
+            orgnummer = a1,
+            avsendersystem = ALTINN
+        ) // ff 1 mars
         håndterInntektsmelding(
             listOf(5.mars til 20.mars),
             førsteFraværsdag = 5.mars,
@@ -277,11 +322,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 18000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekter = listOf(
@@ -330,7 +377,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(28.februar til 15.mars), førsteFraværsdag = 28.februar, orgnummer = a1, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
+            orgnummer = a1,
+            avsendersystem = ALTINN
+        )
         håndterInntektsmelding(
             listOf(5.mars til 20.mars),
             førsteFraværsdag = 5.mars,
@@ -562,8 +614,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT/10)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT/10,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, orgnummer = a1, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
@@ -593,7 +655,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     @Test
     fun `mursteinspølser og manglende inntektsmelding på a2`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
@@ -707,21 +773,25 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekter = listOf(
@@ -802,21 +872,25 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekter = listOf(
@@ -892,21 +966,25 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekter = listOf(
@@ -990,21 +1068,25 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(3.januar til 18.januar),
             beregnetInntekt = 33000.månedlig,
             orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(4.januar til 19.januar),
             beregnetInntekt = 34000.månedlig,
             orgnummer = a4,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekter = listOf(
@@ -1128,12 +1210,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 19000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         val inntekter = listOf(
             grunnlag(
@@ -1245,7 +1329,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2,
             avsendersystem = ALTINN
         )
-
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
@@ -1292,11 +1375,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             beregnetInntekt = 31000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(5.mars til 20.mars),
             beregnetInntekt = 21000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekterFraSkatt = listOf(
@@ -1338,8 +1423,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.februar, 30.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 30.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(28.februar til 15.mars), beregnetInntekt = 31000.månedlig, orgnummer = a1, avsendersystem = ALTINN)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 21000.månedlig, orgnummer = a2, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(28.februar til 15.mars),
+            beregnetInntekt = 31000.månedlig,
+            orgnummer = a1,
+            avsendersystem = ALTINN
+        )
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            beregnetInntekt = 21000.månedlig,
+            orgnummer = a2,
+            avsendersystem = ALTINN
+        )
 
         val inntekterFraSkatt = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
@@ -1379,8 +1474,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = listOf(
@@ -1409,7 +1512,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar, orgnummer = a1, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 21.januar,
+            orgnummer = a1,
+            avsendersystem = ALTINN
+        )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 22.januar,
@@ -1460,7 +1568,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a3)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a3)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a3)
     }
@@ -1468,7 +1580,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     @Test
     fun `søknad for ghost etter utbetalt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
@@ -1492,7 +1608,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -1539,7 +1659,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     @Test
     fun `søknad for ghost etter utbetalt som delvis overlapper med to perioder hos a1`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
@@ -1568,7 +1692,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(20.januar til 4.februar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(20.januar til 4.februar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -1617,7 +1745,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     fun `skjæringstidspunktet er i måneden før ag1`() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(februar), orgnummer = a1, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(februar),
+            orgnummer = a1,
+            avsendersystem = ALTINN
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
@@ -1648,8 +1780,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(31.januar, 14.februar, 100.prosent), orgnummer = a3)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1, avsendersystem = ALTINN)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            orgnummer = a1,
+            avsendersystem = ALTINN
+        )
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            orgnummer = a2,
+            avsendersystem = ALTINN
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
@@ -1679,7 +1819,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     @Test
     fun `ghost blir syk, vi har ikke mottatt IM enda, men kan beregne tidligere periode`() {
         nyPeriode(januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
@@ -1719,12 +1863,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         nyPeriode(1.mai(2023) til 30.mai(2023), orgnummer = a1)
         nyPeriode(1.mai(2023) til 31.mai(2023), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), beregnetInntekt = inntektA1, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mai(2023) til 16.mai(2023)),
+            beregnetInntekt = inntektA1,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterInntektsmelding(
             listOf(1.mai(2023) til 16.mai(2023)), beregnetInntekt = inntektA2,
             refusjon = Refusjon(
                 INGEN, null, emptyList()),
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode,

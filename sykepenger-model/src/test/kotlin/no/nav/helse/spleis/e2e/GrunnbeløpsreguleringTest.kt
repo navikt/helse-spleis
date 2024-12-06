@@ -75,7 +75,11 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         val riktig6G = 561804
         val feil6G = 555456
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 3)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT * 3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertEquals(riktig6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
         hackGrunnbeløp(fra = riktig6G, til = feil6G) // Hacker inn 2017-G

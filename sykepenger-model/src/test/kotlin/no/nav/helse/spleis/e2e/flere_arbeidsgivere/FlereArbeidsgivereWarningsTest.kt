@@ -51,7 +51,11 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         val periode = januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -66,7 +70,11 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         val periode = januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -92,6 +100,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 1000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         assertTilstander(

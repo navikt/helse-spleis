@@ -42,10 +42,12 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -110,6 +112,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList()),
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         val inntekter = listOf(
@@ -142,6 +145,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList()),
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -167,7 +171,11 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 12.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 12.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar), orgnummer = a2)

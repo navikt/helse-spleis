@@ -203,7 +203,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         nyPeriode(10.februar til 28.februar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 10.februar, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            10.februar,
+            avsendersystem = LPS
+        )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -230,14 +234,20 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out-of-order søknad medfører revurdering -- AvventerVilkårsprøving`() {
         nyPeriode(1.mars til 10.mars)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(20.februar til 7.mars))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(20.februar til 7.mars),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         nyPeriode(1.januar til 18.januar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -315,7 +325,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(29.januar til 15.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nyPeriode(17.januar til 25.januar)
 
-        håndterInntektsmelding(listOf(1.januar til 15.januar, 17.januar til 17.januar), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 15.januar, 17.januar til 17.januar),
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+        )
 
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -395,7 +408,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out of order periode rett før - mellom to perioder - arbeidsgiverperioden slutter tidligere`() {
         nyPeriode(1.januar til 15.januar)
         nyPeriode(29.januar til 15.februar)
-        håndterInntektsmelding(listOf(1.januar til 15.januar, 29.januar til 29.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 15.januar, 29.januar til 29.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         assertEquals(1.januar til 15.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(16.januar til 15.februar, inspektør.periode(2.vedtaksperiode))
@@ -417,7 +433,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 16.januar)
 
         nyPeriode(29.januar til 15.februar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 29.januar, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 29.januar,
+            avsendersystem = LPS
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -520,7 +540,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out of order som overlapper med eksisterende -- flere ag`() {
         nyttVedtak(mars, orgnummer = a2)
         nyPeriode(20.februar til 15.mars, a1)
-        håndterInntektsmelding(listOf(20.februar til 7.mars), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(20.februar til 7.mars),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
@@ -596,7 +620,12 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april), orgnummer = a1)
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
         val inntekt = 20000.månedlig
-        håndterInntektsmelding(listOf(1.april til 16.april), beregnetInntekt = inntekt, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.april til 16.april),
+            beregnetInntekt = inntekt,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             listOf(
                 grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
@@ -628,8 +657,18 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a3)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = inntekt,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = inntekt,
+            orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         val sykepengegrunnlag2 = InntektForSykepengegrunnlag(
             listOf(
@@ -669,7 +708,12 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april), orgnummer = a1)
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
         val inntekt = 20000.månedlig
-        håndterInntektsmelding(listOf(1.april til 16.april), beregnetInntekt = inntekt, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.april til 16.april),
+            beregnetInntekt = inntekt,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             listOf(
@@ -701,8 +745,18 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a3)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = inntekt,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = inntekt,
+            orgnummer = a3,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         val sykepengegrunnlag2 = InntektForSykepengegrunnlag(
             listOf(
@@ -754,7 +808,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+        )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -784,7 +841,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         tilGodkjent(mars, 100.prosent)
         nullstillTilstandsendringer()
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         håndterUtbetalt()
@@ -820,7 +880,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `første periode i til utbetaling når det dukker opp en out of order-periode - utbetalingen feiler`() {
         tilGodkjent(mars, 100.prosent)
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
 
@@ -839,7 +902,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertIngenInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -860,14 +926,21 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyPeriode(1.februar til 25.februar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.mars,
+            avsendersystem = LPS
+        )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -983,7 +1056,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.mars,
+            avsendersystem = LPS
+        )
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1011,8 +1088,16 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(mars, a1)
         nyPeriode(20.mars til 20.april, a2)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
-        håndterInntektsmelding(listOf(20.mars til 4.april), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(20.mars til 4.april),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -1057,7 +1142,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(marsId, AVSLUTTET)
 
         nyPeriode(februar)
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         val februarId = 2.vedtaksperiode
         håndterVilkårsgrunnlag(februarId)
         håndterYtelser(februarId)
@@ -1072,7 +1157,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
 
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         val januarId = 3.vedtaksperiode
         håndterVilkårsgrunnlag(januarId)
         håndterYtelser(januarId)
@@ -1143,7 +1228,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(februarId, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(januarId)
         håndterYtelser(januarId)
         håndterSimulering(januarId)

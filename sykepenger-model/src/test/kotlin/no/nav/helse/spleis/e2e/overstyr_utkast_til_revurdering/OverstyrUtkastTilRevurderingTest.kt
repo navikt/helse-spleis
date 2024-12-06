@@ -128,6 +128,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 50000.årlig,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

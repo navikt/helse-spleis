@@ -36,7 +36,11 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar), orgnummer = a2)
         håndterSøknad(6.februar til 28.februar, orgnummer = a2)
-        håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(21.januar til 21.januar, 6.februar til 20.februar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a2,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -66,7 +70,11 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -104,6 +112,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = 1000.månedlig,
             refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -131,7 +140,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(17.januar til 31.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -147,7 +156,11 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `nytt og eneste arbeidsforhold på skjæringstidspunkt`() {
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
         assertVarsel(Varselkode.RV_VV_1)
     }

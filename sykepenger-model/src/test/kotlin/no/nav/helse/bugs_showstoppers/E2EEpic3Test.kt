@@ -92,7 +92,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 12.februar(2020)))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))))
+        håndterInntektsmelding(
+            listOf(Periode(16.januar(2020), 31.januar(2020))),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -119,7 +122,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 3.januar til 4.januar,
                 8.januar til 9.januar,
                 15.januar til 26.januar
-            )
+            ),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
         assertTilstander(
@@ -257,7 +261,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(
                 10.februar(2020) til 12.februar(2020),
                 27.februar(2020) til 10.mars(2020)
-            )
+            ),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         assertTilstander(
             1.vedtaksperiode,
@@ -302,7 +307,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(7.januar, 28.januar, 100.prosent))
         // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar))
+            arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(2, inspektør.sykdomshistorikk.size) // TODO
@@ -341,7 +347,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020)))
+            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -366,7 +373,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(17.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020)))
+            arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -402,7 +410,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `helg i gap i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 4.januar, 9.januar til 10.januar))
+        håndterInntektsmelding(
+            listOf(3.januar til 4.januar, 9.januar til 10.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         inspektør.also {
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[FriskHelgedag::class])
@@ -503,7 +514,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `ikke medlem avviser alle dager og legger på warning`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(INNTEKT, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(INNTEKT, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
@@ -539,7 +554,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(INNTEKT, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(INNTEKT, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
@@ -622,7 +641,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(INNTEKT, null, emptyList())
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(INNTEKT, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -655,7 +676,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar(2020), 16.januar(2020))), refusjon = Refusjon(INNTEKT, null, emptyList()), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(Periode(1.januar(2020), 16.januar(2020))),
+            refusjon = Refusjon(INNTEKT, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, arbeidsforhold = arbeidsforhold)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -695,7 +720,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            beregnetInntekt = lavInntekt
+            beregnetInntekt = lavInntekt,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, lavInntekt)
         håndterYtelser()
@@ -725,7 +751,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmelding(
-            listOf(Periode(1.januar(2020), 16.januar(2020))), refusjon = Refusjon(INNTEKT, null, emptyList()),  vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            listOf(Periode(1.januar(2020), 16.januar(2020))),
+            refusjon = Refusjon(INNTEKT, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -790,7 +818,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding utvider ikke perioden med arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
-        håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 1.juni, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(1.juni, 16.juni)),
+            førsteFraværsdag = 1.juni,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -799,7 +831,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(9.juli, 31.juli))
         håndterSøknad(Sykdom(9.juli, 31.juli, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 9.juli, avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(Periode(1.juni, 16.juni)),
+            førsteFraværsdag = 9.juli,
+            avsendersystem = LPS
+        )
 
         inspektør.also {
             assertEquals(Periode(1.juni, 30.juni), it.vedtaksperioder(1.vedtaksperiode).periode)
@@ -810,7 +846,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `Avsluttet vedtaksperiode forkastes ikke ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 1.januar,
+            avsendersystem = ALTINN
+        )
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -832,7 +872,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Sykdom(1.mars, 21.mars, 100.prosent),
             Arbeid(12.mars, 21.mars)
         )
-        håndterInntektsmelding(listOf(1.mars til 16.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller
@@ -865,7 +908,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Sykdom(1.mars, 21.mars, 100.prosent),
             Arbeid(12.mars, 21.mars)
         )
-        håndterInntektsmelding(listOf(1.mars til 16.mars), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         nyttVedtak(1.mai til 21.mai, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         assertEquals(12.april(2019), inspektør.sisteMaksdato(3.vedtaksperiode).maksdato)
     }

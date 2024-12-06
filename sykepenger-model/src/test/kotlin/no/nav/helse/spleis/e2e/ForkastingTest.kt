@@ -53,7 +53,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -87,7 +87,10 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(3.januar til 26.januar)
         } førerTil AVVENTER_INNTEKTSMELDING somEtterfulgtAv {
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+            håndterInntektsmelding(
+                listOf(Periode(3.januar, 18.januar)),
+                vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            )
         } førerTil AVVENTER_VILKÅRSPRØVING somEtterfulgtAv {
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         } førerTil AVVENTER_HISTORIKK somEtterfulgtAv {
@@ -109,7 +112,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(3.januar til 26.januar)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(29.januar til 23.februar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -157,6 +160,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(3.januar, 18.januar)),
             refusjon = Refusjon(INNTEKT, 20.januar, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -179,6 +183,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
             refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -198,7 +203,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke i til utbetaling ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -226,7 +231,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster i avventer godkjenning ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

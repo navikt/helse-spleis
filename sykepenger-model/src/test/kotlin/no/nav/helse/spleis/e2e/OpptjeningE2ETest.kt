@@ -79,7 +79,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     fun `tar ikke med inntekter fra A-Ordningen dersom arbeidsforholdet kun er brukt til opptjening og ikke gjelder under skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
         håndterSøknad(1.januar til 15.mars, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
@@ -120,7 +120,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     fun `Har ikke pensjonsgivende inntekt måneden før skjæringstidspunkt`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INGEN, 1.januar)
@@ -136,7 +136,11 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = a1)
         håndterSøknad(fom til tom, orgnummer = a1)
-        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
     companion object {

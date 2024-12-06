@@ -53,7 +53,11 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `sender med inntektskilder i sykepengegrunnlaget i godkjenningsbehovet`() {
         nyPeriode(januar, orgnummer = a1)
         nyPeriode(januar, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a2)
         håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
@@ -79,7 +83,12 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(mars)
         nullstillTilstandsendringer()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null), avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.mars,
+            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
+            avsendersystem = LPS
+        )
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         assertNotEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2) // IM lager nytt innslag i vilkårsgrunnlaghistorikken pga nye refusjonsopplysninger
@@ -94,13 +103,18 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterSøknad(februar)
         håndterSøknad(mars)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         val vilkårsgrunnlagId1 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         håndterYtelser(1.vedtaksperiode)
         nullstillTilstandsendringer()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null), avsendersystem = LPS)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.mars,
+            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
+            avsendersystem = LPS
+        )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
@@ -116,7 +130,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `godkjenningsbehov som ikke kan avvises blir forsøkt avvist`() {
         håndterSøknad(1.januar til 16.januar)
         håndterSøknad(17.januar til 31.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -130,6 +144,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!",
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -168,7 +183,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `omgjøring som kan avvises`() {
         håndterSøknad(2.januar til 17.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -181,7 +196,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(2.januar til 17.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         håndterSøknad(18.januar til 31.januar)
-        håndterInntektsmelding(listOf(2.januar til 17.januar))
+        håndterInntektsmelding(listOf(2.januar til 17.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -191,7 +206,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -240,7 +255,10 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -281,8 +299,17 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         nyPeriode(januar, a1)
         nyPeriode(februar, a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2, avsendersystem = ALTINN)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+            orgnummer = a2,
+            avsendersystem = ALTINN
+        )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),

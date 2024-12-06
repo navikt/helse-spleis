@@ -150,9 +150,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1) // Denne bare for at a1 skal være først i lista for arbeidsgivere
 
         håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterSøknad(Sykdom(1.mai, 16.mai, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.mai til 16.mai), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(1.mai til 16.mai),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
 
         nullstillTilstandsendringer()
 

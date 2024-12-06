@@ -60,6 +60,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             listOf(fom til fom.plusDays(15)),
             beregnetInntekt = overstyrtInntekt,
             refusjon = Refusjon(overstyrtInntekt, null, emptyList()),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -81,7 +82,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     @Test
     fun `overstyre ghostinntekt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
@@ -136,6 +141,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = OverMinstegrense,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(

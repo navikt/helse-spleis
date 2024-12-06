@@ -41,7 +41,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterSøknad(mars)
         håndterSøknad(5.april til 30.april)
-        val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        val inntektsmelding1Id = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         val inntektsmelding2Id = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 5.april,
@@ -83,7 +86,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
         håndterSøknad(januar)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterSøknad(februar)
         håndterSøknad(mars)
@@ -99,7 +105,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `inntektsmelding bryter ikke opp forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)))
+        håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -134,7 +140,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         val søknadId = håndterSøknad(mars)
 
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)))
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(Periode(20.februar, 8.mars)),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 

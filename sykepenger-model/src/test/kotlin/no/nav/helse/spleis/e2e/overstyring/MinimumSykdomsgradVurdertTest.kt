@@ -67,7 +67,12 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(10, inspektør.sisteUtbetaling().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
 
         nyPeriode(januar, orgnummer = a2, grad = 10.prosent)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 81000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 81000.månedlig,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterYtelser(orgnummer = a1)
 
         assertEquals(19, inspektør.sisteUtbetaling().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
@@ -123,7 +128,12 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
 
     private fun settOppAvslagPåMinimumSykdomsgrad() {
         nyPeriode(januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 10000.månedlig, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(

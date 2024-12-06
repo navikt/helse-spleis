@@ -65,7 +65,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden med bare ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(0, inspektør.antallUtbetalinger)
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -106,8 +109,18 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar(2020) til 16.januar(2020)),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar(2020) til 16.januar(2020)),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -146,11 +159,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 45000.månedlig,
             orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 44000.månedlig,
             orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -200,6 +215,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "noe",
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

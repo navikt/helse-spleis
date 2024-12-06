@@ -112,7 +112,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `revurdering uten endring som siden annulleres skal sende melding om annullert`() {
         nyttVedtak(januar)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
@@ -125,7 +125,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     @Test
     fun `Pågående revurdering uten endring som siden annulleres skal sende melding om annullert`() {
         nyttVedtak(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterAnnullerUtbetaling()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)

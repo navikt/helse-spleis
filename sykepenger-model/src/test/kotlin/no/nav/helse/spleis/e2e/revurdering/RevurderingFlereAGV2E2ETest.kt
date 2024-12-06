@@ -337,7 +337,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
         * */
         nyttVedtak(januar, orgnummer = a1)
-        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null )
+        førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to null)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
@@ -536,7 +536,11 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(januar, a1)
         nyPeriode(1.februar til 18.februar, a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
 
         nullstillTilstandsendringer()

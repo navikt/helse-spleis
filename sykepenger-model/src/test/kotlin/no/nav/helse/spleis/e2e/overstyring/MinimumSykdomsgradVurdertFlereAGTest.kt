@@ -34,8 +34,18 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
     fun `Saksbehandler vurderer arbeidstid og avslår under 20 prosent på begge arbeidsgivere`() {
         nyPeriode(januar, orgnummer = a1, grad = 15.prosent)
         nyPeriode(januar, orgnummer = a2, grad = 20.prosent)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 40000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 20000.månedlig,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 40000.månedlig,
+            orgnummer = a2,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(

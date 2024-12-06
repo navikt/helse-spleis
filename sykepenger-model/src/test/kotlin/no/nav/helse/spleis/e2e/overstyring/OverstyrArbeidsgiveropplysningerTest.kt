@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -18,7 +17,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -136,7 +134,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar) is Saksbehandler)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = nyIMInntekt)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = nyIMInntekt,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar) is Inntektsmelding)
@@ -695,7 +697,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a1) is Saksbehandler)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a2) is Saksbehandler)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a1) is Inntektsmelding)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a2) is Saksbehandler)
     }
@@ -705,7 +712,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
 
         nyPeriode(5.februar til 28.februar)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar, avsendersystem = ALTINN)
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 7.februar,
+            avsendersystem = ALTINN
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertIngenVarsler()

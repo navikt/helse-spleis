@@ -31,7 +31,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -48,7 +48,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `grad rundes av`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -61,7 +61,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
-        håndterInntektsmelding(listOf(4.januar til 19.januar))
+        håndterInntektsmelding(listOf(4.januar til 19.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar))
         håndterSøknad(23.januar til 31.januar)
 
@@ -91,7 +91,10 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.desember, 31.desember, 10.prosent))
 
-        håndterInntektsmelding(listOf(13.november til 14.november, 1.desember til 14.desember), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(
+            listOf(13.november til 14.november, 1.desember til 14.desember),
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 

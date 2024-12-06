@@ -63,7 +63,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     @Test
     fun `skjønnsfastsetting`() {
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 60000.månedlig)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 60000.månedlig,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 30000.månedlig)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         håndterSkjønnsmessigFastsettelse(

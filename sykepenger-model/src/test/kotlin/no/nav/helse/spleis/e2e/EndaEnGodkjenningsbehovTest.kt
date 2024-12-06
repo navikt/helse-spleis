@@ -106,7 +106,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun ferie() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(31.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag()
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -201,6 +201,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -281,6 +282,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -294,6 +296,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -340,6 +343,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -352,6 +356,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -404,7 +409,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `Periode uten noen navdager får Avslag-tag`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertForventetFeil(
             forklaring = "Skal implementeres snarest",
             ønsket = {
@@ -428,7 +433,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `Periode med arbeidsgiverperiodedager, ingen navdager og minst én avslagsdag får Avslag-tag`() {
         createTestPerson(Personidentifikator("16.01.1948"), 16.januar(1948))
         nyPeriode(januar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertGodkjenningsbehov(tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"))
@@ -438,7 +447,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `Periode med kun avslagsdager får Avslag-tag`() {
         createTestPerson(Personidentifikator("16.01.1946"), 16.januar(1946))
         nyPeriode(januar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertGodkjenningsbehov(tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"))
@@ -493,7 +506,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `legger til hendelses ID'er og dokumenttype på godkjenningsbehovet` () {
         håndterSykmelding(januar)
         val søknadId = håndterSøknad(januar)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
