@@ -111,10 +111,11 @@ fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0, begrunnelse: Begrunnelse = 
     grad = grad
 )
 
-val Int.UKJ get() = Utbetalingsdager(
-    antallDager = { this },
-    addDagFun = { dato, _  -> addUkjentDag(dato) }
-)
+val Int.UKJ
+    get() = Utbetalingsdager(
+        antallDager = { this },
+        addDagFun = { dato, _ -> addUkjentDag(dato) }
+    )
 
 val Int.UTELATE
     get() = Utbetalingsdager(

@@ -1,9 +1,9 @@
 package no.nav.helse.økonomi
 
+import kotlin.math.roundToInt
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.økonomi.Prosentdel.Companion.average
-import kotlin.math.roundToInt
 
 class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
@@ -88,6 +88,7 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         dagligInt = dtoDagligInt(),
         dagligDouble = dtoDagligDouble()
     )
+
     private fun dtoÅrlig() = InntektbeløpDto.Årlig(this.årlig)
     fun dtoMånedligDouble() = InntektbeløpDto.MånedligDouble(månedlig)
     private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(daglig)

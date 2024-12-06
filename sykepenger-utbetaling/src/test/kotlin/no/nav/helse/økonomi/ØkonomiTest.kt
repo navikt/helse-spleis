@@ -448,7 +448,8 @@ internal class ØkonomiTest {
                 assertEquals(
                     1384,
                     betalte.mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer()
-                        .dagligInt)
+                        .dagligInt
+                )
                 assertUtbetaling(betalte[0], 692.0, 0.0)
                 assertUtbetaling(betalte[1], 692.0, 0.0)
             },
@@ -456,7 +457,8 @@ internal class ØkonomiTest {
                 assertEquals(
                     1385,
                     betalte.mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer()
-                        .dagligInt)
+                        .dagligInt
+                )
                 assertUtbetaling(betalte[0], 693.0, 0.0)
                 assertUtbetaling(betalte[1], 692.0, 0.0)
             }
@@ -540,7 +542,7 @@ internal class ØkonomiTest {
     @Test
     fun `Tilkommen inntekt - fordeler ikke personbeløp ved avsluttet arbeidsforhold`() {
         val `6G` = `6g`
-        val a = 0.prosent.sykdomsgrad.inntekt(INGEN, beregningsgrunnlag = 31000.månedlig, `6G`= `6G`)
+        val a = 0.prosent.sykdomsgrad.inntekt(INGEN, beregningsgrunnlag = 31000.månedlig, `6G` = `6G`)
         val b = 100.prosent.sykdomsgrad.inntekt(10000.månedlig, beregningsgrunnlag = INGEN, `6G` = `6G`)
         val betalte = listOf(a, b).betal()
         assertUtbetaling(betalte[0], 0.0, 0.0)
@@ -568,11 +570,12 @@ internal class ØkonomiTest {
         assertEquals(
             2161,
             betalte.mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer()
-                .dagligInt)
+                .dagligInt
+        )
         assertForventetFeil(
             forklaring = "arbeidsgiver 2 har høyere avrundingsdifferanse enn arbeidsgiver 1, og bør få den 1 kr diffen." +
-                    "sykepengegrunnlaget er 561 860 kr (6G). Arbeidsgiver 1 sin andel utgjør (30,000 / (30,000 + 35,000 kr)) * 561 860 kr = 997,38 kr daglig." +
-                    "Arbeidsgiver 2 sin andel utgjør  (35,000 / (30,000 + 35,000 kr)) * 561 860 kr = 1163,62 kr daglig, og har med dette en større avrundingsdifferanse.",
+                "sykepengegrunnlaget er 561 860 kr (6G). Arbeidsgiver 1 sin andel utgjør (30,000 / (30,000 + 35,000 kr)) * 561 860 kr = 997,38 kr daglig." +
+                "Arbeidsgiver 2 sin andel utgjør  (35,000 / (30,000 + 35,000 kr)) * 561 860 kr = 1163,62 kr daglig, og har med dette en større avrundingsdifferanse.",
             nå = {
                 assertUtbetaling(betalte[0], 998.0, 0.0)
                 assertUtbetaling(betalte[1], 1163.0, 0.0)

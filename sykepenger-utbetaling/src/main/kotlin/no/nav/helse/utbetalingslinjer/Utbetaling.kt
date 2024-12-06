@@ -33,7 +33,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
-import no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -61,16 +60,17 @@ class Utbetaling private constructor(
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
 
-    val view get() = UtbetalingView(
-        id = id,
-        korrelasjonsId = korrelasjonsId,
-        periode = periode,
-        utbetalingstidslinje = utbetalingstidslinje,
-        arbeidsgiverOppdrag = arbeidsgiverOppdrag,
-        personOppdrag = personOppdrag,
-        status = tilstand.status,
-        type = type
-    )
+    val view
+        get() = UtbetalingView(
+            id = id,
+            korrelasjonsId = korrelasjonsId,
+            periode = periode,
+            utbetalingstidslinje = utbetalingstidslinje,
+            arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+            personOppdrag = personOppdrag,
+            status = tilstand.status,
+            type = type
+        )
 
     constructor(
         korrelerendeUtbetaling: Utbetaling?,
@@ -143,7 +143,7 @@ class Utbetaling private constructor(
     private fun harOppdragMedUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
-    fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
+    fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger() && personOppdrag.harUtbetalinger()
 
     fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
 
@@ -389,6 +389,7 @@ class Utbetaling private constructor(
         fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }
+
         private fun Collection<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this
                 .asSequence()
@@ -473,7 +474,8 @@ class Utbetaling private constructor(
     private fun håndterKvittering(hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         when (hendelse.status) {
             Oppdragstatus.OVERFØRT,
-            Oppdragstatus.AKSEPTERT -> { } // all is good
+            Oppdragstatus.AKSEPTERT -> {
+            } // all is good
             Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.varsel(RV_UT_2)
             Oppdragstatus.AVVIST,
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
@@ -495,12 +497,15 @@ class Utbetaling private constructor(
     fun overlapperMed(other: Periode): Boolean {
         return this.periode.overlapperMed(other)
     }
+
     fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
     }
+
     fun erNyereEnn(other: LocalDateTime): Boolean {
         return other <= tidsstempel
     }
+
     private fun lagreOverføringsinformasjon(aktivitetslogg: IAktivitetslogg, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         aktivitetslogg.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
         if (this.avstemmingsnøkkel != null && this.avstemmingsnøkkel != avstemmingsnøkkel)
@@ -508,6 +513,7 @@ class Utbetaling private constructor(
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = tidspunkt
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
+
     override fun toString() = "$type(${tilstand.status}) - $periode"
 
     internal sealed interface Tilstand {
@@ -538,6 +544,7 @@ class Utbetaling private constructor(
             aktivitetslogg.info("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             aktivitetslogg.funksjonellFeil(RV_UT_11)
         }
+
         fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forventet ikke kvittering for annullering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             aktivitetslogg.funksjonellFeil(RV_UT_11)
@@ -604,10 +611,12 @@ class Utbetaling private constructor(
 
         private fun vurderNesteTilstand(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             if (utbetaling.annulleringer.any { !it.erAvsluttet() }) return
-            utbetaling.tilstand(when {
-                utbetaling.harOppdragMedUtbetalinger() -> Overført
-                else -> GodkjentUtenUtbetaling
-            }, aktivitetslogg)
+            utbetaling.tilstand(
+                when {
+                    utbetaling.harOppdragMedUtbetalinger() -> Overført
+                    else -> GodkjentUtenUtbetaling
+                }, aktivitetslogg
+            )
         }
     }
 
@@ -682,6 +691,7 @@ class Utbetaling private constructor(
     internal object IkkeGodkjent : Tilstand {
         override val status = Utbetalingstatus.IKKE_GODKJENT
     }
+
     internal object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
     }
@@ -834,7 +844,8 @@ enum class Utbetalingstatus {
     GODKJENT_UTEN_UTBETALING,
     ANNULLERT,
     FORKASTET;
-    internal fun tilTilstand() = when(this) {
+
+    internal fun tilTilstand() = when (this) {
         NY -> Utbetaling.Ny
         IKKE_UTBETALT -> Utbetaling.Ubetalt
         IKKE_GODKJENT -> Utbetaling.IkkeGodkjent

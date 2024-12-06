@@ -301,6 +301,7 @@ class Oppdrag private constructor(
             fagsystemId = tidligere.fagsystemId,
             endringskode = Endringskode.ENDR
         )
+
     // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
     // automatisk opphøre alle eventuelle linjer med fom > b.
     //
@@ -359,11 +360,13 @@ class Oppdrag private constructor(
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
         this.status = hendelse.status
     }
+
     fun håndter(simulering: SimuleringHendelse) {
         if (simulering.fagsystemId != this.fagsystemId || simulering.fagområde != this.fagområde || !simulering.simuleringOK) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringsResultat
     }
+
     fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private class DifferanseBuilder(

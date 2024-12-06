@@ -16,6 +16,7 @@ private class ØkonomiInspektørBuilder(økonomi: Økonomi) {
         økonomi.arbeidsgiverbeløp,
         økonomi.personbeløp
     )
+
     fun build() = inspektøren
 }
 

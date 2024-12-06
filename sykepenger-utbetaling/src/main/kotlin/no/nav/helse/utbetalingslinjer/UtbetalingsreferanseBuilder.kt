@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
-import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.UUID
+import org.apache.commons.codec.binary.Base32
 
 private const val pad = '='
 private const val padByte = pad.code.toByte()

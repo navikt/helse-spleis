@@ -2,11 +2,11 @@ package no.nav.helse.økonomi
 
 import java.math.BigDecimal
 import java.math.MathContext
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.dto.ProsentdelDto
 import kotlin.math.roundToInt
+import no.nav.helse.dto.ProsentdelDto
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 
-class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
+class Prosentdel private constructor(private val brøkdel: BigDecimal) : Comparable<Prosentdel> {
     init {
         require(brøkdel.toDouble() in 0.0..1.0) {
             "Må være prosent mellom 0 og 100"
@@ -55,7 +55,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
 
     internal operator fun div(other: Prosentdel) = Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
 
-    override fun compareTo(other: Prosentdel) = if(this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
+    override fun compareTo(other: Prosentdel) = if (this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String {
         return "${(toDouble())} %"
