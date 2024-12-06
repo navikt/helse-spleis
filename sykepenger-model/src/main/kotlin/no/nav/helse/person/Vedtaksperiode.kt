@@ -108,6 +108,9 @@ internal class Vedtaksperiode private constructor(
     private val jurist get() = behandlinger.subsumsjonslogg(subsumsjonslogg, id, person.fødselsnummer, arbeidsgiver.organisasjonsnummer)
     internal val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     internal val førsteFraværsdag get() = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt, SAMMENHENGENDE_PERIODER_HOS_ARBEIDSGIVER(this))
+    // 💡Må ikke forveksles med `førsteFraværsdag` 💡
+    // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
+    internal val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.startdatoPåSammenhengendeVedtaksperioder(this)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
     private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
@@ -346,10 +349,6 @@ internal class Vedtaksperiode private constructor(
         }
         return true
     }
-
-    // 💡Må ikke forveksles med `førsteFraværsdag` 💡
-    // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
-    private val startdatoPåSammenhengendeVedtaksperioder get() = arbeidsgiver.startdatoPåSammenhengendeVedtaksperioder(this)
 
     internal fun håndter(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør) {
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
