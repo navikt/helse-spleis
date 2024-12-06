@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 internal class SlettPersonRiver(
     rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository
-): River.PacketListener {
+) : River.PacketListener {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

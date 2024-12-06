@@ -15,7 +15,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest: DBTest() {
+internal class PersonRepositoryTest : DBTest() {
 
     private lateinit var personRepository: PersonRepository
 
