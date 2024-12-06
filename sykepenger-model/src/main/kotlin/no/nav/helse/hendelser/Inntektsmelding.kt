@@ -60,16 +60,18 @@ class Inntektsmelding(
     )
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
-    private val dager get() = DagerFraInntektsmelding(
-        arbeidsgiverperioder = this.arbeidsgiverperioder,
-        førsteFraværsdag = type.førsteFraværsdagForHåndteringAvDager(this),
-        mottatt = metadata.registrert,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        avsendersystem = avsendersystem,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        hendelse = this
-    )
+    private val dager by lazy {
+        DagerFraInntektsmelding(
+            arbeidsgiverperioder = this.arbeidsgiverperioder,
+            førsteFraværsdag = type.førsteFraværsdagForHåndteringAvDager(this),
+            mottatt = metadata.registrert,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            avsendersystem = avsendersystem,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            hendelse = this
+        )
+    }
     private var håndtertInntekt = false
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
@@ -188,8 +190,7 @@ class Inntektsmelding(
         person: Person,
         vedtaksperioder: List<Vedtaksperiode>,
         forkastede: List<ForkastetVedtaksperiode>,
-        sykmeldingsperioder: Sykmeldingsperioder,
-        dager: DagerFraInntektsmelding
+        sykmeldingsperioder: Sykmeldingsperioder
     ) {
         if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
         type.ikkeHåndtert(
