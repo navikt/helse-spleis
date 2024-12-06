@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.Toggle
 import java.time.LocalDate
 import no.nav.helse.august
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
@@ -84,11 +85,12 @@ import kotlin.reflect.KClass
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Overstyring av hele perioden til andre ytelser`() {
+    fun `Overstyring av hele perioden til andre ytelser`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         tilGodkjenning(januar, a1)
         håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
+        håndterYtelser(1.vedtaksperiode)
         // Vet ikke om det er ønskelig, men er sånn det er da
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     @Test

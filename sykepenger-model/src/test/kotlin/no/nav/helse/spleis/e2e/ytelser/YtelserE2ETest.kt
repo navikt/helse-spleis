@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
+import no.nav.helse.Toggle
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -101,7 +102,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() {
+    fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         håndterSøknad(1.januar til 15.januar) // Denne må være kortere enn 16 dager
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "noe") // Denn må jo være satt da
@@ -118,13 +119,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         håndterOverstyrTidslinje(forlengelse.map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        observatør.vedtaksperiodeVenter.clear()
-        assertUgyldigSituasjon("En vedtaksperiode i AVSLUTTET_UTEN_UTBETALING trenger hjelp fordi VIL_OMGJØRES!") { håndterSøknad(februar) }
-        val venter = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(ORGNUMMER) }
-        assertEquals("HJELP", venter.venterPå.venteårsak.hva)
-        assertEquals("VIL_OMGJØRES", venter.venterPå.venteårsak.hvorfor)
+        håndterSøknad(februar)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test

@@ -152,6 +152,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
     internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje()
 
+    internal fun harVærtBeregnet() = behandlinger.any { behandling -> behandling.harVærtBeregnet() }
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
@@ -813,6 +814,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.dokumentsporing.hashCode()
         }
 
+        internal fun harVærtBeregnet() = endringer.any { endring -> endring.grunnlagsdata != null }
         internal fun erFattetVedtak() = vedtakFattet != null
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null

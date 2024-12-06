@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
@@ -86,7 +87,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer simulering`() {
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer simulering`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(15.januar til 30.januar))
@@ -100,11 +101,13 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         (13.januar til 15.januar).forEach { dato ->
             assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
         }
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 
     @Test
-    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer godkjenning`() {
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer godkjenning`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(15.januar til 30.januar))
@@ -119,7 +122,9 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         (13.januar til 15.januar).forEach { dato ->
             assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
         }
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -539,7 +544,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerende søknad med gjenopptatt arbeid slik at hele perioden er innenfor arbeidsgiverperioden`() {
+    fun `korrigerende søknad med gjenopptatt arbeid slik at hele perioden er innenfor arbeidsgiverperioden`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar))
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -547,7 +552,8 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), Arbeid(17.januar, 18.januar))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }

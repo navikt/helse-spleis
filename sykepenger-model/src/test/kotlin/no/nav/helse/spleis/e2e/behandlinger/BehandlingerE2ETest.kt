@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
+import no.nav.helse.Toggle
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -13,6 +14,7 @@ import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dto.VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
@@ -35,6 +37,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -572,7 +575,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() {
+    fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         }
@@ -607,12 +610,13 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
         a2 {
+            håndterYtelser(1.vedtaksperiode)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
+                assertEquals(BEREGNET_OMGJØRING, behandlinger[1].tilstand)
             }
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         }
     }
 
@@ -651,7 +655,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
+    fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
             håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
@@ -661,13 +665,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
 
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
-
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(3, behandlinger.size)
+                assertEquals(2, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
+                assertEquals(BEREGNET_OMGJØRING, behandlinger[1].tilstand)
             }
         }
     }
