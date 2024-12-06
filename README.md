@@ -48,6 +48,22 @@ Tjenesten som skulle spleise dokumentene sammen til en sak ble kalt **Spleis**.
 
 Det ble relativt fort klart at vi ikke kunne regne med en så enkel flyt som 1. Dokumenter inn, 2. Sammenstill data, 3. Behandle sak, så Spleis endte opp med å gjøre brorparten av saksbehandlingen, Spa ble aldri laget, og dokument-inntaket er i stor grad håndtert av andre team.
 
+## Linting
+
+Lintet med hjelp av editorconfig er brukt gjennomgående i hele repoet for kotlinfiler. For å slå det på så gjør følgende
+1. `Cmd + Q`
+2. Trykk på `Code style`
+3. Marker `Enable editorconfig support` 
+
+Valgfritt, men lurt er å også bare linte de steder man varit inom. 
+1. `Cmd+Q`
+2. Trykk på `Tools`
+3. Velg `Actions on save`
+4. Marker `Reformat code`
+5. Hvis ønskelig endre fra whole file til changed lines for `Reformat code`
+6. Klikk på `Configure autosave options...` lengst ned i fila, eller gå til `Appearance & Behavior -> System Settings` 
+7. Marker alle alternativ under `Autosave` og endre default tiden for autosave vid idle til 60s. 
+
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
