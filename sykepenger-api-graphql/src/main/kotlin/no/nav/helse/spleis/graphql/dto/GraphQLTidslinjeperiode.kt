@@ -99,9 +99,11 @@ enum class GraphQLUtbetalingstatus {
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
     Overfort,
+
     @Deprecated("skal slettes")
     Sendt,
     Ubetalt,
+
     @Deprecated("skal slettes")
     UtbetalingFeilet,
     Utbetalt
@@ -206,7 +208,7 @@ data class GraphQLUberegnetPeriode(
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>
-    ) : GraphQLTidslinjeperiode
+) : GraphQLTidslinjeperiode
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
