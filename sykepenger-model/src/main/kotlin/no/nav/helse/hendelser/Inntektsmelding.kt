@@ -183,7 +183,7 @@ class Inntektsmelding(
         return dager
     }
 
-    internal fun ikkeHåndert(
+    internal fun ferdigstill(
         aktivitetslogg: IAktivitetslogg,
         person: Person,
         vedtaksperioder: List<Vedtaksperiode>,
@@ -191,17 +191,19 @@ class Inntektsmelding(
         sykmeldingsperioder: Sykmeldingsperioder,
         dager: DagerFraInntektsmelding
     ) {
-        if (håndtertNå()) return
-        aktivitetslogg.info("Inntektsmelding ikke håndtert")
-        val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
-        val overlapperMedForkastet = forkastede.overlapperMed(dager)
-        if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)
-            return aktivitetslogg.info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
-        }
-        person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
+        if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
+        aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${type::class.simpleName}. Avsendersystem $avsendersystem")
+        type.ikkeHåndtert(
+            inntektsmelding = this,
+            aktivitetslogg = aktivitetslogg,
+            person = person,
+            relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager),
+            overlapperMedForkastet = forkastede.overlapperMed(dager),
+            harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
+        )
+
     }
-    private fun håndtertNå() = håndtertInntekt
+
     internal fun subsumsjonskontekst() = Subsumsjonskontekst(
         type = KontekstType.Inntektsmelding,
         verdi = metadata.meldingsreferanseId.toString()
@@ -225,7 +227,7 @@ class Inntektsmelding(
         }
         if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
         if (this.type.valider(this, aktivitetslogg)) return true
-        aktivitetslogg.info("Inntektsmelding ikke håndtert. Type ${type::class.simpleName}. Avsendersystem $avsendersystem")
+        aktivitetslogg.info("Inntektsmelding ikke håndtert - ved validering. Type ${type::class.simpleName}. Avsendersystem $avsendersystem")
         if (arbeidsgiverperioder.isEmpty()) inntektsmeldingIkkeHåndtert(this, orgnummer, true)
         else inntektsmeldingIkkeHåndtert(this, orgnummer, vedtaksperioder.påvirkerArbeidsgiverperiode(arbeidsgiverperioder.periode()!!))
         return false
@@ -239,6 +241,7 @@ class Inntektsmelding(
         fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate
         fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding): LocalDate?
         fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person): LocalDate
+        fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean)
     }
 
     private data class KlassiskInntektsmelding(private val førsteFraværsdag: LocalDate?): Type {
@@ -260,8 +263,14 @@ class Inntektsmelding(
             else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
         }
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = førsteFraværsdag
-        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) =
-            person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato(inntektsmelding).somPeriode())
+        override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato(inntektsmelding).somPeriode())
+        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
+            if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
+                person.emitInntektsmeldingFørSøknadEvent(inntektsmelding.metadata.meldingsreferanseId, relevanteSykmeldingsperioder, inntektsmelding.behandlingsporing.organisasjonsnummer)
+                return aktivitetslogg.info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
+            }
+            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
+        }
     }
 
     private class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate): Type {
@@ -282,6 +291,9 @@ class Inntektsmelding(
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.periode().start
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = vedtaksperiode.skjæringstidspunkt
+        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
+            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
+        }
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -296,6 +308,7 @@ class Inntektsmelding(
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet")
+        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) = error("Forventer ikke videre behandling av portalinntektsmelding som er forkastet.")
     }
 
     private data object PortalinntektsmeldingForForkastetPeriode: ForkastetPortalinntektsmelding() {

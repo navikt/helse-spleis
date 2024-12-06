@@ -526,7 +526,7 @@ internal class Arbeidsgiver private constructor(
         val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
         addInntektsmelding(inntektsmelding, aktivitetslogg, Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring))
 
-        inntektsmelding.ikkeHåndert(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
+        inntektsmelding.ferdigstill(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {

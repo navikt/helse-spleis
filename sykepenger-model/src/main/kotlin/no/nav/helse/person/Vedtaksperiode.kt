@@ -3064,12 +3064,6 @@ internal class Vedtaksperiode private constructor(
                 return medSammeAGP(other)
             }
         }
-        internal val SAMMENHENGENDE_PERIODER_HOS_ARBEIDSGIVER= fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
-            val sammenhengendeVedtaksperioder = segSelv.arbeidsgiver.finnSammenhengendeVedtaksperioder(segSelv)
-            return fun (other: Vedtaksperiode): Boolean {
-                return other in sammenhengendeVedtaksperioder
-            }
-        }
         internal val MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
             val arbeidsgiverperiode = segSelv.finnArbeidsgiverperiode()

@@ -164,7 +164,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
             førsteFraværsdag = 5.mars
         )
-        assertInfo("Inntektsmelding ikke håndtert")
+        assertInfo("Inntektsmelding ikke håndtert - ved ferdigstilling. Type KlassiskInntektsmelding. Avsendersystem LPS(førsteFraværsdag=2018-03-05)")
         assertTilstandFørInntektsmeldingHensyntas()
 
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
