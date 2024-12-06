@@ -5,14 +5,12 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -54,8 +52,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(31.juli til 18.august)
         håndterInntektsmelding(
             listOf(25.juni til 5.juli, 8.juli til 12.juli),
-            førsteFraværsdag = 1.august,
-            avsendersystem = LPS
+            førsteFraværsdag = 1.august
         )
         assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
         assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
@@ -63,8 +60,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(25.juni til 5.juli, 8.juli til 12.juli),
             førsteFraværsdag = 7.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertEquals("ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
         assertEquals(listOf(7.august til 18.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
@@ -342,8 +338,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         val im = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -363,8 +358,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Inntektsmelding kommer før søknad - vi kommer oss videre til AvventerHistorikk pga replay`() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
         håndterSøknad(januar)
         assertTilstander(
@@ -404,8 +398,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `drawio -- Out of order`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
 
         håndterSøknad(februar)
@@ -559,8 +552,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Periode skal ha utbetaling grunnet inntektsmelding vi mottok før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar))
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
         håndterSøknad(11.januar til 26.januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -638,8 +630,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 20.februar,
-            avsendersystem = LPS
+            førsteFraværsdag = 20.februar
         )
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(20.februar til 28.februar)

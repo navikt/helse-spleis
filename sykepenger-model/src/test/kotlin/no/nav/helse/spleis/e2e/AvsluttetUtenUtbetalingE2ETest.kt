@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -42,10 +40,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
-        håndterInntektsmelding(
-            listOf(Periode(3.mars, 18.mars)),
-            avsendersystem = ALTINN
-        )
+        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
         håndterSøknad(3.mars til 26.mars)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -139,8 +134,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
                 8.januar til 12.januar,// 5
                 13.januar til 18.januar // 6
             ),
-            førsteFraværsdag = 8.januar,
-            avsendersystem = LPS
+            førsteFraværsdag = 8.januar
         )
         assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

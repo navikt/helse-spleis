@@ -3,10 +3,8 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.desember
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -45,8 +43,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         nyPeriode(22.januar til 31.januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            førsteFraværsdag = 22.januar,
-            avsendersystem = LPS
+            førsteFraværsdag = 22.januar
         )
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -111,8 +108,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         // perioden 4. til 9.januar er paddet arbeidsdager; perioden 23.januar til 30.januar er "implisitte arbeidsdager" (ukjentdager på sykdomtsidslinjen)
         håndterInntektsmelding(
             listOf(1.januar til 3.januar, 10.januar til 22.januar),
-            førsteFraværsdag = 31.januar,
-            avsendersystem = LPS
+            førsteFraværsdag = 31.januar
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -166,8 +162,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         // Personen vært frisk 1. & 2.Mars, så er nytt skjæringstidspunkt, men samme arbeidsgiverperiode
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
-            førsteFraværsdag = 5.mars,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 5.mars
         )
         assertInfo("Inntektsmelding ikke håndtert")
         assertTilstandFørInntektsmeldingHensyntas()
@@ -193,8 +188,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            førsteFraværsdag = 1.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.februar
         )
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -216,8 +210,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            førsteFraværsdag = 1.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.februar
         )
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))

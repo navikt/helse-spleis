@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.*
@@ -15,7 +14,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller.Companion.IngenArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt

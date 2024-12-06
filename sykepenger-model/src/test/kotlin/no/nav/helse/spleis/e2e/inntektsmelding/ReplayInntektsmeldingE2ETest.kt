@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -27,7 +26,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.inntektsmelding
+import no.nav.helse.spleis.e2e.klassiskInntektsmelding
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -40,7 +39,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - første fraværsdag kant-i-kant`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar)
+        val inntektsmelding = klassiskInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 21.januar
+        )
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(21.januar), inspektør.inntektInspektør.inntektsdatoer) // Lagrer alltid på oppgitt inntektsdato
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
@@ -53,7 +55,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - gap til første fraværsdag`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
+        val inntektsmelding = klassiskInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 25.januar
+        )
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.inntektsdatoer) // lagrer alltid på inntektsdato i IM
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
@@ -66,7 +71,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Når arbeidsgiver bommer med første fraværsdag, og IM kommer før søknad er vi avhengig av replay-sjekk mot første fraværsdag for å gå videre når søknaden kommer`() {
         nyttVedtak(januar)
-        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 13.februar)
+        val inntektsmelding = klassiskInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 13.februar
+        )
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
@@ -80,8 +88,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyttVedtak(mars)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            beregnetInntekt = INNTEKT + 500.daglig,
-            avsendersystem = ALTINN
+            beregnetInntekt = INNTEKT + 500.daglig
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -98,8 +105,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -205,8 +204,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(10.februar til 28.februar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            10.februar,
-            avsendersystem = LPS
+            10.februar
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -435,8 +433,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(29.januar til 15.februar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 29.januar,
-            avsendersystem = LPS
+            førsteFraværsdag = 29.januar
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -938,8 +935,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            førsteFraværsdag = 1.mars,
-            avsendersystem = LPS
+            førsteFraværsdag = 1.mars
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1058,8 +1054,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            førsteFraværsdag = 1.mars,
-            avsendersystem = LPS
+            førsteFraværsdag = 1.mars
         )
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

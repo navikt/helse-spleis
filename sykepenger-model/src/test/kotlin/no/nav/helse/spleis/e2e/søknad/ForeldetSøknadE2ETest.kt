@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -174,8 +173,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 24.januar,
-            avsendersystem = LPS
+            førsteFraværsdag = 24.januar
         )
 
         håndterYtelser(1.vedtaksperiode)

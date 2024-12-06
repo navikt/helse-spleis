@@ -45,8 +45,9 @@ import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
+import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -134,7 +135,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
         AvbruttSøknad(sykmeldingsperiode, UUID.randomUUID(), organisasjonsnummer)
 
-    internal fun lagInntektsmelding(
+    internal fun lagKlassiskInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
@@ -143,8 +144,10 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
-        mottatt: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        avsendersystem: Avsenderutleder = LPS
     ): Inntektsmelding {
+        check(!erNavPortal(avsendersystem)) { "Du kan ikke klage en klassisk inntektsmelding når avsenderen er NavPortal!" }
         val inntektsmeldinggenerator = {
             Inntektsmelding(
                 meldingsreferanseId = id,
@@ -155,7 +158,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
+                avsendersystem = avsendersystem(UUID.randomUUID(), LocalDate.EPOCH, førsteFraværsdag),
                 mottatt = mottatt
             )
         }

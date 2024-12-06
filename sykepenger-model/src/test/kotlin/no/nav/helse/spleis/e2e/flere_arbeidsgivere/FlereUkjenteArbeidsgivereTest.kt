@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -78,8 +77,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val im2 = håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             beregnetInntekt = inntektA2,
-            orgnummer = a2,
-            avsendersystem = ALTINN
+            orgnummer = a2
         )
         nullstillTilstandsendringer()
         val søknad = UUID.randomUUID()
@@ -169,8 +167,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val id = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             orgnummer = a2,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
         )
         assertEquals(id, observatør.inntektsmeldingIkkeHåndtert.single())
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
@@ -217,8 +214,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val imId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             orgnummer = a2,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
         )
         assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
@@ -258,8 +254,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val imId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             orgnummer = a2,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
         )
         assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
 

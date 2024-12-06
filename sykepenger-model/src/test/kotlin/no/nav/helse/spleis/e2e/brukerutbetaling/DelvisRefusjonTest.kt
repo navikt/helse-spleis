@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -712,8 +711,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(),
-            førsteFraværsdag = 17.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 17.januar
         )
 
         assertInntektshistorikkForDato(INNTEKT, 1.januar, inspektør)
@@ -762,8 +760,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             emptyList(),
-            førsteFraværsdag = 1.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.februar
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)

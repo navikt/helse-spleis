@@ -479,7 +479,7 @@ internal class InntektsmeldingTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
         aktivitetslogg = Aktivitetslogg()
-        inntektsmelding = hendelsefabrikk.lagInntektsmelding(
+        inntektsmelding = hendelsefabrikk.lagKlassiskInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,

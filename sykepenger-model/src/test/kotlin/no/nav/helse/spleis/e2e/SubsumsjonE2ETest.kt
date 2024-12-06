@@ -44,7 +44,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
@@ -56,7 +55,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
@@ -780,8 +778,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§8-12 ledd 1 punktum 1 - Blir kun vurdert en gang etter ny periode med ny rett til sykepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar(2019)))
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            avsendersystem = ALTINN
+            listOf(Periode(1.januar, 16.januar))
         )
         håndterSøknad(1.januar til 31.januar(2019), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -874,8 +871,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 30.desember(2018)))
         håndterInntektsmelding(
-            listOf(Periode(1.januar(2018), 16.januar(2018))),
-            avsendersystem = ALTINN
+            listOf(Periode(1.januar(2018), 16.januar(2018)))
         )
         håndterSøknad(
             Sykdom(1.januar(2018), 30.desember(2018), 100.prosent),
@@ -894,8 +890,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             listOf(Periode(1.januar(2018), 16.januar(2018))),
-            førsteFraværsdag = 1.januar(2019),
-            avsendersystem = LPS
+            førsteFraværsdag = 1.januar(2019)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -2302,8 +2297,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 2.februar,
-            fnr = personOver67år,
-            avsendersystem = LPS
+            fnr = personOver67år
         )
 
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
@@ -2435,8 +2429,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 3.februar,
-            fnr = personOver67år,
-            avsendersystem = LPS
+            fnr = personOver67år
         )
 
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)

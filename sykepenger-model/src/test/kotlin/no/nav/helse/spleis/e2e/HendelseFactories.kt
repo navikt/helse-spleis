@@ -43,6 +43,8 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.LPS
+import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -149,7 +151,7 @@ internal fun AbstractEndToEndTest.søknad(
     tilkomneInntekter = tilkomneInntekter
 )
 
-internal fun AbstractEndToEndTest.inntektsmelding(
+internal fun AbstractEndToEndTest.klassiskInntektsmelding(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -159,11 +161,11 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     harOpphørAvNaturalytelser: Boolean = false,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
-    harFlereInntektsmeldinger: Boolean = false
+    harFlereInntektsmeldinger: Boolean = false,
+    avsendersystem: Avsenderutleder = LPS
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(orgnummer).lagInntektsmelding(
+        ArbeidsgiverHendelsefabrikk(orgnummer).lagKlassiskInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
@@ -171,7 +173,8 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             id = id,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = avsendersystem
         )
     }
     val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
@@ -208,7 +211,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     return inntektsmeldinggenerator()
 }
 
-internal fun AbstractEndToEndTest.inntektsmeldingPortal(
+internal fun AbstractEndToEndTest.portalInntektsmelding(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,

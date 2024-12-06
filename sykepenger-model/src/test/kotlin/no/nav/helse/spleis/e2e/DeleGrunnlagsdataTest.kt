@@ -4,8 +4,6 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -47,8 +45,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
         val inntektsmelding2Id = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 5.april,
-            avsendersystem = LPS
+            førsteFraværsdag = 5.april
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -114,8 +111,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(Periode(18.januar, 1.februar)),
-            førsteFraværsdag = 4.mars,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 4.mars
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)

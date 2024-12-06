@@ -43,8 +43,8 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
+import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.hendelser.til
@@ -202,10 +202,9 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
     arbeidsgivere.forEach {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+            førsteFraværsdag = if (it.second == null) periode.start else null,
             beregnetInntekt = 20000.månedlig,
             orgnummer = it.first,
-            avsendersystem = if (it.second == null) ALTINN else NAV_NO,
-            førsteFraværsdag = if (it.second == null) periode.start else null,
             vedtaksperiodeIdInnhenter = it.second
         )
     }
@@ -497,11 +496,17 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: Avsenderutleder = NAV_NO,
+    avsendersystem: Avsenderutleder? = null,
     vedtaksperiodeIdInnhenter: IdInnhenter? = null,
     førReplay: () -> Unit = {}
 ): UUID {
-    if (erNavPortal(avsendersystem)) {
+    val utledetAvsendersystem = when {
+        avsendersystem != null -> avsendersystem
+        vedtaksperiodeIdInnhenter != null -> NAV_NO
+        else -> LPS
+    }
+
+    if (erNavPortal(utledetAvsendersystem)) {
         check(førsteFraværsdag == null) {
             """
             Du har satt første fraværsdag $førsteFraværsdag på en portalinntektsmelding!
@@ -511,7 +516,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         }
 
         return håndterInntektsmelding(
-            inntektsmeldingPortal(
+            portalInntektsmelding(
                 id,
                 arbeidsgiverperioder,
                 beregnetInntekt = beregnetInntekt,
@@ -521,13 +526,13 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = avsendersystem
+                avsendersystem = utledetAvsendersystem
             )
         )
     }
     check(vedtaksperiodeIdInnhenter == null)  { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
     return håndterInntektsmelding(
-        inntektsmelding(
+        klassiskInntektsmelding(
             id,
             arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
@@ -537,7 +542,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             fnr = fnr,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = utledetAvsendersystem
         ), førReplay
     )
 }
@@ -554,7 +560,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder = NAV_NO
 ): UUID {
-    val portalinntektsmelding = inntektsmeldingPortal(
+    val portalinntektsmelding = portalInntektsmelding(
         id,
         arbeidsgiverperioder,
         beregnetInntekt = beregnetInntekt,

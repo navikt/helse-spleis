@@ -6,7 +6,6 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -16,7 +15,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -166,8 +164,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 1.januar til 1.januar,
                 3.januar til 17.januar
             ),
-            3.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 3.januar
         )
 
         håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
@@ -326,8 +323,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
-            førsteFraværsdag = 9.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 9.januar
         )
         håndterSøknad(Sykdom(7.januar, 28.januar, 100.prosent))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -438,8 +434,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar(2020), 1.januar(2020)),
                 Periode(3.januar(2020), 17.januar(2020))
             ),
-            førsteFraværsdag = 11.januar(2020),
-            avsendersystem = ALTINN
+            førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), Ferie(3.januar(2020), 10.januar(2020)), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -479,8 +474,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar(2020), 1.januar(2020)),
                 Periode(11.januar(2020), 25.januar(2020))
             ),
-            førsteFraværsdag = 11.januar(2020),
-            avsendersystem = ALTINN
+            førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -820,8 +814,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
         håndterInntektsmelding(
             listOf(Periode(1.juni, 16.juni)),
-            førsteFraværsdag = 1.juni,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.juni
         )
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -833,8 +826,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(9.juli, 31.juli, 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.juni, 16.juni)),
-            førsteFraværsdag = 9.juli,
-            avsendersystem = LPS
+            førsteFraværsdag = 9.juli
         )
 
         inspektør.also {
@@ -848,8 +840,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 1.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.januar
         )
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)

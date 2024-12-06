@@ -224,7 +224,7 @@ internal class TestPerson(
             orgnummer: String = "",
             mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
-            arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+            arbeidsgiverHendelsefabrikk.lagKlassiskInntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
                 førsteFraværsdag,

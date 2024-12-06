@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -702,8 +701,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding`() {
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
         nyPeriode(januar)
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -715,8 +713,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 10.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 10.februar
         )
         håndterSykmelding(Sykmeldingsperiode(10.februar, 5.mars))
         håndterSøknad(Sykdom(10.februar, 5.mars, sykmeldingsgrad = 100.prosent))
@@ -728,8 +725,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding -- selv om håndteringen feiler`() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            harOpphørAvNaturalytelser = true,
-            avsendersystem = ALTINN
+            harOpphørAvNaturalytelser = true
         )
         nyPeriode(januar)
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -738,8 +734,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Skal sende ut forespørsel for en periode dersom inntektsmeldingReplay ikke bærer noen frukter`() {
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            avsendersystem = ALTINN
+            listOf(1.januar til 16.januar)
         )
         nyPeriode(februar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)

@@ -15,8 +15,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -148,8 +146,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(14.april til 14.april, 18.april til 2.mai),
             førsteFraværsdag = 22.mai,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse",
-            avsendersystem = LPS
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse"
         )
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?NSSSH", inspektør.sykdomstidslinje.toShortString())
@@ -168,8 +165,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = lørdag den 20.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
-            avsendersystem = LPS
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -187,8 +183,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.mars,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
         )
 
         assertEquals("SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
@@ -219,8 +214,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             emptyList(),
             førsteFraværsdag = lørdag den 6.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
-            avsendersystem = LPS
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo"
         )
         assertEquals("HH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -233,8 +227,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             emptyList(),
             førsteFraværsdag = lørdag den 6.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo"
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
@@ -418,8 +411,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juni til 16.juni),
             førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            avsendersystem = LPS
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -440,8 +432,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juni til 5.juni, 8.juni til 18.juni),
             førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            avsendersystem = LPS
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -517,8 +508,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juni til 16.juni),
             førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            avsendersystem = LPS
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

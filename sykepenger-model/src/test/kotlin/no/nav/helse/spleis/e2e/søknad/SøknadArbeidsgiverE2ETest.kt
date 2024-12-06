@@ -2,14 +2,12 @@ package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.Toggle
 import no.nav.helse.februar
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
@@ -306,8 +304,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 5.februar,
-            avsendersystem = LPS
+            førsteFraværsdag = 5.februar
         )
         håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), Ferie(5.februar, 28.februar))
 
@@ -368,8 +365,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 3.februar,
-            avsendersystem = LPS
+            førsteFraværsdag = 3.februar
         )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -379,8 +375,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 3.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 3.februar
         )
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -396,8 +391,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.februar, 2.februar))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 2.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 2.februar
         )
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
@@ -410,8 +404,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(6.februar, 6.februar))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 6.februar,
-            avsendersystem = LPS
+            førsteFraværsdag = 6.februar
         )
         håndterSøknad(Sykdom(6.februar, 6.februar, 100.prosent))
 
@@ -532,8 +525,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
                 9.januar til 12.januar,
                 16.januar til 22.januar
             ),
-            førsteFraværsdag = 16.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 16.januar
         )
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))

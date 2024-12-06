@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -714,8 +713,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(5.februar til 28.februar)
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 7.februar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 7.februar
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

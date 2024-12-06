@@ -7,13 +7,11 @@ import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSi
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -575,8 +573,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
             listOf(Periode(1.januar, 17.januar)),
-            førsteFraværsdag = 1.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.januar
         )
         håndterSøknad(januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -629,8 +626,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
             listOf(Periode(1.januar, 17.januar)),
-            førsteFraværsdag = 1.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 1.januar
         )
         håndterSøknad(januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -912,8 +908,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals("SSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 30.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 30.januar
         )
         assertEquals("UUSSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
@@ -1077,8 +1072,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterInntektsmelding(
             listOf(Periode(2.januar, 18.januar)),
-            førsteFraværsdag = 2.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1110,8 +1104,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterInntektsmelding(
             listOf(Periode(2.januar, 18.januar)),
-            førsteFraværsdag = 2.januar,
-            avsendersystem = ALTINN
+            førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1148,8 +1141,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     fun `oppdager nye utbetalte dager fra infotrygd i revurderingen`() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            avsendersystem = ALTINN
+            listOf(Periode(1.januar, 16.januar))
         )
         håndterSøknad(januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1224,8 +1216,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 25.januar,
-            avsendersystem = LPS
+            førsteFraværsdag = 25.januar
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

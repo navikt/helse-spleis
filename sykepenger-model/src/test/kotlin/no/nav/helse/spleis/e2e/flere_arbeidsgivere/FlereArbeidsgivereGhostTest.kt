@@ -16,8 +16,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -95,7 +93,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
-import no.nav.helse.hendelser.inntektsmelding.LPS
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
@@ -177,8 +174,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertInfoSomFølgeAv("Inntektsmelding oppdaterer ikke vilkårsgrunnlag") {
             håndterInntektsmelding(
                 listOf(mandag den 29.januar til 13.februar),
-                orgnummer = a2,
-                avsendersystem = ALTINN
+                orgnummer = a2
             )
         }
         // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
@@ -226,8 +222,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = 33000.månedlig,
             orgnummer = ghost,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer"
         )
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -343,8 +338,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            orgnummer = a2,
-            avsendersystem = ALTINN
+            orgnummer = a2
         )
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -381,8 +375,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             beregnetInntekt = INNTEKT,
-            orgnummer = a2,
-            avsendersystem = ALTINN
+            orgnummer = a2
         )
 
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
@@ -429,7 +422,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             listOf(1.februar til 16.februar),
             beregnetInntekt = INNTEKT,
             orgnummer = a2,
-            avsendersystem = NAV_NO,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
@@ -456,7 +448,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             listOf(1.februar til 16.februar),
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
-            avsendersystem = NAV_NO,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -476,8 +467,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             førsteFraværsdag = 20.februar,
             beregnetInntekt = 32000.månedlig,
             refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
-            orgnummer = a2,
-            avsendersystem = LPS
+            orgnummer = a2
         )
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
@@ -512,8 +502,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 26.mars,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = a1,
-            avsendersystem = LPS
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -1283,8 +1272,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             listOf(16.mars til 31.mars),
             førsteFraværsdag = 16.mars,
             refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
-            orgnummer = a2,
-            avsendersystem = ALTINN
+            orgnummer = a2
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
@@ -1331,7 +1319,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             listOf(16.mars til 31.mars),
             refusjon = Inntektsmelding.Refusjon(INNTEKT,null, emptyList()),
             orgnummer = a2,
-            avsendersystem = NAV_NO,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)

@@ -13,8 +13,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -88,8 +86,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.mars,
-            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
-            avsendersystem = LPS
+            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
@@ -114,8 +111,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.mars,
-            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
-            avsendersystem = LPS
+            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
@@ -300,7 +296,11 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `tagger perioder innenfor arbeidsgiverperioden`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
         nyPeriode(1.januar til 10.januar)
-        håndterInntektsmelding(emptyList(), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        håndterInntektsmelding(
+            emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -325,8 +325,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             førsteFraværsdag = 1.februar,
-            orgnummer = a2,
-            avsendersystem = ALTINN
+            orgnummer = a2
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode,

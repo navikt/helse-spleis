@@ -6,15 +6,13 @@ import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.LPS
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -94,8 +92,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() {
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         håndterInntektsmelding(
-            listOf(10.januar til 25.januar),
-            avsendersystem = ALTINN
+            listOf(10.januar til 25.januar)
         )
         håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -420,8 +417,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 31.januar,
-            beregnetInntekt = INNTEKT,
-            avsendersystem = LPS
+            beregnetInntekt = INNTEKT
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         håndterYtelser(1.vedtaksperiode)
@@ -663,8 +659,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(10.januar til 25.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterInntektsmelding(
             listOf(10.januar til 25.januar),
-            30.januar,
-            avsendersystem = LPS
+            30.januar
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -686,8 +681,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(10.januar til 25.januar),
-            30.januar,
-            avsendersystem = LPS
+            30.januar
         )
         håndterInntektsmelding(
             listOf(10.januar til 25.januar),
@@ -1268,8 +1262,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
-            avsendersystem = ALTINN
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
 
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -1292,8 +1285,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
-            avsendersystem = NAV_NO_SELVBESTEMT,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            avsendersystem = NAV_NO_SELVBESTEMT
         )
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)
