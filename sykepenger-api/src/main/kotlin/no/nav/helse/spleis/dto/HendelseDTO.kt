@@ -43,6 +43,7 @@ data class HendelseDTO(
             tom = tom,
             rapportertdato = rapportertdato,
         )
+
         fun nyFrilanssøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.NY_SØKNAD_FRILANS,
             id = id,
@@ -51,6 +52,7 @@ data class HendelseDTO(
             tom = tom,
             rapportertdato = rapportertdato,
         )
+
         fun nySelvstendigsøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.NY_SØKNAD_SELVSTENDIG,
             id = id,
@@ -59,6 +61,7 @@ data class HendelseDTO(
             tom = tom,
             rapportertdato = rapportertdato,
         )
+
         fun nyArbeidsledigsøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.NY_SØKNAD_ARBEIDSLEDIG,
             id = id,
@@ -67,6 +70,7 @@ data class HendelseDTO(
             tom = tom,
             rapportertdato = rapportertdato,
         )
+
         fun sendtSøknadNav(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_NAV,
             id = id,
@@ -76,6 +80,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
             sendtNav = sendtNav,
         )
+
         fun sendtSøknadFrilans(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_FRILANS,
             id = id,
@@ -85,6 +90,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
             sendtNav = sendtNav,
         )
+
         fun sendtSøknadSelvstendig(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_SELVSTENDIG,
             id = id,
@@ -94,6 +100,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
             sendtNav = sendtNav,
         )
+
         fun sendtSøknadArbeidsledig(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_ARBEIDSLEDIG,
             id = id,
@@ -103,6 +110,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
             sendtNav = sendtNav,
         )
+
         fun sendtSøknadArbeidsgiver(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtArbeidsgiver: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_ARBEIDSGIVER,
             id = id,
@@ -112,6 +120,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
             sendtArbeidsgiver = sendtArbeidsgiver,
         )
+
         fun inntektsmelding(id: String, eksternDokumentId: String, mottattDato: LocalDateTime, beregnetInntekt: Double) = HendelseDTO(
             type = HendelsetypeDto.INNTEKTSMELDING,
             id = id,
@@ -119,6 +128,7 @@ data class HendelseDTO(
             mottattDato = mottattDato,
             beregnetInntekt = beregnetInntekt
         )
+
         fun inntektFraAOrdningen(id: String, mottattDato: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.INNTEKT_FRA_AORDNINGEN,
             id = id,

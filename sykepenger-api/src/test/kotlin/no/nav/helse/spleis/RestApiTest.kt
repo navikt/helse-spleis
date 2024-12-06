@@ -47,7 +47,7 @@ internal class RestApiTest {
     }
 
     @Test
-    fun `hent personJson med fnr`() = blackboxTestApplication{
+    fun `hent personJson med fnr`() = blackboxTestApplication {
         "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
     }
 
@@ -63,15 +63,15 @@ internal class RestApiTest {
 
     @Test
     fun `request med manglende eller feil access token`() = blackboxTestApplication {
-            val query = """
+        val query = """
             {
                 person(fnr: \"${UNG_PERSON_FNR}\") { } 
             }
         """
 
-            val body = """{"query": "$query"}"""
+        val body = """{"query": "$query"}"""
 
-            val annenIssuer = Issuer("annen")
+        val annenIssuer = Issuer("annen")
 
         post(body, HttpStatusCode.Unauthorized, accessToken = null)
         post(body, HttpStatusCode.Unauthorized, accessToken = issuer.createToken("feil_audience"))
@@ -118,10 +118,18 @@ internal class RestApiTest {
     private fun DataSource.lagrePerson(fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(this, returnGeneratedKey = true).use {
-            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
-            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
-                fødselsnummer.toLong(), personId!!).asExecute)
+            val personId = it.run(
+                queryOf(
+                    "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                    fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
+                ).asUpdateAndReturnGeneratedKey
+            )
+            it.run(
+                queryOf(
+                    "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
+                    fødselsnummer.toLong(), personId!!
+                ).asExecute
+            )
 
         }
     }

@@ -9,38 +9,38 @@ import java.util.Base64
 import org.intellij.lang.annotations.Language
 
 class Issuer(val navn: String) {
-   companion object {
-      private const val SUBJECT = "en_saksbehandler_ident"
-      private val GROUPS = listOf("sykepenger-saksbehandler-gruppe").toTypedArray()
-      val AUDIENCE = "spleis_azure_ad_app_id"
-   }
+    companion object {
+        private const val SUBJECT = "en_saksbehandler_ident"
+        private val GROUPS = listOf("sykepenger-saksbehandler-gruppe").toTypedArray()
+        val AUDIENCE = "spleis_azure_ad_app_id"
+    }
 
-   private val privateKey: RSAPrivateKey
-   private val publicKey: RSAPublicKey
+    private val privateKey: RSAPrivateKey
+    private val publicKey: RSAPublicKey
 
-   init {
-      val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-      keyPairGenerator.initialize(512)
+    init {
+        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        keyPairGenerator.initialize(512)
 
-      val keyPair = keyPairGenerator.genKeyPair()
-      privateKey = keyPair.private as RSAPrivateKey
-      publicKey = keyPair.public as RSAPublicKey
-   }
+        val keyPair = keyPairGenerator.genKeyPair()
+        privateKey = keyPair.private as RSAPrivateKey
+        publicKey = keyPair.public as RSAPublicKey
+    }
 
-   fun createToken(audience: String = AUDIENCE): String {
-      val algorithm = Algorithm.RSA256(publicKey, privateKey)
+    fun createToken(audience: String = AUDIENCE): String {
+        val algorithm = Algorithm.RSA256(publicKey, privateKey)
 
-      return JWT.create()
-         .withIssuer(navn)
-         .withAudience(audience)
-         .withKeyId("key-1234")
-         .withSubject(SUBJECT)
-         .withArrayClaim("groups", GROUPS)
-         .sign(algorithm)
-   }
+        return JWT.create()
+            .withIssuer(navn)
+            .withAudience(audience)
+            .withKeyId("key-1234")
+            .withSubject(SUBJECT)
+            .withArrayClaim("groups", GROUPS)
+            .sign(algorithm)
+    }
 
-   @Language("JSON")
-   val jwks = """
+    @Language("JSON")
+    val jwks = """
    {
        "keys": [
            {

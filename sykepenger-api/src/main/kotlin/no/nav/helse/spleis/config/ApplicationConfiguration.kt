@@ -11,12 +11,13 @@ import com.github.navikt.tbd_libs.naisful.postgres.jdbcUrlWithGoogleSocketFactor
 import com.github.navikt.tbd_libs.speed.SpeedClient
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.auth.jwt.*
+import io.ktor.server.auth.jwt.JWTAuthenticationProvider
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.spleis.SpekematClient
-import no.nav.helse.spleis.objectMapper
 import java.net.URI
 import java.net.http.HttpClient
+import no.nav.helse.spleis.SpekematClient
+import no.nav.helse.spleis.objectMapper
 
 internal class ApplicationConfiguration(meterRegistry: MeterRegistry, env: Map<String, String> = System.getenv()) {
     internal val azureConfig = AzureAdAppConfig(

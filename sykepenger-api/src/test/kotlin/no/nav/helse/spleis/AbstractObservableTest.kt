@@ -141,15 +141,23 @@ internal abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1), type = Arbeidsforholdtype.ORDINÆRT)),
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = inntektperioderForSykepengegrunnlag {
-                        Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
-                            ORGNUMMER inntekt INNTEKT
-                        }
-                    }),
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(listOf(
-            ArbeidsgiverInntekt(ORGNUMMER, listOf(ArbeidsgiverInntekt.MånedligInntekt(YearMonth.from(FOM.minusMonths(1)),
-                INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "kontantytelse", "fastloenn")))
-        ))
+            inntekter = inntektperioderForSykepengegrunnlag {
+                Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }),
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(
+            listOf(
+                ArbeidsgiverInntekt(
+                    ORGNUMMER, listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(
+                        YearMonth.from(FOM.minusMonths(1)),
+                        INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "kontantytelse", "fastloenn"
+                    )
+                )
+                )
+            )
+        )
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),

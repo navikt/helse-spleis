@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Assertions
 
 internal class Applikasjonsservere(private val poolSize: Int) {
     constructor() : this(POOL_SIZE)
+
     companion object {
         private val JUNIT_PARALLELISM = System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt() ?: 1
 

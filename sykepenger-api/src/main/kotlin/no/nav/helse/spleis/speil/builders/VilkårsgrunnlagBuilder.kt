@@ -149,6 +149,7 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
                     )
                 }
         } ?: emptyList()
+
     internal fun potensielleGhostsperioder(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
@@ -258,6 +259,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     null
                 )
             }
+
             is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
                 IInntektkilde.AOrdningen, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
@@ -270,6 +272,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     )
                 }
             )
+
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
         }.also {
             inntekter[io.id] = it
@@ -284,6 +287,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     årlig = io.beløp.årlig.beløp,
                     månedlig = io.beløp.månedligDouble.beløp
                 )
+
                 else -> null
             },
             deaktivert = deaktivert

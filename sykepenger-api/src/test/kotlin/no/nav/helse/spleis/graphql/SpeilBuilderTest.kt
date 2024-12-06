@@ -66,12 +66,12 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
 
     private fun PersonDTO.assertTotalgrad(forventet: Int, vararg perioder: Periode) {
         val totalgrader = (arbeidsgivere[0]
-        .generasjoner[0]
-        .perioder[0] as BeregnetPeriode)
-        .sammenslåttTidslinje
-        .filter { sammenslåttDag -> perioder.any { sammenslåttDag.dagen in it } }
-        .map { it.utbetalingsinfo?.totalGrad }
-        assertTrue(totalgrader.all { it == forventet }) { "Her er det noe som ikke er $forventet: $totalgrader"}
+            .generasjoner[0]
+            .perioder[0] as BeregnetPeriode)
+            .sammenslåttTidslinje
+            .filter { sammenslåttDag -> perioder.any { sammenslåttDag.dagen in it } }
+            .map { it.utbetalingsinfo?.totalGrad }
+        assertTrue(totalgrader.all { it == forventet }) { "Her er det noe som ikke er $forventet: $totalgrader" }
     }
 
     @Test
@@ -86,7 +86,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         assertEquals(10000.0 / 20, nyeInntektsforholdPølse.dagligBeløp)
         assertEquals(10833, nyeInntektsforholdPølse.månedligBeløp.toInt())
 
-        assertEquals(emptyList<GhostPeriodeDTO>(),  speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder)
     }
 
     @Test
@@ -140,7 +140,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         håndterSøknad(1.januar til 16.januar)
-        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",)
+        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
@@ -165,7 +165,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1,)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to 31000.månedlig),
             arbeidsforhold = listOf(a1 to EPOCH, a2 to 25.november(2017))
@@ -232,7 +232,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
 
         assertEquals(1.januar, refusjonsopplysning.fom)
         assertEquals(null, refusjonsopplysning.tom)
-        assertEquals(INNTEKT,refusjonsopplysning.beløp.månedlig)
+        assertEquals(INNTEKT, refusjonsopplysning.beløp.månedlig)
     }
 
     @Test
@@ -257,8 +257,11 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
-                Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))),
+            refusjon = Inntektsmelding.Refusjon(
+                INNTEKT, null, endringerIRefusjon = listOf(
+                Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar)
+            )
+            ),
         )
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
@@ -396,7 +399,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val inntektSkatt = 31000.0 * 2
         val inntektSkjønnsfastsatt = 31000 * 1.5
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(1.januar, beregnetInntekt = inntektIm.månedlig,)
+        håndterInntektsmelding(1.januar, beregnetInntekt = inntektIm.månedlig)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to inntektSkatt.månedlig))
         håndterYtelserTilGodkjenning()
         håndterSkjønnsmessigFastsettelse(
@@ -430,14 +433,16 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterYtelser()
 
         val personDto = speilApi()
-        assertEquals(20,
+        assertEquals(
+            20,
             (personDto
                 .arbeidsgivere[0]
                 .generasjoner[0]
                 .perioder[0] as BeregnetPeriode)
                 .sammenslåttTidslinje[28]
                 .utbetalingsinfo!!
-                .totalGrad)
+                .totalGrad
+        )
     }
 
     @Test
@@ -451,14 +456,16 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterYtelser()
 
         val personDto = speilApi()
-        assertEquals(19,
+        assertEquals(
+            19,
             (personDto
                 .arbeidsgivere[0]
                 .generasjoner[0]
                 .perioder[0] as BeregnetPeriode)
                 .sammenslåttTidslinje[28]
                 .utbetalingsinfo!!
-                .totalGrad)
+                .totalGrad
+        )
     }
 
     @Test

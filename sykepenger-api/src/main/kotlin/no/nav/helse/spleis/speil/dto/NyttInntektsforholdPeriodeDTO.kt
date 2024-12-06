@@ -19,6 +19,7 @@ data class NyttInntektsforholdPeriodeDTO(
         id = UUID.randomUUID(),
         tom = other.start.forrigeDag
     )
+
     internal fun fra(other: ClosedRange<LocalDate>) = copy(
         id = UUID.randomUUID(),
         fom = other.endInclusive.nesteDag

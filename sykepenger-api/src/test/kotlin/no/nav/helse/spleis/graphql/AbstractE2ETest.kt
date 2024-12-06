@@ -78,6 +78,7 @@ internal abstract class AbstractE2ETest {
         person.addObserver(observatør)
         person.addObserver(spekemat)
     }
+
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist ->
         gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist)
     }
@@ -112,6 +113,7 @@ internal abstract class AbstractE2ETest {
     protected fun håndterSøknad(periode: Periode, orgnummer: String = a1): UUID {
         return håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), sykmeldingSkrevet = periode.start.atStartOfDay(), sendtTilNAV = periode.endInclusive.atStartOfDay(), orgnummer = orgnummer)
     }
+
     protected fun håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         sykmeldingSkrevet: LocalDateTime = 1.januar.atStartOfDay(),
@@ -230,6 +232,7 @@ internal abstract class AbstractE2ETest {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id = meldingsreferanseId,
             )
+
             false -> fabrikker.getValue(orgnummer).lagInntektsmelding(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 beregnetInntekt = beregnetInntekt,
@@ -261,6 +264,7 @@ internal abstract class AbstractE2ETest {
     protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT)) {
         håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH })
     }
+
     protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
         val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
         håndterVilkårsgrunnlag(
@@ -376,21 +380,25 @@ internal abstract class AbstractE2ETest {
             meldingsreferanseId = meldingsreferanseId
         )).håndter(Person::håndter)
     }
+
     protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, orgnummer: String = a1, vedtaksperiode: Int = 1) {
         håndterSøknad(fom til tom, orgnummer)
         håndterInntektsmelding(fom, orgnummer = orgnummer, vedtaksperiode = vedtaksperiode)
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
     }
+
     protected fun forlengTilGodkjenning(fom: LocalDate, tom: LocalDate, orgnummer: String = a1) {
         håndterSøknad(fom til tom, orgnummer)
         håndterYtelserTilGodkjenning()
     }
+
     protected fun tilYtelser(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
         orgnummerOgVedtaksperioder.forEach { håndterSøknad(fom til tom, it.first) }
         orgnummerOgVedtaksperioder.forEach { håndterInntektsmelding(fom, orgnummer = it.first, vedtaksperiode = it.second) }
         håndterVilkårsgrunnlag()
     }
+
     protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
         tilYtelser(fom, tom, *orgnummerOgVedtaksperioder)
         håndterYtelserTilGodkjenning()
@@ -404,6 +412,7 @@ internal abstract class AbstractE2ETest {
             håndterUtbetalt()
         }
     }
+
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, vararg orgnumre: String) {
         orgnumre.forEach { håndterSøknad(fom til tom, it) }
         orgnumre.forEach {
@@ -412,11 +421,13 @@ internal abstract class AbstractE2ETest {
             håndterUtbetalt()
         }
     }
+
     protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, orgnummer: String = a1, vedtaksperiode: Int = 1): Utbetalingbehov {
         tilGodkjenning(fom, tom, orgnummer to vedtaksperiode)
         håndterUtbetalingsgodkjenning()
         return håndterUtbetalt()
     }
+
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, orgnummer: String = a1): Utbetalingbehov {
         forlengTilGodkjenning(fom, tom, orgnummer)
         håndterUtbetalingsgodkjenning()
@@ -437,6 +448,7 @@ internal abstract class AbstractE2ETest {
     ) {
         personfabrikk.lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, opplysninger, meldingsreferanseId).håndter(Person::håndter)
     }
+
     protected fun håndterSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
         opplysninger: List<OverstyrtArbeidsgiveropplysning>,
@@ -444,6 +456,7 @@ internal abstract class AbstractE2ETest {
     ) {
         personfabrikk.lagSkjønnsmessigFastsettelse(skjæringstidspunkt, opplysninger, meldingsreferanseId).håndter(Person::håndter)
     }
+
     protected fun håndterUtbetalingsgodkjenning(utbetalingGodkjent: Boolean = true) {
         val behov = hendelselogg.godkjenningbehov() ?: error("Fant ikke godkjenningsbehov")
         fabrikker.getValue(behov.orgnummer).lagUtbetalingsgodkjenning(
@@ -453,6 +466,7 @@ internal abstract class AbstractE2ETest {
             utbetalingId = behov.utbetalingId
         ).håndter(Person::håndter)
     }
+
     protected fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT): Utbetalingbehov {
         val behov = hendelselogg.utbetalingbehov() ?: error("Fant ikke utbetalingbehov")
         behov.oppdrag.forEach {
@@ -464,19 +478,23 @@ internal abstract class AbstractE2ETest {
         }
         return behov
     }
+
     protected fun håndterVilkårsgrunnlagTilUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt(status)
     }
+
     protected fun håndterYtelserTilGodkjent() {
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
     }
+
     protected fun håndterYtelserTilUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT): Utbetalingbehov {
         håndterYtelserTilGodkjent()
         return håndterUtbetalt(status)
     }
+
     protected fun håndterAnnullerUtbetaling(behov: Utbetalingbehov) {
         fabrikker.getValue(behov.orgnummer).lagAnnullering(behov.utbetalingId)
             .håndter(Person::håndter)
@@ -491,6 +509,7 @@ internal abstract class AbstractE2ETest {
             }
 
     }
+
     private fun IAktivitetslogg.infotrygdhistorikkbehov() =
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Sykepengehistorikk))?.single()?.let {
             ubesvarteBehov.remove(it)
@@ -499,6 +518,7 @@ internal abstract class AbstractE2ETest {
                 orgnummer = it.kontekst().getValue("organisasjonsnummer")
             )
         }
+
     private fun IAktivitetslogg.vilkårsgrunnlagbehov() =
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag, Aktivitet.Behov.Behovtype.ArbeidsforholdV2, Aktivitet.Behov.Behovtype.Medlemskap))?.let {
             ubesvarteBehov.removeAll(it)
@@ -509,7 +529,9 @@ internal abstract class AbstractE2ETest {
                 skjæringstidspunkt = LocalDate.parse(behovene.first().detaljer().getValue("skjæringstidspunkt") as String)
             )
         }
-    private fun IAktivitetslogg.ytelserbehov() = ønsketBehov(setOf(
+
+    private fun IAktivitetslogg.ytelserbehov() = ønsketBehov(
+        setOf(
             Aktivitet.Behov.Behovtype.Foreldrepenger,
             Aktivitet.Behov.Behovtype.Pleiepenger,
             Aktivitet.Behov.Behovtype.Omsorgspenger,
@@ -517,7 +539,8 @@ internal abstract class AbstractE2ETest {
             Aktivitet.Behov.Behovtype.Institusjonsopphold,
             Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger,
             Aktivitet.Behov.Behovtype.Dagpenger
-        ))
+        )
+    )
         ?.let {
             ubesvarteBehov.removeAll(it)
             val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.kontekst().getValue("vedtaksperiodeId")) }.entries.single()
@@ -526,6 +549,7 @@ internal abstract class AbstractE2ETest {
                 orgnummer = it.first().kontekst().getValue("organisasjonsnummer")
             )
         }
+
     private fun IAktivitetslogg.simuleringbehov() =
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Simulering))
             ?.let {
@@ -545,6 +569,7 @@ internal abstract class AbstractE2ETest {
                     }
                 )
             }
+
     private fun IAktivitetslogg.godkjenningbehov() = ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Godkjenning))?.single()?.let {
         ubesvarteBehov.remove(it)
         Godkjenningbehov(
@@ -553,6 +578,7 @@ internal abstract class AbstractE2ETest {
             utbetalingId = UUID.fromString(it.kontekst().getValue("utbetalingId"))
         )
     }
+
     private fun IAktivitetslogg.utbetalingbehov() =
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Utbetaling))
             ?.let {
@@ -575,31 +601,37 @@ internal abstract class AbstractE2ETest {
         val vedtaksperiodeId: UUID,
         val orgnummer: String
     )
+
     data class Vilkårsgrunnlagbehov(
         val vedtaksperiodeId: UUID,
         val orgnummer: String,
         val skjæringstidspunkt: LocalDate
     )
+
     data class Ytelserbehov(
         val vedtaksperiodeId: UUID,
         val orgnummer: String
     )
+
     data class Simuleringbehov(
         val vedtaksperiodeId: UUID,
         val orgnummer: String,
         val utbetalingId: UUID,
         val oppdrag: List<Oppdragbehov>
     )
+
     data class Godkjenningbehov(
         val vedtaksperiodeId: UUID,
         val orgnummer: String,
         val utbetalingId: UUID
     )
+
     data class Utbetalingbehov(
         val orgnummer: String,
         val utbetalingId: UUID,
         val oppdrag: List<Oppdragbehov>
     )
+
     data class Oppdragbehov(
         val fagområde: String,
         val fagsystemId: String

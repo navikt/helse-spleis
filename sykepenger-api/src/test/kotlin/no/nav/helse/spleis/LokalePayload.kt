@@ -53,8 +53,10 @@ private class LokaleClaim(private val verdi: String) : Claim {
     override fun asDouble() = 0.0
     override fun asString() = verdi
     override fun asDate() = Date.from(Instant.EPOCH)
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any?> asArray(clazz: Class<T>?) = emptyArray<Any>() as Array<T>
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any?> asList(clazz: Class<T>?) = emptyList<Any>() as List<T>
     override fun asMap() = emptyMap<String, Any>()
