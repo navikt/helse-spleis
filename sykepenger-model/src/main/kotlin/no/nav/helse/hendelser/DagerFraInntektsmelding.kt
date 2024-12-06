@@ -39,7 +39,7 @@ internal class DagerFraInntektsmelding(
     private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-    avsendersystem: Inntektsmelding.Avsendersystem?,
+    avsendersystem: Inntektsmelding.Avsendersystem,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean,
     val hendelse: Hendelse
