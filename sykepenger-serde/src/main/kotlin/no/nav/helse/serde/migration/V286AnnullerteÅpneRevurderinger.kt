@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 
-internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
+internal class V286AnnullerteÅpneRevurderinger : JsonMigration(version = 286) {
     override val description = "smelter sammen til_infotrygd-generasjonen og nest siste generasjon hvis den er en åpen revurdering"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -34,6 +34,7 @@ internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
                 }
             }
     }
+
     private fun migrerForkastetVedtaksperiode(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
         migrerVedtaksperiode(aktørId, orgnr, vedtaksperiode)
 

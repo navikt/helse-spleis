@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.serde.serdeObjectMapper
 
-internal class V313OppryddingIUbrukteRefusjonsopplysninger: JsonMigration(version = 313) {
+internal class V313OppryddingIUbrukteRefusjonsopplysninger : JsonMigration(version = 313) {
     override val description = "Fjerner ubrukte refusjonsopplysninger tidligere enn siste vedtaksperiode på arbeidsgiveren"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -21,10 +21,11 @@ internal class V313OppryddingIUbrukteRefusjonsopplysninger: JsonMigration(versio
             ubrukteRefusjonsopplysninger.fields().forEach { (dato, refusjonstidslinjer) ->
                 val futiristiske = refusjonstidslinjer.path("perioder").deepCopy<JsonNode>()
                     .filter { periode -> periode.path("tom").dato().isAfter(sisteTomPåVedtaksperiode) }
-                    .map { periode -> (periode as ObjectNode)
+                    .map { periode ->
+                        (periode as ObjectNode)
                         val fom = periode.path("fom").dato()
                         periode.put("fom", maxOf(fom, sisteTomPåVedtaksperiode.plusDays(1)).toString())
-                     }
+                    }
                 if (futiristiske.isNotEmpty()) {
                     ubrukteRefusjonsopplysningerEtterMigrering.putObject(dato).putArray("perioder").apply {
                         this.addAll(futiristiske)

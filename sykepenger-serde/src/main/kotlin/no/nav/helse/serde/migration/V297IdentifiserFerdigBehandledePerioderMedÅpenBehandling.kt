@@ -8,7 +8,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 
-internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling: JsonMigration(version = 297) {
+internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling : JsonMigration(version = 297) {
     override val description = "identifisere ferdig behandlede perioder med åpen behandling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -55,7 +55,7 @@ internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling: JsonMi
 
         private fun JsonNode.validerAvsluttetUtenVedtak(aktørId: String, fødselsnummer: String, organisasjonsnummer: String): Pair<LocalDate, JsonNode>? {
             val vedtaksperiodeId = path("id").asText()
-            val sisteBehandling = sisteBehandlingOrNull() ?: return sikkerLogg.error("AvsluttetUtenUtbetaling {} for {} på {} har ingen behandlinger", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId),  keyValue("organisasjonsnummer", organisasjonsnummer)).let { null }
+            val sisteBehandling = sisteBehandlingOrNull() ?: return sikkerLogg.error("AvsluttetUtenUtbetaling {} for {} på {} har ingen behandlinger", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)).let { null }
             val tilstand = sisteBehandling.path("tilstand").asText().takeUnless { it == "AVSLUTTET_UTEN_VEDTAK" } ?: return null
             sikkerLogg.error("AvsluttetUtenUtbetaling {} for {} på {} har siste {} i {}", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer), keyValue("behandlingId", sisteBehandling.path("id").asText()), keyValue("tilstand", tilstand))
             return sisteBehandling.fom() to påminnelse(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, "AVSLUTTET_UTEN_UTBETALING")

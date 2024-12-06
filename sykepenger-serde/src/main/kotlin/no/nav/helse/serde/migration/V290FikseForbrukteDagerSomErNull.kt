@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V290FikseForbrukteDagerSomErNull: JsonMigration(version = 290) {
+internal class V290FikseForbrukteDagerSomErNull : JsonMigration(version = 290) {
     override val description = "fikser historiske utbetalinger som har forbrukteSykedager og gjenståendeSykedager satt til NULL"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

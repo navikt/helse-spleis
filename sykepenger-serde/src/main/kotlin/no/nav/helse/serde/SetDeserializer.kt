@@ -14,7 +14,7 @@ internal class SetDeserializer(t: Class<Set<*>>) : StdDeserializer<Set<*>>(t) {
             .map {
                 try {
                     fromString(it as String)
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     it
                 }
             }

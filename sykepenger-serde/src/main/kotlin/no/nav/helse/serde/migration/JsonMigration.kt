@@ -11,6 +11,7 @@ fun interface MeldingerSupplier {
     companion object {
         internal val empty = MeldingerSupplier { emptyMap() }
     }
+
     fun hentMeldinger(): Map<UUID, Hendelse>
 }
 
@@ -22,7 +23,7 @@ internal fun List<JsonMigration>.migrate(
 ) =
     JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
 
-private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
+private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier) : MeldingerSupplier {
     private val meldinger: Map<UUID, Hendelse> by lazy { supplier.hentMeldinger() }
 
     override fun hentMeldinger(): Map<UUID, Hendelse> = meldinger

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V292AnnullertPeriode: JsonMigration(version = 292) {
+internal class V292AnnullertPeriode : JsonMigration(version = 292) {
     override val description = "setter tilstand=ANNULLERT_PERIODE for annullerte behandlinger"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

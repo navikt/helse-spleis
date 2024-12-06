@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon: JsonMigration(281) {
+internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon : JsonMigration(281) {
     override val description = "forkaster vedtaksperioder som er Avsluttet, men som har én generasjon som er UBEREGNET med forkastet utbetaling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -40,6 +40,7 @@ internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon: JsonMigrati
             }
         }
     }
+
     private fun migrerVedtaksperiode(aktørId: String, periode: JsonNode, leggTilForkastet: (JsonNode) -> Unit) {
         val tilstandForVedtaksperiode = periode.path("tilstand").asText()
         if (tilstandForVedtaksperiode != "AVSLUTTET") return

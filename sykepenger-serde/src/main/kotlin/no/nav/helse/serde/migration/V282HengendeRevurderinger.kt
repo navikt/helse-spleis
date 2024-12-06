@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
 import org.slf4j.LoggerFactory
 
-internal class V282HengendeRevurderinger: JsonMigration(282) {
+internal class V282HengendeRevurderinger : JsonMigration(282) {
     override val description = "fjerner hengende uberegnede revurderinger på perioder som også har en beregnet revurdering"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -19,6 +19,7 @@ internal class V282HengendeRevurderinger: JsonMigration(282) {
                 .onEach { periode -> migrerVedtaksperiode(aktørId, periode) }
         }
     }
+
     private fun migrerVedtaksperiode(aktørId: String, periode: JsonNode) {
         val tilstandForVedtaksperiode = periode.path("tilstand").asText()
         if (tilstandForVedtaksperiode !in setOf("AVVENTER_REVURDERING", "AVVENTER_HISTORIKK_REVURDERING", "AVVENTER_SIMULERING_REVURDERING", "AVVENTER_GODKJENNING_REVURDERING")) return
@@ -50,10 +51,11 @@ internal class V282HengendeRevurderinger: JsonMigration(282) {
         val type: String
     ) {
         companion object {
-            val JsonNode.dokumentsporing get() = Dokumentsporing(
-                id = this.path("dokumentId").asText().uuid,
-                type = this.path("dokumenttype").asText()
-            )
+            val JsonNode.dokumentsporing
+                get() = Dokumentsporing(
+                    id = this.path("dokumentId").asText().uuid,
+                    type = this.path("dokumenttype").asText()
+                )
         }
     }
 

@@ -52,6 +52,7 @@ internal class DagDataTest {
         assertEquals(expected, actual)
         JSONAssert.assertEquals(json, serdeObjectMapper.writeValueAsString(actual), JSONCompareMode.NON_EXTENSIBLE)
     }
+
     @Test
     fun `deserialisere og serialisere flere dager`() {
         @Language("JSON")

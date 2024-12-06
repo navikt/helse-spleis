@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 
-internal class V288FjerneOverflødigeUberegnedeRevurderinger: JsonMigration(version = 288) {
+internal class V288FjerneOverflødigeUberegnedeRevurderinger : JsonMigration(version = 288) {
     override val description = "smelter sammen flere uberegnede (revurderinger) til én"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

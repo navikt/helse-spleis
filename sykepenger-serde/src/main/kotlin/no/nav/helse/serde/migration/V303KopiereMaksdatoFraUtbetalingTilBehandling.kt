@@ -10,9 +10,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
-import kotlin.collections.flatMap
 
-internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(version = 303) {
+internal class V303KopiereMaksdatoFraUtbetalingTilBehandling : JsonMigration(version = 303) {
     override val description = "lagrer maksdatoresultat på behandling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -177,8 +176,7 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
         if (endring.path("maksdatoresultat").path("bestemmelse").asText() != "IKKE_VURDERT") return
 
         val utbetalingId = UUID.fromString(endring.path("utbetalingId").asText())
-        val resultat = maksdatoresultater[utbetalingId] ?:
-            return sikkerlogg.info("[V303] Fant ikke maksdatoresultat for utbetaling. KorrelasjonsIDen har muligens blitt annullert", kv("aktørId", aktørId), kv("vedtaksperiodeId", vedtaksperiodeId))
+        val resultat = maksdatoresultater[utbetalingId] ?: return sikkerlogg.info("[V303] Fant ikke maksdatoresultat for utbetaling. KorrelasjonsIDen har muligens blitt annullert", kv("aktørId", aktørId), kv("vedtaksperiodeId", vedtaksperiodeId))
 
         /* vurdering av kvaliteten */
         if (resultat.antallForbrukteDager > 0 && resultat.forbrukteDager.isEmpty())
@@ -301,10 +299,12 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling: JsonMigration(vers
             }
         }
 
-        private fun LocalDate.forrigeVirkedagFør() = minusDays(when (dayOfWeek) {
-            SUNDAY -> 2
-            MONDAY -> 3
-            else -> 1
-        })
+        private fun LocalDate.forrigeVirkedagFør() = minusDays(
+            when (dayOfWeek) {
+                SUNDAY -> 2
+                MONDAY -> 3
+                else -> 1
+            }
+        )
     }
 }

@@ -9,7 +9,7 @@ import java.util.UUID
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V279AvsluttettidspunktVedtakFattet: JsonMigration(279) {
+internal class V279AvsluttettidspunktVedtakFattet : JsonMigration(279) {
     override val description = "flytter generasjoner i VEDTAK_FATTET som skulle vært VEDTAK_IVERKSATT"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -25,6 +25,7 @@ internal class V279AvsluttettidspunktVedtakFattet: JsonMigration(279) {
                 .onEach { periode -> migrerVedtaksperiode(aktørId, periode, avsluttettidspunktForUtbetalinger::getValue) }
         }
     }
+
     private fun migrerVedtaksperiode(aktørId: String, periode: JsonNode, avsluttettidspunktForUtbetalinger: (UUID) -> LocalDateTime?) {
         val tilstandForVedtaksperiode = periode.path("tilstand").asText()
         if (tilstandForVedtaksperiode != "AVSLUTTET") return
@@ -67,6 +68,7 @@ internal class V279AvsluttettidspunktVedtakFattet: JsonMigration(279) {
                 it.putArray("endringer").addAll(endringer)
             }
     }
+
     private fun lagEndring(
         dokumentId: UUID,
         dokumenttype: String,
@@ -109,10 +111,11 @@ internal class V279AvsluttettidspunktVedtakFattet: JsonMigration(279) {
         val type: String
     ) {
         companion object {
-            val JsonNode.dokumentsporing get() = Dokumentsporing(
-                id = this.path("dokumentId").asText().uuid,
-                type = this.path("dokumenttype").asText()
-            )
+            val JsonNode.dokumentsporing
+                get() = Dokumentsporing(
+                    id = this.path("dokumentId").asText().uuid,
+                    type = this.path("dokumenttype").asText()
+                )
         }
     }
 

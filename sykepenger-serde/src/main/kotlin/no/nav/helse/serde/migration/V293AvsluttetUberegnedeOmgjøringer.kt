@@ -7,7 +7,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
-internal class V293AvsluttetUberegnedeOmgjøringer: JsonMigration(version = 293) {
+internal class V293AvsluttetUberegnedeOmgjøringer : JsonMigration(version = 293) {
     override val description = "avslutter uberegnede omgjøringer for auu-perioder"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
