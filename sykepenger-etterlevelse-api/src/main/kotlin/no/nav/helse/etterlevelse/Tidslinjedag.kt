@@ -27,6 +27,7 @@ class Tidslinjedag(
                     acc
                 }.dager()
         }
+
         private fun List<Tidslinjeperiode>.dager() = map {
             mapOf(
                 "fom" to it.fom,
