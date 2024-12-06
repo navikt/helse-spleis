@@ -6,11 +6,13 @@ import java.util.UUID
 class LazyVedtaksperiodeVenterDto(private val evaluer: () -> VedtaksperiodeVenterDto?) {
     private var erEvaluert: Boolean = false
     private var evaluert: VedtaksperiodeVenterDto? = null
-    val value get() = if (erEvaluert) evaluert else {
-        evaluert = evaluer()
-        erEvaluert = true
-        evaluert
-    }
+    val value
+        get() = if (erEvaluert) evaluert else {
+            evaluert = evaluer()
+            erEvaluert = true
+            evaluert
+        }
+
     override fun equals(other: Any?) = other is LazyVedtaksperiodeVenterDto && other.value == this.value
     override fun hashCode() = value.hashCode()
 }
