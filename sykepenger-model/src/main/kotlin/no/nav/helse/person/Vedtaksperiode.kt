@@ -49,6 +49,8 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.*
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -211,6 +213,21 @@ internal class Vedtaksperiode private constructor(
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         registrerKontekst(aktivitetslogg)
         tilstand.inntektsmeldingFerdigbehandlet(this, hendelse, aktivitetslogg)
+    }
+
+    internal fun håndterPortalInntektsmelding(
+        vedtaksperioder: List<Vedtaksperiode>,
+        inntektsmelding: Inntektsmelding,
+        ubrukteRefusjonsopplysninger: Refusjonsservitør,
+        refusjonshistorikk: Refusjonshistorikk,
+        inntektshistorikk: Inntektshistorikk,
+        aktivitetslogg: IAktivitetslogg
+    ): Boolean {
+        check(inntektsmelding.avsendersystem is Inntektsmelding.Avsendersystem.NavPortal)
+        if (this.id != inntektsmelding.avsendersystem.vedtaksperiodeId) return false
+        registrerKontekst(aktivitetslogg)
+        tilstand.håndterPortalinntektsmelding(this, vedtaksperioder, inntektsmelding, ubrukteRefusjonsopplysninger, refusjonshistorikk, inntektshistorikk, aktivitetslogg)
+        return true
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
@@ -710,7 +727,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
         arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
-            && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
+                && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
 
     private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) =
         arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
@@ -1013,9 +1030,9 @@ internal class Vedtaksperiode private constructor(
         if (vilkårsgrunnlag != null) return null
         return person.vedtaksperioder {
             it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
-            it.skjæringstidspunkt == skjæringstidspunkt &&
-            it.skalFatteVedtak() &&
-            !it.arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt)
+                    it.skjæringstidspunkt == skjæringstidspunkt &&
+                    it.skalFatteVedtak() &&
+                    !it.arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt)
         }.minOrNull()
     }
 
@@ -1023,9 +1040,9 @@ internal class Vedtaksperiode private constructor(
         val bereningsperiode = perioderSomMåHensyntasVedBeregning().periode()
         return person.vedtaksperioder {
             it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
-            it.skjæringstidspunkt == skjæringstidspunkt &&
-            it.periode.overlapperMed(bereningsperiode) &&
-            it.måInnhenteInntektEllerRefusjon(Aktivitetslogg())
+                    it.skjæringstidspunkt == skjæringstidspunkt &&
+                    it.periode.overlapperMed(bereningsperiode) &&
+                    it.måInnhenteInntektEllerRefusjon(Aktivitetslogg())
         }.minOrNull()
     }
 
@@ -1168,6 +1185,53 @@ internal class Vedtaksperiode private constructor(
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
     }
 
+    private fun behandlePortalInntektsmelding(
+        vedtaksperioder: List<Vedtaksperiode>,
+        inntektsmelding: Inntektsmelding,
+        ubrukteRefusjonsopplysninger: Refusjonsservitør,
+        refusjonshistorikk: Refusjonshistorikk,
+        inntektshistorikk: Inntektshistorikk,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        check(inntektsmelding.avsendersystem is Inntektsmelding.Avsendersystem.NavPortal)
+
+        // 1. håndterer dager
+        val dager = inntektsmelding.dager()
+        vedtaksperioder
+            .forEach { it ->
+                it.registrerKontekst(aktivitetslogg)
+                // hvem skal håndtere dagene?
+                // jo, iallfall denne vedtaksperioden, men muligens et par til!
+                val periodeTreffer = dager.skalHåndteresAv(it.periode)
+                if (periodeTreffer) {
+                    it.tilstand.håndterPortalinntektsmeldingdager(it, aktivitetslogg, dager)
+                }
+                dager.vurdertTilOgMed(it.periode.endInclusive)
+            }
+
+        // 2. håndterer refusjonsopplysninger og inntekt
+        // todo: kun håndtere refusjon på sammenhengende vedtaksperioder fremfor å loope gjennom alt?
+        val servitør = inntektsmelding.refusjonsservitør(startdatoPåSammenhengendeVedtaksperioder)
+        vedtaksperioder.forEach {
+            it.registrerKontekst(aktivitetslogg)
+            it.håndter(inntektsmelding, aktivitetslogg, servitør)
+        }
+        if (Toggle.LagreUbrukteRefusjonsopplysninger.enabled) {
+            servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
+        }
+
+        val dagoverstyring = dager.revurderingseventyr()
+        val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
+        val eventyr = Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring)
+        checkNotNull(eventyr) { "gir ikke mening at denne skal returnere null" }
+
+        inntektsmelding.leggTilPortalRefusjon(startdatoPåSammenhengendeVedtaksperioder, refusjonshistorikk)
+        inntektsmelding.addPortalInntekt(skjæringstidspunkt, inntektshistorikk, jurist)
+        inntektsmeldingHåndtert(inntektsmelding)
+
+        person.igangsettOverstyring(eventyr, aktivitetslogg)
+    }
+
     internal sealed class ArbeidsgiveropplysningerStrategi {
         abstract fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg): Boolean
         abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, aktivitetslogg: IAktivitetslogg): Boolean
@@ -1275,8 +1339,29 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) =
             dager.skalHåndteresAv(vedtaksperiode.periode)
+
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
+        }
+
+        fun håndterPortalinntektsmelding(
+            vedtaksperiode: Vedtaksperiode,
+            vedtaksperioder: List<Vedtaksperiode>,
+            inntektsmelding: Inntektsmelding,
+            ubrukteRefusjonsopplysninger: Refusjonsservitør,
+            refusjonshistorikk: Refusjonshistorikk,
+            inntektshistorikk: Inntektshistorikk,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            aktivitetslogg.info("Forventet ikke portalinntektsmelding i %s".format(type.name))
+        }
+
+        fun håndterPortalinntektsmeldingdager(
+            vedtaksperiode: Vedtaksperiode,
+            aktivitetslogg: IAktivitetslogg,
+            dager: DagerFraInntektsmelding
+        ) {
+            aktivitetslogg.info("Forventet ikke å håndtere dager fra portalinntektsmelding i %s".format(type.name))
         }
 
         fun håndtertInntektPåSkjæringstidspunktet(
@@ -1813,6 +1898,26 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndterPortalinntektsmelding(
+            vedtaksperiode: Vedtaksperiode,
+            vedtaksperioder: List<Vedtaksperiode>,
+            inntektsmelding: Inntektsmelding,
+            ubrukteRefusjonsopplysninger: Refusjonsservitør,
+            refusjonshistorikk: Refusjonshistorikk,
+            inntektshistorikk: Inntektshistorikk,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            vedtaksperiode.behandlePortalInntektsmelding(vedtaksperioder, inntektsmelding, ubrukteRefusjonsopplysninger, refusjonshistorikk, inntektshistorikk, aktivitetslogg)
+        }
+
+        override fun håndterPortalinntektsmeldingdager(
+            vedtaksperiode: Vedtaksperiode,
+            aktivitetslogg: IAktivitetslogg,
+            dager: DagerFraInntektsmelding
+        ) {
+            håndter(vedtaksperiode, dager, aktivitetslogg)
+        }
+
         override fun skalHåndtereDager(
             vedtaksperiode: Vedtaksperiode,
             dager: DagerFraInntektsmelding,
@@ -2045,6 +2150,33 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, aktivitetslogg)
+        }
+
+        override fun håndterPortalinntektsmelding(
+            vedtaksperiode: Vedtaksperiode,
+            vedtaksperioder: List<Vedtaksperiode>,
+            inntektsmelding: Inntektsmelding,
+            ubrukteRefusjonsopplysninger: Refusjonsservitør,
+            refusjonshistorikk: Refusjonshistorikk,
+            inntektshistorikk: Inntektshistorikk,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            if (vedtaksperiode.skalFatteVedtak()) return super.håndterPortalinntektsmelding(vedtaksperiode, vedtaksperioder, inntektsmelding, ubrukteRefusjonsopplysninger, refusjonshistorikk, inntektshistorikk, aktivitetslogg)
+            // behandler kun portalinntektsmelding dersom perioden var/er en auu,
+            // siden auu'er sender ut en forespørsel og går via AvBl tilbake til Auu ved overstyringer
+            vedtaksperiode.behandlePortalInntektsmelding(vedtaksperioder, inntektsmelding, ubrukteRefusjonsopplysninger, refusjonshistorikk, inntektshistorikk, aktivitetslogg)
+        }
+
+        override fun håndterPortalinntektsmeldingdager(
+            vedtaksperiode: Vedtaksperiode,
+            aktivitetslogg: IAktivitetslogg,
+            dager: DagerFraInntektsmelding
+        ) {
+            if (vedtaksperiode.skalFatteVedtak()) return super.håndterPortalinntektsmeldingdager(vedtaksperiode, aktivitetslogg, dager)
+            // behandler kun portalinntektsmelding dersom perioden var/er en auu,
+            // siden auu'er sender ut en forespørsel og går via AvBl tilbake til Auu ved overstyringer
+            vedtaksperiode.håndterDager(dager, aktivitetslogg)
+            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
         }
 
         override fun håndter(
@@ -2803,6 +2935,26 @@ internal class Vedtaksperiode private constructor(
         ) {
             aktivitetslogg.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
+        }
+
+        override fun håndterPortalinntektsmelding(
+            vedtaksperiode: Vedtaksperiode,
+            vedtaksperioder: List<Vedtaksperiode>,
+            inntektsmelding: Inntektsmelding,
+            ubrukteRefusjonsopplysninger: Refusjonsservitør,
+            refusjonshistorikk: Refusjonshistorikk,
+            inntektshistorikk: Inntektshistorikk,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            vedtaksperiode.behandlePortalInntektsmelding(vedtaksperioder, inntektsmelding, ubrukteRefusjonsopplysninger, refusjonshistorikk, inntektshistorikk, aktivitetslogg)
+        }
+
+        override fun håndterPortalinntektsmeldingdager(
+            vedtaksperiode: Vedtaksperiode,
+            aktivitetslogg: IAktivitetslogg,
+            dager: DagerFraInntektsmelding
+        ) {
+            håndter(vedtaksperiode, dager, aktivitetslogg)
         }
 
         override fun håndter(

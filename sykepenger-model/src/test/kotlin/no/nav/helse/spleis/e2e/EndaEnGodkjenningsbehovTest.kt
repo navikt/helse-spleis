@@ -340,8 +340,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -353,8 +352,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

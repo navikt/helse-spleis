@@ -68,8 +68,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val im1 = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = inntektA1,
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
