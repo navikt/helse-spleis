@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
@@ -1042,13 +1041,6 @@ internal class Vedtaksperiode private constructor(
             gjelder = skjæringstidspunkt til LocalDate.MAX,
             refusjonsopplysninger = Refusjonsopplysninger()
         )
-    }
-
-    internal fun refusjonsservitørForUbrukteRefusjonsopplysninger(sisteUtbetalteDagIInfotrygd: LocalDate?): Refusjonsservitør? {
-        val beløpstidslinje = vilkårsgrunnlag?.refusjonsopplysninger(arbeidsgiver.organisasjonsnummer)?.beløpstidslinje() ?: return null
-        val fraOgMed = listOfNotNull(periode.endInclusive, sisteUtbetalteDagIInfotrygd).max().nesteDag
-        val ubruktDel = beløpstidslinje.fraOgMed(fraOgMed).takeUnless { it.isEmpty() } ?: return null
-        return Refusjonsservitør(mapOf(startdatoPåSammenhengendeVedtaksperioder to ubruktDel))
     }
 
     private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg): Maksdatoresultat {
@@ -3041,12 +3033,6 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.refusjonseventyr(hendelse: Hendelse) = firstOrNull {
             it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId))
         }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
-
-        internal fun List<Vedtaksperiode>.sistePeriodeRelevantForMigreringAvUbrukteRefusjonsopplysninger(): Vedtaksperiode? {
-            val sistePeriode = lastOrNull() ?: return null
-            if (sistePeriode.tilstand is AvsluttetUtenUtbetaling) return sistePeriode
-            return lastOrNull { it.vilkårsgrunnlag != null }
-        }
 
         internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(
             aktivitetslogg: IAktivitetslogg,

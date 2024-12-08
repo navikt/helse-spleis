@@ -40,7 +40,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -60,7 +59,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonseventyr
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
-import no.nav.helse.person.Vedtaksperiode.Companion.sistePeriodeRelevantForMigreringAvUbrukteRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
@@ -76,7 +74,6 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsservitør
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -174,13 +171,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
             flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
-
-        internal fun List<Arbeidsgiver>.migrerUbrukteRefusjonsopplysninger(
-            aktivitetslogg: IAktivitetslogg,
-            sisteUtbetalteDagIInfotrygd: LocalDate?
-        ) {
-            forEach { arbeidsgiver -> arbeidsgiver.migrerUbrukteRefusjonsopplysninger(aktivitetslogg, sisteUtbetalteDagIInfotrygd) }
-        }
 
         internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(
             aktivitetslogg: IAktivitetslogg,
@@ -326,22 +316,6 @@ internal class Arbeidsgiver private constructor(
             forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, arbeidsgiver, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
             return arbeidsgiver
         }
-    }
-
-    private fun migrerUbrukteRefusjonsopplysninger(
-        aktivitetslogg: IAktivitetslogg,
-        sisteUtbetalteDagIInfotrygd: LocalDate?
-    ) {
-        aktivitetslogg.kontekst(this)
-        val sisteVedtaksperiode = vedtaksperioder.sistePeriodeRelevantForMigreringAvUbrukteRefusjonsopplysninger()
-        val stardatoPåSammenhengendeVedtaksperioder = sisteVedtaksperiode?.let { startdatoPåSammenhengendeVedtaksperioder(it) }
-        val sisteTom = listOfNotNull(sisteVedtaksperiode?.periode()?.endInclusive, sisteUtbetalteDagIInfotrygd).maxOrNull()
-        val refusjonsservitørFraRefusjonshistorikk = refusjonshistorikk.refusjonsservitør(stardatoPåSammenhengendeVedtaksperioder = stardatoPåSammenhengendeVedtaksperioder, fom = sisteTom?.nesteDag)
-        refusjonsservitørFraRefusjonshistorikk.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
-
-        if (sisteVedtaksperiode == null) return
-        val refusjonsservitørFraSisteInntektsgrunnlag = sisteVedtaksperiode.refusjonsservitørForUbrukteRefusjonsopplysninger(sisteUtbetalteDagIInfotrygd) ?: return
-        refusjonsservitørFraSisteInntektsgrunnlag.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 
     private fun migrerRefusjonsopplysningerPåBehandlinger(
@@ -803,7 +777,6 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse) {
             håndter(hendelse, aktivitetslogg, servitør)
         }
-        if (Toggle.LagreUbrukteRefusjonsopplysninger.disabled) return
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
     }
 

@@ -3,8 +3,6 @@ package no.nav.helse.spleis.e2e.refusjon
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle.Companion.LagreRefusjonsopplysningerPåBehandling
-import no.nav.helse.Toggle.Companion.LagreUbrukteRefusjonsopplysninger
-import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -19,6 +17,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -159,10 +158,9 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
 
     @Test
     @Order(6)
-    fun `Siste vedtaksperiode har fått IM, men er ikke beregnet - uten toggle`() = setOf(LagreRefusjonsopplysningerPåBehandling, LagreUbrukteRefusjonsopplysninger).disable {
+    fun `Siste vedtaksperiode har fått IM, men er ikke beregnet - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
             setup5og6()
-            migrerUbrukteRefusjonsopplysninger()
             migrerRefusjonsopplysningerPåBehandlinger()
             assertEquals(forrigeRefusjonstidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
         }
@@ -192,10 +190,9 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
 
     @Test
     @Order(8)
-    fun `Siste vedtaksperiode har fått IM og forlengelsessøknad - uten toggle`() = setOf(LagreRefusjonsopplysningerPåBehandling, LagreUbrukteRefusjonsopplysninger).disable {
+    fun `Siste vedtaksperiode har fått IM og forlengelsessøknad - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
             setup7og8()
-            migrerUbrukteRefusjonsopplysninger()
             migrerRefusjonsopplysningerPåBehandlinger()
             assertEquals(forrigeRefusjonstidslinje, inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje)
         }
@@ -227,7 +224,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
                 )
             }
             tillatUgyldigSituasjon { håndterYtelser(vedtaksperiode) }
-            assertSisteTilstand(vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
+            assertSisteTilstand(vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
@@ -297,9 +294,9 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
                 ),
             ) }
             tillatUgyldigSituasjon { håndterYtelser(1.vedtaksperiode) }
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
-            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
-            assertSisteTilstand(3.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 

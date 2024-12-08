@@ -357,10 +357,6 @@ internal abstract class AbstractDslTest {
     ) =
         this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
-    protected fun migrerUbrukteRefusjonsopplysninger() {
-        person.migrerUbrukteRefusjonsopplysninger(Aktivitetslogg())
-    }
-
     protected fun migrerRefusjonsopplysningerPåBehandlinger() {
         person.migrerRefusjonsopplysningerPåBehandlinger(Aktivitetslogg())
     }
