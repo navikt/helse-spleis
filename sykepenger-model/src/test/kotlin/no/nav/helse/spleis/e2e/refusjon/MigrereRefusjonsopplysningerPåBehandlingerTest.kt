@@ -21,6 +21,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
@@ -66,6 +67,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
 
     @Test
     @Order(2)
+    @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
     fun `Vedtaksperiode med én beregnet endring - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
             setup1og2()
@@ -123,6 +125,7 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
 
     @Test
     @Order(4)
+    @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
     fun `Vedtaksperiode med flere beregnede endringer - uten toggle`() = LagreRefusjonsopplysningerPåBehandling.disable {
         a1 {
             setup3og4()

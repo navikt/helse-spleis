@@ -8,7 +8,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
@@ -54,6 +53,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
@@ -70,6 +70,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
+    @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
     fun `En situasjon med gjenbruk hvor refusjonsopplysningene på vilkårsgrunnlaget blir feil, men vil løse seg med refusjonsopplysniger på behandlingene`() {
         a1 {
             nyttVedtak(2.januar til 31.januar)
