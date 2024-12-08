@@ -22,6 +22,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
     internal val perioderMedBeløp by lazy { dager.keys.grupperSammenhengendePerioder() }
+    internal val unikeKilder = dager.values.map { it.kilde.meldingsreferanseId }.toSet()
 
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
 

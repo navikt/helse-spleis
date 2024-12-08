@@ -1153,8 +1153,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun videreførEksisterendeRefusjonsopplysninger(hendelse: Hendelse? = null, aktivitetslogg: IAktivitetslogg) {
         if (refusjonstidslinje.isNotEmpty()) return
-        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
-        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this)
+        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.let { nabo ->
+            aktivitetslogg.info("Fant refusjonsopplysninger for $periode hos nabo-vedtaksperiode ${nabo.periode} (${nabo.id})")
+            nabo.refusjonstidslinje
+        } ?: Beløpstidslinje()
+        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinje(this).takeUnless { it.isEmpty() }?.also { ubrukte ->
+            aktivitetslogg.info("Fant ubrukte refusjonsopplysninger for $periode fra kildene ${ubrukte.unikeKilder.joinToString()}")
+        } ?: Beløpstidslinje()
         val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(arbeidsgiver, hendelse, aktivitetslogg, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), benyttetRefusjonstidslinje)
