@@ -226,13 +226,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
-    internal fun migrerRefusjonsopplysninger(
-        aktivitetslogg: IAktivitetslogg,
-        orgnummer: String,
-        vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje,
-        vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagElement?
-    ) =
-        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, vedManglendeInntektsgrunnlagPåSisteEndring, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
+    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) =
+        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
 
     fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
         this.behandlinger.last().vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
@@ -836,37 +831,20 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.forkastVedtaksperiode(this, arbeidsgiver, hendelse, aktivitetslogg)
         }
 
-        private fun vilkårsgrunnlagForMigrering(endring: Endring, aktivitetslogg: IAktivitetslogg, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagElement?): VilkårsgrunnlagElement? {
-            if (endring.id != endringer.last().id) return endring.grunnlagsdata // Gamle endringer bruker vi alltid eventuell peker
-            // Fra nå er vi siste endring
+        private fun vilkårsgrunnlagForMigrering(endring: Endring): VilkårsgrunnlagElement? {
             if (tilstand is Tilstand.Uberegnet || tilstand is Tilstand.UberegnetOmgjøring || tilstand is Tilstand.UberegnetRevurdering || tilstand is Tilstand.AvsluttetUtenVedtak) {
-                if (endring.grunnlagsdata != null) aktivitetslogg.info("Endring ${endring.id} i ${tilstand::class.simpleName} peker feilaktig på et vilkårsgrunnlag.")
-                return vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet(endring.skjæringstidspunkt)
+                return null
             }
-            return endring.grunnlagsdata ?: vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet(endring.skjæringstidspunkt)
+            return endring.grunnlagsdata
         }
-        internal fun migrerRefusjonsopplysninger(
-            aktivitetslogg: IAktivitetslogg,
-            orgnummer: String,
-            vedManglendeInntektsgrunnlagPåSisteEndring: () -> Beløpstidslinje,
-            vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagElement?
-        ) {
-            val sisteEndringId = endringer.last().id
+        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
             endringer.forEach { endring ->
-                val vilkårsgrunnlag = vilkårsgrunnlagForMigrering(endring, aktivitetslogg, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet)
-                val refusjonstidslinje = when {
-                    vilkårsgrunnlag == null && endring.id == sisteEndringId -> vedManglendeInntektsgrunnlagPåSisteEndring().also {
-                        if (this.tilstand !is Tilstand.AvsluttetUtenVedtak) {
-                            aktivitetslogg.info("Siste endring ${endring.id} har ikke vilkårsgrunnlag. Migrerer inn refusjonsopplysninger fra nabolaget og ubrukte refusjonsopplysninger")
-                        }
-                    }
-                    vilkårsgrunnlag == null -> Beløpstidslinje()
-                    else -> vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
+                val vilkårsgrunnlag = vilkårsgrunnlagForMigrering(endring) ?: return@forEach
+                val nyRefusjonstidslinje = vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
+                nyRefusjonstidslinje.førsteDagMedUliktBeløp(endring.refusjonstidslinje)?.let {
+                    aktivitetslogg.info("Migrerte inn endret refusjonstidslinje fra og med $it på på endring ${endring.id}")
                 }
-                if (endring.refusjonstidslinje != refusjonstidslinje) {
-                    aktivitetslogg.info("Nå ble det etter migrering en ny refusjonstidslinje på endring ${endring.id}")
-                }
-                endring.refusjonstidslinje = refusjonstidslinje
+                endring.refusjonstidslinje = nyRefusjonstidslinje
             }
         }
 

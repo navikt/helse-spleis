@@ -830,7 +830,7 @@ class Person private constructor(
 
     internal fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Migrerer refusjonsopplysninger på behandlinger")
-        arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, ::vilkårsgrunnlagFor)
+        arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
     }
 
     fun dto() = PersonUtDto(

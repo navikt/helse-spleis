@@ -39,7 +39,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -72,7 +71,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
@@ -172,11 +170,8 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
             flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
 
-        internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(
-            aktivitetslogg: IAktivitetslogg,
-            vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
-        ) {
-            forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
+        internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
+            forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg) }
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
@@ -318,10 +313,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun migrerRefusjonsopplysningerPåBehandlinger(
-        aktivitetslogg: IAktivitetslogg,
-        vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
-    ) = vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet)
+    private fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) =
+        vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer)
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
 
@@ -506,13 +499,6 @@ internal class Arbeidsgiver private constructor(
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)
         return ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode())
-    }
-
-    internal fun refusjonstidslinjeForTmpMigrering(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
-        val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)
-        val søkevindu = startdatoPåSammenhengendeVedtaksperioder til vedtaksperiode.periode().endInclusive
-        val fraRefusjonshistorikk = refusjonshistorikk.beløpstidslinje(søkevindu).subset(vedtaksperiode.periode())
-        return fraRefusjonshistorikk
     }
 
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {

@@ -12,10 +12,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -30,40 +28,31 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
     @Test
     fun `bruker endringer i refusjon oppgitt før siste refusjonsdag`() {
-        val (id, refusjonsopplysninger, refusjonshistorikk) = endringIRefusjonFraOgMed(31.januar)
+        val (id, refusjonsopplysninger) = endringIRefusjonFraOgMed(31.januar)
         assertLikeRefusjonsopplysninger(listOf(
             Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 30.januar, 100.daglig, ARBEIDSGIVER),
             Refusjonsopplysning(id.meldingsreferanseId, 31.januar, 1.februar, 200.daglig, ARBEIDSGIVER),
             Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig, ARBEIDSGIVER)
         ), refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(1.januar til 30.januar, 100.daglig, id) + Beløpstidslinje.fra(31.januar til 1.februar, 200.daglig, id) + Beløpstidslinje.fra(2.februar til 28.februar, INGEN, id)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 28.februar))
     }
 
     @Test
     fun `bruker endringer i refusjon oppgitt lik siste refusjonsdag`() {
-        val (id, refusjonsopplysninger, refusjonshistorikk) = endringIRefusjonFraOgMed(1.februar)
+        val (id, refusjonsopplysninger) = endringIRefusjonFraOgMed(1.februar)
         assertLikeRefusjonsopplysninger(listOf(
             Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 31.januar, 100.daglig, ARBEIDSGIVER),
             Refusjonsopplysning(id.meldingsreferanseId, 1.februar, 1.februar, 200.daglig, ARBEIDSGIVER),
             Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig, ARBEIDSGIVER)
         ), refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(1.januar til 31.januar, 100.daglig, id) + Beløpstidslinje.fra(1.februar til 1.februar, 200.daglig, id) + Beløpstidslinje.fra(2.februar til 28.februar, INGEN, id)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 28.februar))
     }
 
     @Test
     fun `ignorer endringer i refusjon etter siste refusjonsdag`() {
-        val (id, refusjonsopplysninger, refusjonshistorikk) = endringIRefusjonFraOgMed(2.februar)
+        val (id, refusjonsopplysninger) = endringIRefusjonFraOgMed(2.februar)
         assertLikeRefusjonsopplysninger(listOf(
             Refusjonsopplysning(id.meldingsreferanseId, 1.januar, 1.februar, 100.daglig, ARBEIDSGIVER),
             Refusjonsopplysning(id.meldingsreferanseId, 2.februar, null, 0.daglig, ARBEIDSGIVER)
         ), refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(1.januar til 1.februar, 100.daglig, id) + Beløpstidslinje.fra(2.februar til 28.februar, INGEN, id)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 28.februar))
     }
 
     @Test
@@ -80,9 +69,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
         }
         assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 20.januar, null, 0.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(20.januar til 31.januar, INGEN, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(20.januar til 31.januar))
     }
 
     @Test
@@ -100,9 +86,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         }
         val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(5.august).inspektør.refusjonsopplysninger
         assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 5.august, null, 0.daglig, ARBEIDSGIVER)), refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(5.august til 31.august, INGEN, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(5.august til 31.august))
     }
 
     @Test
@@ -119,9 +102,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
         }
         assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 10.januar, null, 0.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(10.januar).inspektør.refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(10.januar til 31.januar, INGEN, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(10.januar til 31.januar))
     }
 
     @Test
@@ -147,17 +127,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
         }
         assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde2.meldingsreferanseId, 1.mars, null, 1000.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(1.mars til 20.mars, 1000.daglig, kilde2) + Beløpstidslinje.fra(21.mars til 31.mars, 1000.daglig, kilde2)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.mars til 31.mars))
     }
 
     @Test
     fun `tom refusjonshistorikk medfører ingen refusjonsopplysninger`() {
         val refusjonshistorikk = Refusjonshistorikk()
         assertEquals(Refusjonsopplysninger(), refusjonshistorikk.refusjonsopplysninger(1.januar))
-
-        assertEquals(Beløpstidslinje(), refusjonshistorikk.beløpstidslinje(januar))
     }
 
     @Test
@@ -175,9 +150,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(kilde1.meldingsreferanseId, 1.januar, null, 1000.daglig, ARBEIDSGIVER)), refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger)
-
-        val forventet = Beløpstidslinje.fra(1.januar til 31.januar, 1000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -201,9 +173,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.januar til 31.januar, 1000.daglig, kilde1) + Beløpstidslinje.fra(1.februar til 28.februar, INGEN, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 28.februar))
     }
 
     @Test
@@ -238,9 +207,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.januar til 28.februar, 1000.daglig, kilde1) + Beløpstidslinje.fra(1.mars til 31.mars, 2000.daglig, kilde2)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.mars))
     }
 
     @Test
@@ -264,9 +230,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.januar til 31.januar, 1000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -289,9 +252,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.januar til 31.januar, INGEN, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -325,9 +285,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.mars til 31.mars, 2000.daglig, kilde2)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.mars til 31.mars))
     }
 
     @Test
@@ -351,9 +308,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.januar til 19.januar, 1000.daglig, kilde1) + Beløpstidslinje.fra(20.januar til 31.januar, 500.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
 
@@ -382,12 +336,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(1.januar til 19.januar, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(20.januar til 24.januar, 500.daglig, kilde1) +
-            Beløpstidslinje.fra(25.januar til 31.januar, 2000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -433,16 +381,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(1.januar til 19.januar, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(20.januar til 24.januar, 500.daglig, kilde1) +
-            Beløpstidslinje.fra(25.januar til 28.februar, 2000.daglig, kilde1) +
-            Beløpstidslinje.fra(1.mars til 19.mars, 999.daglig, kilde2) +
-            Beløpstidslinje.fra(20.mars til 24.mars, 9.daglig, kilde2) +
-            Beløpstidslinje.fra(25.mars til 31.mars, 99.daglig, kilde2)
-
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.mars))
     }
 
     @Test
@@ -465,9 +403,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(1.januar til 19.januar, 1000.daglig, kilde1) + Beløpstidslinje.fra(20.januar til 31.januar, INGEN, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -495,12 +430,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(1.januar til 18.januar, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(19.januar til 19.januar, 500.daglig, kilde1) +
-            Beløpstidslinje.fra(20.januar til 31.januar, 0.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -527,11 +456,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(1.januar til 19.januar, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(20.januar til 31.januar, 0.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -566,12 +490,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
-
-
-        val forventet =
-            Beløpstidslinje.fra(1.februar til 30.april, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(1.mai til 1.mai, 0.daglig, kilde2)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.februar til 1.mai))
     }
 
     @Test
@@ -595,9 +513,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
-
-        val forventet = Beløpstidslinje.fra(10.februar til 28.februar, 1000.daglig, kilde1) // Ingen gråsone på dette nivået
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.februar til 28.februar))
     }
 
     @Test
@@ -622,10 +537,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(11.februar til 28.februar, 1000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.februar til 28.februar))
     }
 
     @Test
@@ -649,10 +560,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(20.februar til 28.februar, 1000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.februar til 28.februar))
     }
 
     @Test
@@ -680,11 +587,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(10.februar til 10.februar, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(11.februar til 28.februar, 2000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.februar til 28.februar))
     }
 
     @Test
@@ -714,13 +616,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
-
-        val forventet =
-            Beløpstidslinje.fra(1.januar til 9.januar, 1000.daglig, kilde1) +
-            Beløpstidslinje.fra(10.januar til 11.januar, 2000.daglig, kilde1) +
-            Beløpstidslinje.fra(12.januar til 14.januar, 3000.daglig, kilde1) +
-            Beløpstidslinje.fra(15.januar til 31.januar, 4000.daglig, kilde1)
-        assertEquals(forventet, refusjonshistorikk.beløpstidslinje(1.januar til 31.januar))
     }
 
     @Test
@@ -735,12 +630,9 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             sisteRefusjonsdag = null,
             endringerIRefusjon = emptyList()
         ))
-
-        assertEquals(emptyList<Refusjonsopplysning>(), refusjonshistorikk.refusjonsopplysninger(2.mars).inspektør.refusjonsopplysninger)
-        assertEquals(Beløpstidslinje(), refusjonshistorikk.beløpstidslinje(2.mars til 31.mars))
     }
 
-    private fun endringIRefusjonFraOgMed(dag: LocalDate): Triple<Kilde, List<Refusjonsopplysning>, Refusjonshistorikk> {
+    private fun endringIRefusjonFraOgMed(dag: LocalDate): Pair<Kilde, List<Refusjonsopplysning>> {
         val refusjonshistorikk = Refusjonshistorikk()
         val refusjonsopplysninger = refusjonshistorikk.apply {
             leggTilRefusjon(Refusjonshistorikk.Refusjon(
@@ -753,6 +645,6 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = kilde1.tidsstempel,
             ))
         }.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
-        return Triple(kilde1, refusjonsopplysninger, refusjonshistorikk)
+        return kilde1 to refusjonsopplysninger
     }
 }

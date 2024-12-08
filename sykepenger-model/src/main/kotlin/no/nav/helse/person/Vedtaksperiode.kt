@@ -1145,12 +1145,6 @@ internal class Vedtaksperiode private constructor(
         return (nabolagFør.asReversed() + nabolagEtter)
     }
 
-    private fun eksisterendeRefusjonsopplysningerForTmpMigrering(): Beløpstidslinje {
-        val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstNotNullOfOrNull { it.refusjonstidslinje.takeUnless { refusjonstidslinje -> refusjonstidslinje.isEmpty() } } ?: Beløpstidslinje()
-        val refusjonstidslinjeFraArbeidsgiver = arbeidsgiver.refusjonstidslinjeForTmpMigrering(this)
-        return (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
-    }
-
     private fun videreførEksisterendeRefusjonsopplysninger(hendelse: Hendelse? = null, aktivitetslogg: IAktivitetslogg) {
         if (refusjonstidslinje.isNotEmpty()) return
         val refusjonstidslinjeFraNabolaget = prioritertNabolag().firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.let { nabo ->
@@ -3039,12 +3033,8 @@ internal class Vedtaksperiode private constructor(
             it.behandlinger.håndterer(Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId))
         }?.let { Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode) }
 
-        internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(
-            aktivitetslogg: IAktivitetslogg,
-            orgnummer: String,
-            vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet: (LocalDate) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
-        ) {
-            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer, it::eksisterendeRefusjonsopplysningerForTmpMigrering, vedManglendeVilkårsgrunnlagPåSkjæringstidspunktet) }
+        internal fun List<Vedtaksperiode>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
+            forEach { it.behandlinger.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
         }
 
         // Fredet funksjonsnavn
