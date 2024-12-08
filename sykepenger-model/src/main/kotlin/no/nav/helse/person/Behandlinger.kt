@@ -226,8 +226,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
-    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) =
-        behandlinger.forEach { it.migrerRefusjonsopplysninger(aktivitetslogg, orgnummer) }
+    internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
+        val sisteBehandlingId = behandlinger.last().id
+        behandlinger.forEach { behandling -> behandling.migrerRefusjonsopplysninger(aktivitetslogg.takeIf { behandling.id == sisteBehandlingId }, orgnummer) }
+    }
 
     fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
         this.behandlinger.last().vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
@@ -840,16 +842,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
             return endring.grunnlagsdata
         }
-        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
+        internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg?, orgnummer: String) {
+            val sisteEndringId = endringer.last().id
             endringer.forEach { endring ->
+                val logg = aktivitetslogg?.takeIf { endring.id == sisteEndringId }
                 val vilkårsgrunnlag = vilkårsgrunnlagForMigrering(endring) ?: return@forEach
                 val refusjonstidslinjeFraVilkårsgrunnlag = vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
                 val nyRefusjonstidslinje = when {
-                    refusjonstidslinjeFraVilkårsgrunnlag.isEmpty() -> vilkårsgrunnlag.inntektsgrunnlag.fallbackRefusjon(orgnummer, periode, aktivitetslogg, endring.id)
+                    refusjonstidslinjeFraVilkårsgrunnlag.isEmpty() -> vilkårsgrunnlag.inntektsgrunnlag.fallbackRefusjon(orgnummer, periode, logg, endring.id)
                     else -> refusjonstidslinjeFraVilkårsgrunnlag
                 }
                 nyRefusjonstidslinje.førsteDagMedUliktBeløp(endring.refusjonstidslinje)?.let {
-                    aktivitetslogg.info("Migrerte inn endret refusjonstidslinje fra og med $it på på endring ${endring.id}")
+                    logg?.info("Migrerte inn endret refusjonstidslinje fra og med $it på på endring ${endring.id}")
                 }
                 endring.refusjonstidslinje = nyRefusjonstidslinje
             }

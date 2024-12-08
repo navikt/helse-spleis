@@ -452,11 +452,11 @@ internal class Inntektsgrunnlag private constructor(
         tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) }
     )
 
-    internal fun fallbackRefusjon(organisasjonsnummer: String, periode: Periode, aktivitetslogg: IAktivitetslogg, endring: UUID): Beløpstidslinje {
+    internal fun fallbackRefusjon(organisasjonsnummer: String, periode: Periode, aktivitetslogg: IAktivitetslogg?, endring: UUID): Beløpstidslinje {
         val inntekt = arbeidsgiverInntektsopplysninger.singleOrNull { it.gjelder(organisasjonsnummer) }?.inntektsopplysning
-        if (inntekt == null) return Beløpstidslinje().also { aktivitetslogg.info("Mangler inntekt & refusjon for $organisasjonsnummer i endring $endring") }
-        if (inntekt !is Infotrygd) return Beløpstidslinje().also { aktivitetslogg.info("Mangler refusjon for $organisasjonsnummer med inntektstype ${inntekt::class.simpleName} i endring $endring") }
-        aktivitetslogg.info("Manglet refusjon for $organisasjonsnummer i endring $endring, men la til full refusjon ettersom det er Infotrygd-inntekt")
+        if (inntekt == null) return Beløpstidslinje().also { aktivitetslogg?.info("Mangler inntekt & refusjon for $organisasjonsnummer i endring $endring") }
+        if (inntekt !is Infotrygd) return Beløpstidslinje().also { aktivitetslogg?.info("Mangler refusjon for $organisasjonsnummer med inntektstype ${inntekt::class.simpleName} i endring $endring") }
+        aktivitetslogg?.info("Manglet refusjon for $organisasjonsnummer i endring $endring, men la til full refusjon ettersom det er Infotrygd-inntekt")
         return Beløpstidslinje.fra(periode, inntekt.beløp, Kilde(inntekt.id, Avsender.ARBEIDSGIVER, inntekt.tidsstempel))
     }
 }
