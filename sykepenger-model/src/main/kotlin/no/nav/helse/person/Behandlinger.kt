@@ -840,7 +840,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun migrerRefusjonsopplysninger(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
             endringer.forEach { endring ->
                 val vilkårsgrunnlag = vilkårsgrunnlagForMigrering(endring) ?: return@forEach
-                val nyRefusjonstidslinje = vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
+                val refusjonstidslinjeFraVilkårsgrunnlag = vilkårsgrunnlag.inntektsgrunnlag.refusjonsopplysninger(orgnummer).beløpstidslinje().fyll(periode)
+                val nyRefusjonstidslinje = when {
+                    refusjonstidslinjeFraVilkårsgrunnlag.isEmpty() -> vilkårsgrunnlag.inntektsgrunnlag.fallbackRefusjon(orgnummer, periode, aktivitetslogg, endring.id)
+                    else -> refusjonstidslinjeFraVilkårsgrunnlag
+                }
                 nyRefusjonstidslinje.førsteDagMedUliktBeløp(endring.refusjonstidslinje)?.let {
                     aktivitetslogg.info("Migrerte inn endret refusjonstidslinje fra og med $it på på endring ${endring.id}")
                 }

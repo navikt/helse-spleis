@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -25,6 +26,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
@@ -448,6 +451,14 @@ internal class Inntektsgrunnlag private constructor(
         inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
         tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) }
     )
+
+    internal fun fallbackRefusjon(organisasjonsnummer: String, periode: Periode, aktivitetslogg: IAktivitetslogg, endring: UUID): Beløpstidslinje {
+        val inntekt = arbeidsgiverInntektsopplysninger.singleOrNull { it.gjelder(organisasjonsnummer) }?.inntektsopplysning
+        if (inntekt == null) return Beløpstidslinje().also { aktivitetslogg.info("Mangler inntekt & refusjon for $organisasjonsnummer i endring $endring") }
+        if (inntekt !is Infotrygd) return Beløpstidslinje().also { aktivitetslogg.info("Mangler refusjon for $organisasjonsnummer med inntektstype ${inntekt::class.simpleName} i endring $endring") }
+        aktivitetslogg.info("Manglet refusjon for $organisasjonsnummer i endring $endring, men la til full refusjon ettersom det er Infotrygd-inntekt")
+        return Beløpstidslinje.fra(periode, inntekt.beløp, Kilde(inntekt.id, Avsender.ARBEIDSGIVER, inntekt.tidsstempel))
+    }
 }
 
 internal data class InntektsgrunnlagView(
