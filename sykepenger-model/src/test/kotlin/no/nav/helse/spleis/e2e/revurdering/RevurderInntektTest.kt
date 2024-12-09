@@ -72,8 +72,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig,
-            refusjon = Refusjon(32000.månedlig, null, emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(32000.månedlig, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -120,8 +119,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig,
-            refusjon = Refusjon(32000.månedlig, null, emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(32000.månedlig, null, emptyList())
         )
 
         håndterYtelser(1.vedtaksperiode)
@@ -132,8 +130,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
-            refusjon = Refusjon(31000.månedlig, null, emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(31000.månedlig, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -436,8 +433,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(25000.månedlig, null, emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(25000.månedlig, null, emptyList())
         )
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)

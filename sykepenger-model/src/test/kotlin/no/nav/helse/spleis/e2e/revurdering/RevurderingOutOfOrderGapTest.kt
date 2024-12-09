@@ -1136,7 +1136,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(marsId, AVSLUTTET)
 
         nyPeriode(februar)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
         val februarId = 2.vedtaksperiode
         håndterVilkårsgrunnlag(februarId)
         håndterYtelser(februarId)
@@ -1151,7 +1151,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
 
         nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         val januarId = 3.vedtaksperiode
         håndterVilkårsgrunnlag(januarId)
         håndterYtelser(januarId)

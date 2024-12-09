@@ -189,7 +189,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Refusjon(1.daglig, null),
-            vedtaksperiodeIdInnhenter = vedtaksperiodeIdFebruar
+            førsteFraværsdag = 10.februar
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -813,8 +813,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
-            refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
         )
 
         håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020)))
@@ -851,8 +850,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.november(2020), 10.desember(2020), 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
-            refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
         )
 
         assertTilstander(
@@ -2247,8 +2245,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
-            beregnetInntekt = 30000.månedlig,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            beregnetInntekt = 30000.månedlig
         )
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

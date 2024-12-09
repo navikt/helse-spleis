@@ -613,8 +613,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT+100.månedlig,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -736,7 +735,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterInntektsmelding(emptyList(), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

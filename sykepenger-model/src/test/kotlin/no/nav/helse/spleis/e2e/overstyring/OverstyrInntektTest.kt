@@ -59,8 +59,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(fom til fom.plusDays(15)),
             beregnetInntekt = overstyrtInntekt,
-            refusjon = Refusjon(overstyrtInntekt, null, emptyList()),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Refusjon(overstyrtInntekt, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

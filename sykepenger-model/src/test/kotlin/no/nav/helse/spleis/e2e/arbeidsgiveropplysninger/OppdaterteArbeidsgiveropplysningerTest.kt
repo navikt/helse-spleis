@@ -306,8 +306,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = 32000.månedlig,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = 32000.månedlig
         )
 
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
@@ -332,8 +331,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = 33000.månedlig,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = 33000.månedlig
         )
 
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()

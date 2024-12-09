@@ -135,8 +135,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar) is Saksbehandler)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = nyIMInntekt,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = nyIMInntekt
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -699,8 +698,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a1) is Inntektsmelding)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a2) is Saksbehandler)

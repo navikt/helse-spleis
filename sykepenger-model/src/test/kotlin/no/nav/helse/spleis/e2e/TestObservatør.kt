@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
@@ -132,6 +133,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
+
+        if (event.forrigeTilstand == TilstandType.AVVENTER_INNTEKTSMELDING) {
+            trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
+        }
     }
 
     internal fun nullstillTilstandsendringer() {

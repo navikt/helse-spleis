@@ -379,7 +379,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
-        håndterInntektsmelding(listOf(1.mars til 16.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))

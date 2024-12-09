@@ -121,8 +121,7 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar)
         )
 
         håndterSykmelding(februar)
@@ -157,7 +156,7 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(AKSEPTERT)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(februar)
         håndterSøknad(februar)

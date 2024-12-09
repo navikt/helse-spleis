@@ -613,8 +613,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
                 INGEN,
                 null,
                 emptyList()
-            ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            )
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -638,8 +637,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
                 25000.månedlig,
                 null,
                 emptyList()
-            ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            )
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)

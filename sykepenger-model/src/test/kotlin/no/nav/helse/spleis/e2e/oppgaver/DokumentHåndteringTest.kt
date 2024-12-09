@@ -100,8 +100,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         nyttVedtak(januar, 100.prosent, beregnetInntekt = INNTEKT)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT * 1.1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = INNTEKT * 1.1
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -112,8 +111,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         observatør.inntektsmeldingHåndtert.clear()
         val korrigertInntektsmelding2 = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT * 1.1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            beregnetInntekt = INNTEKT * 1.1
         )
         assertEquals(listOf(korrigertInntektsmelding2), observatør.inntektsmeldingHåndtert.map { it.first })
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
@@ -505,8 +503,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            harOpphørAvNaturalytelser = true,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            harOpphørAvNaturalytelser = true
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)

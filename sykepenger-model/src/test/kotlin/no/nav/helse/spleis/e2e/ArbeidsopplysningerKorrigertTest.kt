@@ -32,8 +32,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val korrigerendeInntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(29000.månedlig, null),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Inntektsmelding.Refusjon(29000.månedlig, null)
         )
 
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
@@ -59,8 +58,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val korrigerendeInntektsmeldingId = håndterInntektsmelding(
-            listOf(2.januar til 17.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(2.januar til 17.januar)
         )
 
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
@@ -289,8 +287,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null)
         )
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
@@ -325,8 +322,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = 41000.månedlig,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = 41000.månedlig
         )
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
     }
