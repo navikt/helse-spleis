@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.overlapperMed
@@ -73,7 +72,7 @@ class Inntektsmelding(
         )
     }
     private var håndtertInntekt = false
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
+    val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
         val inntektsdato = type.alternativInntektsdatoForInntekthistorikk(this, alternativInntektsdato) ?: return
@@ -107,9 +106,8 @@ class Inntektsmelding(
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
     }
 
-    internal fun leggTil(behandlinger: Behandlinger): Boolean {
+    internal fun inntektHåndtert() {
         håndtertInntekt = true
-        return behandlinger.oppdaterDokumentsporing(dokumentsporing)
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {

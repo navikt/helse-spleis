@@ -285,7 +285,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding): Boolean {
-        if (!inntektsmelding.leggTil(behandlinger)) return true
+        inntektsmelding.inntektHåndtert()
+        if (!behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)) return true
         person.emitInntektsmeldingHåndtert(
             inntektsmelding.metadata.meldingsreferanseId,
             id,
