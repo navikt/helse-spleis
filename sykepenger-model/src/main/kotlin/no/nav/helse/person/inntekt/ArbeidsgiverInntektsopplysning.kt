@@ -314,7 +314,9 @@ data class ArbeidsgiverInntektsopplysning(
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
 
                         is no.nav.helse.person.inntekt.Inntektsmelding -> arbeidsgiver.inntektsopplysning.inntektskilde()
-                        is Infotrygd -> Inntektskilde.Infotrygd
+
+                        is Infotrygd -> Inntektskilde.Arbeidsgiver
+
                         is Saksbehandler,
                         is SkjønnsmessigFastsatt -> Inntektskilde.Saksbehandler
                     }

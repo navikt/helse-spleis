@@ -567,8 +567,7 @@ interface PersonObserver {
         enum class Inntektskilde {
             Arbeidsgiver,
             AOrdningen,
-            Saksbehandler,
-            Infotrygd
+            Saksbehandler
         }
     }
 

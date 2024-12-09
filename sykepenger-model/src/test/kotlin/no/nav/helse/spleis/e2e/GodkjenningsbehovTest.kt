@@ -19,8 +19,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.AOrdningen
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde.Arbeidsgiver
+import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -54,19 +53,57 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `sender med inntektskilder i sykepengegrunnlaget i godkjenningsbehovet`() {
         nyPeriode(januar, orgnummer = a1)
         nyPeriode(januar, orgnummer = a2)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a2)
         håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
-        assertEquals(listOf(Arbeidsgiver, AOrdningen), inntektskilder)
+        assertEquals(listOf(Inntektskilde.Arbeidsgiver, Inntektskilde.AOrdningen), inntektskilder)
+    }
 
+    @Test
+    fun `sender med inntektskilde saksbehandler i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse -- AOrdning på orginal inntekt`() {
+        nyPeriode(januar, a1)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a1)
+        håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT * 2
+            )
+        )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(listOf(Inntektskilde.Saksbehandler), inntektskilder)
+    }
+
+    @Test
+    fun `sender med inntektskilde saksbehandler i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse -- inntektsmelding på orginal inntekt`() {
+        tilGodkjenning(januar, a1)
+
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT * 2
+            )
+        )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(listOf(Inntektskilde.Saksbehandler), inntektskilder)
     }
 
     @Test
