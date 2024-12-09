@@ -155,7 +155,7 @@ data class BeregnetPeriode(
     val refusjonstidslinje: BeløpstidslinjeDto
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
-        val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it, refusjonstidslinje, organisasjonsnummer) }
+        val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it, refusjonstidslinje, vedtaksperiodeId, organisasjonsnummer) }
         if (vilkårsgrunnlag !is ISpleisGrunnlag) return this
         return this.copy(hendelser = this.hendelser + vilkårsgrunnlag.overstyringer)
     }

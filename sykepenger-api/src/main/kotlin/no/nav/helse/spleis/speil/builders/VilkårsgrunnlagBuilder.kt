@@ -150,8 +150,8 @@ internal class IInfotrygdGrunnlag(
 
 internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: List<Map<UUID, IVilkårsgrunnlag>>) {
     private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, IVilkårsgrunnlag>()
-    private val refusjonstidslinjer = mutableMapOf<Pair<UUID, String>, MutableList<BeløpstidslinjeDto>>()
-
+    private val vedtaksperiodeIdTilVilkårsgrunnlagIder = mutableMapOf<Pair<UUID, String>, MutableSet<UUID>>()
+    private val vedtaksperiodeIdTilRefusjonstidslinje = mutableMapOf<UUID, BeløpstidslinjeDto>()
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
         vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 
@@ -181,19 +181,24 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {
         return vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.toDTO(refusjonstidslinjer.filterKeys { (id, _) ->
-                id == vilkårsgrunnlag.id
-            }.mapKeys { (key, _) -> key.second })
+            val relevanteKnytninger = vedtaksperiodeIdTilVilkårsgrunnlagIder.filterValues { vilkårsgrunnlag.id in it }
+            val orgnummerTilRefusjonstidslinjer = relevanteKnytninger.keys.groupBy { (_, orgnummer) -> orgnummer }.mapValues { (_, vedtaksperioder) ->
+                vedtaksperioder.map { (vedtaksperiodeId, _) ->
+                    vedtaksperiodeIdTilRefusjonstidslinje.getValue(vedtaksperiodeId)
+                }
+            }
+            vilkårsgrunnlag.toDTO(orgnummerTilRefusjonstidslinjer)
         }
     }
-
 
     internal fun leggIBøtta(
         vilkårsgrunnlagId: UUID,
         refusjonstidslinje: BeløpstidslinjeDto,
+        vedtaksperiodeId: UUID,
         organisasjonsnummer: String
     ): IVilkårsgrunnlag {
-        refusjonstidslinjer.getOrPut(vilkårsgrunnlagId to organisasjonsnummer) { mutableListOf() }.add(refusjonstidslinje)
+        vedtaksperiodeIdTilRefusjonstidslinje[vedtaksperiodeId] = refusjonstidslinje
+        vedtaksperiodeIdTilVilkårsgrunnlagIder.getOrPut(vedtaksperiodeId to organisasjonsnummer) { mutableSetOf() }.add(vilkårsgrunnlagId)
         return vilkårsgrunnlagIBruk.getOrPut(vilkårsgrunnlagId) {
             tilgjengeligeVilkårsgrunnlag.firstNotNullOf { elementer ->
                 elementer[vilkårsgrunnlagId]
@@ -218,7 +223,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     }
 
     internal fun build() = IVilkårsgrunnlagHistorikk(historikk)
-
     private fun mapSpleis(grunnlagsdata: VilkårsgrunnlagUtDto.Spleis): IVilkårsgrunnlag {
         val oppfyllerKravOmMedlemskap = when (grunnlagsdata.medlemskapstatus) {
             MedlemskapsvurderingDto.Ja -> true

@@ -59,6 +59,7 @@ internal class SpeilGenerasjonerBuilder(
 
     private fun mapVedtaksperiode(vedtaksperiode: VedtaksperiodeUtDto): List<SpeilTidslinjeperiode> {
         var forrigeGenerasjon: SpeilTidslinjeperiode? = null
+        val sisteBehandling = vedtaksperiode.behandlinger.behandlinger.last().id
         return vedtaksperiode.behandlinger.behandlinger.mapNotNull { generasjon ->
             when (generasjon.tilstand) {
                 BehandlingtilstandDto.BEREGNET,
