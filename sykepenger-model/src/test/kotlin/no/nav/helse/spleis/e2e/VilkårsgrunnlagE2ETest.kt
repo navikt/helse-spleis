@@ -140,7 +140,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(17.januar til 31.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)

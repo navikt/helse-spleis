@@ -106,8 +106,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe",
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
         ) // Denn må jo være satt da
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -488,13 +487,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         nyPeriode(26.januar til 31.januar, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a2
         )
 
         håndterVilkårsgrunnlag(2.vedtaksperiode,

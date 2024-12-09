@@ -152,8 +152,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
         håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(
-            listOf(6.mars til 21.mars),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            listOf(6.mars til 21.mars)
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -274,7 +273,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyre ferie til sykdom`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterOverstyrTidslinje(
             (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) }
         )
@@ -378,7 +377,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `vedtaksperiode strekker seg ikke tilbake hvis det er en periode foran`() {
         nyPeriode(1.januar til 9.januar, a1)
         nyPeriode(10.januar til 31.januar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -403,7 +402,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `overstyr tidslinje endrer to perioder samtidig`() {
         nyPeriode(1.januar til 9.januar, a1)
         nyPeriode(10.januar til 31.januar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

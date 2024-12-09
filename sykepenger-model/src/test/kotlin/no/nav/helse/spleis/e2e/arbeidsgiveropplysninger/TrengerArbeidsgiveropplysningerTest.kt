@@ -117,7 +117,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(27.januar, 28.januar, 100.prosent))
         håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -206,7 +206,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `auu håndterer dager før forlengelsen håndterer inntekt`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 11.januar))
         håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
-        håndterInntektsmelding(listOf(12.januar til 27.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(12.januar til 27.januar))
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
     }
@@ -486,7 +486,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar))
         håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent))
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertFalse(trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger.contains(PersonObserver.Arbeidsgiverperiode))
@@ -934,8 +934,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             emptyList(),
+            førsteFraværsdag = 1.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
@@ -1044,8 +1044,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a2
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -1071,7 +1070,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `dersom kort periode allerede har fått inntektsmelding trenger ikke neste periode å be om AGP`() {
         nyPeriode(1.januar til 16.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         nyPeriode(18.januar til 31.januar)
 
         val expectedForespurteOpplysninger  = listOf(

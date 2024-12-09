@@ -105,7 +105,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             Ferie(1.februar, 16.februar),
             sendtTilNAVEllerArbeidsgiver = 1.mai
         )
-        håndterInntektsmelding(listOf(16.januar til 31.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(16.januar til 31.januar))
         assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
         assertTilstander(
             1.vedtaksperiode,

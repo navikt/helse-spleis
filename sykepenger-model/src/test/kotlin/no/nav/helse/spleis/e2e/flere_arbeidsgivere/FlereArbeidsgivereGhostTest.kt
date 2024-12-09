@@ -205,8 +205,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
         håndterVilkårsgrunnlagGhost(2.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
@@ -1168,8 +1167,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a2
         )
 
         håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar), orgnummer = a1)

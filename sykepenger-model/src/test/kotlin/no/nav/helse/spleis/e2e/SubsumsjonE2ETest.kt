@@ -295,8 +295,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 16.januar, fnr = fnr)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            fnr = fnr,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            fnr = fnr
         )
 
         assertForventetFeil(
@@ -1522,8 +1521,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 16.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = INNTEKT
         )
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
@@ -1766,7 +1764,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-19 fjerde ledd - ny agp etter tilstrekkelig opphold`() {
         håndterSøknad(Sykdom(2.januar, 2.februar, 100.prosent), Arbeid(18.januar, 2.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 

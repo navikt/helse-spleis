@@ -131,7 +131,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - skjæringstidspunkt endres som følge av historikk fra IT`() {
         nyPeriode(10.januar til 25.januar)
         nyPeriode(26.januar til 31.januar)
-        håndterInntektsmelding(listOf(10.januar til 25.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(10.januar til 25.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)

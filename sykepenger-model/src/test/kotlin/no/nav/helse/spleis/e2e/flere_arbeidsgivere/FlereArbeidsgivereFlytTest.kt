@@ -78,13 +78,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a2
         )
 
         assertEquals(13.januar til 26.januar, inspektør(a1).periode(3.vedtaksperiode))
@@ -110,8 +108,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
@@ -134,13 +131,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a2
         )
 
         assertEquals(13.januar til 31.januar, inspektør(a1).periode(3.vedtaksperiode))
@@ -749,13 +744,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(31.januar til 15.februar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a1
         )
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a2
         )
         håndterSykmelding(Sykmeldingsperiode(periode3.start, periode3.endInclusive), orgnummer = a2)
         håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)

@@ -81,8 +81,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSøknad(1.februar til 2.februar)
         håndterInntektsmelding(
             emptyList(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            førsteFraværsdag = 1.februar,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))

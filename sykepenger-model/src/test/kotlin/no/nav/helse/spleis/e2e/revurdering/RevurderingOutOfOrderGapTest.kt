@@ -233,8 +233,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out-of-order søknad medfører revurdering -- AvventerVilkårsprøving`() {
         nyPeriode(1.mars til 10.mars)
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(20.februar til 7.mars),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            arbeidsgiverperioder = listOf(20.februar til 7.mars)
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
@@ -1223,7 +1222,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(februarId, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(januarId)
         håndterYtelser(januarId)
         håndterSimulering(januarId)

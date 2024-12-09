@@ -101,8 +101,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(6.januar, 4.februar, 100.prosent), Arbeid(6.januar, 4.februar))
         håndterSøknad(Sykdom(5.februar, 24.februar, 100.prosent), Ferie(5.februar, 11.februar))
         håndterInntektsmelding(
-            listOf(5.februar til 20.februar),
-            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+            listOf(5.februar til 20.februar)
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)

@@ -85,8 +85,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 1.januar til 5.januar,
                 8.januar til 8.januar,
                 24.januar til 2.februar
-            ),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            )
         )
         assertEquals(1.januar til 5.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(6.januar til 2.februar, inspektør.periode(2.vedtaksperiode))

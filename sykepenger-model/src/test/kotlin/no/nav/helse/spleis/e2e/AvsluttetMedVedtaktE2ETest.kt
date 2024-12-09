@@ -66,8 +66,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
         val inntektsmeldingId = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(1.januar til 16.januar)
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(0, inspektør.antallUtbetalinger)
@@ -214,8 +213,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe",
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

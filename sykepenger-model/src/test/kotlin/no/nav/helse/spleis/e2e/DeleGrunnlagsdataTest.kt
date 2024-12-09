@@ -137,8 +137,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(mars)
 
         val inntektsmeldingId = håndterInntektsmelding(
-            listOf(Periode(20.februar, 8.mars)),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(Periode(20.februar, 8.mars))
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

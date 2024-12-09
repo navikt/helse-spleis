@@ -257,8 +257,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(
                 10.februar(2020) til 12.februar(2020),
                 27.februar(2020) til 10.mars(2020)
-            ),
-            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+            )
         )
         assertTilstander(
             1.vedtaksperiode,
@@ -342,8 +341,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020)))
         )
 
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -406,8 +404,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(
-            listOf(3.januar til 4.januar, 9.januar til 10.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(3.januar til 4.januar, 9.januar til 10.januar)
         )
         inspektør.also {
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -795,8 +792,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(12.juni(2020), 25.juni(2020), 100.prosent))
 
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(4.juni(2020), 19.juni(2020))),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            arbeidsgiverperioder = listOf(Periode(4.juni(2020), 19.juni(2020)))
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 17.juli(2020)))
@@ -863,8 +859,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            listOf(1.mars til 16.mars)
         )
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -899,8 +894,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            listOf(1.mars til 16.mars)
         )
         nyttVedtak(1.mai til 21.mai, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         assertEquals(12.april(2019), inspektør.sisteMaksdato(3.vedtaksperiode).maksdato)

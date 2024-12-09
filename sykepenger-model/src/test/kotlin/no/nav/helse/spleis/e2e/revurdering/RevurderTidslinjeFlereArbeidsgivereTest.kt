@@ -62,8 +62,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 20000.månedlig,
-            orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a2
         )
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
@@ -89,8 +88,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterInntektsmelding(
             listOf(2.januar til 17.januar),
             beregnetInntekt = 20000.månedlig,
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            orgnummer = a1
         )
 
         assertIngenFunksjonelleFeil()

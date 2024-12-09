@@ -320,10 +320,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-        )
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -367,7 +364,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)

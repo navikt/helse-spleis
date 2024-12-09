@@ -83,7 +83,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         assertIngenVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
