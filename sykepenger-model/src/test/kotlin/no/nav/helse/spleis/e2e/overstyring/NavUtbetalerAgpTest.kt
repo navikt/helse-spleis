@@ -450,8 +450,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         håndterInntektsmelding(
-            listOf(2.januar til 4.januar, 14.januar til 26.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(2.januar til 4.januar, 14.januar til 26.januar)
         )
         assertEquals(2.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -460,8 +459,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(2.januar til 4.januar, 14.januar til 26.januar),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
         )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)

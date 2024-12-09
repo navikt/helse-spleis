@@ -233,7 +233,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(28.januar, 10.februar, 100.prosent))
         // ingen søknad for perioden 11. januar - 16.januar
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertForventetFeil(
@@ -1303,7 +1303,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 20.januar))
         håndterSøknad(Sykdom(8.januar, 20.januar, 100.prosent))
-        håndterInntektsmelding(listOf(8.januar til 23.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(8.januar til 23.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
@@ -1418,8 +1418,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            id = inntektsmeldingId,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            id = inntektsmeldingId
         )
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
 
@@ -1763,13 +1762,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+        håndterSøknad(mars)
         håndterInntektsmelding(
             listOf(Periode(20.februar, 8.mars)),
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(mars)
 
         håndterSykmelding(Sykmeldingsperiode(20.november(2017), 13.desember(2017)))
         håndterSøknad(Sykdom(20.november(2017), 13.desember(2017), 100.prosent))
@@ -2124,8 +2123,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Korrigerende inntektsmelding før søknad`() {
         nyPeriode(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        håndterInntektsmelding(listOf(2.januar til 17.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(2.januar til 17.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         // På dette tidspunktet har AUU'en lagret dagene i historikken og innsett at skjæringstidspunktet er 1.januar
         nyPeriode(17.januar til 31.januar)
         // IM 1 replayes først og blir lagret på 2.januar av forlengelsen -> kan ikke beregne sykepengegrunnlag
@@ -2207,7 +2206,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Arbeidsgiverperiode skal ikke valideres før sykdomshistorikken er oppdatert`() {
         nyPeriode(1.januar til 15.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(16.januar til 31.januar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

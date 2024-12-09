@@ -160,8 +160,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
-            listOf(2.februar til 17.februar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(2.februar til 17.februar)
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -193,8 +192,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 10.januar)
         nyPeriode(15.januar til 20.januar)
         håndterInntektsmelding(
-            listOf(15.januar til 30.januar),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            listOf(15.januar til 30.januar)
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -218,8 +216,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(1.januar til 16.januar)
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

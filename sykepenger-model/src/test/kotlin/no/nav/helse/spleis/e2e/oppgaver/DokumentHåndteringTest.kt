@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
+import no.nav.helse.assertForventetFeil
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -208,8 +209,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         val id = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(1.januar til 16.januar)
         )
         val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
         assertEquals(id, inntektsmelding)
@@ -250,15 +250,36 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntektsmelding noen dager håndtert`() {
+    fun `lps-Inntektsmelding noen dager håndtert`() {
+        val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        val im = håndterInntektsmelding(
+            listOf(1.januar til 16.januar)
+        )
+        assertEquals(listOf(im), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
+        assertEquals(emptyList<Any>(), observatør.inntektsmeldingHåndtert)
+    }
+
+    @Test
+    fun `portal-Inntektsmelding noen dager håndtert`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertEquals(listOf(im), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
-        assertEquals(emptyList<Any>(), observatør.inntektsmeldingHåndtert)
+        assertForventetFeil(
+            forklaring = "portal-inntektsmeldinger burde bli håndtert",
+            nå = {
+                assertEquals(listOf(im), observatør.inntektsmeldingIkkeHåndtert)
+                assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
+                assertEquals(emptyList<Any>(), observatør.inntektsmeldingHåndtert)
+            },
+            ønsket = {
+                assertEquals(emptyList<Any>(), observatør.inntektsmeldingIkkeHåndtert)
+                assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
+                assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingHåndtert)
+            }
+        )
     }
     @Test
     fun `Inntektsmelding noen dager håndtert - IM før søknad`() {
@@ -560,8 +581,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
         val im2 = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT * 1.1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            beregnetInntekt = INNTEKT * 1.1
         )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

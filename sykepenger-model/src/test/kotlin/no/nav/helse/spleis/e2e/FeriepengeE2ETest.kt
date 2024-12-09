@@ -745,8 +745,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(6.juni(2020), 7.juni(2020)))
             håndterSøknad(6.juni(2020) til 7.juni(2020))
             håndterInntektsmelding(
-                listOf(6.juni(2020) til 7.juni(2020)),
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+                listOf(6.juni(2020) til 7.juni(2020))
             )
 
             håndterUtbetalingshistorikkForFeriepenger(

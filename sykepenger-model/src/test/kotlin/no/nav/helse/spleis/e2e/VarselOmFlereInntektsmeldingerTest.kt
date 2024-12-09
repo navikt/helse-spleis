@@ -27,8 +27,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021)))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021))
         )
         håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 

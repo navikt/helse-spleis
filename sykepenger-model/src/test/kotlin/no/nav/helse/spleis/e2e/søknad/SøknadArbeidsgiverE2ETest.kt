@@ -201,7 +201,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
                 6.januar til 9.januar, // lager et tredagers opphold (10. januar - 12. januar) som forskyver agp
                 13.januar til 19.januar // til å slutte 19. januar. Periode nr 3. forlenger derfor kun helg, og skal også avsluttes uten utbetaling
             ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -226,7 +226,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
                 1.januar til 7.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 3
                 15.januar til 23.januar  // haver innenfor arbeidsgiverperioden likevel
             ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -245,7 +245,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
                 1.januar til 8.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 2
                 12.januar til 19.januar  // haver innenfor arbeidsgiverperioden likevel
             ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)

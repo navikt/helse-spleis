@@ -121,8 +121,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         // Inntektsmelding som flytter arbeidsgiverperioden en uke frem
         // Utbetaling revurderes og skal trekke penger tilbake for 21.-23.februar
         håndterInntektsmelding(
-            listOf(12.februar til 27.februar),
-            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+            listOf(12.februar til 27.februar)
         )
         assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
@@ -540,8 +539,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSøknad(1.januar til 2.januar)
         håndterInntektsmelding(
-            listOf(1.januar til 2.januar, 10.januar til 23.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            listOf(1.januar til 2.januar, 10.januar til 23.januar)
         )
         håndterSøknad(10.januar til 11.januar)
 

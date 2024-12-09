@@ -120,8 +120,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 3.januar til 4.januar,
                 8.januar til 9.januar,
                 15.januar til 26.januar
-            ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            )
         )
 
         assertTilstander(
@@ -259,7 +258,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 10.februar(2020) til 12.februar(2020),
                 27.februar(2020) til 10.mars(2020)
             ),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
         assertTilstander(
             1.vedtaksperiode,

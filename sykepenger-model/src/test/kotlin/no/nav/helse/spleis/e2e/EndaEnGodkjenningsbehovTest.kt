@@ -404,23 +404,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Periode uten noen navdager får Avslag-tag`() {
-        håndterSykmelding(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "Skal implementeres snarest",
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
-                // Et eksisterende godkjenningsbehov med Avslag-tag
-            },
-            nå = {
-                assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-            }
-        )
-    }
-
-    @Test
     fun `Periode med minst én navdag og minst én avslagsdag får DelvisInnvilget-tag`() {
         createTestPerson(Personidentifikator("18.01.1948"), 18.januar(1948))
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)

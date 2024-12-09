@@ -140,7 +140,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmeldingPortal(emptyList())
+        håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
@@ -185,7 +185,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             orgnummer = a2,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
 
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
