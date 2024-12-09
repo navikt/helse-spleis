@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -1015,36 +1016,34 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
         }
 
-        igangsettOverstyringOgHåndterInntektPåSkjæringstidspunkt(
+        korrigerVilkårsgrunnlagOgIgangsettOverstyring(
             skjæringstidspunkt,
-            inntektsmelding,
+            inntektsmelding.korrigertInntekt(),
             aktivitetslogg,
             subsumsjonsloggMedInntektsmeldingkontekst,
             overstyring
         )
+
+        håndter(inntektsmelding) {
+            håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg)
+        }
     }
 
-    private fun igangsettOverstyringOgHåndterInntektPåSkjæringstidspunkt(
+    private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
         skjæringstidspunkt: LocalDate,
-        inntektsmelding: Inntektsmelding,
+        korrigertInntektsmelding: KorrigertInntektOgRefusjon,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
         overstyring: Revurderingseventyr?
     ) {
         val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(
             skjæringstidspunkt,
-            inntektsmelding,
+            korrigertInntektsmelding,
             aktivitetslogg,
             subsumsjonsloggMedInntektsmeldingkontekst
         )
-        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring)
-        if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(
-            overstyringFraInntektsmelding,
-            aktivitetslogg
-        )
-        håndter(inntektsmelding) {
-            håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg)
-        }
+        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring) ?: return
+        person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
     }
 
     private fun subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding: Inntektsmelding) =

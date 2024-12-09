@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -702,7 +703,7 @@ class Person private constructor(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         skjæringstidspunkt: LocalDate,
-        inntektsmelding: Inntektsmelding,
+        korrigertInntektsmelding: KorrigertInntektOgRefusjon,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
     ): Revurderingseventyr? {
@@ -711,7 +712,7 @@ class Person private constructor(
             aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
             return null
         }
-        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, aktivitetslogg, subsumsjonslogg)
+        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, korrigertInntektsmelding, aktivitetslogg, subsumsjonslogg)
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         return eventyr
     }

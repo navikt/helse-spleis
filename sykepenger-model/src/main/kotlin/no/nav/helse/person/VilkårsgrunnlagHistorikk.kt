@@ -16,7 +16,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -281,17 +281,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
             person: Person,
-            inntektsmelding: Inntektsmelding,
+            korrigertInntektsmelding: KorrigertInntektOgRefusjon,
             aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(
                 person,
-                inntektsmelding,
+                korrigertInntektsmelding,
                 subsumsjonslogg
             )
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag)
-            val eventyr = Revurderingseventyr.Companion.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, endringsdato)
+            val eventyr = Revurderingseventyr.Companion.korrigertInntektsmeldingInntektsopplysninger(korrigertInntektsmelding.hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, EmptyLog) to eventyr
         }
 

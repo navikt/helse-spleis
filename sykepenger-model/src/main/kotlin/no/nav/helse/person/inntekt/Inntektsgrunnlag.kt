@@ -13,7 +13,7 @@ import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -23,6 +23,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -306,15 +308,32 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         person: Person,
-        inntektsmelding: Inntektsmelding,
+        korrigertInntektsmelding: KorrigertInntektOgRefusjon,
         subsumsjonslogg: Subsumsjonslogg
     ): Inntektsgrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonslogg)
-        inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
+        builder.leggTilInntekt(korrigertInntektsmelding.arbeidsgiverInntektsopplysning(
+            skjæringstidspunkt = skjæringstidspunkt,
+            strekkTilSkjæringstidspunkt = builder.ingenRefusjonsopplysninger(korrigertInntektsmelding.organisasjonsnummer)
+        ))
         val resultat = builder.resultat()
-        arbeidsgiverInntektsopplysninger
-            .finn(inntektsmelding.behandlingsporing.organisasjonsnummer)
-            ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
+        when (val inntektFraFør = arbeidsgiverInntektsopplysninger.finn(korrigertInntektsmelding.organisasjonsnummer)?.inntektsopplysning) {
+            is Inntektsmelding -> {
+                person.arbeidsgiveropplysningerKorrigert(
+                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                        korrigertInntektsmeldingId = inntektFraFør.hendelseId,
+                        korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
+                        korrigerendeInntektsopplysningId = korrigertInntektsmelding.hendelse.metadata.meldingsreferanseId
+                    )
+                )
+            }
+            is Infotrygd,
+            is Saksbehandler,
+            is IkkeRapportert,
+            is SkattSykepengegrunnlag,
+            is SkjønnsmessigFastsatt,
+            null -> { /* gjør ingenting */ }
+        }
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(
             resultat,
             deaktiverteArbeidsforhold,

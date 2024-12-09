@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
@@ -104,13 +103,6 @@ data class ArbeidsgiverInntektsopplysning(
     ): ArbeidsgiverInntektsopplysning {
         inntektsopplysning.subsumerArbeidsforhold(subsumsjonslogg, orgnummer, forklaring, oppfylt)
         return this
-    }
-
-    internal fun arbeidsgiveropplysningerKorrigert(
-        person: Person,
-        inntektsmelding: Inntektsmelding
-    ) {
-        inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
     }
 
     internal fun arbeidsgiveropplysningerKorrigert(

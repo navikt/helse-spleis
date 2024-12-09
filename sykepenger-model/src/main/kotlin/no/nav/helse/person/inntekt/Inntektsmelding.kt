@@ -9,8 +9,6 @@ import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.Inntektsmelding
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
@@ -68,19 +66,6 @@ class Inntektsmelding internal constructor(
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
-    }
-
-    override fun arbeidsgiveropplysningerKorrigert(
-        person: Person,
-        inntektsmelding: no.nav.helse.hendelser.Inntektsmelding
-    ) {
-        person.arbeidsgiveropplysningerKorrigert(
-            PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                korrigertInntektsmeldingId = hendelseId,
-                korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
-                korrigerendeInntektsopplysningId = inntektsmelding.metadata.meldingsreferanseId
-            )
-        )
     }
 
     override fun arbeidsgiveropplysningerKorrigert(

@@ -14,7 +14,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
 sealed class Inntektsopplysning(
     val id: UUID,
@@ -116,12 +115,6 @@ sealed class Inntektsopplysning(
             aktivitetslogg = aktivitetslogg,
             nyArbeidsgiverperiode = nyArbeidsgiverperiode
         )
-    }
-
-    internal open fun arbeidsgiveropplysningerKorrigert(
-        person: Person,
-        inntektsmelding: InntektsmeldingHendelse
-    ) {
     }
 
     internal open fun arbeidsgiveropplysningerKorrigert(

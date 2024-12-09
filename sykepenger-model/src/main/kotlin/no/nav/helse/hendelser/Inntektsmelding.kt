@@ -26,10 +26,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
@@ -71,8 +72,18 @@ class Inntektsmelding(
             hendelse = this
         )
     }
+
     private var håndtertInntekt = false
     val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
+
+    fun korrigertInntekt() = KorrigertInntektOgRefusjon(
+        hendelse = this,
+        organisasjonsnummer = orgnummer,
+        inntekt = InntektsmeldingInntekt(type.inntektsdato(this), metadata.meldingsreferanseId, beregnetInntekt),
+        refusjonsopplysninger = Refusjonshistorikk().apply {
+            leggTilRefusjon(refusjonsElement)
+        }.refusjonsopplysninger(type.refusjonsdato(this))
+    )
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
         val inntektsdato = type.alternativInntektsdatoForInntekthistorikk(this, alternativInntektsdato) ?: return
@@ -108,24 +119,6 @@ class Inntektsmelding(
 
     internal fun inntektHåndtert() {
         håndtertInntekt = true
-    }
-
-    internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {
-        val refusjonshistorikk = Refusjonshistorikk()
-        refusjonshistorikk.leggTilRefusjon(refusjonsElement)
-        // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
-        // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
-        val startskudd = if (builder.ingenRefusjonsopplysninger(behandlingsporing.organisasjonsnummer)) skjæringstidspunkt else type.refusjonsdato(this)
-        val inntektGjelder = skjæringstidspunkt til LocalDate.MAX
-        builder.leggTilInntekt(
-            ArbeidsgiverInntektsopplysning(
-                behandlingsporing.organisasjonsnummer,
-                inntektGjelder,
-                InntektsmeldingInntekt(type.inntektsdato(this), metadata.meldingsreferanseId, beregnetInntekt),
-                refusjonshistorikk.refusjonsopplysninger(startskudd)
-            )
-        )
-
     }
 
     sealed interface Avsendersystem {
@@ -336,5 +329,31 @@ class Inntektsmelding(
 
     private data object SelvbestemtPortalinntektsmeldingForForlengelse : ForkastetPortalinntektsmelding() {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) = false
+    }
+}
+
+data class KorrigertInntektOgRefusjon(
+    val hendelse: Hendelse,
+    val organisasjonsnummer: String,
+    val inntekt: InntektsmeldingInntekt,
+    val refusjonsopplysninger: Refusjonsopplysninger
+) {
+    internal fun arbeidsgiverInntektsopplysning(skjæringstidspunkt: LocalDate, strekkTilSkjæringstidspunkt: Boolean): ArbeidsgiverInntektsopplysning {
+        return ArbeidsgiverInntektsopplysning(
+            orgnummer = organisasjonsnummer,
+            gjelder = skjæringstidspunkt til LocalDate.MAX,
+            inntektsopplysning = inntekt,
+            refusjonsopplysninger = if (strekkTilSkjæringstidspunkt) refusjonsopplysninger.sikreRefusjonFraOgMed(skjæringstidspunkt) else refusjonsopplysninger
+        )
+    }
+
+    private fun Refusjonsopplysninger.sikreRefusjonFraOgMed(startskudd: LocalDate): Refusjonsopplysninger {
+        if (refusjonsbeløpOrNull(startskudd) != null) return this
+        val første = validerteRefusjonsopplysninger.firstOrNull() ?: return this
+        val gråsone = første.copy(
+            fom = startskudd,
+            tom = første.fom.forrigeDag
+        )
+        return gråsone.refusjonsopplysninger.merge(this)
     }
 }
