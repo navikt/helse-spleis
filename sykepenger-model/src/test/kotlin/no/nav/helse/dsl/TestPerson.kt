@@ -31,12 +31,12 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
@@ -57,6 +57,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spill_av_im.Forespørsel
+import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
@@ -66,7 +67,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.fail
 
 internal class TestPerson(
-    private val observatør: PersonObserver,
+    private val observatør: TestObservatør,
     private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
     private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
     deferredLog: DeferredLog = DeferredLog(),
@@ -249,6 +250,9 @@ internal class TestPerson(
             mottatt: LocalDateTime = LocalDateTime.now(),
             avsendersystem: Avsenderutleder = NAV_NO
         ): UUID {
+            if (erForespurtNavPortal(avsendersystem)) {
+                observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId)
+            }
             arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,

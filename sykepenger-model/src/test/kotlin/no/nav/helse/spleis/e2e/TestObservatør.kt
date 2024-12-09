@@ -138,12 +138,19 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
     }
 
+    private val trengerArbeidsgiveroppysninger = mutableSetOf<UUID>()
+    internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID) {
+        //check(trengerArbeidsgiveroppysninger.contains(vedtaksperiodeId)) { "Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId" }
+    }
+
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
+        trengerArbeidsgiveroppysninger.add(event.vedtaksperiodeId)
     }
 
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
         trengerIkkeArbeidsgiveropplysningerVedtaksperioder.add(event)
+        trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
     }
 
     override fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {

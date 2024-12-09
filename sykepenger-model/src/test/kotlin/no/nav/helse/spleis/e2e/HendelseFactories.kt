@@ -44,6 +44,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
+import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -222,7 +223,9 @@ internal fun AbstractEndToEndTest.portalInntektsmelding(
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder
 ): Inntektsmelding {
-    EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
+    if (erForespurtNavPortal(avsendersystem)) {
+        observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId)
+    }
     return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
         arbeidsgiverperioder = arbeidsgiverperioder,
         beregnetInntekt = beregnetInntekt,

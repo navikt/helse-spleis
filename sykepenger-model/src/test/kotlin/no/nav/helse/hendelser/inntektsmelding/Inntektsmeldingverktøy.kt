@@ -11,5 +11,7 @@ val NAV_NO_SELVBESTEMT: Avsenderutleder = { vedtaksperiodeId: UUID, inntektsdato
 val LPS: Avsenderutleder = { _, _, førsteFraværsdag -> Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag) }
 val ALTINN: Avsenderutleder = { _, _, førsteFraværsdag ->  Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag) }
 
-fun erNavPortal(avsenderutleder: Avsenderutleder) = avsenderutleder(UUID.randomUUID(), LocalDate.EPOCH, null) is Inntektsmelding.Avsendersystem.NavPortal
+private fun utledet(avsenderutleder: Avsenderutleder) = avsenderutleder(UUID.randomUUID(), LocalDate.EPOCH, null)
+fun erNavPortal(avsenderutleder: Avsenderutleder) = utledet(avsenderutleder).let { it is Inntektsmelding.Avsendersystem.NavPortal }
+fun erForespurtNavPortal(avsenderutleder: Avsenderutleder) = utledet(avsenderutleder).let { it is Inntektsmelding.Avsendersystem.NavPortal && it.forespurt }
 fun Inntektsmelding.validert() = apply { valider(emptyList(), Aktivitetslogg()) { _, _, _ -> } }
