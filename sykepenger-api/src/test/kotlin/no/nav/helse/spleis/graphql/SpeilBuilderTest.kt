@@ -3,6 +3,7 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -287,7 +288,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `saksbehandler endrer refusjon frem i tid`() {
+    fun `saksbehandler endrer refusjon frem i tid`() = Toggle.refusjonsopplysningerTilSpeilFraBehandling.enable {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
@@ -307,25 +308,13 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
         val refusjon = vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single()
         val refusjonsopplysninger = refusjon.refusjonsopplysninger
-        assertEquals(1, refusjonsopplysninger.size)
-        assertEquals(1.januar, refusjonsopplysninger.single().fom)
-        assertEquals(null, refusjonsopplysninger.single().tom)
-
-        forlengTilGodkjenning(1.februar, 28.februar)
-        personDto = speilApi()
-        val beregnetPeriode2 = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
-        assertEquals(Periodetilstand.TilGodkjenning, beregnetPeriode2.periodetilstand)
-        val speilVilkårsgrunnlagId2 = beregnetPeriode2.vilkårsgrunnlagId
-        val vilkårsgrunnlag2 = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId2] as? SpleisVilkårsgrunnlag
-        val refusjon2 = vilkårsgrunnlag2!!.arbeidsgiverrefusjoner.single()
-        val refusjonsopplysninger2 = refusjon2.refusjonsopplysninger
-        assertEquals(2, refusjonsopplysninger2.size)
-        assertEquals(1.januar, refusjonsopplysninger2.first().fom)
-        assertEquals(31.januar, refusjonsopplysninger2.first().tom)
-        assertEquals(INNTEKT, refusjonsopplysninger2.first().beløp.månedlig)
-        assertEquals(1.februar, refusjonsopplysninger2.last().fom)
-        assertEquals(null, refusjonsopplysninger2.last().tom)
-        assertEquals(INGEN, refusjonsopplysninger2.last().beløp.månedlig)
+        assertEquals(2, refusjonsopplysninger.size)
+        assertEquals(1.januar, refusjonsopplysninger.first().fom)
+        assertEquals(31.januar, refusjonsopplysninger.first().tom)
+        assertEquals(INNTEKT, refusjonsopplysninger.first().beløp.månedlig)
+        assertEquals(1.februar, refusjonsopplysninger.last().fom)
+        assertEquals(null, refusjonsopplysninger.last().tom)
+        assertEquals(INGEN, refusjonsopplysninger.last().beløp.månedlig)
     }
 
     @Test

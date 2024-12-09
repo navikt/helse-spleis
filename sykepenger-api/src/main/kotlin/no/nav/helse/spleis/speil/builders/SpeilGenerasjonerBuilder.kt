@@ -3,6 +3,7 @@ package no.nav.helse.spleis.speil.builders
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
@@ -146,8 +147,15 @@ internal class SpeilGenerasjonerBuilder(
             beregningId = utbetaling.id,
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
-            vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!
+            vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
+            refusjonstidslinje = mapRefusjonstidslinje(generasjon.id, sisteEndring.refusjonstidslinje )
         )
+    }
+
+    private fun mapRefusjonstidslinje(behandlingId: UUID, refusjonstidslinje: BeløpstidslinjeDto): BeløpstidslinjeDto {
+        val hensyntattUbrukteRefusjonsopplysninger = arbeidsgiverUtDto.ubrukteRefusjonsopplysninger
+        if (hensyntattUbrukteRefusjonsopplysninger.sisteBehandlingId != behandlingId) return refusjonstidslinje
+        return hensyntattUbrukteRefusjonsopplysninger.sisteRefusjonstidslinje!!
     }
 
     private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): AnnullertPeriode {

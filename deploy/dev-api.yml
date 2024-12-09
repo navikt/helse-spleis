@@ -76,4 +76,6 @@ spec:
     value: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
   - name: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
     value: http://speed-api-dev-proxy/token
+  - name: REFUSJONSOPPLYSNINGER_TIL_SPEIL_FRA_BEHANDLING
+    value: "true"
 

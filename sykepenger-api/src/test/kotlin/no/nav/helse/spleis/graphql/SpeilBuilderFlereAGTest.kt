@@ -3,6 +3,7 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate.EPOCH
 import java.time.Month
 import java.time.YearMonth
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -575,6 +576,27 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         assertEquals(1.januar, refusjonsopplysningerForAG2.fom)
         assertEquals(null, refusjonsopplysningerForAG2.tom)
         assertEquals(48000.månedlig, refusjonsopplysningerForAG2.beløp.månedlig)
+    }
+
+    @Test
+    fun `flere oppstykkede ag - vet ikke om dette matcher speil sin forventning`() = Toggle.refusjonsopplysningerTilSpeilFraBehandling.enable {
+        nyeVedtak(1.januar, 31.januar, a1 to 1, a2 to 1)
+        håndterSøknad(1.februar til 28.februar, a1)
+        håndterSøknad(15.februar til 28.februar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, vedtaksperiode = 2)
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+        håndterYtelser()
+        val personDto = speilApi()
+        assertEquals(2, personDto.vilkårsgrunnlag.size)
+        val speilVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagIdForAG2] as? SpleisVilkårsgrunnlag
+        val arbeidsgiverrefusjonForAG2 = vilkårsgrunnlag!!.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a2 }!!
+        val refusjonsopplysningerForAG2 = arbeidsgiverrefusjonForAG2.refusjonsopplysninger.single()
+        assertEquals(15.februar, refusjonsopplysningerForAG2.fom)
+        assertEquals(null, refusjonsopplysningerForAG2.tom)
     }
 
     @Test

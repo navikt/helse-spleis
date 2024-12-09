@@ -45,6 +45,7 @@ class Toggle private constructor(enabled: Boolean) {
         val FatteVedtakPåTidligereBeregnetPerioder = fraEnv("AUU_TIL_GODKJENNING", false)
         val SendFeriepengeOppdrag = fraEnv("SEND_FERIEPENGEOPPDRAG", false) // Denne MÅ settes til false når man er ferdig å kjøre feriepenger. Ref. den mystiske feriepengejobben som startet av seg selv (?) 08.08.2024
         val LagreRefusjonsopplysningerPåBehandling = Toggle(true)
+        val refusjonsopplysningerTilSpeilFraBehandling = fraEnv("REFUSJONSOPPLYSNINGER_TIL_SPEIL_FRA_BEHANDLING", false)
 
         fun fraEnv(navn: String, defaultValue: Boolean) = Toggle(System.getenv(navn)?.lowercase()?.toBooleanStrictOrNull() ?: defaultValue)
 

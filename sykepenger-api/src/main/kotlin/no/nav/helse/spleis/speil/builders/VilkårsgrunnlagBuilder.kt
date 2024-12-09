@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.util.LinkedList
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
+import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -11,6 +13,7 @@ import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.NyttInntektsforholdPeriodeDTO
@@ -30,7 +33,7 @@ internal abstract class IVilkårsgrunnlag(
     val nyeInntekterUnderveis: List<INyInntektUnderveis>,
     val id: UUID
 ) {
-    abstract fun toDTO(): Vilkårsgrunnlag
+    abstract fun toDTO(arbeidsgiverRefusjon: Map<String, List<BeløpstidslinjeDto>>): Vilkårsgrunnlag
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
     open fun potensiellGhostperiode(
         organisasjonsnummer: String,
@@ -48,6 +51,23 @@ internal abstract class IVilkårsgrunnlag(
             vilkårsgrunnlagId = this.id,
             deaktivert = inntekten.deaktivert
         )
+    }
+
+    fun mapRefusjonFraBehandling(arbeidsgiverRefusjonstidslinjer: Map<String, List<BeløpstidslinjeDto>>): List<Arbeidsgiverrefusjon> {
+        return arbeidsgiverRefusjonstidslinjer.map { (orgnummer, beløpdstidslinjer) ->
+            val sortertePerioder = beløpdstidslinjer.flatMap { it.perioder }.sortedBy { it.tom }
+            Arbeidsgiverrefusjon(
+                arbeidsgiver = orgnummer,
+                refusjonsopplysninger = sortertePerioder.mapIndexed { index, periode ->
+                    Refusjonselement(
+                        fom = periode.fom,
+                        tom = periode.tom.takeUnless { index == sortertePerioder.lastIndex },
+                        beløp = periode.dagligBeløp.daglig.månedlig,
+                        meldingsreferanseId = periode.kilde.meldingsreferanseId
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -70,14 +90,14 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, nyeInntekterUnderveis, id) {
 
-    override fun toDTO(): Vilkårsgrunnlag {
+    override fun toDTO(arbeidsgiverRefusjon: Map<String, List<BeløpstidslinjeDto>>): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlag = beregningsgrunnlag,
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            arbeidsgiverrefusjoner = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
+            arbeidsgiverrefusjoner = if (Toggle.refusjonsopplysningerTilSpeilFraBehandling.enabled) mapRefusjonFraBehandling(arbeidsgiverRefusjon) else refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
             grunnbeløp = grunnbeløp,
             sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
@@ -115,7 +135,7 @@ internal class IInfotrygdGrunnlag(
     id: UUID
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, emptyList(), id) {
 
-    override fun toDTO(): Vilkårsgrunnlag {
+    override fun toDTO(arbeidsgiverRefusjon: Map<String, List<BeløpstidslinjeDto>>): Vilkårsgrunnlag {
         return InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlag = beregningsgrunnlag,
@@ -130,6 +150,7 @@ internal class IInfotrygdGrunnlag(
 
 internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: List<Map<UUID, IVilkårsgrunnlag>>) {
     private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, IVilkårsgrunnlag>()
+    private val refusjonstidslinjer = mutableMapOf<Pair<UUID, String>, MutableList<BeløpstidslinjeDto>>()
 
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
         vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
@@ -159,10 +180,20 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
         } ?: emptyList()
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {
-        return vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
+        return vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) ->
+            vilkårsgrunnlag.toDTO(refusjonstidslinjer.filterKeys { (id, _) ->
+                id == vilkårsgrunnlag.id
+            }.mapKeys { (key, _) -> key.second })
+        }
     }
 
-    internal fun leggIBøtta(vilkårsgrunnlagId: UUID): IVilkårsgrunnlag {
+
+    internal fun leggIBøtta(
+        vilkårsgrunnlagId: UUID,
+        refusjonstidslinje: BeløpstidslinjeDto,
+        organisasjonsnummer: String
+    ): IVilkårsgrunnlag {
+        refusjonstidslinjer.getOrPut(vilkårsgrunnlagId to organisasjonsnummer) { mutableListOf() }.add(refusjonstidslinje)
         return vilkårsgrunnlagIBruk.getOrPut(vilkårsgrunnlagId) {
             tilgjengeligeVilkårsgrunnlag.firstNotNullOf { elementer ->
                 elementer[vilkårsgrunnlagId]
