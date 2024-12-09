@@ -51,12 +51,12 @@ Det ble relativt fort klart at vi ikke kunne regne med en så enkel flyt som 1. 
 ## Linting
 
 Lintet med hjelp av editorconfig er brukt gjennomgående i hele repoet for kotlinfiler. For å slå det på så gjør følgende
-1. `Cmd + Q`
+1. `Cmd + ,`
 2. Trykk på `Code style`
 3. Marker `Enable editorconfig support` 
 
 Valgfritt, men lurt er å også bare linte de steder man varit inom. 
-1. `Cmd+Q`
+1. `Cmd + ,`
 2. Trykk på `Tools`
 3. Velg `Actions on save`
 4. Marker `Reformat code`
