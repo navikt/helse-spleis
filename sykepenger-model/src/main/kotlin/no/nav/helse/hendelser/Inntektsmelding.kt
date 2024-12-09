@@ -222,7 +222,8 @@ class Inntektsmelding(
                 val vedtaksperiode = vedtaksperioder.finn(avsendersystem.vedtaksperiodeId)
                 if (vedtaksperiode == null) PortalinntektsmeldingForForkastetPeriode
                 else if (!avsendersystem.forespurt && vedtaksperiode.erForlengelse()) SelvbestemtPortalinntektsmeldingForForlengelse
-                else Portalinntektsmelding(vedtaksperiode, avsendersystem.inntektsdato)
+                else if (avsendersystem.forespurt) ForespurtPortalinnteksmelding(vedtaksperiode, avsendersystem.inntektsdato, avsendersystem.vedtaksperiodeId)
+                else SelvbestemtPortalinnteksmelding(vedtaksperiode, avsendersystem.inntektsdato)
             }
         }
         if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
@@ -274,7 +275,7 @@ class Inntektsmelding(
         }
     }
 
-    private class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate): Type {
+    private abstract class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate): Type {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) = true
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
@@ -292,14 +293,22 @@ class Inntektsmelding(
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.periode().start
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = vedtaksperiode.skjæringstidspunkt
-        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
-            aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
-            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
-        }
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
             private val logger = LoggerFactory.getLogger(Portalinntektsmelding::class.java)
+        }
+    }
+    private data class ForespurtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate, private val vedtaksperiodeId: UUID): Portalinntektsmelding(vedtaksperiode, inntektsdato) {
+        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
+            person.emitInntektsmeldingHåndtert(inntektsmelding.metadata.meldingsreferanseId, vedtaksperiodeId, inntektsmelding.orgnummer)
+        }
+    }
+
+    private data class SelvbestemtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate): Portalinntektsmelding(vedtaksperiode, inntektsdato) {
+        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
+            aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
+            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
     }
 

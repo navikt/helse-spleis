@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
-import no.nav.helse.assertForventetFeil
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -267,19 +266,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertForventetFeil(
-            forklaring = "portal-inntektsmeldinger burde bli håndtert",
-            nå = {
-                assertEquals(listOf(im), observatør.inntektsmeldingIkkeHåndtert)
-                assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
-                assertEquals(emptyList<Any>(), observatør.inntektsmeldingHåndtert)
-            },
-            ønsket = {
-                assertEquals(emptyList<Any>(), observatør.inntektsmeldingIkkeHåndtert)
-                assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
-                assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingHåndtert)
-            }
-        )
+        assertEquals(emptyList<Any>(), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
+        assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingHåndtert)
     }
     @Test
     fun `Inntektsmelding noen dager håndtert - IM før søknad`() {
