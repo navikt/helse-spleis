@@ -38,7 +38,6 @@ internal class UtkastTilVedtakBuilder(
     }
 
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
-
     private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
 
     private val relevantePerioder = mutableSetOf<RelevantPeriode>()
@@ -48,7 +47,6 @@ internal class UtkastTilVedtakBuilder(
 
     private lateinit var behandlingId: UUID
     internal fun behandlingId(behandlingId: UUID) = apply { this.behandlingId = behandlingId }
-
     private lateinit var periode: Periode
     internal fun periode(arbeidsgiverperiode: List<Periode>, periode: Periode) = apply {
         this.periode = periode
@@ -71,7 +69,6 @@ internal class UtkastTilVedtakBuilder(
 
     private val hendelseIder = mutableSetOf<UUID>()
     internal fun hendelseIder(hendelseIder: Set<UUID>) = apply { this.hendelseIder.addAll(hendelseIder) }
-
     private lateinit var skjæringstidspunkt: LocalDate
     internal fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply {
         this.skjæringstidspunkt = skjæringstidspunkt
@@ -79,9 +76,7 @@ internal class UtkastTilVedtakBuilder(
 
     private lateinit var vilkårsgrunnlagId: UUID
     internal fun vilkårsgrunnlagId(vilkårsgrunnlagId: UUID) = apply { this.vilkårsgrunnlagId = vilkårsgrunnlagId }
-
     private lateinit var utbetalingId: UUID
-    private var revurdering by Delegates.notNull<Boolean>()
     internal fun utbetaling(utbetaling: Utbetaling) = apply {
         this.utbetalingId = utbetaling.id
 
@@ -89,8 +84,7 @@ internal class UtkastTilVedtakBuilder(
             "Utkast til vedtak på ${utbetaling.type.name}? Det kan jo ikke være rett."
         }
 
-        this.revurdering = utbetaling.type == REVURDERING
-        if (this.revurdering) {
+        if (utbetaling.type == REVURDERING) {
             tags.add(Tag.Revurdering)
         }
 
@@ -160,11 +154,9 @@ internal class UtkastTilVedtakBuilder(
     }
 
     private val build by lazy { Build() }
-
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
     internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
-
     private inner class Build {
         private val skjønnsfastsatt = arbeidsgiverinntekter.any { it.skjønnsfastsatt != null }.also {
             if (it) check(arbeidsgiverinntekter.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
@@ -234,7 +226,7 @@ internal class UtkastTilVedtakBuilder(
             "vilkårsgrunnlagId" to "$vilkårsgrunnlagId",
             "periodetype" to periodetypeForGodkjenningsbehov,
             "førstegangsbehandling" to tags.contains(Tag.Førstegangsbehandling),
-            "utbetalingtype" to if (revurdering) "REVURDERING" else "UTBETALING",
+            "utbetalingtype" to if (tags.contains(Tag.Revurdering)) "REVURDERING" else "UTBETALING",
             "inntektskilde" to if (tags.contains(Tag.EnArbeidsgiver)) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
             // Til ettertanke: Her kan det være orgnummer på tilkomnde arbeidsgivere i tillegg til de som er i "sykepengegrunnlagsfakta". Kanskje finne på noe smartere der?
             "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
@@ -288,6 +280,11 @@ internal class UtkastTilVedtakBuilder(
             }
         )
 
+        // TODO: 10.12.24 Rename skjønssfastsatt til fastsattÅrsinntekt (som er lik omregnet for hovedregel med forskjellige beløp på skjønn)
+        //  Burde omregnetÅrsinntekt være et objekt med beløp og kilde slik at det er tydligere at kilden hører til dét
+        //  Burde det hete noe annet? Ikke gitt at det skal bli et vedtak. `behandling_beregnet` ? 🤔
+        //  Skal Spleis lytte på noe àla `behandling_utført` / `behandling_ferdig_behandlet` / `behandling_vurdert` som tommel opp/ned på godkjenningsbehov ?
+        //  Sende med en liste med dager & beløp ?
         val utkastTilVedtak = PersonObserver.UtkastTilVedtakEvent(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -306,9 +303,9 @@ internal class UtkastTilVedtakBuilder(
             behandlingId = behandlingId,
             periode = periode,
             // Til ettertanke: AvsluttetMedVedtak har alle hendelseId'er ever på vedtaksperioden, mens godkjenningsbehov/utkast_til_vedtak har kun behandlingens
-            hendelseIder = hendelseIder + historiskeHendelseIder,
+            hendelseIder = hendelseIder + historiskeHendelseIder, // TODO: 10.12.24: Enten klaske på historiske på godkjenningsbehovet (eget felt) eller fjerne "dokumenter" i vedtak_fattet
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
+            sykepengegrunnlag = sykepengegrunnlag, // TODO: 10.12.24: Legge til for skjønnsmessig og infotrygd i tillegg til hovedregel
             // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlag"
             beregningsgrunnlag = beregningsgrunnlagForAvsluttetMedVedtak,
             // Til ettertanke: Den var jo uventet, men er jo slik det har vært 🤷‍
@@ -365,14 +362,12 @@ internal class UtkastTilVedtakBuilder(
     private companion object {
         private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
         private val Set<Tag>.utgående get() = map { it.name }.toSet()
-
         private fun Sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak() = when (val fakta = this) {
             is FastsattEtterSkjønn -> fakta.skjønnsfastsatt
             else -> fakta.omregnetÅrsinntekt
         }
 
         private fun Sykepengegrunnlagsfakta.inntektForAvsluttetMedVedtak() = beregningsgrunnlagForAvsluttetMedVedtak() / 12
-
         private fun Sykepengegrunnlagsfakta.omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak(): Map<String, Double> = when (val fakta = this) {
             is FastsattIInfotrygd -> emptyMap()
             is FastsattEtterHovedregel -> fakta.arbeidsgivere.associate { it.arbeidsgiver to it.omregnetÅrsinntekt.toDesimaler }
