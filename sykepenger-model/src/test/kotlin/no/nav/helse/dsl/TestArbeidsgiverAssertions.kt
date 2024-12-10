@@ -12,7 +12,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,16 +23,25 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeId]?.last(), errortekst)
     }
 
+    internal fun assertSisteForkastetTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
+        assertTrue(inspektør.periodeErForkastet(vedtaksperiodeId)) { "Perioden er ikke forkastet" }
+        assertFalse(inspektør.periodeErIkkeForkastet(vedtaksperiodeId)) { "Perioden er ikke forkastet" }
+        assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeId]?.last(), errortekst)
+    }
+
     internal fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${personInspektør.aktivitetslogg}" }
         assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${personInspektør.aktivitetslogg}" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
-    internal fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
+    internal fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType, varselkode: Varselkode?) {
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
+        varselkode?.let {
+            assertFunksjonellFeil(varselkode)
+        }
     }
 
     internal fun assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate) {
@@ -122,6 +130,11 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     internal fun assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
+    }
+
+    internal fun assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(*filtre)
+        assertTrue(errors.contains(varselkode.funksjonellFeilTekst), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
 
     internal fun assertIngenBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {

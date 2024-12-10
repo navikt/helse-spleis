@@ -31,7 +31,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.serde.assertPersonEquals
@@ -199,8 +198,12 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, forventetPersonbeløp, subset)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1) {
-        testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand)
+    protected fun TestPerson.TestArbeidsgiver.assertSisteForkastetTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
+        testArbeidsgiverAsserter.assertSisteForkastetTilstand(id, tilstand)
+    }
+
+    protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1, varselkode: Varselkode? = null) {
+        testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand, varselkode = varselkode)
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate = 1.januar) {

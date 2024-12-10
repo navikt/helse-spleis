@@ -187,6 +187,7 @@ internal class TestPerson(
             søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
             sendTilGosys: Boolean = false,
             registrert: LocalDateTime = LocalDateTime.now(),
+            merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
             tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
         ) =
             behovsamler.fangInntektsmeldingReplay({
@@ -204,6 +205,7 @@ internal class TestPerson(
                         søknadstype = søknadstype,
                         sendTilGosys = sendTilGosys,
                         registrert = registrert,
+                        merknaderFraSykmelding = merknaderFraSykmelding,
                         tilkomneInntekter = tilkomneInntekter
                     ).håndter(Person::håndter)
                 }?.also {
