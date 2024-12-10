@@ -52,7 +52,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
-import no.nav.helse.person.Vedtaksperiode.Companion.migrerRefusjonsopplysningerPåBehandlinger
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
@@ -174,10 +173,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
             flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
-
-        internal fun List<Arbeidsgiver>.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
-            forEach { arbeidsgiver -> arbeidsgiver.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg) }
-        }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): () -> Skjæringstidspunkt =
             {
@@ -363,9 +358,6 @@ internal class Arbeidsgiver private constructor(
             return arbeidsgiver
         }
     }
-
-    private fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) =
-        vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer)
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
     internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =

@@ -97,7 +97,6 @@ internal abstract class AbstractDslTest {
     private lateinit var testperson: TestPerson
     @Suppress("unused") private val person get() = testperson.person // Hen brukes av @OpenInSpanner
     private lateinit var deferredLog: DeferredLog
-
     protected fun Int.vedtaksperiode(orgnummer: String) = orgnummer { vedtaksperiode }
     protected val Int.vedtaksperiode get() = vedtaksperiode(bareÈnArbeidsgiver(a1))
 
@@ -106,13 +105,11 @@ internal abstract class AbstractDslTest {
 
     private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
-
     protected fun personView() = testperson.view()
     protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
     protected fun inspektørForkastet(vedtaksperiodeId: UUID) = inspiser(personInspektør).forkastetVedtaksperiode(vedtaksperiodeId).inspektør
-
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
         testperson.arbeidsgiver(this, testblokk)
 
@@ -425,10 +422,6 @@ internal abstract class AbstractDslTest {
     ) =
         this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
-    protected fun migrerRefusjonsopplysningerPåBehandlinger() {
-        person.migrerRefusjonsopplysningerPåBehandlinger(Aktivitetslogg())
-    }
-
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     private fun bareÈnArbeidsgiver(orgnr: String): String {
         check(testperson.view().arbeidsgivere.size < 2) {
@@ -599,7 +592,6 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).nyttVedtak(vedtaksperiode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
 
     protected fun dto() = testperson.dto()
-
     protected fun medFødselsdato(fødselsdato: LocalDate) {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist)
     }

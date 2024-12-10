@@ -59,7 +59,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
-import no.nav.helse.person.Arbeidsgiver.Companion.migrerRefusjonsopplysningerPåBehandlinger
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
@@ -402,8 +401,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler personpåminnelse")
         aktivitetslogg.info("Håndterer påminnelse for person")
-        migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
-        //håndterGjenoppta(påminnelse, aktivitetslogg)
+        håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
@@ -828,11 +826,6 @@ class Person private constructor(
 
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
-    }
-
-    internal fun migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.info("Migrerer refusjonsopplysninger på behandlinger")
-        arbeidsgivere.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg)
     }
 
     fun dto() = PersonUtDto(
