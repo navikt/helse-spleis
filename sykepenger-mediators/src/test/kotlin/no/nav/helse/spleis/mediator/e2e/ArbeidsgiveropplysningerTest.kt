@@ -229,7 +229,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             { 
                 "organisasjonsnummer": "ag2",
-                "førsteFraværsdag": "2018-01-01"
+                "førsteFraværsdag": "2018-03-01"
             }
           ],
           "forespurteOpplysninger": [
@@ -506,5 +506,4 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             json.remove(json.fieldNames().asSequence().minus(behold.toSet()).toList())
         }.toString()
     }
-
 }

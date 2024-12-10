@@ -936,7 +936,7 @@ internal class Vedtaksperiode private constructor(
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
-        val førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
+        val førsteFraværsdager = førsteFraværsdagerForForespørsel()
 
         person.trengerArbeidsgiveropplysninger(
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
@@ -949,6 +949,14 @@ internal class Vedtaksperiode private constructor(
                 forespurteOpplysninger = forespurteOpplysninger
             )
         )
+    }
+
+    private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
+        val deAndre = person.førsteFraværsdager(arbeidsgiver, skjæringstidspunkt)
+        val minEgen = arbeidsgiver.finnFørsteFraværsdag(periode)?.let {
+            PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, it)
+        } ?: return deAndre
+        return deAndre.plusElement(minEgen)
     }
 
     private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
@@ -985,7 +993,7 @@ internal class Vedtaksperiode private constructor(
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
-        val førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
+        val førsteFraværsdager = førsteFraværsdagerForForespørsel()
 
         person.inntektsmeldingReplay(
             vedtaksperiodeId = id,

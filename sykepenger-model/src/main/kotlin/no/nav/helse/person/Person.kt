@@ -162,7 +162,6 @@ class Person private constructor(
     val fødselsnummer get() = personidentifikator.toString()
 
     private val observers = mutableListOf<PersonObserver>()
-
     internal fun view() = PersonView(
         arbeidsgivere = arbeidsgivere.map { it.view() },
         vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view()
@@ -245,7 +244,6 @@ class Person private constructor(
     }
 
     private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
-
     fun håndter(dødsmelding: Dødsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler dødsmelding")
         aktivitetslogg.info("Registrerer dødsdato")
@@ -568,7 +566,6 @@ class Person private constructor(
     }
 
     internal fun grunnlagForFeriepenger() = arbeidsgivere.map { it.grunnlagForFeriepenger() }
-
     internal fun trengerHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg) {
         infotrygdhistorikk.oppfriskNødvendig(aktivitetslogg, arbeidsgivere.tidligsteDato())
     }
@@ -604,7 +601,9 @@ class Person private constructor(
 
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
-    internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) = arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
+    internal fun førsteFraværsdager(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) = arbeidsgivere
+        .filterNot { it === arbeidsgiver }
+        .førsteFraværsdager(skjæringstidspunkt)
 
     internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode) =
         vilkårsgrunnlagHistorikk.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
@@ -635,7 +634,6 @@ class Person private constructor(
     }
 
     internal fun beregnSkjæringstidspunkt() = arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)
-
     internal fun sykdomshistorikkEndret() {
         arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
     }
@@ -729,7 +727,6 @@ class Person private constructor(
         igangsettOverstyring(eventyr, aktivitetslogg)
     }
 
-
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: SkjønnsmessigFastsettelse,
         aktivitetslogg: IAktivitetslogg,
@@ -772,7 +769,6 @@ class Person private constructor(
     }
 
     private var gjenopptaBehandlingNy = false
-
     internal fun gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Forbereder gjenoppta behandling")
         gjenopptaBehandlingNy = true
@@ -848,5 +844,4 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
         minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto()
     )
-
 }

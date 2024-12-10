@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import OpenInSpanner
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -119,8 +120,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(
-                PersonObserver.FørsteFraværsdag(a1, 2.januar),
-                PersonObserver.FørsteFraværsdag(a2, 1.januar)
+                PersonObserver.FørsteFraværsdag(a2, 1.januar),
+                PersonObserver.FørsteFraværsdag(a1, 2.januar)
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
@@ -187,8 +188,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 sykmeldingsperioder = listOf(mars),
                 egenmeldingsperioder = emptyList(),
                 førsteFraværsdager = listOf(
-                    PersonObserver.FørsteFraværsdag(a1, 1.januar),
-                    PersonObserver.FørsteFraværsdag(a2, 1.februar)
+                    PersonObserver.FørsteFraværsdag(a2, 1.februar),
+                    PersonObserver.FørsteFraværsdag(a1, 1.mars)
                 ),
                 forespurteOpplysninger = listOf(
                     PersonObserver.FastsattInntekt(INNTEKT),

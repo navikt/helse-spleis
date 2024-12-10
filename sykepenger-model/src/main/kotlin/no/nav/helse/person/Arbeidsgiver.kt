@@ -1142,12 +1142,15 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder
             .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .asReversed()
-            .firstNotNullOfOrNull { sykdomstidslinje().sisteSkjæringstidspunkt(it.periode()) }
+            .firstNotNullOfOrNull { finnFørsteFraværsdag(it.periode()) }
     }
+
+    internal fun finnFørsteFraværsdag(periode: Periode) =
+        sykdomstidslinje().sisteSkjæringstidspunkt(periode)
 
     private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
         if (inntektsdato <= skjæringstidspunkt) return null
-        return sykdomstidslinje().sisteSkjæringstidspunkt(inntektsdato.somPeriode())?.takeUnless { it == inntektsdato }
+        return finnFørsteFraværsdag(inntektsdato.somPeriode())?.takeUnless { it == inntektsdato }
     }
 
     private fun <Hendelsetype : Hendelse> håndter(
