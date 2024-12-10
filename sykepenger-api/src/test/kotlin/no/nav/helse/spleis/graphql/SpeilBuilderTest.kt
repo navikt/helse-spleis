@@ -105,7 +105,6 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         assertTrue(vilkårsgrunnlagIdFørstegangssøknad in vilkårsgrunnlag)
     }
 
-
     @Test
     fun `Dødsdato ligger på person`() {
         val dødsdato = 1.januar
@@ -148,6 +147,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterOverstyrTidslinje((1.januar til 16.januar).map {
             ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
         }, meldingsreferanseId = idOverstyring)
+        håndterYtelserTilGodkjenning()
         val speilJson = speilApi()
         val generasjoner = speilJson.arbeidsgivere.single().generasjoner
         assertEquals(2, generasjoner.size)
@@ -155,7 +155,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val forventetFørstedag = SammenslåttDag(
             dagen = 1.januar,
             sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
-            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, // ingen utbetalingstidslinje
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
             kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, idOverstyring),
             grad = 100,
             utbetalingsinfo = null
@@ -480,5 +480,4 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
             personDto.vilkårsgrunnlag[vilkårsgrunnlagId]!!.inntekter.first().omregnetÅrsinntekt.kilde
         )
     }
-
 }
