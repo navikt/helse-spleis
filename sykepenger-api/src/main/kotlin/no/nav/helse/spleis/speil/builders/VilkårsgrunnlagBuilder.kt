@@ -5,7 +5,6 @@ import java.util.LinkedList
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
-import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -33,7 +32,7 @@ internal abstract class IVilkårsgrunnlag(
     val nyeInntekterUnderveis: List<INyInntektUnderveis>,
     val id: UUID
 ) {
-    abstract fun toDTO(arbeidsgiverRefusjon: Map<String, List<BeløpstidslinjeDto>>): Vilkårsgrunnlag
+    abstract fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
     open fun potensiellGhostperiode(
         organisasjonsnummer: String,
@@ -53,22 +52,8 @@ internal abstract class IVilkårsgrunnlag(
         )
     }
 
-    fun mapRefusjonFraBehandling(arbeidsgiverRefusjonstidslinjer: Map<String, List<BeløpstidslinjeDto>>): List<Arbeidsgiverrefusjon> {
-        return arbeidsgiverRefusjonstidslinjer.map { (orgnummer, beløpdstidslinjer) ->
-            val sortertePerioder = beløpdstidslinjer.flatMap { it.perioder }.sortedBy { it.tom }
-            Arbeidsgiverrefusjon(
-                arbeidsgiver = orgnummer,
-                refusjonsopplysninger = sortertePerioder.mapIndexed { index, periode ->
-                    Refusjonselement(
-                        fom = periode.fom,
-                        tom = periode.tom.takeUnless { index == sortertePerioder.lastIndex },
-                        beløp = periode.dagligBeløp.daglig.månedlig,
-                        meldingsreferanseId = periode.kilde.meldingsreferanseId
-                    )
-                }
-            )
-        }
-    }
+    protected fun refusjonsopplysninger(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>) =
+        (if (Toggle.refusjonsopplysningerTilSpeilFraBehandling.enabled) refusjonsopplysningerFraBehandlinger else refusjonsopplysningerPerArbeidsgiver).map { it.toDTO() }
 }
 
 internal class ISpleisGrunnlag(
@@ -90,14 +75,14 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, nyeInntekterUnderveis, id) {
 
-    override fun toDTO(arbeidsgiverRefusjon: Map<String, List<BeløpstidslinjeDto>>): Vilkårsgrunnlag {
+    override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlag = beregningsgrunnlag,
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            arbeidsgiverrefusjoner = if (Toggle.refusjonsopplysningerTilSpeilFraBehandling.enabled) mapRefusjonFraBehandling(arbeidsgiverRefusjon) else refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
+            arbeidsgiverrefusjoner = refusjonsopplysninger(refusjonsopplysningerFraBehandlinger),
             grunnbeløp = grunnbeløp,
             sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
@@ -135,13 +120,13 @@ internal class IInfotrygdGrunnlag(
     id: UUID
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, emptyList(), id) {
 
-    override fun toDTO(arbeidsgiverRefusjon: Map<String, List<BeløpstidslinjeDto>>): Vilkårsgrunnlag {
+    override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlag = beregningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            arbeidsgiverrefusjoner = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
+            arbeidsgiverrefusjoner = refusjonsopplysninger(refusjonsopplysningerFraBehandlinger)
         )
     }
 
@@ -150,8 +135,7 @@ internal class IInfotrygdGrunnlag(
 
 internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: List<Map<UUID, IVilkårsgrunnlag>>) {
     private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, IVilkårsgrunnlag>()
-    private val vedtaksperiodeIdTilVilkårsgrunnlagIder = mutableMapOf<Pair<UUID, String>, MutableSet<UUID>>()
-    private val vedtaksperiodeIdTilRefusjonstidslinje = mutableMapOf<UUID, BeløpstidslinjeDto>()
+    private val refusjonsopplysningerPerArbeidsgiver = mutableMapOf<Pair<UUID, String>, IArbeidsgiverrefusjon>()
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
         vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 
@@ -181,29 +165,20 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {
         return vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) ->
-            val relevanteKnytninger = vedtaksperiodeIdTilVilkårsgrunnlagIder.filterValues { vilkårsgrunnlag.id in it }
-            val orgnummerTilRefusjonstidslinjer = relevanteKnytninger.keys.groupBy { (_, orgnummer) -> orgnummer }.mapValues { (_, vedtaksperioder) ->
-                vedtaksperioder.map { (vedtaksperiodeId, _) ->
-                    vedtaksperiodeIdTilRefusjonstidslinje.getValue(vedtaksperiodeId)
-                }
-            }
-            vilkårsgrunnlag.toDTO(orgnummerTilRefusjonstidslinjer)
+            vilkårsgrunnlag.toDTO(refusjonsopplysningerPerArbeidsgiver.filterKeys { (vilkårsgrunnlagId, _) -> vilkårsgrunnlagId == vilkårsgrunnlag.id }.values.toList())
         }
     }
 
-    internal fun leggIBøtta(
-        vilkårsgrunnlagId: UUID,
-        refusjonstidslinje: BeløpstidslinjeDto,
-        vedtaksperiodeId: UUID,
-        organisasjonsnummer: String
-    ): IVilkårsgrunnlag {
-        vedtaksperiodeIdTilRefusjonstidslinje[vedtaksperiodeId] = refusjonstidslinje
-        vedtaksperiodeIdTilVilkårsgrunnlagIder.getOrPut(vedtaksperiodeId to organisasjonsnummer) { mutableSetOf() }.add(vilkårsgrunnlagId)
+    internal fun leggIBøtta(vilkårsgrunnlagId: UUID): IVilkårsgrunnlag {
         return vilkårsgrunnlagIBruk.getOrPut(vilkårsgrunnlagId) {
             tilgjengeligeVilkårsgrunnlag.firstNotNullOf { elementer ->
                 elementer[vilkårsgrunnlagId]
             }
         }
+    }
+
+    internal fun leggRefusjonsopplysningerIBøtta(vilkårsgrunnlagId: UUID, refusjonsopplysninger: IArbeidsgiverrefusjon) {
+        refusjonsopplysningerPerArbeidsgiver[vilkårsgrunnlagId to refusjonsopplysninger.arbeidsgiver] = refusjonsopplysninger
     }
 }
 

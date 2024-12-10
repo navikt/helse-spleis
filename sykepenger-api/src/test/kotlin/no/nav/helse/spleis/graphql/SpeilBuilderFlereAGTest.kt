@@ -55,7 +55,6 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
         )
 
-
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
         val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         assertEquals(1, perioder.size)
@@ -591,12 +590,45 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterYtelser()
         val personDto = speilApi()
         assertEquals(2, personDto.vilkårsgrunnlag.size)
-        val speilVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagIdForAG2] as? SpleisVilkårsgrunnlag
-        val arbeidsgiverrefusjonForAG2 = vilkårsgrunnlag!!.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a2 }!!
-        val refusjonsopplysningerForAG2 = arbeidsgiverrefusjonForAG2.refusjonsopplysninger.single()
-        assertEquals(15.februar, refusjonsopplysningerForAG2.fom)
-        assertEquals(null, refusjonsopplysningerForAG2.tom)
+
+        val januarVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
+        val februarVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+
+        val januarVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }!!.generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
+        val februarVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+
+        assertEquals(januarVilkårsgrunnlagIdForAG1, januarVilkårsgrunnlagIdForAG2)
+        assertEquals(februarVilkårsgrunnlagIdForAG1, februarVilkårsgrunnlagIdForAG2)
+        val januarVilkårsgrunnlag = personDto.vilkårsgrunnlag[januarVilkårsgrunnlagIdForAG1] as? SpleisVilkårsgrunnlag
+        val februarVilkårsgrunnlag = personDto.vilkårsgrunnlag[februarVilkårsgrunnlagIdForAG1] as? SpleisVilkårsgrunnlag
+
+        val januarRefusjonForAG1 = januarVilkårsgrunnlag!!.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a1 }!!
+        val februarRefusjonForAG1 = februarVilkårsgrunnlag!!.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a1 }!!
+        val januarRefusjonForAG2 = januarVilkårsgrunnlag.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a2 }!!
+        val februarRefusjonForAG2 = februarVilkårsgrunnlag.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a2 }!!
+
+        val januarRefusjonsopplysningerForAG1 = januarRefusjonForAG1.refusjonsopplysninger
+        val februarRefusjonsopplysningerForAG1 = februarRefusjonForAG1.refusjonsopplysninger
+        val januarRefusjonsopplysningerForAG2 = januarRefusjonForAG2.refusjonsopplysninger
+        val februarRefusjonsopplysningerForAG2 = februarRefusjonForAG2.refusjonsopplysninger
+
+        assertEquals(2, januarRefusjonsopplysningerForAG1.size)
+        assertEquals(2, februarRefusjonsopplysningerForAG1.size)
+        assertEquals(2, januarRefusjonsopplysningerForAG2.size)
+        assertEquals(2, februarRefusjonsopplysningerForAG2.size)
+
+        assertEquals(januarRefusjonsopplysningerForAG1, februarRefusjonsopplysningerForAG1)
+        assertEquals(januarRefusjonsopplysningerForAG2, februarRefusjonsopplysningerForAG2)
+
+        assertEquals(1.januar, januarRefusjonsopplysningerForAG1.first().fom) // TODO: Smelte sammen til én periode når det er samme kilde?
+        assertEquals(31.januar, januarRefusjonsopplysningerForAG1.first().tom)
+        assertEquals(1.februar, januarRefusjonsopplysningerForAG1[1].fom)
+        assertNull(januarRefusjonsopplysningerForAG1[1].tom)
+
+        assertEquals(1.januar, januarRefusjonsopplysningerForAG2.first().fom)
+        assertEquals(14.februar, januarRefusjonsopplysningerForAG2.first().tom)
+        assertEquals(15.februar, januarRefusjonsopplysningerForAG2[1].fom)
+        assertNull(januarRefusjonsopplysningerForAG2[1].tom)
     }
 
     @Test

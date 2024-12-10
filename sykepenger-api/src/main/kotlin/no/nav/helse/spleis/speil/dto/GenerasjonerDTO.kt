@@ -65,13 +65,11 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: Set<UUID>
-
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
         return this
     }
 
     internal abstract fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode
-
     override fun compareTo(other: SpeilTidslinjeperiode) = tom.compareTo(other.tom)
     internal open fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? = null
 
@@ -93,7 +91,6 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
 
 private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 private fun LocalDate.format() = format(formatter)
-
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val behandlingId: UUID,
@@ -152,10 +149,10 @@ data class BeregnetPeriode(
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID,
-    val refusjonstidslinje: BeløpstidslinjeDto
+    val refusjonstidslinje: BeløpstidslinjeDto // TODO: Legge til denne i GraphQL
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
-        val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it, refusjonstidslinje, vedtaksperiodeId, organisasjonsnummer) }
+        val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) }
         if (vilkårsgrunnlag !is ISpleisGrunnlag) return this
         return this.copy(hendelser = this.hendelser + vilkårsgrunnlag.overstyringer)
     }
@@ -230,7 +227,6 @@ internal class AnnullertUtbetaling(
     }
 
     fun annullerer(korrelasjonsId: UUID) = this.korrelasjonsId == korrelasjonsId
-
 }
 
 data class SpeilOppdrag(

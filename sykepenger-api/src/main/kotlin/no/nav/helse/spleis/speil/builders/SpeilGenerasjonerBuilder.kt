@@ -12,6 +12,7 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import no.nav.helse.forrigeDag
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.speil.SpekematDTO
 import no.nav.helse.spleis.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
@@ -21,6 +22,7 @@ import no.nav.helse.spleis.speil.dto.AnnullertUtbetaling
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.EndringskodeDTO
 import no.nav.helse.spleis.speil.dto.Periodetilstand
+import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SpeilGenerasjonDTO
 import no.nav.helse.spleis.speil.dto.SpeilOppdrag
 import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode
@@ -33,6 +35,7 @@ import no.nav.helse.spleis.speil.dto.Utbetalingstidslinjedag
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.speil.dto.Utbetalingtype
 import no.nav.helse.spleis.speil.merge
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 
 internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
@@ -43,23 +46,57 @@ internal class SpeilGenerasjonerBuilder(
 ) {
     private val utbetalinger = mapUtbetalinger()
     private val annulleringer = mapAnnulleringer()
-    private val utbetalingstidslinjer = mapUtbetalingstidslinjer()
 
-    private val allePerioder = mapPerioder()
+    private val gjeldendeRefusjonsopplysningerPerSkjæringstidspunkt = arbeidsgiverUtDto.vedtaksperioder
+        .groupBy { it.skjæringstidspunkt }
+        .mapValues { (_, perioder) ->
+            perioder.map { periode ->
+                periode.behandlinger.behandlinger.last().let { sisteBehandling ->
+                    mapRefusjonstidslinje(sisteBehandling.id, sisteBehandling.endringer.last().refusjonstidslinje)
+                }
+            }
+        }.mapValues { (_, beløpstidslinjer) ->
+            beløpstidslinjer.flatMap { it.perioder }.let { perioder ->
+                if (perioder.isEmpty()) emptyList()
+                else {
+                    perioder.zipWithNext { denne, neste ->
+                        Refusjonselement(
+                            fom = denne.fom,
+                            tom = neste.fom.forrigeDag,
+                            beløp = denne.dagligBeløp.daglig.månedlig,
+                            meldingsreferanseId = denne.kilde.meldingsreferanseId
+                        )
+                    } + perioder.last().let { siste ->
+                        Refusjonselement(
+                            fom = siste.fom,
+                            tom = null,
+                            beløp = siste.dagligBeløp.daglig.månedlig,
+                            meldingsreferanseId = siste.kilde.meldingsreferanseId
+                        )
+                    }
+                }
+            }
+        }.mapValues { (_, refusjonselementer) ->
+            IArbeidsgiverrefusjon(organisasjonsnummer, refusjonselementer)
+        }
 
     internal fun build(): List<SpeilGenerasjonDTO> {
         return buildSpekemat()
     }
 
     private fun mapPerioder(): List<SpeilTidslinjeperiode> {
-        val aktive = arbeidsgiverUtDto.vedtaksperioder.flatMap { mapVedtaksperiode(it) }
+        val aktive = arbeidsgiverUtDto.vedtaksperioder.map {
+            it.behandlinger.behandlinger.last().takeIf { sisteBehandling -> sisteBehandling.endringer.last().vilkårsgrunnlagId != null }?.endringer?.last()?.let { sisteBeregnedeEndring ->
+                vilkårsgrunnlaghistorikk.leggRefusjonsopplysningerIBøtta(sisteBeregnedeEndring.vilkårsgrunnlagId!!, gjeldendeRefusjonsopplysningerPerSkjæringstidspunkt.getValue(sisteBeregnedeEndring.skjæringstidspunkt))
+            }
+            mapVedtaksperiode(it)
+        }.flatten()
         val forkastede = arbeidsgiverUtDto.forkastede.flatMap { mapVedtaksperiode(it.vedtaksperiode) }
         return aktive + forkastede
     }
 
     private fun mapVedtaksperiode(vedtaksperiode: VedtaksperiodeUtDto): List<SpeilTidslinjeperiode> {
         var forrigeGenerasjon: SpeilTidslinjeperiode? = null
-        val sisteBehandling = vedtaksperiode.behandlinger.behandlinger.last().id
         return vedtaksperiode.behandlinger.behandlinger.mapNotNull { generasjon ->
             when (generasjon.tilstand) {
                 BehandlingtilstandDto.BEREGNET,
@@ -149,7 +186,7 @@ internal class SpeilGenerasjonerBuilder(
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
-            refusjonstidslinje = mapRefusjonstidslinje(generasjon.id, sisteEndring.refusjonstidslinje )
+            refusjonstidslinje = mapRefusjonstidslinje(generasjon.id, sisteEndring.refusjonstidslinje)
         )
     }
 
@@ -253,12 +290,6 @@ internal class SpeilGenerasjonerBuilder(
             BeregnetPeriode.Alder(it, it < 70)
         }
         return BeregnetPeriode.Vilkår(sykepengedager, alderSisteSykepengedag)
-    }
-
-    private fun mapUtbetalingstidslinjer(): List<Pair<UUID, UtbetalingstidslinjeBuilder>> {
-        return arbeidsgiverUtDto.utbetalinger.map {
-            it.id to UtbetalingstidslinjeBuilder(it.utbetalingstidslinje)
-        }
     }
 
     private fun mapUtbetalinger(): List<Utbetaling> {
@@ -388,15 +419,11 @@ internal class SpeilGenerasjonerBuilder(
     }
 
     private fun buildSpekemat(): List<SpeilGenerasjonDTO> {
-        val generasjoner = buildTidslinjeperioder()
+        val generasjoner = mapPerioder()
         return pølsepakke.rader
             .fjernUnødvendigeRader()
             .map { rad -> mapRadTilSpeilGenerasjon(rad, generasjoner) }
             .filterNot { rad -> rad.size == 0 } // fjerner tomme rader
-    }
-
-    private fun buildTidslinjeperioder(): List<SpeilTidslinjeperiode> {
-        return allePerioder
     }
 
     private fun mapRadTilSpeilGenerasjon(rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, generasjoner: List<SpeilTidslinjeperiode>): SpeilGenerasjonDTO {
