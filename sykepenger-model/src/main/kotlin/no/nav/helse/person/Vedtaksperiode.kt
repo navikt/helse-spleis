@@ -3700,12 +3700,6 @@ internal class Vedtaksperiode private constructor(
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
         }
 
-        internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
-            { vedtaksperiode: Vedtaksperiode ->
-                MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)(vedtaksperiode) && vedtaksperiode.skalBehandlesISpeil()
-            }
-        }
-
         internal val NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING = { segSelv: Vedtaksperiode ->
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
             { vedtaksperiode: Vedtaksperiode ->

@@ -46,7 +46,6 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
-import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
@@ -274,7 +273,6 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
@@ -370,7 +368,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.migrerRefusjonsopplysningerPåBehandlinger(aktivitetslogg, organisasjonsnummer)
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
-
     internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =
         refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
@@ -394,9 +391,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
-
     internal fun utbetaling() = utbetalinger.lastOrNull()
-
     internal fun grunnlagForFeriepenger() = Arbeidsgiverferiepengegrunnlag(
         orgnummer = organisasjonsnummer,
         utbetalinger = utbetalinger.grunnlagForFeriepenger()
@@ -537,13 +532,13 @@ internal class Arbeidsgiver private constructor(
             aktivitetslogg,
             vedtaksperiode
         )
-                || arbeidsgivere.any {
+            || arbeidsgivere.any {
             it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(
                 aktivitetslogg,
                 vedtaksperiode
             )
         }
-                || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, aktivitetslogg, vedtaksperiode)
+            || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, aktivitetslogg, vedtaksperiode)
     }
 
     private fun harForkastetVedtaksperiodeSomBlokkererBehandling(
@@ -551,8 +546,8 @@ internal class Arbeidsgiver private constructor(
         vedtaksperiode: Vedtaksperiode
     ): Boolean {
         return ForkastetVedtaksperiode.forlengerForkastet(forkastede, aktivitetslogg, vedtaksperiode)
-                || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
-                || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
+            || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
+            || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
     }
 
     internal fun håndter(
@@ -1049,9 +1044,9 @@ internal class Arbeidsgiver private constructor(
     private fun subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding: Inntektsmelding) =
         BehandlingSubsumsjonslogg(
             subsumsjonslogg, listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
-            ) + inntektsmelding.subsumsjonskontekst()
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
+        ) + inntektsmelding.subsumsjonskontekst()
         )
 
     internal fun lagreTidsnærInntektsmelding(
@@ -1143,15 +1138,10 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
     }
 
-    internal fun finnFørsteFraværsdag(
-        skjæringstidspunkt: LocalDate,
-        vedtaksperiodeFilter: VedtaksperiodeFilter = { true }
-    ): LocalDate? {
-        val førstePeriodeMedUtbetaling =
-            vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
-                ?: vedtaksperioder.filter(vedtaksperiodeFilter).firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-                ?: return null
-        return sykdomstidslinje().sisteSkjæringstidspunkt(førstePeriodeMedUtbetaling.periode())
+    internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
+        return vedtaksperioder
+            .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .firstNotNullOfOrNull { sykdomstidslinje().sisteSkjæringstidspunkt(it.periode()) }
     }
 
     private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
@@ -1209,7 +1199,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
-
     internal fun dto(nestemann: Vedtaksperiode?): ArbeidsgiverUtDto {
         val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann) }
         val refusjonsopplysningerPåSisteBehandling = vedtaksperioder.lastOrNull()?.let { sisteVedtaksperiode ->

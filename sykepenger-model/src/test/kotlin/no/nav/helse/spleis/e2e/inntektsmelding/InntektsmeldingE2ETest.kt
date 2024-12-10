@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import OpenInSpanner
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
@@ -260,7 +261,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.first().tilstand)
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
     }
-
 
     @Test
     fun `korrigerer arbeidsgiverperiode etter utbetalt`() {
@@ -1624,7 +1624,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
 
         assertInntektForDato(INNTEKT + 1000.månedlig, 1.januar, inspektør = inspektør)
-
     }
 
     @Test
@@ -2198,7 +2197,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
 
-
     @Test
     fun `arbeidsgiveperiode i forkant av vedtaksperiode med en dags gap`() {
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar))
@@ -2238,7 +2236,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertEquals(30000.månedlig, it.inntektsopplysning.fastsattÅrsinntekt())
             assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -2356,7 +2353,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(avvistDag is Utbetalingsdag.AvvistDag)
         assertEquals(listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode), vedtaksperiode.utbetalingstidslinje.inspektør.begrunnelse(8.februar))
 
-        assertForventetFeil("Arbeidsgiver oppgir en egenmeldingsdag som er innenfor 16 dager til forrige periode. Da anser ikke vi det som Arbeidsgiverdag. Spleis bruker feilaktig 8. februar i gap-beregning og tror 2. vedtaksperiode ikke skal få ny AGP.",
+        assertForventetFeil(
+            "Arbeidsgiver oppgir en egenmeldingsdag som er innenfor 16 dager til forrige periode. Da anser ikke vi det som Arbeidsgiverdag. Spleis bruker feilaktig 8. februar i gap-beregning og tror 2. vedtaksperiode ikke skal få ny AGP.",
             nå = {
                 assertTrue((20.februar til 7.mars).all { vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.NavDag || vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.NavHelgDag })
             },
@@ -2409,5 +2407,4 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertFalse(refusjonsopplysninger.erTom)
     }
-
 }
