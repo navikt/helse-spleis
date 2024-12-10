@@ -547,7 +547,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erForlengelse(): Boolean = arbeidsgiver
         .finnVedtaksperiodeRettFør(this)
-        ?.takeIf { it.skalFatteVedtak() } != null
+        ?.takeIf { it.skalBehandlesISpeil() } != null
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
@@ -995,7 +995,7 @@ internal class Vedtaksperiode private constructor(
             egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
             førsteFraværsdager = førsteFraværsdager,
             trengerArbeidsgiverperiode = trengerArbeidsgiverperiode,
-            erPotensiellForespørsel = !skalFatteVedtak()
+            erPotensiellForespørsel = !skalBehandlesISpeil()
         )
     }
 
@@ -1145,8 +1145,7 @@ internal class Vedtaksperiode private constructor(
     private fun finnArbeidsgiverperiodeHensyntarForkastede() =
         arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
-    private fun skalFatteVedtak(): Boolean {
-        if (!Toggle.FatteVedtakPåTidligereBeregnetPerioder.enabled) return forventerInntekt()
+    private fun skalBehandlesISpeil(): Boolean {
         return behandlinger.harVærtBeregnet() || forventerInntekt()
     }
 
@@ -1208,7 +1207,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         if (skjæringstidspunkt != this.skjæringstidspunkt) return
-        if (!skalFatteVedtak()) return
+        if (!skalBehandlesISpeil()) return
         registrerKontekst(aktivitetslogg)
         tilstand.håndtertInntektPåSkjæringstidspunktet(this, inntektsmelding, aktivitetslogg)
     }
@@ -1319,7 +1318,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun erKandidatForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
         if (this === periodeSomBeregner) return true
-        if (!skalFatteVedtak()) return false
+        if (!skalBehandlesISpeil()) return false
         return this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt && !this.tilstand.erFerdigBehandlet
     }
 
@@ -1329,7 +1328,7 @@ internal class Vedtaksperiode private constructor(
         return person.vedtaksperioder {
             it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
                 it.skjæringstidspunkt == skjæringstidspunkt &&
-                it.skalFatteVedtak() &&
+                it.skalBehandlesISpeil() &&
                 !it.arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt)
         }.minOrNull()
     }
@@ -1488,7 +1487,7 @@ internal class Vedtaksperiode private constructor(
             )
         ) return false
         // auu-er vil kunne ligge i Avventer blokkerende periode
-        if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.skalFatteVedtak()) return false
+        if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.skalBehandlesISpeil()) return false
         if (rettFør.skjæringstidspunkt != this.skjæringstidspunkt) return false
         return true
     }
@@ -2512,7 +2511,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.skalFatteVedtak()) return vedtaksperiode.tilstand(
+            if (!vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.tilstand(
                 aktivitetslogg,
                 AvsluttetUtenUtbetaling
             )
@@ -2543,7 +2542,7 @@ internal class Vedtaksperiode private constructor(
             inntekt: ArbeidsgiverFaktaavklartInntekt?
         ): Utbetalingstidslinje {
             val benyttetInntekt =
-                inntekt ?: vedtaksperiode.defaultinntektForAUU().takeUnless { vedtaksperiode.skalFatteVedtak() }
+                inntekt ?: vedtaksperiode.defaultinntektForAUU().takeUnless { vedtaksperiode.skalBehandlesISpeil() }
                 ?: error(
                     "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
                         "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
@@ -2593,7 +2592,7 @@ internal class Vedtaksperiode private constructor(
             dager: DagerFraInntektsmelding,
             aktivitetslogg: IAktivitetslogg
         ) {
-            if (vedtaksperiode.skalFatteVedtak()) return vedtaksperiode.håndterKorrigerendeInntektsmelding(
+            if (vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.håndterKorrigerendeInntektsmelding(
                 dager,
                 aktivitetslogg
             )
@@ -2666,7 +2665,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             super.beregnUtbetalinger(vedtaksperiode, ytelser, aktivitetslogg)
-            if (!vedtaksperiode.skalFatteVedtak()) {
+            if (!vedtaksperiode.skalBehandlesISpeil()) {
                 // LOL vi skal til AUU så bare slenger på noen varsler her
                 ytelser.valider(
                     aktivitetslogg,
@@ -2685,7 +2684,7 @@ internal class Vedtaksperiode private constructor(
             check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
                 "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
             }
-            if (!vedtaksperiode.skalFatteVedtak()) return ForventerIkkeInntekt
+            if (!vedtaksperiode.skalBehandlesISpeil()) return ForventerIkkeInntekt
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
             if (vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
@@ -3707,7 +3706,7 @@ internal class Vedtaksperiode private constructor(
 
         internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode ->
-                MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)(vedtaksperiode) && vedtaksperiode.skalFatteVedtak()
+                MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)(vedtaksperiode) && vedtaksperiode.skalBehandlesISpeil()
             }
         }
 
@@ -3726,7 +3725,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
-            it.tilstand == AvsluttetUtenUtbetaling && it.skalFatteVedtak()
+            it.tilstand == AvsluttetUtenUtbetaling && it.skalBehandlesISpeil()
         }
 
         internal val OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT = { segSelv: Vedtaksperiode ->
@@ -3780,7 +3779,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             val nestePeriode = this
-                .firstOrNull { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt && it.skalFatteVedtak() }
+                .firstOrNull { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt && it.skalBehandlesISpeil() }
                 ?.takeIf { it.tilstand == AvventerInntektsmelding }
                 ?: return
             if (nestePeriode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
@@ -3932,8 +3931,9 @@ internal class Vedtaksperiode private constructor(
     ): PersonObserver.OverlappendeInfotrygdperioder {
         val overlappende = perioder.filter { it.overlapperMed(this.periode) }
         if (overlappende.isEmpty()) return result
-        return result.copy(overlappendeInfotrygdperioder = result.overlappendeInfotrygdperioder.plusElement(
-            PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+        return result.copy(
+            overlappendeInfotrygdperioder = result.overlappendeInfotrygdperioder.plusElement(
+                PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 vedtaksperiodeId = this.id,
                 kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),

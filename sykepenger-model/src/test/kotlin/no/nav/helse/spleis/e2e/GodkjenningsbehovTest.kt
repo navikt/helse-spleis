@@ -331,7 +331,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         }
 
     @Test
-    fun `tagger perioder innenfor arbeidsgiverperioden`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `tagger perioder innenfor arbeidsgiverperioden`() {
         nyPeriode(1.januar til 10.januar)
         håndterInntektsmelding(
             emptyList(),
@@ -388,7 +388,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         )
     }
 
-
     private fun kanAvvises(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Boolean>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
@@ -415,13 +414,11 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     )!!.let { UUID.fromString(it) }
 
     private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1) = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
-
     private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, Any>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "sykepengegrunnlagsfakta"
     )!!["sykepengegrunnlag"]
-
 
     private fun inntektskilder(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, List<Map<String, Any>>>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),

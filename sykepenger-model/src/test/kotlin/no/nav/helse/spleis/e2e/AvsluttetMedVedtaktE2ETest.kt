@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -207,7 +206,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender ikke avsluttet uten vedtak fordi saksbehandler ikke overstyrer perioden inn i AvsluttetUtenUtbetaling`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `sender ikke avsluttet uten vedtak fordi saksbehandler ikke overstyrer perioden inn i AvsluttetUtenUtbetaling`() {
         val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val inntektsmeldingId = håndterInntektsmelding(
@@ -232,7 +231,6 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(1, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.single().hendelseIder)
     }
-
 
     @Test
     fun `Sender avsluttet uten vedtak ved kort gap til periode med kun ferie`() {

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -101,7 +100,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() {
         håndterSøknad(1.januar til 15.januar) // Denne må være kortere enn 16 dager
         nullstillTilstandsendringer()
         håndterInntektsmelding(
@@ -259,7 +258,6 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil()
         assertActivities(person)
     }
-
 
     @Test
     fun `perioden får warnings dersom bruker har fått AAP innenfor 6 måneder før skjæringstidspunkt`() {

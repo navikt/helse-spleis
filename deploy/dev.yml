@@ -55,17 +55,15 @@ spec:
   secureLogs:
     enabled: true
   env:
-  - name: KAFKA_RAPID_TOPIC
-    value: tbd.rapid.v1
-  - name: KAFKA_CONSUMER_GROUP_ID
-    value: tbd-spleis-v1
-  - name: KAFKA_RESET_POLICY
-    value: EARLIEST
-  - name: IDENTBYTTE
-    value: "true"
-  - name: INNTEKTSMELDING_SOM_IKKEKOMMER
-    value: "true"
-  - name: AUU_TIL_GODKJENNING
-    value: "true"
-  - name: JAVA_TOOL_OPTIONS
-    value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
+    - name: KAFKA_RAPID_TOPIC
+      value: tbd.rapid.v1
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-spleis-v1
+    - name: KAFKA_RESET_POLICY
+      value: EARLIEST
+    - name: IDENTBYTTE
+      value: "true"
+    - name: INNTEKTSMELDING_SOM_IKKEKOMMER
+      value: "true"
+    - name: JAVA_TOOL_OPTIONS
+      value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"

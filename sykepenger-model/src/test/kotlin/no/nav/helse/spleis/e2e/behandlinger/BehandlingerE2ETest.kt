@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.behandlinger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -584,7 +583,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         }
@@ -665,7 +664,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
             håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")

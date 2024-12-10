@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -51,7 +50,6 @@ import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
-
     @Test
     fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))
@@ -87,7 +85,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
     @Test
     @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
-    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer simulering`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer simulering`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(15.januar til 30.januar))
@@ -108,7 +106,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
     @Test
     @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
-    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer godkjenning`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(15.januar til 30.januar))
@@ -250,7 +248,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
-
 
     @Test
     fun `litt permisjon`() {
@@ -562,7 +559,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerende søknad med gjenopptatt arbeid slik at hele perioden er innenfor arbeidsgiverperioden`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `korrigerende søknad med gjenopptatt arbeid slik at hele perioden er innenfor arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar))
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -575,5 +572,4 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }
-
 }

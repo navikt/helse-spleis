@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.erHelg
@@ -83,7 +82,7 @@ import org.junit.jupiter.api.fail
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Overstyring av hele perioden til andre ytelser`() = Toggle.FatteVedtakPåTidligereBeregnetPerioder.enable {
+    fun `Overstyring av hele perioden til andre ytelser`() {
         tilGodkjenning(januar, a1)
         håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
         håndterYtelser(1.vedtaksperiode)
