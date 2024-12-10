@@ -37,8 +37,7 @@ internal class Opptjening private constructor(
         arbeidsforhold = arbeidsforhold.arbeidsforholdForJurist(),
         antallOpptjeningsdager = opptjeningsdager
     )
-
-    internal fun view() = OpptjeningView(arbeidsforhold = arbeidsforhold)
+    internal fun view() = OpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
@@ -211,4 +210,4 @@ internal class Opptjening private constructor(
     )
 }
 
-internal data class OpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>)
+internal data class OpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean)

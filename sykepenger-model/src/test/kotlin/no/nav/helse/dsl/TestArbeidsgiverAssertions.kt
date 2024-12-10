@@ -1,5 +1,6 @@
 package no.nav.helse.dsl
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.etterspurteBehov
@@ -11,6 +12,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,6 +34,21 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
+    }
+
+    internal fun assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate) {
+        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
+        assertEquals(forventet, opptjening.opptjeningsdager)
+    }
+
+    internal fun assertErOppfylt(skjæringstidspunkt: LocalDate) {
+        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
+        assertTrue(opptjening.erOppfylt)
+    }
+
+    internal fun assertErIkkeOppfylt(skjæringstidspunkt: LocalDate) {
+        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
+        assertFalse(opptjening.erOppfylt)
     }
 
     internal fun assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {

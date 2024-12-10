@@ -24,6 +24,7 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
@@ -202,8 +203,28 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand)
     }
 
+    protected fun TestPerson.TestArbeidsgiver.assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate = 1.januar) {
+        testArbeidsgiverAsserter.assertAntallOpptjeningsdager(forventet, skjæringstidspunkt)
+    }
+
+    protected fun TestPerson.TestArbeidsgiver.assertErOppfylt(skjæringstidspunkt: LocalDate = 1.januar) {
+        testArbeidsgiverAsserter.assertErOppfylt(skjæringstidspunkt)
+    }
+
+    protected fun TestPerson.TestArbeidsgiver.assertErIkkeOppfylt(skjæringstidspunkt: LocalDate = 1.januar) {
+        testArbeidsgiverAsserter.assertErIkkeOppfylt(skjæringstidspunkt)
+    }
+
     protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
         testPersonAsserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
+
+    protected fun assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
+        testPersonAsserter.assertHarIkkeArbeidsforhold(skjæringstidspunkt, orgnummer)
+    }
+
+    protected fun assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
+        testPersonAsserter.assertHarArbeidsforhold(skjæringstidspunkt, orgnummer)
+    }
 
     protected fun TestPerson.TestArbeidsgiver.assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
         testArbeidsgiverAsserter.assertHarHendelseIder(vedtaksperiodeId, *hendelseIder)
