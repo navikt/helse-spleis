@@ -742,8 +742,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling = utbetaling,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = maksdatoresultat,
-                // TODO: Her sikrer vi bare at vi bare at vi har rett informasjon i forhold til det som er lagt til grunn i utbetaling.
-                //  Når vi tar i bruk refusjonstidslinjen ved beregning skal denne fjernes.
+                // TODO: Toggle.BrukRefusjonsopplysningerPåBehandling
+                //  Når toggle.enabled skal vi ikke sette refusjonstidslinje (defaulten arver fra den vi kopierer fra)
                 refusjonstidslinje = grunnlagsdata.refusjonsopplysninger(organisasjonsnummer).beløpstidslinje().fyll(this.periode)
             )
 

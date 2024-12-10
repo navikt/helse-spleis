@@ -288,7 +288,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `saksbehandler endrer refusjon frem i tid`() = Toggle.refusjonsopplysningerTilSpeilFraBehandling.enable {
+    fun `saksbehandler endrer refusjon frem i tid`() = Toggle.RefusjonsopplysningerTilSpeilFraBehandling.enable {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,

@@ -1549,6 +1549,8 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ): Boolean
 
+        // TODO: Toggle.BrukRefusjonsopplysningerPåBehandling
+        //  Når toggle er enabled bør vi kunne sjekke vedtaksperiode.refusjonstidslinje.isNotEmpty() uavhengig av før/etter im?
         abstract fun harRefusjonsopplysninger(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiverperiode: Arbeidsgiverperiode,

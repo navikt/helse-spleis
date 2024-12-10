@@ -12,7 +12,6 @@ import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
-import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.NyttInntektsforholdPeriodeDTO
@@ -53,7 +52,7 @@ internal abstract class IVilkårsgrunnlag(
     }
 
     protected fun refusjonsopplysninger(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>) =
-        (if (Toggle.refusjonsopplysningerTilSpeilFraBehandling.enabled) refusjonsopplysningerFraBehandlinger else refusjonsopplysningerPerArbeidsgiver).map { it.toDTO() }
+        (if (Toggle.RefusjonsopplysningerTilSpeilFraBehandling.enabled) refusjonsopplysningerFraBehandlinger else refusjonsopplysningerPerArbeidsgiver).map { it.toDTO() }
 }
 
 internal class ISpleisGrunnlag(

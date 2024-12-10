@@ -113,7 +113,6 @@ internal class ArbeidsgiverFaktaavklartInntekt(
     }
 
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = skjæringstidspunkt == gjelder.start
-
     internal fun medInntektHvisFinnes(
         dato: LocalDate,
         økonomi: Økonomi,
@@ -133,6 +132,9 @@ internal class ArbeidsgiverFaktaavklartInntekt(
 
     private fun medInntekt(dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt, observatør: (LocalDate, Inntekt) -> Unit): Økonomi {
         val aktuellDagsinntekt = fastsattÅrsinntekt(dato)
+        // TODO: Toggle.BrukRefusjonsopplysningerPåBehandling
+        //  Om toggle.enabled så vil vi bruke fra refusjonstidslinjen
+        //  kan vi muligens ha kodet oss bort fra å trenge "refusjonsopplysningFinnesIkkeStrategi" ? -> Nå skal vi vel alltid ha refusjon på refusjonstidslinjen?
         val refusjonsbeløp = refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)
         observatør(dato, refusjonsbeløp)
         return økonomi.inntekt(
@@ -188,7 +190,6 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 ) {
     private class Refusjonsobservatør(private val refusjonstidslinje: Beløpstidslinje) {
         private val linjer = mutableSetOf<String>()
-
         fun refusjonFraInntektsgrunnlag(dato: LocalDate, refusjonFraInntektsgrunnlag: Inntekt) {
             val refusjonFraBehandling = refusjonstidslinje[dato]
             if (refusjonFraBehandling is UkjentDag) {
@@ -210,7 +211,6 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     }
 
     private val refusjonsobservatør = Refusjonsobservatør(refusjonstidslinje)
-
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
@@ -259,7 +259,6 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                             Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
                         }
                         avvistDag(builder, dag.dato, Økonomi.ikkeBetalt(), begrunnelse)
-
                     }
                 }
 
@@ -306,7 +305,6 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     }
 
     private fun erAGP(dato: LocalDate) = arbeidsgiverperiode.any { dato in it }
-
     private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler))
     }
