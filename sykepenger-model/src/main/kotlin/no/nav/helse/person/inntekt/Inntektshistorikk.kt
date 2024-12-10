@@ -1,10 +1,9 @@
 package no.nav.helse.person.inntekt
 
-
 import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
-import no.nav.helse.person.inntekt.Inntektsmelding.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsmelding.Companion.finnInntektsmeldingForSkjæringstidspunkt
 
 internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
 
@@ -28,8 +27,8 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         return true
     }
 
-    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skatteopplysning: SkatteopplysningerForSykepengegrunnlag?): Inntektsopplysning? =
-        historikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skatteopplysning)
+    internal fun avklarInntektsgrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+        historikk.finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
 
     internal fun dto() = InntektshistorikkUtDto(
         historikk = historikk.map { it.dto() }

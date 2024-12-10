@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.sin
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
@@ -663,6 +664,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
+
+            assertEquals(2, inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.view().inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)

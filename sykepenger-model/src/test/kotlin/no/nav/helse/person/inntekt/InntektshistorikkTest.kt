@@ -42,13 +42,7 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertEquals(
-            INNTEKT, historikk.avklarSykepengegrunnlag(
-            1.januar,
-            1.januar,
-            null
-        )?.inspektør?.beløp
-        )
+        assertEquals(INNTEKT, historikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inspektør?.beløp)
     }
 
     @Test
@@ -57,15 +51,15 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, EmptyLog)
         resetSeed(1.februar)
         inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, EmptyLog)
-        assertEquals(29000.månedlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
-        assertEquals(31000.månedlig, historikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
+        assertEquals(29000.månedlig, historikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inspektør?.beløp)
+        assertEquals(31000.månedlig, historikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inspektør?.beløp)
     }
 
     @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertNull(historikk.avklarSykepengegrunnlag(2.januar, 2.januar, null))
+        assertNull(historikk.avklarInntektsgrunnlag(2.januar, 2.januar))
     }
 
     @Test

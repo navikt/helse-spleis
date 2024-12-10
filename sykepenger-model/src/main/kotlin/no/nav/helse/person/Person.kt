@@ -47,7 +47,6 @@ import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
-import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
@@ -76,7 +75,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
@@ -616,19 +614,11 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun avklarSykepengegrunnlag(
-        aktivitetslogg: IAktivitetslogg,
-        skjæringstidspunkt: LocalDate,
-        skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>,
-        subsumsjonslogg: Subsumsjonslogg
-    ): Inntektsgrunnlag {
-        skatteopplysninger.forEach { finnEllerOpprettArbeidsgiver(it.arbeidsgiver.tilYrkesaktivitet(), aktivitetslogg) } // oppretter evt. nye arbeidsgivere
-        return Inntektsgrunnlag.opprett(
-            alder,
-            arbeidsgivere.avklarSykepengegrunnlag(aktivitetslogg, skjæringstidspunkt, skatteopplysninger),
-            skjæringstidspunkt,
-            subsumsjonslogg
-        )
+    internal fun opprettArbeidsgivere(aktivitetslogg: IAktivitetslogg, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>) {
+        // oppretter evt. nye arbeidsgivere
+        skatteopplysninger.forEach {
+            finnEllerOpprettArbeidsgiver(it.arbeidsgiver.tilYrkesaktivitet(), aktivitetslogg)
+        }
     }
 
     internal fun beregnSkjæringstidspunkt() = arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)

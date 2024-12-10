@@ -393,7 +393,6 @@ internal class InntektsmeldingTest {
         assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
 
-
     @Test
     fun `opphold mellom arbeidsgiverperiode og første fraværsdag, arbeidsgiverperiode slutter på torsdag`() {
         inntektsmelding(
@@ -444,8 +443,8 @@ internal class InntektsmeldingTest {
         )
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, Aktivitetslogg(), 1.februar)
-        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
-        assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null))
+        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inspektør?.beløp)
+        assertNull(inntektshistorikk.avklarInntektsgrunnlag(3.februar, 3.februar))
     }
 
     @Test
@@ -458,7 +457,7 @@ internal class InntektsmeldingTest {
         )
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, EmptyLog)
-        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
+        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inspektør?.beløp)
     }
 
     @Test

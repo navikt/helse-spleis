@@ -68,12 +68,10 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -236,19 +234,6 @@ internal class Arbeidsgiver private constructor(
                 PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, førsteFraværsdag)
             }
 
-        internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(
-            aktivitetslogg: IAktivitetslogg,
-            skjæringstidspunkt: LocalDate,
-            skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
-        ) =
-            mapNotNull { arbeidsgiver ->
-                arbeidsgiver.avklarSykepengegrunnlag(
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    skatteopplysning = skatteopplysninger.firstOrNull { it.arbeidsgiver == arbeidsgiver.organisasjonsnummer },
-                    aktivitetslogg = aktivitetslogg
-                )
-            }
-
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
             forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
 
@@ -363,23 +348,19 @@ internal class Arbeidsgiver private constructor(
     internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =
         refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
-    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        avklarSykepengegrunnlag(skjæringstidspunkt) != null
+    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Periode>): Boolean {
+        return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
+    }
 
-    internal fun avklarSykepengegrunnlag(
-        skjæringstidspunkt: LocalDate,
-        skatteopplysning: SkatteopplysningerForSykepengegrunnlag? = null,
-        aktivitetslogg: IAktivitetslogg? = null
-    ): ArbeidsgiverInntektsopplysning? {
-        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        return yrkesaktivitet.avklarSykepengegrunnlag(
-            skjæringstidspunkt,
-            førsteFraværsdag,
-            inntektshistorikk,
-            skatteopplysning,
-            refusjonshistorikk,
-            aktivitetslogg
-        )
+    // TODO: denne avklaringen må bo på behandlingen; dvs. at inntekt må ligge lagret på vedtaksperiodene
+    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Periode>): no.nav.helse.person.inntekt.Inntektsmelding? {
+        // finner inntektsmelding for en av første fraværsdagene.
+        // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
+        // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)
+        return vedtaksperioder.firstNotNullOfOrNull {
+            val førsteFraværsdag = finnFørsteFraværsdag(it)
+            inntektshistorikk.avklarInntektsgrunnlag(skjæringstidspunkt = skjæringstidspunkt, førsteFraværsdag = førsteFraværsdag)
+        }
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer

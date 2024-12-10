@@ -147,6 +147,9 @@ internal class Inntektsgrunnlag private constructor(
             skjæringstidspunkt: LocalDate,
             subsumsjonslogg: Subsumsjonslogg
         ): Inntektsgrunnlag {
+            check(arbeidsgiverInntektsopplysninger.distinctBy { it.orgnummer }.size == arbeidsgiverInntektsopplysninger.size) {
+                "det er oppgitt duplikat orgnumre i inntektsgrunnlaget: ${arbeidsgiverInntektsopplysninger.joinToString { it.orgnummer }}"
+            }
             return Inntektsgrunnlag(
                 alder,
                 arbeidsgiverInntektsopplysninger,

@@ -66,6 +66,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.søndag
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -660,14 +661,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterSøknad(Sykdom(5.januar, 21.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(5.januar, søndag den 21.januar, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         nullstillTilstandsendringer()
         // Perioden som står i AvventerGodkjenningRevurdering får ikke noe signal om overstyring igangsatt ettersom disse periodene er _etter_ 1.vedtaksperiode
         // Allikevel kan den ikke beregnes på nytt, fordi mursteinssituasjonen som nå har oppstått gjør at vi mangler refusjonsopplysninger på 22.januar
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         håndterSøknad(Sykdom(21.januar, 5.februar, 100.prosent), orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
 
@@ -1775,6 +1778,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a1).inspektør.inntektsopplysning)
             assertInstanceOf<IkkeRapportert>(inntekter.getValue(a2).inspektør.inntektsopplysning)
             assertInstanceOf<IkkeRapportert>(inntekter.getValue(a3).inspektør.inntektsopplysning)
+            assertEquals(IkkeRapportert::class, inntekter.getValue(a3).inspektør.inntektsopplysning::class)
         }
 
         assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))

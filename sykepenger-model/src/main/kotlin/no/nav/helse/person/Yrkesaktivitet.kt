@@ -1,16 +1,9 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Refusjonshistorikk
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 
 const val Frilans = "FRILANS"
 const val Selvstendig = "SELVSTENDIG"
@@ -26,47 +19,17 @@ internal sealed interface Yrkesaktivitet {
         }
     }
 
-    fun avklarSykepengegrunnlag(
-        skjæringstidspunkt: LocalDate,
-        førsteFraværsdag: LocalDate?,
-        inntektshistorikk: Inntektshistorikk,
-        skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
-        refusjonshistorikk: Refusjonshistorikk,
-        aktivitetslogg: IAktivitetslogg?
-    ): ArbeidsgiverInntektsopplysning? {
-        throw NotImplementedError("Støtter ikke å avklare sykepengegrunnlag for ${this.identifikator()}")
-    }
-
     fun identifikator(): String
-
     fun jurist(other: BehandlingSubsumsjonslogg): BehandlingSubsumsjonslogg =
         other.medOrganisasjonsnummer(this.toString())
 
     fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean
-
     fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
         sykmeldingsperioder.lagre(sykmelding, aktivitetslogg)
     }
 
     class Arbeidstaker(private val organisasjonsnummer: String) : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg) = false
-        override fun avklarSykepengegrunnlag(
-            skjæringstidspunkt: LocalDate,
-            førsteFraværsdag: LocalDate?,
-            inntektshistorikk: Inntektshistorikk,
-            skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
-            refusjonshistorikk: Refusjonshistorikk,
-            aktivitetslogg: IAktivitetslogg?
-        ): ArbeidsgiverInntektsopplysning? {
-            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skatteopplysning) ?: return null
-            return ArbeidsgiverInntektsopplysning(
-                orgnummer = organisasjonsnummer,
-                gjelder = skjæringstidspunkt til LocalDate.MAX,
-                inntektsopplysning = inntektsopplysning,
-                refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
-            )
-        }
-
         override fun hashCode(): Int {
             throw NotImplementedError()
         }
@@ -127,18 +90,6 @@ internal sealed interface Yrkesaktivitet {
 
         override fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
             aktivitetslogg.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
-        }
-
-        override fun avklarSykepengegrunnlag(
-            skjæringstidspunkt: LocalDate,
-            førsteFraværsdag: LocalDate?,
-            inntektshistorikk: Inntektshistorikk,
-            skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
-            refusjonshistorikk: Refusjonshistorikk,
-            aktivitetslogg: IAktivitetslogg?
-        ): ArbeidsgiverInntektsopplysning? {
-            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skatteopplysning) ?: return null
-            return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skatteopplysning, refusjonshistorikk, aktivitetslogg)
         }
 
         override fun hashCode(): Int {

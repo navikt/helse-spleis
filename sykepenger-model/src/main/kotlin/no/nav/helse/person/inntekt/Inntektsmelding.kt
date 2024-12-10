@@ -139,17 +139,6 @@ class Inntektsmelding internal constructor(
             val inntektsmeldinger = this.filter { it.dato == skjæringstidspunkt || it.dato == førsteFraværsdag }
             return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.tidsstempel }
         }
-
-        internal fun List<Inntektsmelding>.avklarSykepengegrunnlag(
-            skjæringstidspunkt: LocalDate,
-            førsteFraværsdag: LocalDate?,
-            skatteopplysning: SkatteopplysningerForSykepengegrunnlag?
-        ): Inntektsopplysning? {
-            if (førsteFraværsdag == null) return skatteopplysning?.ghostInntektsgrunnlag(skjæringstidspunkt)
-            val inntektsmelding = finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
-            val skatt = skatteopplysning?.arbeidstakerInntektsgrunnlag() ?: return inntektsmelding
-            return inntektsmelding?.avklarSykepengegrunnlag(skatt) ?: skatt
-        }
     }
 }
 
