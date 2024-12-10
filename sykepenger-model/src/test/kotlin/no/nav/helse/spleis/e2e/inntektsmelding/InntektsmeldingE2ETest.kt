@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import OpenInSpanner
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
@@ -596,6 +597,67 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 fail("""\_(ツ)_/¯""")
             }
         )
+    }
+
+    @Test
+    fun `flere arbeidsgivere - a1 har opphold mellom periodene - portal im`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 1.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 16.januar
+            ), vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            orgnummer = a1
+        )
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 1.januar
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+    }
+    
+    @Test
+    fun `flere arbeidsgivere - a1 har opphold mellom periodene - lps im`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 1.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 16.januar
+            ),
+            førsteFraværsdag = 2.februar,
+            orgnummer = a1
+        )
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 1.januar
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
     }
 
     @Test

@@ -1141,6 +1141,7 @@ internal class Arbeidsgiver private constructor(
     internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
         return vedtaksperioder
             .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .asReversed()
             .firstNotNullOfOrNull { sykdomstidslinje().sisteSkjæringstidspunkt(it.periode()) }
     }
 
