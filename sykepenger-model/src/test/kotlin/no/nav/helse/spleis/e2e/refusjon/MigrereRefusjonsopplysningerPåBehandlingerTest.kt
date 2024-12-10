@@ -17,6 +17,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,7 +38,6 @@ internal class MigrereRefusjonsopplysningerPåBehandlingerTest : AbstractDslTest
     private val mottatt1 = LocalDate.EPOCH.atStartOfDay()
     private val meldingsreferanseId2 = UUID.randomUUID()
     private val mottatt2 = mottatt1.plusYears(1)
-
     private fun tillatUgyldigSituasjon(block: () -> Unit) {
         if (LagreRefusjonsopplysningerPåBehandling.enabled) return block()
         assertUgyldigSituasjon("") { block() }

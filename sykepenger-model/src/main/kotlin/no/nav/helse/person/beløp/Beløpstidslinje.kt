@@ -5,7 +5,6 @@ import java.util.SortedMap
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
@@ -13,7 +12,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 
 data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>) : Collection<Dag> by dager.values {
     private constructor(dager: Map<LocalDate, Beløpsdag>) : this(dager.toSortedMap())
-
     constructor(dager: List<Beløpsdag> = emptyList()) : this(dager.associateBy { it.dato }.toSortedMap().also {
         require(dager.size == it.size) { "Forsøkte å opprette en beløpstidslinje med duplikate datoer. Det blir for rart for meg." }
     })
@@ -21,11 +19,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal constructor(vararg dager: Beløpsdag) : this(dager.toList())
 
     private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
-    internal val perioderMedBeløp by lazy { dager.keys.grupperSammenhengendePerioder() }
-    internal val unikeKilder = dager.values.map { it.kilde.meldingsreferanseId }.toSet()
-
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
-
     override operator fun iterator(): Iterator<Dag> {
         if (periode == null) return emptyList<Dag>().iterator()
         return object : Iterator<Dag> {
@@ -49,7 +43,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
     internal operator fun minus(other: Beløpstidslinje) = Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
-
     internal fun subset(periode: Periode): Beløpstidslinje {
         if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()
         return Beløpstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag).toSortedMap())
@@ -57,10 +50,8 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     internal fun tilOgMed(dato: LocalDate) = Beløpstidslinje(dager.headMap(dato.nesteDag).toSortedMap())
     internal fun fraOgMed(dato: LocalDate) = Beløpstidslinje(dager.tailMap(dato).toSortedMap())
-
     private val førsteBeløpsdag = periode?.start?.let { dager.getValue(it) }
     private fun snute(snute: LocalDate) = førsteBeløpsdag?.strekkTilbake(snute) ?: Beløpstidslinje()
-
     private val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) }
     private fun hale(hale: LocalDate) = sisteBeløpsdag?.strekkFrem(hale) ?: Beløpstidslinje()
 
@@ -78,10 +69,8 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     internal fun fyll(periode: Periode) = fyll().strekk(periode).subset(periode)
     internal fun fyll(til: LocalDate) = fyll().strekkFrem(til).tilOgMed(til)
-
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
     private fun strekkFrem(til: LocalDate) = this + hale(til)
-
     internal fun førsteDagMedUliktBeløp(other: Beløpstidslinje): LocalDate? {
         val fom = setOfNotNull(periode?.start, other.periode?.start).minOrNull() ?: return null
         val tom = setOfNotNull(periode?.endInclusive, other.periode?.endInclusive).max()

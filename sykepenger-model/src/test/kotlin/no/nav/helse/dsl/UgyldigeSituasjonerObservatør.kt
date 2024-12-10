@@ -23,6 +23,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
@@ -309,12 +310,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         }
     }
 
-
     private fun BehandlingView.gyldigTilInfotrygd() = tilstand == BehandlingView.TilstandView.TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
     private fun BehandlingView.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
     private fun BehandlingView.gyldigAvsluttet() = tilstand == BehandlingView.TilstandView.VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
     private val BehandlingView.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
-
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
             val view = arbeidsgiver.view()
@@ -367,7 +366,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
 
     private class Inntektsmeldinger {
         private val signaler = mutableMapOf<UUID, MutableList<Signal>>()
-
         fun håndtert(inntektsmeldingId: UUID) {
             signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.HÅNDTERT)
         }
@@ -385,7 +383,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         }
 
         fun behandlingUtført() = signaler.clear()
-
         fun bekreftEntydighåndtering() {
             if (signaler.isEmpty()) return // En behandling uten håndtering av inntektsmeldinger 🤤
             signaler.forEach { (_, signaler) ->

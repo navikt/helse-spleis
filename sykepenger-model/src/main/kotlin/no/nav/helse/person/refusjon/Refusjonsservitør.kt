@@ -5,16 +5,17 @@ import java.time.format.DateTimeFormatter
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 
 internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = emptyMap()) {
     private val refusjonstidslinjer = input.filterValues { it.isNotEmpty() }.toSortedMap()
     private val refusjonsrester = refusjonstidslinjer.toMutableMap()
     internal operator fun get(dato: LocalDate) = refusjonsrester[dato]
-
     private fun leggTil(dato: LocalDate, beløpstidslinje: Beløpstidslinje) {
         refusjonstidslinjer[dato] = refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
         refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
@@ -45,7 +46,8 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
     // Serverer våre rester til en annen servitør
     internal fun servér(other: Refusjonsservitør, aktivitetslogg: IAktivitetslogg) {
         this.refusjonsrester.filterValues { it.isNotEmpty() }.forEach { (dato, beløpstidslinje) ->
-            aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${beløpstidslinje.perioderMedBeløp.joinToString()}")
+            val perioderMedBeløp = beløpstidslinje.filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
+            aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${perioderMedBeløp.joinToString()}")
             other.leggTil(dato, beløpstidslinje)
         }
     }
@@ -55,7 +57,6 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
 
     internal companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
         internal fun fra(refusjonstidslinje: Beløpstidslinje): Refusjonsservitør {
             if (refusjonstidslinje.isEmpty()) return Refusjonsservitør()
             return Refusjonsservitør(mapOf(refusjonstidslinje.first().dato to refusjonstidslinje))

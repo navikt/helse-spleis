@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -278,6 +279,7 @@ internal class BeløpstidslinjeTest {
     }
 
     internal companion object {
+        internal val Beløpstidslinje.perioderMedBeløp get() = filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
         internal fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
             assertTrue(beløpstidslinje.isNotEmpty())
             assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
@@ -297,7 +299,6 @@ internal class BeløpstidslinjeTest {
         internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
         internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
         internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(UUID.randomUUID(), this, LocalDateTime.now()))
-
         private fun Beløpstidslinje.besudlet(
             tidsstempel: (ekte: LocalDateTime) -> LocalDateTime = { it },
             meldingsreferanseId: (ekte: UUID) -> UUID = { it }

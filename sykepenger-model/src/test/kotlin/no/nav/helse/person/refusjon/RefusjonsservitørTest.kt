@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals

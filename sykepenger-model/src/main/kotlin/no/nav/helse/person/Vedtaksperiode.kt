@@ -126,6 +126,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -541,7 +542,6 @@ internal class Vedtaksperiode private constructor(
 
     internal infix fun før(other: Vedtaksperiode) = this < other
     internal infix fun etter(other: Vedtaksperiode) = this > other
-
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
@@ -695,7 +695,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun periode() = periode
-
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.kontekst(arbeidsgiver)
         aktivitetslogg.kontekst(this)
@@ -971,7 +970,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
         arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
-                && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
+            && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
 
     private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) =
         arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
@@ -1143,7 +1142,6 @@ internal class Vedtaksperiode private constructor(
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
     private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
-
     private fun finnArbeidsgiverperiodeHensyntarForkastede() =
         arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
@@ -1181,7 +1179,6 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("Forsøker å gjenoppta $this")
         tilstand.gjenopptaBehandling(this, hendelse, aktivitetslogg)
     }
-
 
     internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         if (revurdering.ikkeRelevant(periode)) return
@@ -1242,12 +1239,10 @@ internal class Vedtaksperiode private constructor(
         else minOf(makstid(), venterPå.makstid())
 
     private fun venteårsak() = tilstand.venteårsak(this)
-
     private fun makstid(tilstandsendringstidspunkt: LocalDateTime = oppdatert) =
         tilstand.makstid(this, tilstandsendringstidspunkt)
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
-
     private fun aktivitetsloggkopi(aktivitetslogg: IAktivitetslogg) =
         aktivitetslogg.barn().also { kopi ->
             this.registrerKontekst(kopi)
@@ -1333,9 +1328,9 @@ internal class Vedtaksperiode private constructor(
         if (vilkårsgrunnlag != null) return null
         return person.vedtaksperioder {
             it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
-                    it.skjæringstidspunkt == skjæringstidspunkt &&
-                    it.skalFatteVedtak() &&
-                    !it.arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt)
+                it.skjæringstidspunkt == skjæringstidspunkt &&
+                it.skalFatteVedtak() &&
+                !it.arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt)
         }.minOrNull()
     }
 
@@ -1343,9 +1338,9 @@ internal class Vedtaksperiode private constructor(
         val bereningsperiode = perioderSomMåHensyntasVedBeregning().periode()
         return person.vedtaksperioder {
             it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
-                    it.skjæringstidspunkt == skjæringstidspunkt &&
-                    it.periode.overlapperMed(bereningsperiode) &&
-                    it.måInnhenteInntektEllerRefusjon(Aktivitetslogg())
+                it.skjæringstidspunkt == skjæringstidspunkt &&
+                it.periode.overlapperMed(bereningsperiode) &&
+                it.måInnhenteInntektEllerRefusjon(Aktivitetslogg())
         }.minOrNull()
     }
 
@@ -1354,7 +1349,6 @@ internal class Vedtaksperiode private constructor(
             ?: førstePeriodeAnnenArbeidsgiverSomTrengerRefusjonsopplysninger()
 
     private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
-
     private fun defaultinntektForAUU(): ArbeidsgiverFaktaavklartInntekt {
         return ArbeidsgiverFaktaavklartInntekt(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -1519,7 +1513,8 @@ internal class Vedtaksperiode private constructor(
             } ?: Beløpstidslinje()
         val refusjonstidslinjeFraArbeidsgiver =
             arbeidsgiver.refusjonstidslinje(this).takeUnless { it.isEmpty() }?.also { ubrukte ->
-                aktivitetslogg.info("Fant ubrukte refusjonsopplysninger for $periode fra kildene ${ubrukte.unikeKilder.joinToString()}")
+                val unikeKilder = ubrukte.filterIsInstance<Beløpsdag>().map { it.kilde.meldingsreferanseId }.toSet()
+                aktivitetslogg.info("Fant ubrukte refusjonsopplysninger for $periode fra kildene ${unikeKilder.joinToString()}")
             } ?: Beløpstidslinje()
         val benyttetRefusjonstidslinje =
             (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
@@ -1540,7 +1535,6 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje + menyBakHalen
     }
 
-
     internal sealed class ArbeidsgiveropplysningerStrategi {
         abstract fun harInntektOgRefusjon(
             vedtaksperiode: Vedtaksperiode,
@@ -1556,7 +1550,6 @@ internal class Vedtaksperiode private constructor(
         ): Boolean
 
         abstract fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
-
         protected fun harEksisterendeInntektOgRefusjon(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiverperiode: Arbeidsgiverperiode,
@@ -1669,7 +1662,6 @@ internal class Vedtaksperiode private constructor(
         val erFerdigBehandlet: Boolean get() = false
 
         val arbeidsgiveropplysningerStrategi: ArbeidsgiveropplysningerStrategi get() = EtterInntektsmelding
-
         fun aktivitetsloggForRevurdering(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
             return FunksjonelleFeilTilVarsler(aktivitetslogg)
         }
@@ -1689,7 +1681,7 @@ internal class Vedtaksperiode private constructor(
         ): Utbetalingstidslinje {
             inntekt ?: error(
                 "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
-                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
             )
             return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
                 inntekt,
@@ -1699,7 +1691,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
-
         fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
@@ -1711,8 +1702,8 @@ internal class Vedtaksperiode private constructor(
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
             return SpesifikkKontekst(
                 "Tilstand", mapOf(
-                    "tilstand" to type.name
-                )
+                "tilstand" to type.name
+            )
             )
         }
 
@@ -1721,7 +1712,6 @@ internal class Vedtaksperiode private constructor(
 
         // venter du på noe?
         fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? = null
-
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             søknad: Søknad,
@@ -1808,7 +1798,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
-
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forventet ikke simulering i %s".format(type.name))
         }
@@ -1829,7 +1818,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun nyAnnullering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
-
         fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
@@ -1854,9 +1842,7 @@ internal class Vedtaksperiode private constructor(
     internal data object Start : Vedtaksperiodetilstand {
         override val type = START
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = HJELP.utenBegrunnelse
-
         override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
-
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             søknad: Søknad,
@@ -1893,11 +1879,11 @@ internal class Vedtaksperiode private constructor(
             if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
             vedtaksperiode.tilstand(
                 aktivitetslogg, when {
-                    !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-                    vedtaksperiode.periodeRettFørHarFåttInntektsmelding() -> AvventerBlokkerendePeriode
-                    periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, aktivitetslogg) -> AvventerBlokkerendePeriode
-                    else -> AvventerInntektsmelding
-                }
+                !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                vedtaksperiode.periodeRettFørHarFåttInntektsmelding() -> AvventerBlokkerendePeriode
+                periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, aktivitetslogg) -> AvventerBlokkerendePeriode
+                else -> AvventerInntektsmelding
+            }
             )
         }
 
@@ -1926,7 +1912,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
-
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
@@ -1989,7 +1974,6 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_REVURDERING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
@@ -2154,7 +2138,6 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK_REVURDERING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
             aktivitetslogg.info("Forespør sykdoms- og inntektshistorikk")
@@ -2246,13 +2229,11 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvventerVilkårsprøvingRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING_REVURDERING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
-
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -2298,7 +2279,6 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(180)
 
         override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
         }
@@ -2309,7 +2289,7 @@ internal class Vedtaksperiode private constructor(
         ): Utbetalingstidslinje {
             inntekt ?: error(
                 "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
-                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
             )
 
             val refusjonstidslinje = Beløpstidslinje.fra(
@@ -2566,7 +2546,7 @@ internal class Vedtaksperiode private constructor(
                 inntekt ?: vedtaksperiode.defaultinntektForAUU().takeUnless { vedtaksperiode.skalFatteVedtak() }
                 ?: error(
                     "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
-                            "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
                 )
             return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
                 benyttetInntekt,
@@ -2807,13 +2787,11 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
         }
@@ -2852,12 +2830,10 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
         }
-
     }
 
     internal data object AvventerHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
             vedtaksperiode.trengerYtelser(aktivitetslogg)
@@ -2869,7 +2845,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = BEREGNING.utenBegrunnelse
-
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -2964,13 +2939,11 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvventerSimulering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             trengerSimulering(vedtaksperiode, aktivitetslogg)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
-
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -3021,13 +2994,11 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING_REVURDERING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.behandlinger.simuler(aktivitetslogg)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING fordi OVERSTYRING_IGANGSATT
-
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -3079,18 +3050,15 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
         }
-
     }
 
     internal data object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(aktivitetslogg)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = GODKJENNING.utenBegrunnelse
-
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -3122,9 +3090,9 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.tilstand(
                 aktivitetslogg, when {
-                    vedtaksperiode.behandlinger.harUtbetalinger() -> TilUtbetaling
-                    else -> Avsluttet
-                }
+                vedtaksperiode.behandlinger.harUtbetalinger() -> TilUtbetaling
+                else -> Avsluttet
+            }
             )
         }
 
@@ -3170,18 +3138,15 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
         }
-
     }
 
     internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(aktivitetslogg)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = GODKJENNING fordi OVERSTYRING_IGANGSATT
-
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -3235,10 +3200,10 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.tilstand(
                 aktivitetslogg, when {
-                    vedtaksperiode.behandlinger.erAvvist() -> RevurderingFeilet
-                    vedtaksperiode.behandlinger.harUtbetalinger() -> TilUtbetaling
-                    else -> Avsluttet
-                }
+                vedtaksperiode.behandlinger.erAvvist() -> RevurderingFeilet
+                vedtaksperiode.behandlinger.harUtbetalinger() -> TilUtbetaling
+                else -> Avsluttet
+            }
             )
         }
 
@@ -3270,11 +3235,8 @@ internal class Vedtaksperiode private constructor(
 
     internal data object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
-
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
-
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -3333,7 +3295,6 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             val arbeidsgiverperiode =
                 vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
@@ -3453,8 +3414,8 @@ internal class Vedtaksperiode private constructor(
                 ) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
                 return vedtaksperiode.behandlinger.avsluttUtenVedtak(
                     vedtaksperiode.arbeidsgiver, aktivitetslogg, forsøkÅLageUtbetalingstidslinje(
-                        vedtaksperiode
-                    )
+                    vedtaksperiode
+                )
                 )
             }
         }
@@ -3595,7 +3556,6 @@ internal class Vedtaksperiode private constructor(
 
     internal data object RevurderingFeilet : Vedtaksperiodetilstand {
         override val type: TilstandType = REVURDERING_FEILET
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
@@ -3641,13 +3601,11 @@ internal class Vedtaksperiode private constructor(
     internal data object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
         override val erFerdigBehandlet = true
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Vedtaksperioden kan ikke behandles i Spleis.")
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = HJELP.utenBegrunnelse
-
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             søknad: Søknad,
@@ -3683,7 +3641,6 @@ internal class Vedtaksperiode private constructor(
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
-
         internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.egenmeldingsperioder }
         internal fun List<Vedtaksperiode>.arbeidsgiverperioder() = map { it.behandlinger.arbeidsgiverperiode() }
         internal fun List<Vedtaksperiode>.refusjonstidslinje() =
@@ -3818,7 +3775,6 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
             filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
-
         internal fun List<Vedtaksperiode>.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
             vedtaksperiode: Vedtaksperiode,
             aktivitetslogg: IAktivitetslogg
@@ -3923,7 +3879,6 @@ internal class Vedtaksperiode private constructor(
             map { it.sykdomstidslinje }.plusElement(sykdomstidslinje).slåSammenForkastedeSykdomstidslinjer()
 
         internal fun List<Vedtaksperiode>.inneholder(id: UUID) = any { id == it.id }
-
         internal fun List<Vedtaksperiode>.periode(): Periode {
             val fom = minOf { it.periode.start }
             val tom = maxOf { it.periode.endInclusive }
