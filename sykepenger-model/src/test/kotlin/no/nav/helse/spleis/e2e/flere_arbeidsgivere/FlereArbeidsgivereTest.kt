@@ -54,12 +54,14 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.til
@@ -662,6 +664,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
+            val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+            assertEquals(2, arbeidsgiverInntektsopplysninger.size)
+            assertInstanceOf<no.nav.helse.person.inntekt.Inntektsmelding>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
+            assertInstanceOf<IkkeRapportert>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
         }
     }
 
@@ -1024,7 +1030,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
-
     }
 
     @Test
@@ -1306,7 +1311,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-            assertEquals(UtbetalingInntektskilde.EN_ARBEIDSGIVER, a1.inspektør.inntektskilde(2.vedtaksperiode))
+            val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
+            assertEquals(2, arbeidsgiverInntektsopplysninger.size)
+            assertInstanceOf<IkkeRapportert>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
+            assertInstanceOf<no.nav.helse.person.inntekt.Inntektsmelding>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
+            assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
         }
         a2 {
             val vilkårsgrunnlag = a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)
@@ -1538,7 +1547,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING) }
-
     }
 
     @Test

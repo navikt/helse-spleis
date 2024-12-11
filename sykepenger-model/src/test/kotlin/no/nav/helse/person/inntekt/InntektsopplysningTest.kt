@@ -73,7 +73,6 @@ internal class InntektsopplysningTest {
         assertFalse(im2.kanLagres(im1))
     }
 
-
     @Test
     fun `inntektsmelding-ulikhet`() {
         val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
@@ -146,7 +145,7 @@ internal class InntektsopplysningTest {
 
         assertSame(im, listOf(im).avklarSykepengegrunnlag(1.februar, 10.februar, skatt1))
         assertInstanceOf(SkattSykepengegrunnlag::class.java, listOf(im).avklarSykepengegrunnlag(31.januar, 10.februar, skatt2))
-        assertSame(im, im.avklarSykepengegrunnlag(skatt1.avklarSomSykepengegrunnlag(1.februar)!!))
-        assertInstanceOf(SkattSykepengegrunnlag::class.java, im.avklarSykepengegrunnlag(skatt2.avklarSomSykepengegrunnlag(31.januar)!!))
+        assertSame(im, im.avklarSykepengegrunnlag(skatt1.ghostInntektsgrunnlag(1.februar)!!))
+        assertInstanceOf(SkattSykepengegrunnlag::class.java, im.avklarSykepengegrunnlag(skatt2.ghostInntektsgrunnlag(31.januar)!!))
     }
 }

@@ -33,7 +33,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
             ),
             ansattPerioder = emptyList()
         )
-        assertNull(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertNull(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -48,7 +48,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertNull(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -63,7 +63,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<IkkeRapportert>(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertInstanceOf<IkkeRapportert>(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -80,7 +80,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertNull(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -97,7 +97,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<SkattSykepengegrunnlag>(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertInstanceOf<SkattSykepengegrunnlag>(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -114,7 +114,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<SkattSykepengegrunnlag>(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertInstanceOf<SkattSykepengegrunnlag>(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -131,7 +131,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertNull(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -146,7 +146,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.avklarSomSykepengegrunnlag(10.april))
+        assertNull(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test
@@ -168,7 +168,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
             )
         )
         val forventetSnitt = (3000.månedlig + 1500.månedlig + 1500.månedlig) / 3
-        assertEquals(forventetSnitt, skatt.avklarSomSykepengegrunnlag(10.april)!!.fastsattÅrsinntekt())
+        assertEquals(forventetSnitt, skatt.ghostInntektsgrunnlag(10.april)!!.fastsattÅrsinntekt())
     }
 
     @Test
@@ -185,7 +185,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertEquals(INGEN, skatt.avklarSomSykepengegrunnlag(10.april)!!.fastsattÅrsinntekt())
+        assertEquals(INGEN, skatt.ghostInntektsgrunnlag(10.april)!!.fastsattÅrsinntekt())
     }
 
     private fun opplysninger(

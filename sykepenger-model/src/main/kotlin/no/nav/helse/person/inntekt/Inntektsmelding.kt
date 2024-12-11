@@ -52,7 +52,6 @@ class Inntektsmelding internal constructor(
     }
 
     override fun overstyrer(gammel: Saksbehandler) = this
-
     override fun overstyrer(gammel: SkjønnsmessigFastsatt) =
         if (erOmregnetÅrsinntektEndret(this, gammel)) this
         else gammel.overstyrer(this)
@@ -63,7 +62,6 @@ class Inntektsmelding internal constructor(
     }
 
     internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId || this.dato != other.dato
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
     }
@@ -147,8 +145,9 @@ class Inntektsmelding internal constructor(
             førsteFraværsdag: LocalDate?,
             skatteopplysning: SkatteopplysningerForSykepengegrunnlag?
         ): Inntektsopplysning? {
+            if (førsteFraværsdag == null) return skatteopplysning?.ghostInntektsgrunnlag(skjæringstidspunkt)
             val inntektsmelding = finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
-            val skatt = skatteopplysning?.avklarSomSykepengegrunnlag(skjæringstidspunkt) ?: return inntektsmelding
+            val skatt = skatteopplysning?.arbeidstakerInntektsgrunnlag() ?: return inntektsmelding
             return inntektsmelding?.avklarSykepengegrunnlag(skatt) ?: skatt
         }
     }

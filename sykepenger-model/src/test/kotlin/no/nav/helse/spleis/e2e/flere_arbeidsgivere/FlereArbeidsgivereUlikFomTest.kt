@@ -66,6 +66,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -303,7 +304,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -362,7 +362,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(18000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -420,7 +419,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(21000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -537,7 +535,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(21.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
         assertEquals(1163, a2Linje.beløp)
-
     }
 
     @Test
@@ -592,7 +589,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(21.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
         assertEquals(582, a2Linje.beløp)
-
     }
 
     @Test
@@ -738,7 +734,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(21.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
         assertEquals(1163, a2Linje.beløp)
-
     }
 
     @Test
@@ -837,7 +832,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(20.januar, a4Linje.fom)
         assertEquals(15.februar, a4Linje.tom)
         assertEquals(565, a4Linje.beløp)
-
     }
 
     @Test
@@ -932,7 +926,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(20.januar, a4Linje.fom)
         assertEquals(15.mars, a4Linje.tom)
         assertEquals(565, a4Linje.beløp)
-
     }
 
     @Test
@@ -1033,7 +1026,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(20.januar, a4Linje.fom)
         assertEquals(15.mars, a4Linje.tom)
         assertEquals(565, a4Linje.beløp)
-
     }
 
     @Test
@@ -1128,7 +1120,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(20.januar, a4Linje.fom)
         assertEquals(15.mars, a4Linje.tom)
         assertEquals(209, a4Linje.beløp)
-
     }
 
     @Test
@@ -1180,7 +1171,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
         assertIngenVarsel(RV_VV_8, 1.vedtaksperiode.filter(a1))
-
     }
 
     @Test
@@ -1231,7 +1221,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         assertIngenVarsler()
-
     }
 
     @Test
@@ -1287,7 +1276,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(5.april, a2Linje.fom)
         assertEquals(25.april, a2Linje.tom)
         assertEquals(1163, a2Linje.beløp)
-
     }
 
     @Test
@@ -1393,7 +1381,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(21000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -1443,7 +1430,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -1533,7 +1519,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -1786,9 +1771,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
         vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
-            assertEquals(2, inntekter.size)
-            assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a1).inspektør.inntektsopplysning::class)
-            assertEquals(IkkeRapportert::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)
+            assertEquals(3, inntekter.size)
+            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a1).inspektør.inntektsopplysning)
+            assertInstanceOf<IkkeRapportert>(inntekter.getValue(a2).inspektør.inntektsopplysning)
+            assertInstanceOf<IkkeRapportert>(inntekter.getValue(a3).inspektør.inntektsopplysning)
         }
 
         assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))

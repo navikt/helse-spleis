@@ -28,8 +28,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     // må ha inntekter innenfor to måneder før skjæringstidspunktet for at vi skal hensynta skatteinntektene
     val inntektvurderingsperiode = utgangspunkt.minusMonths(MAKS_INNTEKT_GAP.toLong())..utgangspunkt.minusMonths(1)
     val harInntekterToMånederFørSkjæringstidspunkt = inntektsopplysninger.any { it.måned in inntektvurderingsperiode }
-
-    fun avklarSomSykepengegrunnlag(skjæringstidspunkt: LocalDate): SkatteopplysningSykepengegrunnlag? {
+    fun ghostInntektsgrunnlag(skjæringstidspunkt: LocalDate): SkatteopplysningSykepengegrunnlag? {
         if (this.skjæringstidspunkt != skjæringstidspunkt) return null
         if (ansattPerioder.isEmpty()) return null
         // ser bort fra skatteinntekter om man ikke er ansatt på skjæringstidspunktet:
@@ -52,6 +51,23 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
 
             else -> null
         }
+    }
+
+    fun arbeidstakerInntektsgrunnlag(): SkatteopplysningSykepengegrunnlag {
+        if (inntektsopplysninger.isEmpty())
+            return IkkeRapportert(
+                hendelseId = this.hendelseId,
+                dato = this.skjæringstidspunkt,
+                tidsstempel = this.tidsstempel
+            )
+
+        return SkattSykepengegrunnlag(
+            hendelseId = this.hendelseId,
+            dato = this.skjæringstidspunkt,
+            inntektsopplysninger = this.treMånederFørSkjæringstidspunkt,
+            ansattPerioder = emptyList(),
+            tidsstempel = this.tidsstempel
+        )
     }
 
     private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate) =
