@@ -1,12 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Dag as Beløpstidslinjedag
 import no.nav.helse.person.beløp.UkjentDag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
@@ -117,33 +119,51 @@ internal class ArbeidsgiverFaktaavklartInntekt(
         dato: LocalDate,
         økonomi: Økonomi,
         regler: ArbeidsgiverRegler,
+        refusjon: Beløpstidslinjedag
     ): Økonomi {
-        return medInntekt(dato, økonomi, regler, lagDefaultRefusjonsbeløpHvisMangler) { _, _ -> }
+        return medInntekt(dato, økonomi, regler, refusjon, lagDefaultRefusjonsbeløpHvisMangler, mutableListOf())
     }
 
     internal fun medInntektOrThrow(
         dato: LocalDate,
         økonomi: Økonomi,
         regler: ArbeidsgiverRegler,
-        observatør: (LocalDate, Inntekt) -> Unit
+        refusjon: Beløpstidslinjedag,
+        forskjeller: MutableList<String>,
     ): Økonomi {
-        return medInntekt(dato, økonomi, regler, krevRefusjonsbeløpHvisMangler, observatør)
+        return medInntekt(dato, økonomi, regler, refusjon, krevRefusjonsbeløpHvisMangler, forskjeller)
     }
 
-    private fun medInntekt(dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt, observatør: (LocalDate, Inntekt) -> Unit): Økonomi {
+    private fun medInntekt(
+        dato: LocalDate,
+        økonomi: Økonomi,
+        regler: ArbeidsgiverRegler,
+        refusjon: Beløpstidslinjedag,
+        refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt,
+        forskjeller: MutableList<String>
+    ): Økonomi {
         val aktuellDagsinntekt = fastsattÅrsinntekt(dato)
-        // TODO: Toggle.BrukRefusjonsopplysningerPåBehandling
-        //  Om toggle.enabled så vil vi bruke fra refusjonstidslinjen
-        //  kan vi muligens ha kodet oss bort fra å trenge "refusjonsopplysningFinnesIkkeStrategi" ? -> Nå skal vi vel alltid ha refusjon på refusjonstidslinjen?
-        val refusjonsbeløp = refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)
-        observatør(dato, refusjonsbeløp)
         return økonomi.inntekt(
             aktuellDagsinntekt = aktuellDagsinntekt,
             beregningsgrunnlag = beregningsgrunnlag(skjæringstidspunkt),
             dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
             `6G` = if (dato < skjæringstidspunkt) INGEN else `6G`,
-            refusjonsbeløp = refusjonsbeløp
+            refusjonsbeløp = refusjonsbeløp(dato, refusjon, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi, forskjeller)
         )
+    }
+
+    private fun refusjonsbeløp(dato: LocalDate, refusjon: Beløpstidslinjedag, aktuellDagsinntekt: Inntekt, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt, forskjeller: MutableList<String>): Inntekt {
+        val refusjonFraInntektsgrunnlag = refusjonsopplysninger.refusjonsbeløpOrNull(dato)
+        val refusjonFraBehandling = refusjon.takeIf { it is Beløpsdag }?.beløp
+        return when (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
+            true -> (refusjonFraBehandling ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
+                if (it != refusjonFraInntektsgrunnlag) forskjeller.add("$dato: Brukte ${it.dagligInt} fra behandlingen. Hadde ${refusjonFraInntektsgrunnlag?.dagligInt} fra inntektsgrunnlaget.")
+            }
+
+            false -> (refusjonFraInntektsgrunnlag ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
+                if (it != refusjonFraBehandling) forskjeller.add("$dato: Brukte ${it.dagligInt} fra inntektsgrunnlaget. Hadde ${refusjonFraBehandling?.dagligInt} fra behandlingen.")
+            }
+        }
     }
 
     internal fun ghosttidslinje(beregningsperiode: Periode, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverlinjer: List<Utbetalingstidslinje>): Utbetalingstidslinje {
@@ -186,31 +206,10 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private val faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt,
     private val regler: ArbeidsgiverRegler,
     private val arbeidsgiverperiode: List<Periode>,
-    refusjonstidslinje: Beløpstidslinje
+    private val refusjonstidslinje: Beløpstidslinje
 ) {
-    private class Refusjonsobservatør(private val refusjonstidslinje: Beløpstidslinje) {
-        private val linjer = mutableSetOf<String>()
-        fun refusjonFraInntektsgrunnlag(dato: LocalDate, refusjonFraInntektsgrunnlag: Inntekt) {
-            val refusjonFraBehandling = refusjonstidslinje[dato]
-            if (refusjonFraBehandling is UkjentDag) {
-                linjer.add("Fant ikke refusjonsbeløp på behandlingen for $dato. Har ${refusjonFraInntektsgrunnlag.dagligInt} fra inntektsgrunnlaget.")
-                return
-            }
-            if (refusjonFraInntektsgrunnlag.rundTilDaglig() == refusjonFraBehandling.beløp.rundTilDaglig()) return
-            linjer.add("Fant ulike refusjonsbeløp på dato ${dato}. RefusjonsbeløpFraInntektsgrunnlag = ${refusjonFraInntektsgrunnlag.dagligInt}, refusjonsbeløpFraTidslinje = ${refusjonFraBehandling.beløp.dagligInt}")
-        }
+    val forskjeller = mutableListOf<String>()
 
-        fun logg() {
-            if (linjer.isEmpty()) return
-            sikkerlogger.info("Refusjonsoppsummering:\n\t${linjer.joinToString("\n\t")}")
-        }
-
-        private companion object {
-            private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
-        }
-    }
-
-    private val refusjonsobservatør = Refusjonsobservatør(refusjonstidslinje)
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
@@ -237,7 +236,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                 }
 
                 is Dag.SykedagNav -> {
-                    if (erAGP(dag.dato)) builder.addArbeidsgiverperiodedagNav(dag.dato, faktaavklarteInntekter.medInntektOrThrow(dag.dato, dag.økonomi, regler, refusjonsobservatør::refusjonFraInntektsgrunnlag))
+                    if (erAGP(dag.dato)) builder.addArbeidsgiverperiodedagNav(dag.dato, faktaavklarteInntekter.medInntektOrThrow(dag.dato, dag.økonomi, regler, refusjonstidslinje[dag.dato], forskjeller))
                     else when (dag.dato.erHelg()) {
                         true -> helg(builder, dag.dato, dag.økonomi)
                         false -> navDag(builder, dag.dato, dag.økonomi)
@@ -269,7 +268,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
                 is Dag.ForeldetSykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
-                    else builder.addForeldetDag(dag.dato, faktaavklarteInntekter.medInntektHvisFinnes(dag.dato, dag.økonomi, regler))
+                    else builder.addForeldetDag(dag.dato, faktaavklarteInntekter.medInntektHvisFinnes(dag.dato, dag.økonomi, regler, refusjonstidslinje[dag.dato]))
                 }
 
                 is Dag.ArbeidIkkeGjenopptattDag -> {
@@ -300,32 +299,38 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                 }
             }
         }
-        refusjonsobservatør.logg()
+        if (forskjeller.isNotEmpty()) {
+            sikkerlogger.info("Refusjonsoppsummering:\n\t${forskjeller.joinToString("\n\t")}")
+        }
         return builder.build()
     }
 
     private fun erAGP(dato: LocalDate) = arbeidsgiverperiode.any { dato in it }
     private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
-        builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler))
+        builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
     }
 
     private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
-        builder.addAvvistDag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi, regler), listOf(begrunnelse))
+        builder.addAvvistDag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi, regler, refusjonstidslinje[dato]), listOf(begrunnelse))
     }
 
     private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
-        builder.addHelg(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler))
+        builder.addHelg(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
     }
 
     private fun navDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
-        builder.addNAVdag(dato, faktaavklarteInntekter.medInntektOrThrow(dato, økonomi, regler, refusjonsobservatør::refusjonFraInntektsgrunnlag))
+        builder.addNAVdag(dato, faktaavklarteInntekter.medInntektOrThrow(dato, økonomi, regler, refusjonstidslinje[dato], forskjeller))
     }
 
     private fun fridag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
-        builder.addFridag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler))
+        builder.addFridag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
     }
 
     private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
-        builder.addArbeidsdag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler))
+        builder.addArbeidsdag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
+    }
+
+    private companion object {
+        private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
     }
 }
