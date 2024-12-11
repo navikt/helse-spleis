@@ -214,7 +214,8 @@ internal class MaksimumSykepengedagerfilterTest {
         val forventetSisteAvvisteDag = forventetFørsteAvvisteDag.plusDays(181)
         val avvisteDager = (forventetFørsteAvvisteDag til forventetSisteAvvisteDag).toList()
         assertEquals(avvisteDager, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(avvisteDager, avvisteDager
+        assertEquals(
+            avvisteDager, avvisteDager
             .filter { dato ->
                 val a = avvisteTidslinjer.single()[dato].erAvvistMed(MinimumSykdomsgrad)
                 val b = avvisteTidslinjer.single()[dato].erAvvistMed(SykepengedagerOppbrukt)
@@ -754,7 +755,6 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     private fun Periode.utenHelg() = filterNot { it.erHelg() }
-
     private fun Utbetalingstidslinje.utbetalingsavgrenser(
         fødselsdato: LocalDate,
         periode: Periode? = null,
@@ -775,9 +775,9 @@ internal class MaksimumSykepengedagerfilterTest {
         )
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
         avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, EmptyLog)
-        val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode, EmptyLog)
+        val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode).resultat
         maksdatoer = maksimumSykepengedagerfilter.maksdatosaker
-            .map { it.beregnMaksdatoOgSubsummer(fødselsdato.alder, NormalArbeidstaker, filterperiode, EmptyLog, Utbetalingstidslinje(), emptyList(), emptyList()) }
+            .map { it.beregnMaksdato(fødselsdato.alder, NormalArbeidstaker, Utbetalingstidslinje()) }
             .map { it.maksdato }
             .plusElement(maksdatoresultat.maksdato)
             .toSet()

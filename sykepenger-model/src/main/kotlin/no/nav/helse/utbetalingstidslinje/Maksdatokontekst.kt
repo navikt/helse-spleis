@@ -5,12 +5,6 @@ import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Tidslinjedag
-import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
-import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
-import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -32,7 +26,6 @@ internal data class Maksdatokontekst(
 
     internal val oppholdsteller = oppholdsdager.size
     internal val forbrukteDager = betalteDager.size
-
     internal fun erDagerUnder67ÅrForbrukte(alder: Alder, regler: ArbeidsgiverRegler) =
         gjenståendeDagerUnder67År(alder, regler) == 0
 
@@ -115,14 +108,10 @@ internal data class Maksdatokontekst(
         oppholdsdager = oppholdsdager + dato
     )
 
-    internal fun beregnMaksdatoOgSubsummer(
+    internal fun beregnMaksdato(
         alder: Alder,
         regler: ArbeidsgiverRegler,
-        vedtaksperiode: Periode,
-        subsumsjonslogg: Subsumsjonslogg,
-        samletGrunnlagstidslinje: Utbetalingstidslinje,
-        tidslinjegrunnlagsubsumsjon: List<List<Tidslinjedag>>,
-        beregnetTidslinjesubsumsjon: List<Tidslinjedag>
+        samletGrunnlagstidslinje: Utbetalingstidslinje
     ): Maksdatoresultat {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
             when (dayOfWeek) {
@@ -136,20 +125,6 @@ internal data class Maksdatokontekst(
             SATURDAY -> minusDays(1)
             SUNDAY -> minusDays(2)
             else -> this
-        }
-
-        val førSyttiårsdagen = fun(subsumsjonslogg: Subsumsjonslogg, utfallTom: LocalDate) {
-            subsumsjonslogg.logg(
-                `§ 8-3 ledd 1 punktum 2`(
-                    oppfylt = true,
-                    syttiårsdagen = alder.syttiårsdagen,
-                    utfallFom = vedtaksperiode.start,
-                    utfallTom = utfallTom,
-                    tidslinjeFom = vedtaksperiode.start,
-                    tidslinjeTom = vedtaksperiode.endInclusive,
-                    avvistePerioder = emptyList()
-                )
-            )
         }
 
         val harNåddMaks = erDagerOver67ÅrForbrukte(alder, regler) || erDagerUnder67ÅrForbrukte(alder, regler)
@@ -169,47 +144,18 @@ internal data class Maksdatokontekst(
                 maksdato = maksdatoOrdinærRett
                 gjenståendeDager = gjenståendeDagerUnder67År(alder, regler)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
-
-                `§ 8-12 ledd 1 punktum 1`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, forbrukteDager, maksdato, startdatoSykepengerettighet).forEach {
-                    subsumsjonslogg.logg(it)
-                }
-                førSyttiårsdagen(subsumsjonslogg, vedtaksperiode.endInclusive)
             }
 
             maksdatoBegrensetRett <= alder.syttiårsdagen.forrigeVirkedagFør() -> {
                 maksdato = maksdatoBegrensetRett
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
-
-                `§ 8-51 ledd 3`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, forbrukteDager, maksdato, startdatoSykepengerettighet).forEach {
-                    subsumsjonslogg.logg(it)
-                }
-                førSyttiårsdagen(subsumsjonslogg, alder.syttiårsdagen.forrigeDag)
             }
 
             else -> {
                 maksdato = alder.syttiårsdagen.forrigeVirkedagFør()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.SYTTI_ÅR
-
-                if (vedtaksperiode.start < alder.syttiårsdagen) {
-                    førSyttiårsdagen(subsumsjonslogg, alder.syttiårsdagen.forrigeDag)
-                }
-
-                val avvisteDagerFraOgMedSøtti = avslåtteDager.filter { alder.mistetSykepengerett(it) }
-                if (avvisteDagerFraOgMedSøtti.isNotEmpty()) {
-                    subsumsjonslogg.logg(
-                        `§ 8-3 ledd 1 punktum 2`(
-                            oppfylt = false,
-                            syttiårsdagen = alder.syttiårsdagen,
-                            utfallFom = maxOf(alder.syttiårsdagen, vedtaksperiode.start),
-                            utfallTom = vedtaksperiode.endInclusive,
-                            tidslinjeFom = vedtaksperiode.start,
-                            tidslinjeTom = vedtaksperiode.endInclusive,
-                            avvistePerioder = avvisteDagerFraOgMedSøtti.grupperSammenhengendePerioder()
-                        )
-                    )
-                }
             }
         }
 

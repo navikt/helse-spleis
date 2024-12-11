@@ -15,7 +15,11 @@ import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
+import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
+import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
+import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
@@ -31,6 +35,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -152,6 +157,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.utbetalingstidslinje.Maksdatovurdering
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
@@ -1361,7 +1367,7 @@ internal class Vedtaksperiode private constructor(
     private fun lagNyUtbetaling(
         arbeidsgiverSomBeregner: Arbeidsgiver,
         aktivitetslogg: IAktivitetslogg,
-        maksdatoresultat: Maksdatoresultat,
+        maksdatoresultat: Maksdatovurdering,
         utbetalingstidslinje: Utbetalingstidslinje,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
     ) {
@@ -1370,11 +1376,12 @@ internal class Vedtaksperiode private constructor(
             this.arbeidsgiver,
             grunnlagsdata,
             aktivitetslogg,
-            maksdatoresultat,
+            maksdatoresultat.resultat,
             utbetalingstidslinje
         )
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.jurist, this.sykdomstidslinje, utbetalingstidslinje)
         subsumsjonen.subsummer(periode, person.regler)
+        maksdatoresultat.subsummer(jurist, periode)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, aktivitetslogg)
     }
 
@@ -1472,7 +1479,7 @@ internal class Vedtaksperiode private constructor(
         )
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.arbeidsgiver.organisasjonsnummer)
-            val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode, other.jurist)
+            val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode)
             other.lagNyUtbetaling(
                 this.arbeidsgiver,
                 other.aktivitetsloggkopi(aktivitetslogg),
@@ -1481,7 +1488,7 @@ internal class Vedtaksperiode private constructor(
                 grunnlagsdata
             )
         }
-        return maksdatofilter.maksdatoresultatForVedtaksperiode(periode, EmptyLog)
+        return behandlinger.maksdato
     }
 
     private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
