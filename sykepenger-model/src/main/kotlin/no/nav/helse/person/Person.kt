@@ -76,7 +76,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.NyInntektUnderveis
-import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -612,13 +611,6 @@ class Person private constructor(
 
     internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
-    }
-
-    internal fun opprettArbeidsgivere(aktivitetslogg: IAktivitetslogg, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>) {
-        // oppretter evt. nye arbeidsgivere
-        skatteopplysninger.forEach {
-            finnEllerOpprettArbeidsgiver(it.arbeidsgiver.tilYrkesaktivitet(), aktivitetslogg)
-        }
     }
 
     internal fun beregnSkjæringstidspunkt() = arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)

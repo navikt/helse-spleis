@@ -929,7 +929,7 @@ internal class Vedtaksperiode private constructor(
         val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, skatteopplysninger)
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
-        person.opprettArbeidsgivere(aktivitetslogg, skatteopplysninger)
+        //person.opprettArbeidsgivere(aktivitetslogg, skatteopplysninger)
         return Inntektsgrunnlag.opprett(person.alder, inntektsgrunnlagArbeidsgivere + ghosts, skjæringstidspunkt, jurist)
     }
 

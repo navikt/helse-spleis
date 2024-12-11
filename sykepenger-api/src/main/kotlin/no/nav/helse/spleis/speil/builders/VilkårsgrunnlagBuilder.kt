@@ -154,6 +154,14 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
                 }
         } ?: emptyList()
 
+    internal fun arbeidsgivere() = vilkårsgrunnlagIBruk
+        .flatMap { (_, grunnlag) ->
+            val arbeidsgivereFraInntektsgrunnlag = grunnlag.inntekter.map { it.arbeidsgiver }
+            val tilkommetArbeidsgivere = grunnlag.nyeInntekterUnderveis.map { it.arbeidsgiver }
+            (arbeidsgivereFraInntektsgrunnlag + tilkommetArbeidsgivere)
+        }
+        .toSet()
+
     internal fun potensielleGhostsperioder(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>

@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.speil.builders
 
+import java.util.UUID
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.spleis.speil.SpekematDTO
 import no.nav.helse.spleis.speil.dto.AlderDTO
+import no.nav.helse.spleis.speil.dto.ArbeidsgiverDTO
 import no.nav.helse.spleis.speil.dto.PersonDTO
 
 internal class PersonBuilder(
@@ -20,7 +22,19 @@ internal class PersonBuilder(
             }
             .map { it.build(alder, vilkårsgrunnlagHistorikk) }
             .let { arbeidsgivere ->
-                arbeidsgivere.map {
+                val arbeidsgivereFraVilkårsgrunnlag = vilkårsgrunnlagHistorikk
+                    .arbeidsgivere()
+                    .filter { arbeidsgiverUtenSøknad ->
+                        arbeidsgivere.none { it.organisasjonsnummer == arbeidsgiverUtenSøknad }
+                    }
+                    .map { arbeidsgiverUtenSøknad ->
+                        ArbeidsgiverDTO(
+                            organisasjonsnummer = arbeidsgiverUtenSøknad,
+                            id = UUID.randomUUID(),
+                            generasjoner = emptyList()
+                        )
+                    }
+                (arbeidsgivere + arbeidsgivereFraVilkårsgrunnlag).map {
                     it
                         .medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
                 }
