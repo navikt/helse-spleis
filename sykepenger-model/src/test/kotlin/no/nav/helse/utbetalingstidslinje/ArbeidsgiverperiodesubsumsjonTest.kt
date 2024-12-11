@@ -49,10 +49,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
-        assertEquals(7, jurist.subsumsjoner)
+        assertEquals(8, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
-        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(2, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(4, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
@@ -64,10 +64,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(35, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(7, observatør.utbetalingsdager)
-        assertEquals(7, jurist.subsumsjoner)
+        assertEquals(8, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
-        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(2, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(2, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
@@ -80,10 +80,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(45, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(9, observatør.utbetalingsdager)
-        assertEquals(7, jurist.subsumsjoner)
+        assertEquals(8, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
-        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(2, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(2, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
@@ -130,10 +130,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(18, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(1, observatør.utbetalingsdager)
-        assertEquals(7, jurist.subsumsjoner)
+        assertEquals(8, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
-        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(2, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(0, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
@@ -153,7 +153,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(2, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
-
     }
 
     @Test
@@ -162,11 +161,11 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(0, observatør.arbeidsgiverperiodedager)
         assertEquals(31, observatør.utbetalingsdager)
-        assertEquals(4, jurist.subsumsjoner)
+        assertEquals(5, jurist.subsumsjoner)
         assertEquals(8, jurist.`§ 8-11 første ledd`)
         assertEquals(0, jurist.`§ 8-19 første ledd - beregning`)
         assertEquals(0, jurist.`§ 8-19 andre ledd - beregning`)
-        assertEquals(0, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
     }
 
     @Test
@@ -175,14 +174,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
-        assertEquals(7, jurist.subsumsjoner)
+        assertEquals(8, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
-        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(2, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(4, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
-
     }
 
     private lateinit var jurist: Subsumsjonobservatør

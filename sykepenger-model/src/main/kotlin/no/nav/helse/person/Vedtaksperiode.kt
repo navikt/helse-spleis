@@ -13,13 +13,8 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
-import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
-import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
-import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
@@ -35,7 +30,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -535,7 +529,7 @@ internal class Vedtaksperiode private constructor(
             hendelse,
             aktivitetslogg,
             person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode(jurist),
+            arbeidsgiver.beregnArbeidsgiverperiode(),
             refusjonstidslinje
         )
     }
@@ -742,7 +736,7 @@ internal class Vedtaksperiode private constructor(
             hendelse,
             aktivitetslogg,
             person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode(jurist),
+            arbeidsgiver.beregnArbeidsgiverperiode(),
             validering
         )
     }
@@ -1568,7 +1562,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver,
             revurdering.hendelse,
             person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode(jurist)
+            arbeidsgiver.beregnArbeidsgiverperiode()
         )
         tilstand(aktivitetslogg, AvventerRevurdering)
     }
@@ -1628,7 +1622,7 @@ internal class Vedtaksperiode private constructor(
             hendelse,
             aktivitetslogg,
             person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode(jurist),
+            arbeidsgiver.beregnArbeidsgiverperiode(),
             benyttetRefusjonstidslinje
         )
     }
@@ -2532,7 +2526,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse = sykepengegrunnlagForArbeidsgiver,
                 aktivitetslogg = aktivitetslogg,
                 beregnSkjæringstidspunkt = vedtaksperiode.person.beregnSkjæringstidspunkt(),
-                beregnArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist),
+                beregnArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(),
                 refusjonstidslinje = ingenRefusjon
             )
 
@@ -3473,7 +3467,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver,
                 revurdering.hendelse,
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
-                vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist)
+                vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
             if (skalOmgjøres(vedtaksperiode)) {
                 revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
@@ -3533,7 +3527,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver,
                 hendelse,
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
-                vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist)
+                vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
 
             val aktivAktivitetslogg = håndterFørstegangsbehandling(aktivitetslogg, vedtaksperiode)
@@ -3623,7 +3617,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver,
                 revurdering.hendelse,
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
-                vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(vedtaksperiode.jurist)
+                vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
             vedtaksperiode.jurist.logg(`fvl § 35 ledd 1`())
             revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)

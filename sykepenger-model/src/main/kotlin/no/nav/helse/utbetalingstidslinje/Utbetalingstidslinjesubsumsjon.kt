@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`Trygderettens kjennelse 2006-4023`
@@ -38,6 +39,7 @@ internal class Utbetalingstidslinjesubsumsjon(
     private val fridager = mutableListOf<Periode>()
     private val aap = mutableListOf<Periode>()
     private val andreYtelser = mutableListOf<Periode>()
+    private val utbetalingsdager = mutableListOf<Periode>()
     private val dekningsgrunnlag = mutableListOf<Dekningsgrunnlag>()
 
     init {
@@ -73,6 +75,7 @@ internal class Utbetalingstidslinjesubsumsjon(
                 }
 
                 is Utbetalingsdag.NavDag -> {
+                    utbetalingsdager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
 
@@ -90,6 +93,9 @@ internal class Utbetalingstidslinjesubsumsjon(
 
     fun subsummer(vedtaksperiode: Periode, regler: ArbeidsgiverRegler) {
         subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
+        utbetalingsdager.firstOrNull()?.firstOrNull { !it.erHelg() }?.also {
+            subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), tidslinjesubsumsjonsformat))
+        }
         subsumsjonslogg.logg(`§ 8-19 andre ledd`(arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`§ 8-17 ledd 1`(arbeidsgiverperiodeNavdager))
         subsumsjonslogg.logg(`§ 8-11 ledd 1`(vedtaksperiode, helger))

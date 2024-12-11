@@ -1415,7 +1415,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_17,
             index = 0,
-            forventetAntall = 2,
+            forventetAntall = 1,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
@@ -1436,8 +1436,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_17,
-            index = 1,
-            forventetAntall = 2,
+            index = 0,
+            forventetAntall = 1,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
@@ -1473,7 +1473,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_17,
             index = 0,
-            forventetAntall = 2,
+            forventetAntall = 1,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
@@ -1494,8 +1494,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_17,
-            index = 1,
-            forventetAntall = 2,
+            index = 0,
+            forventetAntall = 1,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
@@ -1655,52 +1655,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-19 første ledd - arbeidsgiverperioden varer i 16 dager`() {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
-        håndterSøknad(4.januar til 22.januar)
-        håndterInntektsmelding(
-            listOf(4.januar til 19.januar),
-            beregnetInntekt = INNTEKT,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-
-        SubsumsjonInspektør(jurist).assertPaaIndeks(
-            paragraf = PARAGRAF_8_19,
-            index = 0,
-            forventetAntall = 2,
-            versjon = 1.januar(2001),
-            ledd = 1.ledd,
-            input = mapOf(
-                "beregnetTidslinje" to listOf(
-                    mapOf("fom" to 4.januar, "tom" to 22.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                ),
-            ),
-            output = mapOf(
-                "sisteDagIArbeidsgiverperioden" to 19.januar,
-            ),
-            utfall = Utfall.VILKAR_BEREGNET,
-        )
-        SubsumsjonInspektør(jurist).assertPaaIndeks(
-            paragraf = PARAGRAF_8_19,
-            index = 1,
-            forventetAntall = 2,
-            versjon = 1.januar(2001),
-            ledd = 1.ledd,
-            input = mapOf(
-                "beregnetTidslinje" to listOf(
-                    mapOf("fom" to 4.januar, "tom" to 22.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                ),
-            ),
-            output = mapOf(
-                "sisteDagIArbeidsgiverperioden" to 19.januar,
-            ),
-            utfall = Utfall.VILKAR_BEREGNET
-        )
-    }
-
-    @Test
     fun `§ 8-19 andre ledd - arbeidsgiverperioden regnes fra og med første hele fraværsdag`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -1729,86 +1683,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 ),
             )
         )
-    }
-
-    @Test
-    fun `§ 8-19 tredje ledd - opphold i AGP`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        håndterInntektsmelding(
-            listOf(1.januar til 3.januar, 5.januar til 10.januar, 12.januar til 17.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-
-        SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = PARAGRAF_8_19,
-            ledd = 3.ledd,
-            versjon = 1.januar(2001),
-            input = mapOf(
-                "beregnetTidslinje" to listOf(
-                    mapOf("fom" to 1.januar, "tom" to 3.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                    mapOf("fom" to 5.januar, "tom" to 10.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                    mapOf("fom" to 12.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                ),
-            ),
-            output = mapOf(
-                "perioder" to listOf(
-                    mapOf("fom" to 5.januar, "tom" to 5.januar),
-                    mapOf("fom" to 12.januar, "tom" to 12.januar)
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `§ 8-19 fjerde ledd - ny agp etter tilstrekkelig opphold`() {
-        håndterSøknad(Sykdom(2.januar, 2.februar, 100.prosent), Arbeid(18.januar, 2.februar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-
-        SubsumsjonInspektør(jurist).apply {
-            assertPaaIndeks(
-                paragraf = PARAGRAF_8_19,
-                index = 0,
-                forventetAntall = 2,
-                ledd = 4.ledd,
-                versjon = 1.januar(2001),
-                input = mapOf(
-                    "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 2.januar, "tom" to 17.januar, "dagtype" to "SYKEDAG", "grad" to 100)
-                    ),
-                ),
-                output = mapOf(
-                    "perioder" to listOf(
-                        mapOf("fom" to 2.februar, "tom" to 2.februar),
-                    )
-                ),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                utfall = Utfall.VILKAR_BEREGNET
-            )
-            assertPaaIndeks(
-                paragraf = PARAGRAF_8_19,
-                index = 1,
-                forventetAntall = 2,
-                ledd = 4.ledd,
-                versjon = 1.januar(2001),
-                input = mapOf(
-                    "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 2.januar, "tom" to 17.januar, "dagtype" to "SYKEDAG", "grad" to 100)
-                    ),
-                ),
-                output = mapOf(
-                    "perioder" to listOf(
-                        mapOf("fom" to 2.februar, "tom" to 2.februar),
-                    )
-                ),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                utfall = Utfall.VILKAR_BEREGNET
-            )
-        }
     }
 
     @Test

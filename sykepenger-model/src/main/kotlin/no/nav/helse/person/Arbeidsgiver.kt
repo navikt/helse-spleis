@@ -181,7 +181,7 @@ internal class Arbeidsgiver private constructor(
             forEach {
                 it.vedtaksperioder.beregnSkjæringstidspunkter(
                     beregnSkjæringstidspunkt(infotrygdhistorikk),
-                    it.beregnArbeidsgiverperiode(Subsumsjonslogg.EmptyLog)
+                    it.beregnArbeidsgiverperiode()
                 )
             }
         }
@@ -905,10 +905,9 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun beregnArbeidsgiverperiode(jurist: Subsumsjonslogg) = { vedtaksperiode: Periode ->
+    internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
         arbeidsgiverperiodeFor(sykdomstidslinje())
             .finn(vedtaksperiode)
-            ?.also { it.subsummering(jurist, sykdomstidslinje().subset(vedtaksperiode)) }
             ?.arbeidsgiverperiode
             ?.grupperSammenhengendePerioder()
             ?: emptyList()
