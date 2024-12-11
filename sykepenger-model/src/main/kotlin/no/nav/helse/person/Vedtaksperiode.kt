@@ -923,13 +923,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun avklarSykepengegrunnlag(
         hendelse: Hendelse,
-        skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>,
-        aktivitetslogg: IAktivitetslogg
+        skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
     ): Inntektsgrunnlag {
         val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, skatteopplysninger)
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
-        //person.opprettArbeidsgivere(aktivitetslogg, skatteopplysninger)
         return Inntektsgrunnlag.opprett(person.alder, inntektsgrunnlagArbeidsgivere + ghosts, skjæringstidspunkt, jurist)
     }
 
@@ -942,8 +940,7 @@ internal class Vedtaksperiode private constructor(
 
         val sykepengegrunnlag = avklarSykepengegrunnlag(
             hendelse = vilkårsgrunnlag,
-            skatteopplysninger = skatteopplysninger,
-            aktivitetslogg = aktivitetslogg
+            skatteopplysninger = skatteopplysninger
         )
         vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, jurist)
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
