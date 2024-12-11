@@ -176,15 +176,15 @@ internal abstract class AbstractDslTest {
         return testPersonAsserter.assertSubsumsjoner(block)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType, orgnummer: String = a1) {
+    protected fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType) {
         testArbeidsgiverAsserter.assertTilstander(id, *tilstander)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
+    protected fun TestPerson.TestArbeidsgiver.assertTilstand(id: UUID, tilstand: TilstandType) {
         assertSisteTilstand(id, tilstand)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
+    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType) {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand)
     }
 
@@ -198,11 +198,11 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, forventetPersonbeløp, subset)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSisteForkastetTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
+    protected fun TestPerson.TestArbeidsgiver.assertSisteForkastetTilstand(id: UUID, tilstand: TilstandType) {
         testArbeidsgiverAsserter.assertSisteForkastetTilstand(id, tilstand)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1, varselkode: Varselkode? = null) {
+    protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, varselkode: Varselkode? = null) {
         testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand, varselkode = varselkode)
     }
 
@@ -403,6 +403,7 @@ internal abstract class AbstractDslTest {
         this { håndterGrunnbeløpsregulering(skjæringstidspunkt) }
 
     protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
+
     protected fun String.assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         this { assertTilstander(id, *tilstander) }
 

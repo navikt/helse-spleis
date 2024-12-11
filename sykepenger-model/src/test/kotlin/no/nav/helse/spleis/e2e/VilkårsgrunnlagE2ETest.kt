@@ -34,7 +34,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(26.januar, 8.februar))
             håndterSøknad(26.januar til 8.februar)
-
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar))
@@ -65,8 +64,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
-            håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 
@@ -79,7 +78,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                orgnummer = a1,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         ArbeidsgiverInntekt(
@@ -102,8 +100,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 
