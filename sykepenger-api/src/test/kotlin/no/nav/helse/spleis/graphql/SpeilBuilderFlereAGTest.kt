@@ -612,18 +612,16 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         val januarRefusjonsopplysningerForAG2 = januarRefusjonForAG2.refusjonsopplysninger
         val februarRefusjonsopplysningerForAG2 = februarRefusjonForAG2.refusjonsopplysninger
 
-        assertEquals(2, januarRefusjonsopplysningerForAG1.size)
-        assertEquals(2, februarRefusjonsopplysningerForAG1.size)
+        assertEquals(1, januarRefusjonsopplysningerForAG1.size)
+        assertEquals(1, februarRefusjonsopplysningerForAG1.size)
         assertEquals(2, januarRefusjonsopplysningerForAG2.size)
         assertEquals(2, februarRefusjonsopplysningerForAG2.size)
 
         assertEquals(januarRefusjonsopplysningerForAG1, februarRefusjonsopplysningerForAG1)
         assertEquals(januarRefusjonsopplysningerForAG2, februarRefusjonsopplysningerForAG2)
 
-        assertEquals(1.januar, januarRefusjonsopplysningerForAG1.first().fom) // TODO: Smelte sammen til én periode når det er samme kilde?
-        assertEquals(31.januar, januarRefusjonsopplysningerForAG1.first().tom)
-        assertEquals(1.februar, januarRefusjonsopplysningerForAG1[1].fom)
-        assertNull(januarRefusjonsopplysningerForAG1[1].tom)
+        assertEquals(1.januar, januarRefusjonsopplysningerForAG1.single().fom)
+        assertNull(januarRefusjonsopplysningerForAG1.single().tom)
 
         assertEquals(1.januar, januarRefusjonsopplysningerForAG2.first().fom)
         assertEquals(14.februar, januarRefusjonsopplysningerForAG2.first().tom)

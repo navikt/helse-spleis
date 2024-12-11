@@ -11,6 +11,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
+import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.person.UtbetalingInntektskilde
@@ -49,34 +50,10 @@ internal class SpeilGenerasjonerBuilder(
 
     private val gjeldendeRefusjonsopplysningerPerSkjæringstidspunkt = arbeidsgiverUtDto.vedtaksperioder
         .groupBy { it.skjæringstidspunkt }
-        .mapValues { (_, perioder) ->
-            perioder.map { periode ->
-                periode.behandlinger.behandlinger.last().let { sisteBehandling ->
-                    mapRefusjonstidslinje(sisteBehandling.id, sisteBehandling.endringer.last().refusjonstidslinje)
-                }
-            }
-        }.mapValues { (_, beløpstidslinjer) ->
-            beløpstidslinjer.flatMap { it.perioder }.let { perioder ->
-                if (perioder.isEmpty()) emptyList()
-                else {
-                    perioder.zipWithNext { denne, neste ->
-                        Refusjonselement(
-                            fom = denne.fom,
-                            tom = neste.fom.forrigeDag,
-                            beløp = denne.dagligBeløp.daglig.månedlig,
-                            meldingsreferanseId = denne.kilde.meldingsreferanseId
-                        )
-                    } + perioder.last().let { siste ->
-                        Refusjonselement(
-                            fom = siste.fom,
-                            tom = null,
-                            beløp = siste.dagligBeløp.daglig.månedlig,
-                            meldingsreferanseId = siste.kilde.meldingsreferanseId
-                        )
-                    }
-                }
-            }
-        }.mapValues { (_, refusjonselementer) ->
+        .refusjonstidslinjer(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger)
+        .slåSammenSammenhengendeRefusjonstidslinjer()
+        .tilRefusjonselementerMedÅpneHalerOgUtenGap()
+        .mapValues { (_, refusjonselementer) ->
             IArbeidsgiverrefusjon(organisasjonsnummer, refusjonselementer)
         }
 
@@ -186,14 +163,8 @@ internal class SpeilGenerasjonerBuilder(
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
-            refusjonstidslinje = mapRefusjonstidslinje(generasjon.id, sisteEndring.refusjonstidslinje)
+            refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje)
         )
-    }
-
-    private fun mapRefusjonstidslinje(behandlingId: UUID, refusjonstidslinje: BeløpstidslinjeDto): BeløpstidslinjeDto {
-        val hensyntattUbrukteRefusjonsopplysninger = arbeidsgiverUtDto.ubrukteRefusjonsopplysninger
-        if (hensyntattUbrukteRefusjonsopplysninger.sisteBehandlingId != behandlingId) return refusjonstidslinje
-        return hensyntattUbrukteRefusjonsopplysninger.sisteRefusjonstidslinje!!
     }
 
     private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): AnnullertPeriode {
@@ -435,5 +406,57 @@ internal class SpeilGenerasjonerBuilder(
                 .map { it.registrerBruk(vilkårsgrunnlaghistorikk, organisasjonsnummer) }
                 .utledPeriodetyper()
         )
+    }
+
+    companion object {
+        private fun mapRefusjonstidslinje(ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto, behandlingId: UUID, refusjonstidslinje: BeløpstidslinjeDto): BeløpstidslinjeDto {
+            if (ubrukteRefusjonsopplysninger.sisteBehandlingId != behandlingId) return refusjonstidslinje
+            return ubrukteRefusjonsopplysninger.sisteRefusjonstidslinje!!
+        }
+
+        private fun Map<LocalDate, List<VedtaksperiodeUtDto>>.refusjonstidslinjer(ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto) = mapValues { (_, perioder) ->
+            perioder.map { periode ->
+                periode.behandlinger.behandlinger.last().let { sisteBehandling ->
+                    mapRefusjonstidslinje(ubrukteRefusjonsopplysninger, sisteBehandling.id, sisteBehandling.endringer.last().refusjonstidslinje)
+                }
+            }
+        }
+
+        private fun Map<LocalDate, List<BeløpstidslinjeDto>>.slåSammenSammenhengendeRefusjonstidslinjer() = mapValues { (_, beløpstidslinjer) ->
+            beløpstidslinjer.flatMap { it.perioder }.fold(emptyList<BeløpstidslinjeDto>()) { acc, beløpstidslinjeperiode ->
+                when {
+                    acc.isEmpty() -> acc + BeløpstidslinjeDto(listOf(beløpstidslinjeperiode))
+                    acc.last().perioder.last().kanUtvidesAv(beløpstidslinjeperiode) -> {
+                        val utvidedePerioder = acc.last().perioder.dropLast(1) + acc.last().perioder.last().copy(tom = beløpstidslinjeperiode.tom)
+                        acc.dropLast(1) + acc.last().copy(perioder = utvidedePerioder)
+                    }
+
+                    else -> acc + BeløpstidslinjeDto(listOf(beløpstidslinjeperiode))
+                }
+            }
+        }
+
+        private fun Map<LocalDate, List<BeløpstidslinjeDto>>.tilRefusjonselementerMedÅpneHalerOgUtenGap() = mapValues { (_, beløpstidslinjer) ->
+            beløpstidslinjer.flatMap { it.perioder }.let { perioder ->
+                if (perioder.isEmpty()) emptyList()
+                else {
+                    perioder.zipWithNext { denne, neste ->
+                        Refusjonselement(
+                            fom = denne.fom,
+                            tom = neste.fom.forrigeDag,
+                            beløp = denne.dagligBeløp.daglig.månedlig,
+                            meldingsreferanseId = denne.kilde.meldingsreferanseId
+                        )
+                    } + perioder.last().let { siste ->
+                        Refusjonselement(
+                            fom = siste.fom,
+                            tom = null,
+                            beløp = siste.dagligBeløp.daglig.månedlig,
+                            meldingsreferanseId = siste.kilde.meldingsreferanseId
+                        )
+                    }
+                }
+            }
+        }
     }
 }

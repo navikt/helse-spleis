@@ -246,11 +246,12 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(a1, arbeidsgiverrefusjon.arbeidsgiver)
-        val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
+        val refusjonsopplysninger = arbeidsgiverrefusjon.refusjonsopplysninger
+        assertEquals(1, refusjonsopplysninger.size)
 
-        assertEquals(1.januar, refusjonsopplysning.fom)
-        assertEquals(null, refusjonsopplysning.tom)
-        assertEquals(31000.0, refusjonsopplysning.beløp)
+        assertEquals(1.februar, refusjonsopplysninger[0].fom)
+        assertEquals(null, refusjonsopplysninger[0].tom)
+        assertEquals(31000.0, refusjonsopplysninger[0].beløp)
     }
 
     @Test
@@ -318,7 +319,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon for eldste generasjon`() {
+    fun `korrigert inntektsmelding i Avsluttet, velger tom liste med refusjon for eldste generasjon`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -334,7 +335,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
             assertEquals(1, eldsteGenerasjon.perioder.size)
             val vilkårsgrunnlagId = (eldsteGenerasjon.perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
             val vilkårsgrunnlag = speil.vilkårsgrunnlag[vilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
-            assertEquals(INNTEKT, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
+            assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isEmpty())
         }
         generasjoner.first().also { nyesteGenerasjon ->
             assertEquals(1, nyesteGenerasjon.perioder.size)
@@ -360,7 +361,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag
 
-        assertEquals(1, vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
+        assertTrue(vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.isEmpty())
         assertEquals(2, vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
 
         val førsteRefusjonsopplysning = vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.first()
