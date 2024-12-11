@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
+import no.nav.helse.dto.BeløpstidslinjeDto.BeløpstidslinjeperiodeDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
@@ -50,9 +51,9 @@ internal class SpeilGenerasjonerBuilder(
 
     private val gjeldendeRefusjonsopplysningerPerSkjæringstidspunkt = arbeidsgiverUtDto.vedtaksperioder
         .groupBy { it.skjæringstidspunkt }
-        .refusjonstidslinjer(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger)
+        .tilRefusjonstidslinjer(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger)
         .slåSammenSammenhengendeRefusjonstidslinjer()
-        .tilRefusjonselementerMedÅpneHalerOgUtenGap()
+        .tilRefusjonselementerUtenGapOgÅpenHale()
         .mapValues { (_, refusjonselementer) ->
             IArbeidsgiverrefusjon(organisasjonsnummer, refusjonselementer)
         }
@@ -414,7 +415,7 @@ internal class SpeilGenerasjonerBuilder(
             return ubrukteRefusjonsopplysninger.sisteRefusjonstidslinje!!
         }
 
-        private fun Map<LocalDate, List<VedtaksperiodeUtDto>>.refusjonstidslinjer(ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto) = mapValues { (_, perioder) ->
+        private fun Map<LocalDate, List<VedtaksperiodeUtDto>>.tilRefusjonstidslinjer(ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto) = mapValues { (_, perioder) ->
             perioder.map { periode ->
                 periode.behandlinger.behandlinger.last().let { sisteBehandling ->
                     mapRefusjonstidslinje(ubrukteRefusjonsopplysninger, sisteBehandling.id, sisteBehandling.endringer.last().refusjonstidslinje)
@@ -423,38 +424,35 @@ internal class SpeilGenerasjonerBuilder(
         }
 
         private fun Map<LocalDate, List<BeløpstidslinjeDto>>.slåSammenSammenhengendeRefusjonstidslinjer() = mapValues { (_, beløpstidslinjer) ->
-            beløpstidslinjer.flatMap { it.perioder }.fold(emptyList<BeløpstidslinjeDto>()) { acc, beløpstidslinjeperiode ->
+            beløpstidslinjer.flatMap { it.perioder }.fold(emptyList<BeløpstidslinjeperiodeDto>()) { resultat, periode ->
                 when {
-                    acc.isEmpty() -> acc + BeløpstidslinjeDto(listOf(beløpstidslinjeperiode))
-                    acc.last().perioder.last().kanUtvidesAv(beløpstidslinjeperiode) -> {
-                        val utvidedePerioder = acc.last().perioder.dropLast(1) + acc.last().perioder.last().copy(tom = beløpstidslinjeperiode.tom)
-                        acc.dropLast(1) + acc.last().copy(perioder = utvidedePerioder)
+                    resultat.isEmpty() -> listOf(periode)
+                    resultat.last().kanUtvidesAv(periode) -> {
+                        resultat.dropLast(1) + resultat.last().copy(tom = periode.tom)
                     }
 
-                    else -> acc + BeløpstidslinjeDto(listOf(beløpstidslinjeperiode))
+                    else -> resultat + periode
                 }
             }
         }
 
-        private fun Map<LocalDate, List<BeløpstidslinjeDto>>.tilRefusjonselementerMedÅpneHalerOgUtenGap() = mapValues { (_, beløpstidslinjer) ->
-            beløpstidslinjer.flatMap { it.perioder }.let { perioder ->
-                if (perioder.isEmpty()) emptyList()
-                else {
-                    perioder.zipWithNext { denne, neste ->
-                        Refusjonselement(
-                            fom = denne.fom,
-                            tom = neste.fom.forrigeDag,
-                            beløp = denne.dagligBeløp.daglig.månedlig,
-                            meldingsreferanseId = denne.kilde.meldingsreferanseId
-                        )
-                    } + perioder.last().let { siste ->
-                        Refusjonselement(
-                            fom = siste.fom,
-                            tom = null,
-                            beløp = siste.dagligBeløp.daglig.månedlig,
-                            meldingsreferanseId = siste.kilde.meldingsreferanseId
-                        )
-                    }
+        private fun Map<LocalDate, List<BeløpstidslinjeperiodeDto>>.tilRefusjonselementerUtenGapOgÅpenHale() = mapValues { (_, beløpstidslinjeperioder) ->
+            if (beløpstidslinjeperioder.isEmpty()) emptyList()
+            else {
+                beløpstidslinjeperioder.zipWithNext { denne, neste ->
+                    Refusjonselement(
+                        fom = denne.fom,
+                        tom = neste.fom.forrigeDag,
+                        beløp = denne.dagligBeløp.daglig.månedlig,
+                        meldingsreferanseId = denne.kilde.meldingsreferanseId
+                    )
+                } + beløpstidslinjeperioder.last().let { siste ->
+                    Refusjonselement(
+                        fom = siste.fom,
+                        tom = null,
+                        beløp = siste.dagligBeløp.daglig.månedlig,
+                        meldingsreferanseId = siste.kilde.meldingsreferanseId
+                    )
                 }
             }
         }
