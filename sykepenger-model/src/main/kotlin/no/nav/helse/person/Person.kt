@@ -595,10 +595,10 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
-        arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
+        arbeidsgivere.nåværendeVedtaksperioder(filter)
 
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
-    internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
+    internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter)
     internal fun førsteFraværsdager(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) = arbeidsgivere
         .filterNot { it === arbeidsgiver }
         .førsteFraværsdager(skjæringstidspunkt)

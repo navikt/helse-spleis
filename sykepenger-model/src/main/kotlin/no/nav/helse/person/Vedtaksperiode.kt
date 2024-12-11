@@ -1174,6 +1174,7 @@ internal class Vedtaksperiode private constructor(
             harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .sorted()
             .associate { it.id to it.behandlinger }
             .berik(builder)
 
@@ -1268,8 +1269,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg,
             periode,
             skjæringstidspunkt,
-            person.nåværendeVedtaksperioder(OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT(this))
-                .firstOrNull()?.periode
+            person.nåværendeVedtaksperioder(OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT(this)).minOrNull()?.periode
         ) {
             oppdaterHistorikk(
                 ytelser.avgrensTil(periode),
@@ -1318,6 +1318,7 @@ internal class Vedtaksperiode private constructor(
         val skjæringstidspunkt = this.skjæringstidspunkt
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it !== this }
+            .sorted()
             .fold(listOf(this)) { utbetalingsperioder, vedtaksperiode ->
                 if (utbetalingsperioder.any { vedtaksperiode.periode.overlapperMed(it.periode) }) utbetalingsperioder + vedtaksperiode
                 else utbetalingsperioder
