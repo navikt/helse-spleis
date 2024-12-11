@@ -19,6 +19,7 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
     private val ønskerReberegning = packet["ønskerReberegning"].takeIf { it.isBoolean }?.booleanValue() ?: false
+    private val ønskerInntektFraAOrdningen = packet["ønskerInntektFraAOrdningen"].takeIf { it.isBoolean }?.booleanValue() ?: false
 
     private val påminnelse
         get() = Påminnelse(
@@ -31,6 +32,7 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
             påminnelsestidspunkt = påminnelsestidspunkt,
             nestePåminnelsestidspunkt = nestePåminnelsestidspunkt,
             ønskerReberegning = ønskerReberegning,
+            ønskerInntektFraAOrdningen = ønskerInntektFraAOrdningen,
             opprettet = opprettet
         )
 

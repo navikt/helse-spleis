@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import kotlin.collections.mapNotNull
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
@@ -976,8 +975,8 @@ internal class Vedtaksperiode private constructor(
         medlemskap(aktivitetslogg, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun trengerInntektFraSkatt(aktivitetslogg: IAktivitetslogg) {
-        if (Toggle.InntektsmeldingSomIkkeKommer.enabled) {
+    private fun trengerInntektFraSkatt(aktivitetslogg: IAktivitetslogg, skalHenteInntekterFraAOrdningen: Boolean) {
+        if (Toggle.InntektsmeldingSomIkkeKommer.enabled || skalHenteInntekterFraAOrdningen) {
             val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
             inntekterForSykepengegrunnlagForArbeidsgiver(
                 aktivitetslogg,
@@ -2560,7 +2559,7 @@ internal class Vedtaksperiode private constructor(
             }
             if (påminnelse.harVentet3MånederEllerMer()) {
                 aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
-                return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
+                return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg, påminnelse.skalHenteInntekterFraAOrdningen())
             }
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()

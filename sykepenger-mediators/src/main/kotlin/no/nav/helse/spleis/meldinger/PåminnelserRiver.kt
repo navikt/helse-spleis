@@ -28,13 +28,14 @@ internal class PåminnelserRiver(
         message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.requireAny("tilstand", TilstandType.entries.map(Enum<*>::name))
-        message.interestedIn("ønskerReberegning")
+        message.interestedIn("ønskerReberegning", "ønskerInntektFraAOrdningen")
     }
 
     override fun createMessage(packet: JsonMessage) = PåminnelseMessage(
-        packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
+        packet,
+        Meldingsporing(
+            id = packet["@id"].asText().toUUID(),
+            fødselsnummer = packet["fødselsnummer"].asText()
+        )
     )
 }

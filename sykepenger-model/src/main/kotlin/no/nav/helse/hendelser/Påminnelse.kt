@@ -18,6 +18,7 @@ class Påminnelse(
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime,
     private val ønskerReberegning: Boolean = false,
+    private val ønskerInntektFraAOrdningen: Boolean = false,
     private val nå: LocalDateTime = LocalDateTime.now(),
     opprettet: LocalDateTime
 ) : Hendelse {
@@ -45,6 +46,7 @@ class Påminnelse(
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
     internal fun skalReberegnes() = ønskerReberegning
+    internal fun skalHenteInntekterFraAOrdningen() = ønskerInntektFraAOrdningen
 
     internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
