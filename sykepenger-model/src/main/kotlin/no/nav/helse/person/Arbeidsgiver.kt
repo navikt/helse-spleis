@@ -1009,6 +1009,10 @@ internal class Arbeidsgiver private constructor(
             aktivitetslogg,
             subsumsjonsloggMedInntektsmeldingkontekst
         )
+        // TODO: Til ettertanke: Når BrukRefusjonsopplysningerPåBehandling er enabled & vi beholder refusjon i inntektsgrunnlaget for midl. logging:
+        //  - kan vi havne i en situasjon hvor vi får en inntektsoverstyring hvor inntekt er uendret, men refusjon er endret
+        //    samtidig mener behandlingen at den mangler refusjonsopplysninger, gjør det noe?
+        //  - burde vi kun starte overstyring om _inntekten_ er endret når toggle er på?
         val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring) ?: return
         person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
     }
@@ -1032,8 +1036,10 @@ internal class Arbeidsgiver private constructor(
         if (this.organisasjonsnummer != orgnummer) return
         setOfNotNull(finnFørsteFraværsdag(skjæringstidspunkt), skjæringstidspunkt).forEach { dato ->
             inntektsmelding.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
-            // TODO: lagre refusjonsopplysninger inni inntektsmelding-opplysningen?
-            refusjonsopplysninger.lagreTidsnær(dato, refusjonshistorikk)
+            if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) {
+                // Når vi bruker refusjonsopplysninger på behandling skal det ikke være nødvendig å lagre tidsnære refusjonsopplysninger tilbake til refusjonshistorikk
+                refusjonsopplysninger.lagreTidsnær(dato, refusjonshistorikk)
+            }
         }
     }
 

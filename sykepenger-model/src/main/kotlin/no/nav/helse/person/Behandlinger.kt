@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -744,9 +745,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling = utbetaling,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = maksdatoresultat,
-                // TODO: Toggle.BrukRefusjonsopplysningerPåBehandling
-                //  Når toggle.enabled skal vi ikke sette refusjonstidslinje (defaulten arver fra den vi kopierer fra)
-                refusjonstidslinje = grunnlagsdata.refusjonsopplysninger(organisasjonsnummer).beløpstidslinje().fyll(this.periode)
+                refusjonstidslinje = when (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
+                    true -> this.refusjonstidslinje
+                    false -> grunnlagsdata.refusjonsopplysninger(organisasjonsnummer).beløpstidslinje().fyll(this.periode)
+                }
             )
 
             internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)

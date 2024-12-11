@@ -1640,8 +1640,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ): Boolean
 
-        // TODO: Toggle.BrukRefusjonsopplysningerPåBehandling
-        //  Når toggle er enabled bør vi kunne sjekke vedtaksperiode.refusjonstidslinje.isNotEmpty() uavhengig av før/etter im?
         abstract fun harRefusjonsopplysninger(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiverperiode: Arbeidsgiverperiode,
@@ -1691,8 +1689,9 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverperiode: Arbeidsgiverperiode,
             refusjonsopplysninger: Refusjonsopplysninger,
             aktivitetslogg: IAktivitetslogg
-        ) =
-            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
+        ): Boolean {
+            if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) return vedtaksperiode.refusjonstidslinje.isNotEmpty()
+            return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.periode,
                 refusjonsopplysninger,
@@ -1700,6 +1699,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg,
                 vedtaksperiode.arbeidsgiver.organisasjonsnummer
             )
+        }
 
         override fun lagreGjenbrukbareOpplysninger(
             vedtaksperiode: Vedtaksperiode,
@@ -1725,8 +1725,9 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverperiode: Arbeidsgiverperiode,
             refusjonsopplysninger: Refusjonsopplysninger,
             aktivitetslogg: IAktivitetslogg
-        ) =
-            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
+        ): Boolean {
+            if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) return vedtaksperiode.refusjonstidslinje.isNotEmpty()
+            return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.periode,
                 refusjonsopplysninger,
@@ -1734,6 +1735,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg,
                 vedtaksperiode.arbeidsgiver.organisasjonsnummer
             )
+        }
 
         override fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
