@@ -210,6 +210,14 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertAntallOpptjeningsdager(forventet, skjæringstidspunkt)
     }
 
+    protected fun TestPerson.TestArbeidsgiver.assertVilkårsgrunnlagFraSpleisFor(vararg skjæringstidspunkt: LocalDate) {
+        testArbeidsgiverAsserter.assertSkjæringstidspunkt(*skjæringstidspunkt)
+    }
+
+    protected fun TestPerson.TestArbeidsgiver.assertIngenVilkårsgrunnlagFraSpleis() {
+        assertVilkårsgrunnlagFraSpleisFor()
+    }
+
     protected fun TestPerson.TestArbeidsgiver.assertErOppfylt(skjæringstidspunkt: LocalDate = 1.januar) {
         testArbeidsgiverAsserter.assertErOppfylt(skjæringstidspunkt)
     }

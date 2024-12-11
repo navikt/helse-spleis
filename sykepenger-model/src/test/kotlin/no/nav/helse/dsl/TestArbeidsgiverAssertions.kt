@@ -44,6 +44,10 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         }
     }
 
+    internal fun assertSkjæringstidspunkt(vararg skjæringstidspunkt: LocalDate) {
+        assertEquals(skjæringstidspunkt.toSet(), personInspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
+    }
+
     internal fun assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate) {
         val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
         assertEquals(forventet, opptjening.opptjeningsdager)
