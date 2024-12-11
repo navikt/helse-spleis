@@ -164,4 +164,5 @@ internal class TestArbeidsgiverInspektør(
     internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = person.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt.max()) =
         personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer]?.inspektør?.refusjonsopplysninger ?: emptyList()
 
+    internal fun harFunksjonelleFeilEllerVerre(): Boolean = personInspektør.aktivitetslogg.harFunksjonelleFeilEllerVerre()
 }
