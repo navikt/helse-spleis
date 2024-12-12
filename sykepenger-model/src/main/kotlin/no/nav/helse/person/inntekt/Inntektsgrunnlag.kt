@@ -474,7 +474,8 @@ internal class Inntektsgrunnlag private constructor(
         skjæringstidspunkt = skjæringstidspunkt,
         `6G` = `6G`,
         inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
-        tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) }
+        tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) },
+        deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 }
 

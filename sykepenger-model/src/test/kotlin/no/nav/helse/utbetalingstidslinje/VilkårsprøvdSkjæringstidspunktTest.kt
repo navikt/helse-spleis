@@ -28,7 +28,8 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a1", 1000.daglig, 1.januar til 31.januar, Refusjonsopplysning.Refusjonsopplysninger()),
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a2", 500.daglig, 25.januar til LocalDate.MAX, Refusjonsopplysning.Refusjonsopplysninger()),
             ),
-            tilkommendeInntekter = emptyList()
+            tilkommendeInntekter = emptyList(),
+            deaktiverteArbeidsforhold = emptyList()
         )
 
         vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
@@ -74,7 +75,8 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             ),
             tilkommendeInntekter = listOf(
                 VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis("a2", Arbeidsgiver oppgir 500.daglig hele januar)
-            )
+            ),
+            deaktiverteArbeidsforhold = emptyList()
         )
 
         vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(

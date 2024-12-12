@@ -22,7 +22,8 @@ internal class VilkårsprøvdSkjæringstidspunkt(
     private val skjæringstidspunkt: LocalDate,
     private val `6G`: Inntekt,
     inntekter: List<FaktaavklartInntekt>,
-    val tilkommendeInntekter: List<NyInntektUnderveis>
+    val tilkommendeInntekter: List<NyInntektUnderveis>,
+    val deaktiverteArbeidsforhold: List<String>
 ) {
     private val inntekter = inntekter.associate { inntekt ->
         inntekt.organisasjonsnummer to ArbeidsgiverFaktaavklartInntekt(
@@ -79,7 +80,7 @@ internal class VilkårsprøvdSkjæringstidspunkt(
         return utbetalingstidslinjer + tilkommendeInntekterTidslinje
     }
 
-    internal class FaktaavklartInntekt(
+    data class FaktaavklartInntekt(
         val organisasjonsnummer: String,
         val fastsattÅrsinntekt: Inntekt,
         val gjelder: Periode,

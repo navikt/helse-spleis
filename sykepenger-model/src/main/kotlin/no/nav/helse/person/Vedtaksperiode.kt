@@ -158,6 +158,7 @@ import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
+import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
@@ -1442,15 +1443,6 @@ internal class Vedtaksperiode private constructor(
             ?: førstePeriodeSomTrengerRefusjonsopplysninger()
 
     private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
-    private fun defaultinntektForAUU(): ArbeidsgiverFaktaavklartInntekt {
-        return ArbeidsgiverFaktaavklartInntekt(
-            skjæringstidspunkt = skjæringstidspunkt,
-            `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
-            fastsattÅrsinntekt = Inntekt.INGEN,
-            gjelder = skjæringstidspunkt til LocalDate.MAX,
-            refusjonsopplysninger = Refusjonsopplysninger()
-        )
-    }
 
     private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
@@ -1494,8 +1486,19 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning.mapValues { (arbeidsgiver, vedtaksperioder) ->
-            val inntektForArbeidsgiver = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
-            vedtaksperioder.map { it.tilstand.lagUtbetalingstidslinje(it, inntektForArbeidsgiver) }
+            val inntektForArbeidsgiver = faktaavklarteInntekter
+                .forArbeidsgiver(arbeidsgiver)
+                ?: error(
+                    "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
+                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                )
+            vedtaksperioder.map {
+                it.behandlinger.lagUtbetalingstidslinje(
+                    inntektForArbeidsgiver,
+                    it.jurist,
+                    it.refusjonstidslinje
+                )
+            }
         }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
         // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
@@ -1766,21 +1769,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return aktivitetslogg
             // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
             return aktivitetsloggForRevurdering(aktivitetslogg)
-        }
-
-        fun lagUtbetalingstidslinje(
-            vedtaksperiode: Vedtaksperiode,
-            inntekt: ArbeidsgiverFaktaavklartInntekt?
-        ): Utbetalingstidslinje {
-            inntekt ?: error(
-                "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
-                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-            )
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                inntekt,
-                vedtaksperiode.jurist,
-                vedtaksperiode.refusjonstidslinje
-            )
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
@@ -2582,14 +2570,14 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.tilstand(
-                aktivitetslogg,
-                AvsluttetUtenUtbetaling
-            )
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
                 aktivitetslogg.funksjonellFeil(RV_SV_2)
                 return vedtaksperiode.forkast(hendelse, aktivitetslogg)
             }
+            if (!vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.tilstand(
+                aktivitetslogg,
+                AvsluttetUtenUtbetaling
+            )
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
                 aktivitetslogg.funksjonellFeil(RV_IV_11)
                 return vedtaksperiode.forkast(hendelse, aktivitetslogg)
@@ -2606,23 +2594,6 @@ internal class Vedtaksperiode private constructor(
                 "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
             }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
-        }
-
-        override fun lagUtbetalingstidslinje(
-            vedtaksperiode: Vedtaksperiode,
-            inntekt: ArbeidsgiverFaktaavklartInntekt?
-        ): Utbetalingstidslinje {
-            val benyttetInntekt =
-                inntekt ?: vedtaksperiode.defaultinntektForAUU().takeUnless { vedtaksperiode.skalBehandlesISpeil() }
-                ?: error(
-                    "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
-                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-                )
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                benyttetInntekt,
-                vedtaksperiode.jurist,
-                vedtaksperiode.refusjonstidslinje
-            )
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
@@ -3378,23 +3349,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
-        override fun lagUtbetalingstidslinje(
-            vedtaksperiode: Vedtaksperiode,
-            inntekt: ArbeidsgiverFaktaavklartInntekt?
-        ): Utbetalingstidslinje {
-            val benyttetInntekt = inntekt ?: vedtaksperiode.defaultinntektForAUU()
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                benyttetInntekt,
-                vedtaksperiode.jurist,
-                vedtaksperiode.refusjonstidslinje
-            )
-        }
-
         private fun forsøkÅLageUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
-            val faktaavklarteInntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
-                ?.forArbeidsgiver(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+            val inntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
             return try {
-                lagUtbetalingstidslinje(vedtaksperiode, faktaavklarteInntekter)
+                val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
+                vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
+                    inntektForArbeidsgiver,
+                    vedtaksperiode.jurist,
+                    vedtaksperiode.refusjonstidslinje
+                )
             } catch (err: Exception) {
                 sikkerLogg.warn(
                     "klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}",
@@ -3403,6 +3366,26 @@ internal class Vedtaksperiode private constructor(
                 )
                 Utbetalingstidslinje()
             }
+        }
+
+        private fun inntektForAUU(vedtaksperiode: Vedtaksperiode, inntekter: VilkårsprøvdSkjæringstidspunkt?): ArbeidsgiverFaktaavklartInntekt {
+            if (inntekter == null || vedtaksperiode.arbeidsgiver.organisasjonsnummer in inntekter.deaktiverteArbeidsforhold)
+                return defaultinntektForAUU(vedtaksperiode.skjæringstidspunkt)
+            return inntekter.forArbeidsgiver(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+                ?: error(
+                    "Det er en arbeidsgiver som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver} som har søknader: ${vedtaksperiode.periode}.\n" +
+                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                )
+        }
+
+        private fun defaultinntektForAUU(skjæringstidspunkt: LocalDate): ArbeidsgiverFaktaavklartInntekt {
+            return ArbeidsgiverFaktaavklartInntekt(
+                skjæringstidspunkt = skjæringstidspunkt,
+                `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
+                fastsattÅrsinntekt = Inntekt.INGEN,
+                gjelder = skjæringstidspunkt til LocalDate.MAX,
+                refusjonsopplysninger = Refusjonsopplysninger()
+            )
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
