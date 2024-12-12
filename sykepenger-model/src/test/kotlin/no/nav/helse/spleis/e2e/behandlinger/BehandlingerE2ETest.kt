@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.behandlinger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -64,14 +65,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
-    @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
     fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
+        if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return
         a1 {
             nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
             val korrigertIm = håndterInntektsmelding(
@@ -80,12 +80,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT,
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
-            assertInfo("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-01")
-            // Per i dag blir det en revurdering uten endring og varsel om flere IM'er
+            assertInfo("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-01") // Men refusjonsopplysningene blir lagt på behandlignen
             håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("IngenUtbetaling"))
             assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
 
             val dagensRefusjonsopplysninger =

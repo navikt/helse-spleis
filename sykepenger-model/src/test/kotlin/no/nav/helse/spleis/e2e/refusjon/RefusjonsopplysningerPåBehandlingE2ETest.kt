@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.refusjon
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
@@ -53,7 +54,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
@@ -70,8 +70,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    @Disabled("Midertidig deaktivert ifbm. overgang til nye refusjonsopplysninger")
     fun `En situasjon med gjenbruk hvor refusjonsopplysningene på vilkårsgrunnlaget blir feil, men vil løse seg med refusjonsopplysniger på behandlingene`() {
+        if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return
         a1 {
             nyttVedtak(2.januar til 31.januar)
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
@@ -227,7 +227,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertEquals(forventetBruktForMars, inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje)
         }
     }
-
 
     @Test
     fun `saksbehandler opplyser om endring i refusjon frem i tid`() {
@@ -692,7 +691,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertEquals(Beløpstidslinje.fra(februar, INNTEKT, kilde), refusjonstidslinjeVedtaksperiode2)
         }
     }
-
 
     @Test
     fun `Må kunne videreføre refusjonsopplysninger når det kommer søknad som bridger gap'et som før var der`() {
