@@ -637,10 +637,10 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), orgnummer = a2)
-        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.januar, orgnummer = a1, portalInntektsmelding = false)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 12.februar, orgnummer = a1, portalInntektsmelding = false)
+        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 17.januar, orgnummer = a2, portalInntektsmelding = false)
+        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 13.mars, orgnummer = a2, portalInntektsmelding = false)
 
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
         håndterYtelserTilGodkjenning()
