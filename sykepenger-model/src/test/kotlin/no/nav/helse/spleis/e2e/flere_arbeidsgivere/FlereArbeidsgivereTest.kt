@@ -3,9 +3,8 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.math.sin
+import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -76,7 +75,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -110,15 +108,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         }
         a1 {
-            assertForventetFeil(
-                forklaring = "Har ikke tilstrekkelig informasjon til utbetaling!",
-                nå = {
-                    assertThrows<IllegalStateException> { håndterSøknad(april) }
-                },
-                ønsket = {
-                    fail("""\_(ツ)_/¯""")
-                }
-            )
+            if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
+                håndterSøknad(april)
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            } else {
+                assertThrows<IllegalStateException> { håndterSøknad(april) }
+            }
         }
     }
 

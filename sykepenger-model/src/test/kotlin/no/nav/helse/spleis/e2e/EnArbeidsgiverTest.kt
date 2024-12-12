@@ -40,8 +40,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
@@ -80,7 +80,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
                 )
             },
             ønsket = {
-                fail("""¯\_(ツ)_/¯""")
+                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             }
         )
 

@@ -4,6 +4,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
@@ -192,8 +193,18 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger
         assertEquals(emptyList<Refusjonsopplysning>(), ghostRefusjonsopplysinger)
 
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Denna kommer seg videre med nye refusjonsopplysninger",
+            nå = {
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+            },
+            ønsket = {
+                assertTrue(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+                assertTrue(inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+            }
+        )
     }
 
     @Test
