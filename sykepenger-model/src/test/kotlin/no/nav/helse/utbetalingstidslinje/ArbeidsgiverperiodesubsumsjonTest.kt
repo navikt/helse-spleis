@@ -14,12 +14,14 @@ import no.nav.helse.etterlevelse.folketrygdloven
 import no.nav.helse.etterlevelse.førsteLedd
 import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.etterlevelse.tredjeLedd
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -211,7 +213,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
-            refusjonstidslinje = Beløpstidslinje()
+            refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje()
         )
 
         val utbetalingstidslinje = builder.result(tidslinje)
