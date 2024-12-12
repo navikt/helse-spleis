@@ -412,7 +412,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertInfo("Kopierte inntekt som lå lagret på 2018-01-19 til 2018-01-22", 2.vedtaksperiode.filter())
             assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         }
@@ -514,7 +513,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         listOf(a1).forlengVedtak(mars)
 
         a2 {
-            assertInfo("Kopierte inntekt som lå lagret på 2018-04-01 til 2018-01-01", 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }
