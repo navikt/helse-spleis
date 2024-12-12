@@ -157,11 +157,11 @@ internal class ArbeidsgiverFaktaavklartInntekt(
         val refusjonFraBehandling = refusjon.takeIf { it is Beløpsdag }?.beløp
         return when (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
             true -> (refusjonFraBehandling ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
-                if (it != refusjonFraInntektsgrunnlag) forskjeller.add("$dato: Brukte ${it.dagligInt} fra behandlingen. Hadde ${refusjonFraInntektsgrunnlag?.dagligInt} fra inntektsgrunnlaget.")
+                if (it.dagligInt != refusjonFraInntektsgrunnlag?.dagligInt) forskjeller.add("$dato: Brukte ${it.dagligInt} fra behandlingen. Hadde ${refusjonFraInntektsgrunnlag?.dagligInt} fra inntektsgrunnlaget.")
             }
 
             false -> (refusjonFraInntektsgrunnlag ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
-                if (it != refusjonFraBehandling) forskjeller.add("$dato: Brukte ${it.dagligInt} fra inntektsgrunnlaget. Hadde ${refusjonFraBehandling?.dagligInt} fra behandlingen.")
+                if (it.dagligInt != refusjonFraBehandling?.dagligInt) forskjeller.add("$dato: Brukte ${it.dagligInt} fra inntektsgrunnlaget. Hadde ${refusjonFraBehandling?.dagligInt} fra behandlingen.")
             }
         }
     }
