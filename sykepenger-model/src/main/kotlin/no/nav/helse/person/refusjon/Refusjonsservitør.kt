@@ -7,6 +7,7 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
+import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpsdag
@@ -65,10 +66,10 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
         internal fun fra(refusjonstidslinje: Beløpstidslinje, startdatoer: Collection<LocalDate>): Refusjonsservitør {
             if (refusjonstidslinje.isEmpty() || startdatoer.isEmpty()) return Refusjonsservitør()
             val sorterteStartdatoer = startdatoer.toSortedSet()
-            val sisteBit = sorterteStartdatoer.last() to refusjonstidslinje.fraOgMed(sorterteStartdatoer.last())
-            val refusjonsopplysningerPerStartdato = sorterteStartdatoer.zipWithNext { nåværende, neste ->
-                nåværende to refusjonstidslinje.subset(nåværende til neste.forrigeDag)
-            }.toMap() + sisteBit
+            val refusjonsopplysningerPerStartdato = sorterteStartdatoer.mapWithNext { nåværende, neste ->
+                val del = if (neste == null) refusjonstidslinje.fraOgMed(nåværende) else refusjonstidslinje.subset(nåværende til neste.forrigeDag)
+                nåværende to del
+            }.toMap()
             return Refusjonsservitør(refusjonsopplysningerPerStartdato)
         }
 

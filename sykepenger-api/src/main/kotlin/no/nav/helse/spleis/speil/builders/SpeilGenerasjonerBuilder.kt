@@ -15,6 +15,7 @@ import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.forrigeDag
+import no.nav.helse.mapWithNext
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.speil.SpekematDTO
 import no.nav.helse.spleis.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
@@ -437,23 +438,13 @@ internal class SpeilGenerasjonerBuilder(
         }
 
         private fun Map<LocalDate, List<BeløpstidslinjeperiodeDto>>.tilRefusjonselementerUtenGapOgÅpenHale() = mapValues { (_, beløpstidslinjeperioder) ->
-            if (beløpstidslinjeperioder.isEmpty()) emptyList()
-            else {
-                beløpstidslinjeperioder.zipWithNext { denne, neste ->
-                    Refusjonselement(
-                        fom = denne.fom,
-                        tom = neste.fom.forrigeDag,
-                        beløp = denne.dagligBeløp.daglig.månedlig,
-                        meldingsreferanseId = denne.kilde.meldingsreferanseId
-                    )
-                } + beløpstidslinjeperioder.last().let { siste ->
-                    Refusjonselement(
-                        fom = siste.fom,
-                        tom = null,
-                        beløp = siste.dagligBeløp.daglig.månedlig,
-                        meldingsreferanseId = siste.kilde.meldingsreferanseId
-                    )
-                }
+            beløpstidslinjeperioder.mapWithNext { nåværende, neste ->
+                Refusjonselement(
+                    fom = nåværende.fom,
+                    tom = neste?.fom?.forrigeDag,
+                    beløp = nåværende.dagligBeløp.daglig.månedlig,
+                    meldingsreferanseId = nåværende.kilde.meldingsreferanseId
+                )
             }
         }
     }

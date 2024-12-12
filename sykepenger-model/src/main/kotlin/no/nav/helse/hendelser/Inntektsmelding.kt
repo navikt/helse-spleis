@@ -12,6 +12,7 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
@@ -102,13 +103,13 @@ class Inntektsmelding(
 
     private val refusjonsElement
         get() = Refusjonshistorikk.Refusjon(
-                meldingsreferanseId = metadata.meldingsreferanseId,
-                førsteFraværsdag = type.refusjonsdato(this),
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                beløp = refusjon.beløp,
-                sisteRefusjonsdag = refusjon.opphørsdato,
-                endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
-                tidsstempel = metadata.registrert
+            meldingsreferanseId = metadata.meldingsreferanseId,
+            førsteFraværsdag = type.refusjonsdato(this),
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beløp = refusjon.beløp,
+            sisteRefusjonsdag = refusjon.opphørsdato,
+            endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
+            tidsstempel = metadata.registrert
         )
 
     internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(type.refusjonsdato(this), metadata.meldingsreferanseId, metadata.innsendt))
@@ -142,21 +143,20 @@ class Inntektsmelding(
             }
 
             val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, refusjonsdato).takeUnless { it.endringsdato == opphørIRefusjon?.endringsdato }
-            val alleRefusjonsopplysninger = listOfNotNull(opphørIRefusjon, hovedopplysning, *endringerIRefusjon.toTypedArray())
-                .sortedBy { it.endringsdato }
-                .filter { it.endringsdato >= refusjonsdato }
-                .filter { it.endringsdato <= (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
+
+            val gyldigeEndringer = endringerIRefusjon
+                .filter { it.endringsdato > refusjonsdato }
+                .filter { it.endringsdato < (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
+
+            val alleRefusjonsopplysninger = listOfNotNull(hovedopplysning, *gyldigeEndringer.toTypedArray(), opphørIRefusjon).sortedBy { it.endringsdato }
 
             check(alleRefusjonsopplysninger.isNotEmpty()) { "Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?" }
 
-            val sisteBit = Beløpstidslinje.fra(alleRefusjonsopplysninger.last().endringsdato.somPeriode(), alleRefusjonsopplysninger.last().beløp, kilde)
-            val refusjonstidslinje = alleRefusjonsopplysninger
-                .zipWithNext { nåværende, neste ->
-                    Beløpstidslinje.fra(nåværende.endringsdato.somPeriode().oppdaterTom(neste.endringsdato.forrigeDag), nåværende.beløp, kilde)
-                }
-                .fold(sisteBit) { acc, beløpstidslinje -> acc + beløpstidslinje }
-
-            return refusjonstidslinje
+            return alleRefusjonsopplysninger.mapWithNext { nåværende, neste ->
+                val fom = nåværende.endringsdato
+                val tom = neste?.endringsdato?.forrigeDag ?: fom
+                Beløpstidslinje.fra(fom til tom, nåværende.beløp, kilde)
+            }.reduce(Beløpstidslinje::plus)
         }
 
         class EndringIRefusjon(
@@ -193,7 +193,6 @@ class Inntektsmelding(
             overlapperMedForkastet = forkastede.overlapperMed(dager),
             harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
         )
-
     }
 
     internal fun subsumsjonskontekst() = Subsumsjonskontekst(
