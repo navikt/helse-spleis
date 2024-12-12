@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import OpenInSpanner
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 import java.time.LocalDate
 import java.util.UUID
@@ -789,12 +790,39 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+        }
+
+        // sender im på mursteinspølse hos a1
+        a1 {
+            håndterInntektsmeldingPortal(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
+        }
+
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+        }
+
+        // sender im på siste mursteinspølse på a2
+        a2 {
+            håndterInntektsmeldingPortal(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
         }
 
         a1 {
@@ -807,11 +835,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a2 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) // sitter fast her fordi overlappende periode hos arbeidsgiver 1 mangler refusjonsopplysninger
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

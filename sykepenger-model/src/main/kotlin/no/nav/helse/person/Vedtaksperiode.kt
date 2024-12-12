@@ -1432,19 +1432,14 @@ internal class Vedtaksperiode private constructor(
         }.minOrNull()
     }
 
-    private fun førstePeriodeAnnenArbeidsgiverSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
-        val bereningsperiode = perioderSomMåHensyntasVedBeregning().periode()
-        return person.vedtaksperioder {
-            it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
-                it.skjæringstidspunkt == skjæringstidspunkt &&
-                it.periode.overlapperMed(bereningsperiode) &&
-                it.måInnhenteInntektEllerRefusjon(Aktivitetslogg())
-        }.minOrNull()
+    private fun førstePeriodeSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
+        return perioderSomMåHensyntasVedBeregning()
+            .firstOrNull { it.måInnhenteInntektEllerRefusjon(Aktivitetslogg()) }
     }
 
-    private fun førstePeriodeAnnenArbeidsgiverSomTrengerInntektsmelding() =
+    private fun førstePeriodeSomTrengerInntektsmelding() =
         førstePeriodeAnnenArbeidsgiverSomTrengerInntekt()
-            ?: førstePeriodeAnnenArbeidsgiverSomTrengerRefusjonsopplysninger()
+            ?: førstePeriodeSomTrengerRefusjonsopplysninger()
 
     private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
     private fun defaultinntektForAUU(): ArbeidsgiverFaktaavklartInntekt {
@@ -2162,11 +2157,9 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return TrengerInntektsmelding(
                 vedtaksperiode
             )
-            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver =
-                vedtaksperiode.førstePeriodeAnnenArbeidsgiverSomTrengerInntektsmelding()
-            if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(
-                førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver
-            )
+            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
+            if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null)
+                return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver)
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
             return KlarForBeregning
         }
@@ -2379,27 +2372,6 @@ internal class Vedtaksperiode private constructor(
         override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
-        }
-
-        override fun lagUtbetalingstidslinje(
-            vedtaksperiode: Vedtaksperiode,
-            inntekt: ArbeidsgiverFaktaavklartInntekt?
-        ): Utbetalingstidslinje {
-            inntekt ?: error(
-                "Det er en vedtaksperiode som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver.organisasjonsnummer} - $vedtaksperiode.id - $vedtaksperiode.periode." +
-                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-            )
-
-            val refusjonstidslinje = Beløpstidslinje.fra(
-                vedtaksperiode.periode,
-                Inntekt.INGEN,
-                Kilde(UUID.randomUUID(), Avsender.SYSTEM, LocalDateTime.now())
-            )
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                inntekt,
-                vedtaksperiode.jurist,
-                refusjonstidslinje
-            )
         }
 
         override fun håndter(
@@ -2788,11 +2760,9 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
             if (vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
 
-            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver =
-                vedtaksperiode.førstePeriodeAnnenArbeidsgiverSomTrengerInntektsmelding()
-            if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(
-                førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver
-            )
+            val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
+            if (førstePeriodeSomTrengerInntektsmelding != null)
+                return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmelding)
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
             return KlarForBeregning
         }
