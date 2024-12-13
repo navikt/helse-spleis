@@ -100,22 +100,10 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         )
 
         val ubrukteRefusjonsopplysninger2 = inspektør.ubrukteRefusjonsopplysninger
-        assertForventetFeil(
-            forklaring = "vi har noe foran oss også overstyres det litt tilbake i tid, blir surr",
-            nå = {
-                assertBeløpstidslinje(
-                    SAKSBEHANDLER.beløpstidslinje(1.februar.somPeriode(), INGEN) + ARBEIDSGIVER.beløpstidslinje(2.februar til 19.februar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(20.februar.somPeriode(), INNTEKT / 2),
-                    ubrukteRefusjonsopplysninger2.refusjonstidslinjer.getValue(1.januar),
-                    ignoreMeldingsreferanseId = true
-                )
-            },
-            ønsket = {
-                assertBeløpstidslinje(
-                    SAKSBEHANDLER.beløpstidslinje(1.februar.somPeriode(), INGEN),
-                    ubrukteRefusjonsopplysninger2.refusjonstidslinjer.getValue(1.januar),
-                    ignoreMeldingsreferanseId = true
-                )
-            }
+        assertBeløpstidslinje(
+            SAKSBEHANDLER.beløpstidslinje(1.februar.somPeriode(), INGEN),
+            ubrukteRefusjonsopplysninger2.refusjonstidslinjer.getValue(1.januar),
+            ignoreMeldingsreferanseId = true
         )
     }
 

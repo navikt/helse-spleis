@@ -18,8 +18,9 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
     private val refusjonsrester = refusjonstidslinjer.toMutableMap()
     internal operator fun get(dato: LocalDate) = refusjonsrester[dato]
     private fun leggTil(dato: LocalDate, beløpstidslinje: Beløpstidslinje) {
-        refusjonstidslinjer[dato] = refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
-        refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()) + beløpstidslinje
+        val førsteDagIDenNyeTidslinjen = beløpstidslinje.firstOrNull()?.dato ?: return
+        refusjonstidslinjer[dato] = refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
+        refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
     }
 
     // jeg vil bare se hva som kommer etterpå
