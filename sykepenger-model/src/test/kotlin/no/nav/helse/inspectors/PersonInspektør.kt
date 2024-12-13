@@ -11,7 +11,7 @@ internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
 
 internal fun Person.søppelbøtte(hendelse: Hendelse, periode: Periode) =
-    søppelbøtte(hendelse) { it.periode().start >= periode.start }
+    søppelbøtte(hendelse) { it.periode.start >= periode.start }
 
 internal fun Person.søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) =
     søppelbøtte(hendelse, Aktivitetslogg(), filter)

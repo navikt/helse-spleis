@@ -54,7 +54,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonseventyr
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
@@ -589,7 +588,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)
-        return ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode())
+        return ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode)
     }
 
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
@@ -959,7 +958,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
-        finnSammenhengendeVedtaksperioder(vedtaksperiode).periode().start
+        finnSammenhengendeVedtaksperioder(vedtaksperiode).first().periode.start
 
     private fun addInntektsmelding(
         inntektsmelding: Inntektsmelding,
@@ -1057,7 +1056,7 @@ internal class Arbeidsgiver private constructor(
 
         vedtaksperioder.removeAll(perioder.map { it.first })
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first) })
-        sykdomshistorikk.fjernDager(perioder.map { it.first.periode() })
+        sykdomshistorikk.fjernDager(perioder.map { it.first.periode })
         return perioder.map { it.second }
     }
 
@@ -1120,7 +1119,7 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder
             .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .asReversed()
-            .firstNotNullOfOrNull { finnFørsteFraværsdag(it.periode()) }
+            .firstNotNullOfOrNull { finnFørsteFraværsdag(it.periode) }
     }
 
     internal fun finnFørsteFraværsdag(periode: Periode) =
@@ -1162,7 +1161,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperiode.kanForkastes(utbetalinger, aktivitetslogg)
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode): List<Vedtaksperiode> {
-        return vedtaksperioder.filter { it.periode() in arbeidsgiverperiode }
+        return vedtaksperioder.filter { it.periode in arbeidsgiverperiode }
     }
 
     internal fun sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(

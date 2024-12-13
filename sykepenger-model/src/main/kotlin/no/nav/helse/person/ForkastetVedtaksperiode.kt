@@ -5,7 +5,6 @@ import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.person.Vedtaksperiode.Companion.inneholder
 import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -22,7 +21,7 @@ internal class ForkastetVedtaksperiode(
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
         internal fun List<ForkastetVedtaksperiode>.overlapperMed(dagerFraInntektsmelding: DagerFraInntektsmelding) =
-            perioder().any { dagerFraInntektsmelding.overlapperMed(it.periode()) }
+            perioder().any { dagerFraInntektsmelding.overlapperMed(it.periode) }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
             Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), vedtaksperiode, aktivitetslogg)
@@ -38,8 +37,6 @@ internal class ForkastetVedtaksperiode(
         internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
             Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), aktivitetslogg, vedtaksperiode)
 
-        internal fun Iterable<ForkastetVedtaksperiode>.erForkastet(vedtaksperiodeId: UUID) = perioder().inneholder(vedtaksperiodeId)
-
         internal fun hørerTilArbeidsgiverperiode(
             forkastede: List<ForkastetVedtaksperiode>,
             vedtaksperioder: List<Vedtaksperiode>,
@@ -47,7 +44,7 @@ internal class ForkastetVedtaksperiode(
         ): List<Vedtaksperiode> =
             (forkastede.map { it.vedtaksperiode } + vedtaksperioder)
                 .sorted()
-                .filter { arbeidsgiverperiode.hørerTil(it.periode()) }
+                .filter { arbeidsgiverperiode.hørerTil(it.periode) }
 
         internal fun gjenopprett(
             person: Person,
@@ -68,7 +65,6 @@ internal class ForkastetVedtaksperiode(
                 )
             )
         }
-
     }
 
     internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto(null))

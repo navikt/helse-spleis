@@ -228,7 +228,7 @@ class Person private constructor(
         if (andreBehandledeVedtaksperioder.isNotEmpty()) {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_5)
             val msg = andreBehandledeVedtaksperioder.map {
-                "vedtaksperiode(${it.periode()})"
+                "vedtaksperiode(${it.periode})"
             }
             aktivitetslogg.info(
                 """hendelse: ${behandlingsporing::class.java.simpleName} ($periode) kaster ut personen 

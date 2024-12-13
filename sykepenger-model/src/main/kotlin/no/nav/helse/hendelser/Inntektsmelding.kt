@@ -287,7 +287,7 @@ class Inntektsmelding(
 
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
-        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.periode().start
+        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.periode.start
         override fun skjæringstidspunkt(inntektsmelding: Inntektsmelding, person: Person) = vedtaksperiode.skjæringstidspunkt
 
         private companion object {

@@ -200,7 +200,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
-    private val periode get() = behandlinger.periode()
+    internal val periode get() = behandlinger.periode()
     internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     private val jurist
         get() = behandlinger.subsumsjonslogg(
@@ -274,9 +274,9 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
         håndterSykdomstidslinjeHendelse(hendelse, aktivitetslogg) {
-            val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
+            val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
             tilstand.håndter(this, hendelse, aktivitetslogg)
-            val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
+            val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
             if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
                 behandlinger.sisteInntektsmeldingDagerId()?.let {
                     person.arbeidsgiveropplysningerKorrigert(
@@ -700,7 +700,6 @@ internal class Vedtaksperiode private constructor(
         return periode !in arbeidsgiverperiodeOther
     }
 
-    internal fun periode() = periode
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.kontekst(arbeidsgiver)
         aktivitetslogg.kontekst(this)
@@ -3709,7 +3708,7 @@ internal class Vedtaksperiode private constructor(
                 if (vedtaksperiode.id in startdatoer) return@forEach
                 val sammenhendeVedtaksperioder =
                     vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
-                val startdatoPåSammenhengendeVedtaksperioder = sammenhendeVedtaksperioder.periode().start
+                val startdatoPåSammenhengendeVedtaksperioder = sammenhendeVedtaksperioder.first().periode.start
                 startdatoer.putAll(sammenhendeVedtaksperioder.associate { it.id to startdatoPåSammenhengendeVedtaksperioder })
             }
 
@@ -3859,7 +3858,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) =
             forkastede
-                .filter { it.periode.overlapperMed(vedtaksperiode.periode()) }
+                .filter { it.periode.overlapperMed(vedtaksperiode.periode) }
                 .onEach {
                     val delvisOverlappende =
                         !it.periode.inneholder(vedtaksperiode.periode) // hvorvidt vedtaksperioden strekker seg utenfor den forkastede
@@ -3915,13 +3914,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.slåSammenForkastedeSykdomstidslinjer(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje =
             map { it.sykdomstidslinje }.plusElement(sykdomstidslinje).slåSammenForkastedeSykdomstidslinjer()
-
-        internal fun List<Vedtaksperiode>.inneholder(id: UUID) = any { id == it.id }
-        internal fun List<Vedtaksperiode>.periode(): Periode {
-            val fom = minOf { it.periode.start }
-            val tom = maxOf { it.periode.endInclusive }
-            return Periode(fom, tom)
-        }
 
         internal fun gjenopprett(
             person: Person,
