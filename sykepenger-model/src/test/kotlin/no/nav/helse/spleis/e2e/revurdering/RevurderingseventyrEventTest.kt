@@ -62,7 +62,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skjønnsfastsetting`() {
+    fun skjønnsfastsetting() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

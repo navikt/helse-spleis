@@ -33,7 +33,7 @@ internal class UtbetalingstidslinjerBuilderTest {
     }
 
     @Test
-    fun `sammenblanding`() {
+    fun sammenblanding() {
         val tidslinje = tidslinjeOf(7.NAV, 5.ARB, 2.FRI, 5.AVV, 2.HELG, 14.NAVDAGER)
         assertRekkefølge(tidslinje)
         assertEquals(8, tidslinje.inspektør.navHelgDagTeller)

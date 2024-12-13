@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `selvstendigsøknad`() {
+    fun selvstendigsøknad() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSelvstendigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))

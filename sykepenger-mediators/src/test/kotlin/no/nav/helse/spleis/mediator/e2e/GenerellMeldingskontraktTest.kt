@@ -67,7 +67,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `behov`() {
+    fun behov() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))

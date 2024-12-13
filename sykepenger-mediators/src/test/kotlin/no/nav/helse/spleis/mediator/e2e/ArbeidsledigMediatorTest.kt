@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `arbeidsledigsøknad`() {
+    fun arbeidsledigsøknad() {
         sendNySøknadArbeidsledig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendArbeidsledigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))

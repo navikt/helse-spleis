@@ -69,7 +69,7 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
-    fun `equals`() {
+    fun equals() {
         val beløpstidslinje1 = (Arbeidsgiver oppgir 1000.daglig hele januar)
         val beløpstidslinje2 = (Arbeidsgiver oppgir 1000.daglig hele januar)
         val beløpstidslinje3 = (Saksbehandler oppgir 1000.daglig hele januar)

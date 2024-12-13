@@ -718,7 +718,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `g`() {
+    fun g() {
         nyeVedtak(januar, a1, a2)
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,

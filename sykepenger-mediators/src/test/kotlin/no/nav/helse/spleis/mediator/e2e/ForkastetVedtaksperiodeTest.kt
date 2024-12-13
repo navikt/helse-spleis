@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `vedtaksperiode_forkastet`() {
+    fun vedtaksperiode_forkastet() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))

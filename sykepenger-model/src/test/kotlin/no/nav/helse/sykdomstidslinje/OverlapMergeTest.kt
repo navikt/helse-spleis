@@ -35,7 +35,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    fun `dagturnering`() {
+    fun dagturnering() {
         val actual =
             (1.januar ferieTil 12.januar).merge(7.januar betalingTil 19.januar).merge(17.januar ferieTil 26.januar)
 
