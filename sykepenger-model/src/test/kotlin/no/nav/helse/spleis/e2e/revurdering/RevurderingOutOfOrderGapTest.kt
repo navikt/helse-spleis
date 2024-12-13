@@ -1123,13 +1123,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         // 10.februar-2.mars hører derfor til samme arbeidsgiverperioden som 20.mars-4.april, ettersom avstanden mellom
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
 
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-            nyPeriode(10.februar til 2.mars, a2)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
-        } else {
-            assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_VILKÅRSPRØVING") { nyPeriode(10.februar til 2.mars, a2) }
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, a2)
-        }
+        nyPeriode(10.februar til 2.mars, a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a1)

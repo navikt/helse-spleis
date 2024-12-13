@@ -109,12 +109,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         }
         a1 {
-            if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-                håndterSøknad(april)
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            } else {
-                assertThrows<IllegalStateException> { håndterSøknad(april) }
-            }
+            håndterSøknad(april)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

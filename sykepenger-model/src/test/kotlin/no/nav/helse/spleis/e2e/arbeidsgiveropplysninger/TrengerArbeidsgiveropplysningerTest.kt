@@ -142,11 +142,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        } else {
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        }
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -584,46 +580,34 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
         forlengVedtak(februar, orgnummer = a1)
 
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) nyPeriode(mars, a2)
-        else assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_HISTORIKK") { nyPeriode(mars, a2) }
+        nyPeriode(mars, a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-            val trengerArbeidsgiveropplysningerEvents = observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+        val trengerArbeidsgiveropplysningerEvents = observatør.trengerArbeidsgiveropplysningerVedtaksperioder
 
-            val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
+        val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
 
-            val expectedForespurteOpplysninger = listOf(
-                PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                PersonObserver.Refusjon(
-                    listOf(
-                        Refusjonsforslag(1.mars, 9.mars, 17000.månedlig.månedlig),
-                        Refusjonsforslag(10.mars, 31.mars, 16000.månedlig.månedlig),
-                        Refusjonsforslag(1.april, null, 15000.månedlig.månedlig)
-                    )
-                ),
-                PersonObserver.Arbeidsgiverperiode
-            )
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.Refusjon(
+                listOf(
+                    Refusjonsforslag(1.mars, 9.mars, 17000.månedlig.månedlig),
+                    Refusjonsforslag(10.mars, 31.mars, 16000.månedlig.månedlig),
+                    Refusjonsforslag(1.april, null, 15000.månedlig.månedlig)
+                )
+            ),
+            PersonObserver.Arbeidsgiverperiode
+        )
 
-            assertEquals(
-                expectedForespurteOpplysninger,
-                trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger
-            )
-        } else {
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                orgnummer = a2
-            )
-        }
+        assertEquals(
+            expectedForespurteOpplysninger,
+            trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger
+        )
     }
 
     @Test
@@ -648,45 +632,33 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
         forlengVedtak(februar, orgnummer = a1)
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) nyPeriode(mars, a2)
-        else assertUgyldigSituasjon("Burde ikke ha tom refusjonstidslinje i tilstand AVVENTER_HISTORIKK") { nyPeriode(mars, a2) }
+        nyPeriode(mars, a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-            val trengerArbeidsgiveropplysningerEvents = observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+        val trengerArbeidsgiveropplysningerEvents = observatør.trengerArbeidsgiveropplysningerVedtaksperioder
 
-            val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
+        val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
 
-            val expectedForespurteOpplysninger = listOf(
-                PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                PersonObserver.Refusjon(
-                    listOf(
-                        Refusjonsforslag(1.januar, 15.mars, INNTEKT_FLERE_AG.månedlig),
-                        Refusjonsforslag(16.mars, null, INGEN.månedlig)
-                    )
-                ),
-                PersonObserver.Arbeidsgiverperiode
-            )
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.Refusjon(
+                listOf(
+                    Refusjonsforslag(1.januar, 15.mars, INNTEKT_FLERE_AG.månedlig),
+                    Refusjonsforslag(16.mars, null, INGEN.månedlig)
+                )
+            ),
+            PersonObserver.Arbeidsgiverperiode
+        )
 
-            assertEquals(
-                expectedForespurteOpplysninger,
-                trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger
-            )
-        } else {
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                orgnummer = a2
-            )
-        }
+        assertEquals(
+            expectedForespurteOpplysninger,
+            trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger
+        )
     }
 
     @Test

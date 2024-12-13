@@ -71,7 +71,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
     @Test
     fun `En situasjon med gjenbruk hvor refusjonsopplysningene på vilkårsgrunnlaget blir feil, men vil løse seg med refusjonsopplysniger på behandlingene`() {
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return
         a1 {
             nyttVedtak(2.januar til 31.januar)
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)

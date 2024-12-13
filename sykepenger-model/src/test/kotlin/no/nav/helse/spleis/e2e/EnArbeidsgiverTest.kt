@@ -71,19 +71,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         val tidslinje = "ARR SSSSSRR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH"
         assertEquals(tidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
 
-        assertForventetFeil(
-            forklaring = "Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen",
-            nå = {
-                assertEquals(
-                    "Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-07-09",
-                    assertThrows<IllegalStateException> { håndterYtelser(2.vedtaksperiode) }.message
-                )
-            },
-            ønsket = {
-                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
 
         håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
         assertEquals("ARR SSSSSJJ JJJJJJJ JJJJJJJ JJJJJJJ JNSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())

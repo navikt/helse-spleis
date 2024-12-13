@@ -256,14 +256,14 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[6.februar]::class)
         nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
-        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_INNTEKTSMELDING trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!") {
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_BLOKKERENDE_PERIODE trenger hjelp fordi FLERE_SKJÆRINGSTIDSPUNKT!") {
             håndterInntektsmelding(
                 listOf(16.januar til 31.januar)
             )
         }
         observatør.assertVenter(1.vedtaksperiode.id(ORGNUMMER), venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
 
         håndterOverstyrTidslinje(
             listOf(

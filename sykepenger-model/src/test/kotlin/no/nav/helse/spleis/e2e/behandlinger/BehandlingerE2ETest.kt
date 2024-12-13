@@ -71,7 +71,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
     fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
-        if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return
         a1 {
             nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
             val korrigertIm = håndterInntektsmelding(
