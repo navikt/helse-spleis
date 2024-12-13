@@ -309,7 +309,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+            PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
 
@@ -416,7 +416,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -460,7 +460,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+            PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
 
@@ -477,7 +477,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+            PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
 
@@ -533,7 +533,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(INNTEKT),
-            PersonObserver.Refusjon(emptyList<Refusjonsforslag>()),
+            PersonObserver.Refusjon(emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
@@ -791,7 +791,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+            PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
         val actualForespurteOpplysninger =
@@ -862,7 +862,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
+            PersonObserver.Refusjon(forslag = emptyList())
         )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
@@ -925,7 +925,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+            PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
         val actualForespurteOpplysninger =
@@ -951,7 +951,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 2.januar)),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -1049,7 +1049,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
+            PersonObserver.Refusjon(forslag = emptyList())
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)

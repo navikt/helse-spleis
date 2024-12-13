@@ -467,7 +467,7 @@ class Oppdrag private constructor(
             ?.filterNot { it.erHelg() }
             ?.map { UtbetaltDag(it, linje.beløp!!) }
             ?.toList()
-            ?: emptyList<UtbetaltDag>()
+            ?: emptyList()
     }
 
     fun dto() = OppdragUtDto(

@@ -56,7 +56,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -89,7 +89,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -125,7 +125,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>()),
+                PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
         )
@@ -231,7 +231,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar)),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList<Refusjonsforslag>())
+                PersonObserver.Refusjon(forslag = emptyList())
             )
         )
 

@@ -284,7 +284,7 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling : JsonMigration(ver
 
         private fun Iterable<LocalDate>.merge(): List<ClosedRange<LocalDate>> {
             val sortert = sortedBy { it }
-            return sortert.fold(emptyList<ClosedRange<LocalDate>>()) { resultat, dagen ->
+            return sortert.fold(emptyList()) { resultat, dagen ->
                 val last = resultat.lastOrNull()
                 when {
                     // listen er tom

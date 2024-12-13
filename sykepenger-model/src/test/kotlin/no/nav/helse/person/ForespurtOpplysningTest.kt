@@ -19,7 +19,7 @@ class ForespurtOpplysningTest {
         val forespurteOpplysninger = listOf(
             PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Arbeidsgiverperiode,
-            PersonObserver.Refusjon(emptyList<Refusjonsforslag>())
+            PersonObserver.Refusjon(emptyList())
         )
 
         val expectedJson = forespurteOpplysningerMap()
