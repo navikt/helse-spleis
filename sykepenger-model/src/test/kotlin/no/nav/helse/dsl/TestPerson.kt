@@ -488,10 +488,10 @@ internal fun lagStandardInntekterForOpptjeningsvurdering(arbeidsgivere: List<Pai
         ArbeidsgiverInntekt(
             arbeidsgiver = orgnummer,
             inntekter = listOf(
-                ArbeidsgiverInntekt.MånedligInntekt(
+                MånedligInntekt(
                     YearMonth.from(måned),
                     inntekt,
-                    ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                     "kontantytelse",
                     "fastloenn"
                 )

@@ -783,14 +783,14 @@ private fun SykdomstidslinjeDto.tilPersonData() =
         periode = this.periode?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
     )
 
-private fun List<SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData>.forkortSykdomstidslinje(): List<SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData> {
+private fun List<DagData>.forkortSykdomstidslinje(): List<DagData> {
     return this.fold(emptyList()) { result, neste ->
         val slåttSammen = result.lastOrNull()?.utvideMed(neste) ?: return@fold result + neste
         result.dropLast(1) + slåttSammen
     }
 }
 
-private fun SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData.utvideMed(other: SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData): SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData? {
+private fun DagData.utvideMed(other: DagData): DagData? {
     if (!kanUtvidesMed(other)) return null
     val otherDato = checkNotNull(other.dato) { "dato må være satt" }
     if (this.dato != null) {
@@ -799,14 +799,14 @@ private fun SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData.utvid
     return this.copy(tom = other.dato)
 }
 
-private fun SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData.kanUtvidesMed(other: SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData): Boolean {
+private fun DagData.kanUtvidesMed(other: DagData): Boolean {
     // alle verdier må være like (untatt datoene)
-    val utenDatoer = { dag: SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData -> dag.copy(fom = null, tom = null, dato = LocalDate.EPOCH) }
+    val utenDatoer = { dag: DagData -> dag.copy(fom = null, tom = null, dato = LocalDate.EPOCH) }
     return utenDatoer(this) == utenDatoer(other) && (dato ?: tom!!).nesteDag == other.dato
 }
 
 private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
-    is SykdomstidslinjeDagDto.UkjentDagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.UkjentDagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.UKJENT_DAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -817,7 +817,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.AndreYtelserDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.AndreYtelserDto -> DagData(
         type = when (this.ytelse) {
             SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_AAP
             SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Foreldrepenger -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ANDRE_YTELSER_FORELDREPENGER
@@ -836,7 +836,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -847,7 +847,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.ArbeidsdagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.ArbeidsdagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -858,7 +858,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosent,
@@ -869,7 +869,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosent,
@@ -880,7 +880,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.FeriedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.FeriedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -891,7 +891,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.ForeldetSykedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.ForeldetSykedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosent,
@@ -902,7 +902,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.FriskHelgedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.FriskHelgedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -913,7 +913,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.PermisjonsdagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.PermisjonsdagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -924,7 +924,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.ProblemDagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.ProblemDagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG,
         kilde = this.kilde.tilPersonData(),
         grad = 0.0,
@@ -935,7 +935,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.SykHelgedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.SykHelgedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosent,
@@ -946,7 +946,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.SykedagDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.SykedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosent,
@@ -957,7 +957,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.SykedagNavDto -> SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    is SykdomstidslinjeDagDto.SykedagNavDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosent,
@@ -1120,10 +1120,10 @@ private fun BehandlingkildeDto.tilPersonData() =
     )
 
 private fun AvsenderDto.tilPersonData() = when (this) {
-    AvsenderDto.ARBEIDSGIVER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
-    AvsenderDto.SAKSBEHANDLER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
-    AvsenderDto.SYKMELDT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
-    AvsenderDto.SYSTEM -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
+    AvsenderDto.ARBEIDSGIVER -> AvsenderData.ARBEIDSGIVER
+    AvsenderDto.SAKSBEHANDLER -> AvsenderData.SAKSBEHANDLER
+    AvsenderDto.SYKMELDT -> AvsenderData.SYKMELDT
+    AvsenderDto.SYSTEM -> AvsenderData.SYSTEM
 }
 
 private fun BehandlingendringUtDto.tilPersonData() =
@@ -1233,14 +1233,14 @@ private fun UtbetalingstidslinjeUtDto.tilPersonData() = SpannerPersonDto.Utbetal
     dager = this.dager.map { it.tilPersonData() }.forkortUtbetalingstidslinje()
 )
 
-private fun List<SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData>.forkortUtbetalingstidslinje(): List<SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData> {
+private fun List<UtbetalingsdagData>.forkortUtbetalingstidslinje(): List<UtbetalingsdagData> {
     return this.fold(emptyList()) { result, neste ->
         val slåttSammen = result.lastOrNull()?.utvideMed(neste) ?: return@fold result + neste
         result.dropLast(1) + slåttSammen
     }
 }
 
-private fun SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData.utvideMed(other: SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData): SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData? {
+private fun UtbetalingsdagData.utvideMed(other: UtbetalingsdagData): UtbetalingsdagData? {
     if (!kanUtvidesMed(other)) return null
     val otherDato = checkNotNull(other.dato) { "dato må være satt" }
     if (this.dato != null) {
@@ -1249,14 +1249,14 @@ private fun SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData.utvideM
     return this.copy(tom = other.dato)
 }
 
-private fun SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData.kanUtvidesMed(other: SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData): Boolean {
+private fun UtbetalingsdagData.kanUtvidesMed(other: UtbetalingsdagData): Boolean {
     // alle verdier må være like (untatt datoene)
-    val utenDatoer = { dag: SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData -> dag.copy(fom = null, tom = null, dato = LocalDate.EPOCH) }
+    val utenDatoer = { dag: UtbetalingsdagData -> dag.copy(fom = null, tom = null, dato = LocalDate.EPOCH) }
     return utenDatoer(this) == utenDatoer(other) && (dato ?: tom!!).nesteDag == other.dato
 }
 
 private fun UtbetalingsdagUtDto.tilPersonData() =
-    SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData(
+    UtbetalingsdagData(
         type = when (this) {
             is UtbetalingsdagUtDto.ArbeidsdagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Arbeidsdag
             is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
@@ -1567,7 +1567,7 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
     )
 
 private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
-    VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData(
+    ArbeidsgiverInntektsopplysningData(
         orgnummer = this.orgnummer,
         fom = this.gjelder.fom,
         tom = this.gjelder.tom,
@@ -1583,7 +1583,7 @@ private fun NyInntektUnderveisDto.tilPersonData() = VilkårsgrunnlagElementData.
 )
 
 private fun InntektsopplysningUtDto.tilPersonData() =
-    VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
+    ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
         id = this.id,
         dato = this.dato,
         hendelseId = this.hendelseId,
@@ -1609,7 +1609,7 @@ private fun InntektsopplysningUtDto.tilPersonData() =
         },
         subsumsjon = when (this) {
             is InntektsopplysningUtDto.SaksbehandlerDto -> this.subsumsjon?.let {
-                VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.SubsumsjonData(
+                ArbeidsgiverInntektsopplysningData.InntektsopplysningData.SubsumsjonData(
                     paragraf = it.paragraf,
                     bokstav = it.bokstav,
                     ledd = it.ledd
@@ -1649,15 +1649,15 @@ private fun RefusjonsopplysningUtDto.tilPersonData() =
     )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =
-    VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData(
+    ArbeidsgiverInntektsopplysningData.SkatteopplysningData(
         hendelseId = this.hendelseId,
         beløp = this.beløp.beløp,
         måned = this.måned,
         type = when (this.type) {
-            InntekttypeDto.LØNNSINNTEKT -> VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.LØNNSINNTEKT
-            InntekttypeDto.NÆRINGSINNTEKT -> VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.NÆRINGSINNTEKT
-            InntekttypeDto.PENSJON_ELLER_TRYGD -> VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
-            InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
+            InntekttypeDto.LØNNSINNTEKT -> ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.LØNNSINNTEKT
+            InntekttypeDto.NÆRINGSINNTEKT -> ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.NÆRINGSINNTEKT
+            InntekttypeDto.PENSJON_ELLER_TRYGD -> ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
+            InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> ArbeidsgiverInntektsopplysningData.SkatteopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
         },
         fordel = fordel,
         beskrivelse = beskrivelse,

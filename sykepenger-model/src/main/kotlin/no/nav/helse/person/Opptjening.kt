@@ -60,11 +60,11 @@ internal class Opptjening private constructor(
     }
 
     internal fun deaktiver(orgnummer: String): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
+        return nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
     }
 
     internal fun aktiver(orgnummer: String): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
+        return nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
     }
 
     internal data class ArbeidsgiverOpptjeningsgrunnlag(val orgnummer: String, val ansattPerioder: List<Arbeidsforhold>) {

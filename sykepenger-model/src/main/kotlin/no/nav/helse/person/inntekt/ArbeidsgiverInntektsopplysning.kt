@@ -268,7 +268,7 @@ data class ArbeidsgiverInntektsopplysning(
         ): PersonObserver.Inntektsdata? {
             val originalInntektsopplysning = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
             val type = when (originalInntektsopplysning) {
-                is no.nav.helse.person.inntekt.Inntektsmelding -> PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
+                is Inntektsmelding -> PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
                 is Saksbehandler -> PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
                 else -> return null
             }
@@ -305,7 +305,7 @@ data class ArbeidsgiverInntektsopplysning(
                         is IkkeRapportert,
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
 
-                        is no.nav.helse.person.inntekt.Inntektsmelding -> arbeidsgiver.inntektsopplysning.inntektskilde()
+                        is Inntektsmelding -> arbeidsgiver.inntektsopplysning.inntektskilde()
 
                         is Infotrygd -> Inntektskilde.Arbeidsgiver
 

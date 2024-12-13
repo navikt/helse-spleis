@@ -224,7 +224,7 @@ data class Refusjonsopplysning(
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
 
             internal fun gjenopprett(dto: RefusjonsopplysningerInnDto) = Refusjonsopplysninger(
-                refusjonsopplysninger = dto.opplysninger.map { Refusjonsopplysning.gjenopprett(it) }
+                refusjonsopplysninger = dto.opplysninger.map { gjenopprett(it) }
             )
         }
 

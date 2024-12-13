@@ -69,6 +69,6 @@ internal class RefusjonsservitørTest {
     }
 
     private companion object {
-        private val kilde = Kilde(UUID.randomUUID(), Avsender.ARBEIDSGIVER, LocalDateTime.now())
+        private val kilde = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
     }
 }

@@ -22,8 +22,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag.UtbetaltDag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
@@ -97,11 +96,11 @@ class Oppdrag private constructor(
                 overføringstidspunkt = dto.overføringstidspunkt,
                 avstemmingsnøkkel = dto.avstemmingsnøkkel,
                 status = when (dto.status) {
-                    OppdragstatusDto.AKSEPTERT -> Oppdragstatus.AKSEPTERT
-                    OppdragstatusDto.AKSEPTERT_MED_FEIL -> Oppdragstatus.AKSEPTERT_MED_FEIL
-                    OppdragstatusDto.AVVIST -> Oppdragstatus.AVVIST
-                    OppdragstatusDto.FEIL -> Oppdragstatus.FEIL
-                    OppdragstatusDto.OVERFØRT -> Oppdragstatus.OVERFØRT
+                    OppdragstatusDto.AKSEPTERT -> AKSEPTERT
+                    OppdragstatusDto.AKSEPTERT_MED_FEIL -> AKSEPTERT_MED_FEIL
+                    OppdragstatusDto.AVVIST -> AVVIST
+                    OppdragstatusDto.FEIL -> FEIL
+                    OppdragstatusDto.OVERFØRT -> OVERFØRT
                     null -> null
                 },
                 tidsstempel = dto.tidsstempel,
@@ -152,7 +151,7 @@ class Oppdrag private constructor(
         maksdato: LocalDate?,
         saksbehandler: String
     ) {
-        if (status == Oppdragstatus.AKSEPTERT) return aktivitetslogg.info("Overfører ikke oppdrag som allerede er akseptert for fagområde=$fagområde med fagsystemId=$fagsystemId")
+        if (status == AKSEPTERT) return aktivitetslogg.info("Overfører ikke oppdrag som allerede er akseptert for fagområde=$fagområde med fagsystemId=$fagsystemId")
         if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
         aktivitetslogg.kontekst(this)
@@ -490,9 +489,9 @@ class Oppdrag private constructor(
         overføringstidspunkt = overføringstidspunkt,
         avstemmingsnøkkel = avstemmingsnøkkel,
         status = when (status) {
-            Oppdragstatus.OVERFØRT -> OppdragstatusDto.OVERFØRT
-            Oppdragstatus.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
-            Oppdragstatus.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
+            OVERFØRT -> OppdragstatusDto.OVERFØRT
+            AKSEPTERT -> OppdragstatusDto.AKSEPTERT
+            AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
             AVVIST -> OppdragstatusDto.AVVIST
             FEIL -> OppdragstatusDto.FEIL
             null -> null

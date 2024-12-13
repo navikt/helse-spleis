@@ -1,6 +1,6 @@
 package no.nav.helse.person.aktivitetslogg
 
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
+import no.nav.helse.person.aktivitetslogg.Aktivitet.*
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -12,11 +12,11 @@ class Aktivitetslogg(
     val aktiviteter: List<Aktivitet> get() = _aktiviteter.toList()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
 
-    val behov get() = aktiviteter.filterIsInstance<Aktivitet.Behov>()
-    val info get() = aktiviteter.filterIsInstance<Aktivitet.Info>()
-    val varsel get() = aktiviteter.filterIsInstance<Aktivitet.Varsel>()
-    val funksjonellFeil get() = aktiviteter.filterIsInstance<Aktivitet.FunksjonellFeil>()
-    val logiskFeil get() = aktiviteter.filterIsInstance<Aktivitet.LogiskFeil>()
+    val behov get() = aktiviteter.filterIsInstance<Behov>()
+    val info get() = aktiviteter.filterIsInstance<Info>()
+    val varsel get() = aktiviteter.filterIsInstance<Varsel>()
+    val funksjonellFeil get() = aktiviteter.filterIsInstance<FunksjonellFeil>()
+    val logiskFeil get() = aktiviteter.filterIsInstance<LogiskFeil>()
 
     override fun info(melding: String, vararg params: Any?) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)

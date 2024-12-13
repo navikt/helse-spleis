@@ -112,7 +112,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
-            val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
+            val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
@@ -140,8 +140,8 @@ internal class FrilanserTest : AbstractDslTest() {
                 beregnetInntekt = 10000.månedlig
             )
             val arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = 1.februar, type = Arbeidsforholdtype.ORDINÆRT)
+                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = EPOCH, ansattTom = 1.februar, type = Arbeidsforholdtype.ORDINÆRT)
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,

@@ -474,7 +474,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Var ikke permisjon i forlengelsen likevel`() {
         nyttVedtak(januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Permisjon(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)

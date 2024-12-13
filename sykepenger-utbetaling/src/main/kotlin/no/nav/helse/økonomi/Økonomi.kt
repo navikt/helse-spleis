@@ -181,10 +181,10 @@ class Økonomi private constructor(
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
                 er6GBegrenset = dto.er6GBegrenset,
                 tilstand = when {
-                    dto.arbeidsgiverbeløp == null && erAvvistDag -> Økonomi.Tilstand.Låst
-                    dto.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
-                    erAvvistDag -> Økonomi.Tilstand.LåstMedBeløp
-                    else -> Økonomi.Tilstand.HarBeløp
+                    dto.arbeidsgiverbeløp == null && erAvvistDag -> Tilstand.Låst
+                    dto.arbeidsgiverbeløp == null -> Tilstand.HarInntekt
+                    erAvvistDag -> Tilstand.LåstMedBeløp
+                    else -> Tilstand.HarBeløp
                 }
             )
         }
