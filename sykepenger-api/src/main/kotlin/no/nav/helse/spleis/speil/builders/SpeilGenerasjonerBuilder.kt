@@ -428,7 +428,7 @@ internal class SpeilGenerasjonerBuilder(
             beløpstidslinjer.flatMap { it.perioder }.fold(emptyList<BeløpstidslinjeperiodeDto>()) { resultat, periode ->
                 when {
                     resultat.isEmpty() -> listOf(periode)
-                    resultat.last().kanUtvidesAv(periode) -> {
+                    resultat.last().kanUtvidesForSpeil(periode) -> {
                         resultat.dropLast(1) + resultat.last().copy(tom = periode.tom)
                     }
 
@@ -436,6 +436,10 @@ internal class SpeilGenerasjonerBuilder(
                 }
             }
         }
+
+        private fun BeløpstidslinjeperiodeDto.kanUtvidesForSpeil(other: BeløpstidslinjeperiodeDto) =
+            this.tom.plusDays(1) == other.fom &&
+                this.dagligBeløp == other.dagligBeløp
 
         private fun Map<LocalDate, List<BeløpstidslinjeperiodeDto>>.tilRefusjonselementerUtenGapOgÅpenHale() = mapValues { (_, beløpstidslinjeperioder) ->
             beløpstidslinjeperioder.mapWithNext { nåværende, neste ->
