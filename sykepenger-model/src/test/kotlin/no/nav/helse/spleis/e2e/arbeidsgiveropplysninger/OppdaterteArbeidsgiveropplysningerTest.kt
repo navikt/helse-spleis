@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import OpenInSpanner
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag

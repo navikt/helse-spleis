@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import OpenInSpanner
-import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -56,6 +53,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
@@ -77,7 +75,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
