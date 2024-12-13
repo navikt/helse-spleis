@@ -406,7 +406,7 @@ internal abstract class AbstractE2ETest {
 
     protected fun nyeVedtak(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
         tilYtelser(fom, tom, *orgnummerOgVedtaksperioder)
-        orgnummerOgVedtaksperioder.forEach {
+        orgnummerOgVedtaksperioder.forEach { _ ->
             håndterYtelserTilGodkjenning()
             håndterUtbetalingsgodkjenning()
             håndterUtbetalt()
@@ -415,7 +415,7 @@ internal abstract class AbstractE2ETest {
 
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, vararg orgnumre: String) {
         orgnumre.forEach { håndterSøknad(fom til tom, it) }
-        orgnumre.forEach {
+        orgnumre.forEach { _ ->
             håndterYtelserTilGodkjenning()
             håndterUtbetalingsgodkjenning()
             håndterUtbetalt()

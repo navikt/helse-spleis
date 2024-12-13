@@ -242,6 +242,7 @@ internal class PeriodeTest {
     @Test
     fun likhet() {
         val periode = Periode(2.januar, 3.januar)
+        @Suppress("KotlinConstantConditions") // det er jo akkurat dét vi sjekker, dumme inspection.
         assertTrue(periode == periode)
         assertTrue(periode == Periode(2.januar, 3.januar))
         assertFalse(periode == Periode(periode.start, periode.endInclusive.plusDays(1)))
