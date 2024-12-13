@@ -126,6 +126,7 @@ class Utbetaling private constructor(
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
     fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
+    fun erAnnulleringInFlight() = erAnnullering() && erInFlight()
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     fun erAvvist() = tilstand == IkkeGodkjent
     private fun erAnnullering() = type == ANNULLERING

@@ -2140,6 +2140,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg): Tilstand {
+            if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return TrengerInntektsmelding(
                 vedtaksperiode
@@ -2165,6 +2166,16 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg: IAktivitetslogg
             ) {
                 aktivitetslogg.info("Trenger inntektsmelding for perioden etter igangsatt revurdering")
+            }
+        }
+
+        private data object HarPågåendeUtbetaling : Tilstand {
+            override fun venteårsak(): Venteårsak? {
+                return UTBETALING.utenBegrunnelse
+            }
+
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+                aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             }
         }
 
@@ -3283,6 +3294,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
         }
 
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+            aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
+        }
+
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -3736,12 +3751,11 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal val HAR_PÅGÅENDE_UTBETALINGER: VedtaksperiodeFilter = { it.behandlinger.utbetales() }
-
         private val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
             it.tilstand == AvventerGodkjenning || it.tilstand == AvventerGodkjenningRevurdering
         }
 
+        private val HAR_PÅGÅENDE_UTBETALING: VedtaksperiodeFilter = { it.behandlinger.utbetales() }
         private val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
@@ -3810,7 +3824,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
-            filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
+            firstOrNull(HAR_PÅGÅENDE_UTBETALING) ?: filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
         internal fun List<Vedtaksperiode>.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
             vedtaksperiode: Vedtaksperiode,
