@@ -2637,6 +2637,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.revurderTidslinje(hendelse, aktivitetslogg)
+            vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
         override fun håndter(
