@@ -63,7 +63,7 @@ internal class TurneringsnøkkelTest {
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
     }
 
-    private sealed class TestHendelse() : SykdomshistorikkHendelse {
+    private sealed class TestHendelse : SykdomshistorikkHendelse {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde

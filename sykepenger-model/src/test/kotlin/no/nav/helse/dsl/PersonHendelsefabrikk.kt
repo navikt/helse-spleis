@@ -27,7 +27,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 
-internal class PersonHendelsefabrikk() {
+internal class PersonHendelsefabrikk {
     internal fun lagDødsmelding(dødsdato: LocalDate) =
         Dødsmelding(
             meldingsreferanseId = UUID.randomUUID(),

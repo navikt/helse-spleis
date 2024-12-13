@@ -80,7 +80,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 
-internal abstract class AbstractEndToEndMediatorTest() {
+internal abstract class AbstractEndToEndMediatorTest {
     internal companion object {
         internal const val UNG_PERSON_FNR_2018 = "12029240045"
         internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)

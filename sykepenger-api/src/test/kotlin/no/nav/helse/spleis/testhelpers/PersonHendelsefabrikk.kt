@@ -28,7 +28,7 @@ import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning.Companion
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.økonomi.Inntekt
 
-internal class PersonHendelsefabrikk() {
+internal class PersonHendelsefabrikk {
     internal fun lagMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode> = emptySet(), perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet()) =
         MinimumSykdomsgradsvurderingMelding(
             perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK,
