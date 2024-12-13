@@ -72,15 +72,15 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
 
     /**
      * tester serialisering av person med ulike scenario
-     * [x] utbetaling med delvis refusjon
-     * [x] auu periode blir omgjort
-     * [x] ghost i vilkårsgrunnlag
-     * [x] sykmeldingsperiode
-     * [x] forkastet vedtaksperiode
-     * [x] foreldet periode
-     * [x] arbeidsgiverperiodenav-dager
-     * [x] feriepenger
-     * [x] annullering
+     * (x) utbetaling med delvis refusjon
+     * (x) auu periode blir omgjort
+     * (x) ghost i vilkårsgrunnlag
+     * (x) sykmeldingsperiode
+     * (x) forkastet vedtaksperiode
+     * (x) foreldet periode
+     * (x) arbeidsgiverperiodenav-dager
+     * (x) feriepenger
+     * (x) annullering
      *
      */
     @Test
