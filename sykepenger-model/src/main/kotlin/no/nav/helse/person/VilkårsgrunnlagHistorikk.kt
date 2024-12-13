@@ -235,14 +235,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(person, hendelse, opptjening, subsumsjonslogg)
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag)
-            val eventyr = Revurderingseventyr.Companion.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endringsdato)
+            val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr
         }
 
         internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, opptjening, subsumsjonslogg)
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag)
-            val eventyr = Revurderingseventyr.Companion.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato)
+            val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr
         }
 
@@ -291,7 +291,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 subsumsjonslogg
             )
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag)
-            val eventyr = Revurderingseventyr.Companion.korrigertInntektsmeldingInntektsopplysninger(korrigertInntektsmelding.hendelse, skjæringstidspunkt, endringsdato)
+            val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(korrigertInntektsmelding.hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, EmptyLog) to eventyr
         }
 
