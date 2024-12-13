@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import OpenInSpanner
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
+import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -38,6 +38,7 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.til
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -101,7 +102,9 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.søndag
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.torsdag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -119,6 +122,17 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `portalinntektsmelding på forlengelse til en periode utenfor arbeidsgiverperioden, men bare i helg`() {
+        håndterSøknad(torsdag den 4.januar til søndag den 21.januar)
+        håndterSøknad(mandag den 22.januar til 31.januar)
+        håndterInntektsmelding(listOf(4.januar til 19.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(4.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
 
     @Test
     fun `ignorer inntektsmelding som er lik tidligere`() {
@@ -628,7 +642,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
     }
-    
+
     @Test
     fun `flere arbeidsgivere - a1 har opphold mellom periodene - lps im`() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
