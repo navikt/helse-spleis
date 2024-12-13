@@ -10,7 +10,7 @@ class AnnullerUtbetaling(
     organisasjonsnummer: String,
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,
-    private val saksbehandlerEpost: String,
+    saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime
 ) : Hendelse, AnnullerUtbetalingHendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
@@ -26,5 +26,5 @@ class AnnullerUtbetaling(
 
     override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
 
-    fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
+    private fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
 }
