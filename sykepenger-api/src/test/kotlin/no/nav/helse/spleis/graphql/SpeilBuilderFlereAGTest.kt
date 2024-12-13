@@ -578,7 +578,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `flere oppstykkede ag - vet ikke om dette matcher speil sin forventning`() = Toggle.RefusjonsopplysningerTilSpeilFraBehandling.enable {
+    fun `flere oppstykkede ag - vet ikke om dette matcher speil sin forventning`() {
         nyeVedtak(1.januar, 31.januar, a1 to 1, a2 to 1)
         håndterSøknad(1.februar til 28.februar, a1)
         håndterSøknad(15.februar til 28.februar, a2)

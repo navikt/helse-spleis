@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.LinkedList
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -50,9 +49,6 @@ internal abstract class IVilkårsgrunnlag(
             deaktivert = inntekten.deaktivert
         )
     }
-
-    protected fun refusjonsopplysninger(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>) =
-        (if (Toggle.RefusjonsopplysningerTilSpeilFraBehandling.enabled) refusjonsopplysningerFraBehandlinger else refusjonsopplysningerPerArbeidsgiver).map { it.toDTO() }
 }
 
 internal class ISpleisGrunnlag(
@@ -81,7 +77,7 @@ internal class ISpleisGrunnlag(
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            arbeidsgiverrefusjoner = refusjonsopplysninger(refusjonsopplysningerFraBehandlinger),
+            arbeidsgiverrefusjoner = refusjonsopplysningerFraBehandlinger.map { it.toDTO() },
             grunnbeløp = grunnbeløp,
             sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
@@ -125,7 +121,7 @@ internal class IInfotrygdGrunnlag(
             beregningsgrunnlag = beregningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            arbeidsgiverrefusjoner = refusjonsopplysninger(refusjonsopplysningerFraBehandlinger)
+            arbeidsgiverrefusjoner = refusjonsopplysningerFraBehandlinger.map { it.toDTO() }
         )
     }
 

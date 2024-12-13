@@ -10,7 +10,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-   - https://spleis-api.intern.dev.nav.no
+    - https://spleis-api.intern.dev.nav.no
   liveness:
     path: /isalive
     initialDelay: 5
@@ -66,16 +66,14 @@ spec:
     - secret: google-sql-helse-spleis-spleis-spleis-api-cf4f5c2c
       mountPath: /var/run/secrets/spleis_sql
   env:
-  - name: DATABASE_INSTANCE
-    value: "helse-spleis"
-  - name: SPEKEMAT_SCOPE
-    value: "api://dev-gcp.tbd.spekemat/.default"
-  - name: SPEED_API_URL
-    value: http://speed-api-dev-proxy
-  - name: TOKEN_ENDPOINT_ENV_KEY
-    value: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
-  - name: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
-    value: http://speed-api-dev-proxy/token
-  - name: REFUSJONSOPPLYSNINGER_TIL_SPEIL_FRA_BEHANDLING
-    value: "true"
+    - name: DATABASE_INSTANCE
+      value: "helse-spleis"
+    - name: SPEKEMAT_SCOPE
+      value: "api://dev-gcp.tbd.spekemat/.default"
+    - name: SPEED_API_URL
+      value: http://speed-api-dev-proxy
+    - name: TOKEN_ENDPOINT_ENV_KEY
+      value: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
+    - name: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
+      value: http://speed-api-dev-proxy/token
 
