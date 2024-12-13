@@ -542,8 +542,8 @@ internal class HendelseMediator(
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
         datadelingMediator.ferdigstill(context)
         if (aktivitetslogg.aktiviteter.isEmpty()) return
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${aktivitetslogg.toString()}")
-        else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${aktivitetslogg.toString()}")
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n$aktivitetslogg")
+        else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n$aktivitetslogg")
         behovMediator.håndter(context, message, aktivitetslogg)
     }
 }
