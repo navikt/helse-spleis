@@ -3474,6 +3474,8 @@ internal class Vedtaksperiode private constructor(
         ) {
             aktivitetslogg.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
+            if (!aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+            return vedtaksperiode.forkast(søknad, aktivitetslogg)
         }
 
         override fun håndter(

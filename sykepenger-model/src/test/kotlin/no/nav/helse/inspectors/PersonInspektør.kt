@@ -1,20 +1,10 @@
 package no.nav.helse.inspectors
 
-import java.util.UUID
-import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.Periode
+import java.util.*
 import no.nav.helse.person.Person
-import no.nav.helse.person.VedtaksperiodeFilter
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
-
-internal fun Person.søppelbøtte(hendelse: Hendelse, periode: Periode) =
-    søppelbøtte(hendelse) { it.periode.start >= periode.start }
-
-internal fun Person.søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) =
-    søppelbøtte(hendelse, Aktivitetslogg(), filter)
 
 internal class PersonInspektør(person: Person) {
     internal val arbeidsgiverteller get() = arbeidsgivere.size

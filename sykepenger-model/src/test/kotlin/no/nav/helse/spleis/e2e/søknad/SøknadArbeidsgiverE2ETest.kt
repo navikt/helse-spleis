@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -324,16 +323,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             Ferie(18.januar, 19.januar)
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning - med mye gap til forkastet`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        person.søppelbøtte(forrigeHendelse, 1.januar til 20.januar)
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar))
-        håndterSøknad(Sykdom(10.februar, 15.februar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

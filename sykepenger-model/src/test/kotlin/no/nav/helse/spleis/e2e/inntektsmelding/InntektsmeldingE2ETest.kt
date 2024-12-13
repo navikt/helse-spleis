@@ -30,7 +30,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -198,7 +197,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSøknad(10.februar til 28.februar)
         val vedtaksperiodeIdFebruar = 2.vedtaksperiode
-        person.søppelbøtte(forrigeHendelse, februar)
+
+        // trigger forkasting ved å lage en delvis overlappende søknad
+        håndterSøknad(1.februar til 11.februar)
+
         assertSisteTilstand(vedtaksperiodeIdFebruar, TIL_INFOTRYGD)
         nullstillTilstandsendringer()
 

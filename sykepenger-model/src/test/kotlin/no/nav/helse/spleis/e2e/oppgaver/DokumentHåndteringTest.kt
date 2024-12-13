@@ -500,7 +500,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 10.januar,
                 tom = 15.januar,
                 behandletIInfotrygd = false,
-                forlengerPeriode = true,
+                forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
                 sykmeldingsperioder = listOf(11.januar til 16.januar, 10.januar til 15.januar)

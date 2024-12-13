@@ -571,7 +571,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(10.august, 31.august, 100.prosent), søknadId = overlappende)
             assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
-            assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
                 assertEquals(overlappende, behandling.kilde.meldingsreferanseId)
                 assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
