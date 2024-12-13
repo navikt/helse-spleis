@@ -27,7 +27,7 @@ import no.nav.helse.økonomi.Økonomi
 
 internal class Utbetalingstidslinjesubsumsjon(
     private val subsumsjonslogg: Subsumsjonslogg,
-    private val sykdomstidslinje: Sykdomstidslinje,
+    sykdomstidslinje: Sykdomstidslinje,
     utbetalingstidslinje: Utbetalingstidslinje
 ) {
 

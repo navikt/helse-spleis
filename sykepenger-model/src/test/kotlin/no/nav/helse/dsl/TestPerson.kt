@@ -68,8 +68,8 @@ import org.junit.jupiter.api.fail
 
 internal class TestPerson(
     private val observatør: TestObservatør,
-    private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
-    private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
+    personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
+    fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
     deferredLog: DeferredLog = DeferredLog(),
     jurist: SubsumsjonsListLog
 ) {

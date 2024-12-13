@@ -34,7 +34,7 @@ data class SpekematDTO(
     }
 }
 
-internal class SpeilBuilder(person: Person, private val pølsepakke: SpekematDTO) {
+internal class SpeilBuilder(person: Person, pølsepakke: SpekematDTO) {
 
     private companion object {
         /* Økes for å signalisere til spesialist at strukturen i snapshot'et

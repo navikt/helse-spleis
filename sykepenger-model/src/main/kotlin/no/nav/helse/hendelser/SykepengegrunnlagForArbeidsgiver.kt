@@ -11,7 +11,7 @@ class SykepengegrunnlagForArbeidsgiver(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val skjæringstidspunkt: LocalDate,
-    private val orgnummer: String,
+    orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(

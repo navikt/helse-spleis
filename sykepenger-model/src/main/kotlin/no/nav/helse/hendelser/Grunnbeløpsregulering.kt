@@ -9,7 +9,7 @@ import no.nav.helse.person.PersonObserver
 class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
     private val skjæringstidspunkt: LocalDate,
-    private val opprettet: LocalDateTime
+    opprettet: LocalDateTime
 ) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
 

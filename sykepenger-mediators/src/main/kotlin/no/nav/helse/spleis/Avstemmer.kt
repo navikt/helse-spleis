@@ -13,7 +13,7 @@ import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 
-class Avstemmer(private val person: PersonUtDto) {
+class Avstemmer(person: PersonUtDto) {
     private companion object {
         private val mapper = jacksonObjectMapper()
             .registerKotlinModule()
