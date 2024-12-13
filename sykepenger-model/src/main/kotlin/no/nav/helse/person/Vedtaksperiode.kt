@@ -1687,15 +1687,20 @@ internal class Vedtaksperiode private constructor(
             refusjonsopplysninger: Refusjonsopplysninger,
             aktivitetslogg: IAktivitetslogg
         ): Boolean {
-            if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) return vedtaksperiode.refusjonstidslinje.isNotEmpty()
-            return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.periode,
-                refusjonsopplysninger,
-                arbeidsgiverperiode,
-                aktivitetslogg,
-                vedtaksperiode.arbeidsgiver.organisasjonsnummer
-            )
+            val gammelSjekk: () -> Boolean = {
+                Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
+                    skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                    periode = vedtaksperiode.periode,
+                    refusjonsopplysninger = refusjonsopplysninger,
+                    arbeidsgiverperiode = arbeidsgiverperiode,
+                    aktivitetslogg = aktivitetslogg,
+                    organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
+                )
+            }
+            if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return gammelSjekk()
+            if (vedtaksperiode.refusjonstidslinje.isNotEmpty()) return true
+            if (gammelSjekk()) aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
+            return false
         }
 
         override fun lagreGjenbrukbareOpplysninger(
@@ -1723,15 +1728,20 @@ internal class Vedtaksperiode private constructor(
             refusjonsopplysninger: Refusjonsopplysninger,
             aktivitetslogg: IAktivitetslogg
         ): Boolean {
-            if (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) return vedtaksperiode.refusjonstidslinje.isNotEmpty()
-            return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.periode,
-                refusjonsopplysninger,
-                arbeidsgiverperiode,
-                aktivitetslogg,
-                vedtaksperiode.arbeidsgiver.organisasjonsnummer
-            )
+            val gammelSjekk: () -> Boolean = {
+                Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
+                    skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                    periode = vedtaksperiode.periode,
+                    refusjonsopplysninger = refusjonsopplysninger,
+                    arbeidsgiverperiode = arbeidsgiverperiode,
+                    aktivitetslogg = aktivitetslogg,
+                    organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
+                )
+            }
+            if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return gammelSjekk()
+            if (vedtaksperiode.refusjonstidslinje.isNotEmpty()) return true
+            if (gammelSjekk()) aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
+            return false
         }
 
         override fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
