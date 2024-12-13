@@ -163,7 +163,7 @@ sealed class Aktivitet(
                     "Trenger inntekter for sykepengegrunnlag for arbeidsgiver",
                     mapOf(
                         "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                        "organisasjonsnummer" to organisasjonsnummer.toString(),
+                        "organisasjonsnummer" to organisasjonsnummer,
                         "beregningStart" to beregningStart.toString(),
                         "beregningSlutt" to beregningSlutt.toString()
                     )
