@@ -3894,8 +3894,7 @@ internal class Vedtaksperiode private constructor(
                             delvisOverlappende && sammeArbeidsgiver -> RV_SØ_35
                             delvisOverlappende && !sammeArbeidsgiver -> RV_SØ_36
                             !delvisOverlappende && sammeArbeidsgiver -> RV_SØ_33
-                            !delvisOverlappende && !sammeArbeidsgiver -> RV_SØ_34
-                            else -> throw IllegalStateException("dette er ikke mulig med mindre noen har tullet til noe")
+                            else -> RV_SØ_34
                         }
                     )
                     aktivitetslogg.info("Søknad ${vedtaksperiode.periode} overlapper med en forkastet vedtaksperiode ${it.id} (${it.periode})")
