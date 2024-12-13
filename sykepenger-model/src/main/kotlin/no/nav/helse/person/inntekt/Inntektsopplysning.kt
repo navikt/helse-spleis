@@ -106,7 +106,6 @@ sealed class Inntektsopplysning(
         beløp: Inntekt? = null
     ) {
         val gjenbrukbarInntekt = gjenbrukbarInntekt(beløp) ?: return
-        if (refusjonsopplysninger.erTom) return
         arbeidsgiver.lagreTidsnærInntektsmelding(
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = orgnummer,
@@ -123,7 +122,6 @@ sealed class Inntektsopplysning(
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {
     }
-
 
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =
