@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -67,6 +68,55 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertIngenVarsler(2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel
         }
+    }
+
+    @Test
+    fun `overstyring av ubrukte refusjonsopplysninger`() {
+        nyttVedtak(januar)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            refusjon = Refusjon(
+                INNTEKT, null,
+                endringerIRefusjon = listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 20.februar))
+            )
+        )
+        val ubrukteRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger
+        assertBeløpstidslinje(
+            ARBEIDSGIVER.beløpstidslinje(1.februar til 19.februar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(20.februar.somPeriode(), INNTEKT / 2),
+            ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar),
+            ignoreMeldingsreferanseId = true
+        )
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar, arbeidsgiveropplysninger = listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT,
+                forklaring = "nebb",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
+            )
+        )
+        )
+
+        val ubrukteRefusjonsopplysninger2 = inspektør.ubrukteRefusjonsopplysninger
+        assertForventetFeil(
+            forklaring = "vi har noe foran oss også overstyres det litt tilbake i tid, blir surr",
+            nå = {
+                assertBeløpstidslinje(
+                    SAKSBEHANDLER.beløpstidslinje(1.februar.somPeriode(), INGEN) + ARBEIDSGIVER.beløpstidslinje(2.februar til 19.februar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(20.februar.somPeriode(), INNTEKT / 2),
+                    ubrukteRefusjonsopplysninger2.refusjonstidslinjer.getValue(1.januar),
+                    ignoreMeldingsreferanseId = true
+                )
+            },
+            ønsket = {
+                assertBeløpstidslinje(
+                    SAKSBEHANDLER.beløpstidslinje(1.februar.somPeriode(), INGEN),
+                    ubrukteRefusjonsopplysninger2.refusjonstidslinjer.getValue(1.januar),
+                    ignoreMeldingsreferanseId = true
+                )
+            }
+        )
     }
 
     @Test
