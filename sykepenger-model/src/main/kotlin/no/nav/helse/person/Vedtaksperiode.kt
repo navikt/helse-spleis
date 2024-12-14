@@ -1397,7 +1397,6 @@ internal class Vedtaksperiode private constructor(
     private fun perioderSomMåHensyntasVedBeregning(): List<Vedtaksperiode> {
         val skjæringstidspunkt = this.skjæringstidspunkt
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .sorted()
             .filter { it !== this }
             .sorted()
             .fold(listOf(this)) { utbetalingsperioder, vedtaksperiode ->
