@@ -1394,7 +1394,7 @@ internal class Vedtaksperiode private constructor(
             .filter { it.behandlinger.klarForUtbetaling() }
     }
 
-    private fun perioderSomMåHensyntasVedBeregning(): List<Vedtaksperiode> {
+    private fun mursteinsperioderMedSammeSkjæringstidspunkt(): List<Vedtaksperiode> {
         val skjæringstidspunkt = this.skjæringstidspunkt
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it !== this }
@@ -1432,7 +1432,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun førstePeriodeSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
-        return perioderSomMåHensyntasVedBeregning()
+        return mursteinsperioderMedSammeSkjæringstidspunkt()
             .firstOrNull { it.måInnhenteInntektEllerRefusjon(Aktivitetslogg()) }
     }
 
@@ -1479,7 +1479,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
-        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
+        val perioderSomMåHensyntasVedBeregning = mursteinsperioderMedSammeSkjæringstidspunkt()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
 
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
