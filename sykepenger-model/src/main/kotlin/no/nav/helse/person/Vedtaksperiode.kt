@@ -2682,7 +2682,12 @@ internal class Vedtaksperiode private constructor(
             tilstand(aktivitetslogg, vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+            if (påminnelse.skalReberegnes()) {
+                if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
+                    return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+                }
+                return
+            }
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
                 aktivitetslogg.funksjonellFeil(RV_IV_11)
                 return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
