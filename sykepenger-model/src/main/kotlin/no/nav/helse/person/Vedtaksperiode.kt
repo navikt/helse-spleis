@@ -1479,8 +1479,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
-        val perioderSomMåHensyntasVedBeregning =
-            perioderSomMåHensyntasVedBeregning().groupBy { it.arbeidsgiver.organisasjonsnummer }
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
+            .groupBy { it.arbeidsgiver.organisasjonsnummer }
 
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning.mapValues { (arbeidsgiver, vedtaksperioder) ->
@@ -2151,12 +2151,12 @@ internal class Vedtaksperiode private constructor(
         private fun tilstand(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg): Tilstand {
             if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return TrengerInntektsmelding(
-                vedtaksperiode
-            )
-            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
-            if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null)
-                return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver)
+            val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
+            if (førstePeriodeSomTrengerInntektsmelding != null) {
+                if (førstePeriodeSomTrengerInntektsmelding === vedtaksperiode)
+                    return TrengerInntektsmelding(vedtaksperiode)
+                return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmelding)
+            }
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
             return KlarForBeregning
         }
@@ -2748,19 +2748,20 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
         ): Tilstand {
-            check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
-                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
-            }
-            if (!vedtaksperiode.skalBehandlesISpeil()) return ForventerIkkeInntekt
-            if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
-            if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
-            if (vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
-
             val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
-            if (førstePeriodeSomTrengerInntektsmelding != null)
-                return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmelding)
-            if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
-            return KlarForBeregning
+            return when {
+                !vedtaksperiode.skalBehandlesISpeil() -> ForventerIkkeInntekt
+                vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
+                vedtaksperiode.harFlereSkjæringstidspunkt() -> HarFlereSkjæringstidspunkt(vedtaksperiode)
+                vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
+                førstePeriodeSomTrengerInntektsmelding != null -> when (førstePeriodeSomTrengerInntektsmelding) {
+                    vedtaksperiode -> TrengerInntektsmelding(førstePeriodeSomTrengerInntektsmelding)
+                    else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerInntektsmelding)
+                }
+
+                vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
+                else -> KlarForBeregning
+            }
         }
 
         private sealed interface Tilstand {
@@ -2815,7 +2816,20 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        private data class TrengerInntektsmeldingAnnenArbeidsgiver(private val trengerInntektsmelding: Vedtaksperiode) :
+        private data class TrengerInntektsmelding(val segSelv: Vedtaksperiode) : Tilstand {
+            override fun venteårsak() = INNTEKTSMELDING.utenBegrunnelse
+            override fun venterPå() = segSelv
+            override fun gjenopptaBehandling(
+                vedtaksperiode: Vedtaksperiode,
+                hendelse: Hendelse,
+                aktivitetslogg: IAktivitetslogg
+            ) {
+                aktivitetslogg.info("Går tilbake til Avventer inntektsmelding fordi perioden mangler inntekt og/eller refusjonsopplysninger")
+                vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+            }
+        }
+
+        private data class TrengerInntektsmeldingAnnenPeriode(private val trengerInntektsmelding: Vedtaksperiode) :
             Tilstand {
             override fun venteårsak() = trengerInntektsmelding.venteårsak()
             override fun venterPå() = trengerInntektsmelding
