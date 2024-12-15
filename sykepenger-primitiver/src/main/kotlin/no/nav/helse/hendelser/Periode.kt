@@ -94,6 +94,35 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
         fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
 
+        // finner mursteinsperioder (både tidligere og senere) enn utgangspunktet
+        fun Collection<Periode>.mursteinsperioder(utgangspunkt: Periode): List<Periode> {
+            return mursteinsperioder(utgangspunkt) { it }
+        }
+
+        fun <R> Collection<R>.mursteinsperioder(utgangspunkt: Periode, periodeFun: (R) -> Periode): List<R> {
+            val muligeOverlapp = this
+                .toMutableList()
+
+            var omsluttendePeriode = utgangspunkt
+            val resultat = mutableListOf<R>()
+            var fantOverlapp = false
+            do {
+                fantOverlapp = muligeOverlapp.removeAll { elem ->
+                    val periode = periodeFun(elem)
+                    periode.overlapperMed(omsluttendePeriode).also { overlapp ->
+                        if (overlapp) {
+                            omsluttendePeriode = omsluttendePeriode.oppdaterFom(periode).oppdaterTom(periode)
+                            val insertIndex = resultat.indexOfFirst { periode.start <= periodeFun(it).start }
+                            if (insertIndex == -1) resultat.add(elem)
+                            else resultat.add(insertIndex, elem)
+                        }
+                    }
+                }
+            } while (fantOverlapp)
+
+            return resultat.toList()
+        }
+
         fun gjenopprett(dto: PeriodeDto) = Periode(
             fom = dto.fom,
             tom = dto.tom

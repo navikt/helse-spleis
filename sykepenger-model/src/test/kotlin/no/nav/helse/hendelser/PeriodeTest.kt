@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMed
 import no.nav.helse.hendelser.Periode.Companion.intersect
 import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.merge
+import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
@@ -33,6 +34,39 @@ import org.junit.jupiter.api.assertThrows
 
 internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
+
+    @Test
+    fun mursteinsperioder() {
+        val perioder = listOf(
+            1.januar til 10.januar,
+            5.januar til 19.januar,
+            13.januar til 14.januar,
+            17.januar til 21.januar,
+
+            23.januar til 25.januar,
+            26.januar til 28.januar
+        ).shuffled()
+
+        assertEquals(
+            listOf(
+                1.januar til 10.januar,
+                5.januar til 19.januar,
+                13.januar til 14.januar,
+                17.januar til 21.januar,
+            ),
+            perioder.mursteinsperioder(1.januar til 10.januar)
+        )
+
+        assertEquals(
+            listOf(
+                1.januar til 10.januar,
+                5.januar til 19.januar,
+                13.januar til 14.januar,
+                17.januar til 21.januar,
+            ),
+            perioder.mursteinsperioder(13.januar til 14.januar)
+        )
+    }
 
     @Test
     fun `uten helgehale`() {
