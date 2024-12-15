@@ -1395,14 +1395,21 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun mursteinsperioderMedSammeSkjæringstidspunkt(): List<Vedtaksperiode> {
+        // lager en liste av alle vedtaksperioder (inkludert this) som har samme skjæringstidspunkt,
+        // og som overlapper med hverandre
         val skjæringstidspunkt = this.skjæringstidspunkt
-        return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .filter { it !== this }
-            .sorted()
-            .fold(listOf(this)) { utbetalingsperioder, vedtaksperiode ->
-                if (utbetalingsperioder.any { vedtaksperiode.periode.overlapperMed(it.periode) }) utbetalingsperioder + vedtaksperiode
-                else utbetalingsperioder
-            }
+        return person.mursteinsperioder(this)
+            .filter { it.skjæringstidspunkt == skjæringstidspunkt }
+    }
+
+    private fun perioderSomMåHensyntasVedBeregning(): List<Vedtaksperiode> {
+        // finner alle perioder som må beregnes sammen for at vi skal
+        // kunne vurdere alle aktuelle vilkår.
+        // unngår eldre perioder som slutter før this da de skal ha blitt beregnet før this
+        // for eksempel kan listen returnere senere perioder som ikke overlapper med this i det hele tatt,
+        // men som overlapper med en periode som overlapper med this
+        return mursteinsperioderMedSammeSkjæringstidspunkt()
+            .filterNot { it.periode.endInclusive < this.periode.start }
     }
 
     private fun erKandidatForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
@@ -1432,7 +1439,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun førstePeriodeSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
-        return mursteinsperioderMedSammeSkjæringstidspunkt()
+        return perioderSomMåHensyntasVedBeregning()
             .firstOrNull { it.måInnhenteInntektEllerRefusjon(Aktivitetslogg()) }
     }
 
@@ -1479,7 +1486,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
-        val perioderSomMåHensyntasVedBeregning = mursteinsperioderMedSammeSkjæringstidspunkt()
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
 
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()

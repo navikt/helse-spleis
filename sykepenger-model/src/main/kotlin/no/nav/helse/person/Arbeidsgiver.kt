@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Simulering
@@ -225,6 +226,10 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.vedtaksperioder(filter: VedtaksperiodeFilter) =
             map { it.vedtaksperioder.filter(filter) }.flatten()
+
+        internal fun Iterable<Arbeidsgiver>.mursteinsperioder(utgangspunkt: Vedtaksperiode) = this
+            .flatMap { it.vedtaksperioder }
+            .mursteinsperioder(utgangspunkt.periode, Vedtaksperiode::periode)
 
         internal fun Iterable<Arbeidsgiver>.førsteFraværsdager(skjæringstidspunkt: LocalDate) =
             mapNotNull { arbeidsgiver ->

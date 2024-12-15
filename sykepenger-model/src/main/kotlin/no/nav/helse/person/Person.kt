@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -58,6 +59,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
+import no.nav.helse.person.Arbeidsgiver.Companion.mursteinsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
@@ -596,6 +598,7 @@ class Person private constructor(
 
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter)
+    internal fun mursteinsperioder(utgangspunkt: Vedtaksperiode) = arbeidsgivere.mursteinsperioder(utgangspunkt)
     internal fun førsteFraværsdager(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) = arbeidsgivere
         .filterNot { it === arbeidsgiver }
         .førsteFraværsdager(skjæringstidspunkt)
