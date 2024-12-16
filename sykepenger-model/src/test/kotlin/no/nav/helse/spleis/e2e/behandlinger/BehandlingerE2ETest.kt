@@ -85,14 +85,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm)) // Det blir nok fortsatt Gosys-oppgave da, ettersom inntekten ikke brukes som er definisjonen av "inntektsmelding håndtert" (hva enn det betyr)
+            assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(korrigertIm))
 
             val dagensRefusjonsopplysninger =
                 inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().refusjonsopplysninger
             val dagensRefusjonsopplysningerPeriode =
                 dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.first().periode.start til dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.last().periode.endInclusive
             assertEquals(16.januar til LocalDate.MAX, dagensRefusjonsopplysningerPeriode)
-            assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INNTEKT })
+            assertTrue(dagensRefusjonsopplysninger.inspektør.refusjonsopplysninger.all { it.beløp == INGEN })
 
             // Med nye refusjonsopplysnigner vil det tolkes som 0,- i refusjon
             val nyeRefusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje

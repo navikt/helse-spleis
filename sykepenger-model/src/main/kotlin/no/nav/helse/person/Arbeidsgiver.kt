@@ -983,7 +983,12 @@ internal class Arbeidsgiver private constructor(
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-        val skjæringstidspunkt = inntektsmelding.skjæringstidspunkt(person)
+
+        val skjæringstidspunkt = inntektsmelding.inntektsdato().let { dato ->
+            vedtaksperioder.firstOrNull {
+                dato in it.periode || dato == it.skjæringstidspunkt
+            }?.skjæringstidspunkt
+        }
 
         if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
             aktivitetslogg.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
@@ -991,8 +996,10 @@ internal class Arbeidsgiver private constructor(
             return person.igangsettOverstyring(overstyring, aktivitetslogg)
         }
 
-        finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
-            inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
+        if (skjæringstidspunkt != null) {
+            finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
+                inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
+            }
         }
 
         korrigerVilkårsgrunnlagOgIgangsettOverstyring(
@@ -1003,24 +1010,27 @@ internal class Arbeidsgiver private constructor(
             overstyring
         )
 
+        if (skjæringstidspunkt == null) return
         håndter(inntektsmelding) {
             håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg)
         }
     }
 
     private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
-        skjæringstidspunkt: LocalDate,
+        skjæringstidspunkt: LocalDate?,
         korrigertInntektsmelding: KorrigertInntektOgRefusjon,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
         overstyring: Revurderingseventyr?
     ) {
-        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(
-            skjæringstidspunkt,
-            korrigertInntektsmelding,
-            aktivitetslogg,
-            subsumsjonsloggMedInntektsmeldingkontekst
-        )
+        val inntektoverstyring = skjæringstidspunkt?.let {
+            person.nyeArbeidsgiverInntektsopplysninger(
+                it,
+                korrigertInntektsmelding,
+                aktivitetslogg,
+                subsumsjonsloggMedInntektsmeldingkontekst
+            )
+        }
         // TODO: Til ettertanke: Når BrukRefusjonsopplysningerPåBehandling er enabled & vi beholder refusjon i inntektsgrunnlaget for midl. logging:
         //  - kan vi havne i en situasjon hvor vi får en inntektsoverstyring hvor inntekt er uendret, men refusjon er endret
         //    samtidig mener behandlingen at den mangler refusjonsopplysninger, gjør det noe?
