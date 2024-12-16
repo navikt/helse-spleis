@@ -1291,7 +1291,7 @@ internal class Vedtaksperiode private constructor(
         if (revurdering.ikkeRelevant(periode)) return
         registrerKontekst(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
-        tilstand.arbeidsgiveropplysningerStrategi.lagreGjenbrukbareOpplysninger(this, aktivitetslogg)
+        tilstand.arbeidsgiveropplysningerStrategi.lagreGjenbrukbarInntekt(this, aktivitetslogg)
     }
 
     internal fun inngåIRevurderingseventyret(
@@ -1669,7 +1669,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ): Boolean
 
-        abstract fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
+        abstract fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
         protected fun harEksisterendeInntektOgRefusjon(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiverperiode: Arbeidsgiverperiode,
@@ -1683,7 +1683,7 @@ internal class Vedtaksperiode private constructor(
             )
 
         // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
-        private fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+        protected fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
             // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
             // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
             val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag
@@ -1728,10 +1728,10 @@ internal class Vedtaksperiode private constructor(
             return false
         }
 
-        override fun lagreGjenbrukbareOpplysninger(
+        override fun lagreGjenbrukbarInntekt(
             vedtaksperiode: Vedtaksperiode,
             aktivitetslogg: IAktivitetslogg
-        ) { /* Før vi har fått inntektmelding kan vi ikke lagre gjenbrukbare opplysninger 🙅‍ */
+        ) { /* Før vi har fått inntektmelding kan vi ikke lagre gjenbrukbar inntekt 🙅‍ */
         }
     }
 
@@ -1774,14 +1774,8 @@ internal class Vedtaksperiode private constructor(
             return false
         }
 
-        override fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
-            if (harEksisterendeInntektOgRefusjon(
-                    vedtaksperiode,
-                    arbeidsgiverperiode,
-                    aktivitetslogg
-                )
-            ) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
+        override fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            if (harEksisterendeInntekt(vedtaksperiode)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
             vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.arbeidsgiver.organisasjonsnummer,
@@ -2652,11 +2646,11 @@ internal class Vedtaksperiode private constructor(
             }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-            return tilstand(Aktivitetslogg(), vedtaksperiode).venteårsak()
+            return tilstand(vedtaksperiode).venteårsak()
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? {
-            val venterPå = tilstand(Aktivitetslogg(), vedtaksperiode).venterPå() ?: nestemann
+            val venterPå = tilstand(vedtaksperiode).venterPå() ?: nestemann
             return vedtaksperiode.vedtaksperiodeVenter(venterPå)
         }
 
@@ -2708,7 +2702,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) =
-            tilstand(aktivitetslogg, vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
+            tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (påminnelse.skalReberegnes()) {
@@ -2775,7 +2769,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun tilstand(
-            aktivitetslogg: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
         ): Tilstand {
             val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
