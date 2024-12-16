@@ -40,7 +40,6 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
 
                 is Dag.Feriedag -> søkekontekst.potensieltGyldigOppholdsperiode(dato)
 
-
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.Arbeidsdag,
                 is Dag.FriskHelgedag -> søkekontekst.oppholdsdag(søkeperiode, dato)
@@ -118,12 +117,14 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
             override fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.avsluttSøk()
         }
 
-        data object AndreYtelser : Søketilstand
+        data object AndreYtelser : Søketilstand {
+            override fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate) = kontekst
+        }
+
         data object HarSkjæringstidspunkt : Søketilstand {
             override fun potensieltSkjæringstidspunkt(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst
             override fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst
             override fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst
         }
     }
-
 }

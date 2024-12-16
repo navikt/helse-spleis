@@ -185,11 +185,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
-
 
     @Test
     fun `Først litt gjenbruk av tidsnære opplysninger etterfulgt av overstyring til andre ytelser som gjør at vi ikke trengte dem allikevel`() {
@@ -299,7 +298,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 AVVENTER_SIMULERING
             )
         }
-
     }
 
     @Test
