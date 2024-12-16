@@ -54,6 +54,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
@@ -420,7 +421,7 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
-        val inntektseventyr = arbeidsgivere.håndter(hendelse, aktivitetslogg)
+        val inntektseventyr = arbeidsgivere.håndterOverstyringAvInntekt(hendelse, aktivitetslogg)
         val refusjonseventyr = arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetslogg)
         val tidligsteEventyr = Revurderingseventyr.tidligsteEventyr(inntektseventyr, refusjonseventyr)
         check(tidligsteEventyr != null) {

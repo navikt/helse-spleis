@@ -205,24 +205,20 @@ internal class Arbeidsgiver private constructor(
         ) =
             any { it.håndter(overstyrInntektsgrunnlag, aktivitetslogg) }
 
-        internal fun List<Arbeidsgiver>.håndter(
+        internal fun List<Arbeidsgiver>.håndterOverstyringAvInntekt(
             overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger,
             aktivitetslogg: IAktivitetslogg
-        ) =
-            firstNotNullOfOrNull { it.håndter(overstyrArbeidsgiveropplysninger, aktivitetslogg) }
+        ) = firstNotNullOfOrNull { it.håndter(overstyrArbeidsgiveropplysninger, aktivitetslogg) }
 
         internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(
             hendelse: OverstyrArbeidsgiveropplysninger,
             aktivitetslogg: IAktivitetslogg
         ): Revurderingseventyr? {
             val revurderingseventyr = mapNotNull { arbeidsgiver ->
-                val vedtaksperioderPåSkjæringstidspunkt =
-                    arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
+                val vedtaksperioderPåSkjæringstidspunkt = arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
                 val refusjonstidslinje = vedtaksperioderPåSkjæringstidspunkt.refusjonstidslinje()
                 val startdatoer = vedtaksperioderPåSkjæringstidspunkt.startdatoerPåSammenhengendeVedtaksperioder()
-                val servitør =
-                    hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje)
-                        ?: return@mapNotNull null
+                val servitør = hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje) ?: return@mapNotNull null
                 arbeidsgiver.håndter(hendelse, aktivitetslogg, servitør)
             }
             return revurderingseventyr.tidligsteEventyr()
