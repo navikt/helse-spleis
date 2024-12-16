@@ -42,7 +42,6 @@ import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -1146,7 +1145,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun finnFørsteFraværsdag(vedtaksperiode: Periode): LocalDate? {
-        return Skjæringstidspunkt(sykdomstidslinje()).beregnSkjæringstidspunktOrNull(vedtaksperiode)
+        return Skjæringstidspunkt(sykdomstidslinje()).sisteOrNull(vedtaksperiode)
     }
 
     private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {

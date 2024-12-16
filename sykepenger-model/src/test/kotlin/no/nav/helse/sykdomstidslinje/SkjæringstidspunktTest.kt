@@ -38,6 +38,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
@@ -82,7 +83,7 @@ internal class SkjæringstidspunktTest {
 
         // periode med 100 % friskmelding
         resetSeed()
-        assertEquals(17.januar, beregnSkjæringstidspunkt(16.S + 15.A, 17.januar til 31.januar))
+        assertNull(beregnSkjæringstidspunkt(16.S + 15.A, 17.januar til 31.januar))
 
         // periode friskmelding i halen og snuten
         resetSeed()
@@ -94,7 +95,7 @@ internal class SkjæringstidspunktTest {
 
         // ferie etter opphold
         resetSeed()
-        assertEquals(27.januar, beregnSkjæringstidspunkt(16.S + 10.opphold + 5.F, 27.januar til 31.januar))
+        assertNull(beregnSkjæringstidspunkt(16.S + 10.opphold + 5.F, 27.januar til 31.januar))
 
         // periode med litt tøysete hale
         resetSeed()
@@ -417,7 +418,7 @@ internal class SkjæringstidspunktTest {
         val tidslinje = 7.S + 2.opphold + 3.S + 5.opphold + 3.F
         assertSkjæringstidspunkt(1.januar, 1.januar til 7.januar, tidslinje)
         assertSkjæringstidspunkt(10.januar, 10.januar til 12.januar, tidslinje)
-        assertSkjæringstidspunkt(18.januar, 18.januar til 20.januar, tidslinje)
+        assertSkjæringstidspunkt(null, 18.januar til 20.januar, tidslinje)
         assertSkjæringstidspunkt(10.januar, 1.januar til 20.januar, tidslinje)
     }
 
@@ -446,7 +447,7 @@ internal class SkjæringstidspunktTest {
     }
 
     private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
-        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).beregnSkjæringstidspunkt(periode))
+        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).sisteOrNull(periode))
     }
 
     private fun assertSkjæringstidspunkt(
@@ -506,7 +507,7 @@ internal class SkjæringstidspunktTest {
         )
 
         private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
-            Skjæringstidspunkt(tidslinje).beregnSkjæringstidspunkt(søkeperiode)
+            Skjæringstidspunkt(tidslinje).sisteOrNull(søkeperiode)
 
         private fun assertDagenErSkjæringstidspunkt(
             dagen: LocalDate,

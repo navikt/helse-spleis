@@ -276,8 +276,8 @@ internal class InfotrygdhistorikkTest {
                 )
             )
         )
-        assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).beregnSkjæringstidspunkt(5.januar til 31.januar))
-        assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).beregnSkjæringstidspunkt(januar))
+        assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).sisteOrNull(5.januar til 31.januar))
+        assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).sisteOrNull(januar))
     }
 
     @Test

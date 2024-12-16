@@ -20,11 +20,11 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt.Søketilstand.Potensiel
  */
 internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomstidslinje) {
 
-    fun beregnSkjæringstidspunkt(vedtaksperiode: Periode): LocalDate {
-        return beregnSkjæringstidspunktOrNull(vedtaksperiode) ?: vedtaksperiode.start
+    fun alle(vedtaksperiode: Periode): List<LocalDate> {
+        return finnSkjæringstidspunkt(vedtaksperiode)?.skjæringstidspunkter ?: emptyList()
     }
 
-    fun beregnSkjæringstidspunktOrNull(vedtaksperiode: Periode): LocalDate? {
+    fun sisteOrNull(vedtaksperiode: Periode): LocalDate? {
         return finnSkjæringstidspunkt(vedtaksperiode)?.skjæringstidspunkter?.firstOrNull()
     }
 

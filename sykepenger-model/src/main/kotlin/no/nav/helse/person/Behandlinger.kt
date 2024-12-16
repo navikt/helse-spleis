@@ -539,7 +539,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 // trimmer friskmelding/ferie i halen bort
                 val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
-                return beregnSkjæringstidspunkt().beregnSkjæringstidspunkt(søkeperiode)
+                return beregnSkjæringstidspunkt()
+                    .alle(søkeperiode)
+                    .maxOrNull()
+                    ?: periode.start
             }
 
             companion object {
