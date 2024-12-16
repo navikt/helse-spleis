@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -28,7 +28,6 @@ import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
@@ -77,6 +76,17 @@ import org.junit.jupiter.api.Test
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private val INNTEKT_FLERE_AG = 20000.månedlig
+
+    @Test
+    fun `Skal sende med et flagg for å innhente inntekter fra a-ordningen etter å ha ventet på inntektsmelding lengre enn 3 måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        nyPeriode(januar)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertFalse(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().innhentInntektFraAOrdningen)
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusMonths(3))
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertTrue(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().innhentInntektFraAOrdningen)
+    }
 
     @Test
     fun `Skal høre på arbeidsgiver når hen sier at egenmeldinger ikke gjelder`() {
@@ -418,7 +428,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
-            )
+            ),
+            innhentInntektFraAOrdningen = false
         )
         assertEquals(expectedForespørsel, actualForespørsel)
     }
@@ -953,7 +964,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
-            )
+            ),
+            innhentInntektFraAOrdningen = false
         )
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)

@@ -57,7 +57,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
-            )
+            ),
+            innhentInntektFraAOrdningen = false
         )
 
         assertTilstander(
@@ -90,7 +91,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
-            )
+            ),
+            innhentInntektFraAOrdningen = false
         )
 
         assertTilstander(
@@ -126,7 +128,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
-            )
+            ),
+            innhentInntektFraAOrdningen = false
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last {
             it.vedtaksperiodeId == 1.vedtaksperiode.id(a1)
@@ -194,7 +197,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                     PersonObserver.FastsattInntekt(INNTEKT),
                     PersonObserver.Refusjon(forslag = listOf(Refusjonsforslag(1.januar, null, INNTEKT.månedlig))),
                     PersonObserver.Arbeidsgiverperiode
-                )
+                ),
+                innhentInntektFraAOrdningen = false
             )
             assertEquals(expectedForespørsel, trengerArbeidsgiveropplysningerEvent)
         }
@@ -231,7 +235,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList())
-            )
+            ),
+            innhentInntektFraAOrdningen = false
         )
 
         assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())

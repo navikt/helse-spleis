@@ -134,7 +134,8 @@ interface PersonObserver {
         val sykmeldingsperioder: List<Periode>,
         val egenmeldingsperioder: List<Periode>,
         val førsteFraværsdager: List<FørsteFraværsdag>,
-        val forespurteOpplysninger: List<ForespurtOpplysning>
+        val forespurteOpplysninger: List<ForespurtOpplysning>,
+        val innhentInntektFraAOrdningen: Boolean
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
@@ -159,7 +160,8 @@ interface PersonObserver {
                         "førsteFraværsdag" to it.førsteFraværsdag
                     )
                 },
-                "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap()
+                "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap(),
+                "innhentInntektFraAOrdningen" to innhentInntektFraAOrdningen
             )
     }
 

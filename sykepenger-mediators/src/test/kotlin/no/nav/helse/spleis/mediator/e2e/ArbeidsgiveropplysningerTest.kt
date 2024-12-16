@@ -34,14 +34,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
-            "@event_name",
-            "organisasjonsnummer",
-            "skjæringstidspunkt",
-            "sykmeldingsperioder",
-            "førsteFraværsdager",
-            "egenmeldingsperioder",
-            "forespurteOpplysninger",
-            "fødselsnummer"
+            "vedtaksperiodeId",
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
         )
 
         JSONAssert.assertEquals(forventetResultatTrengerInntekt, faktiskResultat, JSONCompareMode.STRICT)
@@ -65,14 +63,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
-            "@event_name",
-            "organisasjonsnummer",
-            "skjæringstidspunkt",
-            "førsteFraværsdager",
-            "sykmeldingsperioder",
-            "egenmeldingsperioder",
-            "forespurteOpplysninger",
-            "fødselsnummer"
+            "vedtaksperiodeId",
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
         )
 
         JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
@@ -113,14 +109,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
-            "@event_name",
-            "organisasjonsnummer",
-            "skjæringstidspunkt",
-            "sykmeldingsperioder",
-            "førsteFraværsdager",
-            "egenmeldingsperioder",
-            "forespurteOpplysninger",
-            "fødselsnummer"
+            "vedtaksperiodeId",
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
         )
 
         JSONAssert.assertEquals(forventetResultatMedInntektFraForrigeSkjæringstidpunkt, faktiskResultat, JSONCompareMode.STRICT)
@@ -149,14 +143,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
-            "@event_name",
-            "organisasjonsnummer",
-            "skjæringstidspunkt",
-            "sykmeldingsperioder",
-            "førsteFraværsdager",
-            "egenmeldingsperioder",
-            "forespurteOpplysninger",
-            "fødselsnummer"
+            "vedtaksperiodeId",
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
         )
 
         JSONAssert.assertEquals(forventetResultatKortGap, faktiskResultat, JSONCompareMode.STRICT)
@@ -182,14 +174,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
         val faktiskResultat = trengerOpplysningerEvent.json(
-            "@event_name",
-            "organisasjonsnummer",
-            "skjæringstidspunkt",
-            "sykmeldingsperioder",
-            "førsteFraværsdager",
-            "egenmeldingsperioder",
-            "forespurteOpplysninger",
-            "fødselsnummer"
+            "vedtaksperiodeId",
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
         )
 
         JSONAssert.assertEquals(forventetResultatOpphørAvRefusjon, faktiskResultat, JSONCompareMode.STRICT)
@@ -251,6 +241,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
+          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -293,6 +284,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
+          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -345,6 +337,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
+          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -392,6 +385,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
+          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -437,6 +431,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               ]
             }
           ],
+          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -502,8 +497,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     }
 
     private companion object {
-        private fun JsonNode.json(vararg behold: String) = (this as ObjectNode).let { json ->
-            json.remove(json.fieldNames().asSequence().minus(behold.toSet()).toList())
-        }.toString()
+        private fun JsonNode.json(vararg dropp: String) = (this as ObjectNode).remove(dropp.toSet()).toString()
     }
 }
