@@ -2561,6 +2561,7 @@ internal class Vedtaksperiode private constructor(
             }
             if (påminnelse.skalReberegnes()) {
                 vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
+                vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(påminnelse, aktivitetslogg)
                 return vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)
             }
             if (påminnelse.harVentet3MånederEllerMer()) {
