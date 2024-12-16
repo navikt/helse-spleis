@@ -125,11 +125,6 @@ class Sykdomstidslinje private constructor(
         }
     }
 
-    internal fun sisteSkjæringstidspunkt(periode: Periode? = null): LocalDate? {
-        val søkeperiode = periode ?: this.periode ?: return null
-        return Skjæringstidspunkt(this).beregnSkjæringstidspunktOrNull(søkeperiode)
-    }
-
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         if (this.dager.isEmpty() || other.dager.isEmpty()) return false
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagOppholdsdag() && !other.erFørsteDagOppholdsdag()
@@ -201,9 +196,6 @@ class Sykdomstidslinje private constructor(
 
         internal fun arbeidsdager(periode: Periode, kilde: Hendelseskilde) =
             Sykdomstidslinje(periode.associateWith { if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) })
-
-        internal fun ghostdager(periode: Periode) =
-            Sykdomstidslinje(periode.associateWith { if (it.erHelg()) UkjentDag(it, INGEN) else UkjentDag(it, INGEN) })
 
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
             arbeidsdager(Periode(førsteDato, sisteDato), kilde)

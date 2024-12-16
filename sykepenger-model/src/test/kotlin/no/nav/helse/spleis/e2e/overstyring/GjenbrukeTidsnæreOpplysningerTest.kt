@@ -149,9 +149,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         }
     }
 
-    private fun TestArbeidsgiverInspektør.førsteFraværsdag(vedtaksperiodeId: UUID) =
-        sykdomstidslinje.sisteSkjæringstidspunkt(periode(vedtaksperiodeId))
-
     @Test
     fun `revurdere seg inn i en situasjon hvor man ikke har noen første fraværsdag, men gjenbrukbare opplysninger biter læll`() {
         a1 {

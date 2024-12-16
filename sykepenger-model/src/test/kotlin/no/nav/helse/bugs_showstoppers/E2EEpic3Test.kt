@@ -311,7 +311,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(7.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteDag())
         assertEquals(FriskHelgedag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[7.januar]::class)
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[8.januar]::class)
-        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteSkjæringstidspunkt())
+        assertEquals(9.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
     }
 
@@ -330,7 +330,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(7.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteDag())
         assertEquals(FriskHelgedag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[7.januar]::class)
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[8.januar]::class)
-        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteSkjæringstidspunkt())
+        assertEquals(9.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
     }
 
