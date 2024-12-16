@@ -1346,8 +1346,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                 nyeRefusjonsopplysninger: Beløpstidslinje
             ): Behandling? {
-                aktivitetslogg.info("Har ikke implementert håndtering av refusjonsopplysninger i behandlingstilstand $this") // TODO: dette kan bli en error når vi har fått migrert alle refusjonsopplysninger til den nye metoden
-                return null
+                error("Har ikke implementert håndtering av refusjonsopplysninger i $this")
             }
 
             fun håndterEndring(

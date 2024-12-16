@@ -770,6 +770,7 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(søknad, aktivitetslogg) {
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, jurist)
         }
+        videreførEksisterendeRefusjonsopplysninger(søknad, aktivitetslogg)
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
         person.oppdaterVilkårsgrunnlagMedInntektene(
             skjæringstidspunkt,
@@ -1986,7 +1987,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.organisasjonsnummer
             )
             vedtaksperiode.håndterSøknad(søknad, aktivitetslogg)
-            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(søknad, aktivitetslogg)
             aktivitetslogg.info("Fullført behandling av søknad")
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.nyPeriode(
