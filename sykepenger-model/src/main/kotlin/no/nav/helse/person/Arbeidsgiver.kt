@@ -238,12 +238,6 @@ internal class Arbeidsgiver private constructor(
             .flatMap { it.vedtaksperioder }
             .mursteinsperioder(utgangspunkt.periode, Vedtaksperiode::periode)
 
-        internal fun Iterable<Arbeidsgiver>.førsteFraværsdager(skjæringstidspunkt: LocalDate) =
-            mapNotNull { arbeidsgiver ->
-                val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt) ?: return@mapNotNull null
-                PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, førsteFraværsdag)
-            }
-
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
             forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
 
@@ -355,17 +349,17 @@ internal class Arbeidsgiver private constructor(
     internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =
         refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
-    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Periode>): Boolean {
+    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
     }
 
     // TODO: denne avklaringen må bo på behandlingen; dvs. at inntekt må ligge lagret på vedtaksperiodene
-    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Periode>): no.nav.helse.person.inntekt.Inntektsmelding? {
+    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): no.nav.helse.person.inntekt.Inntektsmelding? {
         // finner inntektsmelding for en av første fraværsdagene.
         // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
         // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)
         return vedtaksperioder.firstNotNullOfOrNull {
-            val førsteFraværsdag = finnFørsteFraværsdag(it)
+            val førsteFraværsdag = it.førsteFraværsdag
             inntektshistorikk.avklarInntektsgrunnlag(skjæringstidspunkt = skjæringstidspunkt, førsteFraværsdag = førsteFraværsdag)
         }
     }
@@ -1142,15 +1136,16 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder
             .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .asReversed()
-            .firstNotNullOfOrNull { finnFørsteFraværsdag(it.periode) }
+            .firstNotNullOfOrNull { it.førsteFraværsdag }
     }
 
-    internal fun finnFørsteFraværsdag(periode: Periode) =
-        sykdomstidslinje().sisteSkjæringstidspunkt(periode)
+    internal fun finnFørsteFraværsdag(vedtaksperiode: Periode): LocalDate? {
+        return Skjæringstidspunkt(sykdomstidslinje()).beregnSkjæringstidspunktOrNull(vedtaksperiode)
+    }
 
     private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
         if (inntektsdato <= skjæringstidspunkt) return null
-        return finnFørsteFraværsdag(inntektsdato.somPeriode())?.takeUnless { it == inntektsdato }
+        return vedtaksperioder.firstOrNull { inntektsdato in it.periode }?.førsteFraværsdag?.takeUnless { it == inntektsdato }
     }
 
     private fun <Hendelsetype : Hendelse> håndter(

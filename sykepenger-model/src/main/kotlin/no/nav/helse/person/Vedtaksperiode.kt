@@ -210,6 +210,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver.organisasjonsnummer
         )
     internal val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
+    internal val førsteFraværsdag get() = arbeidsgiver.finnFørsteFraværsdag(this.periode)
 
     // 💡Må ikke forveksles med `førsteFraværsdag` 💡
     // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
@@ -870,7 +871,6 @@ internal class Vedtaksperiode private constructor(
     ): ArbeidsgiverInntektsopplysning {
         val alleForSammeArbeidsgiver = vedtaksperioderMedSammeSkjæringstidspunkt
             .filter { it.arbeidsgiver === this.arbeidsgiver }
-            .map { it.periode }
 
         val inntektForArbeidsgiver = arbeidsgiver.avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
         val faktaavklartInntekt = when (inntektForArbeidsgiver) {
@@ -1040,8 +1040,18 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
-        val deAndre = person.førsteFraværsdager(arbeidsgiver, skjæringstidspunkt)
-        val minEgen = arbeidsgiver.finnFørsteFraværsdag(periode)?.let {
+        val deAndre = person.vedtaksperioder(MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(this))
+            .filterNot { it.arbeidsgiver === this.arbeidsgiver }
+            .groupBy { it.arbeidsgiver }
+            .mapNotNull { (arbeidsgiver, perioder) ->
+                val førsteFraværsdagForArbeidsgiver = perioder
+                    .asReversed()
+                    .firstNotNullOfOrNull { it.førsteFraværsdag }
+                førsteFraværsdagForArbeidsgiver?.let {
+                    PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, it)
+                }
+            }
+        val minEgen = førsteFraværsdag?.let {
             PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, it)
         } ?: return deAndre
         return deAndre.plusElement(minEgen)
@@ -1431,7 +1441,6 @@ internal class Vedtaksperiode private constructor(
         val perioderMedSammeSkjæringstidspunkt = person
             .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it.arbeidsgiver === this.arbeidsgiver }
-            .map { it.periode }
 
         return arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt, perioderMedSammeSkjæringstidspunkt)
     }
