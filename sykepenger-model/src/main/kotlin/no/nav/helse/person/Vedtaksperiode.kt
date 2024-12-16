@@ -1672,7 +1672,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         // Refusjonsopplysningene vi allerede har i vilkårsgrunnlag/ i refusjonshistorikken på arbeidsgiver
-        private fun eksisterendeRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) =
+        protected fun eksisterendeRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) =
             when (val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag) {
                 null -> vedtaksperiode.arbeidsgiver.refusjonsopplysninger(vedtaksperiode.skjæringstidspunkt)
                 else -> vilkårsgrunnlag.refusjonsopplysninger(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
@@ -1722,11 +1722,16 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverperiode: Arbeidsgiverperiode,
             aktivitetslogg: IAktivitetslogg
         ) =
-            harEksisterendeInntektOgRefusjon(
-                vedtaksperiode,
-                arbeidsgiverperiode,
-                aktivitetslogg
-            ) || vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, aktivitetslogg) || harGjenbrukbart(vedtaksperiode, arbeidsgiverperiode, aktivitetslogg)
+
+        private fun harGjenbrukbart(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiverperiode: Arbeidsgiverperiode,
+            aktivitetslogg: IAktivitetslogg
+        ): Boolean {
+            if (!harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, eksisterendeRefusjonsopplysninger(vedtaksperiode), aktivitetslogg)) return false
+            return vedtaksperiode.behandlinger.harGjenbrukbarInntekt(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+        }
 
         override fun harRefusjonsopplysninger(
             vedtaksperiode: Vedtaksperiode,
@@ -1758,7 +1763,7 @@ internal class Vedtaksperiode private constructor(
                     aktivitetslogg
                 )
             ) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
-            vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(
+            vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.arbeidsgiver.organisasjonsnummer,
                 vedtaksperiode.arbeidsgiver,
@@ -2130,7 +2135,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (påminnelse.skalReberegnes()) {
-                vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(
+                vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
                     vedtaksperiode.skjæringstidspunkt,
                     vedtaksperiode.arbeidsgiver.organisasjonsnummer,
                     vedtaksperiode.arbeidsgiver,

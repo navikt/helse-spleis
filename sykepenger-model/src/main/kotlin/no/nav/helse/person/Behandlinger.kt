@@ -63,8 +63,8 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
-import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOpplysninger
-import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbareOpplysninger
+import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
+import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.andreYtelser
@@ -304,11 +304,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun håndterer(dokumentsporing: Dokumentsporing) =
         behandlinger.lastOrNull()?.takeUnless { it.erAvsluttet() }?.dokumentHåndtert(dokumentsporing) == true
 
-    internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
-        behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)
+    internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
+        behandlinger.harGjenbrukbarInntekt(organisasjonsnummer)
 
-    internal fun lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
-        behandlinger.lagreGjenbrukbareOpplysninger(
+    internal fun lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
+        behandlinger.lagreGjenbrukbarInntekt(
             skjæringstidspunkt, organisasjonsnummer, arbeidsgiver,
             aktivitetslogg
         )
@@ -1228,16 +1228,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun List<Behandling>.jurist(jurist: BehandlingSubsumsjonslogg, vedtaksperiodeId: UUID) =
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat())
 
-            internal fun List<Behandling>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) != null
-            internal fun List<Behandling>.lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) {
-                val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) ?: return
+            internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null
+            internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+                val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) ?: return
                 val nyArbeidsgiverperiode = forrigeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring())
                 // Herfra bruker vi "gammel" løype - kanskje noe kan skrus på fra det punktet her om en skulle skru på dette
                 vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
             }
 
-            private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? =
-                forrigeEndringMed { it.grunnlagsdata?.harGjenbrukbareOpplysninger(organisasjonsnummer) == true }?.let { it to it.grunnlagsdata!! }
+            private fun List<Behandling>.forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? =
+                forrigeEndringMed { it.grunnlagsdata?.harGjenbrukbarInntekt(organisasjonsnummer) == true }?.let { it to it.grunnlagsdata!! }
 
             // hvorvidt man delte samme utbetaling før
             fun List<Behandling>.erUtbetaltPåForskjelligeUtbetalinger(other: List<Behandling>): Boolean {

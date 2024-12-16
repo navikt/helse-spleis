@@ -344,7 +344,7 @@ data class ArbeidsgiverInntektsopplysning(
             return endringsDatoer.minOrNull()
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
+        internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbarInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.gjenbrukbarInntekt() != null
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(

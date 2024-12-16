@@ -307,8 +307,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun refusjonsopplysninger(organisasjonsnummer: String) =
             inntektsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
 
-        internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
-            inntektsgrunnlag.harGjenbrukbareOpplysninger(organisasjonsnummer)
+        internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
+            inntektsgrunnlag.harGjenbrukbarInntekt(organisasjonsnummer)
 
         internal fun lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
@@ -401,7 +401,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             },
             subsumsjonslogg = subsumsjonslogg,
         )
-
 
         override fun kopierMed(
             aktivitetslogg: IAktivitetslogg,

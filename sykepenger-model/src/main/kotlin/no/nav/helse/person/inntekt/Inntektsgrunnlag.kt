@@ -36,7 +36,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fast
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.forespurtInntektOgRefusjonsopplysninger
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbareOpplysninger
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
@@ -424,8 +424,8 @@ internal class Inntektsgrunnlag private constructor(
             ?: skjæringstidspunkt
     }
 
-    fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.harGjenbrukbareOpplysninger(organisasjonsnummer)
+    fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.harGjenbrukbarInntekt(organisasjonsnummer)
 
     fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
         arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
