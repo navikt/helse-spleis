@@ -179,6 +179,8 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
         }.trim()
     }
 
+    fun toFancyString() = "${UtbetalingtidslinjeButFancy(this)}"
+
     class Builder {
         private val utbetalingsdager = mutableListOf<Utbetalingsdag>()
 

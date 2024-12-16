@@ -19,6 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
@@ -147,6 +148,7 @@ internal class UtbetalingstidslinjeTest {
             ),
             tidslinjedager
         )
+        println(tidslinjeOf(16.AP, 15.NAV, 2.FRI))
     }
 
     @Test
@@ -161,5 +163,12 @@ internal class UtbetalingstidslinjeTest {
             ),
             tidslinjedager
         )
+    }
+
+    @Disabled
+    @Test
+    fun `dette burde ikke committes, tror jeg`() {
+        println(tidslinjeOf(16.AP, 15.NAV, 10.ARB, 2.FRI).toFancyString())
+        println(tidslinjeOf(16.AP, 10.ARB, 15.NAV, 2.FRI).toFancyString())
     }
 }
