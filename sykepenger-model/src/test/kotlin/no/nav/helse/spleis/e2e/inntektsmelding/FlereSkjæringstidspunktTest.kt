@@ -2,8 +2,10 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -22,6 +24,21 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
+
+    @Test
+    fun `korrigert søknad som dekker deler av perioden`() {
+        a1 {
+            nyttVedtak(januar)
+            assertUgyldigSituasjon("FLERE_SKJÆRINGSTIDSPUNKT") {
+                håndterSøknad(
+                    Sykdom(20.januar, 20.januar, 100.prosent),
+                    Arbeid(20.januar, 20.januar)
+                )
+            }
+
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
+        }
+    }
 
     @Test
     fun `Først sier sykmeldte at det var egenmeldingsdag, så ombestemmer de seg`() {
@@ -103,5 +120,4 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }
     }
-
 }
