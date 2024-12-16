@@ -2551,17 +2551,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (vedtaksperiode.periodeRettFørHarFåttInntektsmelding()) {
-                aktivitetslogg.info("Periode ser ut til å feilaktig vente på inntektsmelding. ")
-                return vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
-            }
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
                 aktivitetslogg.funksjonellFeil(RV_IV_11)
                 return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
             }
             if (påminnelse.skalReberegnes()) {
                 vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
-                vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(påminnelse, aktivitetslogg)
+                vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(hendelse = null, aktivitetslogg)
                 return vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)
             }
             if (påminnelse.harVentet3MånederEllerMer()) {
