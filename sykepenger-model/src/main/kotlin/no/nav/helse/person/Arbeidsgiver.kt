@@ -54,7 +54,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.refusjonseventyr
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
@@ -576,14 +575,13 @@ internal class Arbeidsgiver private constructor(
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
         if (!inntektsmelding.valider(vedtaksperioder, aktivitetslogg, person::emitInntektsmeldingIkkeHåndtert)) return
 
-        if (vedtaksperiodeIdForReplay == null) håndter(
+        val refusjonsoverstyring = if (vedtaksperiodeIdForReplay == null) håndter(
             inntektsmelding,
             aktivitetslogg,
             inntektsmelding.refusjonsservitør
-        )
+        ) else null
 
         val dagoverstyring = dager.revurderingseventyr()
-        val refusjonsoverstyring = vedtaksperioder.refusjonseventyr(inntektsmelding)
         addInntektsmelding(
             inntektsmelding,
             aktivitetslogg,
@@ -886,11 +884,17 @@ internal class Arbeidsgiver private constructor(
         return revurderingseventyr
     }
 
-    internal fun håndter(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør) {
+    internal fun håndter(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
+        var revurderingseventyr: Revurderingseventyr? = null
         håndter(hendelse) {
-            håndter(hendelse, aktivitetslogg, servitør)
+            håndter(hendelse, aktivitetslogg, servitør).also { håndtert ->
+                if (revurderingseventyr == null && håndtert) {
+                    revurderingseventyr = Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
+                }
+            }
         }
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
+        return revurderingseventyr
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {

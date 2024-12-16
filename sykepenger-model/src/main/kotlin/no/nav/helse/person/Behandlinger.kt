@@ -320,10 +320,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
         beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
         refusjonstidslinje: Beløpstidslinje
-    ) {
+    ): Boolean {
+        val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje()
         behandlinger.last().håndterRefusjonsopplysninger(arbeidsgiver, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
             leggTilNyBehandling(it)
         }
+        val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje()
+        val endret = refusjonstidslinjeFør != refusjonstidslinjeEtter
+        return endret
     }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
@@ -564,7 +568,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     )
                 }
 
-                internal fun SykdomshistorikkHendelse.dokumentsporingOrNull(): Dokumentsporing? {
+                private fun SykdomshistorikkHendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
                         is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId)
                         is Søknad -> søknad(metadata.meldingsreferanseId)
@@ -574,7 +578,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }
                 }
 
-                internal fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
+                private fun Hendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
                         is Inntektsmelding -> inntektsmeldingInntekt(metadata.meldingsreferanseId)
                         is SykepengegrunnlagForArbeidsgiver -> inntektFraAOrdingen(metadata.meldingsreferanseId)
