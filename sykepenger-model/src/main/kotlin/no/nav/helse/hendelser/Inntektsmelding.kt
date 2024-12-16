@@ -276,7 +276,7 @@ class Inntektsmelding(
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
             if (skjæringstidspunkt != inntektsdato) {
-                "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for inntektsmeldingId ${inntektsmelding.metadata.meldingsreferanseId}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
+                "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for vedtaksperiodeId ${vedtaksperiode.view().id}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
                     .let {
                         logger.info(it)
                         sikkerlogg.info(it)
