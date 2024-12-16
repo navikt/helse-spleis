@@ -409,6 +409,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     fom = periode.fom,
     tom = periode.tom,
     skjæringstidspunkt = skjæringstidspunkt,
+    skjæringstidspunkter = skjæringstidspunkter,
     utbetalingId = utbetalingId,
     vilkårsgrunnlagId = vilkårsgrunnlagId,
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
@@ -497,7 +498,6 @@ private fun UtbetalingUtDto.tilPersonData() = PersonData.UtbetalingData(
 private fun UtbetalingstidslinjeUtDto.tilPersonData() = PersonData.UtbetalingstidslinjeData(
     dager = this.dager.map { it.tilPersonData() }.forkortUtbetalingstidslinje()
 )
-
 
 private fun List<UtbetalingsdagData>.forkortUtbetalingstidslinje(): List<UtbetalingsdagData> {
     return this.fold(emptyList()) { result, neste ->

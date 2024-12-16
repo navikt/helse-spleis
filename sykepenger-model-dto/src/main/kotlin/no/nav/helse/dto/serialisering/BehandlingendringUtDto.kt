@@ -16,6 +16,7 @@ data class BehandlingendringUtDto(
     val periode: PeriodeDto,
     val vilkårsgrunnlagId: UUID?,
     val skjæringstidspunkt: LocalDate,
+    val skjæringstidspunkter: List<LocalDate>,
     val utbetalingId: UUID?,
     val utbetalingstatus: UtbetalingTilstandDto?,
     val dokumentsporing: DokumentsporingDto,

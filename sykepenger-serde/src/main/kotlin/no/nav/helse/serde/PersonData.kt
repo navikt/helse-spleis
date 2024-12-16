@@ -894,6 +894,7 @@ data class PersonData(
                     val fom: LocalDate,
                     val tom: LocalDate,
                     val skjæringstidspunkt: LocalDate,
+                    val skjæringstidspunkter: List<LocalDate>,
                     val utbetalingId: UUID?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
@@ -915,6 +916,7 @@ data class PersonData(
                         utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
                         refusjonstidslinje = this.refusjonstidslinje.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
+                        skjæringstidspunkter = skjæringstidspunkter,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto()
                     )
@@ -1362,7 +1364,6 @@ data class PersonData(
                 )
             )
         })
-
     }
 
     data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)

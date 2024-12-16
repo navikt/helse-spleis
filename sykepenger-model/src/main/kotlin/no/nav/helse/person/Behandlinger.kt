@@ -495,6 +495,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val utbetalingstidslinje: Utbetalingstidslinje,
             val refusjonstidslinje: Beløpstidslinje,
             val skjæringstidspunkt: LocalDate,
+            val skjæringstidspunkter: List<LocalDate>,
             val arbeidsgiverperiode: List<Periode>,
             val maksdatoresultat: Maksdatoresultat
         ) {
@@ -510,11 +511,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetalingstidslinje = utbetalingstidslinje,
                 refusjonstidslinje = refusjonstidslinje,
                 skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkter = skjæringstidspunkter,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 maksdatoresultat = maksdatoresultat
             )
 
-            private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): LocalDate {
+            private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): Pair<LocalDate, List<LocalDate>> {
                 val sisteSykedag = sykdomstidslinje.lastOrNull {
                     // uttømmende when-blokk (uten else) med hensikt, fordi om nye det lages nye
                     // dagtyper så vil det bli compile error og vi blir tvunget til å måtte ta stilling til den
@@ -539,10 +541,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 // trimmer friskmelding/ferie i halen bort
                 val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
-                return beregnSkjæringstidspunkt()
+                val skjæringstidspunkter = beregnSkjæringstidspunkt()
                     .alle(søkeperiode)
-                    .maxOrNull()
-                    ?: periode.start
+                val fastsattSkjæringstidspunkt = skjæringstidspunkter.maxOrNull() ?: periode.start
+                return fastsattSkjæringstidspunkt to skjæringstidspunkter
             }
 
             companion object {
@@ -563,6 +565,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         utbetalingstidslinje = migrerUtbetalingstidslinje(dto, utbetaling, erAvsluttetUtenVedtak),
                         refusjonstidslinje = Beløpstidslinje.gjenopprett(dto.refusjonstidslinje),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
+                        skjæringstidspunkter = dto.skjæringstidspunkter,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) }
                     )
@@ -669,6 +672,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetalingstidslinje: Utbetalingstidslinje = this.utbetalingstidslinje,
                 refusjonstidslinje: Beløpstidslinje = this.refusjonstidslinje,
                 skjæringstidspunkt: LocalDate = this.skjæringstidspunkt,
+                skjæringstidspunkter: List<LocalDate> = this.skjæringstidspunkter,
                 arbeidsgiverperiode: List<Periode> = this.arbeidsgiverperiode,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat
             ) = copy(
@@ -683,16 +687,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetalingstidslinje = utbetalingstidslinje,
                 refusjonstidslinje = refusjonstidslinje,
                 skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkter = skjæringstidspunkter,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 maksdatoresultat = maksdatoresultat,
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Endring? {
-                val nyttSkjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt)
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt)
                 val arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
                 if (nyttSkjæringstidspunkt == this.skjæringstidspunkt && arbeidsgiverperiode == this.arbeidsgiverperiode) return null
                 return kopierMed(
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
+                    skjæringstidspunkter = alleSkjæringstidspunkter,
                     arbeidsgiverperiode = arbeidsgiverperiode
                 )
             }
@@ -703,46 +709,58 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykdomstidslinje: Sykdomstidslinje,
                 beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode>
-            ) = kopierMed(
-                grunnlagsdata = null,
-                utbetaling = null,
-                dokumentsporing = dokument,
-                sykdomstidslinje = sykdomstidslinje,
-                utbetalingstidslinje = Utbetalingstidslinje(),
-                refusjonstidslinje = this.refusjonstidslinje.fyll(periode),
-                periode = periode,
-                skjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode),
-                arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
-                maksdatoresultat = Maksdatoresultat.IkkeVurdert
-            )
+            ): Endring {
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode)
+                return kopierMed(
+                    grunnlagsdata = null,
+                    utbetaling = null,
+                    dokumentsporing = dokument,
+                    sykdomstidslinje = sykdomstidslinje,
+                    utbetalingstidslinje = Utbetalingstidslinje(),
+                    refusjonstidslinje = this.refusjonstidslinje.fyll(periode),
+                    periode = periode,
+                    skjæringstidspunkt = nyttSkjæringstidspunkt,
+                    skjæringstidspunkter = alleSkjæringstidspunkter,
+                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
+                    maksdatoresultat = Maksdatoresultat.IkkeVurdert
+                )
+            }
 
             internal fun kopierUtenUtbetaling(
                 beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode> = { this.arbeidsgiverperiode }
-            ) = kopierMed(
-                grunnlagsdata = null,
-                utbetaling = null,
-                utbetalingstidslinje = Utbetalingstidslinje(),
-                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
-                arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
-            )
+            ): Endring {
+                val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) }
+                return kopierMed(
+                    grunnlagsdata = null,
+                    utbetaling = null,
+                    utbetalingstidslinje = Utbetalingstidslinje(),
+                    maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                    skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
+                    skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
+                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
+                )
+            }
 
             internal fun kopierMedRefusjonstidslinje(
                 dokument: Dokumentsporing,
                 refusjonstidslinje: Beløpstidslinje,
                 beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode> = { this.arbeidsgiverperiode }
-            ) = kopierMed(
-                grunnlagsdata = null,
-                utbetaling = null,
-                utbetalingstidslinje = Utbetalingstidslinje(),
-                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                dokumentsporing = dokument,
-                refusjonstidslinje = refusjonstidslinje,
-                skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
-                arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
-            )
+            ): Endring {
+                val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) }
+                return kopierMed(
+                    grunnlagsdata = null,
+                    utbetaling = null,
+                    utbetalingstidslinje = Utbetalingstidslinje(),
+                    maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                    dokumentsporing = dokument,
+                    refusjonstidslinje = refusjonstidslinje,
+                    skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
+                    skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
+                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
+                )
+            }
 
             internal fun kopierMedUtbetaling(maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, organisasjonsnummer: String) = kopierMed(
                 grunnlagsdata = grunnlagsdata,
@@ -795,6 +813,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     periode = this.periode.dto(),
                     vilkårsgrunnlagId = vilkårsgrunnlagUtDto?.vilkårsgrunnlagId,
                     skjæringstidspunkt = this.skjæringstidspunkt,
+                    skjæringstidspunkter = this.skjæringstidspunkter,
                     utbetalingId = utbetalingUtDto?.id,
                     utbetalingstatus = utbetalingUtDto?.tilstand,
                     dokumentsporing = this.dokumentsporing.dto(),
@@ -1221,6 +1240,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             refusjonstidslinje = Beløpstidslinje(),
                             periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette behandling på tom sykdomstidslinje" },
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
+                            skjæringstidspunkter = emptyList(),
                             arbeidsgiverperiode = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert
                         )
@@ -1958,6 +1978,7 @@ internal data class BehandlingendringView(
     val utbetalingstidslinje: Utbetalingstidslinje,
     val refusjonstidslinje: Beløpstidslinje,
     val skjæringstidspunkt: LocalDate,
+    val skjæringstidspunkter: List<LocalDate>,
     val arbeidsgiverperiode: List<Periode>,
     val maksdatoresultat: Maksdatoresultat
 )

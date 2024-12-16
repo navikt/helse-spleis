@@ -20,6 +20,7 @@ data class BehandlingendringInnDto(
     val utbetalingstidslinje: UtbetalingstidslinjeInnDto?,
     val refusjonstidslinje: BeløpstidslinjeDto,
     val skjæringstidspunkt: LocalDate,
+    val skjæringstidspunkter: List<LocalDate>,
     val arbeidsgiverperiode: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatInnDto
 )

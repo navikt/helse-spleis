@@ -1,0 +1,41 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "skjæringstidspunkter": [
+                      "2018-01-01"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 314
+}
