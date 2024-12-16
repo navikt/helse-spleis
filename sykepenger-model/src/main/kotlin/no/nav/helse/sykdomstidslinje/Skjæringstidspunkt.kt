@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt.Søketilstand.PotensieltGyldigOppholdsperiodeMellomSykdomsperioder
 
 /**
  * Finner skjæringstidspunkter
@@ -24,7 +25,7 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
     }
 
     fun beregnSkjæringstidspunktOrNull(vedtaksperiode: Periode): LocalDate? {
-        return finnSkjæringstidspunkt(vedtaksperiode)?.skjæringstidspunkt
+        return finnSkjæringstidspunkt(vedtaksperiode)?.skjæringstidspunkter?.firstOrNull()
     }
 
     private fun finnSkjæringstidspunkt(vedtaksperiode: Periode): Søkekontekst? {
@@ -64,21 +65,37 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
 
     private fun traverserTidslinjenBaklengs(søkeperiode: Periode, looper: (Søkekontekst, Dag, LocalDate) -> Søkekontekst): Søkekontekst {
         var gjeldendeDag = minOf(søkeperiode.endInclusive, personsykdomstidslinje.sisteDag())
-        var søkekontekst = Søkekontekst(Søketilstand.HarIkkeFunnetSkjæringstidspunkt, null)
+        var søkekontekst = Søkekontekst(søkeperiode, Søketilstand.HarIkkeFunnetSkjæringstidspunkt, emptyList())
         while (gjeldendeDag >= personsykdomstidslinje.førsteDag() && søkekontekst.skalFortsetteÅSøke()) {
             val dagen = personsykdomstidslinje[gjeldendeDag]
             søkekontekst = looper(søkekontekst, dagen, gjeldendeDag)
             gjeldendeDag = gjeldendeDag.minusDays(1L)
         }
+        søkekontekst = søkekontekst.avsluttSøk()
         return søkekontekst
     }
 
     private data class Søkekontekst(
+        val søkeperiode: Periode,
         val tilstand: Søketilstand,
-        val skjæringstidspunkt: LocalDate?
+        val skjæringstidspunkter: List<LocalDate>,
+        val ferdig: Boolean = false
     ) {
-        fun skalFortsetteÅSøke() = tilstand != Søketilstand.HarSkjæringstidspunkt
-        fun avsluttSøk() = copy(tilstand = Søketilstand.HarSkjæringstidspunkt)
+        fun skalFortsetteÅSøke() = !ferdig
+        fun avsluttSøk(): Søkekontekst {
+            return nullstillSøk().copy(ferdig = true)
+        }
+
+        fun nullstillSøk() = this.copy(
+            tilstand = Søketilstand.HarIkkeFunnetSkjæringstidspunkt,
+            skjæringstidspunkter = when (tilstand) {
+                is Søketilstand.HarPotensieltSkjæringstidspunkt -> skjæringstidspunkter.plusElement(tilstand.kandidat)
+                is PotensieltGyldigOppholdsperiodeMellomSykdomsperioder -> skjæringstidspunkter.plusElement(tilstand.kandidat)
+
+                Søketilstand.HarIkkeFunnetSkjæringstidspunkt,
+                Søketilstand.HarSkjæringstidspunkt -> skjæringstidspunkter
+            }
+        )
 
         // behandler oppholdsdager før søkeperioden som avslutning av søk, men
         // håndterer at oppholdsdager kan forekomme i f.eks. halen, før vi har
@@ -88,18 +105,19 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
             else -> tilstand.oppholdsdag(this)
         }
 
-        fun andreYtelser(dagen: LocalDate): Søkekontekst = tilstand.andreYtelser(this, dagen)
+        fun andreYtelser(dagen: LocalDate): Søkekontekst = nullstillSøk()
         fun potensieltSkjæringstidspunkt(dagen: LocalDate): Søkekontekst = tilstand.potensieltSkjæringstidspunkt(this, dagen)
         fun potensieltGyldigOppholdsperiode(dagen: LocalDate): Søkekontekst = tilstand.potensieltGyldigOppholdsperiode(this, dagen)
     }
 
     private sealed interface Søketilstand {
-        fun oppholdsdag(kontekst: Søkekontekst) = kontekst.avsluttSøk()
-        fun potensieltSkjæringstidspunkt(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst.copy(tilstand = HarPotensieltSkjæringstidspunkt, skjæringstidspunkt = dagen)
+        fun oppholdsdag(kontekst: Søkekontekst) = kontekst.nullstillSøk()
+        fun potensieltSkjæringstidspunkt(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst.copy(
+            tilstand = HarPotensieltSkjæringstidspunkt(dagen)
+        )
 
         // en dag som potensielt kan bygge bro mellom to sykdomsperioder (ferie, andre ytelser)
-        fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.copy(tilstand = PotensieltGyldigOppholdsperiodeMellomSykdomsperioder)
-        fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.copy(tilstand = AndreYtelser)
+        fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst
 
         data object HarIkkeFunnetSkjæringstidspunkt : Søketilstand {
             // hopper over friskmelding i halen
@@ -109,22 +127,19 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
             override fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate) = kontekst
         }
 
-        data object HarPotensieltSkjæringstidspunkt : Søketilstand {
-            override fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.avsluttSøk()
+        data class HarPotensieltSkjæringstidspunkt(val kandidat: LocalDate) : Søketilstand {
+            override fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.copy(
+                tilstand = PotensieltGyldigOppholdsperiodeMellomSykdomsperioder(kandidat)
+            )
         }
 
-        data object PotensieltGyldigOppholdsperiodeMellomSykdomsperioder : Søketilstand {
-            override fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.avsluttSøk()
-        }
-
-        data object AndreYtelser : Søketilstand {
+        data class PotensieltGyldigOppholdsperiodeMellomSykdomsperioder(val kandidat: LocalDate) : Søketilstand {
             override fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate) = kontekst
         }
 
         data object HarSkjæringstidspunkt : Søketilstand {
             override fun potensieltSkjæringstidspunkt(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst
             override fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst
-            override fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst
         }
     }
 }
