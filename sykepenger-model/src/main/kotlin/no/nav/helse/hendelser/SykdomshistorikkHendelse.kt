@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
@@ -11,7 +10,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 internal typealias Melding = KClass<out SykdomshistorikkHendelse>
 
 interface SykdomshistorikkHendelse {
-    fun revurderingseventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? = null
     fun oppdaterFom(other: Periode): Periode
     fun sykdomstidslinje(): Sykdomstidslinje
 

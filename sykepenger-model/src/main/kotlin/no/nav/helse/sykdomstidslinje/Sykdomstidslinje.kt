@@ -23,7 +23,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.sykdomstidslinje.Dag.Companion.funksjoneltLik
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -144,8 +143,6 @@ class Sykdomstidslinje private constructor(
         if (other !is Sykdomstidslinje) return false
         return dager == other.dager && periode == other.periode && låstePerioder == other.låstePerioder
     }
-
-    internal fun funksjoneltLik(other: Sykdomstidslinje) = dager.funksjoneltLik(other.dager)
 
     override fun hashCode() = Objects.hash(dager, periode, låstePerioder)
 

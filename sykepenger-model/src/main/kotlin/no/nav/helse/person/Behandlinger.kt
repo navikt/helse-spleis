@@ -60,7 +60,6 @@ import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
-import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
@@ -334,13 +333,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         person.sykdomshistorikkEndret()
         validering()
-        hendelse.igangsettOverstyring(person, aktivitetslogg)
-    }
-
-    private fun SykdomshistorikkHendelse.igangsettOverstyring(person: Person, aktivitetslogg: IAktivitetslogg) {
-        revurderingseventyr(skjæringstidspunkt(), periode())
-            ?.takeIf { behandlinger.endretSykdomshistorikkFra(this) }
-            ?.let { revurderingseventyr -> person.igangsettOverstyring(revurderingseventyr, aktivitetslogg) }
     }
 
     fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
@@ -1285,18 +1277,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         endring.takeIf { predikat(it) }
                     }
                 }
-
-            private fun List<Behandling>.forrigeOgGjeldendeEndring(): Pair<Endring?, Endring> {
-                val gjeldendeEndring = gjeldendeEndring()
-                return forrigeEndringMed { it.tidsstempel < gjeldendeEndring.tidsstempel } to gjeldendeEndring
-            }
-
-            internal fun List<Behandling>.endretSykdomshistorikkFra(hendelse: SykdomshistorikkHendelse): Boolean {
-                val (forrigeEndring, gjeldendeEndring) = forrigeOgGjeldendeEndring()
-                if (gjeldendeEndring.dokumentsporing != hendelse.dokumentsporing()) return false
-                if (forrigeEndring == null) return true
-                return !gjeldendeEndring.sykdomstidslinje.funksjoneltLik(forrigeEndring.sykdomstidslinje)
-            }
 
             internal fun List<Behandling>.grunnbeløpsregulert(): Boolean {
                 val gjeldende = gjeldendeEndring().takeIf { it.grunnlagsdata != null } ?: return false
