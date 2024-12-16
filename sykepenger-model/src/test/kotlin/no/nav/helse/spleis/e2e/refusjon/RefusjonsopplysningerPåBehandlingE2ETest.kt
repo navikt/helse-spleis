@@ -60,6 +60,21 @@ import org.junit.jupiter.api.Test
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
     @Test
+    fun `håndterer refusjonsopplysninger ved out of order`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(17.februar til 28.februar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertEquals(Beløpstidslinje(), inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
+            håndterSøknad(1.februar til 16.februar)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
+        }
+    }
+
+    @Test
     fun `En forespurt portalinntektsmelding som setter arbeidsgiverperioden _etter_ søknaden - virkedag mellom siste søknadsdag og første agp-dag`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
