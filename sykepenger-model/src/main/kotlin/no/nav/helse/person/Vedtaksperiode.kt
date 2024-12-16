@@ -484,6 +484,20 @@ internal class Vedtaksperiode private constructor(
         tilstand.nyAnnullering(this, aktivitetslogg)
     }
 
+    internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (!overstyrArbeidsgiveropplysninger.erRelevant(skjæringstidspunkt)) return null
+        if (vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return null
+        registrerKontekst(aktivitetslogg)
+
+        val eventyr = person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+            overstyrArbeidsgiveropplysninger,
+            aktivitetslogg,
+            skjæringstidspunkt,
+            jurist
+        )
+        return eventyr
+    }
+
     internal fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Boolean {
         if (!overstyrInntektsgrunnlag.erRelevant(skjæringstidspunkt)) return false
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return false
@@ -505,12 +519,7 @@ internal class Vedtaksperiode private constructor(
                 jurist
             )
 
-            is OverstyrArbeidsgiveropplysninger -> person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrInntektsgrunnlag,
-                aktivitetslogg,
-                skjæringstidspunkt,
-                jurist
-            )
+            is OverstyrArbeidsgiveropplysninger -> error("Error. Det finnes en konkret dispatcher-konfigurasjon for dette tilfellet")
 
             is SkjønnsmessigFastsettelse -> person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 overstyrInntektsgrunnlag,

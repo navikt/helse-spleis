@@ -422,9 +422,11 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
-        check(arbeidsgivere.håndter(hendelse, aktivitetslogg)) {
+        val inntektseventyr = arbeidsgivere.håndter(hendelse, aktivitetslogg)
+        check(inntektseventyr != null) {
             "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger"
         }
+        igangsettOverstyring(inntektseventyr, aktivitetslogg)
         arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
@@ -703,11 +705,11 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
+    ): Revurderingseventyr? {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return null
         val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, aktivitetslogg, subsumsjonslogg)
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
-        igangsettOverstyring(eventyr, aktivitetslogg)
+        return eventyr
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
