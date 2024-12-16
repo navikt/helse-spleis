@@ -12,6 +12,7 @@ internal class VedtaksperiodeInspektør(view: VedtaksperiodeView) {
     internal val periode = view.periode
     internal val oppdatert = view.oppdatert
     internal val skjæringstidspunkt = view.skjæringstidspunkt
+    internal val skjæringstidspunkter = view.skjæringstidspunkter
     internal val førsteFraværsdag = view.førsteFraværsdag
 
     internal val utbetalingstidslinje: Utbetalingstidslinje get() = behandlinger.last().endringer.last().utbetalingstidslinje

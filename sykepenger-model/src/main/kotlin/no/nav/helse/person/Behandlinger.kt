@@ -151,6 +151,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val maksdato get() = behandlinger.last().maksdato
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
+    internal fun skjæringstidspunkter() = behandlinger.last().skjæringstidspunkter
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
     internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje()
     internal fun harVærtBeregnet() = behandlinger.any { behandling -> behandling.harVærtBeregnet() }
@@ -403,6 +404,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val dokumentsporing get() = endringer.dokumentsporing
         val arbeidsgiverperiode get() = gjeldende.arbeidsgiverperiode
         val skjæringstidspunkt get() = gjeldende.skjæringstidspunkt
+        val skjæringstidspunkter get() = gjeldende.skjæringstidspunkter
         val maksdato get() = gjeldende.maksdatoresultat
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {

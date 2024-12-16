@@ -104,6 +104,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 14.mars))
             håndterInntektsmelding(emptyList(), førsteFraværsdag = 15.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "fox")
             assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            assertEquals(listOf(15.mars), inspektør.skjæringstidspunkter(3.vedtaksperiode))
         }
         a1 {
             håndterSøknad(april)

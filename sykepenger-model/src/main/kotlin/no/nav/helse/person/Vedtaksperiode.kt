@@ -232,6 +232,7 @@ internal class Vedtaksperiode private constructor(
         tilstand = tilstand.type,
         oppdatert = oppdatert,
         skjæringstidspunkt = skjæringstidspunkt,
+        skjæringstidspunkter = behandlinger.skjæringstidspunkter(),
         egenmeldingsperioder = egenmeldingsperioder,
         behandlinger = behandlinger.view(),
         førsteFraværsdag = førsteFraværsdag
@@ -4102,6 +4103,7 @@ internal data class VedtaksperiodeView(
     val tilstand: TilstandType,
     val oppdatert: LocalDateTime,
     val skjæringstidspunkt: LocalDate,
+    val skjæringstidspunkter: List<LocalDate>,
     val egenmeldingsperioder: List<Periode>,
     val behandlinger: BehandlingerView,
     val førsteFraværsdag: LocalDate?

@@ -136,6 +136,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = skjæringstidspunkt(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.skjæringstidspunkt
 
+    internal fun skjæringstidspunkter(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.skjæringstidspunkter
+
     internal fun førsteFraværsdag(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.førsteFraværsdag
 
     internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalingstidslinjer(vedtaksperiodeIdInnhenter.id(orgnummer))
