@@ -23,7 +23,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 
-
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
     private val skjæringstidspunkt: LocalDate,
@@ -50,6 +49,13 @@ class Revurderingseventyr private constructor(
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
             else -> b
+        }
+
+        fun List<Revurderingseventyr>.tidligsteEventyr(): Revurderingseventyr? {
+            if (this.isEmpty()) return null
+            return fold(first()) { champion, challenger ->
+                tidligsteEventyr(champion, challenger) ?: champion
+            }
         }
     }
 

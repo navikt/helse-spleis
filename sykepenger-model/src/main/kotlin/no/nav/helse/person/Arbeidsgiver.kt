@@ -30,6 +30,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.SykdomstidslinjeHendelse
@@ -213,17 +214,18 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.håndterOverstyringAvRefusjon(
             hendelse: OverstyrArbeidsgiveropplysninger,
             aktivitetslogg: IAktivitetslogg
-        ) {
-            forEach { arbeidsgiver ->
+        ): Revurderingseventyr? {
+            val revurderingseventyr = mapNotNull { arbeidsgiver ->
                 val vedtaksperioderPåSkjæringstidspunkt =
                     arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt))
                 val refusjonstidslinje = vedtaksperioderPåSkjæringstidspunkt.refusjonstidslinje()
                 val startdatoer = vedtaksperioderPåSkjæringstidspunkt.startdatoerPåSammenhengendeVedtaksperioder()
                 val servitør =
                     hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje)
-                        ?: return@forEach
+                        ?: return@mapNotNull null
                 arbeidsgiver.håndter(hendelse, aktivitetslogg, servitør)
             }
+            return revurderingseventyr.tidligsteEventyr()
         }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
