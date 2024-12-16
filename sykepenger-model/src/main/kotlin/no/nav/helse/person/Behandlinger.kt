@@ -1708,6 +1708,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
 
                 override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
+
+                override fun håndterRefusjonsopplysninger(
+                    arbeidsgiver: Arbeidsgiver,
+                    behandling: Behandling,
+                    hendelse: Hendelse?,
+                    aktivitetslogg: IAktivitetslogg,
+                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
+                    nyeRefusjonsopplysninger: Beløpstidslinje
+                ) = behandling.nyBehandlingMedRefusjonstidslinje(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
+
                 override fun håndterEndring(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
@@ -1715,8 +1726,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>
-                ) =
-                    behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
+                ) = behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
 
                 override fun avsluttMedVedtak(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
                     behandling.tilstand(VedtakIverksatt, aktivitetslogg)
@@ -1819,10 +1829,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
                     nyeRefusjonsopplysninger: Beløpstidslinje
-                ): Behandling? {
-                    if (behandling.gjeldende.refusjonstidslinje.isEmpty()) return null // TODO: Denne kan vi fjerne når vi har migrert inn refusjonsopplysninger på alle perioder + dette bør også være i VedtakIverksatt?
-                    return behandling.nyBehandlingMedRefusjonstidslinje(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
-                }
+                ) = behandling.nyBehandlingMedRefusjonstidslinje(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
 
                 override fun håndterEndring(
                     behandling: Behandling,
@@ -1831,8 +1838,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>
-                ) =
-                    behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
+                ) = behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
 
                 override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet != null) return

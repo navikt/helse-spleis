@@ -576,7 +576,7 @@ internal class Arbeidsgiver private constructor(
         addInntektsmelding(
             inntektsmelding,
             aktivitetslogg,
-            Revurderingseventyr.tidligsteEventyr(dagoverstyring, refusjonsoverstyring)
+            tidligsteEventyr(dagoverstyring, refusjonsoverstyring)
         )
 
         inntektsmelding.ferdigstill(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder)
@@ -1030,11 +1030,7 @@ internal class Arbeidsgiver private constructor(
                 subsumsjonsloggMedInntektsmeldingkontekst
             )
         }
-        // TODO: Til ettertanke: Når BrukRefusjonsopplysningerPåBehandling er enabled & vi beholder refusjon i inntektsgrunnlaget for midl. logging:
-        //  - kan vi havne i en situasjon hvor vi får en inntektsoverstyring hvor inntekt er uendret, men refusjon er endret
-        //    samtidig mener behandlingen at den mangler refusjonsopplysninger, gjør det noe?
-        //  - burde vi kun starte overstyring om _inntekten_ er endret når toggle er på?
-        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, overstyring) ?: return
+        val overstyringFraInntektsmelding = tidligsteEventyr(inntektoverstyring, overstyring) ?: return
         person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
     }
 
