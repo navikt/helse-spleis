@@ -106,8 +106,16 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
         }
 
         fun andreYtelser(dagen: LocalDate): Søkekontekst = when {
-            dagen <= søkeperiode.start && skjæringstidspunkter.isNotEmpty() -> avsluttSøk()
+            dagen <= søkeperiode.start && harFunnetSkjæringstidspunkt() -> avsluttSøk()
             else -> nullstillSøk()
+        }
+
+        private fun harFunnetSkjæringstidspunkt() = when (tilstand) {
+            is Søketilstand.HarPotensieltSkjæringstidspunkt,
+            is PotensieltGyldigOppholdsperiodeMellomSykdomsperioder,
+            Søketilstand.HarSkjæringstidspunkt -> true
+
+            Søketilstand.HarIkkeFunnetSkjæringstidspunkt -> skjæringstidspunkter.isNotEmpty()
         }
 
         fun potensieltSkjæringstidspunkt(dagen: LocalDate): Søkekontekst = tilstand.potensieltSkjæringstidspunkt(this, dagen)

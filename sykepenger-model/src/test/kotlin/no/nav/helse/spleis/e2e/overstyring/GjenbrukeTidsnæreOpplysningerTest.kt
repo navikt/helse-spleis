@@ -198,6 +198,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         }
         a2 {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Svangerskapspengerdag)))
+            assertEquals(listOf(1.februar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
