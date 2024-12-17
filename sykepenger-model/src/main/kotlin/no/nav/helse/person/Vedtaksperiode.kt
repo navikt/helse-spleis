@@ -2158,6 +2158,10 @@ internal class Vedtaksperiode private constructor(
                     aktivitetslogg
                 )
             }
+            if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
+                aktivitetslogg.varsel(RV_IV_11)
+                return
+            }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
@@ -2713,8 +2717,8 @@ internal class Vedtaksperiode private constructor(
                 return
             }
             if (vedtaksperiode.harFlereSkjæringstidspunkt()) {
-                aktivitetslogg.funksjonellFeil(RV_IV_11)
-                return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
+                aktivitetslogg.varsel(RV_IV_11)
+                return
             }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
