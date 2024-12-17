@@ -56,7 +56,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
@@ -64,17 +63,17 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `og noen ganger sendes det endringer i refusjon på samme dato`() {
         a1 {
             håndterSøknad(januar)
-            assertThrows<IllegalArgumentException> {
-                håndterInntektsmeldingPortal(
-                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    refusjon = Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
-                        Refusjon.EndringIRefusjon(INNTEKT * 0.7, 20.januar),
-                        Refusjon.EndringIRefusjon(INNTEKT * 0.8, 20.januar),
-                        Refusjon.EndringIRefusjon(INNTEKT * 0.9, 20.januar)
-                    ))
-                )
-            }
+            håndterInntektsmeldingPortal(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                refusjon = Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+                    Refusjon.EndringIRefusjon(INNTEKT * 0.7, 20.januar),
+                    Refusjon.EndringIRefusjon(INNTEKT * 0.8, 20.januar),
+                    Refusjon.EndringIRefusjon(INNTEKT * 0.9, 20.januar)
+                ))
+            )
+            val forventet = ARBEIDSGIVER.beløpstidslinje(1.januar til 19.januar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(20.januar til 31.januar, INNTEKT * 0.7)
+            assertBeløpstidslinje(forventet, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
         }
     }
 

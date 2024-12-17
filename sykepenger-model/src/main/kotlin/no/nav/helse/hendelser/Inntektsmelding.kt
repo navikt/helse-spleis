@@ -147,6 +147,7 @@ class Inntektsmelding(
             val gyldigeEndringer = endringerIRefusjon
                 .filter { it.endringsdato > refusjonsdato }
                 .filter { it.endringsdato < (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
+                .distinctBy { it.endringsdato }
 
             val alleRefusjonsopplysninger = listOfNotNull(hovedopplysning, *gyldigeEndringer.toTypedArray(), opphørIRefusjon).sortedBy { it.endringsdato }
 
