@@ -56,8 +56,27 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `og noen ganger sendes det endringer i refusjon på samme dato`() {
+        a1 {
+            håndterSøknad(januar)
+            assertThrows<IllegalArgumentException> {
+                håndterInntektsmeldingPortal(
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    refusjon = Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+                        Refusjon.EndringIRefusjon(INNTEKT * 0.7, 20.januar),
+                        Refusjon.EndringIRefusjon(INNTEKT * 0.8, 20.januar),
+                        Refusjon.EndringIRefusjon(INNTEKT * 0.9, 20.januar)
+                    ))
+                )
+            }
+        }
+    }
 
     @Test
     fun `håndterer refusjonsopplysninger ved out of order`() {
