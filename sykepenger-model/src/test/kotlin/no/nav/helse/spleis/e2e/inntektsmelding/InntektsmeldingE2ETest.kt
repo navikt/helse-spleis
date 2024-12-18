@@ -149,25 +149,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
         assertEquals(20000.månedlig, inntektFør)
-        håndterInntektsmelding(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(100.daglig, null), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = a2)
+        val forespurtIm = håndterInntektsmelding(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(100.daglig, null), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = a2)
 
         assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 100.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
         val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
 
-        assertForventetFeil(
-            forklaring = "Vi skal ignorere det magiske tallet -1 slik at vi slipper å sende HAG fastsatt inntekt i forespørsler hvor vi ikke trenger inntekt slik at de kan sende det tilbake til oss og vi 🤡",
-            ønsket = {
-                assertEquals(20000.månedlig, inntektEtter)
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-            },
-            nå = {
-                assertEquals((-1).månedlig, inntektEtter)
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
-            }
-        )
+        assertEquals(20000.månedlig, inntektEtter)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertTrue(observatør.inntektsmeldingHåndtert.contains(forespurtIm to 2.vedtaksperiode.id(a2)))
     }
 
     @Test

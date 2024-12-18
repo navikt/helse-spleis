@@ -271,7 +271,7 @@ class Inntektsmelding(
 
     private abstract class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate?) : Type {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) = true
-        override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
+        override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = inntektsmelding.beregnetInntekt >= Inntekt.INGEN
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
             if (inntektsdato != null && skjæringstidspunkt != inntektsdato) {
@@ -283,7 +283,6 @@ class Inntektsmelding(
             }
             return skjæringstidspunkt
         }
-
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
