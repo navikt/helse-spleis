@@ -21,6 +21,7 @@ import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -195,7 +196,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         opprinneligSendt: LocalDateTime? = null,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
-        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
+        inntektFraNyttArbeidsforhold: List<InntektFraNyttArbeidsforholdDTO> = emptyList()
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadNav(
             fnr = fnr,
@@ -209,7 +211,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             opprinneligSendt = opprinneligSendt,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             sendTilGosys = sendTilGosys,
-            egenmeldingerFraSykmelding = egenmeldingerFraSykmelding
+            egenmeldingerFraSykmelding = egenmeldingerFraSykmelding,
+            inntektFraNyttArbeidsforhold = inntektFraNyttArbeidsforhold
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller
