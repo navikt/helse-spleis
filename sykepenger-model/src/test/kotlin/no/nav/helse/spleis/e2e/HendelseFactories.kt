@@ -321,7 +321,9 @@ internal fun påminnelse(
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        ønskerReberegning = skalReberegnes,
+        flagg = mutableSetOf<String>().apply {
+            if (skalReberegnes) add("ønskerReberegning")
+        },
         opprettet = LocalDateTime.now()
     )
 }

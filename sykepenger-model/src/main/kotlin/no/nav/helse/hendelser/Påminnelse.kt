@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.PersonObserver
@@ -17,8 +18,7 @@ class Påminnelse(
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime,
-    private val ønskerReberegning: Boolean = false,
-    private val ønskerInntektFraAOrdningen: Boolean = false,
+    private val flagg: Set<String>,
     private val nå: LocalDateTime = LocalDateTime.now(),
     opprettet: LocalDateTime
 ) : Hendelse {
@@ -45,16 +45,17 @@ class Påminnelse(
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
-    internal fun skalReberegnes() = ønskerReberegning
-    internal fun skalHenteInntekterFraAOrdningen() = ønskerInntektFraAOrdningen
+    internal fun når(vararg predikat: Predikat): Boolean {
+        check(predikat.isNotEmpty()) { "Nå må sende med minst et predikat da.." }
+        return predikat.all { it.evaluer(this) }
+    }
+    internal fun skalReberegnes() = når(Predikat.Flagg("ønskerReberegning"))
 
     internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
             aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
     }
-
-    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >= tilstandsendringstidspunkt
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(
@@ -78,5 +79,15 @@ class Påminnelse(
     fun eventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? {
         if (!skalReberegnes()) return null
         return Revurderingseventyr.reberegning(this, skjæringstidspunkt, periode)
+    }
+
+    internal sealed interface Predikat {
+        fun evaluer(påminnelse: Påminnelse): Boolean
+        data class Flagg(private val flagg: String): Predikat {
+            override fun evaluer(påminnelse: Påminnelse) = flagg in påminnelse.flagg
+        }
+        data class VentetMinst(private val varighet: Period): Predikat {
+            override fun evaluer(påminnelse: Påminnelse) = påminnelse.tilstandsendringstidspunkt.plus(varighet) <= påminnelse.nå
+        }
     }
 }

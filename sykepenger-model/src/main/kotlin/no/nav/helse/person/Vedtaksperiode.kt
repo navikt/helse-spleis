@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -33,6 +34,8 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMed
 import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
+import no.nav.helse.hendelser.Påminnelse.Predikat.VentetMinst
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -968,19 +971,17 @@ internal class Vedtaksperiode private constructor(
         medlemskap(aktivitetslogg, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun trengerInntektFraSkatt(aktivitetslogg: IAktivitetslogg, skalHenteInntekterFraAOrdningen: Boolean) {
-        if (Toggle.InntektsmeldingSomIkkeKommer.enabled || skalHenteInntekterFraAOrdningen) {
-            // Sender ut forespørsel da HAG skal ta over inntektsinnhenting fra a-ordningen
-            sendTrengerArbeidsgiveropplysninger(skalInnhenteInntektFraAOrdningen = true)
-            val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
-            inntekterForSykepengegrunnlagForArbeidsgiver(
-                aktivitetslogg,
-                skjæringstidspunkt,
-                arbeidsgiver.organisasjonsnummer,
-                beregningSlutt.minusMonths(2),
-                beregningSlutt
-            )
-        }
+    private fun trengerInntektFraSkatt(aktivitetslogg: IAktivitetslogg) {
+        // Sender ut forespørsel da HAG skal ta over inntektsinnhenting fra a-ordningen
+        sendTrengerArbeidsgiveropplysninger(skalInnhenteInntektFraAOrdningen = true)
+        val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
+        inntekterForSykepengegrunnlagForArbeidsgiver(
+            aktivitetslogg,
+            skjæringstidspunkt,
+            arbeidsgiver.organisasjonsnummer,
+            beregningSlutt.minusMonths(2),
+            beregningSlutt
+        )
     }
 
     private fun sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -2361,10 +2362,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.håndterDager(dager, aktivitetslogg)
-            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(
-                dager.hendelse,
-                aktivitetslogg
-            )
+            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(
@@ -2469,10 +2467,18 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) return aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
 
-            if (påminnelse.harVentet3MånederEllerMer()) {
-                aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
-                return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg, påminnelse.skalHenteInntekterFraAOrdningen())
+            val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
+            val påTideMedSkatt = ventetMinst3Måneder && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
+
+            if (påTideMedSkatt) {
+                aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
+                return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
             }
+
+            if (ventetMinst3Måneder) {
+                aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
+            }
+
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }

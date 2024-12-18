@@ -395,7 +395,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             LocalDateTime.now(),
             LocalDateTime.now(),
             opprettet = LocalDateTime.now(),
-            ønskerReberegning = reberegning
+            flagg = mutableSetOf<String>().apply {
+                if (reberegning) add("ønskerReberegning")
+            }
         )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =

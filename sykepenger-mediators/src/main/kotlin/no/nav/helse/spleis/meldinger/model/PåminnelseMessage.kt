@@ -19,7 +19,9 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
     private val ønskerReberegning = packet["ønskerReberegning"].takeIf { it.isBoolean }?.booleanValue() ?: false
-    private val ønskerInntektFraAOrdningen = packet["ønskerInntektFraAOrdningen"].takeIf { it.isBoolean }?.booleanValue() ?: false
+    private val flagg = packet["flagg"].map { it.asText() }.toMutableList().apply {
+        if (ønskerReberegning) add("ønskerReberegning") // TODO: Bakoverkompatibel med Spock / Spout - må endre til å sette flagget der så kan vi jo fjerne denna
+    }.toSet()
 
     private val påminnelse
         get() = Påminnelse(
@@ -31,9 +33,8 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
             tilstandsendringstidspunkt = tilstandsendringstidspunkt,
             påminnelsestidspunkt = påminnelsestidspunkt,
             nestePåminnelsestidspunkt = nestePåminnelsestidspunkt,
-            ønskerReberegning = ønskerReberegning,
-            ønskerInntektFraAOrdningen = ønskerInntektFraAOrdningen,
-            opprettet = opprettet
+            opprettet = opprettet,
+            flagg = flagg
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
