@@ -155,7 +155,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sender med forrige refusjonsopplysninger i forespørsel`() {
+    fun `Sender ikke med forrige refusjonsopplysninger i forespørsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(
@@ -229,13 +229,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Refusjon",
-              "forslag": [
-                {
-                  "fom": "2018-01-01",
-                  "tom": null,
-                  "beløp": 31000.0
-                }
-              ]
+              "forslag": []
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -320,18 +314,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Refusjon",
-              "forslag": [
-                {
-                  "fom": "2018-01-01",
-                  "tom": "2018-04-01", 
-                  "beløp": 31000.0
-                },
-                {
-                  "fom": "2018-04-02",
-                  "tom": null, 
-                  "beløp": 0.0
-                }
-              ]
+              "forslag": []
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -373,13 +356,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Refusjon",
-              "forslag": [
-              {                            
-                  "fom": "2018-01-01",       
-                  "tom": null, 
-                  "beløp": 31000.0
-                }                            
-              ]
+              "forslag": []
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -422,13 +399,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Refusjon",
-              "forslag": [
-                { 
-                  "fom": "2018-01-01", 
-                  "tom": null, 
-                  "beløp": 31000.0
-                }
-              ]
+              "forslag": []
             }
           ],
           "innhentInntektFraAOrdningen": false,
