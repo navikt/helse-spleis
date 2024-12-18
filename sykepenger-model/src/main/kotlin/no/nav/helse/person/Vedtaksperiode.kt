@@ -2479,6 +2479,10 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
             }
 
+            if (påminnelse.når(Flagg("maxisEneTestflagg"), Flagg("maxisAndreTestflagg"), VentetMinst(Period.ofDays(1)))) {
+                aktivitetslogg.info("Mangler fortsatt inntektsmelding her")
+            }
+
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
