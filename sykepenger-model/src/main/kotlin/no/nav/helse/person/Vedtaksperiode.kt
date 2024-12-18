@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Grunnbeløp
@@ -1712,7 +1711,6 @@ internal class Vedtaksperiode private constructor(
                     organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
                 )
             }
-            if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return gammelSjekk()
             if (vedtaksperiode.refusjonstidslinje.isNotEmpty()) return true
             if (gammelSjekk()) aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
             return false
@@ -1758,7 +1756,6 @@ internal class Vedtaksperiode private constructor(
                     organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
                 )
             }
-            if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) return gammelSjekk()
             if (vedtaksperiode.refusjonstidslinje.isNotEmpty()) return true
             if (gammelSjekk()) aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
             return false
@@ -2083,7 +2080,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-            return tilstand(vedtaksperiode, Aktivitetslogg()).venteårsak()
+            return tilstand(vedtaksperiode).venteårsak()
         }
 
         override fun igangsettOverstyring(
@@ -2096,7 +2093,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? {
-            val venterPå = tilstand(vedtaksperiode, Aktivitetslogg()).venterPå() ?: nestemann
+            val venterPå = tilstand(vedtaksperiode).venterPå() ?: nestemann
             return vedtaksperiode.vedtaksperiodeVenter(venterPå)
         }
 
@@ -2105,7 +2102,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            tilstand(vedtaksperiode, aktivitetslogg).gjenopptaBehandling(vedtaksperiode, aktivitetslogg)
+            tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, aktivitetslogg)
         }
 
         override fun håndter(
@@ -2162,7 +2159,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
         }
 
-        private fun tilstand(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg): Tilstand {
+        private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
             if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling
             val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
             if (førstePeriodeSomTrengerInntektsmelding != null) {
@@ -2192,7 +2189,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private data object HarPågåendeUtbetaling : Tilstand {
-            override fun venteårsak(): Venteårsak? {
+            override fun venteårsak(): Venteårsak {
                 return UTBETALING.utenBegrunnelse
             }
 
@@ -3699,9 +3696,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val datoformat = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
         // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…

@@ -113,30 +113,6 @@ data class Refusjonsopplysning(
             check(!validerteRefusjonsopplysninger.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon: $refusjonsopplysninger" }
         }
 
-        internal fun lagreTidsnær(førsteFraværsdag: LocalDate, refusjonshistorikk: Refusjonshistorikk) {
-            val relevanteRefusjonsopplysninger = validerteRefusjonsopplysninger.filter {
-                (it.tom ?: LocalDate.MAX) >= førsteFraværsdag
-            }
-            if (relevanteRefusjonsopplysninger.isEmpty()) return
-            val første = relevanteRefusjonsopplysninger.first()
-            val endringerIRefusjon = relevanteRefusjonsopplysninger.drop(1).map { refusjonsopplysning ->
-                Refusjonshistorikk.Refusjon.EndringIRefusjon(
-                    endringsdato = refusjonsopplysning.fom,
-                    beløp = refusjonsopplysning.beløp
-                )
-            }
-
-            val refusjon = Refusjonshistorikk.Refusjon(
-                meldingsreferanseId = første.meldingsreferanseId,
-                førsteFraværsdag = førsteFraværsdag,
-                arbeidsgiverperioder = emptyList(),
-                beløp = første.beløp,
-                sisteRefusjonsdag = null,
-                endringerIRefusjon = endringerIRefusjon
-            )
-            refusjonshistorikk.leggTilRefusjon(refusjon)
-        }
-
         internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.mergeInnNyeOpplysninger(other.validerteRefusjonsopplysninger))
         }

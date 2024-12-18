@@ -70,7 +70,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -1053,17 +1052,12 @@ internal class Arbeidsgiver private constructor(
         skjæringstidspunkt: LocalDate,
         orgnummer: String,
         inntektsmelding: no.nav.helse.person.inntekt.Inntektsmelding,
-        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
         aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean
     ) {
         if (this.organisasjonsnummer != orgnummer) return
         setOfNotNull(finnFørsteFraværsdag(skjæringstidspunkt), skjæringstidspunkt).forEach { dato ->
             inntektsmelding.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
-            if (Toggle.BrukRefusjonsopplysningerPåBehandling.disabled) {
-                // Når vi bruker refusjonsopplysninger på behandling skal det ikke være nødvendig å lagre tidsnære refusjonsopplysninger tilbake til refusjonshistorikk
-                refusjonsopplysninger.lagreTidsnær(dato, refusjonshistorikk)
-            }
         }
     }
 

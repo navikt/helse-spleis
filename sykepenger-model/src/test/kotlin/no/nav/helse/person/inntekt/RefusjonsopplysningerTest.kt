@@ -14,18 +14,15 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.harNødvendigeRefusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -608,24 +605,6 @@ internal class RefusjonsopplysningerTest {
             ).refusjonsopplysninger(), resultat
         )
         assertEquals(1.januar, resultat.finnFørsteDatoForEndring(refusjonsopplysninger))
-    }
-
-    @Test
-    fun `bruker ikke refusjonsopplysning som er før førstefraværsdag ved lagring av tidsnære opplysninger`() {
-        val gamleRefusjonsopplysninger = listOf(
-            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.mars, INNTEKT),
-            Refusjonsopplysning(meldingsreferanseId2, 1.april, null, INGEN),
-        ).refusjonsopplysninger()
-
-        val historikk = Refusjonshistorikk()
-        gamleRefusjonsopplysninger.lagreTidsnær(1.juli, historikk)
-
-        val resultat = historikk.refusjonsopplysninger(1.juli)
-        assertLikeRefusjonsopplysninger(
-            listOf(
-                Refusjonsopplysning(meldingsreferanseId2, 1.juli, null, INGEN, ARBEIDSGIVER)
-            ), resultat.inspektør.refusjonsopplysninger
-        )
     }
 
     internal companion object {

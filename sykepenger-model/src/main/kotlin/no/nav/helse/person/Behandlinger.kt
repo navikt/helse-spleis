@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -17,7 +16,6 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.AvbruttSøknad
@@ -60,7 +58,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
@@ -760,15 +757,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedUtbetaling(maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, organisasjonsnummer: String) = kopierMed(
+            internal fun kopierMedUtbetaling(maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) = kopierMed(
                 grunnlagsdata = grunnlagsdata,
                 utbetaling = utbetaling,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
-                maksdatoresultat = maksdatoresultat,
-                refusjonstidslinje = when (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-                    true -> this.refusjonstidslinje
-                    false -> grunnlagsdata.refusjonsopplysninger(organisasjonsnummer).beløpstidslinje().fyll(this.periode)
-                }
+                maksdatoresultat = maksdatoresultat
             )
 
             internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)
@@ -967,7 +960,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ): Utbetalingstidslinje {
             val denNyeUtbetalingen = strategi(arbeidsgiver, aktivitetslogg, utbetalingstidslinje, maksdatoresultat.maksdato, maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, periode)
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
-            nyEndring(gjeldende.kopierMedUtbetaling(maksdatoresultat, utbetalingstidslinje, denNyeUtbetalingen, grunnlagsdata, arbeidsgiver.organisasjonsnummer))
+            nyEndring(gjeldende.kopierMedUtbetaling(maksdatoresultat, utbetalingstidslinje, denNyeUtbetalingen, grunnlagsdata))
             tilstand(nyTilstand, aktivitetslogg)
             return utbetalingstidslinje.subset(periode)
         }
@@ -1117,7 +1110,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return Behandling(
                 observatører = this.observatører,
                 tilstand = Tilstand.AnnullertPeriode,
-                endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata, arbeidsgiver.organisasjonsnummer)),
+                endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata)),
                 avsluttet = LocalDateTime.now(),
                 kilde = Behandlingkilde(hendelse.metadata)
             )
@@ -1536,7 +1529,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     annullering: Utbetaling,
                     grunnlagsdata: VilkårsgrunnlagElement
                 ): Behandling? {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata, arbeidsgiver.organisasjonsnummer))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata))
                     behandling.tilstand(AnnullertPeriode, aktivitetslogg)
                     return null
                 }
@@ -1656,7 +1649,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
                 override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling? {
                     behandling.gjeldende.utbetaling!!.forkast(aktivitetslogg)
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata, arbeidsgiver.organisasjonsnummer))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata))
                     behandling.tilstand(AnnullertPeriode, aktivitetslogg)
                     return null
                 }

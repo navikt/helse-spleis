@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -156,14 +155,8 @@ internal class ArbeidsgiverFaktaavklartInntekt(
     private fun refusjonsbeløp(dato: LocalDate, refusjon: Beløpstidslinjedag, aktuellDagsinntekt: Inntekt, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt, forskjeller: MutableList<String>): Inntekt {
         val refusjonFraInntektsgrunnlag = refusjonsopplysninger.refusjonsbeløpOrNull(dato)
         val refusjonFraBehandling = refusjon.takeIf { it is Beløpsdag }?.beløp
-        return when (Toggle.BrukRefusjonsopplysningerPåBehandling.enabled) {
-            true -> (refusjonFraBehandling ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
-                if (it.dagligInt != refusjonFraInntektsgrunnlag?.dagligInt) forskjeller.add("$dato: Brukte ${it.dagligInt} fra behandlingen. Hadde ${refusjonFraInntektsgrunnlag?.dagligInt} fra inntektsgrunnlaget.")
-            }
-
-            false -> (refusjonFraInntektsgrunnlag ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
-                if (it.dagligInt != refusjonFraBehandling?.dagligInt) forskjeller.add("$dato: Brukte ${it.dagligInt} fra inntektsgrunnlaget. Hadde ${refusjonFraBehandling?.dagligInt} fra behandlingen.")
-            }
+        return (refusjonFraBehandling ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)).also {
+            if (it.dagligInt != refusjonFraInntektsgrunnlag?.dagligInt) forskjeller.add("$dato: Brukte ${it.dagligInt} fra behandlingen. Hadde ${refusjonFraInntektsgrunnlag?.dagligInt} fra inntektsgrunnlaget.")
         }
     }
 

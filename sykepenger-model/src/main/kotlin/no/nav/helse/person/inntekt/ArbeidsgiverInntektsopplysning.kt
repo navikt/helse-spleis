@@ -352,7 +352,6 @@ data class ArbeidsgiverInntektsopplysning(
                     arbeidsgiver,
                     aktivitetslogg,
                     nyArbeidsgiverperiode,
-                    it.refusjonsopplysninger,
                     it.orgnummer
                 )
             }
