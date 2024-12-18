@@ -602,9 +602,6 @@ class Person private constructor(
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter)
     internal fun mursteinsperioder(utgangspunkt: Vedtaksperiode) = arbeidsgivere.mursteinsperioder(utgangspunkt)
 
-    internal fun forespurtInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.forespurtInntekt(organisasjonsnummer, skjæringstidspunkt)
-
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
 

@@ -267,7 +267,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(4.vedtaksperiode.id(ORGNUMMER), oppdatertForespørsel.vedtaksperiodeId)
         assertEquals(
-            PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+            PersonObserver.Inntekt(forslag = null),
             oppdatertForespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
 
@@ -287,7 +287,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+            PersonObserver.Inntekt(forslag = null),
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
@@ -303,7 +303,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER, 32000.0)),
+            PersonObserver.Inntekt(forslag = null),
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
@@ -320,7 +320,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 32000.0)),
+            PersonObserver.Inntekt(forslag = null),
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
@@ -345,7 +345,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 33000.0)),
+            PersonObserver.Inntekt(forslag = null),
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }

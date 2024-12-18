@@ -305,11 +305,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             {
               "opplysningstype": "Inntekt",
               "forslag": {
-                "forrigeInntekt": {
-                  "skjæringstidspunkt": "2018-01-01",
-                  "kilde": "INNTEKTSMELDING",
-                  "beløp": 31000.0
-                }
+                "forrigeInntekt": null
               }
             },
             {
@@ -347,11 +343,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             {
               "opplysningstype": "Inntekt",
               "forslag": {
-                "forrigeInntekt": {
-                  "skjæringstidspunkt": "2018-01-01", 
-                  "kilde": "INNTEKTSMELDING", 
-                  "beløp": 31000.0
-                }
+                "forrigeInntekt": null
               }
             },
             {
@@ -390,11 +382,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             {
               "opplysningstype": "Inntekt",
               "forslag": {
-                "forrigeInntekt": {
-                  "skjæringstidspunkt": "2018-01-01",
-                  "kilde": "INNTEKTSMELDING",
-                  "beløp": 31000.0
-                }
+                "forrigeInntekt": null
               }
             },
             {

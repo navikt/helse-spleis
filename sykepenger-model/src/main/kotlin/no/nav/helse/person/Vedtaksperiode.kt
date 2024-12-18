@@ -991,16 +991,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode(), skalInnhenteInntektFraAOrdningen: Boolean = false) {
         checkNotNull(arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        val forespurtInntekt = person.forespurtInntekt(
-            arbeidsgiver.organisasjonsnummer,
-            skjæringstidspunkt
-        ) ?: listOf(
-            PersonObserver.Inntekt(forslag = null),
-        )
+        val forespurtInntekt = vilkårsgrunnlag?.fastsattInntekt(arbeidsgiver.organisasjonsnummer)
+            ?: PersonObserver.Inntekt(forslag = null)
 
-        val forespurtRefusjon = forespurtRefusjon() ?: PersonObserver.Refusjon(emptyList())
+        val forespurtRefusjon = forespurtRefusjon() ?: PersonObserver.Refusjon(forslag = emptyList())
         val forespurteOpplysninger =
-            forespurtInntekt + listOf(forespurtRefusjon) + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
+            listOf(forespurtInntekt, forespurtRefusjon) + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
@@ -3706,6 +3702,7 @@ internal class Vedtaksperiode private constructor(
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
                 beløpstidslinje + vedtaksperiode.refusjonstidslinje
             }
+
         internal fun List<Vedtaksperiode>.refusjonstidslinjeForForespørsel(ubrukteRefusjonsopplysninger: Refusjonsservitør) =
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
                 beløpstidslinje + vedtaksperiode.hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger)

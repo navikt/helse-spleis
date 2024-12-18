@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -245,31 +245,12 @@ data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
             singleOrNull { it.gjelder(organisasjonsnummer) }?.refusjonsopplysninger ?: Refusjonsopplysninger()
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.forespurtInntekt(
+        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattInntekt(
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String
-        ): Pair<PersonObserver.FastsattInntekt, PersonObserver.Inntektsdata?>? {
+        ): PersonObserver.FastsattInntekt? {
             val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
-            val inntekt = PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
-            val forslag = inntektforslag(skjæringstidspunkt, fastsattOpplysning)
-            return inntekt to forslag
-        }
-
-        private fun inntektforslag(
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning
-        ): PersonObserver.Inntektsdata? {
-            val originalInntektsopplysning = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
-            val type = when (originalInntektsopplysning) {
-                is Inntektsmelding -> PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
-                is Saksbehandler -> PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
-                else -> return null
-            }
-            return PersonObserver.Inntektsdata(
-                skjæringstidspunkt = skjæringstidspunkt,
-                kilde = type,
-                beløp = originalInntektsopplysning.fastsattÅrsinntekt().månedlig
-            )
+            return PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {

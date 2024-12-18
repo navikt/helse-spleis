@@ -61,10 +61,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk.add(0, nyttInnslag)
     }
 
-    internal fun forespurtInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate): List<PersonObserver.ForespurtOpplysning>? {
-        return sisteInnlag()?.forespurtInntekt(organisasjonsnummer, skjæringstidspunkt)
-    }
-
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
@@ -95,29 +91,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun add(skjæringstidspunkt: LocalDate, vilkårsgrunnlagElement: VilkårsgrunnlagElement) {
             vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
-        }
-
-        internal fun forespurtInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate): List<PersonObserver.ForespurtOpplysning>? {
-            val fastsatteOpplysninger = vilkårsgrunnlagFor(skjæringstidspunkt)
-                ?.forespurtInntekt(organisasjonsnummer)
-
-            if (fastsatteOpplysninger != null) {
-                val (fastsattInntekt, _) = fastsatteOpplysninger
-                return listOf(fastsattInntekt)
-            }
-
-            // om arbeidsgiveren ikke har noen fastsatte opplysninger på skjæringstidspunktet så foreslår
-            // vi inntekt og refusjon fra forrige skjæringstidspunkt arbeidsgiveren er representert
-            val forrigeFastsatteOpplysning = vilkårsgrunnlag
-                .keys
-                .filter { it < skjæringstidspunkt }
-                .sortedDescending()
-                .firstNotNullOfOrNull {
-                    vilkårsgrunnlagFor(it)?.forespurtInntekt(organisasjonsnummer)
-                } ?: return null
-
-            val (_, inntektForslag) = forrigeFastsatteOpplysning
-            return listOf(PersonObserver.Inntekt(forslag = inntektForslag))
         }
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
@@ -213,8 +186,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun inntektskilde() = inntektsgrunnlag.inntektskilde()
 
-        internal fun forespurtInntekt(organisasjonsnummer: String) =
-            inntektsgrunnlag.forespurtInntekt(organisasjonsnummer)
+        internal fun fastsattInntekt(organisasjonsnummer: String) =
+            inntektsgrunnlag.fastsattInntekt(organisasjonsnummer)
 
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
             return tidslinjer
