@@ -5,6 +5,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_5
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest() {
@@ -29,7 +30,7 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
         )
 
         assertTilstander(1, "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
-        assertVarsel(1, RV_SV_5)
+        assertIngenVarsler(1)
     }
 
     @Test
@@ -59,6 +60,8 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
     fun `inntekt fra nytt arbeidsforhold med harJobbet = true & inget beløp`() {
         nyttVedtak(1.januar, 31.januar)
 
+        assertEquals(1, testRapid.inspektør.vedtaksperiodeteller)
+
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
             inntektFraNyttArbeidsforhold = listOf(
@@ -71,10 +74,9 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
                     harJobbet = true
                 )
             )
-
         )
 
-        assertTilstander(1, "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
-        assertVarsel(1, RV_SV_5)
+        // En slik type søknad skal angivelig ikke skje & den tryner på en exception
+        assertEquals(1, testRapid.inspektør.vedtaksperiodeteller)
     }
 }

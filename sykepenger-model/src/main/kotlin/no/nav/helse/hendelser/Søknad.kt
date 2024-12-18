@@ -35,7 +35,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.ukedager
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel
 
@@ -207,11 +206,11 @@ class Søknad(
         fom: LocalDate,
         tom: LocalDate,
         private val orgnummer: String,
-        private val råttBeløp: Int?,
+        private val råttBeløp: Int,
     ) {
         private val periode = fom til tom
         private val antallVirkedager = (fom til tom.nesteDag).ukedager()
-        private val smurtBeløp = if (råttBeløp == null) Inntekt.INGEN else (råttBeløp / antallVirkedager).daglig
+        private val smurtBeløp = (råttBeløp / antallVirkedager).daglig
         internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
             orgnummer = orgnummer,
             beløpstidslinje = Beløpstidslinje(periode.map {

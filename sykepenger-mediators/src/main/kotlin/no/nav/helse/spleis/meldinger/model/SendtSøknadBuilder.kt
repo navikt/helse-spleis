@@ -106,7 +106,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         this.opprinneligSendt = opprinneligSendt
     }
 
-    fun tilkommenInntekt(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int?) {
+    fun tilkommenInntekt(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int) {
         tilkomneInntekter.add(
             TilkommenInntekt(
                 fom = fom,

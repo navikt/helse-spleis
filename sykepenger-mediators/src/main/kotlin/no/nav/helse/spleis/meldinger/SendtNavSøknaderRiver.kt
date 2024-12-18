@@ -34,6 +34,7 @@ internal class SendtNavSøknaderRiver(
             message.requireArray("inntektFraNyttArbeidsforhold") {
                 require("arbeidsstedOrgnummer") { it.isTextual }
                 interestedIn("belop")
+                requireKey("harJobbet")
                 require("fom") { JsonNode::asLocalDate }
                 require("tom") { JsonNode::asLocalDate }
             }
