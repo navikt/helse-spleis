@@ -1,9 +1,11 @@
 rootProject.name = "sykepenger-spleis"
-include("jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", "sykepenger-api-dto", "sykepenger-model", "sykepenger-model-dto",
+include(
+    "jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", "sykepenger-api-dto", "sykepenger-model", "sykepenger-model-dto",
     "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling",
-    "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api")
+    "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api"
+)
 
-val rapidsAndRiversVersion = "2024120608421733470968.fc0a3d5e3685"
+val rapidsAndRiversVersion = "2024121811541734519284.92481d65a0e7"
 
 dependencyResolutionManagement {
     versionCatalogs {

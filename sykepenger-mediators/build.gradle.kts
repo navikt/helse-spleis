@@ -6,7 +6,7 @@ plugins {
 
 val mainClass = "no.nav.helse.AppKt"
 
-val tbdLibsVersion = "2024.11.25-10.59-6f263a10"
+val tbdLibsVersion = "2024.12.18-11.39-73f8eecb"
 val tbdSpillAvImMatchingVersion = "2024.11.06-14.54-41ea7ff3"
 val syfokafkaVersion = "2024.10.21-14.49-932f4f94"
 val mockkVersion = "1.13.9"
@@ -59,10 +59,10 @@ tasks.withType<Jar> {
 }
 
 tasks.withType<Test> {
-        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-        systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
-        systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
+    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+    systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
+    systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
 }
 
 tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
