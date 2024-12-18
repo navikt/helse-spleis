@@ -751,10 +751,10 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         nesteTilstand: () -> Vedtaksperiodetilstand? = { null }
     ) {
-        oppdaterHistorikk(søknad, aktivitetslogg) {
-            søknad.valider(aktivitetslogg, vilkårsgrunnlag, jurist)
-        }
         videreførEksisterendeRefusjonsopplysninger(søknad, aktivitetslogg)
+        oppdaterHistorikk(søknad, aktivitetslogg) {
+            søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
+        }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
         person.oppdaterVilkårsgrunnlagMedInntektene(
             skjæringstidspunkt,
@@ -801,7 +801,7 @@ internal class Vedtaksperiode private constructor(
                 jurist
             )
             oppdaterHistorikk(søknad, aktivitetslogg) {
-                søknad.valider(aktivitetslogg, vilkårsgrunnlag, jurist)
+                søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
             }
         }
 

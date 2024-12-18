@@ -102,10 +102,10 @@ class Søknad(
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
-        søknadstype.valider(aktivitetslogg, vilkårsgrunnlag, orgnummer, sykdomstidslinje.periode())
+        søknadstype.valider(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
         return aktivitetslogg
     }
 
@@ -228,13 +228,13 @@ class Søknad(
         internal fun valider(
             aktivitetslogg: IAktivitetslogg,
             vilkårsgrunnlag: VilkårsgrunnlagElement?,
-            orgnummer: String,
-            periode: Periode?
+            periode: Periode?,
+            refusjonstidslinje: Beløpstidslinje
         ) {
             if (this == Arbeidstaker) return
             if (this != Arbeidsledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
             if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
-            if (vilkårsgrunnlag.refusjonsopplysninger(orgnummer).overlappendeEllerSenereRefusjonsopplysninger(periode).all { it.beløp == Inntekt.INGEN }) {
+            if (periode != null && refusjonstidslinje.kunIngenRefusjon()) {
                 return aktivitetslogg.info("Arbeidsledigsøknad lagt til grunn og vi har ikke registrert refusjon i søknadstidsrommet")
             }
             aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)

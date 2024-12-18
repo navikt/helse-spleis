@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 
 data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>) : Collection<Dag> by dager.values {
@@ -54,6 +55,11 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     private fun snute(snute: LocalDate) = førsteBeløpsdag?.strekkTilbake(snute) ?: Beløpstidslinje()
     private val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) }
     private fun hale(hale: LocalDate) = sisteBeløpsdag?.strekkFrem(hale) ?: Beløpstidslinje()
+
+    internal fun kunIngenRefusjon(): Boolean {
+        if (dager.isEmpty()) return false
+        return dager.values.all { it.beløp == INGEN }
+    }
 
     // Fyller alle hull i beløpstidslinjen (les UkjentDag) med beløp & kilde fra forrige Beløpsdag
     internal fun fyll(): Beløpstidslinje {
