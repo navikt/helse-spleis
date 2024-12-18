@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt
@@ -75,11 +74,6 @@ internal class Refusjonshistorikk {
                     tidsstempel = dto.tidsstempel
                 )
             }
-        }
-
-        internal fun beløp(dag: LocalDate): Inntekt {
-            if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return INGEN
-            return endringerIRefusjon.beløp(dag) ?: beløp ?: INGEN
         }
 
         internal data class EndringIRefusjon(
