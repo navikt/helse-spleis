@@ -12,6 +12,7 @@ import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -39,6 +40,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -63,6 +65,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -98,6 +101,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.lønnsinntekt
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
@@ -122,6 +126,49 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `En portalinntektsmelding uten inntekt (-1) bevarer inntekten som var`() {
+        nyeVedtak(januar, a1, a2)
+        forlengVedtak(februar, a1)
+        håndterSøknad(15.februar til 28.februar, a2)
+        nullstillTilstandsendringer()
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
+        // Først trenger vi jo alt
+        val forespørselA2Januar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }
+        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<PersonObserver.Inntekt>().size)
+        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
+        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
+
+        // Så trenger vi bare refusjon
+        val forespørselA2Februar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode.id(a2) }
+        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Inntekt>().size)
+        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
+        assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
+
+        val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
+        assertEquals(20000.månedlig, inntektFør)
+        håndterInntektsmelding(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(100.daglig, null), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = a2)
+
+        assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 100.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
+
+        val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
+
+        assertForventetFeil(
+            forklaring = "Vi skal ignorere det magiske tallet -1 slik at vi slipper å sende HAG fastsatt inntekt i forespørsler hvor vi ikke trenger inntekt slik at de kan sende det tilbake til oss og vi 🤡",
+            ønsket = {
+                assertEquals(20000.månedlig, inntektEtter)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+            },
+            nå = {
+                assertEquals((-1).månedlig, inntektEtter)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
+            }
+        )
+    }
 
     @Test
     fun `Tåler at inntektsdato ikke er oppgitt på portalinntektsmelding -- inntektsdato skal fjernes fra inntektsmeldingen`() {
