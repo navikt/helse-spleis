@@ -215,7 +215,7 @@ class Inntektsmelding(
                 if (vedtaksperiode == null) PortalinntektsmeldingForForkastetPeriode
                 else if (!avsendersystem.forespurt && vedtaksperiode.erForlengelse()) SelvbestemtPortalinntektsmeldingForForlengelse
                 else if (avsendersystem.forespurt) ForespurtPortalinnteksmelding(vedtaksperiode, avsendersystem.inntektsdato, avsendersystem.vedtaksperiodeId)
-                else SelvbestemtPortalinnteksmelding(vedtaksperiode, avsendersystem.inntektsdato)
+                else SelvbestemtPortalinnteksmelding(vedtaksperiode, avsendersystem.inntektsdato, avsendersystem.vedtaksperiodeId)
             }
         }
         if (førsteValidering || type is ForkastetPortalinntektsmelding) aktivitetslogg.info("Håndterer inntektsmelding som ${type::class.simpleName}. Avsendersystem $avsendersystem")
@@ -299,8 +299,9 @@ class Inntektsmelding(
         }
     }
 
-    private data class SelvbestemtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate?) : Portalinntektsmelding(vedtaksperiode, inntektsdato) {
+    private data class SelvbestemtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate?, private val vedtaksperiodeId: UUID) : Portalinntektsmelding(vedtaksperiode, inntektsdato) {
         override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
+            if (inntektsmelding.beregnetInntekt < Inntekt.INGEN) return person.emitInntektsmeldingHåndtert(inntektsmelding.metadata.meldingsreferanseId, vedtaksperiodeId, inntektsmelding.orgnummer)
             aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
             person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
         }

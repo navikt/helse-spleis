@@ -164,8 +164,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
-
         assertTrue(observatør.inntektsmeldingHåndtert.contains(forespurtIm to 2.vedtaksperiode.id(a2)))
+
+        val selvbestemtIm = håndterInntektsmelding(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(77.daglig, null), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = a2, avsendersystem = NAV_NO_SELVBESTEMT)
+        assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 77.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
+
+        val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
+        assertEquals(20000.månedlig, inntektEtterselvbestemtIm)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertTrue(observatør.inntektsmeldingHåndtert.contains(selvbestemtIm to 2.vedtaksperiode.id(a2)))
     }
 
     @Test
