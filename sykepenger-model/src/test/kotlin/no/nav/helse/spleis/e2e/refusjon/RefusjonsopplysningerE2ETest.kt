@@ -38,7 +38,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden`() {
         a1 {
             nyttVedtak(førsteFraværsdag = 17.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar), periode = januar)
-            assertIngenInfoSomInneholder("Mangler refusjonsopplysninger på orgnummer")
         }
     }
 
@@ -46,7 +45,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg`() {
         a1 {
             nyttVedtak(førsteFraværsdag = 22.januar, arbeidsgiverperiode = listOf(4.januar til 19.januar), periode = 4.januar til 31.januar)
-            assertIngenInfoSomInneholder("Mangler refusjonsopplysninger på orgnummer")
         }
     }
 

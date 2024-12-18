@@ -198,8 +198,5 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
         internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
             harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
-
-        internal fun utbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate, periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode) =
-            arbeidsgiverperiode.utbetalingsdagerI(periode).filter { it < skjæringstidspunkt }
     }
 }

@@ -1276,7 +1276,7 @@ internal class Vedtaksperiode private constructor(
         if (revurdering.ikkeRelevant(periode)) return
         registrerKontekst(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
-        tilstand.arbeidsgiveropplysningerStrategi.lagreGjenbrukbarInntekt(this, aktivitetslogg)
+        tilstand.arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(this, aktivitetslogg)
     }
 
     internal fun inngåIRevurderingseventyret(
@@ -1640,35 +1640,47 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje + menyBakHalen
     }
 
+    // TODO: Når vi sletter refusjonsopplysninger fra inntektsgrunnlaget trenger ikke dette være før/etter IM - for eneste diffen er logging mot _gamle_ refusjonsopplysninger.
     internal sealed class ArbeidsgiveropplysningerStrategi {
-        abstract fun harInntektOgRefusjon(
+        fun harInntektOgRefusjon(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiverperiode: Arbeidsgiverperiode,
             aktivitetslogg: IAktivitetslogg
-        ): Boolean
+        ): Boolean {
+            if (vedtaksperiode.refusjonstidslinje.isEmpty()) {
+                if (!harGamleRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, gamleRefusjonsopplysninger(vedtaksperiode), aktivitetslogg)) return false
+                aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
+                return false
+            }
+            return harEksisterendeInntekt(vedtaksperiode) || vedtaksperiode.behandlinger.harGjenbrukbarInntekt(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+        }
 
-        abstract fun harRefusjonsopplysninger(
+        fun videreførEksisterendeOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            lagreGjenbrukbarInntekt(vedtaksperiode, aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
+        }
+
+        @Deprecated("Denne brukes kun til logging og om du bruker den til noe annen så kækker vi deg")
+        abstract fun harGamleRefusjonsopplysninger(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiverperiode: Arbeidsgiverperiode,
             refusjonsopplysninger: Refusjonsopplysninger,
             aktivitetslogg: IAktivitetslogg
         ): Boolean
 
-        abstract fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
-        protected fun harEksisterendeInntektOgRefusjon(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) =
-            harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(
-                vedtaksperiode,
-                arbeidsgiverperiode,
-                eksisterendeRefusjonsopplysninger(vedtaksperiode),
-                aktivitetslogg
+        private fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            if (harEksisterendeInntekt(vedtaksperiode)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
+            // Ikke 100% at dette lagrer noe. F.eks. revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
+            vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
+                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
+                arbeidsgiver = vedtaksperiode.arbeidsgiver,
+                aktivitetslogg = aktivitetslogg
             )
+        }
 
         // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
-        protected fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+        private fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
             // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
             // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
             val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag
@@ -1676,7 +1688,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         // Refusjonsopplysningene vi allerede har i vilkårsgrunnlag/ i refusjonshistorikken på arbeidsgiver
-        protected fun eksisterendeRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) =
+        private fun gamleRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) =
             when (val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag) {
                 null -> vedtaksperiode.arbeidsgiver.refusjonsopplysninger(vedtaksperiode.skjæringstidspunkt)
                 else -> vilkårsgrunnlag.refusjonsopplysninger(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
@@ -1684,88 +1696,27 @@ internal class Vedtaksperiode private constructor(
     }
 
     private data object FørInntektsmelding : ArbeidsgiveropplysningerStrategi() {
-        override fun harInntektOgRefusjon(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) =
-            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, aktivitetslogg)
-
-        override fun harRefusjonsopplysninger(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            refusjonsopplysninger: Refusjonsopplysninger,
-            aktivitetslogg: IAktivitetslogg
-        ): Boolean {
-            val gammelSjekk: () -> Boolean = {
-                Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
-                    skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                    periode = vedtaksperiode.periode,
-                    refusjonsopplysninger = refusjonsopplysninger,
-                    arbeidsgiverperiode = arbeidsgiverperiode,
-                    aktivitetslogg = aktivitetslogg,
-                    organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
-                )
-            }
-            if (vedtaksperiode.refusjonstidslinje.isNotEmpty()) return true
-            if (gammelSjekk()) aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
-            return false
-        }
-
-        override fun lagreGjenbrukbarInntekt(
-            vedtaksperiode: Vedtaksperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) { /* Før vi har fått inntektmelding kan vi ikke lagre gjenbrukbar inntekt 🙅‍ */
-        }
+        @Deprecated("Denne brukes kun til logging og om du bruker den til noe annen så kækker vi deg")
+        override fun harGamleRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, aktivitetslogg: IAktivitetslogg) = Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
+            skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+            periode = vedtaksperiode.periode,
+            refusjonsopplysninger = refusjonsopplysninger,
+            arbeidsgiverperiode = arbeidsgiverperiode,
+            aktivitetslogg = aktivitetslogg,
+            organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
+        )
     }
 
     private data object EtterInntektsmelding : ArbeidsgiveropplysningerStrategi() {
-        override fun harInntektOgRefusjon(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) =
-            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, aktivitetslogg) || harGjenbrukbart(vedtaksperiode, arbeidsgiverperiode, aktivitetslogg)
-
-        private fun harGjenbrukbart(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            aktivitetslogg: IAktivitetslogg
-        ): Boolean {
-            if (!harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, eksisterendeRefusjonsopplysninger(vedtaksperiode), aktivitetslogg)) return false
-            return vedtaksperiode.behandlinger.harGjenbrukbarInntekt(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
-        }
-
-        override fun harRefusjonsopplysninger(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            refusjonsopplysninger: Refusjonsopplysninger,
-            aktivitetslogg: IAktivitetslogg
-        ): Boolean {
-            val gammelSjekk: () -> Boolean = {
-                Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
-                    skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                    periode = vedtaksperiode.periode,
-                    refusjonsopplysninger = refusjonsopplysninger,
-                    arbeidsgiverperiode = arbeidsgiverperiode,
-                    aktivitetslogg = aktivitetslogg,
-                    organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
-                )
-            }
-            if (vedtaksperiode.refusjonstidslinje.isNotEmpty()) return true
-            if (gammelSjekk()) aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
-            return false
-        }
-
-        override fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            if (harEksisterendeInntekt(vedtaksperiode)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
-            vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.arbeidsgiver.organisasjonsnummer,
-                vedtaksperiode.arbeidsgiver,
-                aktivitetslogg
-            ) // Ikke 100% at dette lagrer noe. F.eks. revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
-        }
+        @Deprecated("Denne brukes kun til logging og om du bruker den til noe annen så kækker vi deg")
+        override fun harGamleRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, aktivitetslogg: IAktivitetslogg) = Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
+            skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+            periode = vedtaksperiode.periode,
+            refusjonsopplysninger = refusjonsopplysninger,
+            arbeidsgiverperiode = arbeidsgiverperiode,
+            aktivitetslogg = aktivitetslogg,
+            organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
+        )
     }
 
     // Gang of four State pattern
@@ -2440,13 +2391,9 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
             vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)
             if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
-            if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(
-                    aktivitetslogg
-                )
-            ) {
+            if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
             revurdering.inngåVedSaksbehandlerendring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
@@ -2539,7 +2486,6 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
             vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
         }
 
@@ -2579,10 +2525,8 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.funksjonellFeil(RV_SV_2)
                 return vedtaksperiode.forkast(hendelse, aktivitetslogg)
             }
-            if (!vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.tilstand(
-                aktivitetslogg,
-                AvsluttetUtenUtbetaling
-            )
+            arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(vedtaksperiode, aktivitetslogg)
+            if (!vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
         }
