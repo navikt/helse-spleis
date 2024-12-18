@@ -1226,7 +1226,6 @@ internal class Vedtaksperiode private constructor(
         vedtaksperiode.person.vedtaksperiodePåminnet(id, arbeidsgiver.organisasjonsnummer, påminnelse)
         val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
         if (påminnelse.nåddMakstid(beregnetMakstid)) return håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
-        if (påminnelse.skalReberegnes()) vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(hendelse = null, aktivitetslogg)
         håndter(vedtaksperiode, påminnelse, aktivitetslogg)
     }
 
@@ -1670,7 +1669,10 @@ internal class Vedtaksperiode private constructor(
 
         private fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             if (harEksisterendeInntekt(vedtaksperiode)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
-            // Ikke 100% at dette lagrer noe. F.eks. revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
+            // Ikke 100% at dette lagrer noe. F.eks.
+            //  - det er en periode som aldri er vilkårsprøvd før
+            //  - revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
+            //  - inntekten i vilkårsgrunnlaget er skatteopplysninger
             vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
                 skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
                 organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
@@ -2080,13 +2082,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.skalReberegnes()) {
-                vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
-                    vedtaksperiode.skjæringstidspunkt,
-                    vedtaksperiode.arbeidsgiver.organisasjonsnummer,
-                    vedtaksperiode.arbeidsgiver,
-                    aktivitetslogg
-                )
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
+                arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(vedtaksperiode, aktivitetslogg)
+                if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return
+                aktivitetslogg.info("Ordnet opp i manglende inntekt/refusjon i AvventerRevurdering ved videreføring av eksisterende opplysninger.")
             }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
@@ -2468,10 +2467,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.skalReberegnes()) {
-                vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
-                return vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)
-            }
+            if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) return aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
+
             if (påminnelse.harVentet3MånederEllerMer()) {
                 aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
                 return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg, påminnelse.skalHenteInntekterFraAOrdningen())
@@ -2520,15 +2517,20 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
-        ) {
+        ): Boolean {
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
                 aktivitetslogg.funksjonellFeil(RV_SV_2)
-                return vedtaksperiode.forkast(hendelse, aktivitetslogg)
+                vedtaksperiode.forkast(hendelse, aktivitetslogg)
+                return true
             }
             arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(vedtaksperiode, aktivitetslogg)
-            if (!vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return
+            if (!vedtaksperiode.skalBehandlesISpeil()) {
+                vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
+                return true
+            }
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return false
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
+            return true
         }
     }
 

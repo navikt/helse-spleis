@@ -118,7 +118,7 @@ internal class Venteårsak private constructor(
     }
 
     enum class Hvorfor {
-        SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING, // Om vi fikser lagring av tidsnære inntektsopplysninger skal dette være en umulighet
+        SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING, // Om vi lagrer inntekt på behandlingen skal ikke dette kunne skje * 🤞
         OVERSTYRING_IGANGSATT,
         VIL_OMGJØRES
     }

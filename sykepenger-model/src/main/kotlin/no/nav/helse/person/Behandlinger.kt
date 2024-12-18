@@ -306,10 +306,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.harGjenbrukbarInntekt(organisasjonsnummer)
 
     internal fun lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
-        behandlinger.lagreGjenbrukbarInntekt(
-            skjæringstidspunkt, organisasjonsnummer, arbeidsgiver,
-            aktivitetslogg
-        )
+        behandlinger.lagreGjenbrukbarInntekt(skjæringstidspunkt, organisasjonsnummer, arbeidsgiver, aktivitetslogg)
 
     internal fun håndterRefusjonstidslinje(
         arbeidsgiver: Arbeidsgiver,
