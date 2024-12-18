@@ -1231,6 +1231,7 @@ internal class Vedtaksperiode private constructor(
         vedtaksperiode.person.vedtaksperiodePåminnet(id, arbeidsgiver.organisasjonsnummer, påminnelse)
         val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
         if (påminnelse.nåddMakstid(beregnetMakstid)) return håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
+        if (påminnelse.skalReberegnes()) vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(hendelse = null, aktivitetslogg)
         håndter(vedtaksperiode, påminnelse, aktivitetslogg)
     }
 
@@ -2529,7 +2530,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (påminnelse.skalReberegnes()) {
                 vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
-                vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(hendelse = null, aktivitetslogg)
                 return vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)
             }
             if (påminnelse.harVentet3MånederEllerMer()) {
