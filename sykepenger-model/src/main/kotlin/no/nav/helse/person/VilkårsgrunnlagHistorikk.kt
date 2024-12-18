@@ -61,8 +61,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk.add(0, nyttInnslag)
     }
 
-    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode): List<PersonObserver.ForespurtOpplysning>? {
-        return sisteInnlag()?.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
+    internal fun forespurtInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate): List<PersonObserver.ForespurtOpplysning>? {
+        return sisteInnlag()?.forespurtInntekt(organisasjonsnummer, skjæringstidspunkt)
     }
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
@@ -97,13 +97,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
         }
 
-        internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode): List<PersonObserver.ForespurtOpplysning>? {
+        internal fun forespurtInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate): List<PersonObserver.ForespurtOpplysning>? {
             val fastsatteOpplysninger = vilkårsgrunnlagFor(skjæringstidspunkt)
-                ?.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, periode)
+                ?.forespurtInntekt(organisasjonsnummer)
 
             if (fastsatteOpplysninger != null) {
-                val (fastsattInntekt, fastsattRefusjon) = fastsatteOpplysninger
-                return listOf(fastsattInntekt, fastsattRefusjon)
+                val (fastsattInntekt, _) = fastsatteOpplysninger
+                return listOf(fastsattInntekt)
             }
 
             // om arbeidsgiveren ikke har noen fastsatte opplysninger på skjæringstidspunktet så foreslår
@@ -113,14 +113,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 .filter { it < skjæringstidspunkt }
                 .sortedDescending()
                 .firstNotNullOfOrNull {
-                    vilkårsgrunnlagFor(it)?.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, periode)
+                    vilkårsgrunnlagFor(it)?.forespurtInntekt(organisasjonsnummer)
                 } ?: return null
 
-            val (_, refusjonForslag, inntektForslag) = forrigeFastsatteOpplysning
-            return listOf(
-                PersonObserver.Inntekt(forslag = inntektForslag),
-                PersonObserver.Refusjon(forslag = refusjonForslag.forslag)
-            )
+            val (_, inntektForslag) = forrigeFastsatteOpplysning
+            return listOf(PersonObserver.Inntekt(forslag = inntektForslag))
         }
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
@@ -216,8 +213,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun inntektskilde() = inntektsgrunnlag.inntektskilde()
 
-        internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
-            inntektsgrunnlag.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, periode)
+        internal fun forespurtInntekt(organisasjonsnummer: String) =
+            inntektsgrunnlag.forespurtInntekt(organisasjonsnummer)
 
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
             return tidslinjer

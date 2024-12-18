@@ -245,21 +245,14 @@ data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
             singleOrNull { it.gjelder(organisasjonsnummer) }?.refusjonsopplysninger ?: Refusjonsopplysninger()
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.forespurtInntektOgRefusjonsopplysninger(
+        internal fun List<ArbeidsgiverInntektsopplysning>.forespurtInntekt(
             skjæringstidspunkt: LocalDate,
-            organisasjonsnummer: String,
-            periode: Periode
-        ): Triple<PersonObserver.FastsattInntekt, PersonObserver.Refusjon, PersonObserver.Inntektsdata?>? {
+            organisasjonsnummer: String
+        ): Pair<PersonObserver.FastsattInntekt, PersonObserver.Inntektsdata?>? {
             val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
             val inntekt = PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
             val forslag = inntektforslag(skjæringstidspunkt, fastsattOpplysning)
-            val refusjon =
-                PersonObserver.Refusjon(forslag = fastsattOpplysning.refusjonsopplysninger.overlappendeEllerSenereRefusjonsopplysninger(
-                    periode
-                )
-                    .map { PersonObserver.Refusjon.Refusjonsforslag(it.fom, it.tom, it.beløp.månedlig) }
-                )
-            return Triple(inntekt, refusjon, forslag)
+            return inntekt to forslag
         }
 
         private fun inntektforslag(

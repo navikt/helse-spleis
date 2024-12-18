@@ -992,16 +992,16 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode(), skalInnhenteInntektFraAOrdningen: Boolean = false) {
         checkNotNull(arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        val forespurtInntektOgRefusjon = person.forespurtInntektOgRefusjonsopplysninger(
+        val forespurtInntekt = person.forespurtInntekt(
             arbeidsgiver.organisasjonsnummer,
-            skjæringstidspunkt,
-            periode
+            skjæringstidspunkt
         ) ?: listOf(
             PersonObserver.Inntekt(forslag = null),
-            PersonObserver.Refusjon(forslag = emptyList())
         )
+
+        val forespurtRefusjon = forespurtRefusjon() ?: PersonObserver.Refusjon(emptyList())
         val forespurteOpplysninger =
-            forespurtInntektOgRefusjon + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
+            forespurtInntekt + listOf(forespurtRefusjon) + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
@@ -1026,6 +1026,8 @@ internal class Vedtaksperiode private constructor(
             )
         )
     }
+
+    private fun forespurtRefusjon() = arbeidsgiver.refusjonstidslinjeForForespørsel(skjæringstidspunkt, periode).forespurtRefusjon()
 
     private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
         val deAndre = person.vedtaksperioder(MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(this))
@@ -3709,6 +3711,10 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.refusjonstidslinje() =
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
                 beløpstidslinje + vedtaksperiode.refusjonstidslinje
+            }
+        internal fun List<Vedtaksperiode>.refusjonstidslinjeForForespørsel(ubrukteRefusjonsopplysninger: Refusjonsservitør) =
+            fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
+                beløpstidslinje + vedtaksperiode.hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger)
             }
 
         internal fun List<Vedtaksperiode>.finn(vedtaksperiodeId: UUID): Vedtaksperiode? =

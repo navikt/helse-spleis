@@ -55,6 +55,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsme
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
+import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinjeForForespørsel
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
@@ -585,6 +586,12 @@ internal class Arbeidsgiver private constructor(
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)
         return ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode)
+    }
+
+    internal fun refusjonstidslinjeForForespørsel(skjæringstidspunkt: LocalDate, periode: Periode): Beløpstidslinje {
+        val opplysningerPåSkjæringstidspunkt = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }.refusjonstidslinjeForForespørsel(ubrukteRefusjonsopplysninger)
+        val opplysningerSomOverlapperEllerErSenere = opplysningerPåSkjæringstidspunkt.fraOgMed(periode.start)
+        return opplysningerSomOverlapperEllerErSenere
     }
 
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {

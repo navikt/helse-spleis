@@ -35,7 +35,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fakt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.forespurtInntektOgRefusjonsopplysninger
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.forespurtInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
@@ -452,8 +452,8 @@ internal class Inntektsgrunnlag private constructor(
         }
     }
 
-    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
-        arbeidsgiverInntektsopplysninger.forespurtInntektOgRefusjonsopplysninger(skjæringstidspunkt, organisasjonsnummer, periode)
+    internal fun forespurtInntekt(organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.forespurtInntekt(skjæringstidspunkt, organisasjonsnummer)
 
     internal fun dto() = InntektsgrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },

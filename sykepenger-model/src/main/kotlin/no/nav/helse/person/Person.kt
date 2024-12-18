@@ -54,8 +54,8 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.mursteinsperioder
@@ -602,8 +602,8 @@ class Person private constructor(
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter)
     internal fun mursteinsperioder(utgangspunkt: Vedtaksperiode) = arbeidsgivere.mursteinsperioder(utgangspunkt)
 
-    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode) =
-        vilkårsgrunnlagHistorikk.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
+    internal fun forespurtInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
+        vilkårsgrunnlagHistorikk.forespurtInntekt(organisasjonsnummer, skjæringstidspunkt)
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
