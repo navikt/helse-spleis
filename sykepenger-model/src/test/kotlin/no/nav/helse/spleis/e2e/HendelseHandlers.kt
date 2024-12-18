@@ -500,6 +500,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder? = null,
     vedtaksperiodeIdInnhenter: IdInnhenter? = null,
+    inntektsdato: LocalDate? = null,
     førReplay: () -> Unit = {}
 ): UUID {
     val utledetAvsendersystem = when {
@@ -528,6 +529,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+                inntektsdato = inntektsdato,
                 avsendersystem = utledetAvsendersystem
             )
         )

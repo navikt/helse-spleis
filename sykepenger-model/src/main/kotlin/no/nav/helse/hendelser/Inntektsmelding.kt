@@ -125,7 +125,7 @@ class Inntektsmelding(
     sealed interface Avsendersystem {
         data class Altinn(internal val førsteFraværsdag: LocalDate?) : Avsendersystem
         data class LPS(internal val førsteFraværsdag: LocalDate?) : Avsendersystem
-        data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate, internal val forespurt: Boolean) : Avsendersystem
+        data class NavPortal(internal val vedtaksperiodeId: UUID, internal val inntektsdato: LocalDate?, internal val forespurt: Boolean) : Avsendersystem
     }
 
     class Refusjon(
@@ -269,12 +269,12 @@ class Inntektsmelding(
         }
     }
 
-    private abstract class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Type {
+    private abstract class Portalinntektsmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate?) : Type {
         override fun valider(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) = true
         override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?) = true
         override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
-            if (skjæringstidspunkt != inntektsdato) {
+            if (inntektsdato != null && skjæringstidspunkt != inntektsdato) {
                 "Inntekt lagres på en annen dato enn oppgitt i portalinntektsmelding for vedtaksperiodeId ${vedtaksperiode.view().id}. Inntektsmelding oppga inntektsdato $inntektsdato, men inntekten ble lagret på skjæringstidspunkt $skjæringstidspunkt"
                     .let {
                         logger.info(it)
@@ -294,13 +294,13 @@ class Inntektsmelding(
         }
     }
 
-    private data class ForespurtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate, private val vedtaksperiodeId: UUID) : Portalinntektsmelding(vedtaksperiode, inntektsdato) {
+    private data class ForespurtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate?, private val vedtaksperiodeId: UUID) : Portalinntektsmelding(vedtaksperiode, inntektsdato) {
         override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
             person.emitInntektsmeldingHåndtert(inntektsmelding.metadata.meldingsreferanseId, vedtaksperiodeId, inntektsmelding.orgnummer)
         }
     }
 
-    private data class SelvbestemtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate) : Portalinntektsmelding(vedtaksperiode, inntektsdato) {
+    private data class SelvbestemtPortalinnteksmelding(private val vedtaksperiode: Vedtaksperiode, private val inntektsdato: LocalDate?) : Portalinntektsmelding(vedtaksperiode, inntektsdato) {
         override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
             aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
             person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)

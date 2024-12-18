@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -118,9 +119,17 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
+    @Test
+    fun `Tåler at inntektsdato ikke er oppgitt på portalinntektsmelding -- inntektsdato skal fjernes fra inntektsmeldingen`() {
+        nyPeriode(januar)
+        assertDoesNotThrow {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = NAV_NO, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        }
+    }
     @Test
     fun `portalinntektsmelding på forlengelse til en periode utenfor arbeidsgiverperioden, men bare i helg`() {
         håndterSøknad(torsdag den 4.januar til søndag den 21.januar)

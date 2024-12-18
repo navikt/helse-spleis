@@ -207,6 +207,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now(),
+        inntektsdato: LocalDate? = null,
         avsendersystem: Avsenderutleder
     ): Inntektsmelding {
         check(erNavPortal(avsendersystem)) { "Du kan ikke klage en portalinntektsmelding når avsenderen er ALTINN/LPS!" }
@@ -219,7 +220,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem(vedtaksperiodeId, arbeidsgiverperioder.lastOrNull()?.start ?: LocalDate.EPOCH, null),
+            avsendersystem = avsendersystem(vedtaksperiodeId, inntektsdato, null),
             mottatt = mottatt
         )
     }

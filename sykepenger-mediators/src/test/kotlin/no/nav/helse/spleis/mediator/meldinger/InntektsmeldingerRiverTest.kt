@@ -52,7 +52,8 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         naerRelasjon = null,
         avsenderSystem = AvsenderSystem("LPS", "1.0"),
         innsenderFulltNavn = "SPLEIS MEDIATOR",
-        innsenderTelefon = "tlfnr"
+        innsenderTelefon = "tlfnr",
+        inntektsdato = null
     ).asObjectNode()
     private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
         inntektsmeldingId = UUID.randomUUID().toString(),
@@ -76,7 +77,8 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         mottattDato = LocalDateTime.now(),
         naerRelasjon = null,
         innsenderTelefon = "tlfnr",
-        innsenderFulltNavn = "SPLEIS MEDIATOR"
+        innsenderFulltNavn = "SPLEIS MEDIATOR",
+        inntektsdato = null
     ).asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()

@@ -221,6 +221,7 @@ internal fun AbstractEndToEndTest.portalInntektsmelding(
     harOpphørAvNaturalytelser: Boolean = false,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
+    inntektsdato: LocalDate? = null,
     avsendersystem: Avsenderutleder
 ): Inntektsmelding {
     if (erForespurtNavPortal(avsendersystem)) {
@@ -235,6 +236,7 @@ internal fun AbstractEndToEndTest.portalInntektsmelding(
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         id = id,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        inntektsdato = inntektsdato,
         avsendersystem = avsendersystem
     )
 }

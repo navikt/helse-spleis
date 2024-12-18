@@ -448,7 +448,9 @@ internal class TestMessageFactory(
         orgnummer: String,
         opphørsdatoForRefusjon: LocalDate? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: AvsenderSystem?
+        avsenderSystem: AvsenderSystem?,
+        inntektsdato: LocalDate? = null,
+        vedtaksperiodeId: UUID? = null
     ) = Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = fødselsnummer,
@@ -473,7 +475,9 @@ internal class TestMessageFactory(
         naerRelasjon = null,
         avsenderSystem = avsenderSystem,
         innsenderTelefon = "12345678",
-        innsenderFulltNavn = "SPLEIS MEDIATOR"
+        innsenderFulltNavn = "SPLEIS MEDIATOR",
+        inntektsdato = inntektsdato,
+        vedtaksperiodeId = vedtaksperiodeId
     )
 
     fun lagInntektsmelding(
@@ -484,7 +488,9 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: AvsenderSystem = AvsenderSystem("LPS", "V1.0")
+        avsenderSystem: AvsenderSystem = AvsenderSystem("LPS", "V1.0"),
+        inntektsdato: LocalDate? = null,
+        vedtaksperiodeId: UUID? = null
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
         arbeidsgiverperiode,
@@ -494,7 +500,9 @@ internal class TestMessageFactory(
         orgnummer,
         opphørsdatoForRefusjon,
         begrunnelseForReduksjonEllerIkkeUtbetalt,
-        avsenderSystem
+        avsenderSystem,
+        inntektsdato,
+        vedtaksperiodeId
     ).toMapMedFelterFraSpedisjon(fødselsdato)
     )
 
