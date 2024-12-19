@@ -605,13 +605,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-            PersonObserver.Refusjon(
-                listOf(
-                    Refusjonsforslag(1.mars, 9.mars, 17000.månedlig.månedlig),
-                    Refusjonsforslag(10.mars, 31.mars, 16000.månedlig.månedlig),
-                    Refusjonsforslag(1.april, null, 15000.månedlig.månedlig)
-                )
-            ),
+            PersonObserver.Refusjon(emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
 
@@ -657,12 +651,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-            PersonObserver.Refusjon(
-                listOf(
-                    Refusjonsforslag(1.mars, 15.mars, INNTEKT_FLERE_AG.månedlig),
-                    Refusjonsforslag(16.mars, null, INGEN.månedlig)
-                )
-            ),
+            PersonObserver.Refusjon(emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
 

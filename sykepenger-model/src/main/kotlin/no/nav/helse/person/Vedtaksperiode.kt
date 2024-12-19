@@ -3655,11 +3655,6 @@ internal class Vedtaksperiode private constructor(
                 beløpstidslinje + vedtaksperiode.refusjonstidslinje
             }
 
-        internal fun List<Vedtaksperiode>.refusjonstidslinjeForForespørsel(ubrukteRefusjonsopplysninger: Refusjonsservitør) =
-            fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
-                beløpstidslinje + vedtaksperiode.hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger)
-            }
-
         internal fun List<Vedtaksperiode>.finn(vedtaksperiodeId: UUID): Vedtaksperiode? =
             firstOrNull { it.id == vedtaksperiodeId }
 
