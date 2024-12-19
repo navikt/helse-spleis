@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG
@@ -27,11 +28,12 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.ukedager
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class DagerFraInntektsmelding(
@@ -170,11 +172,11 @@ internal class DagerFraInntektsmelding(
     private fun egenmeldingerIForkantAvPerioden(periode: Periode) =
         (overlappsperiode != null && overlappsperiode.overlapperMed(periode) && _gjenståendeDager.isNotEmpty())
 
-    internal fun skalHåndteresAvRevurdering(periode: Periode, sammenhengende: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
+    internal fun skalHåndteresAvRevurdering(periode: Periode, sammenhengende: Periode, arbeidsgiverperiode: List<Periode>?): Boolean {
         if (skalHåndtere(periode)) return true
         // vedtaksperiodene før dagene skal bare håndtere dagene om de nye opplyste dagene er nærmere enn 10 dager fra forrige AGP-beregning
         if (opprinneligPeriode == null || arbeidsgiverperiode == null) return false
-        val periodeMellomForrigeAgpOgNyAgp = arbeidsgiverperiode.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start) ?: return false
+        val periodeMellomForrigeAgpOgNyAgp = arbeidsgiverperiode.periode()?.periodeMellom(opprinneligPeriode.start) ?: return false
         return periodeMellomForrigeAgpOgNyAgp.count() <= MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER && sammenhengende.contains(periodeMellomForrigeAgpOgNyAgp)
     }
 
@@ -221,7 +223,7 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverperiode.overlapperMed(periode)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: Arbeidsgiverperiode? = null) {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: List<Periode>? = null) {
         if (!skalValideresAv(periode)) return
         if (harOpphørAvNaturalytelser) aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
@@ -247,16 +249,22 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverperioder.size > 1 && (førsteFraværsdag == null || førsteFraværsdag in arbeidsgiverperiode!!)
     }
 
-    internal fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, periode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
+    internal fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, periode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {
         if (!skalValideresAv(periode)) return
         if (_gjenståendeDager.isNotEmpty()) return validator.validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg, periode, beregnetArbeidsgiverperiode)
         if (beregnetArbeidsgiverperiode != null) validerArbeidsgiverperiode(aktivitetslogg, beregnetArbeidsgiverperiode)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
     }
 
-    private fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, arbeidsgiverperiode: Arbeidsgiverperiode) {
-        if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
+    private fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, arbeidsgiverperiode: List<Periode>) {
+        if (starterUtbetalingSamtidig(arbeidsgiverperiode)) return
         validator.uenigOmArbeidsgiverperiode(aktivitetslogg)
+    }
+
+    private fun starterUtbetalingSamtidig(beregnetArbeidsgiverperiode: List<Periode>): Boolean {
+        val thisSiste = this.arbeidsgiverperiode?.endInclusive ?: return false
+        val otherSiste = beregnetArbeidsgiverperiode.periode()?.endInclusive ?: return false
+        return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
 
     internal fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
@@ -280,18 +288,18 @@ internal class DagerFraInntektsmelding(
         return overlappsperiode.overlapperMed(periode)
     }
 
-    private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg: IAktivitetslogg, gammelAgp: Arbeidsgiverperiode?) {
+    private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg: IAktivitetslogg, gammelAgp: List<Periode>?) {
         if (!overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp)) return
         aktivitetslogg.varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 10 dager")
     }
 
-    private fun overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp: Arbeidsgiverperiode?): Boolean {
+    private fun overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp: List<Periode>?): Boolean {
         if (opprinneligPeriode == null) return false
-        val periodeMellom = gammelAgp?.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start) ?: return false
+        val periodeMellom = gammelAgp?.periode()?.periodeMellom(opprinneligPeriode.start) ?: return false
         return periodeMellom.count() > MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER
     }
 
-    internal fun erKorrigeringForGammel(aktivitetslogg: IAktivitetslogg, gammelAgp: Arbeidsgiverperiode?): Boolean {
+    internal fun erKorrigeringForGammel(aktivitetslogg: IAktivitetslogg, gammelAgp: List<Periode>?): Boolean {
         if (opprinneligPeriode == null) return true
         if (gammelAgp == null) return false
         if (overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp)) return true
@@ -364,22 +372,25 @@ internal class DagerFraInntektsmelding(
     }
 
     private sealed interface Validator {
-        fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?)
+        fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?)
         fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg)
     }
 
     private data object ForespurtPortalinntektsmeldingUtenArbeidsgiverperiodeValidering : Validator {
-        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {}
+        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {}
         override fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg) {}
     }
 
     private data object DefaultValidering : Validator {
-        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
-            beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, aktivitetslogg)
+        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {
+            val sisteDagAgp = beregnetArbeidsgiverperiode?.periode()?.endInclusive ?: return
+            // Om det er én eller fler ukedager mellom beregnet AGP og vedtaksperioden som overlapper med dager fra inntektsmeldingen
+            // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
+            if (ukedager(sisteDagAgp, vedtaksperiode.start) > 0) aktivitetslogg.varsel(RV_IM_3)
         }
 
         override fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.varsel(Varselkode.RV_IM_3)
+            aktivitetslogg.varsel(RV_IM_3)
         }
     }
 }

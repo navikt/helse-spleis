@@ -3,16 +3,13 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
-import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.ukedager
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -98,13 +95,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate = this.sisteKjente) =
         periode.overlapperMed(førsteKjente til sisteKjente)
 
-    internal fun sammenlign(other: List<Periode>): Boolean {
-        if (fiktiv()) return true
-        val thisSiste = this.perioder.last().endInclusive
-        val otherSiste = other.lastOrNull()?.endInclusive?.coerceAtMost(this.sisteKjente) ?: return false
-        return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
-    }
-
     internal fun erFørsteUtbetalingsdagFørEllerLik(periode: Periode): Boolean {
         // forventer inntekt dersom vi overlapper med en utbetalingsperiode…
         if (utbetalingsdager.any { periode.overlapperMed(it) }) return true
@@ -143,20 +133,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun oppholdsdag(dato: LocalDate) = apply {
         this.oppholdsdager.add(dato)
         kjentDag(dato)
-    }
-
-    internal fun klinLik(other: Arbeidsgiverperiode?): Boolean {
-        if (other == null) return false
-        if (this.toSet().containsAll(other.toSet())) return true
-        return false
-    }
-
-    internal fun validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode: Periode, aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
-        val sisteDagAgp = perioder.lastOrNull()?.endInclusive ?: return aktivitetslogg
-        // Om det er én eller fler ukedager mellom beregnet AGP og vedtaksperioden som overlapper med dager fra inntektsmeldingen
-        // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
-        if (ukedager(sisteDagAgp, vedtaksperiode.start) > 0) aktivitetslogg.varsel(RV_IM_3)
-        return aktivitetslogg
     }
 
     private fun utbetalingsdagerI(periode: Periode) = periode.filter { dag -> utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode } }

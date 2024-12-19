@@ -351,7 +351,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
         return skalHåndtereDager(dager, aktivitetslogg) { sammenhengende ->
-            dager.skalHåndteresAvRevurdering(periode, sammenhengende, finnArbeidsgiverperiode())
+            dager.skalHåndteresAvRevurdering(periode, sammenhengende, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
         }
     }
 
@@ -384,14 +384,14 @@ internal class Vedtaksperiode private constructor(
         )
         håndterDager(hendelse, aktivitetslogg) {
             dager.valider(aktivitetslogg, periode)
-            dager.validerArbeidsgiverperiode(aktivitetslogg, periode, finnArbeidsgiverperiode())
+            dager.validerArbeidsgiverperiode(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
         }
     }
 
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val hendelse = dager.tomBitAvInntektsmelding(aktivitetslogg, periode)
         håndterDager(hendelse, aktivitetslogg) {
-            dager.valider(aktivitetslogg, periode, finnArbeidsgiverperiode())
+            dager.valider(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
         }
     }
 
@@ -825,8 +825,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val korrigertInntektsmeldingId = behandlinger.sisteInntektsmeldingDagerId()
-        val opprinneligAgp = finnArbeidsgiverperiode()
-        if (dager.erKorrigeringForGammel(aktivitetslogg, opprinneligAgp)) {
+        val opprinneligAgp = behandlinger.arbeidsgiverperiode()
+        if (dager.erKorrigeringForGammel(aktivitetslogg, opprinneligAgp.arbeidsgiverperioder)) {
             håndterDagerUtenEndring(dager, aktivitetslogg)
         } else {
             håndterDager(dager, aktivitetslogg)
@@ -834,8 +834,8 @@ internal class Vedtaksperiode private constructor(
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
 
-        val nyAgp = finnArbeidsgiverperiode()
-        if (opprinneligAgp != null && !opprinneligAgp.klinLik(nyAgp)) {
+        val nyAgp = behandlinger.arbeidsgiverperiode()
+        if (opprinneligAgp != nyAgp) {
             aktivitetslogg.varsel(
                 RV_IM_24,
                 "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}"

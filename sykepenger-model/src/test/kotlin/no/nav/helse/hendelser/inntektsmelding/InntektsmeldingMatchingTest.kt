@@ -12,7 +12,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -138,7 +137,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 1.januar til 31.januar
         val vedtaksperiode2 = februar
         val sammenhengendePeriode = 1.januar til 28.februar
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
+        val arbeidsgiverperiode = listOf(1.januar til 16.januar)
         val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
 
         assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
@@ -153,7 +152,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 10.januar til 31.januar
         val vedtaksperiode2 = februar
         val sammenhengendePeriode = 10.januar til 28.februar
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
+        val arbeidsgiverperiode = listOf(10.januar til 26.januar)
         val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
 
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
@@ -169,7 +168,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode2 = 2.februar til 28.februar
         val sammenhengendePeriode1 = 10.januar til 31.januar
         val sammenhengendePeriode2 = 2.februar til 28.februar
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
+        val arbeidsgiverperiode = listOf(10.januar til 26.januar)
         val dager = inntektsmelding(2.februar, 2.februar til 17.februar)
 
         assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode1, arbeidsgiverperiode))
