@@ -995,9 +995,8 @@ internal class Vedtaksperiode private constructor(
         val forespurtInntekt = vilkårsgrunnlag?.fastsattInntekt(arbeidsgiver.organisasjonsnummer)
             ?: PersonObserver.Inntekt(forslag = null)
 
-        val forespurtRefusjon = PersonObserver.Refusjon(forslag = emptyList())
         val forespurteOpplysninger =
-            listOf(forespurtInntekt, forespurtRefusjon) + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
+            listOf(forespurtInntekt, PersonObserver.Refusjon) + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag

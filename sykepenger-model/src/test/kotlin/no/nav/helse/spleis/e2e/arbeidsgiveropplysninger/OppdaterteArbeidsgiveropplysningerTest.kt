@@ -54,7 +54,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
             ),
             innhentInntektFraAOrdningen = false
@@ -88,7 +88,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
             ),
             innhentInntektFraAOrdningen = false
@@ -125,7 +125,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
             ),
             innhentInntektFraAOrdningen = false
@@ -148,7 +148,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `oppdaterte opplysninger for mars når ag2 tetter gapet`() {
         nyPeriode(januar, a1)
-        val im = håndterInntektsmelding(
+        håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -194,7 +194,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 ),
                 forespurteOpplysninger = listOf(
                     PersonObserver.FastsattInntekt(INNTEKT),
-                    PersonObserver.Refusjon(forslag = emptyList()),
+                    PersonObserver.Refusjon,
                     PersonObserver.Arbeidsgiverperiode
                 ),
                 innhentInntektFraAOrdningen = false
@@ -233,7 +233,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar)),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
-                PersonObserver.Refusjon(forslag = emptyList())
+                PersonObserver.Refusjon
             ),
             innhentInntektFraAOrdningen = false
         )
@@ -253,7 +253,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        val im = håndterInntektsmelding(
+        håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
@@ -272,7 +272,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(
-            PersonObserver.Refusjon(forslag = emptyList()),
+            PersonObserver.Refusjon,
             oppdatertForespørsel.forespurteOpplysninger.first { it is PersonObserver.Refusjon }
         )
     }

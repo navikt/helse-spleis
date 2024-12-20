@@ -1,12 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.april
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
-import no.nav.helse.person.PersonObserver.Refusjon.Refusjonsforslag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -19,7 +15,7 @@ class ForespurtOpplysningTest {
         val forespurteOpplysninger = listOf(
             PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Arbeidsgiverperiode,
-            PersonObserver.Refusjon(emptyList())
+            PersonObserver.Refusjon
         )
 
         val expectedJson = forespurteOpplysningerMap()
@@ -32,12 +28,7 @@ class ForespurtOpplysningTest {
         val forespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(30000.månedlig),
             PersonObserver.Arbeidsgiverperiode,
-            PersonObserver.Refusjon(
-                listOf(
-                    Refusjonsforslag(fom = 1.januar, tom = 31.mars, 30000.månedlig.månedlig),
-                    Refusjonsforslag(fom = 1.april, tom = null, INGEN.månedlig)
-                )
-            )
+            PersonObserver.Refusjon
         )
 
         val expectedJson = forespurteOpplysningerMedFastsattInntektMap()
@@ -54,10 +45,7 @@ class ForespurtOpplysningTest {
         ),
         mapOf(
             "opplysningstype" to "Refusjon",
-            "forslag" to listOf(
-                mapOf("fom" to 1.januar, "tom" to 31.mars, "beløp" to 30000.0),
-                mapOf("fom" to 1.april, "tom" to null, "beløp" to 0.0)
-            ),
+            "forslag" to emptyList<Nothing>()
         )
     )
 

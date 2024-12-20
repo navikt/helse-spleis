@@ -223,13 +223,7 @@ interface PersonObserver {
 
                     is Refusjon -> mapOf(
                         "opplysningstype" to "Refusjon",
-                        "forslag" to forespurtOpplysning.forslag.map { forslag ->
-                            mapOf(
-                                "fom" to forslag.fom,
-                                "tom" to forslag.tom,
-                                "beløp" to forslag.månedligBeløp
-                            )
-                        }
+                        "forslag" to emptyList<Nothing>()
                     )
                 }
             }
@@ -244,10 +238,8 @@ interface PersonObserver {
 
     data class Inntekt(val forslag: Inntektsdata?) : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
-    object Arbeidsgiverperiode : ForespurtOpplysning()
-    data class Refusjon(val forslag: List<Refusjonsforslag>) : ForespurtOpplysning() {
-        data class Refusjonsforslag(val fom: LocalDate, val tom: LocalDate?, val månedligBeløp: Double)
-    }
+    data object Arbeidsgiverperiode : ForespurtOpplysning()
+    data object Refusjon : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(
         val organisasjonsnummer: String,
