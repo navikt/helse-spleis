@@ -95,8 +95,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             )
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(februar, 100)))
-            assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_IV_9), 2.vedtaksperiode.filter())
         }
     }
-
 }

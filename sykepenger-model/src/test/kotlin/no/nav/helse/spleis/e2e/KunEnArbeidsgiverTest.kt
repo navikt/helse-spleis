@@ -242,6 +242,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
@@ -347,6 +348,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertActivities()
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.februar til 16.februar), INNTEKT)
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -664,8 +666,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             sykmeldingSkrevet = 6.august.atStartOfDay()
         )
         håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNAVEllerArbeidsgiver = 8.august)
+        assertVarsel(Varselkode.RV_SØ_2, 2.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(22.februar til 14.mars), INNTEKT)
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -689,6 +693,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterInntektsmelding(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT)
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

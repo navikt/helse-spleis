@@ -15,7 +15,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -56,6 +58,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null))
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().let { refusjonsopplysninger ->
                 refusjonsopplysninger.assertRefusjonsbeløp(1.januar til 21.januar, INNTEKT)
@@ -72,6 +75,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
         }
@@ -98,6 +102,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 id = inntektsmeldingId,
                 arbeidsgiverperioder = arbeidsgiverperiode,
             )
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
         }
@@ -117,6 +122,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar)
         }
         a2 {
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         }
@@ -124,7 +130,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }
-
 
     @Test
     fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten take two`() {
