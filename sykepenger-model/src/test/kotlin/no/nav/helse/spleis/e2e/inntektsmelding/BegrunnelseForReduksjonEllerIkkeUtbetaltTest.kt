@@ -127,16 +127,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
             assertEquals("SSSSSHH SSSSSHH SSSSNHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            assertForventetFeil(
-                forklaring = "Når arbeidsgiver oppgir første fraværsdag ut i forlengelsen havner varselet om uenighet i " +
-                    "AGP på siste periode. Da utbetaler vi potensielt første periode feil og automatisk.",
-                nå = {
-                    assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
-                },
-                ønsket = {
-                    assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
-                }
-            )
+            assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
         }
     }
 }

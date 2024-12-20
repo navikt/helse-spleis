@@ -729,7 +729,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT, ARBEIDSGIVER)
             ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
         )
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -769,7 +768,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         assertIngenVarsler(1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 

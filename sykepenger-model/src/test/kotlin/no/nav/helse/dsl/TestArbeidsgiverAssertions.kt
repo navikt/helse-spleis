@@ -108,7 +108,7 @@ internal class TestArbeidsgiverAssertions(
     }
 
     internal fun assertIngenVarsler(filter: AktivitetsloggFilter) {
-        val warnings = collectVarsler(filter)
+        val warnings = collectVarselkoder(filter)
         assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
     }
 

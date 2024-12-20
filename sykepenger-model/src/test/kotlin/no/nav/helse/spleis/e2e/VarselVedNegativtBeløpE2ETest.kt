@@ -19,7 +19,6 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
     fun `skal få varsel når utbetaling flyttes fra arbeidsgiver til person`() {
         a1 {
             nyttVedtak(januar)
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, Inntekt.INGEN)))
@@ -36,7 +35,6 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
     fun `skal få varsel når utbetaling flyttes fra person til arbeidsgiver`() {
         a1 {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, INNTEKT)))
@@ -53,7 +51,6 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
     fun `skal få varsel når utbetaling reduseres pga lavere inntekt`() {
         a1 {
             nyttVedtak(januar)
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
 
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(

@@ -112,7 +112,6 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT_MED_FEIL)
             assertVarsel(RV_UT_2, AktivitetsloggFilter.arbeidsgiver(a1))
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         }
     }
 

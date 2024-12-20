@@ -22,6 +22,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -51,6 +53,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertEquals(21, inspektør.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, inspektør.sykdomstidslinje.inspektør.dagteller[Feriedag::class])
@@ -82,6 +85,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -128,6 +132,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -148,7 +153,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
@@ -200,6 +205,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -236,6 +242,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -332,6 +339,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertEquals(Endringskode.NY, utbetalingslinjeInspektør.endringskode)
                 assertNull(utbetalingslinjeInspektør.datoStatusFom)
             }
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
@@ -362,6 +370,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -414,6 +423,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[27.februar] is Utbetalingsdag.Fridag)
             assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[28.februar] is Utbetalingsdag.Fridag)
@@ -450,6 +460,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[29.mars] is Utbetalingsdag.Fridag)
             assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[30.mars] is Utbetalingsdag.Fridag)
@@ -501,6 +512,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -540,6 +552,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
@@ -634,6 +647,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -668,6 +682,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
@@ -697,6 +713,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -728,6 +745,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
@@ -765,6 +783,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 Ferie(30.januar, 31.januar)
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
             håndterSøknad(
@@ -812,6 +831,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
@@ -842,6 +863,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             (17..31).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
             }
@@ -852,6 +875,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             (17..31).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
             }

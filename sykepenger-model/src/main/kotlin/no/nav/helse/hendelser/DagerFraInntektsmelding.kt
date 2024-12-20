@@ -257,6 +257,7 @@ internal class DagerFraInntektsmelding(
     }
 
     private fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, arbeidsgiverperiode: List<Periode>) {
+        if (this.arbeidsgiverperioder.isEmpty()) return
         if (starterUtbetalingSamtidig(arbeidsgiverperiode)) return
         validator.uenigOmArbeidsgiverperiode(aktivitetslogg)
     }

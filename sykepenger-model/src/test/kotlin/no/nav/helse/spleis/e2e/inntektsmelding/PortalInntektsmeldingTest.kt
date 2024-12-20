@@ -36,7 +36,7 @@ internal class PortalInntektsmeldingTest : AbstractDslTest() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+            assertIngenVarsler(2.vedtaksperiode.filter())
         }
     }
 
