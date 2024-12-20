@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.GradertPeriode
@@ -92,6 +93,8 @@ internal abstract class AbstractDslTest {
         protected infix fun List<String>.og(annen: String) = this.plus(annen)
     }
 
+    private val assertetVarsler = AssertetVarsler()
+
     protected lateinit var jurist: SubsumsjonsListLog
     protected lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
@@ -103,7 +106,7 @@ internal abstract class AbstractDslTest {
     protected val String.inspektør get() = inspektør(this)
     protected val inspektør: TestArbeidsgiverInspektør get() = bareÈnArbeidsgiver(a1).inspektør
 
-    private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
+    private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør), assertetVarsler)
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
     protected fun personView() = testperson.view()
     protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
@@ -639,7 +642,7 @@ internal abstract class AbstractDslTest {
 
     @AfterEach
     fun verify() {
-        testperson.bekreftBehovOppfylt()
+        testperson.bekreftBehovOppfylt(assertetVarsler)
     }
 
     fun dumpLog() = deferredLog.dumpLog()

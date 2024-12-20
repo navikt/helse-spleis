@@ -22,7 +22,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 internal class TestArbeidsgiverAssertions(
     private val observatør: TestObservatør,
     private val inspektør: TestArbeidsgiverInspektør,
-    private val personInspektør: PersonInspektør
+    private val personInspektør: PersonInspektør,
+    private val assertetVarsler: Varslersamler.AssertetVarsler
 ) {
     internal fun assertSisteTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
         assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeId]?.last(), errortekst)
@@ -118,6 +119,7 @@ internal class TestArbeidsgiverAssertions(
         assertTrue(result.isEmpty()) {
             "\nFant ikke forventet warning:\n\t${result.joinToString(separator = "\n\t")}\nWarnings funnet:\n\t${actualVarsler.joinToString("\n\t")}\n"
         }
+        assertetVarsler.kvitterVarsel(filter, varsler)
     }
 
     internal fun assertVarsel(warning: String, filter: AktivitetsloggFilter) {
@@ -128,6 +130,8 @@ internal class TestArbeidsgiverAssertions(
     internal fun assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) {
         val varselkoder = collectVarselkoder(filter)
         assertTrue(varselkoder.contains(kode), "\nFant ikke forventet varselkode:\n\t$kode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
+
+        assertetVarsler.kvitterVarsel(filter, kode)
     }
 
     internal fun assertIngenVarsel(warning: String, filter: AktivitetsloggFilter) {

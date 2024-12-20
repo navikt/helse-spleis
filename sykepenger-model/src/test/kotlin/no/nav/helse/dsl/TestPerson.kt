@@ -87,6 +87,7 @@ internal class TestPerson(
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
 
     private val behovsamler = Behovsamler(deferredLog)
+    private val varslersamler = Varslersamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
     internal val person = Person(personidentifikator, fødselsdato.alder, jurist).also {
@@ -118,13 +119,15 @@ internal class TestPerson(
         try {
             person.håndter(this, forrigeAktivitetslogg)
         } finally {
+            varslersamler.registrerVarsler(forrigeAktivitetslogg.varsel)
             behovsamler.registrerBehov(forrigeAktivitetslogg)
         }
         return this
     }
 
-    internal fun bekreftBehovOppfylt() {
+    internal fun bekreftBehovOppfylt(assertetVarsler: Varslersamler.AssertetVarsler) {
         behovsamler.bekreftBehovOppfylt()
+        varslersamler.bekreftVarslerAssertet(assertetVarsler)
     }
 
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
