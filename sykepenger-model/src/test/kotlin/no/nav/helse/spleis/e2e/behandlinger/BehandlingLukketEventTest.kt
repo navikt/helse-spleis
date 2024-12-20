@@ -17,6 +17,8 @@ import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.søndag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -61,6 +63,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             val behandlinger = inspektør(1.vedtaksperiode).behandlinger
@@ -76,6 +79,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     fun `behandling lukkes når vedtak uten utbetaling fattes`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -118,6 +122,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(1.januar til (onsdag den 31.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
 
@@ -141,6 +146,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(1.januar til (onsdag den 31.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
@@ -186,6 +192,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje((17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
             håndterUtbetalt()
@@ -208,6 +215,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     fun `behandling lukkes når vedtak uten utbetaling fattes - uten tidligere utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

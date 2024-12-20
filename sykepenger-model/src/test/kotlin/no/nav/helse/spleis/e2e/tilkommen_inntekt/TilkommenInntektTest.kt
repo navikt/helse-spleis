@@ -44,6 +44,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             nyttVedtak(januar)
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1231, 1431, subset = 1.februar til 28.februar)
 
@@ -59,6 +60,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -86,6 +88,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
             )
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -112,6 +115,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
             håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1181, 1431, subset = 1.februar til 28.februar)
             inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
@@ -131,6 +135,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
             )
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -141,6 +146,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
                 )
             )
+            assertVarsel(Varselkode.RV_SV_5, 3.vedtaksperiode.filter())
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
@@ -230,6 +236,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     Arbeidsforhold(a2, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
+            assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -237,6 +244,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a3, råttBeløp = 4000)))
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -265,6 +273,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         }
 
         a1 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
@@ -279,6 +288,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_8, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
@@ -301,6 +311,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     )
                 )
             )
+            assertVarsel(Varselkode.RV_SV_5, 1.vedtaksperiode.filter())
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 40.K.månedlig)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -342,6 +353,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     )
                 )
             )
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             val dagsatsFørstegangs =
@@ -396,6 +408,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SIMULERING_REVURDERING)
             assertVarsel(Varselkode.RV_SV_5, 1.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
@@ -433,6 +446,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     Arbeidsforhold(a2, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
+            assertVarsler(listOf(Varselkode.RV_SV_5, Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
@@ -522,6 +536,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100)))
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)
@@ -556,10 +571,13 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             )
         )
         a1 {
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100)))
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertTilkommenInntektTag(2.vedtaksperiode)
