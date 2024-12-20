@@ -5,7 +5,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
 
-
 internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
@@ -25,6 +24,6 @@ internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 26.februar, sykmeldingsgrad = 100)),
             tidligereArbeidsgiverOrgnummer = ORGNUMMER
         )
-        assertTilstander(1, "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
+        assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
     }
 }

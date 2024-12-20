@@ -29,7 +29,7 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
 
         )
 
-        assertTilstander(1, "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
+        assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
         assertIngenVarsler(1)
     }
 
@@ -52,7 +52,7 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
 
         )
 
-        assertTilstander(1, "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
+        assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
         assertVarsel(1, RV_SV_5)
     }
 

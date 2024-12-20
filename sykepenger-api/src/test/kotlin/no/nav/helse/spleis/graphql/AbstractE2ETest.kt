@@ -107,6 +107,7 @@ internal abstract class AbstractE2ETest {
         observatør.ventendeReplays().forEach { (orgnr, vedtaksperiodeId) ->
             hendelselogg = Aktivitetslogg()
             person.håndter(fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
+            ubesvarteBehov.addAll(hendelselogg.behov)
         }
     }
 
@@ -507,7 +508,6 @@ internal abstract class AbstractE2ETest {
             ?.also {
                 ubesvarteBehov.clear()
             }
-
     }
 
     private fun IAktivitetslogg.infotrygdhistorikkbehov() =
