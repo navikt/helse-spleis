@@ -1486,18 +1486,31 @@ internal class Vedtaksperiode private constructor(
         return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
     }
 
+    private fun VilkårsprøvdSkjæringstidspunkt.faktaavklartInntekt(arbeidsgiver: String, vedtaksperioder: List<Vedtaksperiode>): ArbeidsgiverFaktaavklartInntekt {
+        val fraVilkårsgrunnlag = forArbeidsgiver(arbeidsgiver)
+        if (fraVilkårsgrunnlag != null) return fraVilkårsgrunnlag
+
+        // Tidligere tok vi inn AUU'er på arbeidsgivere som ikke var vilkårsgrunnlaget (det gjør vi ikke lenger etter 5a7089f)
+        // .. men for de AUU'ene vi allerede har i systemet som ikke er i vilkårsgrunnlaget må vi lage denne tøysete inntekten
+        // ellers blir perioder stuck når en slik situasjon overstyres av saksbehandler/korrigerende dokumenter.
+        if (vedtaksperioder.none { it.skalBehandlesISpeil() }) return ArbeidsgiverFaktaavklartInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
+            fastsattÅrsinntekt = Inntekt.INGEN,
+            gjelder = skjæringstidspunkt til LocalDate.MAX,
+            refusjonsopplysninger = Refusjonsopplysninger()
+        )
+        error(
+            "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
+                "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+        )
+    }
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
-
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning.mapValues { (arbeidsgiver, vedtaksperioder) ->
-            val inntektForArbeidsgiver = faktaavklarteInntekter
-                .forArbeidsgiver(arbeidsgiver)
-                ?: error(
-                    "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
-                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-                )
+            val inntektForArbeidsgiver = faktaavklarteInntekter.faktaavklartInntekt(arbeidsgiver, vedtaksperioder)
             vedtaksperioder.map {
                 it.behandlinger.lagUtbetalingstidslinje(
                     inntektForArbeidsgiver,
