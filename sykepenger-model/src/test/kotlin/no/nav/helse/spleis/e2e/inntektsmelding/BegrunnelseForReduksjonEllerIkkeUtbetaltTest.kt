@@ -25,6 +25,8 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent))
             assertEquals("SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
             assertEquals("NNNNNHH NNNNNHH NNS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         }
     }
@@ -35,6 +37,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             assertEquals("SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertEquals("NNNNNHH NNN", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent))
             assertForventetFeil(
@@ -54,6 +57,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         // Arbeidsgiver kommuniserer at bruker er permitert fra 11.januar og at de dekker AGP tom 10.januar 🤔
         håndterInntektsmelding(listOf(1.januar til 10.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "Permisjon")
+        assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
         assertForventetFeil(
             forklaring = "Nav skal dekke de resterende dagene av arbeidsgiverperioden som arbeidsgiver ikke opplyser om",
             nå = {
@@ -70,6 +74,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         // Arbeidsgiver kommuniserer at arbeidet er opphørt fra 11.januar og at de dekker AGP tom 10.januar 🤔
         håndterInntektsmelding(listOf(1.januar til 10.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert")
+        assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
         assertForventetFeil(
             forklaring = "Nav skal dekke de resterende dagene av arbeidsgiverperioden som arbeidsgiver ikke opplyser om",
             nå = {
@@ -87,7 +92,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
-
+            assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
             assertTrue(inspektør.sykdomstidslinje[25.januar] is Dag.SykedagNav)
             assertEquals(25.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.inspektør.førsteIkkeUkjenteDag)
 

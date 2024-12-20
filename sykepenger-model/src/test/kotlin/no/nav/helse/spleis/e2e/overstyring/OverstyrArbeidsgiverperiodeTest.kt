@@ -18,6 +18,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -50,12 +52,14 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
                     ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100)
                 )
             )
+            assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100)))
-
+            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
 
             assertEquals(2, inspektør.antallUtbetalinger)
@@ -108,5 +112,4 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             }
         }
     }
-
 }

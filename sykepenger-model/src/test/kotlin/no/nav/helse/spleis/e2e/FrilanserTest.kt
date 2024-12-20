@@ -23,6 +23,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -70,6 +72,7 @@ internal class FrilanserTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
                 )
             )
+            assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
             assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(
                 1.vedtaksperiode,
@@ -170,5 +173,4 @@ internal class FrilanserTest : AbstractDslTest() {
             assertIngenVarsler()
         }
     }
-
 }

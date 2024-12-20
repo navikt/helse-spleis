@@ -23,10 +23,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -47,6 +49,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -116,6 +119,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -145,6 +149,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 organisasjonsnummer = a2
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -177,6 +182,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -246,6 +252,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -257,6 +264,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(2.vedtaksperiode, skjæringstidspunkt = 1.mars)
+            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -340,7 +348,6 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
         }
     }
 
-
     private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
         inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
             if (it is Utbetalingsdag.NavHelgDag) return
@@ -355,7 +362,6 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
         personbeløp: Inntekt = Inntekt.INGEN
     ) =
         periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
-
 
     private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT) {
         håndterVilkårsgrunnlag(

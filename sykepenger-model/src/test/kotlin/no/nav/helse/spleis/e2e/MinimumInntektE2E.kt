@@ -10,6 +10,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,6 +42,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                     )
                 )
             )
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(11, utbetalingstidslinjeInspektør.avvistDagTeller)
@@ -99,6 +102,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                     )
                 )
             )
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(8, utbetalingstidslinjeInspektør.avvistDagTeller)
@@ -128,6 +132,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                     )
                 )
             )
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(21, utbetalingstidslinjeInspektør.avvistDagTeller)

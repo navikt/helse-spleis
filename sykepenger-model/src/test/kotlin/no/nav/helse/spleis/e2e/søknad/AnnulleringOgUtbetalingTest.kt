@@ -54,6 +54,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -73,6 +74,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
     @Test
     fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() = a1 {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        assertVarsler(listOf(Varselkode.RV_SØ_2), 1.vedtaksperiode.filter())
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -84,6 +86,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_21), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -92,8 +95,6 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-
-        assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
 
         assertEquals(5, inspektør.antallUtbetalinger)
         val januarutbetaling = inspektør.utbetaling(0)
@@ -152,16 +153,17 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         nullstillTilstandsendringer()
         nyPeriode(5.februar til 15.februar, a1)
+        assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
 
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_21, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsoppholdsperiode(5.februar, 15.februar)))
-
 
         inspektør.utbetaling(0).let {
             assertEquals(januar, it.periode)
@@ -198,6 +200,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_SØ_2), 1.vedtaksperiode.filter())
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
 
@@ -207,6 +210,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_UT_21, Varselkode.RV_OS_2), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
         håndterYtelser(2.vedtaksperiode)
@@ -238,6 +242,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent), Ferie(3.mars, 26.mars))
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -285,6 +290,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
                 (13.februar til 28.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) }
             )
             håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
@@ -369,6 +375,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
                 ManuellOverskrivingDag(it, Dagtype.Feriedag)
             }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
             håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
@@ -416,6 +423,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
                 ManuellOverskrivingDag(it, Dagtype.Feriedag)
             }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_21, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -487,6 +495,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
                 ManuellOverskrivingDag(it, Dagtype.Feriedag)
             }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_21, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 

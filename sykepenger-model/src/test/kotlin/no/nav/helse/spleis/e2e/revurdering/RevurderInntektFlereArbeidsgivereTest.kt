@@ -23,8 +23,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -49,6 +51,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterOverstyrInntekt(1.januar, 31000.månedlig)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -81,7 +84,6 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             )
             assertDag(17.januar, 1098.0.daglig, aktuellDagsinntekt = 32000.månedlig)
         }
-
     }
 
     @Test
@@ -112,6 +114,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 33000.månedlig)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 33000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -121,6 +124,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -140,12 +144,14 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             )
         }
         a1 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 15000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -181,6 +187,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 16500.månedlig)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 16500.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -206,6 +213,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterOverstyrInntekt(1.januar, 31000.månedlig)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -316,6 +324,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterOverstyrInntekt(1.januar, 31000.månedlig)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -404,6 +413,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 22000.månedlig)
             håndterOverstyrInntekt(1.januar, 23000.månedlig)
             håndterYtelser(1.vedtaksperiode)
@@ -432,6 +442,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 22000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterOverstyrInntekt(1.januar, 23000.månedlig)
@@ -462,6 +473,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 22000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -496,6 +508,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterOverstyrInntekt(1.januar, 19000.månedlig)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

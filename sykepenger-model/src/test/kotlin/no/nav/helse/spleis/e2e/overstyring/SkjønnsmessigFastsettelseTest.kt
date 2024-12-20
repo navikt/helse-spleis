@@ -25,11 +25,13 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -52,6 +54,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         "a6" {
             tilGodkjenning(mars)
             håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning("a6", INGEN)))
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertEquals(100, inspektør(1.vedtaksperiode).utbetalingstidslinje[17.mars].økonomi.inspektør.totalGrad)
         }
@@ -74,6 +77,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
                 )
             )
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -93,7 +97,9 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
         }
         a1 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -136,6 +142,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
                 )
             )
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -155,7 +162,9 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektVedNyIM)
         }
         a1 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -192,6 +201,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
         a1 {
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -289,6 +299,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             nullstillTilstandsendringer()
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val inntektsopplysning = inspektør.inntektsopplysningISykepengegrunnlaget(1.januar)
             assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
@@ -317,7 +328,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is SkjønnsmessigFastsatt) }
         a3 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a3) is SkjønnsmessigFastsatt) }
 
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+        }
 
         a1 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Inntektsmelding) }
         a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Inntektsmelding) }
@@ -333,6 +347,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         )
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
     }
@@ -383,12 +398,12 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag, 100))
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
-
     }
 
     @Test
@@ -461,5 +476,4 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
     private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning
-
 }

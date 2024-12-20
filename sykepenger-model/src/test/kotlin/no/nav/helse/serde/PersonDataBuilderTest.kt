@@ -37,6 +37,9 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -105,6 +108,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
                 )
             )
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -122,6 +126,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 egenmeldinger = listOf(1.februar til 2.februar),
                 sendtTilNAVEllerArbeidsgiver = 1.juni
             )
+            assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             håndterInntektsmeldingPortal(listOf(1.februar til 16.februar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -135,6 +140,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "IngenOpptjening",
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
                 listOf(

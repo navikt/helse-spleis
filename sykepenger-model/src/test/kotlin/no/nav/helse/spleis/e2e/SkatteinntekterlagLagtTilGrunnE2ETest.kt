@@ -10,6 +10,8 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -28,9 +30,9 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
             )
             )
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
             val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
                 organisasjonsnummer = a1,
@@ -61,7 +63,9 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), sprøInntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
             )
             )
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
 
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
@@ -80,5 +84,4 @@ internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
             assertEquals(forventet, event)
         }
     }
-
 }

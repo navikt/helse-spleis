@@ -12,7 +12,9 @@ import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
 import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,6 +67,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
+            assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
@@ -111,6 +114,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()

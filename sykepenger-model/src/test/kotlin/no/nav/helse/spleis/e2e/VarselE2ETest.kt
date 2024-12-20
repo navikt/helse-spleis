@@ -84,13 +84,14 @@ internal class VarselE2ETest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) })
             håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
 
             håndterOverstyrTidslinje((23.januar til 23.januar).map { manuellFeriedag(it) })
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(RV_OS_3, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_OS_3, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         }
     }
 
@@ -101,7 +102,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
 
-            assertVarsel(RV_AY_9, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_AY_9, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         }
     }
 
@@ -128,6 +129,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             )
             håndterYtelser(1.vedtaksperiode)
             assertIngenVarsel(RV_IT_13, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         }
     }

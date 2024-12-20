@@ -12,7 +12,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,6 +29,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             val registrert = LocalDateTime.now()
             val innsendt = registrert.minusHours(2)
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
+            assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             val behandlingOpprettetEvent = observatør.behandlingOpprettetEventer.last()
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 val behandlingId = behandlinger.single().id
@@ -69,6 +72,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterInntektsmelding(listOf(25.desember(2017) til 10.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()
@@ -112,6 +116,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
+            assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
             val behandlingOpprettet = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettet.size)
             assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet[0].type)

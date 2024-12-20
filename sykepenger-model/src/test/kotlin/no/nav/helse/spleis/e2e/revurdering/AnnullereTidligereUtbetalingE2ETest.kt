@@ -6,10 +6,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
@@ -22,6 +25,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             nyttVedtak(mars)
             håndterAnnullering(utbetalingId)
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -45,7 +49,10 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         a1 {
             håndterAnnullering(utbetalingId)
             assertIngenFunksjonelleFeil()
-            Assertions.assertEquals(Utbetalingtype.ANNULLERING, inspektør.sisteUtbetaling().type)
+            assertEquals(Utbetalingtype.ANNULLERING, inspektør.sisteUtbetaling().type)
+        }
+        a2 {
+            assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
         }
     }
 }

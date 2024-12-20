@@ -95,6 +95,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             )
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(
@@ -127,6 +128,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, emptyList())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(

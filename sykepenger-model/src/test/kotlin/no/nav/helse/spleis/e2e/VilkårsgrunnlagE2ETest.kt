@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
@@ -66,6 +67,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
@@ -102,6 +104,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
@@ -121,6 +124,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             )
 
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
 
             håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar))
             håndterSøknad(18.januar til 20.januar)
@@ -173,7 +177,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
-            assertVarsel(Varselkode.RV_VV_1, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_VV_1, Varselkode.RV_OV_1), 1.vedtaksperiode.filter())
         }
     }
 

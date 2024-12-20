@@ -21,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -57,6 +58,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
                 ), orgnummer = a1
             )
+            assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -68,12 +70,16 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         a2 {
             håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }
                 assertInstanceOf(SkattSykepengegrunnlag::class.java, inntektA2.inspektør.inntektsopplysning)
                 assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder)
             }
+        }
+        a1 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -95,6 +101,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT),
                 ), orgnummer = a1
             )
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
@@ -116,6 +123,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -125,6 +133,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
@@ -152,6 +161,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar, type = ORDINÆRT)
                 )
             )
+            assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsgiveropplysninger(
