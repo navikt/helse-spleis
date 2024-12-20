@@ -586,12 +586,6 @@ internal class Arbeidsgiver private constructor(
         return ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode)
     }
 
-    internal fun refusjonstidslinjeForForespørsel(skjæringstidspunkt: LocalDate, periode: Periode): Beløpstidslinje {
-        val opplysningerPåSkjæringstidspunkt = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }.refusjonstidslinje()
-        val opplysningerSomOverlapperEllerErSenere = opplysningerPåSkjæringstidspunkt.fraOgMed(periode.start)
-        return opplysningerSomOverlapperEllerErSenere
-    }
-
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.kontekst(this)
         aktivitetslogg.info("Inntektsmelding ferdigbehandlet")

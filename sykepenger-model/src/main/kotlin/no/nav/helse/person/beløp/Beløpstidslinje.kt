@@ -1,13 +1,12 @@
 package no.nav.helse.person.beløp
 
 import java.time.LocalDate
-import java.util.SortedMap
+import java.util.*
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -82,30 +81,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         val fom = setOfNotNull(periode?.start, other.periode?.start).minOrNull() ?: return null
         val tom = setOfNotNull(periode?.endInclusive, other.periode?.endInclusive).max()
         return (fom til tom).firstOrNull { this.dager[it]?.beløp != other.dager[it]?.beløp }
-    }
-
-    internal fun forespurtRefusjon(): PersonObserver.Refusjon? {
-        val listeMedPerioder = dager
-            .map { (_, dag) ->
-                PersonObserver.Refusjon.Refusjonsforslag(
-                    fom = dag.dato,
-                    tom = dag.dato,
-                    månedligBeløp = dag.beløp.månedlig
-                )
-            }.fold(emptyList<PersonObserver.Refusjon.Refusjonsforslag>()) { acc, dag ->
-                when {
-                    acc.isEmpty() -> listOf(dag)
-                    acc.last().let { sisteBeløpsdag ->
-                        sisteBeløpsdag.tom == dag.fom.minusDays(1) && sisteBeløpsdag.månedligBeløp == dag.månedligBeløp
-                    } -> acc.dropLast(1) + acc.last().copy(tom = dag.tom)
-
-                    else -> acc.plusElement(dag)
-                }
-            }
-        if (listeMedPerioder.isEmpty()) return null
-
-        val medÅpenHale = listeMedPerioder.dropLast(1) + listeMedPerioder.last().copy(tom = null)
-        return PersonObserver.Refusjon(medÅpenHale)
     }
 
     internal fun dto() = BeløpstidslinjeDto(

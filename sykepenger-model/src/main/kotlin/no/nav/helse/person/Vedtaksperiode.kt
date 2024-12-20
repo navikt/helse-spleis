@@ -995,7 +995,7 @@ internal class Vedtaksperiode private constructor(
         val forespurtInntekt = vilkårsgrunnlag?.fastsattInntekt(arbeidsgiver.organisasjonsnummer)
             ?: PersonObserver.Inntekt(forslag = null)
 
-        val forespurtRefusjon = forespurtRefusjon() ?: PersonObserver.Refusjon(forslag = emptyList())
+        val forespurtRefusjon = PersonObserver.Refusjon(forslag = emptyList())
         val forespurteOpplysninger =
             listOf(forespurtInntekt, forespurtRefusjon) + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
@@ -1022,8 +1022,6 @@ internal class Vedtaksperiode private constructor(
             )
         )
     }
-
-    private fun forespurtRefusjon() = arbeidsgiver.refusjonstidslinjeForForespørsel(skjæringstidspunkt, periode).forespurtRefusjon()
 
     private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
         val deAndre = person.vedtaksperioder(MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(this))
