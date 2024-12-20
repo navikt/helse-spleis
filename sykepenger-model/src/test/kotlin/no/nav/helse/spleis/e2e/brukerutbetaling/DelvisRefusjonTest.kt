@@ -14,6 +14,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -79,6 +80,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -702,7 +704,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 assertEquals(22.januar til 31.januar, linje.fom til linje.tom)
             }
         }
-
     }
 
     @Test
@@ -764,10 +765,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         assertIngenVarsler(1.vedtaksperiode.filter())
-        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test

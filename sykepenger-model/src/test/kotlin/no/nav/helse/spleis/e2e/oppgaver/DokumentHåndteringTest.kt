@@ -546,7 +546,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
         håndterSøknad(februar)
-        assertFalse(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
+        assertTrue(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
         assertTrue(im2 in observatør.inntektsmeldingIkkeHåndtert)
     }
 

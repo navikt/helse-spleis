@@ -41,6 +41,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -188,6 +189,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), avsendersystem = NAV_NO, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         }
     }
+
     @Test
     fun `portalinntektsmelding på forlengelse til en periode utenfor arbeidsgiverperioden, men bare i helg`() {
         håndterSøknad(torsdag den 4.januar til søndag den 21.januar)
@@ -979,6 +981,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -2067,6 +2070,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,

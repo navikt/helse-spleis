@@ -28,6 +28,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -147,7 +148,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(1.januar, inspektør(ghost).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = ghost)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
     }
 
     @Test
@@ -195,7 +196,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertTrue(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         assertTrue(inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
     }
 
     @Test

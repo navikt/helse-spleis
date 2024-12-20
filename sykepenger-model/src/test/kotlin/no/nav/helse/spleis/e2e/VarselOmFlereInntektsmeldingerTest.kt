@@ -61,17 +61,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
 
-        assertForventetFeil(
-            forklaring = "Burde legge på warning om vi får en inntektsmelding ville ha truffet vedtaksperioden til søknaden",
-            nå = {
-                assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-                assertIngenVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-                assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-            }
-        )
+        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
     }
-
 }

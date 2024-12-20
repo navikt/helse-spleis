@@ -1584,20 +1584,6 @@ internal class Vedtaksperiode private constructor(
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
 
-    private fun periodeRettFørHarFåttInntektsmelding(): Boolean {
-        val rettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) ?: return false
-        if (rettFør.tilstand in setOf(
-                AvsluttetUtenUtbetaling,
-                AvventerInfotrygdHistorikk,
-                AvventerInntektsmelding
-            )
-        ) return false
-        // auu-er vil kunne ligge i Avventer blokkerende periode
-        if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.skalBehandlesISpeil()) return false
-        if (rettFør.skjæringstidspunkt != this.skjæringstidspunkt) return false
-        return true
-    }
-
     private fun prioritertNabolag(): List<Vedtaksperiode> {
         val (nabolagFør, nabolagEtter) = this.arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
             .partition { it.periode.endInclusive < this.periode.start }
@@ -1930,21 +1916,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(
                 aktivitetslogg, when {
                 !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-                vedtaksperiode.periodeRettFørHarFåttInntektsmelding() -> AvventerBlokkerendePeriode
-                periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, aktivitetslogg) -> AvventerBlokkerendePeriode
                 else -> AvventerInntektsmelding
             }
             )
-        }
-
-        private fun periodeRettEtterHarFåttInntektsmelding(
-            vedtaksperiode: Vedtaksperiode,
-            aktivitetslogg: IAktivitetslogg
-        ): Boolean {
-            val rettEtter = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode) ?: return false
-            // antagelse at om vi har en periode rett etter oss, og vi har tilstrekkelig informasjon til utbetaling, så har vi endt
-            // opp med å gjenbruke tidsnære opplysninger og trenger derfor ikke egen IM
-            return !rettEtter.måInnhenteInntektEllerRefusjon(aktivitetslogg)
         }
 
         override fun igangsettOverstyring(

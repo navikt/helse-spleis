@@ -16,6 +16,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -324,6 +325,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING
@@ -450,6 +452,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -488,6 +491,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE
         )
     }

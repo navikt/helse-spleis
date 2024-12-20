@@ -1127,6 +1127,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 START,
+                AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1156,6 +1157,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 START,
+                AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

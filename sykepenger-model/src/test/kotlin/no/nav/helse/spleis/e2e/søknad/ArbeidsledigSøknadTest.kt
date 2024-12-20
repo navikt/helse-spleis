@@ -6,8 +6,10 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadstype.Companion.Arbeidsledig
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
@@ -53,7 +55,7 @@ internal class ArbeidsledigSøknadTest : AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
 }

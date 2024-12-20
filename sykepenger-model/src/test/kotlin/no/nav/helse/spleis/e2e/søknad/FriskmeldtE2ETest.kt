@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
@@ -73,6 +74,6 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 }

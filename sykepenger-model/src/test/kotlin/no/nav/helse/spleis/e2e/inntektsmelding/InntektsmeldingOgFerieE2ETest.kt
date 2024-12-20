@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -45,7 +46,6 @@ import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
-
     @Test
     fun ferieforlengelse() {
         nyttVedtak(januar)
@@ -54,7 +54,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), Ferie(1.februar, 20.februar))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test

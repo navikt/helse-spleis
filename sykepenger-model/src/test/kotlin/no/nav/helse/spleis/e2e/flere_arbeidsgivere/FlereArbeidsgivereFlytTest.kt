@@ -17,6 +17,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -247,7 +248,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertEquals(100, økonomiInspektør.totalGrad)
     }
 
-
     @Test
     fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - kort periode`() {
         nyeVedtak(januar, a1, a2)
@@ -393,7 +393,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
@@ -995,5 +995,4 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         vilkårsprøv(vedtaksperiode, orgnummer, skjæringstidspunkt)
         utbetalPeriodeEtterVilkårsprøving(vedtaksperiode, orgnummer)
     }
-
 }

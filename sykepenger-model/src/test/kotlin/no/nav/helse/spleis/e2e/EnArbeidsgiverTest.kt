@@ -19,6 +19,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -152,7 +153,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, AVSLUTTET)
         assertTrue(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(3.vedtaksperiode))
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(4.vedtaksperiode))
     }
 
@@ -266,7 +267,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -601,7 +602,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         forkastAlle()
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
 
     @Test

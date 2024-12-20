@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -137,6 +138,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 START,
+                AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE
             )
         }
