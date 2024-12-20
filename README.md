@@ -15,10 +15,7 @@ https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/res
 ## Migrere JSON til siste skjema
 
 JSON-migrering skjer hver gang vi henter opp en person, men noen ganger er det greit å kunne bumpe alle personer samtidig.
-Da kan vi anvende `spleis-migrate`, en enkel k8s job:
-
-1. Trykk på [Run workflow](https://github.com/navikt/helse-spleis/actions/workflows/manuell-jobb.yml) 
-2. Fyll image som beskrevet & navn til `migrate_v2`
+Da kan vi anvende `spleis-migrate`, en enkel k8s job.
 
 En fullskala migrering tar omtrent 2 timer for spleis å gjennomføre.
 
