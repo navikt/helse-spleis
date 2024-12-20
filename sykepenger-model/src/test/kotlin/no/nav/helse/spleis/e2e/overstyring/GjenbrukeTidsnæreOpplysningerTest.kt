@@ -778,7 +778,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag
-            assertIngenVarsel(RV_IV_7)
+            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
         }
     }
@@ -859,7 +859,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
-            assertIngenVarsel(RV_IV_7)
+            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
         }
     }
 
@@ -869,7 +869,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(juni)
             håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(29.juni, 30.juni))
-            assertIngenVarsel(RV_IV_7)
+            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
         }
     }
 
@@ -884,7 +884,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
-            assertIngenVarsel(RV_IV_7)
+            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
         }
     }
 
@@ -1065,7 +1065,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-            assertIngenVarsel(RV_IV_7)
+            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
         }
     }
 

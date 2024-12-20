@@ -24,6 +24,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt.Companion.K
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -370,7 +371,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             håndterYtelser(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_5)
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -396,7 +397,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             )
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SIMULERING_REVURDERING)
-            assertVarsel(Varselkode.RV_SV_5)
+            assertVarsel(Varselkode.RV_SV_5, 1.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -467,7 +468,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     )
                 )
             )
-            assertVarsel(Varselkode.RV_SV_5)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
@@ -503,7 +505,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     )
                 )
             )
-            assertVarsel(Varselkode.RV_SV_5)
+            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)

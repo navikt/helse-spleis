@@ -243,17 +243,17 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
         testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(*filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
+        testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil() =
-        testArbeidsgiverAsserter.assertFunksjonelleFeil()
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.person()) =
+        testArbeidsgiverAsserter.assertFunksjonelleFeil(filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: String, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: String, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.funksjonellFeilTekst, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: Varselkode, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.funksjonellFeilTekst, filter)
 
     protected fun TestPerson.TestArbeidsgiver.ingenNyeFunksjonelleFeil(block: () -> Unit) =
         testArbeidsgiverAsserter.ingenNyeFunksjonelleFeil(block)
@@ -261,29 +261,29 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.nyeFunksjonelleFeil(block: () -> Unit) =
         testArbeidsgiverAsserter.nyeFunksjonelleFeil(block)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsler(vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertVarsler(*filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertVarsler(varsler, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertVarsel(warning, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertVarsel(warning, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertVarsel(kode, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertVarsel(kode, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenVarsel(kode, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenVarsel(kode, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenVarsler(*filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
+        testArbeidsgiverAsserter.assertIngenVarsler(filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertInfo(forventet, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertInfo(forventet, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenInfo(forventet, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenInfo(forventet, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenInfoSomInneholder(forventet: String, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenInfoSomInneholder(forventet, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenInfoSomInneholder(forventet: String, filter: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenInfoSomInneholder(forventet, filter)
 
     protected fun TestPerson.TestArbeidsgiver.assertIngenBehov(vedtaksperiodeId: UUID, behovtype: Aktivitet.Behov.Behovtype) =
         testArbeidsgiverAsserter.assertIngenBehov(vedtaksperiodeId, behovtype)
@@ -410,26 +410,26 @@ internal abstract class AbstractDslTest {
     protected fun String.assertSisteTilstand(id: UUID, tilstand: TilstandType) =
         this { assertSisteTilstand(id, tilstand) }
 
-    protected fun String.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
-        this { assertIngenFunksjonelleFeil(*filtre) }
+    protected fun String.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter) =
+        this { assertIngenFunksjonelleFeil(filter) }
 
-    protected fun String.assertVarsler(vararg filtre: AktivitetsloggFilter) =
-        this { assertVarsler(*filtre) }
+    protected fun String.assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
+        this { assertVarsler(varsler, filter) }
 
-    protected fun String.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
-        this { assertVarsel(warning, *filtre) }
+    protected fun String.assertVarsel(warning: String, filter: AktivitetsloggFilter) =
+        this { assertVarsel(warning, filter) }
 
-    protected fun String.assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        this { assertVarsel(kode, *filtre) }
+    protected fun String.assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
+        this { assertVarsel(kode, filter) }
 
-    protected fun String.assertIngenVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        this { assertIngenVarsel(kode, *filtre) }
+    protected fun String.assertIngenVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
+        this { assertIngenVarsel(kode, filter) }
 
-    protected fun String.assertFunksjonellFeil(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        this { assertFunksjonellFeil(kode, *filtre) }
+    protected fun String.assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
+        this { assertFunksjonellFeil(kode, filter) }
 
-    protected fun String.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
-        this { assertIngenVarsler(*filtre) }
+    protected fun String.assertIngenVarsler(filter: AktivitetsloggFilter) =
+        this { assertIngenVarsler(filter) }
 
     protected fun String.nyttVedtak(
         periode: Periode,
@@ -568,26 +568,26 @@ internal abstract class AbstractDslTest {
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) =
         bareÈnArbeidsgiver(orgnummer).assertSisteTilstand(id, tilstand)
 
-    protected fun assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertIngenFunksjonelleFeil(*filtre)
+    protected fun assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
+        bareÈnArbeidsgiver(a1).assertIngenFunksjonelleFeil(filter)
 
-    protected fun assertVarsler(vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertVarsler(*filtre)
+    protected fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertVarsler(varsler, filter)
 
-    protected fun assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertVarsel(warning, *filtre)
+    protected fun assertVarsel(warning: String, filter: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertVarsel(warning, filter)
 
-    protected fun assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertVarsel(kode, *filtre)
+    protected fun assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertVarsel(kode, filter)
 
-    protected fun assertIngenVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertIngenVarsel(kode, *filtre)
+    protected fun assertIngenVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertIngenVarsel(kode, filter)
 
-    protected fun assertFunksjonellFeil(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertFunksjonellFeil(kode, *filtre)
+    protected fun assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertFunksjonellFeil(kode, filter)
 
-    protected fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertIngenVarsler(*filtre)
+    protected fun assertIngenVarsler(filter: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertIngenVarsler(filter)
 
     protected fun assertActivities() {
         val inspektør = inspiser(personInspektør)

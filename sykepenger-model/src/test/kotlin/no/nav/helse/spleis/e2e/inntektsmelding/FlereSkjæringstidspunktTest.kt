@@ -40,7 +40,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
                 Arbeid(20.januar, 20.januar)
             )
             assertEquals(listOf(21.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
-            assertVarsel(Varselkode.RV_IV_11)
+            assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
         }
     }

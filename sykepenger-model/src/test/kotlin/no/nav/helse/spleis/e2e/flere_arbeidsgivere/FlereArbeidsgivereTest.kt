@@ -57,6 +57,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
@@ -1024,7 +1025,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertVarsler()
+            assertIngenVarsler(1.vedtaksperiode.filter())
         }
         a1 {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
@@ -1465,11 +1466,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonellFeil(Varselkode.RV_SØ_10)
+            assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_SØ_10, AktivitetsloggFilter.Alle)
         }
         a2 {
             assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonellFeil(Varselkode.RV_SØ_10)
+            assertFunksjonellFeil(Varselkode.RV_SØ_10, 1.vedtaksperiode.filter())
         }
     }
 
@@ -1510,7 +1512,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertIngenFunksjonelleFeil()
-            assertVarsel(Varselkode.RV_SØ_10)
+            assertVarsel(Varselkode.RV_SØ_10, 1.vedtaksperiode.filter())
             håndterInntektsmelding(listOf(15.januar til 31.januar))
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }

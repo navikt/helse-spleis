@@ -16,7 +16,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -30,6 +29,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
@@ -225,7 +225,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `Søknad med utenlandsopphold gir warning`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Utlandsopphold(11.januar, 15.januar))
-        assertVarsler()
+        assertVarsler(emptyList(), AktivitetsloggFilter.Alle)
         assertVarsel(RV_SØ_8, 1.vedtaksperiode.filter())
         inspektør.also {
             assertEquals(1, it.sykdomshistorikk.size)
@@ -321,7 +321,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
-        assertVarsler(2.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_AY_3, 2.vedtaksperiode.filter())
         assertTilstander(
             2.vedtaksperiode,
             START,

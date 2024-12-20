@@ -12,13 +12,18 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 
-internal class TestArbeidsgiverAssertions(private val observatør: TestObservatør, private val inspektør: TestArbeidsgiverInspektør, private val personInspektør: PersonInspektør) {
+internal class TestArbeidsgiverAssertions(
+    private val observatør: TestObservatør,
+    private val inspektør: TestArbeidsgiverInspektør,
+    private val personInspektør: PersonInspektør
+) {
     internal fun assertSisteTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
         assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeId]?.last(), errortekst)
     }
@@ -40,7 +45,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
         varselkode?.let {
-            assertFunksjonellFeil(varselkode)
+            assertFunksjonellFeil(varselkode, id.filter())
         }
     }
 
@@ -87,57 +92,61 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         }
     }
 
-    internal fun assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
-        val info = collectInfo(*filtre)
+    internal fun assertInfo(forventet: String, filter: AktivitetsloggFilter) {
+        val info = collectInfo(filter)
         assertTrue(info.any { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
     }
 
-    internal fun assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
-        val info = collectInfo(*filtre)
+    internal fun assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) {
+        val info = collectInfo(filter)
         assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
     }
 
-    internal fun assertIngenInfoSomInneholder(forventet: String, vararg filtre: AktivitetsloggFilter) {
-        val info = collectInfo(*filtre)
+    internal fun assertIngenInfoSomInneholder(forventet: String, filter: AktivitetsloggFilter) {
+        val info = collectInfo(filter)
         assertEquals(0, info.count { it.contains(forventet) }, "fant uventet info. Info:\n${info.joinToString("\n")}")
     }
 
-    internal fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) {
-        val warnings = collectVarsler(*filtre)
+    internal fun assertIngenVarsler(filter: AktivitetsloggFilter) {
+        val warnings = collectVarsler(filter)
         assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
     }
 
-    internal fun assertVarsler(vararg filtre: AktivitetsloggFilter) {
-        assertTrue(collectVarsler(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
+    internal fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) {
+        val actualVarsler = collectVarselkoder(filter)
+        val result = varsler.filterNot { it in actualVarsler }
+        assertTrue(result.isEmpty()) {
+            "\nFant ikke forventet warning:\n\t${result.joinToString(separator = "\n\t")}\nWarnings funnet:\n\t${actualVarsler.joinToString("\n\t")}\n"
+        }
     }
 
-    internal fun assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
-        val warnings = collectVarsler(*filtre)
+    internal fun assertVarsel(warning: String, filter: AktivitetsloggFilter) {
+        val warnings = collectVarsler(filter)
         assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
 
-    internal fun assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) {
-        val varselkoder = collectVarselkoder(*filtre)
+    internal fun assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) {
+        val varselkoder = collectVarselkoder(filter)
         assertTrue(varselkoder.contains(kode), "\nFant ikke forventet varselkode:\n\t$kode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
     }
 
-    internal fun assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
-        val warnings = collectVarsler(*filtre)
+    internal fun assertIngenVarsel(warning: String, filter: AktivitetsloggFilter) {
+        val warnings = collectVarsler(filter)
         assertFalse(warnings.contains(warning), "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
 
-    internal fun assertIngenVarsel(warning: Varselkode, vararg filtre: AktivitetsloggFilter) {
-        val varselkoder = collectVarselkoder(*filtre)
+    internal fun assertIngenVarsel(warning: Varselkode, filter: AktivitetsloggFilter) {
+        val varselkoder = collectVarselkoder(filter)
         assertTrue(warning !in varselkoder, "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
     }
 
-    internal fun assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
-        val errors = collectFunksjonelleFeil(*filtre)
+    internal fun assertFunksjonellFeil(error: String, filter: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(filter)
         assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
 
-    internal fun assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
-        val errors = collectFunksjonelleFeil(*filtre)
+    internal fun assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(filter)
         assertTrue(errors.contains(varselkode.funksjonellFeilTekst), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
 
@@ -150,9 +159,9 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     }
 
     private fun funksjonelleFeilFørOgEtter(block: () -> Unit): Pair<Map<String, Int>, Map<String, Int>> {
-        val funksjonelleFeilFør = collectFunksjonelleFeil().groupBy { it }.mapValues { it.value.size }
+        val funksjonelleFeilFør = collectFunksjonelleFeil(AktivitetsloggFilter.Alle).groupBy { it }.mapValues { it.value.size }
         block()
-        val funksjonelleFeilEtter = collectFunksjonelleFeil().groupBy { it }.mapValues { it.value.size }
+        val funksjonelleFeilEtter = collectFunksjonelleFeil(AktivitetsloggFilter.Alle).groupBy { it }.mapValues { it.value.size }
         return funksjonelleFeilFør to funksjonelleFeilEtter
     }
 
@@ -166,49 +175,48 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         return før != etter
     }
 
-    internal fun assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
-        val errors = collectFunksjonelleFeil(*filtre)
+    internal fun assertFunksjonelleFeil(filter: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(filter)
         assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
     }
 
-
-    internal fun assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
-        val errors = collectFunksjonelleFeil(*filtre)
+    internal fun assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(filter)
         assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
     }
 
-    internal fun assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {
-        val severes = collectLogiskeFeil(*filtre)
+    internal fun assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) {
+        val severes = collectLogiskeFeil(filter)
         assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
     }
 
-    private fun collectInfo(vararg filtre: AktivitetsloggFilter): List<String> {
+    private fun collectInfo(filter: AktivitetsloggFilter): List<String> {
         return personInspektør.aktivitetslogg.info
-            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .filter { it.kontekster.any { filter.filtrer(it) } }
             .map { it.melding }
     }
 
-    private fun collectVarsler(vararg filtre: AktivitetsloggFilter): List<String> {
+    private fun collectVarsler(filter: AktivitetsloggFilter): List<String> {
         return personInspektør.aktivitetslogg.varsel
-            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .filter { it.kontekster.any { filter.filtrer(it) } }
             .map { it.melding }
     }
 
-    private fun collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
+    private fun collectVarselkoder(filter: AktivitetsloggFilter): List<Varselkode> {
         return personInspektør.aktivitetslogg.varsel
-            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .filter { it.kontekster.any { filter.filtrer(it) } }
             .map { it.kode }
     }
 
-    private fun collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): List<String> {
+    private fun collectFunksjonelleFeil(filter: AktivitetsloggFilter): List<String> {
         return personInspektør.aktivitetslogg.funksjonellFeil
-            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .filter { it.kontekster.any { filter.filtrer(it) } }
             .map { it.melding }
     }
 
-    private fun collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): List<String> {
+    private fun collectLogiskeFeil(filter: AktivitetsloggFilter): List<String> {
         return personInspektør.aktivitetslogg.logiskFeil
-            .filter { filtre.all { filter -> it.kontekster.any { filter.filtrer(it) } } }
+            .filter { it.kontekster.any { filter.filtrer(it) } }
             .map { it.melding }
     }
 }

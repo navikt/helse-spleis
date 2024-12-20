@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 
-
 internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
     assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato)?.sykepengegrunnlag)
 }
@@ -303,6 +302,7 @@ internal fun Aktivitetslogg.collectLogiskeFeil(vararg filtre: AktivitetsloggFilt
 
 internal fun interface AktivitetsloggFilter {
     companion object {
+        internal val Alle = AktivitetsloggFilter { true }
         internal fun UUID.filter() = vedtaksperiode(this)
 
         internal fun vedtaksperiode(vedtaksperiodeId: UUID): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->

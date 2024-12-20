@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.refusjon
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
@@ -46,6 +45,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.serde.tilPersonData
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
@@ -66,11 +66,13 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterInntektsmeldingPortal(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 vedtaksperiodeId = 1.vedtaksperiode,
-                refusjon = Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+                refusjon = Refusjon(
+                    INNTEKT, null, endringerIRefusjon = listOf(
                     Refusjon.EndringIRefusjon(INNTEKT * 0.7, 20.januar),
                     Refusjon.EndringIRefusjon(INNTEKT * 0.8, 20.januar),
                     Refusjon.EndringIRefusjon(INNTEKT * 0.9, 20.januar)
-                ))
+                )
+                )
             )
             val forventet = ARBEIDSGIVER.beløpstidslinje(1.januar til 19.januar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(20.januar til 31.januar, INNTEKT * 0.7)
             assertBeløpstidslinje(forventet, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
@@ -388,7 +390,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2)
-            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018")
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018", 1.vedtaksperiode.filter())
         }
     }
 
@@ -1049,7 +1051,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterSøknad(februar)
 
-            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018")
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018", 1.vedtaksperiode.filter())
 
             assertEquals(
                 INNTEKT,
@@ -1062,7 +1064,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `Inntektsmelding kommer før søknad`() {
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.mars, emptyList()))
-            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-01-2018 til 01-04-2018")
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-01-2018 til 01-04-2018", AktivitetsloggFilter.arbeidsgiver(a1))
         }
     }
 
