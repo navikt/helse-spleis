@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
-import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -14,6 +13,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
+import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -388,13 +388,13 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun kanAvvises(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Boolean>(
+    private fun kanAvvises(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<Boolean>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "kanAvvises"
     )!!
 
-    private fun omregnedeÅrsinntekter(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<List<Map<String, Any>>>(
+    private fun omregnedeÅrsinntekter(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<List<Map<String, Any>>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "omregnedeÅrsinntekter"
@@ -407,20 +407,20 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     private data class OmregnetÅrsinntektFraGodkjenningsbehov(val orgnummer: String, val beløp: Inntekt)
 
-    private fun vilkårsgrunnlagIdFraSisteGodkjenningsbehov(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<String>(
+    private fun vilkårsgrunnlagIdFraSisteGodkjenningsbehov(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<String>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "vilkårsgrunnlagId"
     )!!.let { UUID.fromString(it) }
 
     private fun vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(skjæringstidspunkt: LocalDate, orgnummer: String = a1) = inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.view().inspektør.vilkårsgrunnlagId
-    private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, Any>>(
+    private fun sykepengegrunnlag(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<Map<String, Any>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "sykepengegrunnlagsfakta"
     )!!["sykepengegrunnlag"]
 
-    private fun inntektskilder(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.etterspurtBehov<Map<String, List<Map<String, Any>>>>(
+    private fun inntektskilder(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<Map<String, List<Map<String, Any>>>>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "sykepengegrunnlagsfakta"

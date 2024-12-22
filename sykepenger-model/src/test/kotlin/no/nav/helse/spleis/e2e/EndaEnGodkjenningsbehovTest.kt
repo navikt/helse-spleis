@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.august
-import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -13,6 +12,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -631,10 +631,9 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     private inline fun <reified T> hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1), feltNavn: String) =
-        hendelselogg.etterspurtBehov<T>(
+        hendelselogg.hentFeltFraBehov<T>(
             vedtaksperiodeId = vedtaksperiodeId,
             behov = Aktivitet.Behov.Behovtype.Godkjenning,
             felt = feltNavn
         )
-
 }

@@ -27,12 +27,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.UtbetalingInntektskilde
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.september
-import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -541,32 +538,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `Inntektskilde i godkjenningsbehov for en arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020)))
-        håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        assertEquals(UtbetalingInntektskilde.EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
-        assertEquals("EN_ARBEIDSGIVER", inspiser(personInspektør).aktivitetslogg.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
-    }
-
-    @Test
-    fun `sender med skjæringstidspunkt på godkjenningsbehov`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        val godkjenningsbehov = inspiser(personInspektør).aktivitetslogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
-        assertEquals(1.januar.toString(), godkjenningsbehov.detaljer()["skjæringstidspunkt"])
     }
 
     @Test

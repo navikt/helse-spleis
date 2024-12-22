@@ -25,6 +25,7 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
@@ -106,7 +107,13 @@ internal abstract class AbstractDslTest {
     protected val String.inspektør get() = inspektør(this)
     protected val inspektør: TestArbeidsgiverInspektør get() = bareÈnArbeidsgiver(a1).inspektør
 
-    private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør), assertetVarsler)
+    private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter
+        get() = TestArbeidsgiverAssertions(
+            observatør = observatør,
+            inspektør = inspektør,
+            personInspektør = testperson.inspiser(personInspektør),
+            aktivitetsloggAsserts = AktivitetsloggAsserts(testperson.person.personLogg, assertetVarsler)
+        )
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
     protected fun personView() = testperson.view()
     protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)

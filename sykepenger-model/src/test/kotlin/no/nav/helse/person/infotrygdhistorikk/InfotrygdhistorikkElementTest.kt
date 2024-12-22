@@ -15,7 +15,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
@@ -213,7 +213,7 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf("01" to 1.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
         assertTrue(element.valider(aktivitetslogg, Periode(6.januar, 23.januar), "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
+        aktivitetslogg.assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -231,7 +231,7 @@ internal class InfotrygdhistorikkElementTest {
             arbeidskategorikoder = arbeidskategorikoder
         )
         assertTrue(element.valider(aktivitetslogg, 26.januar.somPeriode(), "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
+        aktivitetslogg.assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -239,14 +239,14 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf("01" to 1.januar, "01" to 6.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
         assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
+        aktivitetslogg.assertIngenFunksjonelleFeil()
     }
 
     @Test
     fun `validering skal ikke feile når utbetalingshistorikken er tom`() {
         val element = nyttHistorikkelement()
         assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
+        aktivitetslogg.assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -527,6 +527,4 @@ internal class InfotrygdhistorikkElementTest {
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder
         )
-
-
 }

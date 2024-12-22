@@ -15,7 +15,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -213,7 +213,7 @@ internal class InntektsmeldingTest {
         val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje()
         dager.validerArbeidsgiverperiode(aktivitetslogg, januar, null)
         aktivitetslogg.assertIngenVarsler()
-        aktivitetslogg.assertIngenFunksjonellFeil()
+        aktivitetslogg.assertIngenFunksjonelleFeil()
         assertNull(nyTidslinje)
     }
 
@@ -274,7 +274,7 @@ internal class InntektsmeldingTest {
     fun `arbeidgiverperioden kan ha overlappende perioder`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)))
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 6.januar, null)
-        aktivitetslogg.assertIngenFunksjonellFeil()
+        aktivitetslogg.assertIngenFunksjonelleFeil()
     }
 
     @Test

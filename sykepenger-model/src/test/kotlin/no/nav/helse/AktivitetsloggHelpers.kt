@@ -15,12 +15,6 @@ internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhen
 internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
     etterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer))
 
-internal fun Aktivitetslogg.sisteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
-    behov.last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeIdInnhenter.id(orgnummer).toString() }
-
-internal fun Aktivitetslogg.sisteBehov(vedtaksperiodeId: UUID) =
-    behov.last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString() }
-
 internal fun Aktivitetslogg.sisteBehov(type: Aktivitet.Behov.Behovtype) =
     behov.last { it.type == type }
 
@@ -38,17 +32,12 @@ internal fun Aktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, behov
     }.any { it.type == behov }
 
 internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =
-    this.behov.filter {
-        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+    behov.filter {
+        it.kontekster.any {
+            it.kontekstType == "Vedtaksperiode" && it.kontekstMap["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+        }
     }
 
-internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype) =
-    this.behov.filter {
-        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
-    }.filter { it.type == behov }.size == 1
-
-inline fun <reified T> Aktivitetslogg.etterspurtBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype, felt: String): T? {
-    return this.behov
-        .filter { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString() }
-        .last { it.type == behov }.detaljer()[felt] as T?
+internal inline fun <reified T> Aktivitetslogg.hentFeltFraBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype, felt: String): T? {
+    return etterspurteBehov(vedtaksperiodeId).last { it.type == behov }.detaljer[felt] as T?
 }
