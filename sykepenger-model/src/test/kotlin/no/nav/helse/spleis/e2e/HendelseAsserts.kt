@@ -152,30 +152,53 @@ internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer:
     assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
 }
 
-internal fun AbstractPersonTest.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertInfo(forventet, filter)
-internal fun AbstractPersonTest.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenInfo(forventet, filter)
-internal fun AbstractPersonTest.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenVarsler(filter)
-internal fun AbstractPersonTest.assertHarVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertHarVarsler(filter)
-internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter) = person.personLogg.assertVarsel(varsel, filter)
-internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenVarsel(varselkode, filter)
-internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertFunksjonellFeil(varselkode, filter)
-internal fun AbstractPersonTest.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = person.personLogg.assertFunksjonelleFeil(filter)
-internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonellFeil(varselkode, filter)
-internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonelleFeil(filter)
-internal fun AbstractPersonTest.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = person.personLogg.assertLogiskFeil(severe, filter)
+internal fun AbstractPersonTest.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertInfo(forventet, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenInfo(forventet, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenVarsler(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertHarVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertHarVarsler(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter) = person.personLogg.assertVarsel(varsel, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenVarsel(varselkode, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertFunksjonellFeil(varselkode, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = person.personLogg.assertFunksjonelleFeil(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonellFeil(varselkode, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonelleFeil(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = person.personLogg.assertLogiskFeil(severe, filter, assertetVarsler)
 
-internal fun Aktivitetslogg.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertInfo(forventet, filter)
-internal fun Aktivitetslogg.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertIngenInfo(forventet, filter)
-internal fun Aktivitetslogg.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertIngenVarsler(filter)
-internal fun Aktivitetslogg.assertHarVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertHarVarsler(filter)
-internal fun Aktivitetslogg.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertVarsel(varsel, filter)
-internal fun Aktivitetslogg.assertIngenVarsel(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertIngenVarsel(varselkode, filter)
-internal fun Aktivitetslogg.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertFunksjonellFeil(varselkode, filter)
-internal fun Aktivitetslogg.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertFunksjonelleFeil(filter)
-internal fun Aktivitetslogg.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertIngenFunksjonellFeil(varselkode, filter)
-internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertIngenFunksjonelleFeil(filter)
-internal fun Aktivitetslogg.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertLogiskFeil(severe, filter)
-internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = ORGNUMMER, forventetTag: String) = AktivitetsloggAsserts(this, Varslersamler.AssertetVarsler()).assertHarTag(vedtaksperiode.id(orgnummer), forventetTag)
+internal fun Aktivitetslogg.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertInfo(forventet, filter)
+
+internal fun Aktivitetslogg.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertIngenInfo(forventet, filter)
+
+internal fun Aktivitetslogg.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertIngenVarsler(filter)
+
+internal fun Aktivitetslogg.assertHarVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertHarVarsler(filter)
+
+internal fun Aktivitetslogg.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertVarsel(varsel, filter)
+
+internal fun Aktivitetslogg.assertIngenVarsel(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertIngenVarsel(varselkode, filter)
+
+internal fun Aktivitetslogg.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertFunksjonellFeil(varselkode, filter)
+
+internal fun Aktivitetslogg.assertFunksjonelleFeil(filter: AktivitetsloggFilter, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertFunksjonelleFeil(filter)
+
+internal fun Aktivitetslogg.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertIngenFunksjonellFeil(varselkode, filter)
+
+internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertIngenFunksjonelleFeil(filter)
+
+internal fun Aktivitetslogg.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertLogiskFeil(severe, filter)
+
+internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = ORGNUMMER, forventetTag: String, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertHarTag(vedtaksperiode.id(orgnummer), forventetTag)
 
 internal fun interface AktivitetsloggFilter {
     companion object {

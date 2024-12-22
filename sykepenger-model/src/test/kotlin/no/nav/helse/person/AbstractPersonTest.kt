@@ -10,12 +10,14 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
+import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -27,6 +29,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractPersonTest {
@@ -79,6 +82,7 @@ internal abstract class AbstractPersonTest {
         }
     }
 
+    internal val assertetVarsler = Varslersamler.AssertetVarsler()
     lateinit var person: Person
     lateinit var observatør: TestObservatør
     lateinit var jurist: SubsumsjonsListLog
@@ -91,6 +95,13 @@ internal abstract class AbstractPersonTest {
     @BeforeEach
     internal fun createTestPerson() {
         createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO)
+    }
+
+    @AfterEach
+    fun alleVarslerAssertet() {
+        val varslersamler = Varslersamler()
+        varslersamler.registrerVarsler(person.personLogg.varsel)
+        // varslersamler.bekreftVarslerAssertet(assertetVarsler)
     }
 
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
