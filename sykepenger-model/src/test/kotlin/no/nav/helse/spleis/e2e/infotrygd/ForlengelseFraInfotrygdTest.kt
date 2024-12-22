@@ -12,6 +12,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -105,6 +106,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     private fun assertForlengerInfotrygdperiode() {
-        assertFunksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
+        assertFunksjonellFeil(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
     }
 }

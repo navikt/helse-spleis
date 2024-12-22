@@ -10,6 +10,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -85,7 +86,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         // oppretter forlengelse fom 182 dager etter maksdato
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
-        assertFunksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato", siste.filter())
+        assertFunksjonellFeil(Varselkode.RV_VV_9, siste.filter())
         assertSisteTilstand(siste, TIL_INFOTRYGD) {
             "Disse periodene skal kastes ut pr nå"
         }

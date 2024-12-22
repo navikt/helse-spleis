@@ -504,7 +504,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertIngenVarsel(RV_IM_8)
-        assertVarsel(RV_IM_25)
+        assertVarsel(RV_IM_25, 2.vedtaksperiode.filter())
 
         håndterOverstyrTidslinje((1..31).map {
             ManuellOverskrivingDag(

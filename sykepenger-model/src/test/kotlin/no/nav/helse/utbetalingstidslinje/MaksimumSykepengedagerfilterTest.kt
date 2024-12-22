@@ -17,6 +17,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.plus
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
@@ -687,7 +688,7 @@ internal class MaksimumSykepengedagerfilterTest {
         utbetalingstidslinjeInspektør.avvistedatoer.dropLast(1).forEach { dato ->
             assertEquals(listOf(SykepengedagerOppbrukt), utbetalingstidslinjeInspektør.begrunnelse(dato))
         }
-        aktivitetslogg.assertFunksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato")
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_VV_9)
         assertEquals(listOf(NyVilkårsprøvingNødvendig), utbetalingstidslinjeInspektør.begrunnelse(utbetalingstidslinjeInspektør.avvistedatoer.last()))
     }
 

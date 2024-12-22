@@ -124,7 +124,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         håndterSøknad(Sykdom(1.januar(2023), 31.januar(2023), 100.prosent))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertVarsel(RV_IT_3)
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVVENTER_BLOKKERENDE_PERIODE")

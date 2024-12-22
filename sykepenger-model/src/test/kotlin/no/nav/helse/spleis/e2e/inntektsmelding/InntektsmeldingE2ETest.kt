@@ -41,7 +41,6 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -59,6 +58,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -641,7 +641,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             harFlereInntektsmeldinger = true
         )
-        assertVarsel(RV_IM_22)
+        assertVarsel(RV_IM_22, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
@@ -1106,7 +1106,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
         assertNull(inspektør.vilkårsgrunnlag(1.januar))
-        assertVarsel(RV_IM_3)
+        assertVarsel(RV_IM_3, 5.vedtaksperiode.filter())
     }
 
     @Test
@@ -2208,7 +2208,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre", 1.vedtaksperiode.filter())
-        assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 

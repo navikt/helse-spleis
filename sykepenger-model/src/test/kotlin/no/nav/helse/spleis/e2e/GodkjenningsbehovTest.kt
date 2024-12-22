@@ -319,7 +319,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3)
             )
             håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode)
-            assertVarsel(RV_IV_10)
+            assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

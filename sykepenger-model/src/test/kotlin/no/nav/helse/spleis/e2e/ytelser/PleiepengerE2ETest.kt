@@ -75,7 +75,7 @@ internal class PleiepengerE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(GradertPeriode(januar, 100)))
-        assertVarsel(Varselkode.RV_AY_6)
+        assertVarsel(Varselkode.RV_AY_6, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -108,10 +108,9 @@ internal class PleiepengerE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.mars til 18.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
-        assertVarsel(Varselkode.RV_AY_6)
+        assertVarsel(Varselkode.RV_AY_6, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
-
 
     @Test
     fun `Pleiepenger starter mer enn 4 uker før sykefraværstilfellet`() {

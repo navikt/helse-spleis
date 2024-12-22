@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -22,7 +23,6 @@ import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -227,7 +227,7 @@ internal class InntektsmeldingTest {
         val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje()
         dager.valider(aktivitetslogg, januar)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
-        aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
         assertNull(nyTidslinje)
     }
 
@@ -310,7 +310,7 @@ internal class InntektsmeldingTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
         dager.valider(aktivitetslogg, 1.januar til 12.januar)
-        aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }
 

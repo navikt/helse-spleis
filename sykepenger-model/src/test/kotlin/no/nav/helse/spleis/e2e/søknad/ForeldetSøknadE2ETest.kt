@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -22,7 +21,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -46,7 +44,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     fun `forledet søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
-        assertVarsel(RV_SØ_2)
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
     }
 
@@ -55,7 +53,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        assertVarsel(RV_SØ_2)
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning()
@@ -124,7 +122,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), mottatt = 1.februar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2019))
-        assertVarsel(RV_SØ_2)
+        assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
@@ -234,17 +232,5 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-    }
-
-    @Test
-    fun `skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 3.mai)
-
-        assertForventetFeil(
-            forklaring = "Skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden",
-            nå = { assertVarsel(RV_SØ_2) },
-            ønsket = { assertIngenVarsel(RV_SØ_2) }
-        )
     }
 }

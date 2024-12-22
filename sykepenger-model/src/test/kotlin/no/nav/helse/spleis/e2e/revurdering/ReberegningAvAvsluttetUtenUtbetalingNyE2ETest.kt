@@ -239,7 +239,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertVarsel(RV_IT_3)
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -265,7 +265,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertVarsel(RV_IT_3)
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
     }
 
     @Test

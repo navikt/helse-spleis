@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
@@ -80,7 +81,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(Varselkode.RV_SØ_13, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -240,7 +241,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(7.juni til 28.juni)
         håndterSøknad(27.mai til 15.juni)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(Varselkode.RV_SØ_13, 1.vedtaksperiode.filter())
         nyPeriode(16.juni til 16.juli)
         assertEquals(7.juni til 28.juni, inspektør.periode(1.vedtaksperiode))
         assertEquals(27.mai til 15.juni, inspektør.periode(2.vedtaksperiode))

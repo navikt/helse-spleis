@@ -81,7 +81,7 @@ internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(31.januar til 14.februar, 100)))
-        assertVarsel(Varselkode.RV_AY_7)
+        assertVarsel(Varselkode.RV_AY_7, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -92,7 +92,7 @@ internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.mars til 18.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
-        assertVarsel(Varselkode.RV_AY_7)
+        assertVarsel(Varselkode.RV_AY_7, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 }

@@ -320,7 +320,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
-        assertVarsel(RV_AY_11)
+        assertVarsel(RV_AY_11, 1.vedtaksperiode.filter())
     }
 
     @Test

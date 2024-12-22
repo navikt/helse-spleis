@@ -89,7 +89,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         // utbetalingen endres -ikke- fordi det fremdeles lages agp-dager for februar, siden 1.vedtaksperiode ikke åpnes opp
-        assertIngenVarsel(Varselkode.RV_OS_2)
+        assertIngenVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
         inspektør.utbetaling(1).also { utbetalinginspektør ->
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
             assertEquals(17.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
@@ -123,7 +123,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSøknad(10.januar til 26.januar)
         assertEquals(listOf(31.januar, 10.januar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
-        assertVarsel(Varselkode.RV_IV_11)
+        assertVarsel(Varselkode.RV_IV_11, 2.vedtaksperiode.filter())
 
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[4.januar])
@@ -171,7 +171,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
-
 
     @Test
     fun `korrigert arbeidsgiverperiode under pågående revurdering`() {

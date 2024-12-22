@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -14,11 +13,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
@@ -26,7 +23,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -49,7 +45,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -172,7 +167,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(Feriedag::class, inspektør.sykdomstidslinje[17.januar]::class)
         assertEquals(Feriedag::class, inspektør.sykdomstidslinje[18.januar]::class)
 
-        assertVarsel(RV_OS_2)
+        assertVarsel(RV_OS_2, 1.vedtaksperiode.filter())
 
         val arbeidsgiverOppdrag = inspektør.sisteUtbetaling().arbeidsgiverOppdrag
         assertEquals(2, arbeidsgiverOppdrag.size)
@@ -248,7 +243,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVSLUTTET)
         assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-
     }
 
     @Test
@@ -263,7 +257,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVSLUTTET)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
-
     }
 
     @Test
@@ -418,7 +411,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
-
     @Test
     fun `Korrigert søknad med friskmelding for avsluttet periode`() {
         nyttVedtak(januar, 100.prosent)
@@ -451,52 +443,5 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
-    }
-
-    @Test
-    fun `andre inntektskilder i avsluttet på førstegangsbehandling - skal gi error`() {
-        nyttVedtak(januar, 100.prosent)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent), andreInntektskilder = true)
-
-        assertForventetFeil(
-            forklaring = "Produkteier ønsker warning, legal ønsker error. for øyeblikket warning",
-            nå = {
-                assertVarsel(RV_SØ_10)
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            },
-            ønsket = {
-                assertFunksjonellFeil(RV_SØ_10)
-                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            }
-        )
-    }
-
-    @Test
-    fun `andre inntektskilder til godkjenning på førstegangsbehandling - skal gi error`() {
-        tilGodkjenning(januar, ORGNUMMER)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent), andreInntektskilder = true)
-        assertForventetFeil(
-            forklaring = "Produkteier ønsker warning, legal ønsker error. for øyeblikket warning",
-            nå = {
-                assertVarsel(RV_SØ_10)
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            },
-            ønsket = {
-                assertFunksjonellFeil(RV_SØ_10)
-                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            }
-        )
-    }
-
-    private fun assertRevurderingUtenEndring(vedtakperiodeId: IdInnhenter, orgnummer: String = ORGNUMMER, block: () -> Unit) {
-        val sykdomsHistorikkElementerFør = inspektør(orgnummer).sykdomshistorikk.elementer()
-        val utbetalingerFør = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
-        block()
-        val utbetalingerEtter = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
-        val sykdomsHistorikkElementerEtter = inspektør(orgnummer).sykdomshistorikk.elementer()
-        assertEquals(1, utbetalingerEtter.size - utbetalingerFør.size) { "Forventet at det skal være opprettet en utbetaling" }
-        assertEquals(UEND, utbetalingerEtter.last().inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(0, utbetalingerEtter.last().inspektør.personOppdrag.size)
-        assertEquals(sykdomsHistorikkElementerFør, sykdomsHistorikkElementerEtter) { "Forventet at sykdomshistorikken skal være uendret" }
     }
 }

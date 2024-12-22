@@ -40,7 +40,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertEquals(11, avvistedager.size)
         assertTrue(avvistedager.all { it.begrunnelser == listOf(Begrunnelse.MinimumSykdomsgrad) })
-        assertVarsel(Varselkode.RV_VV_4)
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
         håndterYtelser(1.vedtaksperiode)

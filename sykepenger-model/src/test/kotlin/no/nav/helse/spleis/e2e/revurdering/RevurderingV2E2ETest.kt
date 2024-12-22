@@ -1011,7 +1011,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 10.januar, 100)))
 
-        assertVarsel(RV_AY_5)
+        assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
     }
 

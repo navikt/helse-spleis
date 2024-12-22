@@ -53,7 +53,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertVarsel(RV_IM_4)
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
@@ -61,7 +61,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
-        assertVarsel(RV_IM_24)
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
@@ -74,7 +74,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList())
         )
 
-        assertVarsel(RV_IM_4)
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
     }
 
     @Test
