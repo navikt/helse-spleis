@@ -64,6 +64,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.september
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -2769,6 +2770,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
 
         val forventetInput = mapOf(
             "sykdomstidslinje" to listOf(
@@ -2827,6 +2829,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         val forventetInput = mapOf(
             "sykdomstidslinje" to listOf(
                 mapOf("fom" to 1.januar, "tom" to 23.januar, "dagtype" to "SYKEDAG", "grad" to 100),

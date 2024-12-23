@@ -190,6 +190,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
@@ -212,6 +214,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
     }

@@ -9,10 +9,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertUtbetalingsdag
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -41,6 +43,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG1))
 
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
@@ -87,6 +90,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG1))
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
@@ -126,6 +130,8 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG1))
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG2))
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
         inspektør(AG1) {
@@ -158,6 +164,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG1))
 
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
 
@@ -192,6 +199,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG1))
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalt(orgnummer = AG1)
@@ -224,6 +232,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = AG1))
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalt(orgnummer = AG1)

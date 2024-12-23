@@ -20,6 +20,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -264,6 +265,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val overstyringId = UUID.randomUUID()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)

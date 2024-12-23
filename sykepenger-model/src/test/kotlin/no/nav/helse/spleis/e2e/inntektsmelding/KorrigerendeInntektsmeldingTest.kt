@@ -15,14 +15,17 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -149,7 +152,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje[1.januar] is Utbetalingsdag.Arbeidsdag)
         assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
@@ -202,7 +207,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
-        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -262,7 +267,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
-        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
 
         val utbetalingFebruar = inspektør.utbetaling(2)
 
@@ -311,7 +316,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
-        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertEquals(INNTEKT * 1.1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.omregnetÅrsinntekt)
     }
 
@@ -352,7 +357,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, RV_UT_23), 2.vedtaksperiode.filter())
     }
 
     @Test

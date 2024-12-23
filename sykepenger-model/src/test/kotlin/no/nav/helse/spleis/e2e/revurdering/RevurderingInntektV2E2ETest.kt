@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -96,7 +97,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
     }
 
-
     @Test
     fun `skal kunne overstyre inntekt i utkast til revurdering`() {
         nyttVedtak(januar)
@@ -106,6 +106,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertDiff(-5588)
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
@@ -146,6 +147,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertDiff(-5588)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -170,6 +172,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
@@ -197,6 +200,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
@@ -228,6 +232,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(
             dato = 22.januar,
@@ -276,6 +281,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTrue(inspektør.utbetaling(0).erUtbetalt)
         assertTrue(inspektør.utbetaling(1).erUbetalt)
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
@@ -418,6 +424,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
@@ -443,6 +450,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
@@ -521,6 +529,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 30000.månedlig)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -561,6 +570,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
@@ -620,6 +630,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
@@ -644,6 +655,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
@@ -683,7 +695,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
     }
 
-
     @Test
     fun `refusjonsopplysninger er uendret etter revurdert inntekt`() {
         nyttVedtak(januar)
@@ -692,7 +703,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         val refusjonsopplysningerEtterRevurdering = inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
         assertEquals(refusjonsopplysningerFørRevurdering, refusjonsopplysningerEtterRevurdering)
     }
-
 
     private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
         inspektør.sykdomshistorikk.tidslinje(0)[dato].let {

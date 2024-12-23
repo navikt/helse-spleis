@@ -28,6 +28,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -265,6 +266,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
@@ -281,6 +283,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         forkastAlle()
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
@@ -298,6 +301,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         forkastAlle()
@@ -316,6 +320,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)

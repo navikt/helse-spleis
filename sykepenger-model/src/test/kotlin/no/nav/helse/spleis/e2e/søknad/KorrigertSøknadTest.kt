@@ -27,6 +27,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -36,6 +37,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -66,6 +68,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }

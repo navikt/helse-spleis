@@ -179,6 +179,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter(orgnummer = a2))
         assertTrue(observatør.inntektsmeldingHåndtert.contains(selvbestemtIm to 2.vedtaksperiode.id(a2)))
     }
 
@@ -364,6 +365,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertEquals(setOf(1.januar, 26.januar), inspektør.vilkårsgrunnlaghistorikk().aktiveSpleisSkjæringstidspunkt)
     }
@@ -2462,6 +2465,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.mars
         )
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
     }
 

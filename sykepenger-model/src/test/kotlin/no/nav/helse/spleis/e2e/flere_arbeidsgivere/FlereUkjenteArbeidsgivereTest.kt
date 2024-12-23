@@ -73,6 +73,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
+
         val im2 = håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             beregnetInntekt = inntektA2,

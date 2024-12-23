@@ -156,6 +156,7 @@ internal fun AbstractPersonTest.assertInfo(forventet: String, filter: Aktivitets
 internal fun AbstractPersonTest.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenInfo(forventet, filter, assertetVarsler)
 internal fun AbstractPersonTest.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenVarsler(filter, assertetVarsler)
 internal fun AbstractPersonTest.assertHarVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertHarVarsler(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertVarsler(varsel: List<Varselkode>, filter: AktivitetsloggFilter) = person.personLogg.assertVarsler(varsel, filter, assertetVarsler)
 internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter) = person.personLogg.assertVarsel(varsel, filter, assertetVarsler)
 internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenVarsel(varselkode, filter, assertetVarsler)
 internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertFunksjonellFeil(varselkode, filter, assertetVarsler)
@@ -175,6 +176,9 @@ internal fun Aktivitetslogg.assertIngenVarsler(filter: AktivitetsloggFilter = Ak
 
 internal fun Aktivitetslogg.assertHarVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertHarVarsler(filter)
+
+internal fun Aktivitetslogg.assertVarsler(varsel: List<Varselkode>, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertVarsler(varsel, filter)
 
 internal fun Aktivitetslogg.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertVarsel(varsel, filter)

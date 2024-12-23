@@ -12,9 +12,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -46,6 +48,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje((28.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellSykedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -76,6 +79,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
@@ -97,6 +101,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
 
         // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
@@ -142,6 +147,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(48000.årlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
 
         håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar)
@@ -165,6 +171,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(38773, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
@@ -186,11 +193,13 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje((28.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) })
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -218,12 +227,14 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((28.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
 
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) })
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -250,10 +261,12 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(2.vedtaksperiode)
 
         håndterOverstyrTidslinje((29.januar til 30.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

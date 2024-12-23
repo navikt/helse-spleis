@@ -32,6 +32,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -132,6 +133,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(21.februar, opphørslinje.inspektør.datoStatusFom)
         assertEquals("OPPH", opphørslinje.inspektør.statuskode)
         assertEquals(-4293, utbetalingenSomTrekkerPenger.nettobeløp)
+
+        assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
 
         // Det kommer en forlengelse som skal lage en ny utbetaling som hekter seg på forrige utbetaling
         nullstillTilstandsendringer()

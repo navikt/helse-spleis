@@ -37,6 +37,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -44,6 +45,7 @@ import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
@@ -566,6 +568,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
 
         // Denne overstyringen kommer før den forrige er ferdig prossessert
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
@@ -583,6 +586,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
 
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
@@ -636,6 +640,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((20.januar til 31.januar).map { manuellForeldrepengedag(it) })
         assertEquals("SSSSSHH SSSSSHH SSSSSYY YYYYYYY YYY", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør
         assertEquals(12, utbetalingstidslinje.avvistDagTeller)
@@ -667,6 +672,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

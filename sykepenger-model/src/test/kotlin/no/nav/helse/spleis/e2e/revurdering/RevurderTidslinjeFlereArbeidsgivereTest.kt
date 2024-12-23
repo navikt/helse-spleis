@@ -23,11 +23,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -107,6 +109,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
@@ -161,7 +164,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -192,6 +195,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((17.januar til 21.januar).map { ManuellOverskrivingDag(it, Feriedag) }, orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -215,5 +219,4 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     private fun assertPeriode(periode: Periode, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN) =
         periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
-
 }

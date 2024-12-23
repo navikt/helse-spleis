@@ -42,6 +42,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -55,6 +56,7 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertHarVarsler
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
@@ -239,6 +241,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100)))
+
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.SykHelgedag)
         assertTrue(inspektør.sykdomstidslinje[28.januar] is Dag.SykHelgedag)
         assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -346,11 +350,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             opplæringspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100))
         )
-        assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
-        assertVarsel(RV_AY_6, 1.vedtaksperiode.filter())
-        assertVarsel(RV_AY_7, 1.vedtaksperiode.filter())
-        assertVarsel(RV_AY_8, 1.vedtaksperiode.filter())
-        assertVarsel(RV_AY_11, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_AY_5, RV_AY_6, RV_AY_7, RV_AY_8, RV_AY_11, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -535,6 +535,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((20..31).map { ManuellOverskrivingDag(it.januar, Dagtype.Pleiepengerdag) }, orgnummer = a1)
         håndterOverstyrTidslinje((20..31).map { ManuellOverskrivingDag(it.januar, Dagtype.Pleiepengerdag) }, orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -609,6 +611,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
+
+        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
 
         nyPeriode(mars)
         assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))

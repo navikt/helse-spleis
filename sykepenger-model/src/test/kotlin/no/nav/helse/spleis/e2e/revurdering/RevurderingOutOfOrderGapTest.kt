@@ -40,6 +40,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
@@ -152,6 +153,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
         nyPeriode(januar)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
     }
@@ -564,6 +566,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
@@ -981,6 +984,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         //Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         assertEquals(0, inspektør.sisteMaksdato(3.vedtaksperiode).gjenståendeDager)
         assertEquals(0, inspektør.utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
         assertEquals(6, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistDagTeller)

@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -68,6 +69,8 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTrue(inspektør.sykdomstidslinje[17.januar] is Feriedag)
         assertTrue(inspektør.sykdomstidslinje[18.januar] is Feriedag)
         assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is Fridag)
@@ -139,6 +142,8 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertEquals(januar, inspektør.sykdomstidslinje.periode())
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         (1..16).forEach {
             assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
         }
@@ -160,6 +165,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -283,6 +289,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(22.januar, 26.januar))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -308,6 +315,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(22.januar, 26.januar))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -335,6 +343,8 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
         (17..21).forEach {
@@ -358,12 +368,14 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent, 50.prosent))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -417,6 +429,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
 
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
         assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
@@ -440,6 +453,8 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)

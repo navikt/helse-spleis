@@ -27,6 +27,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -56,6 +57,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
         håndterUtbetalt()
@@ -95,6 +97,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
                 listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
         )
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -413,7 +416,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         assertTrue(inspektør.sisteUtbetaling().erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
-        assertEquals(2,
+        assertEquals(
+            2,
             person.personLogg.behov
                 .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
                 .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }

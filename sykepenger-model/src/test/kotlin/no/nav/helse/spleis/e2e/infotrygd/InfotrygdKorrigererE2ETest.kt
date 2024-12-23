@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -32,6 +33,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -79,6 +81,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 28.februar))
@@ -92,6 +95,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
         håndterYtelser()
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
 
@@ -105,6 +109,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -133,7 +138,6 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             assertEquals(31.mai, it.arbeidsgiverOppdrag[0].inspektør.tom)
         }
     }
-
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
         gjenopprettFraJSON("/personer/dobbelutbetaling.json", jurist)

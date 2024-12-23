@@ -16,6 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -26,6 +27,7 @@ import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
@@ -69,6 +71,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -236,6 +240,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
         val førsteUtbetaling = inspektør.utbetaling(0)
         val revurdering = inspektør.utbetaling(3)
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
@@ -312,6 +317,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
 
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -368,6 +374,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         // a1
@@ -472,6 +479,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertEquals(a1ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningIInntektsgrunnlaget(1.januar, a1))
@@ -573,6 +581,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertEquals(2, inspektør(a1).antallUtbetalinger)
         assertEquals(2, inspektør(a2).antallUtbetalinger)
@@ -704,6 +714,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertEquals(a1ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningIInntektsgrunnlaget(1.januar, a1))
