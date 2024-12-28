@@ -12,6 +12,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -250,6 +251,8 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         ).metadata.meldingsreferanseId
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
             korrigertInntektsmeldingId = korrigertInntektsmeldingId,
             korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,

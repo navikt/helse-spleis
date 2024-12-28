@@ -264,10 +264,12 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
+
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
-        assertVarsler(listOf(RV_IM_24, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
         val utbetalingFebruar = inspektør.utbetaling(2)
 

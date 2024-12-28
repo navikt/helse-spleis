@@ -244,7 +244,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100)))
 
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IV_7, RV_UT_23), 1.vedtaksperiode.filter())
         assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.SykHelgedag)
         assertTrue(inspektør.sykdomstidslinje[28.januar] is Dag.SykHelgedag)
         assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
