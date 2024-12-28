@@ -182,6 +182,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!"
         )
+        assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

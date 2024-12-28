@@ -632,6 +632,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         }
         val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetaling(1).arbeidsgiverOppdrag[0].fom
         assertEquals(17.januar, førsteUtbetalingsdagEtterOverstyring)
+        assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
     }
 
     @Test

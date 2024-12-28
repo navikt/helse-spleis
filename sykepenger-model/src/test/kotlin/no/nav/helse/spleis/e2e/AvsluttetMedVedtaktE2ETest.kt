@@ -21,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -225,6 +226,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val overstyringId = UUID.randomUUID()
         håndterOverstyrTidslinje(liste, meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         val utbetaling = inspektør.utbetaling(0)
         assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
