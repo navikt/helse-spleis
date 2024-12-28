@@ -13,11 +13,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
@@ -101,6 +103,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(januar)
 
+        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET, TilstandType.AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
@@ -126,5 +129,4 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size) // fra førstegangsbehandling, korrigert IM, skjønnsmessig fastsatt & periode out-of-order på nytt skjæringstidspunkt
     }
-
 }

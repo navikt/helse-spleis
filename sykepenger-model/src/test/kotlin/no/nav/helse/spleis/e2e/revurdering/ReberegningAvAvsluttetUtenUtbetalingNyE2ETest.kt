@@ -96,6 +96,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(10.januar til 25.januar)
         )
         håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
+
+        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }

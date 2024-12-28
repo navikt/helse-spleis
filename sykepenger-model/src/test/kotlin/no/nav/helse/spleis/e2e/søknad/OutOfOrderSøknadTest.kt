@@ -49,6 +49,8 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
     fun `Out of order AUUer- skal beholde perioden som kom først som låst i tillegg til den nye`() {
         håndterSøknad(Sykdom(9.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
+
+        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertEquals(listOf(1.januar til 8.januar, 9.januar til 16.januar), inspektør.sykdomstidslinje.inspektør.låstePerioder)
     }
 

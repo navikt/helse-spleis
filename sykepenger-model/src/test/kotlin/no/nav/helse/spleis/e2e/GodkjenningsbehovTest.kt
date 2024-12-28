@@ -33,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -268,18 +269,26 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `kan avvise en out of order rett i forkant av en utbetalt periode`() {
         nyttVedtak(februar)
         håndterSøknad(januar)
+
+        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
+
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(kanAvvises(2.vedtaksperiode))
+
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+
         assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
+
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFalse(kanAvvises(1.vedtaksperiode))
     }
@@ -288,8 +297,11 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `kan avvise en out of order selv om noe er utbetalt senere på annen agp`() {
         nyttVedtak(mars)
         håndterSøknad(januar)
+
+        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
@@ -297,14 +309,20 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
+
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(kanAvvises(2.vedtaksperiode))
+
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+
         assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterYtelser(1.vedtaksperiode)
+
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFalse(kanAvvises(1.vedtaksperiode))
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
     }

@@ -180,6 +180,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(februar)
 
+        assertVarsel(Varselkode.RV_OO_1, 5.vedtaksperiode.filter())
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
         assertTilstand(4.vedtaksperiode, AVVENTER_REVURDERING)
