@@ -60,6 +60,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter(orgnummer = a2))
         val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
         assertEquals(listOf(Inntektskilde.Arbeidsgiver, Inntektskilde.AOrdningen), inntektskilder)
     }
@@ -84,6 +86,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
         val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
         assertEquals(listOf(Inntektskilde.Saksbehandler), inntektskilder)
     }
