@@ -260,6 +260,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         observatør.vedtaksperiodeVenter.clear()
         håndterInntektsmelding(listOf(16.januar til 31.januar))
 
+        assertEquals(listOf(7.februar, 16.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
+        assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
         håndterOverstyrTidslinje(
