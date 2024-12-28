@@ -29,6 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -39,6 +40,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
@@ -240,6 +242,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
+        assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter(orgnummer = a1))
         val utbetalingstidslinje = inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)
         val økonomiInspektør = utbetalingstidslinje[17.januar].økonomi.inspektør
         assertEquals(1081.daglig, økonomiInspektør.arbeidsgiverbeløp)

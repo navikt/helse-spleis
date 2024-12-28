@@ -490,6 +490,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 2.mai, korrigerer = søknadId, opprinneligSendt = 1.mai)
         assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
     }
 
     @Test

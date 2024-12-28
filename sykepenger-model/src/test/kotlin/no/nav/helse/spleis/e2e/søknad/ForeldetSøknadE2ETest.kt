@@ -19,6 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -82,6 +83,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
         assertTilstander(
             1.vedtaksperiode,
@@ -105,6 +107,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             sendtTilNAVEllerArbeidsgiver = 1.mai
         )
         håndterInntektsmelding(listOf(16.januar til 31.januar))
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
         assertTilstander(
             1.vedtaksperiode,
@@ -143,6 +146,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
+        assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
         val førsteUtbetaling = inspektør.utbetaling(0)
         val andreUtbetaling = inspektør.utbetaling(1)
 
@@ -183,6 +188,9 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
+        assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
+
         val førsteUtbetaling = inspektør.utbetaling(0)
         val andreUtbetaling = inspektør.utbetaling(1)
         val tredjeUtbetaling = inspektør.utbetaling(2)
@@ -220,6 +228,9 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
+        assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
 
         val førsteUtbetaling = inspektør.utbetaling(0)
         val andreUtbetaling = inspektør.utbetaling(1)

@@ -65,6 +65,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
 import no.nav.helse.september
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -2735,6 +2736,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             vedtaksperiodeId = 1.vedtaksperiode
         )
+        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
     }
 
     @Test
