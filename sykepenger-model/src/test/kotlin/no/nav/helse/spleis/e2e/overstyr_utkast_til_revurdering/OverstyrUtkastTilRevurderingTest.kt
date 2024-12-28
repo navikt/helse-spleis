@@ -17,6 +17,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -155,6 +156,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+        assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
 
         assertTrue(inspektør.utbetaling(0).erUtbetalt)
         assertTrue(inspektør.utbetaling(1).erForkastet)

@@ -15,11 +15,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -98,11 +100,11 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
+        assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(0, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
         Assertions.assertTrue(inspektør.utbetaling(1).erAvsluttet)
         Assertions.assertTrue(inspektør.utbetaling(0).erForkastet)
-
     }
 
     @Test
