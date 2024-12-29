@@ -101,7 +101,7 @@ internal abstract class AbstractPersonTest {
     fun alleVarslerAssertet() {
         val varslersamler = Varslersamler()
         varslersamler.registrerVarsler(person.personLogg.varsel)
-        // varslersamler.bekreftVarslerAssertet(assertetVarsler)
+        varslersamler.bekreftVarslerAssertet(assertetVarsler)
     }
 
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
