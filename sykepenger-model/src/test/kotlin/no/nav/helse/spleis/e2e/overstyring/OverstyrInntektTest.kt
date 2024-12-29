@@ -16,6 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -68,6 +69,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.

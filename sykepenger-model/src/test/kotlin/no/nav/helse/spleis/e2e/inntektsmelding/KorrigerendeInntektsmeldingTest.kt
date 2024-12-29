@@ -127,12 +127,15 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Korrigerende inntektsmelding med lik agp skal ikke ha varsel`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertIngenVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
@@ -181,10 +184,12 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-        assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
+
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -227,6 +232,8 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar)
         )
+
+        assertVarsler(listOf(RV_IM_3, RV_IM_4), 2.vedtaksperiode.filter())
         assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -236,14 +243,17 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `her er det et gap mellom første og andre vedtaksperiode og mer enn 10 dager mellom agps, men mindre enn 16 dager mellom periodene`() {
         nyttVedtak(10.januar til 29.januar)
         nyttVedtak(10.februar til 26.februar, arbeidsgiverperiode = listOf(10.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(10.februar til 26.februar)
         )
+
         assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 
@@ -399,9 +409,12 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `korrigert agp i avventer_godkjenning`() {
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        
         håndterInntektsmelding(listOf(5.januar til 20.januar))
+
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
         assertEquals("AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -433,6 +446,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
     }
 }

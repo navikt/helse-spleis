@@ -235,6 +235,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         // Så kjem søknaden på ghosten læll
         val ghostSøknad = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
+
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)
@@ -346,6 +348,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
@@ -384,6 +388,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -432,6 +437,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -476,6 +482,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
             orgnummer = a2
         )
+
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a2))
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
 
         assertLikeRefusjonsopplysninger(
@@ -1137,6 +1146,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             orgnummer = a2
         )
+
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
 
@@ -1184,6 +1195,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
+
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
 

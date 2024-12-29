@@ -14,6 +14,7 @@ import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDIN
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -37,6 +38,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(29000.månedlig, null)
         )
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
             korrigertInntektsmeldingId = korrigertInntektsmeldingId,
             korrigerendeInntektsopplysningId = korrigerendeInntektsmeldingId,
@@ -307,6 +309,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 )
             )
         )
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertFalse(observatør.arbeidsgiveropplysningerKorrigert.isEmpty())
     }
 
@@ -331,5 +334,6 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             beregnetInntekt = 41000.månedlig
         )
         assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
     }
 }

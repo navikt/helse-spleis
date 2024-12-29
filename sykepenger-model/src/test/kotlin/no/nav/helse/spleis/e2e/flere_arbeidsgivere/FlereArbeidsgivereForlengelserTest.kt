@@ -11,9 +11,11 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -28,6 +30,7 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
@@ -157,11 +160,12 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a2)
-        Assertions.assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
-        Assertions.assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-        Assertions.assertEquals(
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(
             inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode),
             inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
         )

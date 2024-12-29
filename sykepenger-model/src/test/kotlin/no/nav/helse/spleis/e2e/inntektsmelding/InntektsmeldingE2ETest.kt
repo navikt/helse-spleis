@@ -222,6 +222,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             refusjon = Refusjon(10_000.månedlig, null)
         )
         håndterSøknad(januar)
+
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, 10_000.månedlig, im3.arbeidsgiver), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
     }
 
@@ -1409,7 +1411,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(februar)
         håndterInntektsmelding(listOf(1.februar til 16.februar))
 
-        assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 3.vedtaksperiode.filter())
         assertEquals("SSSSSHH SSSSSHH SSSSSHH PPSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -1430,7 +1432,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
-        assertVarsel(RV_IM_24, 4.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 4.vedtaksperiode.filter())
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -2050,6 +2052,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
 
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2273,6 +2276,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         // På dette tidspunktet har AUU'en lagret dagene i historikken og innsett at skjæringstidspunktet er 1.januar
         nyPeriode(17.januar til 31.januar)
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         // IM 1 replayes først og blir lagret på 2.januar av forlengelsen -> kan ikke beregne sykepengegrunnlag
         // IM 2 replayes deretter og blir lagret på 1.januar av forlengelsen -> kan beregne sykepengegrunnlag og går videre
         assertInntektshistorikkForDato(INNTEKT, dato = 1.januar, inspektør = inspektør)
@@ -2386,6 +2390,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig
         )
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
@@ -2415,6 +2420,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             beregnetInntekt = 30000.månedlig
         )
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 

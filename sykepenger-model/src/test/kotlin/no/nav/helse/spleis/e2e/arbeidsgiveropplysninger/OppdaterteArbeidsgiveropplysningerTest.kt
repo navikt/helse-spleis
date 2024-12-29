@@ -16,10 +16,12 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -313,11 +315,14 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyPeriode(mars)
 
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig
         )
 
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
             PersonObserver.Inntekt(forslag = null),
@@ -338,11 +343,15 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 33000.månedlig
         )
 
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+        assertEquals(5, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
             PersonObserver.Inntekt(forslag = null),

@@ -61,6 +61,7 @@ import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
@@ -984,8 +985,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = riktigInntekt
         )
         assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4), 2.vedtaksperiode.filter())
         assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
         assertEquals("UUUUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1266,6 +1267,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             avsendersystem = NAV_NO_SELVBESTEMT
         )
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)
 

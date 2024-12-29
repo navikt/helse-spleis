@@ -13,12 +13,14 @@ import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -107,6 +109,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         nullstillTilstandsendringer()
+
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         observatør.inntektsmeldingIkkeHåndtert.clear()
         observatør.inntektsmeldingHåndtert.clear()
         val korrigertInntektsmelding2 = håndterInntektsmelding(
@@ -531,6 +535,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             harOpphørAvNaturalytelser = true
         )
+
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
@@ -591,6 +597,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT * 1.1
         )
+
+        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

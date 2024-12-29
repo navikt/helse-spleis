@@ -159,6 +159,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar) is Inntektsmelding)
     }
 
@@ -760,6 +762,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             orgnummer = a1
         )
+
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a1) is Inntektsmelding)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a2) is Saksbehandler)
     }

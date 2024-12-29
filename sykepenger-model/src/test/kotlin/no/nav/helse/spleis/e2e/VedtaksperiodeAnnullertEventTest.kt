@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -119,6 +120,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterAnnullerUtbetaling()
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
 
@@ -128,6 +130,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterAnnullerUtbetaling()
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
 }

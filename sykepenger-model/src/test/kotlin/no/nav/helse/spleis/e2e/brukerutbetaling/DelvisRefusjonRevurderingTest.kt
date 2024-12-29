@@ -18,6 +18,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -50,6 +51,9 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT / 2,
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
+
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
         håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = skjæringstidspunkt)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -181,7 +185,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, orgnummer = a1, tilstand = AVVENTER_SIMULERING_REVURDERING)
         assertSisteTilstand(1.vedtaksperiode, orgnummer = a2, tilstand = AVVENTER_REVURDERING)
     }

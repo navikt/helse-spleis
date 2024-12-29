@@ -34,6 +34,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -156,6 +157,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
 
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         assertNotEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2) // IM lager nytt innslag i vilkårsgrunnlaghistorikken pga nye refusjonsopplysninger
@@ -186,7 +189,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!"
         )
-        assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

@@ -93,7 +93,9 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT + 500.daglig
         )
 
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
         håndterYtelser()
         håndterSimulering()

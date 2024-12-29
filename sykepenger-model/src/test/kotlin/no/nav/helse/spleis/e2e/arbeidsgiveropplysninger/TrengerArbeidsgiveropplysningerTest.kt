@@ -201,6 +201,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
 
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
+        
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })

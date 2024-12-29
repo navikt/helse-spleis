@@ -619,6 +619,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,
