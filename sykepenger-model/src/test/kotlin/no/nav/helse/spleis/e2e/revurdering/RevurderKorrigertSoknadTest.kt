@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -93,6 +94,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Utbetaling i Infortrygd opphører tidligere utbetalinger innenfor samme arbeidsgiverperiode`() {
         nyttVedtak(1.januar til 28.januar)
         nyttVedtak(3.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         forlengVedtak(mars)
         val marsutbetaling = inspektør.utbetaling(2)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 25.februar))
@@ -363,6 +365,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(januar, 100.prosent)
         nyttVedtak(15.februar til 15.mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Feriedag)))
 
         assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)

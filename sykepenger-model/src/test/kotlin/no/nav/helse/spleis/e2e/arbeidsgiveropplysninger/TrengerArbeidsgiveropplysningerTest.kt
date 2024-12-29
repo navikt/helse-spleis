@@ -114,6 +114,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             listOf(6.januar til 17.januar, 22.januar til 25.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
+        assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
@@ -202,7 +203,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
-        
+
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })

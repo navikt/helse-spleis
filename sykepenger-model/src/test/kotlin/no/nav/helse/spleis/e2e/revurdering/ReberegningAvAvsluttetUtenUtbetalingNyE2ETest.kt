@@ -39,6 +39,7 @@ import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
@@ -765,6 +766,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(3.januar til 19.januar),
             orgnummer = a2
         )
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter(orgnummer = a2))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1243,6 +1245,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
 
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 1.januar, inspektør)
@@ -1267,6 +1270,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             avsendersystem = NAV_NO_SELVBESTEMT
         )
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)

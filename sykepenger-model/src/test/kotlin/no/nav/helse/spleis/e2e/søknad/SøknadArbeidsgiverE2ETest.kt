@@ -374,7 +374,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
-        assertVarsler(listOf(RV_IT_3, Varselkode.RV_IT_38), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3, RV_IT_3, Varselkode.RV_IT_38), 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 

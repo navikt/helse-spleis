@@ -15,11 +15,13 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -210,6 +212,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(1.februar til 15.februar)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         forlengVedtak(april)
 
         val januar = observatør.utbetalteVedtaksperioder[0]
@@ -240,6 +243,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(1.februar til 15.februar)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         forlengVedtak(april)
 
         val februar = observatør.utbetalteVedtaksperioder[1]
@@ -282,5 +286,4 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     private infix fun UUID.og(other: UUID) = listOf(this, other)
     private infix fun List<UUID>.og(other: UUID) = this + other
-
 }

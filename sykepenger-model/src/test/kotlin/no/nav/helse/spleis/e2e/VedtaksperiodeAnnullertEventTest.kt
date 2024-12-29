@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,6 +32,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         nyttVedtak(5.mars til 31.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         håndterAnnullerUtbetaling()
 
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         assertEquals(3, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(
             1.januar til 31.januar,
@@ -53,6 +55,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         tilGodkjenning(5.mars til 31.mars, ORGNUMMER, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         håndterAnnullerUtbetaling()
 
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         assertEquals(2, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(
             1.januar til 31.januar,
@@ -88,7 +91,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.mars,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
-        assertVarsel(Varselkode.RV_IM_25, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

@@ -89,7 +89,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         // utbetalingen endres -ikke- fordi det fremdeles lages agp-dager for februar, siden 1.vedtaksperiode ikke åpnes opp
-        assertIngenVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3), 2.vedtaksperiode.filter())
         inspektør.utbetaling(1).also { utbetalinginspektør ->
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
             assertEquals(17.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
@@ -166,6 +166,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
         // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
         håndterSøknad(5.mars til 31.mars)
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         assertTilstandFørInntektsmeldingHensyntas()
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

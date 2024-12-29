@@ -253,7 +253,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 
@@ -341,7 +341,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, Varselkode.RV_OS_2, RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertEquals(INNTEKT * 1.1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.omregnetÅrsinntekt)
     }
 
@@ -409,7 +409,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `korrigert agp i avventer_godkjenning`() {
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        
+
         håndterInntektsmelding(listOf(5.januar til 20.januar))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

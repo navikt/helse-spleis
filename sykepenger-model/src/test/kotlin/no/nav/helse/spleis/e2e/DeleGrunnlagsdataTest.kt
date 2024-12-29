@@ -18,6 +18,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -121,8 +123,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(), 2.vedtaksperiode.filter())
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -139,6 +141,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(Periode(20.februar, 8.mars))
         )
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 

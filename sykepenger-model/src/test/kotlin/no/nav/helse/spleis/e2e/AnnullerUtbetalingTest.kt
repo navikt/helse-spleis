@@ -21,6 +21,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.assertNotNull
@@ -67,6 +68,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar) // forlengelse
         nyttVedtak(10.mars til 31.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode) // førstegangsbehandling, men med samme agp
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai)) // førstegangsbehandling, ny agp
         håndterSøknad(1.mai til 20.mai)
         håndterAnnullerUtbetaling()

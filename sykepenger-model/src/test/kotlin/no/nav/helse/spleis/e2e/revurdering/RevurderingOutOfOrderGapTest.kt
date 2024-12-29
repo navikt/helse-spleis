@@ -42,6 +42,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
@@ -142,8 +143,12 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out of order med utbetaling i arbeidsgiverperioden og overlapp med andre ytelser`() {
         nyttVedtak(1.januar til 25.januar)
         nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
         håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(26.januar til 31.januar, 100)))
+
         assertVarsler(listOf(RV_OO_1, `Overlapper med foreldrepenger`), 3.vedtaksperiode.filter())
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
@@ -331,8 +336,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out of order periode med 15 dagers gap - mellom to perioder`() {
         nyPeriode(1.januar til 15.januar)
         nyttVedtak(29.januar til 15.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+
         nyPeriode(17.januar til 25.januar)
+
         assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
+
         håndterInntektsmelding(
             listOf(1.januar til 15.januar, 17.januar til 17.januar),
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
@@ -343,6 +353,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
+
         assertVarsel(Varselkode.RV_OS_2, 3.vedtaksperiode.filter())
 
         håndterYtelser(2.vedtaksperiode)

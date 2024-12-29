@@ -38,6 +38,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -186,23 +187,18 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av tidslinje i avventer inntektsmelding2`() {
-        håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
-        håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.februar til 21.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-    }
-
-    @Test
     fun `overstyring av tidslinje som flytter skjæringstidspunkt blant annet - da gjenbruker vi tidsnære opplysninger`() {
         nyPeriode(1.januar til 10.januar)
         nyPeriode(15.januar til 20.januar)
         håndterInntektsmelding(
             listOf(15.januar til 30.januar)
         )
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(21.januar til 10.mars)
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -224,6 +220,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar)
         )
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
@@ -310,7 +307,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.august,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
-        assertVarsel(Varselkode.RV_IM_25, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -454,6 +451,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -666,6 +664,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             listOf(10.februar til 26.februar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

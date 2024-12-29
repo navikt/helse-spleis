@@ -40,6 +40,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
@@ -402,15 +403,20 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar til 26.januar)
         nyttVedtak(1.februar til 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(21.februar til 10.mars)
+
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         nullstillTilstandsendringer()
+
         håndterOverstyrTidslinje((5.februar til 15.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
+
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
@@ -421,6 +427,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar til 26.januar)
         nyttVedtak(1.februar til 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(21.februar til 10.mars)
+
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
 
         håndterOverstyrTidslinje((22.februar til 25.februar).map { manuellFeriedag(it) })
         håndterYtelser(3.vedtaksperiode)
@@ -588,7 +596,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     fun `Avslag fører til feilet revurdering`() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 17.januar)),
+            listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 1.januar
         )
         håndterSøknad(januar)
@@ -644,7 +652,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     fun `annullering av feilet revurdering`() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 17.januar)),
+            listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 1.januar
         )
         håndterSøknad(januar)
@@ -1110,6 +1118,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1117,9 +1126,12 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterOverstyrTidslinje(listOf(manuellSykedag(26.januar, 80)))
         håndterYtelser(1.vedtaksperiode)
+
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
@@ -1143,6 +1155,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1236,6 +1249,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     fun `Kun periode berørt av endringene skal ha hendelseIden`() {
         nyttVedtak(januar)
         nyttVedtak(2.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        
         val hendelseId = UUID.randomUUID()
         håndterOverstyrTidslinje(
             meldingsreferanseId = hendelseId,

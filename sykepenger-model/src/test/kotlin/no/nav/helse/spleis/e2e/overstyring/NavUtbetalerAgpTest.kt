@@ -201,7 +201,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "NoeSomUmuligKanVæreIListaViIkkeTillater",
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, RV_IM_8), 1.vedtaksperiode.filter())
         assertFunksjonellFeil(RV_IM_23)
         assertEquals(setOf(Dokumentsporing.søknad(søknad), Dokumentsporing.inntektsmeldingDager(im)), inspektør.hendelser(1.vedtaksperiode).toSet())
         assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
@@ -515,7 +515,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertIngenVarsel(RV_IM_8)
-        assertVarsel(RV_IM_25, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, RV_IM_25), 2.vedtaksperiode.filter())
 
         håndterOverstyrTidslinje((1..31).map {
             ManuellOverskrivingDag(

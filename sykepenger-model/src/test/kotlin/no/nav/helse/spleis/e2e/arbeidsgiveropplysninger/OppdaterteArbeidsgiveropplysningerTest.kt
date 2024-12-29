@@ -364,7 +364,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(januar)
         nyPeriode(mars)
         håndterInntektsmelding(
-            listOf(mars),
+            listOf(1.mars til 16.mars),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
 
@@ -372,7 +372,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         håndterInntektsmelding(
-            listOf(januar),
+            listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)

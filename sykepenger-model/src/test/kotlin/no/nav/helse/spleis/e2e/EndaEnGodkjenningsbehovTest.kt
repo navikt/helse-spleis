@@ -140,6 +140,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `ingen ny arbeidsgiverperiode og sykepengegrunnlag under 2g`() {
         nyttVedtak(januar, orgnummer = a1)
         tilGodkjenning(10.februar til 20.februar, a1, beregnetInntekt = 10000.månedlig, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         assertGodkjenningsbehov(
             skjæringstidspunkt = 10.februar,
             periodeFom = 10.februar,
@@ -182,7 +183,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.august,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
-        assertVarsel(Varselkode.RV_IM_25, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -209,6 +210,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         tilGodkjenning(16.februar til 28.februar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         assertEquals("NNNNNHH NNNNNHH NNSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         assertTags(setOf("IngenNyArbeidsgiverperiode"), 2.vedtaksperiode.id(a1))
     }
@@ -263,6 +265,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
         håndterSøknad(1.januar til 10.januar)
         tilGodkjenning(15.januar til 31.januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))

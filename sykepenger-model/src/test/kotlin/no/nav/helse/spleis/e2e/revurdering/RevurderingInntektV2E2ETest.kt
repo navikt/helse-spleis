@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -356,6 +357,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurder inntekt tidligere skjæringstidspunkt - med samme AGP`() {
         nyttVedtak(januar, 100.prosent)
         nyttVedtak(2.februar til 28.februar, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)

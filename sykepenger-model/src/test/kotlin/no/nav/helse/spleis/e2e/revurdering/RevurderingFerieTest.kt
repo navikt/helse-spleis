@@ -19,6 +19,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -44,7 +45,8 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 17.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OO_1), 2.vedtaksperiode.filter())
     }
 
     @Test
