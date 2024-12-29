@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -92,7 +92,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     private fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {
-        ArbeidsgiverHendelsefabrikk(ORGNUMMER).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
+        ArbeidsgiverHendelsefabrikk(a1).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
     }
 
     private fun hackGrunnbeløp(fra: Int, til: Int) {

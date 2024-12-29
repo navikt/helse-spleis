@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.august
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -456,15 +455,15 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertGodkjenningsbehov(
             tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"),
-            vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
             periodeType = "FORLENGELSE",
             periodeFom = 1.februar,
             periodeTom = 28.februar,
             førstegangsbehandling = false,
             behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(ORGNUMMER).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(ORGNUMMER).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
             )
         )
     }

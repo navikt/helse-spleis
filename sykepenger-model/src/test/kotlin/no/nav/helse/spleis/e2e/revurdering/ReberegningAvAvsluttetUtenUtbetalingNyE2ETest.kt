@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -237,8 +236,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(a1, 17.januar, INNTEKT, true)
         )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -263,8 +262,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, false)
+            PersonUtbetalingsperiode(a1, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(a1, 1.januar, INNTEKT, false)
         )
         )
 
@@ -961,8 +960,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
         nullstillTilstandsendringer()
-        val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 20.januar, 100.prosent, INNTEKT))
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
         håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         håndterYtelser(1.vedtaksperiode)
 
@@ -1004,8 +1003,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
 
-        assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(ORGNUMMER))
-        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(ORGNUMMER))
+        assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(a1))
+        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
 
         assertNotNull(vilkårsgrunnlag)
 
@@ -1241,7 +1240,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     @Test
     fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() {
         nyPeriode(2.januar til 17.januar)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 17.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
     }

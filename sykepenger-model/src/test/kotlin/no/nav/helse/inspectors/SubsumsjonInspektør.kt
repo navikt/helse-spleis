@@ -2,7 +2,7 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.KontekstType
@@ -97,7 +97,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         output: Map<String, Any>,
         sporing: List<Subsumsjonskontekst>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = a1
     ) {
         assertBeregnet(0, 1, paragraf, versjon, ledd, punktum, bokstav, input, output, sporing, vedtaksperiodeId, organisasjonsnummer)
     }
@@ -114,7 +114,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         output: Map<String, Any>,
         sporing: List<Subsumsjonskontekst>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER,
+        organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
@@ -144,7 +144,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = a1
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
@@ -166,7 +166,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER,
+        organisasjonsnummer: String = a1,
         utfall: Utfall
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
@@ -186,7 +186,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = a1
     ) {
         val resultat =
             finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
@@ -208,7 +208,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         input: Map<String, Any>,
         output: Map<String, Any>,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = a1
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer)).also {
             assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
@@ -225,7 +225,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = ORGNUMMER,
+        organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
@@ -239,7 +239,7 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = ORGNUMMER,
+        organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))

@@ -4,7 +4,6 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.den
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.til
@@ -53,12 +52,12 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(9.januar til 15.januar)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(16.januar til 31.januar)
-        assertTrue(observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(3.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertTrue(observatør.hendelseider(1.vedtaksperiode.id(a1)).isNotEmpty())
+        assertTrue(observatør.hendelseider(2.vedtaksperiode.id(a1)).isNotEmpty())
+        assertTrue(observatør.hendelseider(3.vedtaksperiode.id(a1)).isNotEmpty())
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
@@ -74,11 +73,11 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(19.februar, 8.mars)) // forlenger overlappende
         håndterSøknad(19.februar til 8.mars) // forlenger overlappende
         assertEquals(5, inspektør.vedtaksperiodeTeller)
-        assertTrue(observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(3.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(4.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(5.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
+        assertTrue(observatør.hendelseider(1.vedtaksperiode.id(a1)).isNotEmpty())
+        assertTrue(observatør.hendelseider(2.vedtaksperiode.id(a1)).isNotEmpty())
+        assertTrue(observatør.hendelseider(3.vedtaksperiode.id(a1)).isNotEmpty())
+        assertTrue(observatør.hendelseider(4.vedtaksperiode.id(a1)).isNotEmpty())
+        assertTrue(observatør.hendelseider(5.vedtaksperiode.id(a1)).isNotEmpty())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
@@ -99,27 +98,27 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster periode som er forlengelse av forkastet periode`() {
         (1.januar til 17.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar))
         håndterSøknad(18.januar til 31.januar)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
     }
 
     @Test
     fun `forkaster periode som er forlengelse av forkastet periode over helg`() {
         (1.januar til 19.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(22.januar til 31.januar)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
     }
 
     @Test
     fun `forkaster ikke periode som har gap til forkastet periode`() {
         (1.januar til 19.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(10.februar til 28.februar)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -129,14 +128,14 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `fortsetter å forkaste gjentatte forlengelser av kastede perioder`() {
         (1.januar til 18.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar))
         håndterSøknad(19.januar til 31.januar)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(21.mars, 21.april))
         håndterSøknad(21.mars til 21.april)

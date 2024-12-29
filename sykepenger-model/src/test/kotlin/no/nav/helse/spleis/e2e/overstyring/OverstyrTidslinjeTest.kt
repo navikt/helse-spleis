@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.august
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -106,8 +105,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(
             listOf(
                 PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
-                    orgnummer = ORGNUMMER,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                    orgnummer = a1,
+                    vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                     periode = 1.februar til 28.februar,
                     skjæringstidspunkt = 1.januar,
                     typeEndring = "ENDRING"
@@ -126,7 +125,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sendes ut overstyring i gangsatt når det er en periode som står i avventer blokkerende periode ved endring fra saksbehandler`() {
-        tilGodkjenning(januar, ORGNUMMER)
+        tilGodkjenning(januar, a1)
         håndterSøknad(februar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -135,8 +134,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(
             listOf(
                 PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
-                    orgnummer = ORGNUMMER,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                    orgnummer = a1,
+                    vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                     periode = 1.februar til 28.februar,
                     skjæringstidspunkt = 1.januar,
                     typeEndring = "ENDRING"
@@ -148,11 +147,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Senere perioder inngår ikke i overstyring igangsatt selv om det er en endring fra saksbehandler`() {
-        tilGodkjenning(januar, ORGNUMMER)
+        tilGodkjenning(januar, a1)
         håndterSøknad(mars)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT / 2)))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
         val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
-        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
+        assertEquals(listOf(1.vedtaksperiode.id(a1)), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
     }
 
     @Test
@@ -294,7 +293,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlaget = inspektør.vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "fant ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlaget.inspektør.inntektsgrunnlag.inspektør
-        val arbeidsgiverInntektsopplysning = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
+        val arbeidsgiverInntektsopplysning = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør
         assertEquals(INNTEKT, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.beløp)
         assertEquals(Inntektsmelding::class, arbeidsgiverInntektsopplysning.inntektsopplysning::class)
     }

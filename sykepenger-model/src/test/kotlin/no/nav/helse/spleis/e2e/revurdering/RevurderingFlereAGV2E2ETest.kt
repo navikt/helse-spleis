@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.april
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -283,7 +282,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-            assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+            assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         }
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -369,7 +368,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-            assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+            assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         }
 
         inspektør(a2) {
@@ -406,7 +405,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-            assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+            assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         }
 
         inspektør(a2) {

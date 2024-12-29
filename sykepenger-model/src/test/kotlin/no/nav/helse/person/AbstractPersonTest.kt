@@ -7,7 +7,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
@@ -40,18 +40,18 @@ internal abstract class AbstractPersonTest {
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
 
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER
+            organisasjonsnummer = a1
         )
 
         private fun overgangFraInfotrygdPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
-                    UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
+                    UUID.randomUUID(), a1, UUID.randomUUID().toString(),
                     InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
                         UUID.randomUUID(),
-                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, TestPerson.INNTEKT)),
-                        listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                        listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, TestPerson.INNTEKT)),
+                        listOf(Inntektsopplysning(a1, 1.januar, TestPerson.INNTEKT, true)),
                         emptyMap()
                     ),
                     besvart = LocalDateTime.now()
@@ -63,12 +63,12 @@ internal abstract class AbstractPersonTest {
         private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
-                    UUID.randomUUID(), ORGNUMMER, UUID.randomUUID().toString(),
+                    UUID.randomUUID(), a1, UUID.randomUUID().toString(),
                     InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
                         UUID.randomUUID(),
-                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, TestPerson.INNTEKT)),
-                        listOf(Inntektsopplysning(ORGNUMMER, 1.februar, TestPerson.INNTEKT, true)),
+                        listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, TestPerson.INNTEKT)),
+                        listOf(Inntektsopplysning(a1, 1.februar, TestPerson.INNTEKT, true)),
                         emptyMap()
                     ),
                     besvart = LocalDateTime.now()
@@ -82,11 +82,11 @@ internal abstract class AbstractPersonTest {
     lateinit var person: Person
     lateinit var observatør: TestObservatør
     lateinit var jurist: SubsumsjonsListLog
-    val inspektør get() = inspektør(ORGNUMMER)
+    val inspektør get() = inspektør(a1)
 
     val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this@vedtaksperiode.vedtaksperiodeId(orgnummer) }
     fun Int.vedtaksperiode(orgnummer: String): IdInnhenter = IdInnhenter { this@vedtaksperiode.vedtaksperiodeId(orgnummer) }
-    fun IdInnhenter.filter(orgnummer: String = ORGNUMMER) = AktivitetsloggFilter.vedtaksperiode(this, orgnummer)
+    fun IdInnhenter.filter(orgnummer: String = a1) = AktivitetsloggFilter.vedtaksperiode(this, orgnummer)
 
     @BeforeEach
     internal fun createTestPerson() {

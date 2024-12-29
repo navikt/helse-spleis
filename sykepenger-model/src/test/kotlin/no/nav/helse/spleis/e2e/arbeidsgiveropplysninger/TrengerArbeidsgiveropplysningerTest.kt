@@ -7,7 +7,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -150,7 +149,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().let { event ->
             assertEquals(listOf(12.februar til 28.februar), event.sykmeldingsperioder)
             assertEquals(13.februar, event.skjæringstidspunkt)
-            assertEquals(listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 13.februar)), event.førsteFraværsdager)
+            assertEquals(listOf(PersonObserver.FørsteFraværsdag(a1, 13.februar)), event.førsteFraværsdager)
             assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -219,7 +218,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
         håndterSøknad(Sykdom(30.januar, 8.februar, 100.prosent))
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
+        assertEquals(2.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
     }
 
     @Test
@@ -228,7 +227,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
         håndterInntektsmelding(listOf(12.januar til 27.januar))
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
+        assertEquals(2.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
     }
 
     @Test
@@ -740,7 +739,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt`() {
         val inntektsmeldingId = UUID.randomUUID()
         nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT * 2)))
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 2)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -766,7 +765,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(ORGNUMMER, 32000.månedlig, "", null, listOf(Triple(1.januar, null, 32000.månedlig)))
+                OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig, "", null, listOf(Triple(1.januar, null, 32000.månedlig)))
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -937,8 +936,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+            organisasjonsnummer = a1,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             skjæringstidspunkt = 2.januar,
             sykmeldingsperioder = listOf(2.januar til 17.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -43,7 +43,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterSøknad(2.februar til 28.februar)
         håndterSøknad(februar)
 
-        assertEquals(ORGNUMMER, observatør.utbetaltEndretEventer.last().organisasjonsnummer)
+        assertEquals(a1, observatør.utbetaltEndretEventer.last().organisasjonsnummer)
     }
 
     @Test
@@ -103,12 +103,12 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_VV_4, 2.vedtaksperiode.filter())
 
         // Arbeidsgiverperioden blir beregnet riktig
-        assertEquals(listOf(1.januar til 16.januar), inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode))
-        assertEquals(listOf(1.desember til 16.desember), inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør(a1).arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.desember til 16.desember), inspektør(a1).arbeidsgiverperiode(2.vedtaksperiode))
 
-        assertEquals(2, inspektør(ORGNUMMER).antallUtbetalinger)
-        assertEquals(1.januar til 31.januar, inspektør(ORGNUMMER).utbetaling(0).periode)
-        assertEquals(13.november til 31.desember, inspektør(ORGNUMMER).utbetaling(1).periode)
-        assertNotEquals(inspektør(ORGNUMMER).utbetaling(0).korrelasjonsId, inspektør(ORGNUMMER).utbetaling(1).korrelasjonsId)
+        assertEquals(2, inspektør(a1).antallUtbetalinger)
+        assertEquals(1.januar til 31.januar, inspektør(a1).utbetaling(0).periode)
+        assertEquals(13.november til 31.desember, inspektør(a1).utbetaling(1).periode)
+        assertNotEquals(inspektør(a1).utbetaling(0).korrelasjonsId, inspektør(a1).utbetaling(1).korrelasjonsId)
     }
 }

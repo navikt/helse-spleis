@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -110,7 +110,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
             ?.also {
                 assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
@@ -148,7 +148,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
             ?.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
@@ -247,7 +247,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = 50000.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
+        val inntekter = listOf(grunnlag(a1, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
@@ -277,7 +277,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = OverMinstegrense,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
+        val inntekter = listOf(grunnlag(a1, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
@@ -457,7 +457,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -467,7 +467,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -477,7 +477,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-        assertNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(a1)])
     }
 
     @Test

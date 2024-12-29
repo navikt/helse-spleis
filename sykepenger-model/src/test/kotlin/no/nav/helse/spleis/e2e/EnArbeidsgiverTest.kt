@@ -1,9 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -20,7 +19,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -46,7 +44,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
@@ -623,8 +620,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         utbetalPeriode(1.vedtaksperiode)
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 10.februar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, INNTEKT, true))
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -637,7 +634,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `overlappende sykmeldinger - første bit skal kunne gå videre selv om vi ikke har mottatt søknad for halen`() {
-        tilGodkjenning(januar, ORGNUMMER)
+        tilGodkjenning(januar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         håndterSøknad(1.februar til 20.februar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -39,9 +39,9 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         val historie1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar, 26.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(a1, 3.januar, 26.januar, 100.prosent, 1000.daglig)
         )
-        val inntektshistorikk1 = listOf(Inntektsopplysning(ORGNUMMER, 3.januar, INNTEKT, true))
+        val inntektshistorikk1 = listOf(Inntektsopplysning(a1, 3.januar, INNTEKT, true))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
             inntektshistorikk = inntektshistorikk1,
@@ -57,9 +57,9 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
 
         val historie1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 26.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 26.januar, 100.prosent, 1000.daglig)
         )
-        val inntektshistorikk1 = listOf(Inntektsopplysning(ORGNUMMER, 3.januar, INNTEKT, true))
+        val inntektshistorikk1 = listOf(Inntektsopplysning(a1, 3.januar, INNTEKT, true))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
             inntektshistorikk = inntektshistorikk1,

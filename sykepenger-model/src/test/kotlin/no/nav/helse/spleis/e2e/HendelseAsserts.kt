@@ -5,7 +5,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.AktivitetsloggAsserts
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Hendelse
@@ -73,7 +73,7 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
     forventetArbeidsgiverbeløp: Int,
     forventetArbeidsgiverRefusjonsbeløp: Int,
     subset: Periode? = null,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
 
@@ -87,7 +87,7 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
 internal fun AbstractEndToEndTest.assertHarHendelseIder(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg hendelseIder: UUID,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     assertTrue(
         inspektør(orgnummer).hendelseIder(vedtaksperiodeIdInnhenter).containsAll(hendelseIder.toList())
@@ -97,7 +97,7 @@ internal fun AbstractEndToEndTest.assertHarHendelseIder(
 internal fun AbstractEndToEndTest.assertHarIkkeHendelseIder(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg hendelseIder: UUID,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     assertTrue(
         inspektør(orgnummer).hendelseIder(vedtaksperiodeIdInnhenter).none { it in hendelseIder.toList() }) { "Perioden inneholder ikke alle hendelseidene" }
@@ -106,7 +106,7 @@ internal fun AbstractEndToEndTest.assertHarIkkeHendelseIder(
 internal fun AbstractEndToEndTest.assertTilstand(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     tilstand: TilstandType,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
 ) {
     val sisteTilstand = inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)
     assertEquals(tilstand, sisteTilstand) {
@@ -114,26 +114,26 @@ internal fun AbstractEndToEndTest.assertTilstand(
     }
 }
 
-internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: String = ORGNUMMER, errortekst: (() -> String)? = null) {
+internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: String = a1, errortekst: (() -> String)? = null) {
     assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last(), errortekst)
 }
 
-internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: String = ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: String = a1) {
     assertTilstander(vedtaksperiodeIdInnhenter = (indeks + 1).vedtaksperiode, tilstander = tilstander, orgnummer = orgnummer)
 }
 
-internal fun AbstractEndToEndTest.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), message: String? = null) {
+internal fun AbstractEndToEndTest.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = a1, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), message: String? = null) {
     val id = vedtaksperiodeIdInnhenter.id(orgnummer)
     assertFalse(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${person.personLogg}" }
     assertTrue(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${person.personLogg}" }
     assertEquals(tilstander.asList(), observatør.tilstandsendringer[id], message)
 }
 
-internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: String = ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: String = a1) {
     assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter = indeks.vedtaksperiode, tilstander = tilstander, orgnummer = orgnummer)
 }
 
-internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), varselkode: Varselkode? = null) {
+internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = a1, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), varselkode: Varselkode? = null) {
     assertTrue(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     assertFalse(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)])
@@ -189,7 +189,7 @@ internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(filter: AktivitetsloggFi
 internal fun Aktivitetslogg.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertLogiskFeil(severe, filter)
 
-internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = ORGNUMMER, forventetTag: String, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = a1, forventetTag: String, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertHarTag(vedtaksperiode.id(orgnummer), forventetTag)
 
 internal fun interface AktivitetsloggFilter {

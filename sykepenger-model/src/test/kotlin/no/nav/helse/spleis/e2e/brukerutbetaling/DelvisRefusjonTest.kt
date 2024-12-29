@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
 import java.time.LocalDate
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -636,7 +635,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)
         assertNotNull(vilkårsgrunnlag)
-        val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
+        val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør
         assertEquals(INNTEKT + 100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
         assertEquals(INNTEKT / 2, inntektsopplysninger.refusjonsopplysninger.single().inspektør.beløp)
     }
@@ -819,6 +818,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+    private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger
 }

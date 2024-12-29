@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -26,8 +26,8 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
-    private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
-    private val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+    private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
+    private val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
 
     @Test
     fun `infotrygdhistorikken var tom`() {

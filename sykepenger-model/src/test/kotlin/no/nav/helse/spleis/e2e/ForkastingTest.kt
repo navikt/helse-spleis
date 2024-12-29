@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -43,7 +43,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = emptyList()
         )
         håndterSøknad(1.februar til 23.februar)

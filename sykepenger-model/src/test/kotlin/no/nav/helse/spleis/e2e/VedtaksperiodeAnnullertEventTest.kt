@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -53,7 +53,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        tilGodkjenning(5.mars til 31.mars, ORGNUMMER, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        tilGodkjenning(5.mars til 31.mars, a1, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         håndterAnnullerUtbetaling()
 
         assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())

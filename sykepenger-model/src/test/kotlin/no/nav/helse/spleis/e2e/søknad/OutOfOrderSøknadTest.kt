@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -67,9 +67,9 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `out-of-order perioder endrer skjæringstidspunkter`() {
-        tilGodkjenning(3.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(3.januar til 31.januar, a1)
         nullstillTilstandsendringer()
-        nyPeriode(1.januar til 2.januar, ORGNUMMER)
+        nyPeriode(1.januar til 2.januar, a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 20000.månedlig)
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -112,7 +112,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
     @Test
     fun `out-of-order med senere periode i Avventer inntektsmelding eller historikk`() {
         nyttVedtak(januar, 100.prosent)
-        nyPeriode(1.mars til 20.mars, ORGNUMMER)
+        nyPeriode(1.mars til 20.mars, a1)
         nullstillTilstandsendringer()
         forlengVedtak(februar)
 

@@ -5,7 +5,6 @@ import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -1111,7 +1110,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        val relevanteOrgnumre1: Iterable<String> = hendelselogg.hentFeltFraBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+        val relevanteOrgnumre1: Iterable<String> = hendelselogg.hentFeltFraBehov(1.vedtaksperiode.id(a1), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
         håndterOverstyrArbeidsforhold(
             skjæringstidspunkt, listOf(
@@ -1128,7 +1127,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
-        val relevanteOrgnumre2: Iterable<String> = hendelselogg.hentFeltFraBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+        val relevanteOrgnumre2: Iterable<String> = hendelselogg.hentFeltFraBehov(1.vedtaksperiode.id(a1), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1), relevanteOrgnumre2.toList())
         assertEquals(listOf(a2), sykepengegrunnlagInspektør.deaktiverteArbeidsforhold)
 

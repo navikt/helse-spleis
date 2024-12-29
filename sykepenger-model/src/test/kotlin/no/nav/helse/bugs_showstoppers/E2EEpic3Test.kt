@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -80,15 +80,15 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding starter etter sykmeldingsperioden`() {
         val inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 3.april(2019), INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER, 18.mars(2018), INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER, 13.november(2017), INNTEKT, true)
+            Inntektsopplysning(a1, 3.april(2019), INNTEKT, true),
+            Inntektsopplysning(a1, 18.mars(2018), INNTEKT, true),
+            Inntektsopplysning(a1, 13.november(2017), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.april(2019), 30.april(2019), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.mars(2018), 2.april(2018), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.november(2017), 3.desember(2017), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 13.november(2017), 28.november(2017), 100.prosent, 100.daglig)
+            ArbeidsgiverUtbetalingsperiode(a1, 3.april(2019), 30.april(2019), 100.prosent, 100.daglig),
+            ArbeidsgiverUtbetalingsperiode(a1, 18.mars(2018), 2.april(2018), 100.prosent, 100.daglig),
+            ArbeidsgiverUtbetalingsperiode(a1, 29.november(2017), 3.desember(2017), 100.prosent, 100.daglig),
+            ArbeidsgiverUtbetalingsperiode(a1, 13.november(2017), 28.november(2017), 100.prosent, 100.daglig)
         )
         håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger, inntektshistorikk = inntektshistorikk)
 
@@ -546,7 +546,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `opptjening ikke ok avviser ikke dager før gjeldende skjæringstidspunkt`() {
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
@@ -633,7 +633,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `bevarer avviste dager fra tidligere periode og avviser dager fra skjæringstidspunkt ved opptjening ok`() {
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 31.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 31.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(

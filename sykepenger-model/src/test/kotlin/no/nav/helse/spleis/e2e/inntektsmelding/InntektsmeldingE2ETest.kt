@@ -8,7 +8,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -1569,8 +1568,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
 
-        observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).contains(inntektsmeldingId)
-        observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)).contains(inntektsmeldingId)
+        observatør.hendelseider(1.vedtaksperiode.id(a1)).contains(inntektsmeldingId)
+        observatør.hendelseider(2.vedtaksperiode.id(a1)).contains(inntektsmeldingId)
     }
 
     @Test
@@ -1585,8 +1584,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
 
-        observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).contains(inntektsmeldingId)
-        observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)).contains(inntektsmeldingId)
+        observatør.hendelseider(1.vedtaksperiode.id(a1)).contains(inntektsmeldingId)
+        observatør.hendelseider(2.vedtaksperiode.id(a1)).contains(inntektsmeldingId)
     }
 
     @Test
@@ -1693,10 +1692,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding uten relevant inntekt (fordi perioden er i agp) flytter perioden til ferdig-tilstand`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
-        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(9.januar, 10.januar))
-        håndterSøknad(Sykdom(9.januar, 10.januar, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSøknad(Sykdom(9.januar, 10.januar, 100.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(12.januar, 24.januar))
         håndterSøknad(Sykdom(12.januar, 24.januar, 100.prosent))
@@ -2227,7 +2226,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1.januar til 10.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter(ORGNUMMER))
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -2422,7 +2421,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Hensyntar korrigert inntekt i avventer blokkerende`() {
-        tilGodkjenning(januar, ORGNUMMER)
+        tilGodkjenning(januar, a1)
         nyPeriode(mars)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
@@ -2454,7 +2453,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding korrigerer periode til godkjenning`() {
-        tilGodkjenning(januar, ORGNUMMER, beregnetInntekt = INNTEKT)
+        tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(
@@ -2469,7 +2468,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding korrigerer periode til godkjenning - starter før perioden`() {
-        tilGodkjenning(2.januar til 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
+        tilGodkjenning(2.januar til 31.januar, a1, beregnetInntekt = INNTEKT)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(

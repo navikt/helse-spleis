@@ -6,7 +6,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dto.SimuleringResultatDto
@@ -87,7 +87,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 
 internal fun AbstractEndToEndTest.håndterSykmelding(
     periode: Periode,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = orgnummer)
 
 internal fun AbstractEndToEndTest.håndterSykmelding(
@@ -95,7 +95,7 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     sykmeldingSkrevet: LocalDateTime? = null,
     mottatt: LocalDateTime? = null,
     id: UUID = UUID.randomUUID(),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
 ): UUID {
     sykmelding(
@@ -246,7 +246,7 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
@@ -262,7 +262,7 @@ internal fun AbstractEndToEndTest.tilGodkjent(
     periode: Periode,
     grad: Prosentdel,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
@@ -288,7 +288,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     periode: Periode,
     grad: Prosentdel,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
@@ -304,7 +304,7 @@ internal fun AbstractEndToEndTest.tilSimulering(
     periode: Periode,
     grad: Prosentdel,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
@@ -318,7 +318,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     periode: Periode,
     grad: Prosentdel,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -360,7 +360,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     forlengTilGodkjenning(periode, grad, fnr, orgnummer)
     håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, fnr = fnr, orgnummer = orgnummer)
@@ -370,7 +370,7 @@ internal fun AbstractEndToEndTest.forlengTilSimulering(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
@@ -382,7 +382,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
@@ -394,7 +394,7 @@ internal fun AbstractEndToEndTest.forlengVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ) {
     forlengTilGodkjentVedtak(periode, grad, fnr, orgnummer)
     håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
@@ -404,14 +404,14 @@ internal fun AbstractEndToEndTest.forlengPeriode(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
 ) {
     nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
 }
 
 internal fun AbstractEndToEndTest.håndterSøknad(
     periode: Periode,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     sendTilGosys: Boolean = false,
     sendtTilNAVEllerArbeidsgiver: LocalDate = periode.endInclusive
@@ -431,7 +431,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     andreInntektskilder: Boolean = false,
     sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     id: UUID = UUID.randomUUID(),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     korrigerer: UUID? = null,
@@ -492,7 +492,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     førsteFraværsdag: LocalDate? = null,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     id: UUID = UUID.randomUUID(),
     harOpphørAvNaturalytelser: Boolean = false,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
@@ -556,7 +556,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     id: UUID = UUID.randomUUID(),
     harOpphørAvNaturalytelser: Boolean = false,
@@ -600,7 +600,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     inntekt: Inntekt = INNTEKT,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
         inntekter = listOf(
             ArbeidsgiverInntekt(orgnummer, (0..2).map {
@@ -615,7 +615,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
             })
         )
     ),
-    inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(a1, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
     fnr: Personidentifikator = UNG_PERSON_FNR_2018
 ): Vilkårsgrunnlag {
@@ -642,7 +642,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     simuleringOK: Boolean = true,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
@@ -655,7 +655,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     fagsystemId: String,
     fagområde: Fagområde,
     simuleringOK: Boolean = true,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
@@ -681,7 +681,7 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     val bedtOmSykepengehistorikk = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
@@ -724,7 +724,7 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     omsorgspenger: List<GradertPeriode> = emptyList(),
     opplæringspenger: List<GradertPeriode> = emptyList(),
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     arbeidsavklaringspenger: List<Periode> = emptyList(),
     dagpenger: List<Periode> = emptyList(),
     fnr: Personidentifikator = UNG_PERSON_FNR_2018
@@ -768,7 +768,7 @@ internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefa
 internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
     vedtaksperiodeId: IdInnhenter,
     skjæringstidspunkt: LocalDate = 1.januar,
-    orgnummer: String = ORGNUMMER
+    orgnummer: String = a1
 ): UUID {
     val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt, orgnummer)
     inntektFraAOrdningen.håndter(Person::håndter)
@@ -779,7 +779,7 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     antallGangerPåminnet: Int = 1,
     skalReberegnes: Boolean = false
 ) {
@@ -797,7 +797,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     utbetalingGodkjent: Boolean = true,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     automatiskBehandling: Boolean = false,
     utbetalingId: UUID = UUID.fromString(
         person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"]
@@ -811,7 +811,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
 internal fun AbstractEndToEndTest.håndterUtbetalt(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     fagsystemId: String,
     utbetalingId: UUID? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
@@ -849,7 +849,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sendOverførtKvittering: Boolean = true,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
     førsteUhåndterteUtbetalingsbehov(orgnummer)?.also { (utbetalingId, fagsystemIder) ->
@@ -860,7 +860,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 }
 
 internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     utbetalingId: UUID = inspektør.sisteUtbetaling().utbetalingId,
     opprettet: LocalDateTime = LocalDateTime.now()
 ) {
@@ -876,7 +876,7 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
 
 internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     inntekt: Inntekt = 31000.månedlig,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     skjæringstidspunkt: LocalDate,
     gjelder: Periode = skjæringstidspunkt til LocalDate.MAX,
     meldingsreferanseId: UUID = UUID.randomUUID(),
@@ -971,7 +971,7 @@ internal class OverstyrtArbeidsgiveropplysning(
 
 internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
     overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): OverstyrTidslinje {
     val hendelse = OverstyrTidslinje(
@@ -1014,7 +1014,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkForFeriepenger(
 
 internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-    orgnummer: String = ORGNUMMER,
+    orgnummer: String = a1,
     fagsystemId: String,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): UtbetalingHendelse {
@@ -1028,7 +1028,7 @@ internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
 
 internal fun AbstractEndToEndTest.håndterOverstyringSykedag(periode: Periode) = håndterOverstyrTidslinje(periode.map { manuellSykedag(it) })
 
-internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String = ORGNUMMER, grad: Prosentdel = 100.prosent, fnr: Personidentifikator = UNG_PERSON_FNR_2018) {
+internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String = a1, grad: Prosentdel = 100.prosent, fnr: Personidentifikator = UNG_PERSON_FNR_2018) {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), fnr = fnr, orgnummer = orgnummer)
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = orgnummer)
 }

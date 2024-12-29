@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -881,7 +880,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -899,7 +898,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(a1)])
 
         nullstillTilstandsendringer()
 
@@ -937,7 +936,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -1072,7 +1071,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Out of order kastes ut når det finnes en forkastet periode senere i tid`() {
-        tilGodkjenning(1.februar til 25.februar, ORGNUMMER)
+        tilGodkjenning(1.februar til 25.februar, a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -62,7 +62,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(mai, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterAnnullerUtbetaling()
         assertEquals(1, observatør.forkastedePerioder())
-        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(a1)).gjeldendeTilstand)
     }
 
     @Test
@@ -75,10 +75,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterSøknad(1.mai til 20.mai)
         håndterAnnullerUtbetaling()
         assertEquals(4, observatør.forkastedePerioder())
-        assertEquals(AVSLUTTET, observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVVENTER_INNTEKTSMELDING, observatør.forkastet(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.forkastet(1.vedtaksperiode.id(a1)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(a1)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(a1)).gjeldendeTilstand)
+        assertEquals(AVVENTER_INNTEKTSMELDING, observatør.forkastet(4.vedtaksperiode.id(a1)).gjeldendeTilstand)
     }
 
     @Test

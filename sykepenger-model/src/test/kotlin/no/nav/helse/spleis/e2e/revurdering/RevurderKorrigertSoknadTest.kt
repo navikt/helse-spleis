@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -104,7 +104,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertFunksjonellFeil(RV_SØ_13)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar, 2.februar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 29.januar, 2.februar, 100.prosent, INNTEKT))
         forlengVedtak(april)
         assertEquals(4, inspektør.antallUtbetalinger)
 

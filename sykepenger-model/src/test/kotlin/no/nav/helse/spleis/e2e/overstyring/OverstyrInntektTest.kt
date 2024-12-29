@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -79,7 +78,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
@@ -128,9 +127,9 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke hente registerdata for vilkårsprøving på nytt ved overstyring av inntekt`() {
-        tilGodkjenning(januar, ORGNUMMER)
+        tilGodkjenning(januar, a1)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = ORGNUMMER, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = a1, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(
@@ -155,7 +154,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = OverMinstegrense,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
+        val inntekter = listOf(grunnlag(a1, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)

@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -79,7 +78,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         håndterSkjønnsmessigFastsettelse(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                orgnummer = ORGNUMMER,
+                orgnummer = a1,
                 inntekt = 60000.månedlig,
                 forklaring = "",
                 subsumsjon = null,
@@ -108,7 +107,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
                 listOf(
                     VedtaksperiodeData(
                         orgnummer = a1,
-                        vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                        vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                         periode = 1.januar til 16.januar,
                         skjæringstidspunkt = 1.januar,
                         typeEndring = "ENDRING"

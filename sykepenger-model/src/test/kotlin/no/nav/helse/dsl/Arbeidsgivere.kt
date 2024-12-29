@@ -13,4 +13,5 @@ val frilans = Frilans
 val selvstendig = Selvstendig
 val arbeidsledig = Arbeidsledig
 
-val ORGNUMMER = a1
+@Deprecated("erstatte med a1", replaceWith = ReplaceWith("a1"))
+val ORGNUMMER = "bruk_heller_a1"

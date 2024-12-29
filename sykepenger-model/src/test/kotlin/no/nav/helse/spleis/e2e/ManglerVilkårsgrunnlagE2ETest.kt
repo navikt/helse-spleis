@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -72,7 +72,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(10.mars til 31.mars)
         håndterInntektsmelding(
             listOf(10.mars til 26.mars),

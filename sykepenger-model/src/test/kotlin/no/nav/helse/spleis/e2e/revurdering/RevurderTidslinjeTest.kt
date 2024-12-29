@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -104,7 +104,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -114,7 +114,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -124,7 +124,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-        assertNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -1043,10 +1043,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    ORGNUMMER,
+                    a1,
                     17.januar, INNTEKT, true
                 )
             )
@@ -1094,10 +1094,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    ORGNUMMER,
+                    a1,
                     1.februar, INNTEKT, true
                 )
             )
@@ -1200,10 +1200,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
+            ArbeidsgiverUtbetalingsperiode(a1, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    orgnummer = ORGNUMMER, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
+                    orgnummer = a1, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
                 )
             )
         )
@@ -1317,8 +1317,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(a1, 1.mars, 31.mars, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.mars, INNTEKT, true))
         )
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Sykedag, 80)))
         håndterYtelser(1.vedtaksperiode)

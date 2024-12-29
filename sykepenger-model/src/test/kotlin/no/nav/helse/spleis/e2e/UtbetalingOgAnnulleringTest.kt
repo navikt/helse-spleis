@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
-import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
@@ -47,7 +47,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
-        tilGodkjenning(januar, ORGNUMMER, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt()
         assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
@@ -78,7 +78,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
-        håndterAnnullerUtbetaling(ORGNUMMER)
+        håndterAnnullerUtbetaling(a1)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
     }

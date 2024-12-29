@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -45,7 +44,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
     fun `AUU med infotrygdperiode rett før skal omgjøres`() {
         nyPeriode(5.januar til 20.januar)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 4.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 4.januar, 100.prosent, INNTEKT))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_14)
         assertIngenOverlappendeInfotrygdutbetaling()
     }
@@ -55,7 +54,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyPeriode(5.januar til 20.januar)
         nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 4.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 4.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_14, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -67,7 +66,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
     fun `helt overlappende infotrygd`() {
         nyPeriode(5.januar til 20.januar)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertIngenOverlappendeInfotrygdutbetaling()
@@ -77,7 +76,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
     fun `delvis overlappende infotrygd`() {
         nyPeriode(5.januar til 20.januar)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 15.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 15.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertIngenOverlappendeInfotrygdutbetaling()
@@ -88,7 +87,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyPeriode(5.januar til 20.januar)
         nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 15.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 15.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
@@ -101,7 +100,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyPeriode(5.januar til 20.januar)
         nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 18.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 18.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
@@ -113,7 +112,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyPeriode(5.januar til 20.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar(2023), 31.januar(2023), 100.prosent))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
@@ -126,7 +125,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar(2023), 31.januar(2023), 100.prosent))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 20.januar, 100.prosent, INNTEKT))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertVarsler(listOf(RV_IT_3, RV_IT_38), 1.vedtaksperiode.filter())
@@ -141,7 +140,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar(2023), 31.januar(2023), 100.prosent))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 4.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 4.januar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_14, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -181,7 +180,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
 
     private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter, tilstand: String) {
         val overlapp = observatør.overlappendeInfotrygdperioder.last()
-        val vedtaksperiodeId = vedtaksperiode.id(ORGNUMMER)
+        val vedtaksperiodeId = vedtaksperiode.id(a1)
         assertEquals(vedtaksperiodeId, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodeId)
         assertEquals(tilstand, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodetilstand)
     }

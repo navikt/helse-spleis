@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -63,7 +62,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, INNTEKT, "Noo", null, listOf(
+                a1, INNTEKT, "Noo", null, listOf(
                 Triple(1.januar, null, INNTEKT / 2),
             )
             )
@@ -86,7 +85,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, INNTEKT, "Noo", null, listOf(
+                a1, INNTEKT, "Noo", null, listOf(
                 Triple(1.januar, 31.januar, INNTEKT),
                 Triple(1.februar, null, INNTEKT / 2)
             )
@@ -105,7 +104,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
+                a1, nyInntekt, "Det var jo alt for lite!", null, listOf(
                 Triple(1.januar, null, nyInntekt)
             )
             )
@@ -148,7 +147,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, nySaksbehandlerInntekt, "Det var jo alt for lite!", null, listOf(
+                a1, nySaksbehandlerInntekt, "Det var jo alt for lite!", null, listOf(
                 Triple(1.januar, null, nySaksbehandlerInntekt)
             )
             )
@@ -177,7 +176,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
+                a1, nyInntekt, "Det var jo alt for lite!", null, listOf(
                 Triple(1.januar, null, nyInntekt)
             )
             )
@@ -191,7 +190,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, nyInntekt, "Det var jo alt for lite!", null, listOf(
+                a1, nyInntekt, "Det var jo alt for lite!", null, listOf(
                 Triple(1.januar, null, nyInntekt)
             )
             )
@@ -237,7 +236,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
-                ORGNUMMER, INNTEKT, "Vi bruker det samme som før", null, listOf(
+                a1, INNTEKT, "Vi bruker det samme som før", null, listOf(
                 Triple(1.mars, null, INNTEKT / 2)
             )
             )
@@ -297,7 +296,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val nyInntekt = INNTEKT * 2
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(ORGNUMMER, nyInntekt, "Prøver å overstyre Infotrygd-inntekt", null, emptyList())
+            OverstyrtArbeidsgiveropplysning(a1, nyInntekt, "Prøver å overstyre Infotrygd-inntekt", null, emptyList())
         )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -318,7 +317,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 meldingsreferanseId = UUID.randomUUID(),
                 arbeidsgiveropplysninger = listOf(
                     OverstyrtArbeidsgiveropplysning(
-                        ORGNUMMER, INNTEKT / 2, "noe", null, refusjonsopplysninger = listOf(
+                        a1, INNTEKT / 2, "noe", null, refusjonsopplysninger = listOf(
                         Triple(1.januar, null, INNTEKT / 2)
                     )
                     )
@@ -808,15 +807,15 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
-    private fun TestArbeidsgiverInspektør.inntektIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+    private fun TestArbeidsgiverInspektør.inntektIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.inspektør.beløp
 
-    private fun TestArbeidsgiverInspektør.inntektsopplysningIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+    private fun TestArbeidsgiverInspektør.inntektsopplysningIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning
 
-    private fun TestArbeidsgiverInspektør.refusjonsopplysningerIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+    private fun TestArbeidsgiverInspektør.refusjonsopplysningerIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger
 
-    private fun TestArbeidsgiverInspektør.arbeidsgiverInntektsopplysningIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+    private fun TestArbeidsgiverInspektør.arbeidsgiverInntektsopplysningIInntektsgrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }
 }

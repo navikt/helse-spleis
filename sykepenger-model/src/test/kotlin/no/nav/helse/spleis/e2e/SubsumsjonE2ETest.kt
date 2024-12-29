@@ -7,7 +7,6 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -136,7 +135,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 4.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 4.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -148,7 +147,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
                     mapOf(
-                        "orgnummer" to ORGNUMMER,
+                        "orgnummer" to a1,
                         "fom" to 4.desember(2017),
                         "tom" to 31.januar
                     )
@@ -163,7 +162,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
@@ -176,7 +175,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
                     mapOf(
-                        "orgnummer" to ORGNUMMER,
+                        "orgnummer" to a1,
                         "fom" to 5.desember(2017),
                         "tom" to 31.januar
                     )
@@ -350,7 +349,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 46817.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
@@ -378,7 +377,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 46817.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.november(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.november(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, inntekt = 50000.årlig)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -397,7 +396,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser()
         håndterSimulering()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, 50000.årlig)))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 50000.årlig)))
 
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 1,
@@ -426,7 +425,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 46816.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
 
@@ -652,7 +651,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2020),
             sporing = listOf(
                 Subsumsjonskontekst(KontekstType.Fødselsnummer, UNG_PERSON_FNR_2018.toString()),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, ORGNUMMER),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, a1),
                 Subsumsjonskontekst(KontekstType.Inntektsmelding, im.toString())
             ),
             input = mapOf("årligInntekt" to 260000.0),
@@ -2042,7 +2041,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 187268.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
@@ -2061,7 +2060,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             fnr = personOver67år,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -2091,7 +2090,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             fnr = personOver67år,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
 
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())

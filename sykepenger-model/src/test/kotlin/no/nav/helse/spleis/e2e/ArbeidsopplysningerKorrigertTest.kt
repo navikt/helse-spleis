@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.Dagtype
@@ -95,7 +94,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             1.januar,
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(
-                    ORGNUMMER,
+                    a1,
                     25000.månedlig,
                     "forklaring",
                     null,
@@ -323,7 +322,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             1.januar,
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(
-                    ORGNUMMER,
+                    a1,
                     40000.månedlig,
                     "forklaring",
                     null,

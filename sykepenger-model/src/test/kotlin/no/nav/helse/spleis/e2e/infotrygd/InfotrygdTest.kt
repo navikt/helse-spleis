@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.util.UUID
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -54,8 +53,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk som er nærme`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 30.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -65,8 +64,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 30.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
         )
         håndterSøknad(Sykdom(20.februar, 28.mars, 100.prosent))
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

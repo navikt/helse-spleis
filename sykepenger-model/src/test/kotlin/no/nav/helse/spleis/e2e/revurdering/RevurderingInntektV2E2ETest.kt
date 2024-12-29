@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -271,7 +270,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 50000.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
+        val inntekter = listOf(grunnlag(a1, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
@@ -681,12 +680,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
-        assertNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
     }
 
     @Test

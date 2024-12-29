@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import no.nav.helse.desember
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -54,7 +53,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars))
         håndterSøknad(Sykdom(18.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, 1000.daglig))
 
         assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
@@ -81,8 +80,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `forlenger utbetaling i Infotrygd på samme arbeidsgiver`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -92,7 +91,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger utbetaling i Infotrygd på annen arbeidsgiver`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)))
         nyPeriode(februar, a1)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
@@ -101,8 +100,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `bare ferie - etter infotrygdutbetaling`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
+            ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true)
         )
         )
         håndterSykmelding(januar)

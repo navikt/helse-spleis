@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -53,7 +52,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
-        val event = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
+        val event = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(a1))
         assertEquals(inspektør.utbetaling(0).utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).tilstand)
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
@@ -94,7 +93,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val event = observatør.avsluttetMedVedtakEvent.getValue(2.vedtaksperiode.id(ORGNUMMER))
+        val event = observatør.avsluttetMedVedtakEvent.getValue(2.vedtaksperiode.id(a1))
         assertEquals(inspektør.utbetaling(1).utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).tilstand)
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
@@ -276,14 +275,14 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)
-        val tidligereVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
+        assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(a1)).size)
+        val tidligereVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(a1))
         håndterUtbetalt()
-        assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)
-        val nyttVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
+        assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(a1)).size)
+        val nyttVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(a1))
         assertEquals(tidligereVedtak.hendelseIder.plus(overstyringId), nyttVedtak.hendelseIder)
     }
 
-    private val IdInnhenter.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(id(ORGNUMMER))
-    private fun IdInnhenter.assertIngenVedtakFattet() = assertEquals(emptyList<PersonObserver.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[id(ORGNUMMER)] ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>())
+    private val IdInnhenter.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(id(a1))
+    private fun IdInnhenter.assertIngenVedtakFattet() = assertEquals(emptyList<PersonObserver.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[id(a1)] ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>())
 }
