@@ -232,7 +232,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
         assertIngenTag("IngenNyArbeidsgiverperiode")
         assertTags(setOf("InngangsvilkårFraInfotrygd"))
     }

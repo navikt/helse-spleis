@@ -15,6 +15,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
@@ -24,6 +25,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
@@ -123,8 +125,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar(2023), 31.januar(2023), 100.prosent))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IT_3, RV_IT_38), 1.vedtaksperiode.filter())
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVVENTER_BLOKKERENDE_PERIODE")
@@ -166,6 +169,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             ArbeidsgiverUtbetalingsperiode(a2, 1.mars, 5.mars, 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai, 100.prosent, INNTEKT)
         )
+
+        assertVarsler(listOf(RV_IT_3, RV_IT_38), 2.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(RV_IT_3, RV_IT_38), 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)

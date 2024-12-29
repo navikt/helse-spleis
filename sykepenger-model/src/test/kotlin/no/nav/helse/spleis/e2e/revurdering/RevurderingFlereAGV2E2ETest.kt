@@ -566,7 +566,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23, Varselkode.RV_IT_3), 1.vedtaksperiode.filter(orgnummer = a1))
 
         val utbetaling1 = inspektør.utbetaling(0)
         val revurdering = inspektør.utbetaling(1)

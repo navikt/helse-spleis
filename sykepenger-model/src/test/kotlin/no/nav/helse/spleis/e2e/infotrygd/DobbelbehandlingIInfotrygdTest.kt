@@ -10,6 +10,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -68,6 +69,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, skalReberegnes = true)
         håndterYtelser(1.vedtaksperiode)
 
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.also { utbetalingInspektør ->
             assertEquals(Endringskode.UEND, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(0, utbetalingInspektør.personOppdrag.inspektør.antallLinjer())

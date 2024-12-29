@@ -295,6 +295,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         )
         håndterYtelser(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
         assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertEquals(UEND, inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.endringskode)
         assertEquals(gammelInntekt, inspektør.inntektIInntektsgrunnlaget(1.januar))

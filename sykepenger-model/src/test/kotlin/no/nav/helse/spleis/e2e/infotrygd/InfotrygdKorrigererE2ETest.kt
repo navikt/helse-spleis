@@ -34,6 +34,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -109,7 +110,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IT_1), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

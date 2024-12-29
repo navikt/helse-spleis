@@ -201,6 +201,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet med sykepengegrunnlag fastsatt i Infotrygd`() {
         createOvergangFraInfotrygdPerson()
         forlengVedtak(februar)
+
+        assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
         assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
         val event = observatør.avsluttetMedVedtakEvent.values.single()
         val forventetSykepengegrunnlagsfakta = FastsattIInfotrygd(372000.0)

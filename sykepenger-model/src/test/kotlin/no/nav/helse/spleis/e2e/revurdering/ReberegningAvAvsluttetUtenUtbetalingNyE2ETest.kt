@@ -295,6 +295,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a2)
