@@ -106,6 +106,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
         håndterYtelser()
+        assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
         assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
@@ -143,8 +144,10 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, ORDINÆRT),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, ORDINÆRT)
-            )
+            ),
+            orgnummer = a1
         )
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 }

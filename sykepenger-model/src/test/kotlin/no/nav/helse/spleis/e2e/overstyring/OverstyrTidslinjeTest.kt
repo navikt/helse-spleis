@@ -503,6 +503,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
         assertEquals(2, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.size)
         assertEquals(21.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[0].tom)
         assertEquals(23.januar, inspektør.sisteUtbetaling().arbeidsgiverOppdrag[1].fom)

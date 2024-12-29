@@ -10,6 +10,7 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -97,6 +98,8 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_VV_4, 2.vedtaksperiode.filter())
 
         // Arbeidsgiverperioden blir beregnet riktig
         assertEquals(listOf(1.januar til 16.januar), inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode))

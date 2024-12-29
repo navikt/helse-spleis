@@ -18,6 +18,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -34,6 +35,8 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         nyPeriode(5.februar til 9.februar, a1, 10.prosent)
         nyPeriode(5.februar til 9.februar, a2, 10.prosent)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertVarsel(RV_VV_4, 2.vedtaksperiode.filter(orgnummer = a1))
         inspektør(a1).utbetaling(1).also {
             assertEquals(listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar), it.utbetalingstidslinje.inspektør.avvistedatoer)
         }
@@ -47,6 +50,8 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(0))
         val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
         assertTrue(utbetalingstidslinje[17.januar] is Utbetalingsdag.AvvistDag)
@@ -74,6 +79,8 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
+
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(21.januar til 31.januar)
         håndterYtelser(2.vedtaksperiode)

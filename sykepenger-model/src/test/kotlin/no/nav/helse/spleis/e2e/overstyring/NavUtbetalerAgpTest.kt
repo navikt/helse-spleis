@@ -495,7 +495,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(RV_IM_8, RV_VV_2), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_VV_4, RV_IM_8, RV_VV_2), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertUtbetalingsdag(inspektør.sisteUtbetalingUtbetalingstidslinje()[2.januar], expectedDagtype = Utbetalingsdag.AvvistDag::class, 11)
     }

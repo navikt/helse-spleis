@@ -17,6 +17,7 @@ import no.nav.helse.november
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -282,7 +283,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a2
         )
+        assertVarsel(Varselkode.RV_VV_1, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertVarsel(Varselkode.RV_VV_8, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør

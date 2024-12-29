@@ -964,7 +964,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-13 ledd 1 - Sykmeldte har under 20 prosent uføregrad`() {
+    fun `§ 8-13 ledd 1 og ledd 2 - Sykmeldte har under 20 prosent uføregrad`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
@@ -972,6 +972,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_13,
             ledd = 1.ledd,
@@ -988,6 +989,34 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "perioder" to listOf(
                     mapOf(
                         "fom" to 17.januar,
+                        "tom" to 31.januar
+                    )
+                )
+            )
+        )
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = PARAGRAF_8_13,
+            ledd = 2.ledd,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 19),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 19)
+                    )
+                ),
+                "grense" to 20.0
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar
+                    )
+                ),
+                "dagerUnderGrensen" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
                         "tom" to 31.januar
                     )
                 )
@@ -1027,45 +1056,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     )
                 ),
                 "dagerUnderGrensen" to emptyList()
-            )
-        )
-    }
-
-    @Test
-    fun `§ 8-13 ledd 2 - Sykmeldte har under 20 prosent uføregrad`() {
-        håndterSykmelding(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = PARAGRAF_8_13,
-            ledd = 2.ledd,
-            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-            input = mapOf(
-                "tidslinjegrunnlag" to listOf(
-                    listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 19),
-                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 19)
-                    )
-                ),
-                "grense" to 20.0
-            ),
-            output = mapOf(
-                "perioder" to listOf(
-                    mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 31.januar
-                    )
-                ),
-                "dagerUnderGrensen" to listOf(
-                    mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 31.januar
-                    )
-                )
             )
         )
     }

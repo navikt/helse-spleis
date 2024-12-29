@@ -597,6 +597,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             INNTEKT,
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(Varselkode.RV_VV_1, 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -643,6 +644,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             INNTEKT,
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         håndterYtelser()
         håndterUtbetalingsgodkjenning()
 
@@ -675,6 +677,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, arbeidsforhold = arbeidsforhold)
+        assertVarsel(Varselkode.RV_VV_1, 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 

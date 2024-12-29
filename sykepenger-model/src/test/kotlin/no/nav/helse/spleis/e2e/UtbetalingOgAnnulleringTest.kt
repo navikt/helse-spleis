@@ -75,6 +75,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
         håndterAnnullerUtbetaling(ORGNUMMER)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -452,6 +453,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
         val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
         val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }

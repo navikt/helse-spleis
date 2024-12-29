@@ -16,6 +16,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.UtbetalingInntektskilde
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -369,6 +370,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold2
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_VV_8, 2.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
