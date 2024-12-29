@@ -216,6 +216,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
@@ -232,6 +233,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
@@ -273,6 +275,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
         assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[5.februar]::class)
         assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[6.februar]::class)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -678,7 +682,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_IV_7, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_IV_7, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

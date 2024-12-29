@@ -34,6 +34,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -70,7 +71,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertTrue(inspektør.sykdomstidslinje[17.januar] is Feriedag)
         assertTrue(inspektør.sykdomstidslinje[18.januar] is Feriedag)
         assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is Fridag)

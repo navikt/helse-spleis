@@ -177,6 +177,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterSøknad(mars)
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -192,6 +193,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -235,26 +237,35 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `omgjøring som _ikke_ kan avvises`() {
         håndterSøknad(2.januar til 17.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
         håndterSøknad(18.januar til 31.januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
+
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(kanAvvises(2.vedtaksperiode))
+
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
+
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+
+        assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertFalse(kanAvvises(1.vedtaksperiode))
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
+
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFalse(kanAvvises(2.vedtaksperiode))
     }
@@ -282,6 +293,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
+        assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(kanAvvises(2.vedtaksperiode))
 

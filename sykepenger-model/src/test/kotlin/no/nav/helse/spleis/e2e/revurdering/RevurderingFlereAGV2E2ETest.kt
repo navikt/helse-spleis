@@ -28,6 +28,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -68,7 +69,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -162,7 +163,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -187,7 +188,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 10.juni), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.juni, 10.juni, 100.prosent), orgnummer = a2)
 
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
@@ -245,7 +246,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a2))
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -295,7 +296,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a3))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a3))
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -320,7 +321,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
@@ -426,7 +427,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
 
@@ -455,7 +456,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a2))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1) {
@@ -475,7 +476,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
-        assertVarsler(listOf(RV_AY_5, Varselkode.RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_AY_5, Varselkode.RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         assertIngenVarsel(RV_AY_5, 1.vedtaksperiode.filter(a2))
     }
 
@@ -487,7 +488,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.mars til 31.mars, 100)), orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         assertIngenVarsel(RV_AY_5)
     }
 
@@ -517,7 +518,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
 
         inspektør(a1).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
             assertEquals(3, utbetalinger.size)
@@ -544,13 +545,13 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
-        assertVarsler(listOf(RV_VV_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter(a1))
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(RV_VV_4, Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(a2))
         assertIngenVarsel(RV_VV_4, 1.vedtaksperiode.filter(a2))
     }
 
     @Test
-    fun `revurdere på en eldre arbeidsgiver - infotrygd har utbetalt `() {
+    fun `revurdere på en eldre arbeidsgiver - infotrygd har utbetalt`() {
         nyeVedtak(januar, a1)
         nyPeriode(1.februar til 18.februar, a2)
 
@@ -565,7 +566,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
 
         val utbetaling1 = inspektør.utbetaling(0)
         val revurdering = inspektør.utbetaling(1)
