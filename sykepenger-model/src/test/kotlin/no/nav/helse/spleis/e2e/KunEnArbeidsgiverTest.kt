@@ -222,8 +222,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `Søknad med utenlandsopphold gir warning`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Utlandsopphold(11.januar, 15.januar))
-        assertVarsler(emptyList(), AktivitetsloggFilter.Alle)
-        assertVarsel(RV_SØ_8, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
         inspektør.also {
             assertEquals(1, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])

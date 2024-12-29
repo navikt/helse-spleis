@@ -42,7 +42,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
@@ -56,8 +55,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -536,10 +533,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterInntektsmelding(listOf(10.januar til 25.januar))
-        assertIngenVarsler(1.vedtaksperiode.filter(a1))
         assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
-        // assertNoWarnings(2.vedtaksperiode.filter(a1))
-        assertIngenVarsler(3.vedtaksperiode.filter(a1))
+
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter(a1))
+        assertVarsler(emptyList(), 3.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -565,9 +563,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterInntektsmelding(listOf(10.januar til 25.januar))
 
-        assertIngenVarsler(1.vedtaksperiode.filter())
-        assertIngenVarsler(2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4), 3.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -966,8 +964,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IT_1, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
     }
 
     @Test

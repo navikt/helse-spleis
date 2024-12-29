@@ -8,9 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -207,6 +205,6 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
             }
         }
         assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
-        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 }

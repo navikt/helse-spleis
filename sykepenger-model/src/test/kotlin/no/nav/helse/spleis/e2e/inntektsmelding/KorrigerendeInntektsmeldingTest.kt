@@ -21,7 +21,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -88,10 +87,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         forlengVedtak(mars)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IM_4, 4.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4), 2.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 3.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 4.vedtaksperiode.filter())
     }
 
     @Test
@@ -158,7 +157,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje[1.januar] is Utbetalingsdag.Arbeidsdag)
         assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
@@ -382,7 +381,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_IM_3, RV_UT_23), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_IM_3, RV_UT_23, RV_IM_24), 2.vedtaksperiode.filter())
     }
 
     @Test

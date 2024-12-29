@@ -92,11 +92,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
-        assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12, RV_IM_8), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
 
         håndterOverstyrTidslinje(
             (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +

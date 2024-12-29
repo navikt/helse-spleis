@@ -8,7 +8,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class AktivitetsloggAsserts(
@@ -30,21 +29,16 @@ internal class AktivitetsloggAsserts(
         assertEquals(0, info.count { it.contains(forventet) }, "fant uventet info. Info:\n${info.joinToString("\n")}")
     }
 
-    internal fun assertIngenVarsler(filter: AktivitetsloggFilter) {
-        val warnings = collectVarselkoder(filter)
-        assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
-    }
-
-    internal fun assertHarVarsler(filter: AktivitetsloggFilter) {
-        val warnings = collectVarselkoder(filter)
-        assertTrue(warnings.isNotEmpty(), "Forventet warnings, men ingen warnings er funnet")
-    }
-
     internal fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) {
         val actualVarsler = collectVarselkoder(filter)
         val result = varsler.filterNot { it in actualVarsler }
+        val ikkeAssertet = actualVarsler.filterNot { it in varsler }
+
         assertTrue(result.isEmpty()) {
             "\nFant ikke forventet warning:\n\t${result.joinToString(separator = "\n\t")}\nWarnings funnet:\n\t${actualVarsler.joinToString("\n\t")}\n"
+        }
+        assertTrue(ikkeAssertet.isEmpty()) {
+            "\nIkke alle varsler er assertet:\n\t${ikkeAssertet.joinToString(separator = "\n\t")}\n"
         }
         assertetVarsler.kvitterVarsel(filter, varsler)
     }
@@ -59,16 +53,6 @@ internal class AktivitetsloggAsserts(
         assertTrue(varselkoder.contains(kode), "\nFant ikke forventet varselkode:\n\t$kode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
 
         assertetVarsler.kvitterVarsel(filter, kode)
-    }
-
-    internal fun assertIngenVarsel(warning: String, filter: AktivitetsloggFilter) {
-        val warnings = collectVarsler(filter)
-        assertFalse(warnings.contains(warning), "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
-    }
-
-    internal fun assertIngenVarsel(warning: Varselkode, filter: AktivitetsloggFilter) {
-        val varselkoder = collectVarselkoder(filter)
-        assertTrue(warning !in varselkoder, "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
     }
 
     internal fun assertIngenFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) {

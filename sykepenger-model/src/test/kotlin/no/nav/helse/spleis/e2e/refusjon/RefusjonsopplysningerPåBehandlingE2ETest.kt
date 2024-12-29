@@ -103,7 +103,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSøknad(17.januar til 21.januar)
             håndterInntektsmeldingPortal(listOf(tirsdag(23.januar) til 7.februar), vedtaksperiodeId = 2.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            assertIngenVarsler(2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel
         }
     }
 

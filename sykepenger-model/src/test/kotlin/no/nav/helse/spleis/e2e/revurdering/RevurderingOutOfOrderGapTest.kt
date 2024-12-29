@@ -53,7 +53,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenInfo
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
@@ -1065,9 +1064,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
 
-        assertIngenVarsel(RV_OO_1, 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_1, 2.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_1, 3.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -1093,9 +1092,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_1, 2.vedtaksperiode.filter())
-        assertIngenVarsel(RV_OO_1, 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OO_1), 3.vedtaksperiode.filter())
     }
 
     @Test

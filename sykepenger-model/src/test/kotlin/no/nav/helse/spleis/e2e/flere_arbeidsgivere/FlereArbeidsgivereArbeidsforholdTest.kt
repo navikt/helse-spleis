@@ -20,9 +20,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -113,7 +113,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
-        assertIngenVarsler(2.vedtaksperiode.filter(a1))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -145,7 +145,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-        assertIngenVarsler()
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -179,7 +179,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
-        assertIngenVarsler(1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
         assertEquals(UtbetalingInntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode))
     }
 
@@ -254,7 +254,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a2Linje.tom)
         assertEquals(692, a2Linje.beløp)
 
-        assertIngenVarsler()
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a2))
     }
 
     @Test

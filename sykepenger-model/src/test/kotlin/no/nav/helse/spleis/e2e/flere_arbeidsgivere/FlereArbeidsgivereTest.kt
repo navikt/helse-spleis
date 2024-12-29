@@ -1050,7 +1050,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertIngenVarsler(1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
         a1 {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
@@ -1091,7 +1091,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
-            assertIngenVarsler()
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 

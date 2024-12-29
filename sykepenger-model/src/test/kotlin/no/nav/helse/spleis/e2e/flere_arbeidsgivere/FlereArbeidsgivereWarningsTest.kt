@@ -19,9 +19,10 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertIngenVarsler
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.Alle
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -43,7 +44,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a2)
-        assertIngenVarsler(1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -61,8 +62,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-
-        assertIngenVarsler(AktivitetsloggFilter.person())
+        assertVarsler(emptyList(), Alle)
     }
 
     @Test

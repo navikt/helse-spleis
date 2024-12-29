@@ -22,7 +22,7 @@ internal class YrkesskadeE2ETest : AbstractDslTest() {
     fun `søknad uten yrkesskade gir ikke varsel om yrkesskade`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), yrkesskade = false)
-            assertIngenVarsler(1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 }

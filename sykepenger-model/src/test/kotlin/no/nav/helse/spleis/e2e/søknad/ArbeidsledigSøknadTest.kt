@@ -38,7 +38,7 @@ internal class ArbeidsledigSøknadTest : AbstractDslTest() {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertIngenVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
     }
 

@@ -33,9 +33,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
@@ -476,8 +474,8 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_AY_5, Varselkode.RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
-        assertIngenVarsel(RV_AY_5, 1.vedtaksperiode.filter(a2))
+        assertVarsler(listOf(Varselkode.RV_OS_2, RV_AY_5, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -489,7 +487,10 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.mars til 31.mars, 100)), orgnummer = a1)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
-        assertIngenVarsel(RV_AY_5)
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(emptyList(), 3.vedtaksperiode.filter(orgnummer = a2))
     }
 
     @Test
@@ -547,7 +548,6 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
         assertVarsler(listOf(RV_VV_4, Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(a1))
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(a2))
-        assertIngenVarsel(RV_VV_4, 1.vedtaksperiode.filter(a2))
     }
 
     @Test

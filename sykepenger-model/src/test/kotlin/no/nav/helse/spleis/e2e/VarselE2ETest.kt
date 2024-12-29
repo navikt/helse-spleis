@@ -25,7 +25,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
@@ -128,7 +127,6 @@ internal class VarselE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            assertIngenVarsel(RV_IT_13, 1.vedtaksperiode.filter())
             assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         }

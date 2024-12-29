@@ -16,8 +16,8 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -212,7 +212,7 @@ internal class InntektsmeldingTest {
         assertEquals(emptySet<LocalDate>(), dager.inspektør.gjenståendeDager)
         val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje()
         dager.validerArbeidsgiverperiode(aktivitetslogg, januar, null)
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
         aktivitetslogg.assertIngenFunksjonelleFeil()
         assertNull(nyTidslinje)
     }

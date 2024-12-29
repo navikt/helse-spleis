@@ -30,7 +30,7 @@ internal class MedlemskapE2E : AbstractDslTest() {
     fun `søknad uten arbeidUtenforNorge gir ikke varsel om medlemskap`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), arbeidUtenforNorge = false)
-            assertIngenVarsler(1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 

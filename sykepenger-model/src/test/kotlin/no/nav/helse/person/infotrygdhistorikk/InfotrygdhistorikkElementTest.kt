@@ -16,8 +16,8 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -297,7 +297,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -312,7 +312,7 @@ internal class InfotrygdhistorikkElementTest {
         )
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -324,7 +324,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
 
         val inspektør = tidslinje.inspektør
         assertEquals(1.januar, inspektør.førstedato)
@@ -342,7 +342,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
 
         val inspektør = tidslinje.inspektør
         assertEquals(1.januar, inspektør.førstedato)
@@ -367,7 +367,7 @@ internal class InfotrygdhistorikkElementTest {
     fun `Validerer ok hvis det ikke finnes noen utbetalinger fra Infotrygd`() {
         val element = nyttHistorikkelement()
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -389,7 +389,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertFalse(element.valider(aktivitetslogg, 23.januar.somPeriode(), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -400,7 +400,7 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(26.januar, 26.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -412,7 +412,7 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -423,7 +423,7 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -436,7 +436,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -448,7 +448,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -461,7 +461,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -474,7 +474,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -486,7 +486,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -498,7 +498,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.februar(2019), 28.februar(2019)), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     @Test
@@ -510,7 +510,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(2.januar, 31.januar), "ag1"))
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     private fun nyttHistorikkelement(

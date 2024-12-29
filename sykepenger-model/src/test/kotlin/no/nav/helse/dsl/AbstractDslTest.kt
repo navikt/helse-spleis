@@ -280,12 +280,6 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsel(kode, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenVarsel(kode, filter)
-
-    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsler(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
-        testArbeidsgiverAsserter.assertIngenVarsler(filter)
-
     protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertInfo(forventet, filter)
 
@@ -432,14 +426,8 @@ internal abstract class AbstractDslTest {
     protected fun String.assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
         this { assertVarsel(kode, filter) }
 
-    protected fun String.assertIngenVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
-        this { assertIngenVarsel(kode, filter) }
-
     protected fun String.assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
         this { assertFunksjonellFeil(kode, filter) }
-
-    protected fun String.assertIngenVarsler(filter: AktivitetsloggFilter) =
-        this { assertIngenVarsler(filter) }
 
     protected fun String.nyttVedtak(
         periode: Periode,
@@ -590,14 +578,8 @@ internal abstract class AbstractDslTest {
     protected fun assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertVarsel(kode, filter)
 
-    protected fun assertIngenVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertIngenVarsel(kode, filter)
-
     protected fun assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertFunksjonellFeil(kode, filter)
-
-    protected fun assertIngenVarsler(filter: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertIngenVarsler(filter)
 
     protected fun assertActivities() {
         val inspektør = inspiser(personInspektør)

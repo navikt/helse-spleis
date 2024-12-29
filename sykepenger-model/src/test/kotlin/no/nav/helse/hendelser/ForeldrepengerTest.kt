@@ -8,8 +8,8 @@ import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.september
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.til
 import no.nav.helse.torsdag
 import org.junit.jupiter.api.Test
@@ -25,7 +25,7 @@ class ForeldrepengerTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         foreldrepenger.valider(aktivitetslogg, 1.oktober til 30.oktober, false)
-        aktivitetslogg.assertIngenVarsel(Varselkode.RV_AY_12)
+        aktivitetslogg.assertVarsler(listOf(Varselkode.RV_AY_5))
     }
 
     @Test
@@ -61,7 +61,7 @@ class ForeldrepengerTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         foreldrepenger.valider(aktivitetslogg, mandag den 22.januar til 31.januar, false)
-        aktivitetslogg.assertIngenVarsel(Varselkode.RV_AY_12)
+        aktivitetslogg.assertVarsler(listOf(Varselkode.RV_AY_5))
     }
 
     @Test
@@ -73,6 +73,6 @@ class ForeldrepengerTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         foreldrepenger.valider(aktivitetslogg, 1.oktober til 30.oktober, false)
-        aktivitetslogg.assertIngenVarsel(Varselkode.RV_AY_12)
+        aktivitetslogg.assertVarsler(listOf(Varselkode.RV_AY_5))
     }
 }

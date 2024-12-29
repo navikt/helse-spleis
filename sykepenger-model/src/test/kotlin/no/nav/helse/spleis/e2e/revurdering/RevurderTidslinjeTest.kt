@@ -53,7 +53,6 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -643,9 +642,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
         nullstillTilstandsendringer()
 
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertIngenVarsel(Varselkode.RV_SI_1, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -957,7 +955,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_IV_7, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IV_7, RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1251,7 +1249,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(2.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-        
+
         val hendelseId = UUID.randomUUID()
         håndterOverstyrTidslinje(
             meldingsreferanseId = hendelseId,

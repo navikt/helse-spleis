@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -61,7 +62,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
 
-        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3), 2.vedtaksperiode.filter())
     }
 }

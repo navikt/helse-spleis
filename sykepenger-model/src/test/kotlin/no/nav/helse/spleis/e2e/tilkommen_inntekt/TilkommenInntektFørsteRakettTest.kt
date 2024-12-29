@@ -30,8 +30,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                     TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
-            assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
-            assertIngenVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IV_9), 2.vedtaksperiode.filter())
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -51,8 +50,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                     TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
-            assertVarsel(Varselkode.RV_IV_9, 2.vedtaksperiode.filter())
-            assertIngenVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IV_9), 2.vedtaksperiode.filter())
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -73,8 +71,7 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                 )
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertVarsel(Varselkode.RV_IV_9, 1.vedtaksperiode.filter())
-            assertIngenVarsel(Varselkode.RV_SV_5, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IV_9), 1.vedtaksperiode.filter())
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -93,9 +90,8 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                     TilkommenInntekt(1.februar, 28.februar, a2, 10000)
                 )
             )
-            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(februar, 100)))
-            assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_IV_9), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_SV_5, Varselkode.RV_AY_5, Varselkode.RV_IV_9), 2.vedtaksperiode.filter())
         }
     }
 }

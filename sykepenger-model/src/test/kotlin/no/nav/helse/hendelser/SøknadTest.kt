@@ -25,8 +25,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_44
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -279,7 +279,7 @@ internal class SøknadTest {
     fun `jobbet siste 14 dager i annet arbeidsforhold`() {
         søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false)
         søknad.valider(aktivitetslogg, null, Beløpstidslinje(), EmptyLog)
-        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertVarsler(emptyList())
     }
 
     private fun søknad(

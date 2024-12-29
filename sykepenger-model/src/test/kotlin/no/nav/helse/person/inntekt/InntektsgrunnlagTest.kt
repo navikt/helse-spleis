@@ -40,8 +40,8 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
@@ -158,17 +158,19 @@ internal class InntektsgrunnlagTest {
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(41, resultat.inspektør.avvistDagTeller)
-        assertTrue((1.januar(2021) til 1.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
-            }
+        assertTrue(
+            (1.januar(2021) til 1.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
+                }
         )
-        assertTrue((2.februar(2021) til 28.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-            }
+        assertTrue(
+            (2.februar(2021) til 28.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+                }
         )
     }
 
@@ -291,17 +293,19 @@ internal class InntektsgrunnlagTest {
         val tidslinje = tidslinjeOf(28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(20, resultat.inspektør.avvistDagTeller)
-        assertTrue((1.februar(2021) til 1.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
-            }
+        assertTrue(
+            (1.februar(2021) til 1.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntekt
+                }
         )
-        assertTrue((2.februar(2021) til 28.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-            }
+        assertTrue(
+            (2.februar(2021) til 28.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+                }
         )
     }
 
@@ -316,11 +320,12 @@ internal class InntektsgrunnlagTest {
         val tidslinje = tidslinjeOf(27.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
         assertEquals(19, resultat.inspektør.avvistDagTeller)
-        assertTrue((2.februar(2021) til 28.februar(2021))
-            .filterNot { it.erHelg() }
-            .all { dato ->
-                resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
-            }
+        assertTrue(
+            (2.februar(2021) til 28.februar(2021))
+                .filterNot { it.erHelg() }
+                .all { dato ->
+                    resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
+                }
         )
     }
 
@@ -511,7 +516,6 @@ internal class InntektsgrunnlagTest {
         val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysningA1)
 
-
         val resultat = overstyring.resultat()
         assertNotNull(resultat)
         assertEquals(2, resultat.size)
@@ -597,7 +601,7 @@ internal class InntektsgrunnlagTest {
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a2)
-            aktivitetslogg.assertIngenVarsel(RV_VV_8)
+            aktivitetslogg.assertVarsler(emptyList())
         }
     }
 
@@ -779,7 +783,7 @@ internal class InntektsgrunnlagTest {
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningMedA2)
-            aktivitetslogg.assertIngenVarsel(RV_VV_1)
+            aktivitetslogg.assertVarsler(emptyList())
         }
     }
 
@@ -824,7 +828,7 @@ internal class InntektsgrunnlagTest {
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
-            aktivitetslogg.assertIngenVarsel(RV_VV_2)
+            aktivitetslogg.assertVarsler(emptyList())
         }
     }
 

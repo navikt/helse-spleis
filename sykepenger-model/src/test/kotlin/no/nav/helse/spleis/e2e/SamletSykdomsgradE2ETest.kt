@@ -123,7 +123,7 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
-        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_VV_4), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 }

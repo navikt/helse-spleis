@@ -46,7 +46,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsopplysning
@@ -56,19 +55,16 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
-import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.assertHarVarsler
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterAvbrytSøknad
@@ -287,7 +283,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -303,8 +299,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a1))
-        assertIngenVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
+        assertVarsler(listOf(RV_VV_2, RV_IM_4), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -610,9 +606,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertHarVarsler()
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
-        assertIngenVarsel(RV_VV_8, 1.vedtaksperiode.filter(a1))
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(a1))
         assertEquals(
             FLERE_ARBEIDSGIVERE,
             inspektør(a1).inntektskilde(1.vedtaksperiode)
@@ -880,7 +874,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
-        assertIngenVarsler(2.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter(a1))
     }
 
     @Test

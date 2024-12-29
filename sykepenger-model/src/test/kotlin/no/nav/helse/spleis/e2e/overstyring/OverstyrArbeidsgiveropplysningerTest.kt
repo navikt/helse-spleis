@@ -24,10 +24,10 @@ import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
@@ -779,7 +779,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
-        assertIngenVarsler()
 
         assertLikeRefusjonsopplysninger(
             listOf(
@@ -800,6 +799,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
+
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 

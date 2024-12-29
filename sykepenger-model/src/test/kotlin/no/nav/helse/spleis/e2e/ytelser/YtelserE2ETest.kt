@@ -50,13 +50,10 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.assertHarVarsler
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -77,7 +74,6 @@ import no.nav.helse.søndag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -272,13 +268,9 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-
-        assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
-        assertIngenVarsler()
-
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.januar.minusDays(14) til 5.januar.minusDays(15)))
 
-        assertVarsel(RV_AY_4, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_AY_4), 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
         assertActivities(person)
     }
@@ -289,10 +281,9 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
-        assertIngenVarsler(1.vedtaksperiode.filter())
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
-        assertVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
+
+        assertVarsler(listOf(Varselkode.RV_AY_3), 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
         assertActivities(person)
     }
@@ -304,7 +295,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.januar til 18.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.februar til 5.februar))
-        assertIngenVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
+
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -314,7 +306,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.januar til 18.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.februar til 5.februar))
-        assertIngenVarsel(RV_AY_4, 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -384,7 +376,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             opplæringspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100))
         )
-        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -427,7 +419,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             )
         )
         assertIngenFunksjonelleFeil()
-        assertIngenVarsel(RV_AY_11)
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
@@ -445,7 +437,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             dagpenger = listOf(februar),
         )
 
-        assertIngenVarsler()
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -489,7 +482,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             arbeidsavklaringspenger = listOf(februar),
             dagpenger = listOf(februar)
         )
-        assertIngenVarsler()
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test

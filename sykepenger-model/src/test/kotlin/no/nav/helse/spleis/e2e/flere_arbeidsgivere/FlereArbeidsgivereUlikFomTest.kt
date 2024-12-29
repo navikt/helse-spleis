@@ -36,23 +36,19 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
@@ -520,7 +516,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
-        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -643,12 +639,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val sisteUtbetalingA1 = inspektør(a1).sisteUtbetaling()
         assertEquals(1.januar til 10.februar, sisteUtbetalingA1.periode)
-        sisteUtbetalingA1.utbetalingstidslinje[31.januar].let { dag ->
-            assertEquals(100, dag.økonomi.inspektør.totalGrad)
-        }
-        sisteUtbetalingA1.utbetalingstidslinje[1.februar].let { dag ->
-            assertEquals(100, dag.økonomi.inspektør.totalGrad)
-        }
+        assertEquals(100, sisteUtbetalingA1.utbetalingstidslinje[31.januar].økonomi.inspektør.totalGrad)
+        assertEquals(100, sisteUtbetalingA1.utbetalingstidslinje[1.februar].økonomi.inspektør.totalGrad)
     }
 
     @Test
@@ -1190,8 +1182,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
-        assertIngenVarsel(RV_VV_8, 1.vedtaksperiode.filter(a1))
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -1240,8 +1231,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 inntekter = inntekter
             )
         )
-
-        assertIngenVarsler()
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -1744,7 +1735,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             listOf(februar),
             orgnummer = a1
         )
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
@@ -1759,8 +1749,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
@@ -1770,7 +1758,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)
         }
 
-        assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))
+        assertVarsler(listOf(RV_VV_2, RV_IM_3), 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
 
@@ -1801,8 +1789,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
@@ -1814,7 +1800,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(IkkeRapportert::class, inntekter.getValue(a3).inspektør.inntektsopplysning::class)
         }
 
-        assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
 

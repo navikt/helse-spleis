@@ -46,7 +46,6 @@ import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.VarselE2ETest
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -257,7 +256,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
             assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
@@ -287,7 +286,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 )
             )
 
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
 
             val dagen = inspektør.sykdomstidslinje[9.januar]
@@ -408,7 +407,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                     ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
                 )
             )
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -446,10 +445,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                     ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
                 )
             )
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
@@ -485,7 +484,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterOverstyrTidslinje((1.januar til 16.januar).map { dag ->
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -540,7 +539,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             })
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -592,9 +591,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_23), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 2.vedtaksperiode.filter())
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -648,7 +647,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
@@ -725,7 +724,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_IV_7), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7), 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
@@ -795,7 +794,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -805,7 +803,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag
-            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
         }
     }
@@ -871,7 +869,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             nyttVedtak(5.mars til 31.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
-            assertIngenVarsler(3.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 3.vedtaksperiode.filter())
         }
     }
 
@@ -886,7 +884,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
-            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 
@@ -896,7 +894,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(juni)
             håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(29.juni, 30.juni))
-            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 
@@ -911,7 +909,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
-            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 
@@ -1097,7 +1095,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-            assertIngenVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 
@@ -1131,10 +1129,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
             håndterOverstyrTidslinje((1.januar til 7.januar).map { manuellSykedag(it) })
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -1190,7 +1188,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
             håndterOverstyrTidslinje((1.januar til 7.januar).map { manuellSykedag(it) })
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())

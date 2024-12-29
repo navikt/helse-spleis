@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -24,7 +23,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -52,8 +50,9 @@ internal class FrilanserTest : AbstractDslTest() {
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
+
             assertIngenFunksjonelleFeil()
-            assertIngenVarsler()
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         }
     }
@@ -127,7 +126,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt(orgnummer = a1)
 
-            assertIngenVarsler()
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
@@ -153,7 +152,7 @@ internal class FrilanserTest : AbstractDslTest() {
                 arbeidsforhold = arbeidsforhold
             )
             håndterYtelser(1.vedtaksperiode)
-            assertIngenVarsler()
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 
@@ -170,7 +169,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
 
-            assertIngenVarsler()
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
     }
 }

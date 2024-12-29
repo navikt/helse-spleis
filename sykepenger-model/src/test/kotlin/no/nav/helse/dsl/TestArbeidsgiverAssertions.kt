@@ -101,9 +101,6 @@ internal class TestArbeidsgiverAssertions(
     internal fun assertIngenInfoSomInneholder(forventet: String, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertIngenInfoSomInneholder(forventet, filter)
 
-    internal fun assertIngenVarsler(filter: AktivitetsloggFilter) =
-        aktivitetsloggAsserts.assertIngenVarsler(filter)
-
     internal fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertVarsler(varsler, filter)
 
@@ -112,12 +109,6 @@ internal class TestArbeidsgiverAssertions(
 
     internal fun assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertVarsel(kode, filter)
-
-    internal fun assertIngenVarsel(warning: String, filter: AktivitetsloggFilter) =
-        aktivitetsloggAsserts.assertIngenVarsel(warning, filter)
-
-    internal fun assertIngenVarsel(warning: Varselkode, filter: AktivitetsloggFilter) =
-        aktivitetsloggAsserts.assertIngenVarsel(warning, filter)
 
     internal fun assertFunksjonellFeil(error: String, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertFunksjonellFeil(error, filter)
