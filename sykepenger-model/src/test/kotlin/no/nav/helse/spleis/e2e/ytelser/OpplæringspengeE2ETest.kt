@@ -69,7 +69,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = emptyList())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

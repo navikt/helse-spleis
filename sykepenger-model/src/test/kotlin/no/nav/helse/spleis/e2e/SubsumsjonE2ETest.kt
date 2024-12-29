@@ -137,8 +137,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 4.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        håndterVilkårsgrunnlag()
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_2,
@@ -150,12 +149,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "arbeidsforhold" to listOf(
                     mapOf(
                         "orgnummer" to a1,
-                        "fom" to 4.desember(2017),
-                        "tom" to 31.januar
+                        "fom" to LocalDate.EPOCH,
+                        "tom" to null
                     )
                 )
             ),
-            output = mapOf("antallOpptjeningsdager" to 28)
+            output = mapOf("antallOpptjeningsdager" to 17532)
         )
     }
 
@@ -164,8 +163,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), null, Arbeidsforholdtype.ORDINÆRT))
+        håndterVilkårsgrunnlag(
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INNTEKT, 1.januar),
+            arbeidsforhold = arbeidsforhold,
+        )
 
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -179,7 +181,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     mapOf(
                         "orgnummer" to a1,
                         "fom" to 5.desember(2017),
-                        "tom" to 31.januar
+                        "tom" to null
                     )
                 )
             ),
@@ -347,10 +349,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 46817.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        håndterVilkårsgrunnlag()
 
-        assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
@@ -376,7 +376,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.november(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, inntekt = 50000.årlig)
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, 50000.årlig, 1.januar))
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -423,9 +423,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 46816.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
-        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
+        håndterVilkårsgrunnlag()
+        assertVarsler(listOf(Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -662,7 +661,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -686,7 +685,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -726,7 +725,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(Periode(3.januar(2018), 18.januar(2018))),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -793,7 +792,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.januar, 16.januar))
         )
         håndterSøknad(1.januar til 31.januar(2019), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -805,7 +804,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(Periode(16.juni(2019), 1.juli(2019))),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -825,7 +824,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent, 50.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -837,7 +836,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(Periode(17.juli, 1.august)),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -889,7 +888,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             Sykdom(1.januar(2018), 30.desember(2018), 100.prosent),
             sendtTilNAVEllerArbeidsgiver = 1.januar(2018)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -904,7 +903,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.januar(2018), 16.januar(2018))),
             førsteFraværsdag = 1.januar(2019)
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
@@ -941,7 +940,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -976,7 +975,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
@@ -1037,7 +1036,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1387,7 +1386,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
@@ -1419,7 +1418,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertPaaIndeks(
@@ -1477,7 +1476,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertPaaIndeks(
@@ -1583,7 +1582,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_17,
@@ -1615,7 +1614,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 0,
@@ -1646,7 +1645,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             versjon = 1.januar(2018),
@@ -1673,7 +1672,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_19,
@@ -2039,10 +2038,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 187268.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        håndterVilkårsgrunnlag()
 
-        assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
     }
 
@@ -2057,9 +2054,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 187268.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
-        assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
+        håndterVilkårsgrunnlag()
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
             ledd = LEDD_2,
@@ -2086,10 +2081,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 187267.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        håndterVilkårsgrunnlag()
 
-        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_51,
             ledd = LEDD_2,

@@ -279,14 +279,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 31000.månedlig, a2 to 20000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -338,14 +335,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 31000.månedlig, a2 to 20000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -395,14 +389,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(2) + 23000.månedlig)
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 31000.månedlig, a2 to 21000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -454,14 +445,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 10000.månedlig, a2 to 20000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -510,14 +498,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 35000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -572,14 +557,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 35000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -628,10 +610,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, orgnummer = a1, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-            arbeidsgivere = listOf(a1 to INNTEKT / 10, a2 to INNTEKT),
-            skjæringstidspunkt = 1.januar
-        )
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to INNTEKT / 10, a2 to INNTEKT),
+                skjæringstidspunkt = 1.januar
+            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -719,14 +703,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 35000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -794,16 +775,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33000.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 31000.månedlig,
+                    a2 to 32000.månedlig,
+                    a3 to 33000.månedlig,
+                    a4 to 34000.månedlig
+                ),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -891,17 +872,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a4,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 31500.månedlig,
+                    a2 to 32500.månedlig,
+                    a3 to 33500.månedlig,
+                    a4 to 34500.månedlig
+                ),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -984,17 +964,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a4,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 31500.månedlig,
+                    a2 to 32500.månedlig,
+                    a3 to 33500.månedlig,
+                    a4 to 34500.månedlig
+                ),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -1085,17 +1064,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a4,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 31500.månedlig,
+                    a2 to 32500.månedlig,
+                    a3 to 33500.månedlig,
+                    a4 to 34500.månedlig
+                ),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -1261,14 +1239,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 35000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -1316,14 +1291,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             beregnetInntekt = 40000.månedlig,
             orgnummer = a2
         )
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 35000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -1371,15 +1343,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-
-        val inntekterFraSkatt = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterFraSkatt
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 20000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -1420,15 +1388,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             beregnetInntekt = 21000.månedlig,
             orgnummer = a2
         )
-
-        val inntekterFraSkatt = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterFraSkatt
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to 30000.månedlig, a2 to 20000.månedlig),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             ),
             orgnummer = a1
         )
@@ -1470,11 +1434,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = listOf(
-                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-            )
+        val sykepengegrunnlag = lagStandardSykepengegrunnlag(
+            arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT),
+            skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
         )
 
         håndterVilkårsgrunnlag(

@@ -279,7 +279,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     @Test
     fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
         a1 {
-            tilGodkjenning(10.januar til 31.januar, beregnetInntekt = 20000.månedlig)
+            tilGodkjenning(10.januar til 31.januar)
             val vilkårsgrunnlagFørEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
@@ -295,7 +295,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertEquals(Dag.Sykedag::class, dagen::class)
             assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 20000.månedlig)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             val vilkårsgrunnlagEtterEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
 
@@ -315,7 +315,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `endrer skjæringstidspunkt på en førstegangsbehandling ved å omgjøre en arbeidsdag til sykedag`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent))
-            tilGodkjenning(10.januar til 31.januar, beregnetInntekt = 20000.månedlig, arbeidsgiverperiode = listOf(10.januar til 26.januar)) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
+            tilGodkjenning(10.januar til 31.januar, arbeidsgiverperiode = listOf(10.januar til 26.januar)) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
             assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
             nullstillTilstandsendringer()
@@ -323,7 +323,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)))
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            håndterVilkårsgrunnlag(2.vedtaksperiode, inntekt = 20000.månedlig)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
             assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
@@ -1029,13 +1029,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `gjenbruker grunnlaget for skjønnsmessig fastsettelse`() {
         a1 {
             val beregnetInntektIM = INNTEKT * 2
-            val inntektSkatt = INNTEKT
             val skjønnsmessigFastsattInntekt = INNTEKT * 1.5
 
             håndterSøknad(januar)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntektIM)
             nullstillTilstandsendringer()
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektSkatt)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
             nullstillTilstandsendringer()
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsmessigFastsattInntekt)))
@@ -1060,7 +1059,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterVilkårsgrunnlag(2.vedtaksperiode, inntektSkatt)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.februar, listOf(OverstyrtArbeidsgiveropplysning(a1, beregnetInntektIM)))
 

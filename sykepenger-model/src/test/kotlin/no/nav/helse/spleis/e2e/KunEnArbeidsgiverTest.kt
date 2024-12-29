@@ -49,7 +49,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -98,7 +98,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(11.januar, 22.januar, 100.prosent))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         assertIngenFunksjonelleFeil()
         assertActivities()
@@ -190,7 +190,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -278,7 +278,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -294,7 +294,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -336,7 +336,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -346,7 +346,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.februar til 16.februar), INNTEKT)
         assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -417,7 +417,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -466,7 +466,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -500,7 +500,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -559,7 +559,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             ), INNTEKT
         )
 
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -588,7 +588,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             ), INNTEKT
         )
 
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -616,7 +616,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 20.januar(2021) til 25.januar(2021)
             ), INNTEKT, førsteFraværsdag = 5.februar(2021)
         )
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

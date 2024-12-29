@@ -454,7 +454,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
@@ -470,7 +470,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 30)))
@@ -494,7 +494,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 0)))
@@ -518,7 +518,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
@@ -541,7 +541,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 3.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellFeriedag(26.januar)))
@@ -561,7 +561,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 21.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyringSykedag(20.januar til 21.januar)

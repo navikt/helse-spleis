@@ -144,11 +144,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             )
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a3 to INNTEKT
-                ), 1.juni
-            )
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a3 to INNTEKT), 1.juni)
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

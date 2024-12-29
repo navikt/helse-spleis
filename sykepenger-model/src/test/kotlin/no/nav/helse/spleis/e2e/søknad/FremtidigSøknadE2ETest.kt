@@ -49,7 +49,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             listOf(Periode(fom, sisteArbeidsgiverdag)),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

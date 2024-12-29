@@ -1,9 +1,10 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
+import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -132,11 +133,12 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), a1Inntekt.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), a2Inntekt.repeat(3))
-                )
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to a1Inntekt,
+                    a2 to a2Inntekt
+                ),
+                skjæringstidspunkt = 1.januar
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

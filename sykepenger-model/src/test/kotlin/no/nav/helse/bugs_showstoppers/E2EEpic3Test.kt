@@ -99,7 +99,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             listOf(Periode(16.januar(2020), 31.januar(2020))),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(
@@ -349,7 +349,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020)))
         )
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -374,7 +374,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -438,7 +438,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), Ferie(3.januar(2020), 10.januar(2020)), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -478,7 +478,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -514,11 +514,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            INNTEKT,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
-        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
         assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
         håndterYtelser()
         håndterUtbetalingsgodkjenning()
@@ -555,11 +551,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            INNTEKT,
-            arbeidsforhold = arbeidsforhold
-        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = arbeidsforhold)
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
@@ -595,11 +587,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(
-            2.vedtaksperiode,
-            INNTEKT,
-            arbeidsforhold = arbeidsforhold
-        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode, arbeidsforhold = arbeidsforhold)
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -642,11 +630,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            INNTEKT,
-            arbeidsforhold = arbeidsforhold
-        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = arbeidsforhold)
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         håndterYtelser()
         håndterUtbetalingsgodkjenning()
@@ -679,7 +663,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, arbeidsforhold = arbeidsforhold)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, arbeidsforhold = arbeidsforhold)
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -754,7 +738,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -803,7 +787,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(4.juni(2020), 19.juni(2020)))
         )
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 17.juli(2020)))
         håndterSøknad(
             Sykdom(26.juni(2020), 17.juli(2020), 100.prosent)
@@ -821,7 +805,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 1.juni
         )
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -847,7 +831,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar
         )
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

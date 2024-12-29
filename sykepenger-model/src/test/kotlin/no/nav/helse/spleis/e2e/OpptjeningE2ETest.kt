@@ -7,6 +7,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -16,6 +17,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
@@ -34,7 +36,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
         }
         assertHarArbeidsforhold(1.januar, a1)
         assertHarIkkeArbeidsforhold(1.januar, a2)
@@ -48,11 +50,12 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT),
+                    skjæringstidspunkt = 1.januar
                 )
             )
+            assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
@@ -66,6 +69,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INNTEKT, 1.januar),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, 20.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017), Arbeidsforholdtype.ORDINÆRT)
@@ -84,6 +88,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INNTEKT, 1.januar),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 24.desember(2017), Arbeidsforholdtype.ORDINÆRT)
@@ -102,6 +107,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INNTEKT, 1.januar),
                 arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null, Arbeidsforholdtype.ORDINÆRT))
             )
 
@@ -163,6 +169,10 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INNTEKT, 1.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                ),
                 inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(a1, INGEN, 1.januar)
             )
 

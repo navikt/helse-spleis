@@ -212,7 +212,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(10.januar til 25.januar),
             beregnetInntekt = INNTEKT
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -234,7 +234,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
@@ -260,7 +260,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             PersonUtbetalingsperiode(a1, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
@@ -289,7 +289,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT,
             orgnummer = a2
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
 
         nullstillTilstandsendringer()
@@ -318,7 +318,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
@@ -352,7 +352,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -379,7 +379,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -407,7 +407,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT
         )
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 

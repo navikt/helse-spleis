@@ -5,8 +5,8 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -39,7 +39,6 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -53,7 +52,6 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertNotNull
@@ -271,10 +269,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 50000.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(a1, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, 50000.årlig, 1.januar)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

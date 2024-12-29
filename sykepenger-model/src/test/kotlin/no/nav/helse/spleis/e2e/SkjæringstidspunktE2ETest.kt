@@ -1,14 +1,18 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -85,14 +89,14 @@ internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
-            grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 15000.månedlig,
+                    a2 to 16000.månedlig
+                ),
+                skjæringstidspunkt = 1.januar
             ),
             orgnummer = a1
         )
@@ -127,11 +131,12 @@ internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
-                    grunnlag(a2, 24.februar, 16000.månedlig.repeat(3))
-                )
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 17000.månedlig,
+                    a2 to 16000.månedlig
+                ),
+                skjæringstidspunkt = 24.februar
             ),
             orgnummer = a1
         )
@@ -168,14 +173,14 @@ internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        val inntekter = listOf(
-            grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
-            grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to 15000.månedlig,
+                    a2 to 16000.månedlig
+                ),
+                skjæringstidspunkt = 1.januar
             ),
             orgnummer = a1
         )

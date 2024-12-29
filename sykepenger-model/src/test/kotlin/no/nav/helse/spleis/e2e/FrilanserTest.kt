@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.frilans
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -47,10 +49,7 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 

@@ -69,12 +69,8 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a1 to INNTEKT,
-                    a2 to INNTEKT
-                ), 1.januar
-            ),
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
@@ -134,12 +130,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a1 to INNTEKT,
-                    a2 to inntektVedSkjønnsvurdering
-                ), 1.januar
-            ),
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    listOf(a1 to INNTEKT, a2 to inntektVedSkjønnsvurdering), 1.januar
+                ),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
@@ -395,7 +389,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyPeriode(mars, a1)
             håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT * 2)
-            håndterVilkårsgrunnlag(2.vedtaksperiode, inntekt = INNTEKT)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
                 listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag, 100))

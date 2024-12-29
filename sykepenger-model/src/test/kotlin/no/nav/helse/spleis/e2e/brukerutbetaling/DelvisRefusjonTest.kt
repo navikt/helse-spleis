@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -326,11 +327,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                )
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

@@ -57,7 +57,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
@@ -96,7 +96,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode
             )
         } førerTil AVVENTER_VILKÅRSPRØVING somEtterfulgtAv {
-            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
         } førerTil AVVENTER_HISTORIKK somEtterfulgtAv {
             håndterYtelser(1.vedtaksperiode)
         } førerTil AVVENTER_SIMULERING somEtterfulgtAv {
@@ -117,7 +117,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(29.januar til 23.februar)
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, false) // går til TilInfotrygd
@@ -208,7 +208,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -236,7 +236,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(3.januar til 26.januar)
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 27.januar))

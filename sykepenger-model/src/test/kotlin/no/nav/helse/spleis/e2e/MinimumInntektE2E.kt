@@ -1,12 +1,16 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a3
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -37,11 +41,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    )
-                )
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, 1.januar)
             )
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -67,11 +67,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             håndterInntektsmelding(listOf(22.januar til 6.februar), inntekt)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    )
-                )
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, skjæringstidspunkt)
             )
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
@@ -97,11 +93,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    )
-                )
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, skjæringstidspunkt)
             )
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -127,11 +119,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             håndterInntektsmelding(listOf(15.januar til 30.januar), inntekt)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
-                    )
-                )
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, skjæringstidspunkt)
             )
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)

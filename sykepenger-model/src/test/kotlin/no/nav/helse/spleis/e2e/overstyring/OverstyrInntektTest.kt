@@ -5,6 +5,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -30,7 +31,6 @@ import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -40,7 +40,6 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -155,10 +154,9 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = OverMinstegrense,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(a1, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, OverMinstegrense, 1.januar)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

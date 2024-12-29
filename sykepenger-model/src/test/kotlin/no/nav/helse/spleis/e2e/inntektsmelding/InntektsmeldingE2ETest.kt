@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -89,6 +88,7 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
+import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
@@ -932,7 +932,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 5.januar))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         val vedtaksperiode = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør
         assertTrue((1.januar til 16.januar).all { vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.ArbeidsgiverperiodeDag })
@@ -975,7 +975,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020)))
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -1024,7 +1024,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020)))
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -1648,23 +1648,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             orgnummer = a1
         )
-        val skjæringstidspunkt = inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)
-        val inntektsvurderingForSykepengegrunnlag =
-            InntektForSykepengegrunnlag(inntekter = listOf(a1, a2).map { arbeidsgiver ->
-                ArbeidsgiverInntekt(arbeidsgiver, (0..2).map {
-                    val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth = yearMonth,
-                        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                        inntekt = INNTEKT,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                })
-            })
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT),
+                skjæringstidspunkt = finnSkjæringstidspunkt(a1, 1.vedtaksperiode)
+            ),
             orgnummer = a1
         )
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -2059,7 +2048,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2120,7 +2109,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         assertIngenFunksjonelleFeil()
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2139,7 +2128,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)

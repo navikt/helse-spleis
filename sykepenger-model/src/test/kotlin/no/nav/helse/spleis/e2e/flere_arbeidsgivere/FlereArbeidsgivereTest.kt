@@ -971,14 +971,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = inntektperioderForSykepengegrunnlag {
-                        1.oktober(2020) til 1.desember(2020) inntekter {
-                            a1 inntekt INNTEKT
-                            a2 inntekt 1000.månedlig
-                        }
-                    }
-                )
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 1000.månedlig), periode.start)
             )
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -1043,10 +1036,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = emptyList()
-                )
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
             )
             assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)

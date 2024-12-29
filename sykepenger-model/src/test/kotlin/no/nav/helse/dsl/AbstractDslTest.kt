@@ -333,15 +333,23 @@ internal abstract class AbstractDslTest {
             )
         }
 
+    protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID) =
+        this { håndterVilkårsgrunnlag(vedtaksperiodeId) }
+
+    protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus) =
+        this { håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus) }
+
+    protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag) =
+        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntektsvurderingForSykepengegrunnlag) }
+
     protected fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null
     ) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, inntekterForOpptjeningsvurdering, arbeidsforhold) }
+        this { håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold, inntekterForOpptjeningsvurdering) }
 
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
@@ -479,16 +487,24 @@ internal abstract class AbstractDslTest {
             mottatt = mottatt
         )
 
+    internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, orgnummer: String = a1) =
+        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId)
+
+    internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag, orgnummer: String = a1) =
+        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, inntektsvurderingForSykepengegrunnlag)
+
+    internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus, orgnummer: String = a1) =
+        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus)
+
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, inntekterForOpptjeningsvurdering, arbeidsforhold)
+        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold, inntekterForOpptjeningsvurdering)
 
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,

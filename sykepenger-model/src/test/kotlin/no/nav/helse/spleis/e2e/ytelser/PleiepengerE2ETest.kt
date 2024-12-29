@@ -48,7 +48,7 @@ internal class PleiepengerE2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.januar(2020), 16.januar(2020))),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, pleiepenger = emptyList())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

@@ -280,11 +280,42 @@ internal class TestPerson(
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
-            inntekt: Inntekt = INNTEKT,
+            orgnummer: String = "aa"
+        ) = håndterVilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+        )
+
+        internal fun håndterVilkårsgrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+            orgnummer: String = "aa"
+        ) = håndterVilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            medlemskapstatus = medlemskapstatus,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(this.orgnummer, INNTEKT, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
+            arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+        )
+
+        internal fun håndterVilkårsgrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+            orgnummer: String = "aa"
+        ) = håndterVilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            arbeidsforhold = inntektsvurderingForSykepengegrunnlag.inntekter.map { Vilkårsgrunnlag.Arbeidsforhold(it.arbeidsgiver, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+        )
+
+        internal fun håndterVilkårsgrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
             inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
             orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
@@ -292,9 +323,9 @@ internal class TestPerson(
                 vedtaksperiodeId,
                 inspektør.skjæringstidspunkt(vedtaksperiodeId),
                 medlemskapstatus,
-                arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
-                inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
-                inntekterForOpptjeningsvurdering ?: lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+                arbeidsforhold,
+                inntektsvurderingForSykepengegrunnlag,
+                inntekterForOpptjeningsvurdering ?: lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, inspektør.skjæringstidspunkt(vedtaksperiodeId))
             ).håndter(Person::håndter)
         }
 
@@ -543,11 +574,13 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag),
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = lagStandardInntekterForOpptjeningsvurdering(orgnummer, beregnetInntekt, førsteFraværsdag),
-    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = sykepengegrunnlagSkatt.inntekter.map {
+        Vilkårsgrunnlag.Arbeidsforhold(it.arbeidsgiver, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+    },
 ): UUID {
     val vedtaksperiode = nyPeriode(periode, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
-    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, inntekterForOpptjeningsvurdering, arbeidsforhold)
+    håndterVilkårsgrunnlag(vedtaksperiode, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, arbeidsforhold, inntekterForOpptjeningsvurdering)
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode

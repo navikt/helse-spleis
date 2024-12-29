@@ -9,6 +9,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -311,13 +312,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     orgnummer: String = a1,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-        inntekter = inntektperioderForSykepengegrunnlag {
-            periode.start.minusMonths(3) til periode.start.minusMonths(1) inntekter {
-                orgnummer inntekt beregnetInntekt
-            }
-        }
-    ),
+    inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, periode.start),
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter
@@ -336,9 +331,11 @@ internal fun AbstractEndToEndTest.tilYtelser(
     val id = observatør.sisteVedtaksperiode()
     håndterVilkårsgrunnlag(
         vedtaksperiodeIdInnhenter = id,
-        inntekt = beregnetInntekt,
         orgnummer = orgnummer,
-        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag
+        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+        arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+        )
     )
     håndterYtelser(id, orgnummer = orgnummer)
     return id
@@ -575,25 +572,88 @@ internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
 
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    inntekt: Inntekt = INNTEKT,
+    orgnummer: String = a1
+) = håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+    orgnummer = orgnummer
+)
+
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+    orgnummer: String = a1
+) = håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+    medlemskapstatus = medlemskapstatus,
+    orgnummer = orgnummer,
+    inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    arbeidsforhold = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) }
+)
+
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    inntekt: Inntekt,
+    orgnummer: String = a1
+) = håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+    orgnummer = orgnummer,
+    inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, inntekt, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    arbeidsforhold = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) }
+)
+
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+    orgnummer: String = a1
+) = håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+    orgnummer = orgnummer,
+    inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    arbeidsforhold = arbeidsforhold
+)
+
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+    orgnummer: String = a1
+) = håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+    orgnummer = orgnummer,
+    inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+    inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    arbeidsforhold = arbeidsforhold
+)
+
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+    orgnummer: String = a1
+) = håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+    orgnummer = orgnummer,
+    inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+    inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
+    arbeidsforhold = inntektsvurderingForSykepengegrunnlag.inntekter.map {
+        Vilkårsgrunnlag.Arbeidsforhold(it.arbeidsgiver, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+    }
+)
+
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = a1,
-    inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-        inntekter = listOf(
-            ArbeidsgiverInntekt(orgnummer, (0..2).map {
-                val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt(
-                    yearMonth = yearMonth,
-                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = inntekt,
-                    fordel = "fordel",
-                    beskrivelse = "beskrivelse"
-                )
-            })
-        )
-    ),
+    inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(a1, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
-    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) }
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
 ): Vilkårsgrunnlag {
     fun assertEtterspurt(behovtype: Behovtype) =
         assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeIdInnhenter, orgnummer)

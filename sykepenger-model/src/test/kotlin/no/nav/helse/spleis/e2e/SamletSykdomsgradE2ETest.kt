@@ -49,7 +49,7 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
@@ -78,7 +78,7 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
@@ -111,7 +111,7 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
@@ -121,7 +121,7 @@ internal class SamletSykdomsgradE2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.mars, 16.mars)),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

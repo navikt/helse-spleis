@@ -48,7 +48,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 5.april
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -61,7 +61,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-        håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
@@ -88,7 +88,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterSøknad(februar)
         håndterSøknad(mars)
         håndterSøknad(5.april til 30.april)
@@ -104,7 +104,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
         håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))

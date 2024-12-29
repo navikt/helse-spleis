@@ -5,6 +5,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -27,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
 
@@ -124,7 +126,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
             )
 
-            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
 
             håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar))
@@ -177,7 +179,11 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                 listOf(1.januar til 16.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INGEN, 1.januar),
+                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT))
+            )
             assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_VV_1, Varselkode.RV_OV_1), 1.vedtaksperiode.filter())
         }
     }

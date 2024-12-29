@@ -3,8 +3,8 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -39,7 +39,6 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
-import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -50,7 +49,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -248,10 +246,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = 50000.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(a1, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, 50000.årlig, 1.januar)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -278,10 +275,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = OverMinstegrense,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val inntekter = listOf(grunnlag(a1, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter)
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, OverMinstegrense, 1.januar)
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

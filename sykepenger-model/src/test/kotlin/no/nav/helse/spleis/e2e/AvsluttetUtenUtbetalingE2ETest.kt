@@ -43,7 +43,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
         håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
         håndterSøknad(3.mars til 26.mars)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -91,7 +91,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSøknad(8.mars til 26.mars)
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
