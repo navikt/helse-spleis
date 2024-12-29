@@ -195,17 +195,24 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar)
         )
+
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
+
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
@@ -248,7 +255,12 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar)
         )
+
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

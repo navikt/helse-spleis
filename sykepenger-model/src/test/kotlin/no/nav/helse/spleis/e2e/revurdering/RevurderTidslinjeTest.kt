@@ -39,6 +39,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
@@ -937,6 +938,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 30.januar
         )
+
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertEquals("UUSSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
         nullstillTilstandsendringer()

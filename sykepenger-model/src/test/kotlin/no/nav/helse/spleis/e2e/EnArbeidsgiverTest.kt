@@ -33,6 +33,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -56,6 +57,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             listOf(25.juni til 5.juli, 8.juli til 12.juli),
             førsteFraværsdag = 1.august
         )
+
         assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
         assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
 
@@ -64,6 +66,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             førsteFraværsdag = 7.august,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
+
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals("ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
         assertEquals(listOf(7.august til 18.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
         assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -95,6 +99,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(5.februar til 20.februar)
         )
+
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -114,6 +119,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(12.februar til 27.februar)
         )
+        assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
         assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
         håndterVilkårsgrunnlag(3.vedtaksperiode)
