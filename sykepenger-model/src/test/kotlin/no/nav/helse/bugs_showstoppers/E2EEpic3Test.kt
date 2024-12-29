@@ -40,13 +40,13 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -517,6 +517,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             INNTEKT,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
         )
+        assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
         håndterYtelser()
         håndterUtbetalingsgodkjenning()
 
@@ -597,7 +598,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             INNTEKT,
             arbeidsforhold = arbeidsforhold
         )
-        assertVarsel(Varselkode.RV_VV_1, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -677,7 +678,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, arbeidsforhold = arbeidsforhold)
-        assertVarsel(Varselkode.RV_VV_1, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
