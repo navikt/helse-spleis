@@ -67,6 +67,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -348,7 +349,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     // TODO: denne avklaringen må bo på behandlingen; dvs. at inntekt må ligge lagret på vedtaksperiodene
-    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): no.nav.helse.person.inntekt.Inntektsmelding? {
+    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Inntektsmeldinginntekt? {
         // finner inntektsmelding for en av første fraværsdagene.
         // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
         // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)
@@ -623,11 +624,11 @@ internal class Arbeidsgiver private constructor(
         skjæringstidspunkt: LocalDate,
         omregnetÅrsinntekt: Inntekt
     ) {
-        val im = no.nav.helse.person.inntekt.Inntektsmelding(
+        val im = Inntektsmeldinginntekt(
             dato = skjæringstidspunkt,
             hendelseId = meldingsreferanseId,
             beløp = omregnetÅrsinntekt,
-            kilde = no.nav.helse.person.inntekt.Inntektsmelding.Kilde.AOrdningen
+            kilde = Inntektsmeldinginntekt.Kilde.AOrdningen
         )
 
         inntektshistorikk.leggTil(im)
@@ -1044,13 +1045,13 @@ internal class Arbeidsgiver private constructor(
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
         orgnummer: String,
-        inntektsmelding: no.nav.helse.person.inntekt.Inntektsmelding,
+        inntektsmeldinginntekt: Inntektsmeldinginntekt,
         aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean
     ) {
         if (this.organisasjonsnummer != orgnummer) return
         setOfNotNull(finnFørsteFraværsdag(skjæringstidspunkt), skjæringstidspunkt).forEach { dato ->
-            inntektsmelding.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
+            inntektsmeldinginntekt.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
         }
     }
 

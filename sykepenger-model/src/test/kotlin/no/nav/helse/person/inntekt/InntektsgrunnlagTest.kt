@@ -364,10 +364,10 @@ internal class InntektsgrunnlagTest {
         val a1Inntekt = 25000.månedlig
         val a2Inntekt = 5000.månedlig
         val inntekter = listOf(
-            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmelding(a1Fom, UUID.randomUUID(), a1Inntekt), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmeldinginntekt(a1Fom, UUID.randomUUID(), a1Inntekt), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), a1Fom, null, a1Inntekt), LocalDateTime.now())
             }.build()),
-            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmelding(a2Fom, UUID.randomUUID(), a2Inntekt), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmeldinginntekt(a2Fom, UUID.randomUUID(), a2Inntekt), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), a2Fom, null, INGEN), LocalDateTime.now())
             }.build()),
         )
@@ -386,10 +386,10 @@ internal class InntektsgrunnlagTest {
     fun `overstyre inntekt og refusjon - endre til samme`() {
         val skjæringstidsounkt = 1.januar
         val opprinnelig = listOf(
-            ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Inntektsmelding(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
             }.build()),
-            ArbeidsgiverInntektsopplysning("a2", skjæringstidsounkt til LocalDate.MAX, Inntektsmelding(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a2", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, INGEN), LocalDateTime.now())
             }.build()),
         )
@@ -405,8 +405,8 @@ internal class InntektsgrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
         val skjæringstidspunkt = 1.januar
-        val a1Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
+        val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
         }.build()
@@ -431,8 +431,8 @@ internal class InntektsgrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
         val skjæringstidspunkt = 1.januar
-        val a1Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
+        val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
         }.build()
@@ -461,7 +461,7 @@ internal class InntektsgrunnlagTest {
     fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
-        val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
+        val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
         }.build()
@@ -488,8 +488,8 @@ internal class InntektsgrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {
         val skjæringstidspunkt = 1.januar
-        val a1Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
+        val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
         }.build()
@@ -537,7 +537,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -616,7 +616,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -669,7 +669,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -680,7 +680,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = førsteFraværsdagAG2,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -710,7 +710,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -721,7 +721,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -793,7 +793,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -804,7 +804,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmelding(
+                    inntektsopplysning = Inntektsmeldinginntekt(
                         dato = førsteFraværsdagAG2,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,

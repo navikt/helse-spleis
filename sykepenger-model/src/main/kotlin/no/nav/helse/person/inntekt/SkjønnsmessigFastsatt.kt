@@ -31,7 +31,7 @@ class SkjønnsmessigFastsatt internal constructor(
     override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
     override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
     override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
-    override fun overstyrer(gammel: Inntektsmelding) = kopierMed(gammel)
+    override fun overstyrer(gammel: Inntektsmeldinginntekt) = kopierMed(gammel)
 
     private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         SkjønnsmessigFastsatt(id, dato, hendelseId, beløp, overstyrtInntekt, tidsstempel)

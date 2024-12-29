@@ -1547,7 +1547,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(INNTEKT, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(no.nav.helse.person.inntekt.Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
         }
     }
 
@@ -2416,7 +2416,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.inntektsopplysning.fastsattÅrsinntekt())
-            assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(no.nav.helse.person.inntekt.Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
         }
     }
 
@@ -2448,7 +2448,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.inntektsopplysning.fastsattÅrsinntekt())
-            assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(no.nav.helse.person.inntekt.Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
         }
     }
 
@@ -2562,7 +2562,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         val inntektsopplysningVilkårsgrunnlagA2 = inspektør(a2).vilkårsgrunnlag(25.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.firstOrNull { it.inspektør.orgnummer == a2 }?.inspektør?.inntektsopplysning
-        assertTrue(inntektsopplysningVilkårsgrunnlagA2 is no.nav.helse.person.inntekt.Inntektsmelding)
+        assertTrue(inntektsopplysningVilkårsgrunnlagA2 is no.nav.helse.person.inntekt.Inntektsmeldinginntekt)
         assertEquals(INNTEKT, inntektsopplysningVilkårsgrunnlagA2?.inspektør?.beløp)
     }
 

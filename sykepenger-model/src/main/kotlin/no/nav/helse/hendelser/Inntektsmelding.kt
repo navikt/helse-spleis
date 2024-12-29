@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -28,6 +27,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -80,7 +80,7 @@ class Inntektsmelding(
     fun korrigertInntekt() = KorrigertInntektOgRefusjon(
         hendelse = this,
         organisasjonsnummer = orgnummer,
-        inntekt = InntektsmeldingInntekt(type.inntektsdato(this), metadata.meldingsreferanseId, beregnetInntekt),
+        inntekt = Inntektsmeldinginntekt(type.inntektsdato(this), metadata.meldingsreferanseId, beregnetInntekt),
         refusjonsopplysninger = Refusjonshistorikk().apply {
             leggTilRefusjon(refusjonsElement)
         }.refusjonsopplysninger(type.refusjonsdato(this))
@@ -88,14 +88,14 @@ class Inntektsmelding(
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
         val inntektsdato = type.alternativInntektsdatoForInntekthistorikk(this, alternativInntektsdato) ?: return
-        if (!inntektshistorikk.leggTil(InntektsmeldingInntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))) return
+        if (!inntektshistorikk.leggTil(Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))) return
         aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
         subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
         val inntektsdato = type.inntektsdato(this)
-        inntektshistorikk.leggTil(InntektsmeldingInntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
         return inntektsdato
     }
 
@@ -283,6 +283,7 @@ class Inntektsmelding(
             }
             return skjæringstidspunkt
         }
+
         override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = null
         override fun refusjonsdato(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
         override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = vedtaksperiode.startdatoPåSammenhengendeVedtaksperioder
@@ -331,7 +332,7 @@ class Inntektsmelding(
 data class KorrigertInntektOgRefusjon(
     val hendelse: Hendelse,
     val organisasjonsnummer: String,
-    val inntekt: InntektsmeldingInntekt,
+    val inntekt: Inntektsmeldinginntekt,
     val refusjonsopplysninger: Refusjonsopplysninger
 ) {
     internal fun arbeidsgiverInntektsopplysning(skjæringstidspunkt: LocalDate, strekkTilSkjæringstidspunkt: Boolean): ArbeidsgiverInntektsopplysning {

@@ -44,14 +44,14 @@ sealed class Inntektsopplysning(
                 else -> ny.fastsattÅrsinntekt() != this.beløp
             }
         }
-        if (ny !is Inntektsmelding) return false
+        if (ny !is Inntektsmeldinginntekt) return false
         val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
         return ny.dato in måned
     }
 
     internal open fun overstyrer(gammel: IkkeRapportert) = this
     internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
-    internal open fun overstyrer(gammel: Inntektsmelding) = this
+    internal open fun overstyrer(gammel: Inntektsmeldinginntekt) = this
     internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
     }
@@ -94,7 +94,7 @@ sealed class Inntektsopplysning(
         )
     }
 
-    internal open fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmelding? = null
+    internal open fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmeldinginntekt? = null
 
     internal fun lagreTidsnærInntekt(
         skjæringstidspunkt: LocalDate,
@@ -108,7 +108,7 @@ sealed class Inntektsopplysning(
         arbeidsgiver.lagreTidsnærInntektsmelding(
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = orgnummer,
-            inntektsmelding = gjenbrukbarInntekt,
+            inntektsmeldinginntekt = gjenbrukbarInntekt,
             aktivitetslogg = aktivitetslogg,
             nyArbeidsgiverperiode = nyArbeidsgiverperiode
         )
@@ -149,7 +149,7 @@ sealed class Inntektsopplysning(
                 when (dto) {
                     is InntektsopplysningInnDto.IkkeRapportertDto -> IkkeRapportert.gjenopprett(dto)
                     is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
-                    is InntektsopplysningInnDto.InntektsmeldingDto -> Inntektsmelding.gjenopprett(dto)
+                    is InntektsopplysningInnDto.InntektsmeldingDto -> Inntektsmeldinginntekt.gjenopprett(dto)
                     is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
                     is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
                     is InntektsopplysningInnDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(

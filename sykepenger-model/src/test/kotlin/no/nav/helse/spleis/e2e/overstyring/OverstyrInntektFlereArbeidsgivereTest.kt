@@ -21,7 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -73,11 +73,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                 assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
             }
         }
 
@@ -102,7 +102,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                 assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
             }
 
         }
@@ -128,7 +128,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -158,7 +158,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)

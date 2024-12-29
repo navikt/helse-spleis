@@ -46,7 +46,7 @@ internal class SkattSykepengegrunnlag private constructor(
     ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), inntektsopplysninger, ansattPerioder, tidsstempel)
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        if (ny !is Inntektsmelding) return true
+        if (ny !is Inntektsmeldinginntekt) return true
         return super.kanOverstyresAv(ny)
     }
 

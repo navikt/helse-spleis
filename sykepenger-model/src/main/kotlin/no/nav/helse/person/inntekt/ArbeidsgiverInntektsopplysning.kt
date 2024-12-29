@@ -279,7 +279,7 @@ data class ArbeidsgiverInntektsopplysning(
                         is IkkeRapportert,
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
 
-                        is Inntektsmelding -> arbeidsgiver.inntektsopplysning.inntektskilde()
+                        is Inntektsmeldinginntekt -> arbeidsgiver.inntektsopplysning.inntektskilde()
 
                         is Infotrygd -> Inntektskilde.Arbeidsgiver
 

@@ -29,7 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -336,8 +336,8 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
 
-        a1 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Inntektsmelding) }
-        a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Inntektsmelding) }
+        a1 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Inntektsmeldinginntekt) }
+        a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Inntektsmeldinginntekt) }
         a3 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a3) is Saksbehandler) }
     }
 
@@ -352,7 +352,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmeldinginntekt)
     }
 
     @Test
@@ -425,7 +425,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmeldinginntekt)
             assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, inntektsmeldingInntekt, ARBEIDSGIVER)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
 
             // Saksbehandler skjønnsmessig fastsetter
@@ -459,7 +459,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmeldinginntekt)
             assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, inntektsmeldingInntekt, ARBEIDSGIVER)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag())
 
             // Saksbehandler skjønnsmessig fastsetter

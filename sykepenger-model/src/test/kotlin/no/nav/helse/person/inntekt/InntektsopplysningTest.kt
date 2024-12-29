@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.person.inntekt.Inntektsmelding.Companion.finnInntektsmeldingForSkjæringstidspunkt
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -26,8 +26,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun overstyres() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
+        val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
+        val im2 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
         val saksbehandler1 = im1.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
@@ -44,7 +44,7 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `opphøre, gjøre om, avvikle, tilbakestille eller kansellere`() {
-        val im = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
+        val im = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
         val saksbehandler = im.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
         val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
         val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
@@ -64,8 +64,8 @@ internal class InntektsopplysningTest {
     @Test
     fun `inntektsmelding-likhet`() {
         val hendelsesId = UUID.randomUUID()
-        val im1 = Inntektsmelding(1.januar, hendelsesId, INNTEKT)
-        val im2 = Inntektsmelding(1.januar, hendelsesId, INNTEKT)
+        val im1 = Inntektsmeldinginntekt(1.januar, hendelsesId, INNTEKT)
+        val im2 = Inntektsmeldinginntekt(1.januar, hendelsesId, INNTEKT)
 
         assertEquals(im1, im2)
         assertFalse(im1.kanLagres(im2))
@@ -74,8 +74,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `inntektsmelding-ulikhet`() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmelding(2.januar, UUID.randomUUID(), INNTEKT)
+        val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
+        val im2 = Inntektsmeldinginntekt(2.januar, UUID.randomUUID(), INNTEKT)
 
         assertNotEquals(im1, im2)
         assertTrue(im1.kanLagres(im2))
@@ -92,15 +92,15 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - inntektsmelding vs inntektsmelding`() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now())
-        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
+        val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmeldinginntekt.Kilde.Arbeidsgiver, LocalDateTime.now())
+        val im2 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmeldinginntekt.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
 
         assertEquals(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
     }
 
     @Test
     fun `turnering - skatt vs inntektsmelding`() {
-        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT)
+        val im = Inntektsmeldinginntekt(10.februar, UUID.randomUUID(), INNTEKT)
         val skatt1 = SkatteopplysningerForSykepengegrunnlag(
             arbeidsgiver = "orgnr",
             hendelseId = UUID.randomUUID(),

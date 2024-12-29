@@ -18,7 +18,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -150,7 +150,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
             }
         }
     }

@@ -9,7 +9,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
@@ -29,7 +29,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
             ArbeidsgiverInntektsopplysning(
                 orgnr,
                 skjæringstidspunkt til LocalDate.MAX,
-                Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this),
+                Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), this),
                 refusjonsopplysninger
             )
         ),
@@ -45,7 +45,7 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
             ArbeidsgiverInntektsopplysning(
                 orgnr,
                 skjæringstidspunkt til LocalDate.MAX,
-                Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this),
+                Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), this),
                 Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, this).refusjonsopplysninger
             )
         ),

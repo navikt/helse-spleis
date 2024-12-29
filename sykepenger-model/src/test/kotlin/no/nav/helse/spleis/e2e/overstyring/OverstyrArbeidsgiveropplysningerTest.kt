@@ -21,7 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
@@ -165,7 +165,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-        assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar) is Inntektsmelding)
+        assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar) is Inntektsmeldinginntekt)
     }
 
     @Test
@@ -768,7 +768,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
-        assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a1) is Inntektsmelding)
+        assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a1) is Inntektsmeldinginntekt)
         assertTrue(inspektør.inntektsopplysningIInntektsgrunnlaget(1.januar, a2) is Saksbehandler)
     }
 

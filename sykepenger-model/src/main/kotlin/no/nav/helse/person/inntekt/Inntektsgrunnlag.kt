@@ -318,7 +318,7 @@ internal class Inntektsgrunnlag private constructor(
         )
         val resultat = builder.resultat()
         when (val inntektFraFør = arbeidsgiverInntektsopplysninger.finn(korrigertInntektsmelding.organisasjonsnummer)?.inntektsopplysning) {
-            is Inntektsmelding -> {
+            is Inntektsmeldinginntekt -> {
                 person.arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                         korrigertInntektsmeldingId = inntektFraFør.hendelseId,

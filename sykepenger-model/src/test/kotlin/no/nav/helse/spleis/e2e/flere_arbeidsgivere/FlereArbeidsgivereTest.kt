@@ -56,7 +56,8 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.IkkeRapportert
-import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt as InntektFraInntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
@@ -141,8 +142,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             )
             val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
             assertEquals(3, inntekter.size)
-            assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is no.nav.helse.person.inntekt.Inntektsmelding)
-            assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is no.nav.helse.person.inntekt.Inntektsmelding)
+            assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is Inntektsmeldinginntekt)
+            assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is Inntektsmeldinginntekt)
             assertTrue(inntekter.single { it.gjelder(a3) }.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -672,7 +673,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)
-            assertInstanceOf<no.nav.helse.person.inntekt.Inntektsmelding>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
+            assertInstanceOf<Inntektsmeldinginntekt>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
             assertInstanceOf<IkkeRapportert>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
         }
     }
@@ -1357,7 +1358,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)
             assertInstanceOf<IkkeRapportert>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
-            assertInstanceOf<no.nav.helse.person.inntekt.Inntektsmelding>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
+            assertInstanceOf<Inntektsmeldinginntekt>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
             assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
         }
         a2 {

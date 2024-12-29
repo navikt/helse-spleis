@@ -3,16 +3,16 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
-import no.nav.helse.person.inntekt.Inntektsmelding.Companion.finnInntektsmeldingForSkjæringstidspunkt
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
 
-internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
+internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmeldinginntekt>) {
 
     internal constructor() : this(mutableListOf())
 
     internal companion object {
         internal fun gjenopprett(dto: InntektshistorikkInnDto) = Inntektshistorikk(
             historikk = dto.historikk.map {
-                Inntektsmelding.gjenopprett(it)
+                Inntektsmeldinginntekt.gjenopprett(it)
             }.toMutableList()
         )
     }
@@ -21,7 +21,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         inntekter = historikk.map { it.view() }
     )
 
-    internal fun leggTil(inntekt: Inntektsmelding): Boolean {
+    internal fun leggTil(inntekt: Inntektsmeldinginntekt): Boolean {
         if (historikk.any { !it.kanLagres(inntekt) }) return false
         historikk.add(0, inntekt)
         return true
