@@ -21,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_7
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -94,6 +95,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractEndToEndTest() {
             Permisjon(17.januar, 25.januar),
             Ferie(26.januar, 31.januar)
         )
+
+        assertVarsel(Varselkode.RV_SØ_5, 1.vedtaksperiode.filter())
         assertEquals(februar, inspektør.periode(1.vedtaksperiode))
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
@@ -107,6 +110,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractEndToEndTest() {
             Permisjon(17.januar, 25.januar),
             Ferie(26.januar, 2.februar)
         )
+
+        assertVarsel(Varselkode.RV_SØ_5, 1.vedtaksperiode.filter())
         assertEquals(februar, inspektør.periode(1.vedtaksperiode))
         assertEquals(2, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }

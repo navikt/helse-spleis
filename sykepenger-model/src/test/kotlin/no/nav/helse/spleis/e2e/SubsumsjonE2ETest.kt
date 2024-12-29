@@ -449,6 +449,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-9 ledd 1 - avslag ved utenlandsopphold`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utlandsopphold(20.januar, 31.januar))
+        assertVarsel(Varselkode.RV_SØ_8, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_9,
             versjon = 1.juni(2021),
@@ -486,6 +487,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             Utlandsopphold(15.januar, 17.januar),
             Utlandsopphold(20.januar, 31.januar)
         )
+        assertVarsel(Varselkode.RV_SØ_8, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_9,
             versjon = 1.juni(2021),
