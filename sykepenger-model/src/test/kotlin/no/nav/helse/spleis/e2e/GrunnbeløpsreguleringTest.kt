@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.til

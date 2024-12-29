@@ -8,6 +8,9 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
@@ -49,8 +52,6 @@ import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -58,7 +59,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -72,7 +72,7 @@ import no.nav.inntektsmeldingkontrakt.Status
 internal fun AbstractEndToEndTest.utbetaling(
     fagsystemId: String,
     status: Oppdragstatus,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID(),
     utbetalingId: UUID? = null
@@ -91,7 +91,7 @@ internal fun AbstractEndToEndTest.utbetaling(
 internal fun AbstractEndToEndTest.feriepengeutbetaling(
     fagsystemId: String,
     status: Oppdragstatus,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) =
@@ -112,7 +112,7 @@ internal fun AbstractEndToEndTest.sykmelding(
     orgnummer: String = a1,
     sykmeldingSkrevet: LocalDateTime? = null,
     mottatt: LocalDateTime? = null,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
 ) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSykmelding(
     sykeperioder = sykeperioder,
@@ -126,7 +126,7 @@ internal fun AbstractEndToEndTest.søknad(
     sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: String = a1,
     sykmeldingSkrevet: LocalDateTime? = null,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     utenlandskSykmelding: Boolean = false,
     sendTilGosys: Boolean = false,
@@ -160,7 +160,7 @@ internal fun AbstractEndToEndTest.klassiskInntektsmelding(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = a1,
     harOpphørAvNaturalytelser: Boolean = false,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder = LPS
@@ -250,7 +250,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018
 ): Vilkårsgrunnlag {
     return Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
@@ -268,7 +268,7 @@ internal fun utbetalingpåminnelse(
     utbetalingId: UUID,
     status: Utbetalingstatus,
     tilstandsendringstidspunkt: LocalDateTime,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = a1
 ): Utbetalingpåminnelse {
     return Utbetalingpåminnelse(
@@ -308,7 +308,7 @@ internal fun påminnelse(
     vedtaksperiodeId: UUID,
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = a1,
     antallGangerPåminnet: Int = 1,
     skalReberegnes: Boolean = false
@@ -333,7 +333,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     utbetalinger: List<Infotrygdperiode> = listOf(),
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = a1,
     besvart: LocalDateTime = LocalDateTime.now(),
 ): Utbetalingshistorikk {
@@ -356,7 +356,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
     meldingsreferanseId: UUID = UUID.randomUUID(),
     utbetalinger: List<Infotrygdperiode> = listOf(),
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     besvart: LocalDateTime = LocalDateTime.now(),
 ): UtbetalingshistorikkEtterInfotrygdendring {
@@ -409,7 +409,7 @@ internal fun AbstractEndToEndTest.ytelser(
     orgnummer: String = a1,
     arbeidsavklaringspenger: List<Periode> = emptyList(),
     dagpenger: List<Periode> = emptyList(),
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018
 ): Ytelser {
     val meldingsreferanseId = UUID.randomUUID()
     return Ytelser(
@@ -448,7 +448,7 @@ internal fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(da
 internal fun AbstractEndToEndTest.simulering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     simuleringOK: Boolean = true,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = a1,
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
@@ -509,7 +509,7 @@ internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2
 internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     utbetalingGodkjent: Boolean,
-    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String,
     automatiskBehandling: Boolean,
     utbetalingId: UUID = UUID.fromString(

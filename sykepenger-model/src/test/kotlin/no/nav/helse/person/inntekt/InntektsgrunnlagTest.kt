@@ -8,6 +8,8 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
@@ -31,7 +33,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.nesteDag
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -41,7 +42,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykepengegrunnlag

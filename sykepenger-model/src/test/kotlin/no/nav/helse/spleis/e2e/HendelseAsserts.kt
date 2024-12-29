@@ -5,6 +5,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.AktivitetsloggAsserts
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.erHelg
@@ -205,7 +206,7 @@ internal fun interface AktivitetsloggFilter {
             kontekst.kontekstType == "Vedtaksperiode" && kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
         }
 
-        internal fun person(personidentifikator: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
+        internal fun person(personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstMap["fødselsnummer"] == personidentifikator.toString()
         }
 

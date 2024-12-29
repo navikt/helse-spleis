@@ -3,10 +3,10 @@ package no.nav.helse
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -17,10 +17,10 @@ import no.nav.helse.økonomi.Inntekt
 
 internal val Inntekt.sykepengegrunnlag get() = inntektsgrunnlag(a1)
 
-internal fun Inntekt.inntektsgrunnlag(orgnr: String) = inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
+internal fun Inntekt.inntektsgrunnlag(orgnr: String) = inntektsgrunnlag(UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
 internal fun Inntekt.inntektsgrunnlag(alder: Alder) = inntektsgrunnlag(alder, a1, 1.januar)
 internal fun Inntekt.inntektsgrunnlag(skjæringstidspunkt: LocalDate) =
-    inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, a1, skjæringstidspunkt)
+    inntektsgrunnlag(UNG_PERSON_FØDSELSDATO.alder, a1, skjæringstidspunkt)
 
 internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.EmptyLog, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
     Inntektsgrunnlag(
@@ -39,7 +39,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
 
 internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Inntektsgrunnlag.ferdigSykepengegrunnlag(
-        alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+        alder = UNG_PERSON_FØDSELSDATO.alder,
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(

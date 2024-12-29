@@ -4,15 +4,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.GradertPeriode
@@ -61,7 +58,6 @@ import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.fail
@@ -69,17 +65,11 @@ import org.junit.jupiter.api.fail
 internal class TestPerson(
     private val observatør: TestObservatør,
     personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
-    fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
+    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     deferredLog: DeferredLog = DeferredLog(),
     jurist: SubsumsjonsListLog
 ) {
     internal companion object {
-        private val fnrformatter = DateTimeFormatter.ofPattern("ddMMyy")
-        internal val UNG_PERSON_FDATO_2018 = 12.februar(1992)
-        internal val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045")
-
-        internal val INNTEKT = 31000.00.månedlig
-
         internal operator fun <R> String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> R) =
             testPerson.arbeidsgiver(this, testblokk)
     }

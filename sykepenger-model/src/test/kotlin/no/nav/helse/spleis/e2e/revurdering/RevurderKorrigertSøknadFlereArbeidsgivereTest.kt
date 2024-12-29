@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -181,13 +182,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
         }
         a1 {
             håndterVilkårsgrunnlag(
@@ -198,8 +199,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
-                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
                     )
                 )
             )
@@ -488,13 +489,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
         }
         a1 {
             håndterVilkårsgrunnlag(
@@ -505,8 +506,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
-                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
                     )
                 )
             )
@@ -623,13 +624,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars))
             håndterSøknad(Sykdom(10.februar, 10.mars, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT, 10.februar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, 10.februar)
         }
         a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
         }
         a1 {
             håndterVilkårsgrunnlag(
@@ -640,8 +641,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
-                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
                     )
                 )
             )

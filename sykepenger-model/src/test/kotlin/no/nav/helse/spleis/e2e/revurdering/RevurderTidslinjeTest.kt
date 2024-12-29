@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.februar

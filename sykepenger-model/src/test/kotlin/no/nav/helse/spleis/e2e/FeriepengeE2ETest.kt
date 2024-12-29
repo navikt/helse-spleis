@@ -6,6 +6,7 @@ import no.nav.helse.EnableFeriepenger
 import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode

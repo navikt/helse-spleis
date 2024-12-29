@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -22,7 +23,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Venteårsak.Hva
 import no.nav.helse.person.Venteårsak.Hvorfor
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -2,8 +2,8 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.Dagtype
@@ -159,7 +159,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                     perioder = listOf(
                         Friperiode(fom = 1.februar, tom = 28.februar)
                     ),
-                    inntekter = listOf(Inntektsopplysning(a1, 1.januar, TestPerson.INNTEKT, true)),
+                    inntekter = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
                     arbeidskategorikoder = emptyMap()
                 ),
                 besvart = LocalDateTime.now()

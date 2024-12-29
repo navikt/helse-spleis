@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -18,9 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -123,7 +122,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3), 1.vedtaksperiode.filter())
         assertVarsler(listOf(), 2.vedtaksperiode.filter())
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))

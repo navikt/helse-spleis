@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.time.YearMonth
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -72,5 +73,4 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
         assertEquals(tom, oppdragInspektør.periode?.endInclusive)
     }
-
 }

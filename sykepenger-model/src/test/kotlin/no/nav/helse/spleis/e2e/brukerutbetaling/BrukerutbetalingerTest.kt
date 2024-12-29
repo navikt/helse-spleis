@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til

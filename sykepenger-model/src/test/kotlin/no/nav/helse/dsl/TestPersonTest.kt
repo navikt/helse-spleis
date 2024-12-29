@@ -1,6 +1,5 @@
 package no.nav.helse.dsl
 
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -30,8 +29,8 @@ internal class TestPersonTest : AbstractDslTest() {
     @Test
     fun `oppretter standardperson`() {
         val inspektør = inspiser(personInspektør)
-        assertEquals(TestPerson.UNG_PERSON_FNR_2018, inspektør.personidentifikator)
-        assertEquals(TestPerson.UNG_PERSON_FDATO_2018, inspektør.fødselsdato)
+        assertEquals(UNG_PERSON_FNR_2018, inspektør.personidentifikator)
+        assertEquals(UNG_PERSON_FØDSELSDATO, inspektør.fødselsdato)
         assertNull(inspektør.dødsdato)
     }
 

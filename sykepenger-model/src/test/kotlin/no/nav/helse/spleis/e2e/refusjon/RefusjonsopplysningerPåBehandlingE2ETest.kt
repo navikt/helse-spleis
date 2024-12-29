@@ -6,8 +6,8 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak

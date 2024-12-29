@@ -7,9 +7,11 @@ import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.SubsumsjonsListLog
-import no.nav.helse.dsl.TestPerson
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
 import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -36,9 +38,6 @@ import org.junit.jupiter.api.BeforeEach
 internal abstract class AbstractPersonTest {
 
     internal companion object {
-        val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("12029240045")
-        val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
-
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             organisasjonsnummer = a1
         )
@@ -50,8 +49,8 @@ internal abstract class AbstractPersonTest {
                     InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
                         UUID.randomUUID(),
-                        listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, TestPerson.INNTEKT)),
-                        listOf(Inntektsopplysning(a1, 1.januar, TestPerson.INNTEKT, true)),
+                        listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+                        listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
                         emptyMap()
                     ),
                     besvart = LocalDateTime.now()
@@ -67,8 +66,8 @@ internal abstract class AbstractPersonTest {
                     InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
                         UUID.randomUUID(),
-                        listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, TestPerson.INNTEKT)),
-                        listOf(Inntektsopplysning(a1, 1.februar, TestPerson.INNTEKT, true)),
+                        listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT)),
+                        listOf(Inntektsopplysning(a1, 1.februar, INNTEKT, true)),
                         emptyMap()
                     ),
                     besvart = LocalDateTime.now()

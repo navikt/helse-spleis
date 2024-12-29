@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,8 +9,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

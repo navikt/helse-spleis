@@ -6,10 +6,10 @@ import no.nav.helse.EnableFeriepenger
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FDATO_2018
-import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -168,7 +168,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         val dto = dto()
 
         assertEquals(UNG_PERSON_FNR_2018.toString(), dto.fødselsnummer)
-        assertEquals(UNG_PERSON_FDATO_2018, dto.alder.fødselsdato)
+        assertEquals(UNG_PERSON_FØDSELSDATO, dto.alder.fødselsdato)
         assertEquals(1.oktober, dto.alder.dødsdato)
 
         assertArbeidsgivere(dto.arbeidsgivere)

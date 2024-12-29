@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e.refusjon
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog

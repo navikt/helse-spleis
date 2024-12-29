@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.august
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar

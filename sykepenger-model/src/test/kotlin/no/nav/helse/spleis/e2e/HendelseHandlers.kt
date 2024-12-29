@@ -6,8 +6,10 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.PersonHendelsefabrikk
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
@@ -53,7 +55,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
@@ -70,7 +71,6 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Ref
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.sisteBehov
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilSkjønnsmessigFastsatt
