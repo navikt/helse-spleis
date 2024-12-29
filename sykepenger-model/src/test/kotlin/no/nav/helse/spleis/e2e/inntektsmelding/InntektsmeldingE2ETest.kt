@@ -237,6 +237,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 5.februar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
+        assertVarsel(Varselkode.RV_IM_25, 1.vedtaksperiode.filter())
         assertForventetFeil(
             forklaring = "Padder arbeidsgiverdager. Påvirker ikke beregningen, skjæringstidpunktet blir fortsatt riktig.",
             nå = { assertEquals(1.februar til 28.februar, inspektør.periode(1.vedtaksperiode)) },
@@ -614,6 +615,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             harFlereInntektsmeldinger = true
         )
+        assertVarsel(RV_IM_22, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_22, 2.vedtaksperiode.filter())
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             harFlereInntektsmeldinger = true

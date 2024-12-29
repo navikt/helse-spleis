@@ -158,6 +158,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar til 26.januar, 100.prosent)
         tilGodkjent(mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+
+        assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -166,7 +168,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     private fun Aktivitet.Behov.hentLinjer() =
         @Suppress("UNCHECKED_CAST")
         (detaljer()["linjer"] as List<Map<String, Any>>)
-
 
     @Test
     fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {

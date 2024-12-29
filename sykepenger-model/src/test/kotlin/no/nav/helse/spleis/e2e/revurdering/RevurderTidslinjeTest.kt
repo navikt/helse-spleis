@@ -659,7 +659,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             foreldrepenger = listOf(GradertPeriode(16.januar til 28.januar, 100))
         )
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_AY_5, RV_UT_23), 1.vedtaksperiode.filter())
         håndterAnnullerUtbetaling()
 
         assertForkastetPeriodeTilstander(
@@ -772,6 +772,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((23.januar til 23.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_OS_3, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()

@@ -310,6 +310,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.august,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
+        assertVarsel(Varselkode.RV_IM_25, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

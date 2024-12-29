@@ -373,6 +373,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
             førsteFraværsdag = 1.januar
         )
+        assertVarsel(Varselkode.RV_IM_25, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

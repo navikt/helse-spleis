@@ -400,6 +400,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
         )
+        assertVarsel(Varselkode.RV_IM_25, 1.vedtaksperiode.filter())
         assertEquals(SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
         assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra("Inntektsmelding"))
     }
