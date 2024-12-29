@@ -2,6 +2,7 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.KontekstType
@@ -13,10 +14,8 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
-import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
-
 
 internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
 

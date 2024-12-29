@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar

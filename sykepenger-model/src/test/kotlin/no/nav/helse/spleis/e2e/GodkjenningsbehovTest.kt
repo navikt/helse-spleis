@@ -5,6 +5,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype

@@ -3,7 +3,7 @@
   "fødselsdato": "1992-02-12",
   "arbeidsgivere": [
     {
-      "organisasjonsnummer": "987654321",
+      "organisasjonsnummer": "a1",
       "id": "dffade44-943f-429b-a135-570b39efbee1",
       "inntektshistorikk": [
         {
@@ -1468,7 +1468,7 @@
             ]
           },
           "arbeidsgiverOppdrag": {
-            "mottaker": "987654321",
+            "mottaker": "a1",
             "fagområde": "SPREF",
             "linjer": [
               {
@@ -1503,7 +1503,7 @@
                     {
                       "forfallsdato": "2018-01-21",
                       "utbetalesTil": {
-                        "id": "987654321",
+                        "id": "a1",
                         "navn": "Org Orgesen AS"
                       },
                       "feilkonto": false,
@@ -1525,7 +1525,7 @@
                             "antall": 2,
                             "type": "DAG"
                           },
-                          "refunderesOrgnummer": "987654321"
+                          "refunderesOrgnummer": "a1"
                         }
                       ]
                     }
@@ -1627,7 +1627,7 @@
             "grunnbeløp": 561804.0,
             "arbeidsgiverInntektsopplysninger": [
               {
-                "orgnummer": "987654321",
+                "orgnummer": "a1",
                 "fom": "2018-01-01",
                 "tom": "+999999999-12-31",
                 "inntektsopplysning": {
@@ -1672,7 +1672,7 @@
             "opptjeningTom": "2017-12-31",
             "arbeidsforhold": [
               {
-                "orgnummer": "987654321",
+                "orgnummer": "a1",
                 "ansattPerioder": [
                   {
                     "ansattFom": "1970-01-01",
@@ -1701,7 +1701,7 @@
             "grunnbeløp": 561804.0,
             "arbeidsgiverInntektsopplysninger": [
               {
-                "orgnummer": "987654321",
+                "orgnummer": "a1",
                 "fom": "2018-01-01",
                 "tom": "+999999999-12-31",
                 "inntektsopplysning": {
@@ -1746,7 +1746,7 @@
             "opptjeningTom": "2017-12-31",
             "arbeidsforhold": [
               {
-                "orgnummer": "987654321",
+                "orgnummer": "a1",
                 "ansattPerioder": [
                   {
                     "ansattFom": "1970-01-01",

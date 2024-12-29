@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober

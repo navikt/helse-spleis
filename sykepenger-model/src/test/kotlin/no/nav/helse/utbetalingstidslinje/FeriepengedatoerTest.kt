@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-
 import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
@@ -8,6 +7,9 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -38,13 +40,10 @@ import org.junit.jupiter.api.Test
 internal class FeriepengedatoerTest : AbstractEndToEndTest() {
     private companion object {
         private val alder = UNG_PERSON_FØDSELSDATO.alder
-        private val a1 = "456789123"
-        private val a2 = "789456213"
     }
 
     private fun feriepengerFor(opptjeningsår: Year, historikk: UtbetalingshistorikkForFeriepenger, sisteInfotrygdkjøring: LocalDate = LocalDate.MAX) =
         Feriepengeberegner(alder, opptjeningsår, grunnlagFraInfotrygd = historikk.grunnlagForFeriepenger(sisteInfotrygdkjøring), grunnlagFraSpleis = person.grunnlagForFeriepenger())
-
 
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
@@ -446,5 +445,4 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
     }
-
 }

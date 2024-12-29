@@ -3,6 +3,8 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar

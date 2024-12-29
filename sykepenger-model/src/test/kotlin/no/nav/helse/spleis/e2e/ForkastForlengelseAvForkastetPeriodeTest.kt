@@ -4,6 +4,9 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.den
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.til
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -59,7 +60,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
     }
-
 
     @Test
     fun `utbetaling med delvis refusjon`() {

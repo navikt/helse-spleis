@@ -7,6 +7,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
@@ -37,15 +38,10 @@ internal abstract class AbstractPersonTest {
     internal companion object {
         val UNG_PERSON_FNR_2018: Personidentifikator = Personidentifikator("12029240045")
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
-        val ORGNUMMER: String = "987654321"
 
-        val a1: String = ORGNUMMER
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             organisasjonsnummer = ORGNUMMER
         )
-        val a2: String = "654321987"
-        val a3: String = "321987654"
-        val a4: String = "456789123"
 
         private fun overgangFraInfotrygdPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
             person.håndter(

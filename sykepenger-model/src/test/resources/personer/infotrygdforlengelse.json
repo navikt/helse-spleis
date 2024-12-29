@@ -3,7 +3,7 @@
   "fødselsdato": "1992-02-12",
   "arbeidsgivere": [
     {
-      "organisasjonsnummer": "987654321",
+      "organisasjonsnummer": "a1",
       "id": "864d66dd-46c8-44df-991a-cc1fdc89462b",
       "inntektshistorikk": [
         {
@@ -604,7 +604,7 @@
             ]
           },
           "arbeidsgiverOppdrag": {
-            "mottaker": "987654321",
+            "mottaker": "a1",
             "fagområde": "SPREF",
             "linjer": [
               {
@@ -639,7 +639,7 @@
                     {
                       "forfallsdato": "2018-01-21",
                       "utbetalesTil": {
-                        "id": "987654321",
+                        "id": "a1",
                         "navn": "Org Orgesen AS"
                       },
                       "feilkonto": false,
@@ -661,7 +661,7 @@
                             "antall": 2,
                             "type": "DAG"
                           },
-                          "refunderesOrgnummer": "987654321"
+                          "refunderesOrgnummer": "a1"
                         }
                       ]
                     }
@@ -717,7 +717,7 @@
       "ferieperioder": [],
       "arbeidsgiverutbetalingsperioder": [
         {
-          "orgnr": "987654321",
+          "orgnr": "a1",
           "fom": "2018-01-01",
           "tom": "2018-01-31",
           "grad": 100.0,
@@ -727,7 +727,7 @@
       "personutbetalingsperioder": [],
       "inntekter": [
         {
-          "orgnr": "987654321",
+          "orgnr": "a1",
           "sykepengerFom": "2018-01-01",
           "inntekt": 31000.0,
           "refusjonTilArbeidsgiver": true,
@@ -745,7 +745,7 @@
       "ferieperioder": [],
       "arbeidsgiverutbetalingsperioder": [
         {
-          "orgnr": "987654321",
+          "orgnr": "a1",
           "fom": "2018-01-01",
           "tom": "2018-01-31",
           "grad": 100.0,
@@ -755,7 +755,7 @@
       "personutbetalingsperioder": [],
       "inntekter": [
         {
-          "orgnr": "987654321",
+          "orgnr": "a1",
           "sykepengerFom": "2018-01-01",
           "inntekt": 31000.0,
           "refusjonTilArbeidsgiver": true,
@@ -779,7 +779,7 @@
             "grunnbeløp": 561804.0,
             "arbeidsgiverInntektsopplysninger": [
               {
-                "orgnummer": "987654321",
+                "orgnummer": "a1",
                 "fom": "2018-01-01",
                 "tom": "+999999999-12-31",
                 "inntektsopplysning": {
@@ -830,7 +830,7 @@
             "grunnbeløp": 561804.0,
             "arbeidsgiverInntektsopplysninger": [
               {
-                "orgnummer": "987654321",
+                "orgnummer": "a1",
                 "fom": "2018-01-01",
                 "tom": "+999999999-12-31",
                 "inntektsopplysning": {

@@ -1,6 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding

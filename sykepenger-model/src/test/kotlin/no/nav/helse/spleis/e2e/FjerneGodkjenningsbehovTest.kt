@@ -5,6 +5,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET

@@ -3,6 +3,8 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.august
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype

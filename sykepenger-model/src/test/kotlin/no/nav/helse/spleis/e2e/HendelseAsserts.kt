@@ -5,6 +5,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.AktivitetsloggAsserts
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Hendelse
@@ -13,7 +14,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType

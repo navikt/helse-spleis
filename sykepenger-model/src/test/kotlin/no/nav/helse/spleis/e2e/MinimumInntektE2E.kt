@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag

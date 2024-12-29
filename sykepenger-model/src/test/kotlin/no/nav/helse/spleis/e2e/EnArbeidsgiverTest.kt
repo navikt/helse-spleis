@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.harBehov
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -45,7 +46,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_IT_3, 2.vedtaksperiode.filter())
-        
+
         assertEquals(2, observatør.overlappendeInfotrygdperioder.size)
         val event = observatør.overlappendeInfotrygdperioder.last()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(1.vedtaksperiode)

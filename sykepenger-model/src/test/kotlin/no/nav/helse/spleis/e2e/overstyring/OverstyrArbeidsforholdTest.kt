@@ -2,6 +2,10 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import no.nav.helse.desember
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.a3
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -295,7 +299,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a2
         )
-        assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(Varselkode.RV_VV_1, RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a2))
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(Varselkode.RV_VV_8, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)

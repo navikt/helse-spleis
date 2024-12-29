@@ -10,6 +10,9 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FDATO_2018
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -38,7 +41,6 @@ import no.nav.helse.juni
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB

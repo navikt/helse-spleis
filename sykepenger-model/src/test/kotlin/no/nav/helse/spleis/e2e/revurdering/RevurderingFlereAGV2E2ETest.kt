@@ -1,6 +1,10 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.april
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.a3
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag

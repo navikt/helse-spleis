@@ -4,6 +4,7 @@ import java.time.YearMonth
 import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar

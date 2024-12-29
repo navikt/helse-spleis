@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON

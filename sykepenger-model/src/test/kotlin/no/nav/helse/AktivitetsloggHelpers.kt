@@ -1,18 +1,19 @@
 package no.nav.helse
 
 import java.util.UUID
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
-internal fun Aktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+internal fun Aktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitet.Behov.Behovtype, orgnummer: String = ORGNUMMER) =
     antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
 
-internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitet.Behov.Behovtype, orgnummer: String = ORGNUMMER) =
     etterspurteBehovFinnes(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
 
-internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER) =
     etterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer))
 
 internal fun Aktivitetslogg.sisteBehov(type: Aktivitet.Behov.Behovtype) =

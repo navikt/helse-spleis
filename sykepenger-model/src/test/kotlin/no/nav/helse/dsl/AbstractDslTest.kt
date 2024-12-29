@@ -27,10 +27,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.person.Arbeidsledig
-import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
-import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -56,28 +53,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(DeferredLogging::class)
 internal abstract class AbstractDslTest {
     internal companion object {
-        @JvmStatic
-        protected val a1 = "a1"
-
-        @JvmStatic
-        protected val a2 = "a2"
-
-        @JvmStatic
-        protected val a3 = "a3"
-
-        @JvmStatic
-        protected val frilans = Frilans
-
-        @JvmStatic
-        protected val selvstendig = Selvstendig
-
-        @JvmStatic
-        protected val arbeidsledig = Arbeidsledig
-
-        @JvmStatic
-        @Deprecated("må bruke a1")
-        protected val ORGNUMMER = a1
-
         @JvmStatic
         protected val personInspektør = { person: Person -> PersonInspektør(person) }
 

@@ -3,6 +3,8 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.dsl.ORGNUMMER
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -283,7 +285,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertTrue(inspektør.utbetaling(0).erUtbetalt)
         assertTrue(inspektør.utbetaling(1).erUbetalt)
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)

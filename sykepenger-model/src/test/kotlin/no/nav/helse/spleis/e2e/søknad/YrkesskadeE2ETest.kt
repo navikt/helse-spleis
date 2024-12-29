@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1

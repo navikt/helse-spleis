@@ -6,6 +6,7 @@ import no.nav.helse.EnableFeriepenger
 import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -188,7 +189,6 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.utbetalingslinjer)
-
     }
 
     @Test

@@ -8,6 +8,8 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
@@ -524,8 +526,6 @@ internal class InntektsgrunnlagTest {
 
     @Test
     fun `lager varsel dersom arbeidsforhold har opphørt`() {
-        val a1 = "a1"
-        val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
         val startdatoA2 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(2)
@@ -607,8 +607,6 @@ internal class InntektsgrunnlagTest {
 
     @Test
     fun `lager varsel ved flere arbeidsgivere med ghost`() {
-        val a1 = "a1"
-        val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
@@ -661,8 +659,6 @@ internal class InntektsgrunnlagTest {
 
     @Test
     fun `lager varsel ved flere arbeidsgivere med ulik startdato`() {
-        val a1 = "a1"
-        val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
@@ -706,8 +702,6 @@ internal class InntektsgrunnlagTest {
 
     @Test
     fun `lager varsel dersom en arbeidsgiver i sykepengegrunnlaget ikke har registrert opptjening`() {
-        val a1 = "a1"
-        val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
@@ -789,8 +783,6 @@ internal class InntektsgrunnlagTest {
 
     @Test
     fun `ikke varsel ved flere arbeidsgivere med samme startdato`() {
-        val a1 = "a1"
-        val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt

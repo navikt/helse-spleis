@@ -5,6 +5,7 @@ import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.ORGNUMMER
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
@@ -318,7 +319,7 @@ internal class OpptjeningTest {
         val jurist = jurist
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                AbstractPersonTest.ORGNUMMER,
+                ORGNUMMER,
                 listOf(Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
             )
         )
@@ -335,7 +336,7 @@ internal class OpptjeningTest {
                     "tilstrekkeligAntallOpptjeningsdager" to 28,
                     "arbeidsforhold" to listOf(
                         mapOf(
-                            "orgnummer" to AbstractPersonTest.ORGNUMMER,
+                            "orgnummer" to ORGNUMMER,
                             "fom" to 4.desember(2017),
                             "tom" to 31.januar
                         )
@@ -352,7 +353,7 @@ internal class OpptjeningTest {
         val jurist = jurist
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                AbstractPersonTest.ORGNUMMER,
+                ORGNUMMER,
                 listOf(Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
             )
         )
@@ -369,7 +370,7 @@ internal class OpptjeningTest {
                     "tilstrekkeligAntallOpptjeningsdager" to 28,
                     "arbeidsforhold" to listOf(
                         mapOf(
-                            "orgnummer" to AbstractPersonTest.ORGNUMMER,
+                            "orgnummer" to ORGNUMMER,
                             "fom" to 5.desember(2017),
                             "tom" to 31.januar
                         )
