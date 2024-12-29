@@ -216,7 +216,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     fun `sender ikke avsluttet uten vedtak fordi saksbehandler ikke overstyrer perioden inn i AvsluttetUtenUtbetaling`() {
         val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        val inntektsmeldingId = håndterInntektsmelding(
+        håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"

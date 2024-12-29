@@ -18,7 +18,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -286,7 +285,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             val mottatt = LocalDateTime.now()
-            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = 28.februar), mottatt = mottatt)
+            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(INNTEKT, opphørsdato = 28.februar), mottatt = mottatt)
 
             val forventetUbruktEtterJanuarSøknad =
                 Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT, Kilde(im, ARBEIDSGIVER, mottatt)) +
@@ -369,7 +368,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.januar,
-                refusjon = Inntektsmelding.Refusjon(
+                refusjon = Refusjon(
                     beløp = INNTEKT / 2,
                     opphørsdato = null
                 )
@@ -395,7 +394,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.januar,
-                refusjon = Inntektsmelding.Refusjon(
+                refusjon = Refusjon(
                     beløp = INNTEKT / 2,
                     opphørsdato = 30.april
                 )
@@ -427,7 +426,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null))
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
@@ -462,7 +461,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null))
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT)
@@ -493,7 +492,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
@@ -511,7 +510,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
@@ -530,7 +529,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
@@ -548,7 +547,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
@@ -570,7 +569,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeGammel = Kilde(imGammel, ARBEIDSGIVER, tidsstempelGammel)
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
@@ -598,7 +597,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
@@ -658,7 +657,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val inspektør = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør
@@ -688,7 +687,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val inspektør = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør
@@ -718,7 +717,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy)
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val inspektør = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør
@@ -750,7 +749,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         val tidsstempelNy = LocalDateTime.now()
-        val imNy = håndterInntektsmelding(listOf(1.mars til 16.mars), INNTEKT, refusjon = Inntektsmelding.Refusjon(500.daglig, 27.mars), mottatt = tidsstempelNy)
+        val imNy = håndterInntektsmelding(listOf(1.mars til 16.mars), INNTEKT, refusjon = Refusjon(500.daglig, 27.mars), mottatt = tidsstempelNy)
         assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
@@ -878,8 +877,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val tidsstempel = LocalDateTime.now()
             val im = nyttVedtak(
                 januar, tidsstempel, endringerIRefusjon = listOf(
-                Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.8, 1.februar),
-                Inntektsmelding.Refusjon.EndringIRefusjon(INNTEKT * 0.5, 20.februar)
+                Refusjon.EndringIRefusjon(INNTEKT * 0.8, 1.februar),
+                Refusjon.EndringIRefusjon(INNTEKT * 0.5, 20.februar)
             )
             )
             val kilde = Kilde(im, ARBEIDSGIVER, tidsstempel)
@@ -1093,7 +1092,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding kommer før søknad`() {
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.mars, emptyList()))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(INNTEKT, 31.mars, emptyList()))
             assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-01-2018 til 01-04-2018", AktivitetsloggFilter.arbeidsgiver(a1))
         }
     }
@@ -1152,7 +1151,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 20.januar,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null),
+            refusjon = Refusjon(INNTEKT / 2, null),
             beregnetInntekt = INNTEKT
         )
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
@@ -1166,7 +1165,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         vedtaksperiode: Int = 1,
         arbeidsgiverperiode: List<Periode> = listOf(periode.start til periode.start.plusDays(15)),
         opphørAvRefusjon: LocalDate? = null,
-        endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
+        endringerIRefusjon: List<Refusjon.EndringIRefusjon> = emptyList()
     ): UUID {
         håndterSøknad(periode)
         val im = håndterInntektsmelding(
@@ -1174,7 +1173,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             INNTEKT,
             førsteFraværsdag = periode.start,
             mottatt = tidsstempel,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
+            refusjon = Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
         )
         håndterVilkårsgrunnlag(vedtaksperiode.vedtaksperiode)
         håndterYtelser(vedtaksperiode.vedtaksperiode)

@@ -2,19 +2,14 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.a1
-import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.somPeriode
@@ -37,14 +32,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningTest {
-
-    private val jurist = BehandlingSubsumsjonslogg(
-        EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    )
-    )
 
     @Test
     fun `konkret opptjeningsperiode`() {
@@ -316,7 +303,6 @@ internal class OpptjeningTest {
 
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid tilfredstilt`() {
-        val jurist = jurist
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 a1,
@@ -350,7 +336,6 @@ internal class OpptjeningTest {
 
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid ikke tilfredstilt`() {
-        val jurist = jurist
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 a1,

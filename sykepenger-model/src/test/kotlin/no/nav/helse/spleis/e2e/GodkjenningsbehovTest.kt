@@ -45,7 +45,6 @@ import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -437,19 +436,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         behov = Aktivitet.Behov.Behovtype.Godkjenning,
         felt = "kanAvvises"
     )!!
-
-    private fun omregnedeÅrsinntekter(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<List<Map<String, Any>>>(
-        vedtaksperiodeId = vedtaksperiode.id(orgnummer),
-        behov = Aktivitet.Behov.Behovtype.Godkjenning,
-        felt = "omregnedeÅrsinntekter"
-    )!!.map {
-        OmregnetÅrsinntektFraGodkjenningsbehov(
-            orgnummer = it.getValue("organisasjonsnummer") as String,
-            beløp = (it.getValue("beløp") as Double).årlig
-        )
-    }
-
-    private data class OmregnetÅrsinntektFraGodkjenningsbehov(val orgnummer: String, val beløp: Inntekt)
 
     private fun vilkårsgrunnlagIdFraSisteGodkjenningsbehov(vedtaksperiode: IdInnhenter, orgnummer: String = a1) = hendelselogg.hentFeltFraBehov<String>(
         vedtaksperiodeId = vedtaksperiode.id(orgnummer),
