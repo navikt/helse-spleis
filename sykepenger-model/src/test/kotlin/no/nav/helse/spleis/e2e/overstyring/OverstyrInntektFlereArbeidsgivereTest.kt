@@ -17,6 +17,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
@@ -130,7 +131,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
-
     }
 
     @Test
@@ -286,8 +286,9 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
     }
-
 }

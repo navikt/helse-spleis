@@ -67,6 +67,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.september
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -94,6 +95,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             )
         )
+
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
 
@@ -1094,6 +1097,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1167,6 +1172,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1224,6 +1231,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1339,6 +1348,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1713,6 +1724,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
@@ -1784,6 +1797,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1847,6 +1862,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1911,6 +1928,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1971,6 +1990,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),

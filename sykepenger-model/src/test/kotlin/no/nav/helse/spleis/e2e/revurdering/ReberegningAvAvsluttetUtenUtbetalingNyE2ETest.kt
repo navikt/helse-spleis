@@ -290,6 +290,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             orgnummer = a2
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, orgnummer = a2)
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
+
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             PersonUtbetalingsperiode(a2, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
@@ -769,6 +771,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter(orgnummer = a2))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -927,6 +931,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             orgnummer = a1
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
+        assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
 
@@ -1085,6 +1091,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -1131,6 +1139,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             )
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

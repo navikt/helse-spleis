@@ -544,6 +544,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -675,6 +677,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
@@ -721,6 +725,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrInntekt(1200.månedlig, orgnummer = a2, skjæringstidspunkt = 1.januar)
@@ -793,7 +799,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             orgnummer = a2,
@@ -801,6 +806,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
 
         utbetalPeriode(1.vedtaksperiode, a2, 1.januar)
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 16.mars), orgnummer = a2)
@@ -937,6 +943,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         tilGodkjenning(februar, a1)
         tilGodkjenning(januar, a2)
 
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
         assertTilstander(
             1.vedtaksperiode,
             START,

@@ -169,6 +169,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

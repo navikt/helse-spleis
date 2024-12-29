@@ -18,6 +18,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -67,6 +68,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.mars)
         assertNotNull(vilkårsgrunnlag)
@@ -312,6 +315,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold1
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -369,6 +374,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold2
         )
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_8, 2.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
@@ -415,6 +422,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 

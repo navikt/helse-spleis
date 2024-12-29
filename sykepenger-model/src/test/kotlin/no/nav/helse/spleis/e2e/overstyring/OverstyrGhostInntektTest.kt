@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -22,6 +23,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -82,6 +84,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
     }
 
@@ -100,7 +104,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
-        assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_VV_2, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(0, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
         Assertions.assertTrue(inspektør.utbetaling(1).erAvsluttet)
@@ -138,7 +142,9 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
     private fun tilOverstyring(

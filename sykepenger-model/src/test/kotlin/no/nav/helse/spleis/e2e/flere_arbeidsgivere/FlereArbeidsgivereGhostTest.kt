@@ -132,6 +132,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(ghost, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -168,6 +170,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -211,6 +215,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         håndterVilkårsgrunnlagGhost(2.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -281,6 +287,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -338,6 +346,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -370,6 +380,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile = Subsumsjon("8-28", 3, "b")
@@ -418,6 +430,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile = Subsumsjon("8-28", 3, "b")
@@ -539,6 +553,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -749,6 +765,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
@@ -895,6 +913,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -1089,6 +1109,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
         )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
@@ -1233,6 +1255,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val utbetaling1 = inspektør(a1).utbetaling(0)
@@ -1260,6 +1284,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlagGhost(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         if (tilGodkjenning) return

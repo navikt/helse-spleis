@@ -412,6 +412,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)

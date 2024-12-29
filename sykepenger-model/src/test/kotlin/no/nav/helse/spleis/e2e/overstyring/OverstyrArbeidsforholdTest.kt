@@ -20,10 +20,12 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
@@ -57,6 +59,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
         )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
@@ -80,6 +84,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
         )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
@@ -140,6 +146,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a2
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         inspektør(a2).sisteUtbetalingUtbetalingstidslinje()[17.januar].also {
@@ -194,6 +202,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertThrows<IllegalStateException>("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til") {
@@ -227,6 +237,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also {
@@ -283,7 +295,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a2
         )
-        assertVarsel(Varselkode.RV_VV_1, 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a2))
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(Varselkode.RV_VV_8, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -329,6 +341,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
@@ -362,6 +376,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
@@ -406,6 +422,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also {

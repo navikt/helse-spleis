@@ -36,6 +36,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -103,6 +104,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -179,6 +182,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -284,6 +289,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -399,6 +405,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -457,6 +464,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -512,6 +520,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -573,6 +582,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -657,6 +668,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -720,6 +733,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -1261,6 +1276,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -1315,6 +1331,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -1419,6 +1436,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
@@ -1508,6 +1526,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
@@ -1562,6 +1581,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -1648,6 +1669,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -1736,6 +1759,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
@@ -1776,6 +1801,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
@@ -1813,6 +1840,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

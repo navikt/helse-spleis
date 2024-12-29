@@ -47,6 +47,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -101,6 +102,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlagMedGhost(1.vedtaksperiode, skjæringstidspunkt = 1.januar, arbeidsgiver = a1, ghost = a2)
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -110,6 +113,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterInntektsmeldingPortal(emptyList(), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         håndterVilkårsgrunnlagMedGhost(2.vedtaksperiode, skjæringstidspunkt = 25.januar, arbeidsgiver = a1, ghost = a2)
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -589,6 +594,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -675,6 +682,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -720,6 +728,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold2,
             orgnummer = a2
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
 
@@ -765,6 +775,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -810,6 +821,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold2,
             orgnummer = a2
         )
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)

@@ -727,6 +727,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
@@ -758,6 +760,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ), orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
@@ -819,6 +823,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -1666,6 +1672,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             orgnummer = a1
         )
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar), orgnummer = a2)
