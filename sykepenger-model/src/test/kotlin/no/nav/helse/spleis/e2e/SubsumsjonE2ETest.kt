@@ -191,15 +191,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-3 ledd 1 punktum 2 - fyller 70`() {
         val fnr = Personidentifikator("20014835841")
         createTestPerson(fnr, 20.januar(1948))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = fnr)
-        håndterSøknad(januar, fnr = fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            fnr = fnr,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(fnr = fnr)
-        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -240,15 +239,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-3 ledd 1 punktum 2 - blir aldri 70`() {
         val fnr = Personidentifikator("01024835841")
         createTestPerson(fnr, 1.februar(1948))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = fnr)
-        håndterSøknad(januar, fnr = fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            fnr = fnr,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(fnr = fnr)
-        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -272,15 +270,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-3 ledd 1 punktum 2 - er alltid 70`() {
         val fnr = Personidentifikator("01014835841")
         createTestPerson(fnr, 1.januar(1948))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = fnr)
-        håndterSøknad(januar, fnr = fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            fnr = fnr,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(fnr = fnr)
-        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -304,11 +301,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
         val fnr = Personidentifikator("01014835841")
         createTestPerson(fnr, 1.januar(1948))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), fnr = fnr)
-        håndterSøknad(1.januar til 16.januar, fnr = fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(1.januar til 16.januar)
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            fnr = fnr
+            listOf(1.januar til 16.januar)
         )
 
         assertForventetFeil(
@@ -318,9 +314,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_3)
             },
             ønsket = {
-                håndterYtelser(fnr = fnr)
-                håndterVilkårsgrunnlag(fnr = fnr)
-                håndterYtelser(fnr = fnr)
+                håndterYtelser()
+                håndterVilkårsgrunnlag()
+                håndterYtelser()
 
                 SubsumsjonInspektør(jurist).assertIkkeOppfylt(
                     paragraf = PARAGRAF_8_3,
@@ -2054,16 +2050,15 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
         val personOver67år = Personidentifikator("01014500065")
         createTestPerson(personOver67år, 1.januar(1945))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = personOver67år)
-        håndterSøknad(januar, fnr = personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 187268.årlig,
-            fnr = personOver67år,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -2084,16 +2079,15 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
         val personOver67år = Personidentifikator("01014500065")
         createTestPerson(personOver67år, 1.januar(1945))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = personOver67år)
-        håndterSøknad(januar, fnr = personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 187267.årlig,
-            fnr = personOver67år,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -2117,7 +2111,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         createTestPerson(personOver67år, 5.februar(1951))
         val inntekt = 100_000.årlig // mellom 0.5G og 2G - slik at kravet er oppfyllt før personen fyllte 67, men ikke etter
 
-        nyttVedtak(januar, fnr = personOver67år, beregnetInntekt = inntekt)
+        nyttVedtak(januar, beregnetInntekt = inntekt)
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_2, ledd = LEDD_2)
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -2180,36 +2174,34 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val personOver67år = Personidentifikator("01025100065")
         createTestPerson(personOver67år, 1.februar(1951))
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = personOver67år)
-        håndterSøknad(januar, fnr = personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            fnr = personOver67år,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
-        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
-        håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(fnr = personOver67år)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar), fnr = personOver67år)
-        håndterSøknad(2.februar til 28.februar, fnr = personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(2.februar til 28.februar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 2.februar,
-            fnr = personOver67år
+            førsteFraværsdag = 2.februar
         )
 
-        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(fnr = personOver67år)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = personOver67år)
-        håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
-        håndterSimulering(2.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(fnr = personOver67år)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 0,
@@ -2312,36 +2304,34 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val personOver67år = Personidentifikator("01025100065")
         createTestPerson(personOver67år, 1.februar(1951))
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar), fnr = personOver67år)
-        håndterSøknad(1.januar til 1.februar, fnr = personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar))
+        håndterSøknad(1.januar til 1.februar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            fnr = personOver67år,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
-        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
-        håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(fnr = personOver67år)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar), fnr = personOver67år)
-        håndterSøknad(3.februar til 28.februar, fnr = personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar))
+        håndterSøknad(3.februar til 28.februar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 3.februar,
-            fnr = personOver67år
+            førsteFraværsdag = 3.februar
         )
 
-        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(fnr = personOver67år)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = personOver67år)
-        håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
-        håndterSimulering(2.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(fnr = personOver67år)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 0,
@@ -2442,10 +2432,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
         val personOver67år = Personidentifikator("01025100065")
         createTestPerson(personOver67år, 1.februar(1951))
-        nyttVedtak(januar, fnr = personOver67år)
-        forlengVedtak(februar, fnr = personOver67år)
-        forlengVedtak(mars, fnr = personOver67år)
-        forlengVedtak(1.april til 26.april, fnr = personOver67år)
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+        forlengVedtak(mars)
+        forlengVedtak(1.april til 26.april)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -2573,10 +2563,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
         val personOver67år = Personidentifikator("01025100065")
         createTestPerson(personOver67år, 1.februar(1951))
-        nyttVedtak(januar, fnr = personOver67år)
-        forlengVedtak(februar, fnr = personOver67år)
-        forlengVedtak(mars, fnr = personOver67år)
-        forlengVedtak(1.april til 27.april, fnr = personOver67år)
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+        forlengVedtak(mars)
+        forlengVedtak(1.april til 27.april)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
