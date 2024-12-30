@@ -73,7 +73,6 @@ import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilSkjønnsmessigFastsatt
-import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -618,6 +617,26 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     arbeidsforhold = arbeidsforhold
 )
 
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    skatteinntekter: List<Pair<String, Inntekt>>,
+    arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
+    orgnummer: String = a1
+): Vilkårsgrunnlag {
+    val skjæringstidspunkt = inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
+    return håndterVilkårsgrunnlag(
+        vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+        medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        orgnummer = orgnummer,
+        inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(skatteinntekter, skjæringstidspunkt),
+        inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, skjæringstidspunkt),
+        arbeidsforhold = arbeidsforhold.map { (orgnr, fom, tom) ->
+            Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
+        }
+    )
+}
+
+@Deprecated("bytt ut med enklere variant", ReplaceWith("håndterVilkårsgrunnlag(vedtaksperiodeId, skatteinntekter, arbeidsforhold, orgnummer)"))
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,

@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.YearMonth
 import no.nav.helse.april
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
@@ -54,27 +55,14 @@ internal class InntektForInntektsgrunnlagTest {
             ),
         )
         assertThrows<IllegalArgumentException> {
-            InntektForSykepengegrunnlag(
-                inntekter = inntekter
-            )
+            InntektForSykepengegrunnlag(inntekter = inntekter)
         }
     }
 
     @Test
     fun `Frilanserinntekt i løpet av de 3 månedene gir error`() {
         val aktivitetslogg = Aktivitetslogg()
-        val inntekter = listOf(
-            ArbeidsgiverInntekt(
-                "orgnummer",
-                (1..3).map {
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        YearMonth.of(2017, it),
-                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
-                    )
-                }
-            ),
-        )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 28.februar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
@@ -103,19 +91,7 @@ internal class InntektForInntektsgrunnlagTest {
     @Test
     fun `Frilanser-arbeidsforhold uten inntekt de siste 3 månedene gir ikke error`() {
         val aktivitetslogg = Aktivitetslogg()
-        val inntekter = listOf(
-            ArbeidsgiverInntekt(
-                "orgnummer",
-                (1..3).map {
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        YearMonth.of(2017, it),
-                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
-                    )
-                }
-            ),
-        )
-
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer2", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
@@ -123,18 +99,7 @@ internal class InntektForInntektsgrunnlagTest {
 
     @Test
     fun `Finner frilansinntekt måneden før skjæringstidspunkt`() {
-        val inntekter = listOf(
-            ArbeidsgiverInntekt(
-                "orgnummer",
-                (1..3).map {
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        YearMonth.of(2017, it),
-                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
-                    )
-                }
-            ),
-        )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         val aktivitetslogg = Aktivitetslogg()
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
@@ -143,22 +108,10 @@ internal class InntektForInntektsgrunnlagTest {
 
     @Test
     fun `Finner ikke frilansinntekt måneden før skjæringstidspunkt`() {
-        val inntekter = listOf(
-            ArbeidsgiverInntekt(
-                "orgnummer",
-                (1..3).map {
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        YearMonth.of(2017, it),
-                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
-                    )
-                }
-            ),
-        )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer2", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         val aktivitetslogg = Aktivitetslogg()
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
-
 }
