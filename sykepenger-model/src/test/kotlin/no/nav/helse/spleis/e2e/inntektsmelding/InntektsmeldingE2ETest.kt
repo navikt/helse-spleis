@@ -151,18 +151,20 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
 
         val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
-        assertEquals(20000.månedlig, inntektFør)
+        assertEquals(INNTEKT, inntektFør)
         val forespurtIm = håndterInntektsmelding(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(100.daglig, null), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = a2)
 
         assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 100.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
         val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
 
-        assertEquals(20000.månedlig, inntektEtter)
+        assertEquals(INNTEKT, inntektEtter)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
@@ -173,7 +175,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 77.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
         val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
-        assertEquals(20000.månedlig, inntektEtterselvbestemtIm)
+        assertEquals(INNTEKT, inntektEtterselvbestemtIm)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)

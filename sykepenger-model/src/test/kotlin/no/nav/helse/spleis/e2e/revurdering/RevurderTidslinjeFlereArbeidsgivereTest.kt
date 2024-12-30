@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -171,8 +172,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertIngenFunksjonelleFeil()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)

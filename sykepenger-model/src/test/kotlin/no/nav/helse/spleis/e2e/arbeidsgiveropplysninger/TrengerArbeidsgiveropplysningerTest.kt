@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Toggle
@@ -10,22 +9,17 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -47,9 +41,7 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
@@ -61,13 +53,11 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -76,8 +66,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
-
-    private val INNTEKT_FLERE_AG = 20000.månedlig
 
     @Test
     fun `Skal sende med et flagg for å innhente inntekter fra a-ordningen etter å ha ventet på inntektsmelding lengre enn 3 måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
@@ -172,19 +160,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a1 to INNTEKT,
-                    a2 to INNTEKT
-                ), 1.januar
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
-        )
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -357,7 +333,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode
         )
@@ -378,7 +354,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon
         )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
@@ -399,7 +375,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode
         )
@@ -458,7 +434,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespurtOpplysning =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode
         )
@@ -519,19 +495,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
-        )
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -570,15 +534,15 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(januar, a2)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT_FLERE_AG,
+            beregnetInntekt = INNTEKT,
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT_FLERE_AG,
+            beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT_FLERE_AG,
+                beløp = INNTEKT,
                 opphørsdato = null,
                 endringerIRefusjon = listOf(
                     Inntektsmelding.Refusjon.EndringIRefusjon(18000.månedlig, 10.februar),
@@ -590,7 +554,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
+        fraVilkårsprøvingTilGodkjent()
         forlengVedtak(februar, orgnummer = a1)
 
         nyPeriode(mars, a2)
@@ -606,7 +570,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode
         )
@@ -623,21 +587,21 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(januar, a2)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT_FLERE_AG,
+            beregnetInntekt = INNTEKT,
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT_FLERE_AG,
+            beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT_FLERE_AG,
+                beløp = INNTEKT,
                 opphørsdato = 15.mars
             ),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
+        fraVilkårsprøvingTilGodkjent()
         forlengVedtak(februar, orgnummer = a1)
         nyPeriode(mars, a2)
 
@@ -652,7 +616,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val trengerArbeidsgiveropplysningerEvent = trengerArbeidsgiveropplysningerEvents.last()
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode
         )
@@ -1015,15 +979,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             orgnummer = a2
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            )
-        )
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         nyPeriode(21.januar til 31.januar, orgnummer = a2)
@@ -1059,10 +1015,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
-    private fun nyeVedtakMedUlikFom(
-        sykefraværHosArbeidsgiver: Map<String, Periode>,
-        inntekt: Inntekt = INNTEKT_FLERE_AG
-    ) {
+    private fun nyeVedtakMedUlikFom(sykefraværHosArbeidsgiver: Map<String, Periode>) {
         val ag1Periode = sykefraværHosArbeidsgiver[a1]!!
         val ag2Periode = sykefraværHosArbeidsgiver[a2]!!
         nyPeriode(ag1Periode.start til ag1Periode.endInclusive, a1)
@@ -1070,35 +1023,20 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterInntektsmeldingPortal(
             listOf(ag1Periode.start til ag1Periode.start.plusDays(15)),
-            beregnetInntekt = inntekt,
+            beregnetInntekt = INNTEKT,
             orgnummer = a1
         )
         håndterInntektsmeldingPortal(
             listOf(ag2Periode.start til ag2Periode.start.plusDays(15)),
-            beregnetInntekt = inntekt,
+            beregnetInntekt = INNTEKT,
             orgnummer = a2
         )
 
-        fraVilkårsprøvingTilGodkjent(inntekt)
+        fraVilkårsprøvingTilGodkjent()
     }
 
-    private fun fraVilkårsprøvingTilGodkjent(inntekt: Inntekt) {
-        val sykepengegrunnlag = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
-        )
-
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(sykepengegrunnlag),
-            arbeidsforhold = arbeidsforhold
-        )
+    private fun fraVilkårsprøvingTilGodkjent() {
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

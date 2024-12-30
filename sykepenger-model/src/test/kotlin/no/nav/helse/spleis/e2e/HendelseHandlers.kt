@@ -133,7 +133,7 @@ internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
 internal fun AbstractEndToEndTest.tilGodkjenning(
     periode: Periode,
     vararg organisasjonsnummere: String,
-    beregnetInntekt: Inntekt = 20000.månedlig,
+    beregnetInntekt: Inntekt = INNTEKT,
     arbeidsgiverperiode: List<Periode> = listOf(Periode(periode.start, periode.start.plusDays(15))),
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
@@ -165,7 +165,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
 internal fun AbstractEndToEndTest.nyeVedtak(
     periode: Periode,
     vararg organisasjonsnummere: String,
-    inntekt: Inntekt = 20000.månedlig
+    inntekt: Inntekt = INNTEKT
 ) {
     val vedtaksperiode = observatør.sisteVedtaksperiode()
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
@@ -201,7 +201,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             førsteFraværsdag = if (it.second == null) periode.start else null,
-            beregnetInntekt = 20000.månedlig,
+            beregnetInntekt = INNTEKT,
             orgnummer = it.first,
             vedtaksperiodeIdInnhenter = it.second
         )

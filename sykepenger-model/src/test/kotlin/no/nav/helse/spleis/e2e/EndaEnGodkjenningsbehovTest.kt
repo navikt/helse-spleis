@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -88,16 +89,16 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1)
         assertGodkjenningsbehov(
             tags = setOf("Arbeidsgiverutbetaling"),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240_000.0)),
+            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.årlig)),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 240_000.0,
-                "sykepengegrunnlag" to 240_000.0,
+                "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
+                "sykepengegrunnlag" to INNTEKT.årlig,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 240_000.0,
+                        "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
                 )
@@ -379,27 +380,27 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             inntektskilde = "FLERE_ARBEIDSGIVERE",
             orgnummere = setOf(a1, a2),
             omregnedeÅrsinntekter = listOf(
-                mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0),
-                mapOf("organisasjonsnummer" to a2, "beløp" to 240000.0)
+                mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.årlig),
+                mapOf("organisasjonsnummer" to a2, "beløp" to INNTEKT.årlig)
             ),
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 40_000.månedlig.årlig,
-                "sykepengegrunnlag" to 40_000.månedlig.årlig,
+                "omregnetÅrsinntektTotalt" to 744000.årlig.årlig,
+                "sykepengegrunnlag" to 561_804.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 20000.månedlig.årlig,
+                        "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     ),
                     mapOf(
                         "arbeidsgiver" to a2,
-                        "omregnetÅrsinntekt" to 20000.månedlig.årlig,
+                        "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     )
                 )
