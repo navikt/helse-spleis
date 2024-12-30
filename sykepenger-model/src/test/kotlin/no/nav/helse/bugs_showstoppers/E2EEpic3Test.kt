@@ -15,8 +15,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -543,7 +541,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `opptjening ikke ok avviser ikke dager før gjeldende skjæringstidspunkt`() {
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Triple(a1, 1.januar(2017), 31.januar))
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
@@ -622,7 +620,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `bevarer avviste dager fra tidligere periode og avviser dager fra skjæringstidspunkt ved opptjening ok`() {
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 31.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        val arbeidsforhold = listOf(Triple(a1, 31.desember(2017), 31.januar))
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(

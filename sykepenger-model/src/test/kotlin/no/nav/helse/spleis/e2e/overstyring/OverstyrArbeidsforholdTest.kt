@@ -7,12 +7,9 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.februar
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
@@ -30,16 +27,15 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -60,8 +56,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
+                Triple(a1, LocalDate.EPOCH, null),
+                Triple(a2, 1.desember(2017), null)
             )
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -85,9 +81,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
+            skatteinntekter = listOf(a1 to INNTEKT),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
+                Triple(a1, LocalDate.EPOCH, null),
+                Triple(a2, 1.desember(2017), null)
             )
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -139,16 +136,11 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
+            skatteinntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                )
+                Triple(a1, LocalDate.EPOCH, null),
+                Triple(a2, LocalDate.EPOCH, null),
+                Triple(a3, 1.desember(2017), null)
             ),
             orgnummer = a2
         )
@@ -194,20 +186,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                )
-            ),
-            orgnummer = a1
-        )
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -229,17 +208,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a3, 1.januar, 1000.månedlig.repeat(1)) // Liten inntekt som saksbehandler ikke ser på som relevant
-                )
+            skatteinntekter = listOf(
+                a1 to INNTEKT,
+                a2 to INNTEKT,
+                a3 to 4000.årlig // Liten inntekt som saksbehandler ikke ser på som relevant
             ),
             orgnummer = a1
         )
@@ -289,15 +261,13 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, 30.november(2017), Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            skatteinntekter = listOf(
+                a1 to INNTEKT,
+                a3 to INNTEKT
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a3, 1.januar, INNTEKT.repeat(3))
-                )
+            arbeidsforhold = listOf(
+                Triple(a1, LocalDate.EPOCH, 30.november(2017)),
+                Triple(a3, LocalDate.EPOCH, null)
             ),
             orgnummer = a2
         )
@@ -335,16 +305,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
-                )
-            ),
+            skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
             orgnummer = a1
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -370,15 +331,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, 3800.månedlig.repeat(3)),
-                    grunnlag(a2, 1.januar, 300.månedlig.repeat(3))
-                )
+            skatteinntekter = listOf(
+                a1 to 3800.månedlig,
+                a2 to 300.månedlig
             ),
             orgnummer = a1
         )
@@ -417,14 +372,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
+            skatteinntekter = listOf(a2 to 1000.månedlig),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 31.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 5.januar, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
-                )
+                Triple(a1, 31.desember(2017), null),
+                Triple(a2, LocalDate.EPOCH, 5.januar),
             ),
             orgnummer = a1
         )
