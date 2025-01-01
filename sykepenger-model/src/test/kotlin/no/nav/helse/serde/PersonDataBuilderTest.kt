@@ -143,10 +143,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a3 to INNTEKT), 1.juni)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsgiveropplysninger(

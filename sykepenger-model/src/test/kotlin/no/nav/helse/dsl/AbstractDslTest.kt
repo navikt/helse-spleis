@@ -125,8 +125,7 @@ internal abstract class AbstractDslTest {
 
     protected fun List<String>.nyeVedtak(
         periode: Periode, grad: Prosentdel = 100.prosent, inntekt: Inntekt = 20000.månedlig,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(map { it to inntekt }, periode.start),
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = map { orgnr -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT) }
+        ghosts: List<String> = emptyList()
     ) {
         forEach {
             it {
@@ -140,7 +139,8 @@ internal abstract class AbstractDslTest {
             }
         }
         (first()){
-            håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurderingForSykepengegrunnlag = sykepengegrunnlagSkatt, arbeidsforhold = arbeidsforhold)
+            val arbeidsgivere = this@nyeVedtak + ghosts
+            håndterVilkårsgrunnlagFlereArbeidsgivere(observatør.sisteVedtaksperiodeId(orgnummer), *arbeidsgivere.toTypedArray())
             håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
@@ -339,9 +339,6 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus) =
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus) }
 
-    protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntektsvurderingForSykepengegrunnlag) }
-
     protected fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -433,7 +430,7 @@ internal abstract class AbstractDslTest {
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
+        this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status) }
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     private fun bareÈnArbeidsgiver(orgnr: String): String {
@@ -489,9 +486,6 @@ internal abstract class AbstractDslTest {
 
     internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, orgnummer: String = a1) =
         bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId)
-
-    internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, inntektsvurderingForSykepengegrunnlag)
 
     internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus, orgnummer: String = a1) =
         bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus)

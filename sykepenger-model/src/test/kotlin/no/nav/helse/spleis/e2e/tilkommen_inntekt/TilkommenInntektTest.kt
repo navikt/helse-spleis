@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -462,16 +462,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     fun `inntekt fra søknad på men allerede ghost på skjæringstidspunktet`() {
         a1 {
             val inntekt = 20000.månedlig
-            val inntekter = listOf(a1 to inntekt, a2 to inntekt)
-            val arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
             listOf(a1).nyeVedtak(
                 januar,
                 inntekt = inntekt,
-                sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar),
-                arbeidsforhold = arbeidsforhold
+                ghosts = listOf(a2)
             )
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
@@ -499,17 +493,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     fun `inntekt fra søknad på men syk med IM på skjæringstidspunktet`() {
         a1 {
             val inntekt = 20000.månedlig
-            val inntekter = listOf(a1 to inntekt, a2 to inntekt)
-            val arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
-            listOf(a1, a2).nyeVedtak(
-                januar,
-                inntekt = inntekt,
-                sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar),
-                arbeidsforhold = arbeidsforhold
-            )
+            listOf(a1, a2).nyeVedtak(januar, inntekt = inntekt)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 orgnummer = a1,
@@ -567,11 +551,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         listOf(a1).nyeVedtak(
             periode = januar,
             inntekt = 20000.månedlig,
-            sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(listOf(a1 to 20000.månedlig, a2 to 20000.månedlig), 1.januar),
-            arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            ghosts = listOf(a2)
         )
         a1 {
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())

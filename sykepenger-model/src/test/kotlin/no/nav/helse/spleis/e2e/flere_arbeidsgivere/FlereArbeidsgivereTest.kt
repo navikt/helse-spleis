@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -507,18 +507,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     @Test
     fun `out of order ag1 - binder sammen skjæringstidspunkt mellom ag1 og ag2 - da gjenbruker vi tidsnære opplysninger`() {
         val inntekt = 20000.månedlig
-        val inntekter = listOf(a1 to inntekt, a2 to inntekt)
-        val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
-        listOf(a1).nyeVedtak(januar, inntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar), arbeidsforhold = arbeidsforhold)
+        listOf(a1).nyeVedtak(januar, inntekt = inntekt, ghosts = listOf(a2))
         a1 {
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
         }
         listOf(a1).forlengVedtak(februar)
         a2 {
-            tilGodkjenning(april, beregnetInntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.april), arbeidsforhold = arbeidsforhold)
+            tilGodkjenning(april, beregnetInntekt = inntekt, ghosts = listOf(a1))
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
         }
         listOf(a1).forlengVedtak(mars)
