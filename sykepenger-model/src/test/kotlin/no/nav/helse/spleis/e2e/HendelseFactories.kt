@@ -4,8 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
@@ -57,7 +56,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
-import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.yearMonth
@@ -515,41 +513,3 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     godkjenttidspunkt = LocalDateTime.now(),
     automatiskBehandling = automatiskBehandling,
 )
-
-internal fun inntektsvurderingForSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, vararg orgnummere: String) = InntektForSykepengegrunnlag(
-    inntekter = orgnummere.map { orgnummer ->
-        grunnlag(orgnummer, skjæringstidspunkt, inntekt.repeat(3))
-    }
-)
-
-internal fun grunnlag(
-    orgnummer: String,
-    skjæringstidspunkt: LocalDate,
-    inntekter: List<Inntekt>
-) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter)
-
-private fun lagMånedsinntekter(
-    orgnummer: String,
-    skjæringstidspunkt: LocalDate,
-    inntekter: List<Inntekt>
-) = ArbeidsgiverInntekt(
-    orgnummer, inntekter.mapIndexed { index, inntekt ->
-    val sluttMnd = YearMonth.from(skjæringstidspunkt)
-    ArbeidsgiverInntekt.MånedligInntekt(
-        sluttMnd.minusMonths((inntekter.size - index).toLong()),
-        inntekt,
-        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-        "Juidy inntekt",
-        "Juidy fordel"
-    )
-}
-)
-
-internal fun Inntektperioder.lagInntektperioder(
-    orgnummer: String = a1,
-    fom: LocalDate,
-    inntekt: Inntekt = INNTEKT
-) =
-    fom.minusYears(1) til fom.minusMonths(1) inntekter {
-        orgnummer inntekt inntekt
-    }
