@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.frilans
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -93,10 +91,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
             assertTilstander(
                 1.vedtaksperiode,
@@ -116,12 +111,13 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
-            val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 1000.månedlig), 1.januar),
-                arbeidsforhold = arbeidsforhold
+                skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
+                arbeidsforhold = listOf(
+                    Triple(a1, EPOCH, null)
+                )
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -143,15 +139,14 @@ internal class FrilanserTest : AbstractDslTest() {
                 førsteFraværsdag = 1.mars,
                 beregnetInntekt = 10000.månedlig
             )
-            val arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = EPOCH, ansattTom = 1.februar, type = Arbeidsforholdtype.ORDINÆRT)
-            )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 10000.månedlig, a2 to 100.månedlig), 1.mars),
-                arbeidsforhold = arbeidsforhold
+                skatteinntekter = listOf(a1 to 10000.månedlig, a2 to 100.månedlig),
+                arbeidsforhold = listOf(
+                    Triple(a1, EPOCH, null),
+                    Triple(a2, EPOCH, 1.februar)
+                )
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())

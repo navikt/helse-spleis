@@ -1,16 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.erHelg
 import no.nav.helse.februar
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -31,7 +26,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
     @Test
     fun `avslår dager tom 67 år`() {
         val inntektskrav = halvG.beløp(1.januar)
-        val skjæringstidspunkt = 1.januar
         val inntekt = inntektskrav - 1.daglig
 
         medFødselsdato(fødseldato67år)
@@ -39,10 +33,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, 1.januar)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
@@ -57,7 +48,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
     @Test
     fun `avslår dager etter fylte 67 år selv om skjæringstidspunktet var før fylte 67 år`() {
         val inntektskrav = `2G`.beløp(1.januar)
-        val skjæringstidspunkt = 22.januar
         val inntekt = inntektskrav - 1.daglig
 
         medFødselsdato(fødseldato67år)
@@ -65,10 +55,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(22.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(22.januar til 6.februar), inntekt)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, skjæringstidspunkt)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(16, utbetalingstidslinjeInspektør.avvistDagTeller)
@@ -83,7 +70,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
     @Test
     fun `avslår dager etter fylte 67 år`() {
         val inntektskrav = `2G`.beløp(1.januar)
-        val skjæringstidspunkt = 1.februar
         val inntekt = inntektskrav - 1.daglig
 
         medFødselsdato(fødseldato67år)
@@ -91,10 +77,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(februar, a1)
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, skjæringstidspunkt)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
@@ -109,7 +92,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
     @Test
     fun `avslår perioden med ny begrunnelse etter fylte 67 år`() {
         val inntektskrav = halvG.beløp(1.januar)
-        val skjæringstidspunkt = 15.januar
         val inntekt = inntektskrav - 1.daglig
 
         medFødselsdato(fødseldato67år)
@@ -117,10 +99,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         a1 {
             nyPeriode(15.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(15.januar til 30.januar), inntekt)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, inntekt, skjæringstidspunkt)
-            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->

@@ -5,7 +5,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -121,14 +120,11 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a2 {
             håndterSykmelding(Sykmeldingsperiode(periodeAg2.start, periodeAg2.endInclusive))
             håndterSøknad(Sykdom(periodeAg2.start, periodeAg2.endInclusive, 100.prosent))
-            håndterInntektsmelding(listOf(periodeAg2.start til periodeAg2.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
+            håndterInntektsmelding(listOf(periodeAg2.start til periodeAg2.start.plusDays(15)))
         }
         a1 {
-            håndterInntektsmelding(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = listOf(a1, a2).lagStandardSykepengegrunnlag(20000.månedlig, periodeAg1.start)
-            )
+            håndterInntektsmelding(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)))
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

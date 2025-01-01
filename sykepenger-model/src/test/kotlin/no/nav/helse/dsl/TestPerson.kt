@@ -280,34 +280,25 @@ internal class TestPerson(
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             orgnummer: String = "aa"
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
         )
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             orgnummer: String = "aa"
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = medlemskapstatus,
             skatteinntekter = listOf(this.orgnummer to INNTEKT),
             arbeidsforhold = arbeidsgivere.map { Triple(it.key, LocalDate.EPOCH, null) },
-        )
-
-        @Deprecated("bytt")
-        internal fun håndterVilkårsgrunnlag(
-            vedtaksperiodeId: UUID = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-            orgnummer: String = "aa"
-        ) = håndterVilkårsgrunnlag(
-            vedtaksperiodeId = vedtaksperiodeId,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
-            arbeidsforhold = inntektsvurderingForSykepengegrunnlag.inntekter.map { Vilkårsgrunnlag.Arbeidsforhold(it.arbeidsgiver, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
         )
 
         /**
@@ -336,13 +327,64 @@ internal class TestPerson(
             skatteinntekter: List<Pair<String, Inntekt>>,
             arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             orgnummer: String = a1
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
+            val opptjeningsinntekter = inntekterForOpptjeningsvurdering?.let {
+                lagStandardInntekterForOpptjeningsvurdering(it, skjæringstidspunkt)
+            } ?: lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, skjæringstidspunkt)
+
             håndterVilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId,
                 medlemskapstatus = medlemskapstatus,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(skatteinntekter, skjæringstidspunkt),
+                inntekterForOpptjeningsvurdering = opptjeningsinntekter,
+                arbeidsforhold = arbeidsforhold.map { (orgnr, fom, tom) ->
+                    Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
+                },
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+        }
+
+        /**
+         * lager månedsinntekter fra de oppgitte månedene; hver måned har en liste av orgnummer-til-inntekt
+         * lager by default arbeidsforhold for alle oppgitte orgnumre i inntekt-listen
+         */
+        internal fun håndterVilkårsgrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            månedligeInntekter: Map<YearMonth, List<Pair<String, Inntekt>>>,
+            arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = månedligeInntekter
+                .flatMap { (_, inntekter) -> inntekter.map { (orgnr, _) -> orgnr } }
+                .toSet()
+                .map { orgnr -> Triple(orgnr, LocalDate.EPOCH, null) },
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            orgnummer: String = ""
+        ) {
+            val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
+            return håndterVilkårsgrunnlag(
+                vedtaksperiodeId = vedtaksperiodeId,
+                medlemskapstatus = medlemskapstatus,
+                orgnummer = orgnummer,
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = månedligeInntekter
+                        .flatMap { (måned, inntekter) -> inntekter.map { (orgnr, inntekt) -> Triple(måned, orgnr, inntekt) } }
+                        .groupBy { (_, orgnr, _) -> orgnr }
+                        .map { (orgnr, inntekter) ->
+                            ArbeidsgiverInntekt(
+                                arbeidsgiver = orgnr,
+                                inntekter = inntekter.map { (måned, _, inntekt) ->
+                                    MånedligInntekt(
+                                        yearMonth = måned,
+                                        inntekt = inntekt,
+                                        type = MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                                        fordel = "",
+                                        beskrivelse = ""
+                                    )
+                                }
+                            )
+                        }
+                ),
                 inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, skjæringstidspunkt),
                 arbeidsforhold = arbeidsforhold.map { (orgnr, fom, tom) ->
                     Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
