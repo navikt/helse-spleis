@@ -13,7 +13,6 @@ import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.DokumenttypeDto
@@ -33,7 +32,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -100,14 +98,10 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                    listOf(
-                        a1 to INNTEKT
-                    ), 1.januar
-                ),
+                skatteinntekter = listOf(a1 to INNTEKT),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
+                    Triple(a1, LocalDate.EPOCH, null),
+                    Triple(a2, 1.desember(2017), null)
                 )
             )
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())

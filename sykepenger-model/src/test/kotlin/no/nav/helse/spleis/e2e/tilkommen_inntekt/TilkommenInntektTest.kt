@@ -9,15 +9,12 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -227,16 +224,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                    arbeidsgivere = listOf(
-                        a1 to INNTEKT,
-                        a2 to 10000.månedlig
-                    ),
-                    skjæringstidspunkt = 1.januar,
-                ),
+                skatteinntekter = listOf(a1 to INNTEKT, a2 to 10000.månedlig),
                 arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Arbeidsforhold(a2, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
+                    Triple(a1, LocalDate.EPOCH, null),
+                    Triple(a2, 1.januar, null)
                 )
             )
             assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
@@ -438,18 +429,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                    arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig),
-                    skjæringstidspunkt = 1.januar,
-                ),
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Arbeidsforhold(a2, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
-            assertVarsler(listOf(Varselkode.RV_SV_5, Varselkode.RV_VV_1, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+            assertVarsler(listOf(Varselkode.RV_SV_5, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmeldinginntekt)

@@ -8,10 +8,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -30,8 +27,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.grunnlag
-import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -259,19 +254,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         }
         (a1 og a2) { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -381,19 +364,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -542,14 +513,10 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                    )
-                ),
+                skatteinntekter = listOf(a1 to INNTEKT),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+                    Triple(a1, LocalDate.EPOCH, null),
+                    Triple(a2, LocalDate.EPOCH, null)
                 )
             )
             håndterYtelser(1.vedtaksperiode)

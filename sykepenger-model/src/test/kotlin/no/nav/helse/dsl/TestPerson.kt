@@ -333,8 +333,7 @@ internal class TestPerson(
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             val opptjeningsinntekter = inntekterForOpptjeningsvurdering?.let {
                 lagStandardInntekterForOpptjeningsvurdering(it, skjæringstidspunkt)
-            } ?: lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, skjæringstidspunkt)
-
+            }
             håndterVilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId,
                 medlemskapstatus = medlemskapstatus,
@@ -393,8 +392,23 @@ internal class TestPerson(
             )
         }
 
-        @Deprecated("bytt")
         internal fun håndterVilkårsgrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            skatteinntekter: List<Pair<String, Inntekt>>,
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+            orgnummer: String = "aa"
+        ) {
+            val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = vedtaksperiodeId,
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(skatteinntekter, skjæringstidspunkt),
+                arbeidsforhold = arbeidsforhold,
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+        }
+
+        private fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,

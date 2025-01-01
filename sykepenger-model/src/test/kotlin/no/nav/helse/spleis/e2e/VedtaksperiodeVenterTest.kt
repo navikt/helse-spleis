@@ -1,17 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate.EPOCH
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -78,14 +73,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
-                    Arbeidsforhold(a2, EPOCH, type = ORDINÆRT),
-                )
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

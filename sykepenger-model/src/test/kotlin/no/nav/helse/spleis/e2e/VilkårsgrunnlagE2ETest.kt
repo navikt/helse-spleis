@@ -1,23 +1,15 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -44,31 +36,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar))
             håndterSøknad(6.februar til 28.februar)
             håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar))
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        ArbeidsgiverInntekt(
-                            a1, listOf(
-                            desember(2017).lønnsinntekt(),
-                            november(2017).lønnsinntekt(),
-                            oktober(2017).lønnsinntekt()
-                        )
-                        ),
-                        ArbeidsgiverInntekt(
-                            a2, listOf(
-                            desember(2017).lønnsinntekt(),
-                            november(2017).lønnsinntekt(),
-                            oktober(2017).lønnsinntekt(),
-                        )
-                        ),
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
@@ -84,27 +52,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        ArbeidsgiverInntekt(
-                            a1, listOf(
-                            desember(2017).lønnsinntekt(INNTEKT),
-                            november(2017).lønnsinntekt(INNTEKT),
-                            oktober(2017).lønnsinntekt(INNTEKT)
-                        )
-                        ),
-                        ArbeidsgiverInntekt(
-                            a2, listOf(
-                            desember(2017).lønnsinntekt(2500.månedlig),
-                            november(2017).lønnsinntekt((-3000).månedlig),
-                        )
-                        ),
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null, Arbeidsforholdtype.ORDINÆRT)
-                )
+                skatteinntekter = listOf(a1 to INNTEKT, a2 to (-500).månedlig),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
@@ -181,8 +129,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, INGEN, 1.januar),
-                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT))
+                skatteinntekter = listOf(a1 to INGEN),
+                arbeidsforhold = listOf(Triple(a1, 1.januar, null))
             )
             assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_VV_1, Varselkode.RV_OV_1), 1.vedtaksperiode.filter())
         }

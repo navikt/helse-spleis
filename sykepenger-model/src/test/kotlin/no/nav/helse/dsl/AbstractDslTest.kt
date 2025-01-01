@@ -2,14 +2,13 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -18,7 +17,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -339,15 +337,6 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus) =
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus) }
 
-    protected fun String.håndterVilkårsgrunnlag(
-        vedtaksperiodeId: UUID,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-    ) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold, inntekterForOpptjeningsvurdering) }
-
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<GradertPeriode> = emptyList(),
@@ -489,16 +478,6 @@ internal abstract class AbstractDslTest {
 
     internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus, orgnummer: String = a1) =
         bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus)
-
-    internal fun håndterVilkårsgrunnlag(
-        vedtaksperiodeId: UUID,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-        orgnummer: String = a1
-    ) =
-        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold, inntekterForOpptjeningsvurdering)
 
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.time.LocalDate
 import java.util.*
 import no.nav.helse.april
 import no.nav.helse.den
@@ -11,7 +10,6 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
@@ -19,15 +17,12 @@ import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -61,8 +56,6 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.grunnlag
-import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.til
@@ -127,15 +120,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT, a3 to INNTEKT), 1.januar),
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Arbeidsforhold(a3, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                ), orgnummer = a1
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
             val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
             assertEquals(3, inntekter.size)
             assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is Inntektsmeldinginntekt)
@@ -377,19 +362,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 egenmeldinger = listOf(fredag den 19.januar til fredag den 19.januar)
             )
             håndterInntektsmelding(listOf(3.januar til 17.januar, 19.januar.somPeriode()), beregnetInntekt = INNTEKT)
-            håndterVilkårsgrunnlag(
-                2.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                    listOf(
-                        a1 to INNTEKT,
-                        a2 to INNTEKT
-                    ), 19.januar
-                ),
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -429,19 +402,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(20.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
-            håndterVilkårsgrunnlag(
-                2.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                    listOf(
-                        a1 to INNTEKT,
-                        a2 to INNTEKT
-                    ), 1.januar
-                ),
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -1466,16 +1427,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
     fun `andre inntektskilder på a2 etter vilkårsprøving på a1 - kun warning på a2`() {
-        val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
-        val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = listOf(
-                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-            )
-        )
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
