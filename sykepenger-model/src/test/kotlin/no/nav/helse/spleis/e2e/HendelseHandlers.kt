@@ -614,17 +614,28 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     arbeidsforhold = arbeidsforhold
 )
 
+/**
+ * lager et vilkårsgrunnlag med samme inntekt for de oppgitte arbeidsgiverne,
+ * inkl. arbeidsforhold.
+ *
+ * snarvei for å få et vilkårsgrunnlag for flere arbeidsgivere uten noe fuzz
+ */
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlagFlereArbeidsgivere(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     vararg orgnumre: String,
+    inntekt: Inntekt = INNTEKT,
     orgnummer: String = a1
 ) = håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
     medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer = orgnummer,
-    skatteinntekter = orgnumre.map { it to INNTEKT }
+    skatteinntekter = orgnumre.map { it to inntekt }
 )
 
+/**
+ * lager tre månedsinntekter for hver arbeidsgiver i skatteinntekter, med samme beløp hver måned.
+ * arbeidsforhold-listen blir by default fylt ut med alle arbeidsgiverne i inntekt-listen
+ */
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     skatteinntekter: List<Pair<String, Inntekt>>,
@@ -638,6 +649,51 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         medlemskapstatus = medlemskapstatus,
         orgnummer = orgnummer,
         inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(skatteinntekter, skjæringstidspunkt),
+        inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, skjæringstidspunkt),
+        arbeidsforhold = arbeidsforhold.map { (orgnr, fom, tom) ->
+            Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
+        }
+    )
+}
+
+/**
+ * lager månedsinntekter fra de oppgitte månedene; hver måned har en liste av orgnummer-til-inntekt
+ * lager by default arbeidsforhold for alle oppgitte orgnumre i inntekt-listen
+ */
+internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    månedligeInntekter: Map<YearMonth, List<Pair<String, Inntekt>>>,
+    arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = månedligeInntekter
+        .flatMap { (_, inntekter) -> inntekter.map { (orgnr, _) -> orgnr } }
+        .toSet()
+        .map { orgnr -> Triple(orgnr, LocalDate.EPOCH, null) },
+    medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+    orgnummer: String = a1
+): Vilkårsgrunnlag {
+    val skjæringstidspunkt = inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
+    return håndterVilkårsgrunnlag(
+        vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+        medlemskapstatus = medlemskapstatus,
+        orgnummer = orgnummer,
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = månedligeInntekter
+                .flatMap { (måned, inntekter) -> inntekter.map { (orgnr, inntekt) -> Triple(måned, orgnr, inntekt) } }
+                .groupBy { (_, orgnr, _) -> orgnr }
+                .map { (orgnr, inntekter) ->
+                    ArbeidsgiverInntekt(
+                        arbeidsgiver = orgnr,
+                        inntekter = inntekter.map { (måned, _, inntekt) ->
+                            ArbeidsgiverInntekt.MånedligInntekt(
+                                yearMonth = måned,
+                                inntekt = inntekt,
+                                type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "",
+                                beskrivelse = ""
+                            )
+                        }
+                    )
+                }
+        ),
         inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(orgnummer, INNTEKT, skjæringstidspunkt),
         arbeidsforhold = arbeidsforhold.map { (orgnr, fom, tom) ->
             Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
