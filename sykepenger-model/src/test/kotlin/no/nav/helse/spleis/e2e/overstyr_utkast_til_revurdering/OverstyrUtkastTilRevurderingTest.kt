@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyr_utkast_til_revurdering
 
 import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -138,10 +137,7 @@ internal class OverstyrUtkastTilRevurderingTest : AbstractEndToEndTest() {
             beregnetInntekt = 50000.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 50000.månedlig), 1.januar)
-        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

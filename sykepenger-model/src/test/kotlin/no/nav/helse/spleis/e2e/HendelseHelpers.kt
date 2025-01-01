@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-
 import java.util.UUID
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
@@ -53,6 +52,3 @@ internal class EtterspurtBehov(
 
     override fun toString() = "$type ($tilstand)"
 }
-
-internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =
-    inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
