@@ -4,10 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.PersonHendelsefabrikk
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dto.SimuleringResultatDto
@@ -154,7 +154,6 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
         val vedtaksperiode = observatør.sisteVedtaksperiode()
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
-            inntekt = beregnetInntekt,
             orgnummer = organisasjonsnummer
         )
         håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
@@ -552,15 +551,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Innte
     return inntektsmelding.metadata.meldingsreferanseId
 }
 
-internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
-    ArbeidsgiverInntekt.MånedligInntekt(
-        yearMonth = this,
-        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-        inntekt = inntekt,
-        fordel = "fordel",
-        beskrivelse = "beskrivelse"
-    )
-
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     orgnummer: String = a1
@@ -579,18 +569,6 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     medlemskapstatus = medlemskapstatus,
     orgnummer = orgnummer,
     skatteinntekter = listOf(orgnummer to INNTEKT),
-    arbeidsforhold = finnArbeidsgivere().map { Triple(it, LocalDate.EPOCH, null) }
-)
-
-internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
-    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    inntekt: Inntekt,
-    orgnummer: String = a1
-) = håndterVilkårsgrunnlag(
-    vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
-    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-    orgnummer = orgnummer,
-    skatteinntekter = listOf(orgnummer to inntekt),
     arbeidsforhold = finnArbeidsgivere().map { Triple(it, LocalDate.EPOCH, null) }
 )
 
@@ -794,8 +772,6 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     ).håndter(Person::håndter)
     return meldingsreferanseId
 }
-
-internal fun Inntekt.repeat(antall: Int) = (0.until(antall)).map { this }
 
 private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgivere()
 

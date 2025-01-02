@@ -704,7 +704,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             beregnetInntekt = lavInntekt,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, lavInntekt)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
         håndterUtbetalingsgodkjenning()
         assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())

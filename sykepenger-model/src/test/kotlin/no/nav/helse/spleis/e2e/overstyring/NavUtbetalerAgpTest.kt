@@ -518,7 +518,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             refusjon = Refusjon(INGEN, null),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "HvaSomHelst",
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = underHalvG)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(RV_IM_8, RV_SV_1), 1.vedtaksperiode.filter())
         (1.januar til 16.januar).filterNot { it.erHelg() }.forEach {

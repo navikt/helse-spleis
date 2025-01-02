@@ -73,7 +73,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             beregnetInntekt = 60000.månedlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 30000.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         håndterSkjønnsmessigFastsettelse(
             1.januar, listOf(

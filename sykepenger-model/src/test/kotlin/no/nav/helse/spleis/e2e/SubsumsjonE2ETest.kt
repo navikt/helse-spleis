@@ -358,7 +358,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 46817.årlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(inntekt = 50000.årlig)
+        håndterVilkårsgrunnlag()
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -568,7 +568,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = maksimumSykepengegrunnlag2018,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(inntekt = maksimumSykepengegrunnlag2018)
+        håndterVilkårsgrunnlag()
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_2,
@@ -596,7 +596,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = inntekt,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterVilkårsgrunnlag(inntekt = inntekt)
+        håndterVilkårsgrunnlag()
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_2,
