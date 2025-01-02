@@ -3,7 +3,6 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -335,7 +334,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
             assertEquals(1, eldsteGenerasjon.perioder.size)
             val vilkårsgrunnlagId = (eldsteGenerasjon.perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
             val vilkårsgrunnlag = speil.vilkårsgrunnlag[vilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
-            assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isEmpty())
+            assertEquals(20000.månedlig, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
         }
         generasjoner.first().also { nyesteGenerasjon ->
             assertEquals(1, nyesteGenerasjon.perioder.size)
@@ -361,7 +360,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag
 
-        assertTrue(vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.isEmpty())
+        assertTrue(vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.isNotEmpty())
         assertEquals(2, vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
 
         val førsteRefusjonsopplysning = vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.first()

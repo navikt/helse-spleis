@@ -142,8 +142,6 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             )
         }
         a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            håndterOverstyrInntekt(1.januar, 15000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
@@ -321,15 +319,19 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         }
         nullstillTilstandsendringer()
         a1 {
-            håndterOverstyrInntekt(1.januar, 31000.månedlig)
+            håndterOverstyrInntekt(1.januar, 31500.månedlig)
             håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
                 AVSLUTTET
             )
         }

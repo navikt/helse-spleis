@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -83,8 +82,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val søknad = UUID.randomUUID()
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), id = søknad, orgnummer = a2)
 
-        assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter(a1))
-
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(3.vedtaksperiode)?.inspektør ?: fail { "må ha vilkårsgrunnlag" }
         val inntektsopplysninger = vilkårsgrunnlag.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
 
@@ -133,9 +130,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         overstyringerIgangsatt[2].also { event ->
             assertEquals(
                 PersonObserver.OverstyringIgangsatt(
-                    årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
-                    skjæringstidspunkt = 1.januar,
-                    periodeForEndring = 1.mars.somPeriode(),
+                    årsak = "ARBEIDSGIVERPERIODE",
+                    skjæringstidspunkt = 1.mars,
+                    periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
                         VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                     ),

@@ -267,10 +267,6 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         }
 
         a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)

@@ -415,13 +415,12 @@ internal class Inntektsgrunnlag private constructor(
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
-    internal fun finnEndringsdato(other: Inntektsgrunnlag): LocalDate {
+    internal fun finnEndringsdato(other: Inntektsgrunnlag): LocalDate? {
         check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
             "Skal bare sammenlikne med samme skjæringstidspunkt"
         }
         return arbeidsgiverInntektsopplysninger.finnEndringsdato(other.arbeidsgiverInntektsopplysninger)
             ?: tilkommendeInntekter.finnEndringsdato(other.tilkommendeInntekter)
-            ?: skjæringstidspunkt
     }
 
     fun harGjenbrukbarInntekt(organisasjonsnummer: String) =

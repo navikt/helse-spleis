@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -15,7 +15,14 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -540,7 +547,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             harOpphørAvNaturalytelser = true
         )
 
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
@@ -556,6 +562,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
         håndterSøknad(februar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTrue(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
         assertTrue(im2 in observatør.inntektsmeldingIkkeHåndtert)
     }

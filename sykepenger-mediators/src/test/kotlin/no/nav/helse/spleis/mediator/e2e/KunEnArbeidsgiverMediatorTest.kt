@@ -19,7 +19,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.TestHendelseMediator
-import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -238,68 +237,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_SIMULERING",
-            "AVVENTER_GODKJENNING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_SIMULERING",
-            "AVVENTER_GODKJENNING",
-            "TIL_UTBETALING"
-        )
-    }
-
-    @Test
-    fun `overstyring av inntekt fra saksbehandler fører til tilstandsendring`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendInntektsmelding(
-            listOf(Periode(fom = 1.januar, tom = 16.januar)),
-            førsteFraværsdag = 1.januar,
-            beregnetInntekt = 33000.0
-        )
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendOverstyrArbeidsgiveropplysninger(
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(
-                TestMessageFactory.Arbeidsgiveropplysning(
-                    organisasjonsnummer = ORGNUMMER,
-                    månedligInntekt = 33000.0,
-                    forklaring = "forklaring",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(
-                        TestMessageFactory.Refusjonsopplysning(
-                            fom = 1.januar,
-                            tom = null,
-                            beløp = 33000.0
-                        )
-                    )
-                )
-            )
-        )
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, true)
-        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "FORKASTET")
-        assertUtbetalingTilstander(1, "NY", "IKKE_UTBETALT", "FORKASTET")
-        assertUtbetalingTilstander(2, "NY", "IKKE_UTBETALT", "OVERFØRT")
-        assertTilstander(
-            0,
-            "AVVENTER_INFOTRYGDHISTORIKK",
-            "AVVENTER_INNTEKTSMELDING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_SIMULERING",
-            "AVVENTER_GODKJENNING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",

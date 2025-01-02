@@ -8,9 +8,9 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -124,17 +124,15 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterAnnullerUtbetaling()
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
 
     @Test
     fun `Pågående revurdering uten endring som siden annulleres skal sende melding om annullert`() {
         nyttVedtak(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         håndterAnnullerUtbetaling()
-
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
 }

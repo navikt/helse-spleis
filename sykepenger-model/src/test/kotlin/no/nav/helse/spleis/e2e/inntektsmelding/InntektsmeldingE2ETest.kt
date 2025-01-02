@@ -1375,7 +1375,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(februar)
         håndterInntektsmelding(listOf(1.februar til 16.februar))
 
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 3.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24), 3.vedtaksperiode.filter())
         assertEquals("SSSSSHH SSSSSHH SSSSSHH PPSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -1396,7 +1396,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 4.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24), 4.vedtaksperiode.filter())
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -1996,7 +1996,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
 
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

@@ -69,9 +69,6 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                 assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder)
             }
         }
-        a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-        }
     }
 
     @Test

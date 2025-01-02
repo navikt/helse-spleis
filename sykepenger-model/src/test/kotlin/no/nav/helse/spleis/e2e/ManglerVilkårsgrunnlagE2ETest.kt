@@ -188,7 +188,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             listOf(1.februar til 16.februar),
             førsteFraværsdag = 1.februar
         )
-        assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
@@ -213,7 +213,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             listOf(1.februar til 16.februar),
             førsteFraværsdag = 1.februar
         )
-        assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 

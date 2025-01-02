@@ -3,7 +3,6 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate.EPOCH
 import java.time.Month
 import java.time.YearMonth
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -589,7 +588,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterUtbetalt()
         håndterYtelser()
         val personDto = speilApi()
-        assertEquals(2, personDto.vilkårsgrunnlag.size)
+        assertEquals(1, personDto.vilkårsgrunnlag.size)
 
         val januarVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
         val februarVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId

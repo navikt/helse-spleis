@@ -14,7 +14,6 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.NyttInntektsforholdPeriodeDTO
-import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
@@ -26,7 +25,6 @@ internal abstract class IVilkårsgrunnlag(
     val beregningsgrunnlag: Double,
     val sykepengegrunnlag: Double,
     val inntekter: List<IArbeidsgiverinntekt>,
-    val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     val nyeInntekterUnderveis: List<INyInntektUnderveis>,
     val id: UUID
 ) {
@@ -57,7 +55,6 @@ internal class ISpleisGrunnlag(
     inntekter: List<IArbeidsgiverinntekt>,
     sykepengegrunnlag: Double,
     id: UUID,
-    refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     nyeInntekterUnderveis: List<INyInntektUnderveis>,
     val overstyringer: Set<UUID>,
     val omregnetÅrsinntekt: Double,
@@ -68,7 +65,7 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, nyeInntekterUnderveis, id) {
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, nyeInntekterUnderveis, id) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
@@ -110,10 +107,9 @@ internal class IInfotrygdGrunnlag(
     skjæringstidspunkt: LocalDate,
     beregningsgrunnlag: Double,
     inntekter: List<IArbeidsgiverinntekt>,
-    refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     sykepengegrunnlag: Double,
     id: UUID
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, emptyList(), id) {
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, emptyList(), id) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return InfotrygdVilkårsgrunnlag(
@@ -238,7 +234,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     )
                 }
             },
-            refusjonsopplysningerPerArbeidsgiver = refusjonsopplysninger(grunnlagsdata.inntektsgrunnlag),
             sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             grunnbeløp = begrensning.grunnbeløp,
             sykepengegrunnlagsgrense = begrensning,
@@ -307,27 +302,11 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
     }
 
-    private fun refusjonsopplysninger(dto: InntektsgrunnlagUtDto) =
-        dto.arbeidsgiverInntektsopplysninger.map {
-            IArbeidsgiverrefusjon(
-                arbeidsgiver = it.orgnummer,
-                refusjonsopplysninger = it.refusjonsopplysninger.opplysninger.map {
-                    Refusjonselement(
-                        fom = it.fom,
-                        tom = it.tom,
-                        beløp = it.beløp.månedligDouble.beløp,
-                        meldingsreferanseId = it.meldingsreferanseId
-                    )
-                }
-            )
-        }
-
     private fun mapInfotrygd(infotrygdVilkårsgrunnlag: VilkårsgrunnlagUtDto.Infotrygd): IVilkårsgrunnlag {
         return IInfotrygdGrunnlag(
             skjæringstidspunkt = infotrygdVilkårsgrunnlag.skjæringstidspunkt,
             beregningsgrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
             inntekter = inntekter(infotrygdVilkårsgrunnlag.inntektsgrunnlag),
-            refusjonsopplysningerPerArbeidsgiver = refusjonsopplysninger(infotrygdVilkårsgrunnlag.inntektsgrunnlag),
             sykepengegrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             id = infotrygdVilkårsgrunnlag.vilkårsgrunnlagId
         )

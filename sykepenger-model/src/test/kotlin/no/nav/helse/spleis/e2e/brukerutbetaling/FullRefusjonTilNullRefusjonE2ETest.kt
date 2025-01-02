@@ -205,7 +205,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
                 }
             }
         }
-        assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 }

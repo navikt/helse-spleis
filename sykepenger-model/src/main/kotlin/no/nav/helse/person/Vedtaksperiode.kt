@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
@@ -382,6 +382,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.oppdaterHistorikk(BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, acc.sykdomstidslinje.fremTilOgMed(vedtaksperiode.periode.endInclusive)), aktivitetslogg) {}
                     eventyr.add(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 }
+
                 else -> aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${vedtaksperiode.tilstand.type}")
 
             }
@@ -389,7 +390,7 @@ internal class Vedtaksperiode private constructor(
         }
         this.registrerKontekst(aktivitetslogg)
 
-        check(rester.gjenståendeDager.isEmpty()) { "Hvis det er rester igjen er det litt rart"}
+        check(rester.gjenståendeDager.isEmpty()) { "Hvis det er rester igjen er det litt rart" }
 
         return eventyr
     }
@@ -401,7 +402,8 @@ internal class Vedtaksperiode private constructor(
             Sykdomstidslinje.arbeidsdager(strekkTilbakeTil, omsluttendePeriode.endInclusive, hendelsekilde).merge(gjenståendeDager.fold(Sykdomstidslinje()) { acc, periode ->
                 acc + Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, hendelsekilde)
             })
-            else Sykdomstidslinje()
+        else Sykdomstidslinje()
+
         fun håndter(vedtaksperiode: Periode) = this.copy(
             gjenståendeDager = gjenståendeDager.flatMap { it.trim(vedtaksperiode.oppdaterFom(LocalDate.MIN)) },
             strekkTilbakeTil = vedtaksperiode.endInclusive.nesteDag
@@ -428,11 +430,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOppgittInntekt(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, inntektshistorikk: Inntektshistorikk): List<Revurderingseventyr> {
         val oppgittInntekt = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittInntekt>().singleOrNull() ?: return emptyList()
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(
-            dato = skjæringstidspunkt,
-            hendelseId = arbeidsgiveropplysninger.metadata.meldingsreferanseId,
-            beløp = oppgittInntekt.inntekt
-        ))
+        inntektshistorikk.leggTil(
+            Inntektsmeldinginntekt(
+                dato = skjæringstidspunkt,
+                hendelseId = arbeidsgiveropplysninger.metadata.meldingsreferanseId,
+                beløp = oppgittInntekt.inntekt
+            )
+        )
         return listOf(Revurderingseventyr.inntekt(arbeidsgiveropplysninger, skjæringstidspunkt))
     }
 
@@ -927,23 +931,18 @@ internal class Vedtaksperiode private constructor(
             håndterDager(dager, aktivitetslogg)
         }
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
-
         val nyAgp = behandlinger.arbeidsgiverperiode()
-        if (opprinneligAgp != nyAgp) {
-            aktivitetslogg.varsel(
-                RV_IM_24,
-                "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}"
-            )
-            korrigertInntektsmeldingId?.let {
-                person.arbeidsgiveropplysningerKorrigert(
-                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigerendeInntektsopplysningId = dager.hendelse.metadata.meldingsreferanseId,
-                        korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
-                        korrigertInntektsmeldingId = it
-                    )
+        if (opprinneligAgp == nyAgp) return
+
+        aktivitetslogg.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
+        korrigertInntektsmeldingId?.let {
+            person.arbeidsgiveropplysningerKorrigert(
+                PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                    korrigerendeInntektsopplysningId = dager.hendelse.metadata.meldingsreferanseId,
+                    korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
+                    korrigertInntektsmeldingId = it
                 )
-            }
+            )
         }
     }
 
@@ -1600,6 +1599,7 @@ internal class Vedtaksperiode private constructor(
                 "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
         )
     }
+
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }

@@ -311,8 +311,8 @@ data class ArbeidsgiverInntektsopplysning(
                 val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
                 when {
                     gammel == null -> ny.gjelder.start
-                    ny.inntektsopplysning != gammel.inntektsopplysning -> minOf(ny.gjelder.start, gammel.gjelder.start)
-                    else -> ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
+                    ny.inntektsopplysning != gammel.inntektsopplysning || ny.gjelder != gammel.gjelder -> minOf(ny.gjelder.start, gammel.gjelder.start)
+                    else -> null
                 }
             }
             return endringsDatoer.minOrNull()

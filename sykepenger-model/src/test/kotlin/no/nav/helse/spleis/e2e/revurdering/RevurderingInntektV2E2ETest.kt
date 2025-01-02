@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.april
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -15,7 +13,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -32,7 +29,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -73,7 +69,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
@@ -284,16 +279,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).erUbetalt)
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
         assertDiff(-2112)
-    }
-
-    @Test
-    fun `revurder inntekt ukjent skjæringstidspunkt`() {
-        nyttVedtak(januar, 100.prosent)
-        nullstillTilstandsendringer()
-        assertThrows<IllegalStateException> { håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar) }
-        assertIngenFunksjonelleFeil(AktivitetsloggFilter.person())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertEquals(1, inspektør.antallUtbetalinger)
     }
 
     @Test
@@ -595,28 +580,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
-        nyttVedtak(januar)
-        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        forlengVedtak(april)
-        val overstyrInntektHendelseId = UUID.randomUUID()
-        håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
-
-        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
-            assertNotEquals(overstyrInntektHendelseId, behandling.kilde.meldingsreferanseId)
-            assertTrue(overstyrInntektHendelseId !in behandling.endringer.map { it.dokumentsporing }.ider())
-        }
-        inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
-            assertEquals(overstyrInntektHendelseId, behandling.kilde.meldingsreferanseId)
-            assertTrue(overstyrInntektHendelseId !in behandling.endringer.map { it.dokumentsporing }.ider())
-        }
-        inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
-            assertEquals(overstyrInntektHendelseId, behandling.kilde.meldingsreferanseId)
-            assertTrue(overstyrInntektHendelseId !in behandling.endringer.map { it.dokumentsporing }.ider())
-        }
-    }
-
-    @Test
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         nyttVedtak(januar)
         håndterInntektsmelding(
@@ -629,7 +592,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
@@ -654,7 +617,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())

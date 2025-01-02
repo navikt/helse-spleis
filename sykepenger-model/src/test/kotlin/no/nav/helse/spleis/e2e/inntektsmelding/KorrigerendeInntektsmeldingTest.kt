@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -44,7 +43,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -54,45 +52,11 @@ import org.junit.jupiter.api.Test
 internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
-        nyttVedtak(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-    }
-
-    @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-    }
-
-    @Test
-    fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i refusjonsbeløp`() {
-        nyttVedtak(januar)
-
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList())
-        )
-
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `bare varsel på første periode`() {
-        nyPeriode(1.januar til 16.januar)
-        nyttVedtak(17.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        forlengVedtak(februar)
-        forlengVedtak(mars)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_4), 2.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 3.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 4.vedtaksperiode.filter())
     }
 
     @Test
@@ -130,7 +94,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertVarsler(listOf(RV_IM_4), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
         håndterYtelser(1.vedtaksperiode)
@@ -190,7 +153,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 3.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24), 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -234,7 +197,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
             listOf(1.februar til 16.februar)
         )
 
-        assertVarsler(listOf(RV_IM_3, RV_IM_4), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3), 2.vedtaksperiode.filter())
         assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -254,7 +217,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsler(listOf(RV_IM_3, RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, RV_IM_24), 2.vedtaksperiode.filter())
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 
@@ -447,6 +410,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
     }
 }

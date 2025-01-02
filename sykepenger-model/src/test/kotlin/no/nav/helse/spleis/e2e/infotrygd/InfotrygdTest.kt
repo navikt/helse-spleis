@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
@@ -96,12 +97,17 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val antallInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
 
         val meldingsreferanse = UUID.randomUUID()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, listOf(Triple(1.januar, null, 15000.månedlig)))), meldingsreferanseId = meldingsreferanse)
-        assertEquals(antallInnslagFør + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, listOf(Triple(1.januar, null, 15000.månedlig)))),
+            meldingsreferanseId = meldingsreferanse
+        )
+        assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
         assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
         assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).beløp)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
 }

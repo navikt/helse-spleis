@@ -432,9 +432,7 @@ class Person private constructor(
         val inntektseventyr = arbeidsgivere.håndterOverstyringAvInntekt(hendelse, aktivitetslogg)
         val refusjonseventyr = arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetslogg)
         val tidligsteEventyr = Revurderingseventyr.tidligsteEventyr(inntektseventyr, refusjonseventyr)
-        check(tidligsteEventyr != null) {
-            "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger"
-        }
+        if (tidligsteEventyr == null) return aktivitetslogg.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
         igangsettOverstyring(tidligsteEventyr, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
@@ -697,7 +695,7 @@ class Person private constructor(
             aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
             return null
         }
-        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, korrigertInntektsmelding, aktivitetslogg, subsumsjonslogg)
+        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, korrigertInntektsmelding, aktivitetslogg, subsumsjonslogg) ?: return null
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         return eventyr
     }
@@ -709,7 +707,7 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ): Revurderingseventyr? {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return null
-        val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, aktivitetslogg, subsumsjonslogg)
+        val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, aktivitetslogg, subsumsjonslogg) ?: return null
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         return eventyr
     }
@@ -721,7 +719,7 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, eventyr) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg)
+        val (nyttGrunnlag, eventyr) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg) ?: return
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         igangsettOverstyring(eventyr, aktivitetslogg)
     }

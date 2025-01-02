@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -171,13 +171,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val nyInntekt = INNTEKT * 2
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
-            1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(
-                a1, nyInntekt, "Det var jo alt for lite!", null, listOf(
-                Triple(1.januar, null, nyInntekt)
-            )
-            )
-        ), meldingsreferanseId = overstyringId
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(a1, nyInntekt, "Det var jo alt for lite!", null, listOf(Triple(1.januar, null, nyInntekt)))
+            ),
+            meldingsreferanseId = overstyringId
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -185,18 +183,15 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         val overstyring2Id = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
-            1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(
-                a1, nyInntekt, "Det var jo alt for lite!", null, listOf(
-                Triple(1.januar, null, nyInntekt)
-            )
-            )
-        ), meldingsreferanseId = overstyring2Id
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(a1, nyInntekt, "Det var jo alt for lite!", null, listOf(Triple(1.januar, null, nyInntekt)))
+            ),
+            meldingsreferanseId = overstyring2Id
         )
-        håndterYtelser(1.vedtaksperiode)
-
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         val førsteUtbetaling = inspektør.utbetaling(0)
-        val revurdering = inspektør.utbetaling(2)
+        val revurdering = inspektør.utbetaling(1)
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(0, revurdering.personOppdrag.size)
         revurdering.arbeidsgiverOppdrag.also { oppdrag ->
@@ -204,19 +199,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertEquals(31.januar, oppdrag[0].inspektør.tom)
             assertEquals(2161, oppdrag[0].inspektør.beløp)
         }
-        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertEquals(nyInntekt, inspektør.inntekt(1.vedtaksperiode).beløp)
         assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, nyInntekt, overstyringId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
 
-        assertTilstander(
-            1.vedtaksperiode,
-            AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
-        )
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
     }
 
     @Test
@@ -227,13 +215,9 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
-            1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(
-                a1, INNTEKT, "Vi bruker det samme som før", null, listOf(
-                Triple(1.mars, null, INNTEKT / 2)
-            )
-            )
-        ), meldingsreferanseId = overstyringId
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "Vi bruker det samme som før", null, listOf(Triple(1.mars, null, INNTEKT / 2)))),
+            meldingsreferanseId = overstyringId
         )
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -260,7 +244,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertEquals(716, oppdrag[0].inspektør.beløp)
             assertEquals(NY, oppdrag[0].inspektør.endringskode)
         }
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
         assertEquals(INNTEKT, inspektør.inntekt(1.vedtaksperiode).beløp)
@@ -280,17 +264,14 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val antallHistorikkInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
         val gammelInntekt = inspektør.inntekt(1.januar)
         val nyInntekt = INNTEKT * 2
+        nullstillTilstandsendringer()
         håndterOverstyrArbeidsgiveropplysninger(
-            1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(a1, nyInntekt, "Prøver å overstyre Infotrygd-inntekt", null, emptyList())
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, nyInntekt, "Prøver å overstyre Infotrygd-inntekt", null, emptyList()))
         )
-        )
-        håndterYtelser(1.vedtaksperiode)
-
-        assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
         assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(UEND, inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.endringskode)
         assertEquals(gammelInntekt, inspektør.inntekt(1.januar))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -302,23 +283,22 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 skjæringstidspunkt = 1.januar,
                 meldingsreferanseId = UUID.randomUUID(),
                 arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        a1, INNTEKT / 2, "noe", null, refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, INNTEKT / 2)
-                    )
-                    )
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2, "noe", null, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT / 2)))
                 )
             )
-            håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
 
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         overstyr()
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
+        nullstillTilstandsendringer()
+
         repeat(10) { overstyr() }
-        assertEquals(12, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 
     @Test
@@ -423,8 +403,9 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             )
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
+        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertEquals(a1InntektFørOverstyring, inspektør.inntekt(1.januar))
         assertEquals(a2InntektFørOverstyring, inspektør(a2).inntekt(1.januar))
@@ -766,24 +747,25 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
 
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, im1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
         assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
 
+        nullstillTilstandsendringer()
+
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
-            5.februar, meldingsreferanseId = overstyringId, arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                a1, INNTEKT, "endre refusjon", null, listOf(Triple(5.februar, null, INNTEKT)))
+            skjæringstidspunkt = 5.februar,
+            meldingsreferanseId = overstyringId,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "endre refusjon", null, listOf(Triple(5.februar, null, INNTEKT)))
             )
         )
 
         assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
 
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
         assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 }
