@@ -182,14 +182,14 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding? {
+    internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvArbeidsgiverperiode? {
         val sykdomstidslinje = håndterDager(aktivitetslogg, vedtaksperiode) ?: return null
-        return BitAvInntektsmelding(hendelse.metadata, sykdomstidslinje)
+        return BitAvArbeidsgiverperiode(hendelse.metadata, sykdomstidslinje)
     }
 
-    internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvInntektsmelding {
+    internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvArbeidsgiverperiode {
         håndterDager(aktivitetslogg, vedtaksperiode)
-        return BitAvInntektsmelding(hendelse.metadata, Sykdomstidslinje())
+        return BitAvArbeidsgiverperiode(hendelse.metadata, Sykdomstidslinje())
     }
 
     private fun håndterDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): Sykdomstidslinje? {
@@ -316,13 +316,6 @@ internal class DagerFraInntektsmelding(
     fun revurderingseventyr(): Revurderingseventyr? {
         val dagene = håndterteDager.omsluttendePeriode ?: harValidert ?: return null
         return Revurderingseventyr.arbeidsgiverperiode(hendelse, dagene.start, dagene)
-    }
-
-    internal class BitAvInntektsmelding(val metadata: HendelseMetadata, private val sykdomstidslinje: Sykdomstidslinje) : SykdomshistorikkHendelse {
-        override fun oppdaterFom(other: Periode) =
-            other.oppdaterFom(sykdomstidslinje().periode() ?: other)
-
-        override fun sykdomstidslinje() = sykdomstidslinje
     }
 
     internal class BegrunnelseForReduksjonEllerIkkeUtbetalt {

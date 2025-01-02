@@ -18,9 +18,10 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.DagerFraInntektsmelding
+import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Grunnbeløpsregulering
@@ -350,7 +351,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         constructor(metadata: HendelseMetadata) : this(metadata.meldingsreferanseId, metadata.innsendt, metadata.registrert, metadata.avsender)
         constructor(sykdomshistorikkHendelse: SykdomshistorikkHendelse) : this(
             when (sykdomshistorikkHendelse) {
-                is DagerFraInntektsmelding.BitAvInntektsmelding -> sykdomshistorikkHendelse.metadata
+                is BitAvArbeidsgiverperiode -> sykdomshistorikkHendelse.metadata
                 is Søknad -> sykdomshistorikkHendelse.metadata
                 is OverstyrTidslinje -> sykdomshistorikkHendelse.metadata
                 is Ytelser -> sykdomshistorikkHendelse.metadata
@@ -565,7 +566,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 private fun SykdomshistorikkHendelse.dokumentsporingOrNull(): Dokumentsporing? {
                     return when (this) {
-                        is DagerFraInntektsmelding.BitAvInntektsmelding -> inntektsmeldingDager(metadata.meldingsreferanseId)
+                        is BitAvArbeidsgiverperiode -> inntektsmeldingDager(metadata.meldingsreferanseId)
                         is Søknad -> søknad(metadata.meldingsreferanseId)
                         is OverstyrTidslinje -> overstyrTidslinje(metadata.meldingsreferanseId)
                         is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
@@ -584,6 +585,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Grunnbeløpsregulering -> grunnbeløpendring(metadata.meldingsreferanseId)
                         is Ytelser -> andreYtelser(metadata.meldingsreferanseId)
                         is SkjønnsmessigFastsettelse -> skjønnsmessigFastsettelse(metadata.meldingsreferanseId)
+                        is Arbeidsgiveropplysninger,
                         is Dødsmelding,
                         is IdentOpphørt,
                         is Infotrygdendring,
@@ -1019,7 +1021,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun dokumentsporingForRefusjonstidslinje(hendelse: Hendelse?) = when (hendelse) {
-            is Inntektsmelding -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId)
+            is Inntektsmelding,
+            is Arbeidsgiveropplysninger -> Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId)
             else -> hendelse?.dokumentsporing()
         } ?: endringer.last().dokumentsporing
 

@@ -15,6 +15,7 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -63,6 +64,7 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -551,6 +553,12 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg.kontekst(this)
         replays.fortsettÅBehandle(this, aktivitetslogg)
         håndter(replays) { håndter(replays, aktivitetslogg) }
+    }
+
+    internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.kontekst(this)
+        if (énHarHåndtert(arbeidsgiveropplysninger) { håndter(arbeidsgiveropplysninger, aktivitetslogg, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }) return
+        aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_26)
     }
 
     internal fun håndter(

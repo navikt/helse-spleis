@@ -12,6 +12,7 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dødsmelding
@@ -200,6 +201,13 @@ class Person private constructor(
         søknad.forUng(aktivitetslogg, alder)
         arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
         håndterGjenoppta(søknad, aktivitetslogg)
+    }
+
+    fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
+        registrer(aktivitetslogg, "Behandler arbeidsgiveropplysninger")
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(arbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
+        arbeidsgiver.håndter(arbeidsgiveropplysninger, aktivitetslogg)
+        håndterGjenoppta(arbeidsgiveropplysninger, aktivitetslogg)
     }
 
     fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {

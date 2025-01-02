@@ -42,6 +42,7 @@ class Revurderingseventyr private constructor(
         fun infotrygdendring(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
         fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
         fun refusjonsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.Refusjonsopplysninger, skjæringstidspunkt, periode, hendelse)
+        fun inntekt(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntekt, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
         fun minimumSykdomsgradVurdert(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
@@ -190,6 +191,10 @@ class Revurderingseventyr private constructor(
 
         data object Refusjonsopplysninger : RevurderingÅrsak {
             override fun navn() = "REFUSJONSOPPLYSNINGER"
+        }
+
+        data object Inntekt : RevurderingÅrsak {
+            override fun navn() = "INNTEKT"
         }
     }
 }

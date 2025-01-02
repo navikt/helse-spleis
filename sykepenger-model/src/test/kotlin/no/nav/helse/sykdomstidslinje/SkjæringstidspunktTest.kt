@@ -5,6 +5,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.erRettFør
 import no.nav.helse.februar
+import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -481,7 +482,7 @@ internal class SkjæringstidspunktTest {
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 31.desember,
         endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
-    ): DagerFraInntektsmelding.BitAvInntektsmelding {
+    ): BitAvArbeidsgiverperiode {
         val inntektsmelding = hendelsefabrikk.lagKlassiskInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
