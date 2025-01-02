@@ -27,7 +27,7 @@ spec:
   replicas:
     min: 1
     max: 2
-    cpuThresholdPercentage: 75
+    cpuThresholdPercentage: 70
   gcp:
     permissions:
       - resource:
