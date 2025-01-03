@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
@@ -14,6 +15,8 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dagtype
@@ -53,6 +56,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.nesteDag
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.IdInnhenter
@@ -78,6 +82,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -482,22 +487,35 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             til LPS/ALTINN om det er en viktig detalj i testen din at første fraværsdag er satt.
             """
         }
+        val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" })
 
-        return håndterInntektsmelding(
-            portalInntektsmelding(
-                id,
-                arbeidsgiverperioder,
-                beregnetInntekt = beregnetInntekt,
-                vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" }),
-                refusjon = refusjon,
-                orgnummer = orgnummer,
-                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                inntektsdato = inntektsdato,
-                avsendersystem = utledetAvsendersystem
-            )
+        val endringerIRefusjon = refusjon.endringerIRefusjon.map { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.endringsdato, it.beløp) }
+        val opphørAvRefusjon = listOfNotNull(refusjon.opphørsdato?.let { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
+        val oppgittRefusjon = Arbeidsgiveropplysning.OppgittRefusjon(refusjon.beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
+        val arbeidsgiveropplysninger = ArbeidsgiverHendelsefabrikk(orgnummer).lagArbeidsgiveropplysninger(
+            meldingsreferanseId = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntekt = beregnetInntekt,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            opplysninger = arrayOf(oppgittRefusjon)
         )
+
+        val portalInnteksmelding = portalInntektsmelding(
+            id,
+            arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            vedtaksperiodeId = vedtaksperiodeId,
+            refusjon = refusjon,
+            orgnummer = orgnummer,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            inntektsdato = inntektsdato,
+            avsendersystem = utledetAvsendersystem
+        )
+
+        return håndterInntektsmelding(portalInnteksmelding)
+        //return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
     }
     check(vedtaksperiodeIdInnhenter == null) { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
     return håndterInntektsmelding(
@@ -514,6 +532,11 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             avsendersystem = utledetAvsendersystem
         ), førReplay
     )
+}
+
+internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger: Arbeidsgiveropplysninger): UUID {
+    arbeidsgiveropplysninger.håndter(Person::håndter)
+    return arbeidsgiveropplysninger.metadata.meldingsreferanseId
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(

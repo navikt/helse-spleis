@@ -153,6 +153,7 @@ import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkatteopplysningSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
@@ -390,18 +391,18 @@ internal class Vedtaksperiode private constructor(
         }
         this.registrerKontekst(aktivitetslogg)
 
-        check(rester.gjenståendeDager.isEmpty()) { "Hvis det er rester igjen er det litt rart" }
+        check(rester.gjenståendeDager.isEmpty()) { "Hvis det er rester igjen er det litt rart. Refusjon frem i tid?" }
 
         return eventyr
     }
 
     private data class OppgittArbeidsgiverperiodehåndtering(val gjenståendeDager: List<Periode>, val strekkTilbakeTil: LocalDate, private val hendelseMetadata: HendelseMetadata) {
         private val hendelsekilde = Hendelseskilde("Inntektsmelding", hendelseMetadata.meldingsreferanseId, hendelseMetadata.innsendt) // TODO: Type? 🤔
-        val omsluttendePeriode = gjenståendeDager.periode()
+        private val omsluttendePeriode = gjenståendeDager.periode()
         val sykdomstidslinje = if (omsluttendePeriode != null)
             Sykdomstidslinje.arbeidsdager(strekkTilbakeTil, omsluttendePeriode.endInclusive, hendelsekilde).merge(gjenståendeDager.fold(Sykdomstidslinje()) { acc, periode ->
                 acc + Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, hendelsekilde)
-            })
+            }, replace)
         else Sykdomstidslinje()
 
         fun håndter(vedtaksperiode: Periode) = this.copy(

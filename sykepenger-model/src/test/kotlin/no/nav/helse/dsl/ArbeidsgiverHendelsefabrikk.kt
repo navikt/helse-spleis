@@ -10,6 +10,8 @@ import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
@@ -55,6 +57,7 @@ import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -224,6 +227,42 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             mottatt = mottatt
         )
     }
+
+    internal fun lagArbeidsgiveropplysninger(
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID,
+        innsendt: LocalDateTime = LocalDateTime.now(),
+        registrert: LocalDateTime = innsendt.plusSeconds(1),
+        arbeidsgiverperioder: List<Periode>? = null,
+        inntekt: Inntekt? = null,
+        refusjon: Inntekt? = null,
+        vararg opplysninger: Arbeidsgiveropplysning
+    ): Arbeidsgiveropplysninger {
+        val alleOpplysninger = listOfNotNull(
+            arbeidsgiverperioder?.takeUnless { it.isEmpty() }?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) },
+            inntekt?.takeUnless { it < INGEN }?.let { Arbeidsgiveropplysning.OppgittInntekt(it) },
+            refusjon?.let { Arbeidsgiveropplysning.OppgittRefusjon(it, emptyList()) }
+        ) + opplysninger
+
+        check(alleOpplysninger.groupBy { it::class }.values.all { it.size == 1 }) { "Du har sendt med duplikate opplysningstyper."}
+
+        return lagArbeidsgiveropplysninger(meldingsreferanseId = meldingsreferanseId, vedtaksperiodeId = vedtaksperiodeId, innsendt = innsendt, registrert = registrert, *alleOpplysninger.toTypedArray())
+    }
+
+    internal fun lagArbeidsgiveropplysninger(
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID,
+        innsendt: LocalDateTime = LocalDateTime.now(),
+        registrert: LocalDateTime = innsendt.plusSeconds(1),
+        vararg opplysninger: Arbeidsgiveropplysning
+    ) = Arbeidsgiveropplysninger(
+        meldingsreferanseId = meldingsreferanseId,
+        innsendt = innsendt,
+        registrert = registrert,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = opplysninger.toList()
+    )
 
     internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
         InntektsmeldingerReplay(
@@ -503,8 +542,5 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
-        ), meldingsreferanseId = hendelseId, tidsstempel
-        )
-
-
+        ), meldingsreferanseId = hendelseId, tidsstempel)
 }
