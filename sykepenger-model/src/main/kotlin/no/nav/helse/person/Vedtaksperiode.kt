@@ -708,15 +708,10 @@ internal class Vedtaksperiode private constructor(
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
     }
 
-    private fun måInnhenteInntektEllerRefusjon(aktivitetslogg: IAktivitetslogg): Boolean {
+    private fun måInnhenteInntektEllerRefusjon(): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
-        if (tilstand.arbeidsgiveropplysningerStrategi.harInntektOgRefusjon(
-                this,
-                arbeidsgiverperiode,
-                aktivitetslogg
-            )
-        ) return false
+        if (harInntektOgRefusjon()) return false
         return true
     }
 
@@ -1075,7 +1070,7 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         aktivitetslogg.info("Vilkårsgrunnlag vurdert")
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag, aktivitetslogg)
-        arbeidsgiver.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(this, aktivitetslogg)
+        arbeidsgiver.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(this)
         tilstand(aktivitetslogg, nesteTilstand)
     }
 
@@ -1116,8 +1111,8 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg: IAktivitetslogg): Boolean {
-        if (!måInnhenteInntektEllerRefusjon(aktivitetslogg)) return false
+    private fun sjekkTrengerArbeidsgiveropplysninger(): Boolean {
+        if (!måInnhenteInntektEllerRefusjon()) return false
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
         return arbeidsgiverperiode.forventerOpplysninger(periode)
     }
@@ -1405,7 +1400,7 @@ internal class Vedtaksperiode private constructor(
         if (revurdering.ikkeRelevant(periode)) return
         registrerKontekst(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
-        tilstand.arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(this, aktivitetslogg)
+        videreførEksisterendeOpplysninger(aktivitetslogg)
     }
 
     internal fun inngåIRevurderingseventyret(
@@ -1573,7 +1568,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun førstePeriodeSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
         return perioderSomMåHensyntasVedBeregning()
-            .firstOrNull { it.måInnhenteInntektEllerRefusjon(Aktivitetslogg()) }
+            .firstOrNull { it.måInnhenteInntektEllerRefusjon() }
     }
 
     private fun førstePeriodeSomTrengerInntektsmelding() =
@@ -1723,7 +1718,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg, periode)
         behandlinger.forkastUtbetaling(aktivitetslogg)
-        if (måInnhenteInntektEllerRefusjon(aktivitetslogg)) return tilstand(aktivitetslogg, AvventerInntektsmelding)
+        if (måInnhenteInntektEllerRefusjon()) return tilstand(aktivitetslogg, AvventerInntektsmelding)
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
 
@@ -1763,92 +1758,42 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun harInntektOgRefusjon(): Boolean {
+        if (refusjonstidslinje.isEmpty()) return false
+        return harEksisterendeInntekt() || behandlinger.harGjenbrukbarInntekt(arbeidsgiver.organisasjonsnummer)
+    }
+
+    private fun videreførEksisterendeOpplysninger(aktivitetslogg: IAktivitetslogg) {
+        lagreGjenbrukbarInntekt(aktivitetslogg)
+        videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
+    }
+
+    private fun lagreGjenbrukbarInntekt(aktivitetslogg: IAktivitetslogg) {
+        if (harEksisterendeInntekt()) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
+        // Ikke 100% at dette lagrer noe. F.eks.
+        //  - det er en periode som aldri er vilkårsprøvd før
+        //  - revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
+        //  - inntekten i vilkårsgrunnlaget er skatteopplysninger
+        behandlinger.lagreGjenbrukbarInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            arbeidsgiver = arbeidsgiver,
+            aktivitetslogg = aktivitetslogg
+        )
+    }
+
+    // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
+    private fun harEksisterendeInntekt(): Boolean {
+        // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
+        // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
+        val vilkårsgrunnlag = vilkårsgrunnlag
+        return vilkårsgrunnlag != null || kanAvklareInntekt()
+    }
+
     internal fun hensyntattUbrukteRefusjonsopplysninger(ubrukteRefusjonsopplysninger: Refusjonsservitør): Beløpstidslinje {
         val menyBakHalen = ubrukteRefusjonsopplysninger.dessertmeny(startdatoPåSammenhengendeVedtaksperioder, periode)
             .fraOgMed(periode.endInclusive.nesteDag)
         return refusjonstidslinje + menyBakHalen
-    }
-
-    // TODO: Når vi sletter refusjonsopplysninger fra inntektsgrunnlaget trenger ikke dette være før/etter IM - for eneste diffen er logging mot _gamle_ refusjonsopplysninger.
-    internal sealed class ArbeidsgiveropplysningerStrategi {
-        fun harInntektOgRefusjon(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            aktivitetslogg: IAktivitetslogg
-        ): Boolean {
-            if (vedtaksperiode.refusjonstidslinje.isEmpty()) {
-                if (!harGamleRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, gamleRefusjonsopplysninger(vedtaksperiode), aktivitetslogg)) return false
-                aktivitetslogg.info("Har tilstrekkelig refusjonsopplysninger i inntektsgrunnlaget, men ikke behandlingen")
-                return false
-            }
-            return harEksisterendeInntekt(vedtaksperiode) || vedtaksperiode.behandlinger.harGjenbrukbarInntekt(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
-        }
-
-        fun videreførEksisterendeOpplysninger(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            lagreGjenbrukbarInntekt(vedtaksperiode, aktivitetslogg)
-            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
-        }
-
-        @Deprecated("Denne brukes kun til logging og om du bruker den til noe annen så kækker vi deg")
-        abstract fun harGamleRefusjonsopplysninger(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverperiode: Arbeidsgiverperiode,
-            refusjonsopplysninger: Refusjonsopplysninger,
-            aktivitetslogg: IAktivitetslogg
-        ): Boolean
-
-        private fun lagreGjenbrukbarInntekt(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            if (harEksisterendeInntekt(vedtaksperiode)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
-            // Ikke 100% at dette lagrer noe. F.eks.
-            //  - det er en periode som aldri er vilkårsprøvd før
-            //  - revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
-            //  - inntekten i vilkårsgrunnlaget er skatteopplysninger
-            vedtaksperiode.behandlinger.lagreGjenbrukbarInntekt(
-                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
-                arbeidsgiver = vedtaksperiode.arbeidsgiver,
-                aktivitetslogg = aktivitetslogg
-            )
-        }
-
-        // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
-        private fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
-            // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
-            // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
-            val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag
-            return vilkårsgrunnlag != null || vedtaksperiode.kanAvklareInntekt()
-        }
-
-        // Refusjonsopplysningene vi allerede har i vilkårsgrunnlag/ i refusjonshistorikken på arbeidsgiver
-        private fun gamleRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) =
-            when (val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag) {
-                null -> vedtaksperiode.arbeidsgiver.refusjonsopplysninger(vedtaksperiode.skjæringstidspunkt)
-                else -> vilkårsgrunnlag.refusjonsopplysninger(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
-            }
-    }
-
-    private data object FørInntektsmelding : ArbeidsgiveropplysningerStrategi() {
-        @Deprecated("Denne brukes kun til logging og om du bruker den til noe annen så kækker vi deg")
-        override fun harGamleRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, aktivitetslogg: IAktivitetslogg) = Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(
-            skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-            periode = vedtaksperiode.periode,
-            refusjonsopplysninger = refusjonsopplysninger,
-            arbeidsgiverperiode = arbeidsgiverperiode,
-            aktivitetslogg = aktivitetslogg,
-            organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
-        )
-    }
-
-    private data object EtterInntektsmelding : ArbeidsgiveropplysningerStrategi() {
-        @Deprecated("Denne brukes kun til logging og om du bruker den til noe annen så kækker vi deg")
-        override fun harGamleRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, aktivitetslogg: IAktivitetslogg) = Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(
-            skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-            periode = vedtaksperiode.periode,
-            refusjonsopplysninger = refusjonsopplysninger,
-            arbeidsgiverperiode = arbeidsgiverperiode,
-            aktivitetslogg = aktivitetslogg,
-            organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer
-        )
     }
 
     // Gang of four State pattern
@@ -1856,7 +1801,6 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        val arbeidsgiveropplysningerStrategi: ArbeidsgiveropplysningerStrategi get() = EtterInntektsmelding
         fun aktivitetsloggForRevurdering(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
             return FunksjonelleFeilTilVarsler(aktivitetslogg)
         }
@@ -2022,7 +1966,6 @@ internal class Vedtaksperiode private constructor(
     internal data object Start : Vedtaksperiodetilstand {
         override val type = START
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = HJELP.utenBegrunnelse
-        override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             søknad: Søknad,
@@ -2078,7 +2021,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.trengerHistorikkFraInfotrygd(aktivitetslogg)
         }
 
-        override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
@@ -2200,9 +2142,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
-                arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(vedtaksperiode, aktivitetslogg)
-                if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
+                vedtaksperiode.videreførEksisterendeOpplysninger(aktivitetslogg)
+                if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
                 aktivitetslogg.info("Ordnet opp i manglende inntekt/refusjon i AvventerRevurdering ved videreføring av eksisterende opplysninger.")
             }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
@@ -2439,7 +2381,6 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(180)
 
-        override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
         }
@@ -2507,7 +2448,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)
             if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
-            if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
+            if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
             revurdering.inngåVedSaksbehandlerendring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
@@ -2596,7 +2537,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
             }
 
-            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
+            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
         }
@@ -2610,7 +2551,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
+            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
@@ -2646,12 +2587,12 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.forkast(hendelse, aktivitetslogg)
                 return true
             }
-            arbeidsgiveropplysningerStrategi.videreførEksisterendeOpplysninger(vedtaksperiode, aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeOpplysninger(aktivitetslogg)
             if (!vedtaksperiode.skalBehandlesISpeil()) {
                 vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
                 return true
             }
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return false
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return false
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
             return true
         }
@@ -2660,7 +2601,7 @@ internal class Vedtaksperiode private constructor(
     internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
+            check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                 "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
             }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
@@ -2733,7 +2674,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (påminnelse.skalReberegnes()) {
-                if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
+                if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                     return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
                 }
                 return
@@ -2756,7 +2697,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             // todo: infotrygdendringer burde nok kommet inn som revurderingseventyr istedenfor.. ?
-            if (!vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) return
+            if (!vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
             vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
         }
 
@@ -2766,7 +2707,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) vedtaksperiode.tilstand(
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) vedtaksperiode.tilstand(
                 aktivitetslogg,
                 AvventerInntektsmelding
             )
@@ -3506,7 +3447,7 @@ internal class Vedtaksperiode private constructor(
                 )
                 vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(aktivitetslogg = aktivitetslogg)
                 aktivitetslogg.info(RV_RV_1.varseltekst)
-                if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivitetslogg)) {
+                if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                     aktivitetslogg.info("mangler nødvendige opplysninger fra arbeidsgiver")
                     return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
                 }
@@ -3574,7 +3515,7 @@ internal class Vedtaksperiode private constructor(
                 aktivAktivitetslogg.info("Forkaster perioden fordi Infotrygdhistorikken ikke validerer")
                 return vedtaksperiode.forkast(hendelse, aktivAktivitetslogg)
             }
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(aktivAktivitetslogg)) {
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                 aktivAktivitetslogg.info("Forkaster perioden fordi perioden har ikke tilstrekkelig informasjon til utbetaling")
                 return vedtaksperiode.forkast(hendelse, aktivAktivitetslogg)
             }
@@ -3881,15 +3822,12 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
             firstOrNull(HAR_PÅGÅENDE_UTBETALING) ?: filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
-        internal fun List<Vedtaksperiode>.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
-            vedtaksperiode: Vedtaksperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) {
+        internal fun List<Vedtaksperiode>.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode: Vedtaksperiode) {
             val nestePeriode = this
                 .firstOrNull { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt && it.skalBehandlesISpeil() }
                 ?.takeIf { it.tilstand == AvventerInntektsmelding }
                 ?: return
-            if (nestePeriode.sjekkTrengerArbeidsgiveropplysninger(aktivitetslogg)) {
+            if (nestePeriode.sjekkTrengerArbeidsgiveropplysninger()) {
                 nestePeriode.sendTrengerArbeidsgiveropplysninger()
             }
         }

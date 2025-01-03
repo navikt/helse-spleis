@@ -1186,14 +1186,8 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.filter { it.periode in arbeidsgiverperiode }
     }
 
-    internal fun sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
-        vedtaksperiode: Vedtaksperiode,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperioder.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(
-            vedtaksperiode,
-            aktivitetslogg
-        )
+    internal fun sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode: Vedtaksperiode) {
+        vedtaksperioder.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode)
     }
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
