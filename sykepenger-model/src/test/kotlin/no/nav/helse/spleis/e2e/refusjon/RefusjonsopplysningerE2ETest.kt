@@ -8,8 +8,8 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -18,9 +18,9 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -57,15 +57,16 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null))
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().let { refusjonsopplysninger ->
-                refusjonsopplysninger.assertRefusjonsbeløp(1.januar til 21.januar, INNTEKT)
-                refusjonsopplysninger.assertRefusjonsbeløp(22.januar til 31.januar, INGEN)
-            }
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(1.januar til 21.januar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(22.januar til 31.januar, INGEN),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true
+            )
         }
     }
 
@@ -74,12 +75,12 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
     }
 
@@ -95,7 +96,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -106,7 +107,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
     }
 
@@ -158,12 +159,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        }
-    }
-
-    private fun List<Refusjonsopplysning>.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
-        periode.forEach { dag ->
-            assertEquals(beløp, singleOrNull { dag in it.periode }?.beløp)
         }
     }
 }

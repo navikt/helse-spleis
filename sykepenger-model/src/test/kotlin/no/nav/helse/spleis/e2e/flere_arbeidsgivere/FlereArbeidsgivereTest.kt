@@ -15,7 +15,6 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.fredag
-import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -48,12 +47,12 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt as InntektFraInntektsmelding
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertInstanceOf
@@ -495,7 +494,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is InntektFraInntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Inntektsmeldinginntekt)
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
         }
 
@@ -520,12 +519,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            assertLikeRefusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(a2Inntektsmelding, 1.januar, 31.januar, INNTEKT, ARBEIDSGIVER),
-                    Refusjonsopplysning(a2Inntektsmelding, 1.februar, null, INNTEKT, ARBEIDSGIVER),
-                ), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
-            )
+            assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, a2Inntektsmelding.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
         }

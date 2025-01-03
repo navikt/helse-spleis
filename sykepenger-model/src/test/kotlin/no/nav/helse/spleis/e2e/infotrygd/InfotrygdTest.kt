@@ -1,27 +1,25 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -88,8 +86,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, emptyList())))
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inntektsopplysning(1.vedtaksperiode) is Infotrygd)
-        assertEquals(31000.månedlig, inntektsopplysning(1.vedtaksperiode).inspektør.beløp)
+        assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
+        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).beløp)
     }
 
     @Test
@@ -100,14 +98,10 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val meldingsreferanse = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, listOf(Triple(1.januar, null, 15000.månedlig)))), meldingsreferanseId = meldingsreferanse)
         assertEquals(antallInnslagFør + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertLikeRefusjonsopplysninger(listOf(Refusjonsopplysning(meldingsreferanse, 1.januar, null, 15000.månedlig, SAKSBEHANDLER)), refusjonsopplysninger(1.vedtaksperiode))
-        assertTrue(inntektsopplysning(1.vedtaksperiode) is Infotrygd)
-        assertEquals(31000.månedlig, inntektsopplysning(1.vedtaksperiode).inspektør.beløp)
+
+        assertBeløpstidslinje(Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
+        assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
+        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).beløp)
     }
 
-    private fun refusjonsopplysninger(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.orgnummer == a1 }.inspektør.refusjonsopplysninger
-
-    private fun inntektsopplysning(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inspektør.inntektsopplysning
 }

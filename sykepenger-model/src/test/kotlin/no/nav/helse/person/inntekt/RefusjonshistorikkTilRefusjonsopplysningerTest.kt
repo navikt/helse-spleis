@@ -689,4 +689,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         }.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         return kilde1 to refusjonsopplysninger
     }
+
+    private companion object {
+        fun assertLikeRefusjonsopplysninger(expected: List<Refusjonsopplysning>, actual: List<Refusjonsopplysning>) {
+            assertEquals(expected.map { it.copy(tidsstempel = LocalDate.EPOCH.atStartOfDay()) }, actual.map { it.copy(tidsstempel = LocalDate.EPOCH.atStartOfDay()) })
+        }
+    }
 }

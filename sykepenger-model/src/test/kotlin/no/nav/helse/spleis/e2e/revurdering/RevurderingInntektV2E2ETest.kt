@@ -27,6 +27,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -696,10 +697,10 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `refusjonsopplysninger er uendret etter revurdert inntekt`() {
         nyttVedtak(januar)
-        val refusjonsopplysningerFørRevurdering = inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
+        val refusjonsopplysningerFørRevurdering = inspektør.refusjon(1.vedtaksperiode)
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
-        val refusjonsopplysningerEtterRevurdering = inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
-        assertEquals(refusjonsopplysningerFørRevurdering, refusjonsopplysningerEtterRevurdering)
+        val refusjonsopplysningerEtterRevurdering = inspektør.refusjon(1.vedtaksperiode)
+        assertBeløpstidslinje(refusjonsopplysningerFørRevurdering, refusjonsopplysningerEtterRevurdering)
     }
 
     private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {

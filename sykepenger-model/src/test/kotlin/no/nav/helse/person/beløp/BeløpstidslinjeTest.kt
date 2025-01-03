@@ -19,6 +19,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -280,7 +281,13 @@ internal class BeløpstidslinjeTest {
 
     internal companion object {
         internal val Beløpstidslinje.perioderMedBeløp get() = filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
+        internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
+        internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
+        internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(UUID.randomUUID(), this, LocalDateTime.now()))
+        internal fun Inntekt.beløpstidslinje(periode: Periode) = Beløpstidslinje.fra(periode, this, Kilde(UUID.randomUUID(), SYSTEM, LocalDateTime.now()))
+
         internal fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
+            // TODO Endre til å bruke den under.
             assertTrue(beløpstidslinje.isNotEmpty())
             assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
             assertTrue(beløpstidslinje.all { it.beløp == beløp })
@@ -289,24 +296,22 @@ internal class BeløpstidslinjeTest {
             }
         }
 
-        internal fun assertBeløpstidslinje(expected: Beløpstidslinje, actual: Beløpstidslinje, ignoreMeldingsreferanseId: Boolean = false) {
-            val tidsstempel: (_: LocalDateTime) -> LocalDateTime = { LocalDate.EPOCH.atStartOfDay() }
+        internal fun assertBeløpstidslinje(expected: Beløpstidslinje, actual: Beløpstidslinje, ignoreMeldingsreferanseId: Boolean = false, ignoreAvsender: Boolean = false) {
             val tøyseteMeldingsreferanseId = UUID.randomUUID()
             val meldingsreferanseId: (ekte: UUID) -> UUID = if (ignoreMeldingsreferanseId) { _ -> tøyseteMeldingsreferanseId } else { ekte -> ekte }
-            assertEquals(expected.besudlet(tidsstempel, meldingsreferanseId), actual.besudlet(tidsstempel, meldingsreferanseId))
+            val avsender: (ekte: Avsender) -> Avsender = if (ignoreAvsender) { _ -> SYSTEM } else { ekte -> ekte }
+            assertEquals(expected.besudlet(meldingsreferanseId, avsender), actual.besudlet(meldingsreferanseId, avsender))
         }
 
-        internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
-        internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
-        internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(UUID.randomUUID(), this, LocalDateTime.now()))
         private fun Beløpstidslinje.besudlet(
-            tidsstempel: (ekte: LocalDateTime) -> LocalDateTime = { it },
-            meldingsreferanseId: (ekte: UUID) -> UUID = { it }
+            meldingsreferanseId: (ekte: UUID) -> UUID,
+            avsender: (ekte: Avsender) -> Avsender
         ): Beløpstidslinje {
             val beløpsdager = filterIsInstance<Beløpsdag>().map {
                 it.copy(
                     kilde = it.kilde.copy(
-                        tidsstempel = tidsstempel(it.kilde.tidsstempel),
+                        avsender = avsender(it.kilde.avsender),
+                        tidsstempel = LocalDate.EPOCH.atStartOfDay(),
                         meldingsreferanseId = meldingsreferanseId(it.kilde.meldingsreferanseId)
                     )
                 )

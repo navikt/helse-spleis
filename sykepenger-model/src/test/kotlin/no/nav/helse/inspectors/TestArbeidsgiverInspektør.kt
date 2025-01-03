@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -166,8 +167,13 @@ internal class TestArbeidsgiverInspektør(
     internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter)
     private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
 
-    internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = person.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt.max()) =
-        personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer]?.inspektør?.refusjonsopplysninger ?: emptyList()
+    internal fun refusjon(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).refusjonstidslinje
+    internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
+
+    private fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inntekt() = inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer).inntektsopplysning
+    internal fun inntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.inntekt()
+    internal fun inntekt(vedtaksperiodeIdInnhenter: IdInnhenter) = vilkårsgrunnlag(vedtaksperiodeIdInnhenter)!!.inntekt()
+    internal fun inntekt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.inntekt()
 
     internal fun harFunksjonelleFeilEllerVerre(): Boolean = personInspektør.aktivitetslogg.harFunksjonelleFeilEllerVerre()
 }

@@ -1,18 +1,15 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -27,8 +24,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.assertLikeRefusjonsopplysninger
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -583,7 +581,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        håndterInntektsmelding(
+        val im2 = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT + 100.månedlig,
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
@@ -608,7 +606,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertNotNull(vilkårsgrunnlag)
         val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør
         assertEquals(INNTEKT + 100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
-        assertEquals(INNTEKT / 2, inntektsopplysninger.refusjonsopplysninger.single().inspektør.beløp)
+        assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT / 2, im2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
     }
 
     @Test
@@ -687,12 +685,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertLikeRefusjonsopplysninger(
-            listOf(
-                Refusjonsopplysning(inntektsmeldingId, 1.januar, 16.januar, INNTEKT, ARBEIDSGIVER),
-                Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT, ARBEIDSGIVER)
-            ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
-        )
+        assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
     }
 
     @Test
@@ -779,7 +772,4 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             assertTrue(utbetaling.arbeidsgiverOppdrag.isEmpty())
         }
     }
-
-    private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger
 }

@@ -8,5 +8,4 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     val orgnummer = arbeidsgiverInntektsopplysning.orgnummer
     val inntektsopplysning = arbeidsgiverInntektsopplysning.inntektsopplysning
     val gjelder = arbeidsgiverInntektsopplysning.gjelder
-    val refusjonsopplysninger = arbeidsgiverInntektsopplysning.refusjonsopplysninger.validerteRefusjonsopplysninger
 }
