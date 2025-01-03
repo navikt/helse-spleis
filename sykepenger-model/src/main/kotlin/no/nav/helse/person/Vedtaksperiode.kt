@@ -12,6 +12,7 @@ import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
@@ -30,6 +31,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
@@ -356,23 +358,25 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Boolean {
         if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return false
         registrerKontekst(aktivitetslogg)
-        if (tilstand !is AvventerInntektsmelding) return true.also { aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}") }
+        // Vi må støtte AUU & AVBL på grunn av at det sendes forespørsel på entering i AUU om det er oppgitt egenmeldingsdager som gjør at perioden skal utbetaltes
+        if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) return true.also { aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}") }
 
         val eventyr = listOf(
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg),
             håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
-            håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk)
+            håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg)
         ).flatten().tidligsteEventyr()
 
-        if (eventyr != null) person.igangsettOverstyring(eventyr, aktivitetslogg)
+        person.emitInntektsmeldingHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
 
+        if (eventyr != null) person.igangsettOverstyring(eventyr, aktivitetslogg)
         return true
     }
 
     private fun håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         val oppgittArbeidgiverperiode = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittArbeidgiverperiode>().singleOrNull() ?: return emptyList()
         val eventyr = mutableListOf<Revurderingseventyr>()
-        val initiell = OppgittArbeidsgiverperiodehåndtering(oppgittArbeidgiverperiode.perioder, oppgittArbeidgiverperiode.perioder.first().start, arbeidsgiveropplysninger.metadata)
+        val initiell = OppgittArbeidsgiverperiodehåndtering.opprett(oppgittArbeidgiverperiode.perioder, arbeidsgiveropplysninger.metadata)
 
         val rester = vedtaksperioder.fold(initiell) { acc, vedtaksperiode ->
             when (vedtaksperiode.tilstand) {
@@ -380,8 +384,10 @@ internal class Vedtaksperiode private constructor(
                 AvsluttetUtenUtbetaling,
                 AvventerBlokkerendePeriode -> {
                     vedtaksperiode.registrerKontekst(aktivitetslogg)
-                    vedtaksperiode.oppdaterHistorikk(BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, acc.sykdomstidslinje.fremTilOgMed(vedtaksperiode.periode.endInclusive)), aktivitetslogg) {}
-                    eventyr.add(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+                    acc.sykdomstidslinje(vedtaksperiode.periode)?.let {
+                        vedtaksperiode.håndterDager(BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, it), aktivitetslogg) {}
+                        eventyr.add(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+                    }
                 }
 
                 else -> aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${vedtaksperiode.tilstand.type}")
@@ -391,23 +397,41 @@ internal class Vedtaksperiode private constructor(
         }
         this.registrerKontekst(aktivitetslogg)
 
-        check(rester.gjenståendeDager.isEmpty()) { "Hvis det er rester igjen er det litt rart. Refusjon frem i tid?" }
+        check(rester.sykdomstidslinje.count() == 0) { "Hvis det er rester igjen er det litt rart. Refusjon frem i tid?" }
 
         return eventyr
     }
 
-    private data class OppgittArbeidsgiverperiodehåndtering(val gjenståendeDager: List<Periode>, val strekkTilbakeTil: LocalDate, private val hendelseMetadata: HendelseMetadata) {
-        private val hendelsekilde = Hendelseskilde("Inntektsmelding", hendelseMetadata.meldingsreferanseId, hendelseMetadata.innsendt) // TODO: Type? 🤔
-        private val omsluttendePeriode = gjenståendeDager.periode()
-        val sykdomstidslinje = if (omsluttendePeriode != null)
-            Sykdomstidslinje.arbeidsdager(strekkTilbakeTil, omsluttendePeriode.endInclusive, hendelsekilde).merge(gjenståendeDager.fold(Sykdomstidslinje()) { acc, periode ->
-                acc + Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, hendelsekilde)
-            }, replace)
-        else Sykdomstidslinje()
+    private data class OppgittArbeidsgiverperiodehåndtering(
+        val arbeidsgiverperiode: List<Periode>,
+        val sykdomstidslinje: Sykdomstidslinje
+    ) {
+        companion object {
+            fun opprett(arbeidsgiverperiode: List<Periode>, hendelseMetadata: HendelseMetadata): OppgittArbeidsgiverperiodehåndtering {
+                val hendelsekilde = Hendelseskilde("Inntektsmelding", hendelseMetadata.meldingsreferanseId, hendelseMetadata.innsendt) // TODO: Type? 🤔
+                val sykdomstidslinje = if (arbeidsgiverperiode.isNotEmpty())
+                    Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode.first().start, arbeidsgiverperiode.last().endInclusive, hendelsekilde).merge(arbeidsgiverperiode.fold(Sykdomstidslinje()) { acc, periode ->
+                        acc + Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, hendelsekilde)
+                    }, replace)
+                else Sykdomstidslinje()
+                return OppgittArbeidsgiverperiodehåndtering(arbeidsgiverperiode, sykdomstidslinje)
+            }
+        }
+        private val omsluttendePeriode = sykdomstidslinje.periode()
+
+        private fun skalHåndtere(vedtaksperiode: Periode): Boolean {
+            if (omsluttendePeriode == null) return false
+            return vedtaksperiode.endInclusive >= omsluttendePeriode.start || vedtaksperiode.endInclusive.erRettFør(omsluttendePeriode.start)
+        }
+        fun sykdomstidslinje(vedtaksperiode: Periode) : Sykdomstidslinje? {
+            if (!skalHåndtere(vedtaksperiode)) return null
+            val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(vedtaksperiode.endInclusive)
+            val snute = if (vedtaksperiode.start < omsluttendePeriode!!.start) Sykdomstidslinje.arbeidsdager(vedtaksperiode.start, omsluttendePeriode.start.forrigeDag, this.sykdomstidslinje.first().kilde) else Sykdomstidslinje()
+            return snute.merge(sykdomstidslinje)
+        }
 
         fun håndter(vedtaksperiode: Periode) = this.copy(
-            gjenståendeDager = gjenståendeDager.flatMap { it.trim(vedtaksperiode.oppdaterFom(LocalDate.MIN)) },
-            strekkTilbakeTil = vedtaksperiode.endInclusive.nesteDag
+            sykdomstidslinje = sykdomstidslinje.fraOgMed(vedtaksperiode.endInclusive.nesteDag)
         )
     }
 
@@ -429,16 +453,29 @@ internal class Vedtaksperiode private constructor(
         return eventyr
     }
 
-    private fun håndterOppgittInntekt(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, inntektshistorikk: Inntektshistorikk): List<Revurderingseventyr> {
+    private fun håndterOppgittInntekt(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         val oppgittInntekt = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittInntekt>().singleOrNull() ?: return emptyList()
-        inntektshistorikk.leggTil(
-            Inntektsmeldinginntekt(
-                dato = skjæringstidspunkt,
-                hendelseId = arbeidsgiveropplysninger.metadata.meldingsreferanseId,
-                beløp = oppgittInntekt.inntekt
-            )
+        val inntektsmeldingInntekt = Inntektsmeldinginntekt(
+            dato = skjæringstidspunkt,
+            hendelseId = arbeidsgiveropplysninger.metadata.meldingsreferanseId,
+            beløp = oppgittInntekt.inntekt
         )
-        return listOf(Revurderingseventyr.inntekt(arbeidsgiveropplysninger, skjæringstidspunkt))
+        inntektshistorikk.leggTil(inntektsmeldingInntekt)
+
+        // Hvis overgang fra Ghost
+        val sykFraGhost = person.nyeArbeidsgiverInntektsopplysninger(
+            skjæringstidspunkt = skjæringstidspunkt,
+            korrigertInntektsmelding = KorrigertInntektOgRefusjon(
+                hendelse = arbeidsgiveropplysninger,
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                inntekt = inntektsmeldingInntekt,
+                refusjonsopplysninger = Refusjonsopplysninger()
+            ),
+            aktivitetslogg = aktivitetslogg,
+            subsumsjonslogg = this.jurist
+        ) != null
+        return if (!sykFraGhost) emptyList()
+        else listOf(Revurderingseventyr.inntekt(arbeidsgiveropplysninger, skjæringstidspunkt))
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {

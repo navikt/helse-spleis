@@ -143,8 +143,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `ingen ny arbeidsgiverperiode og sykepengegrunnlag under 2g`() {
         nyttVedtak(januar, orgnummer = a1)
-        tilGodkjenning(10.februar til 20.februar, a1, beregnetInntekt = 10000.månedlig, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+        tilGodkjenning(10.februar til 20.februar, a1, beregnetInntekt = 10000.månedlig, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
         assertGodkjenningsbehov(
             skjæringstidspunkt = 10.februar,
             periodeFom = 10.februar,
@@ -213,8 +212,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-        tilGodkjenning(16.februar til 28.februar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+        tilGodkjenning(16.februar til 28.februar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
         assertEquals("NNNNNHH NNNNNHH NNSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         assertTags(setOf("IngenNyArbeidsgiverperiode"), 2.vedtaksperiode.id(a1))
     }

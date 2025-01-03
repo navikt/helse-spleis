@@ -11,7 +11,7 @@ sealed interface Arbeidsgiveropplysning {
         init { check(perioder.isNotEmpty()) { "Må være minst en periode med agp!" }}
     }
     data class OppgittInntekt(val inntekt: Inntekt): Arbeidsgiveropplysning {
-        init { check(inntekt > Inntekt.INGEN) { "Inntekten må settes til noe mer enn 0." }}
+        init { check(inntekt >= Inntekt.INGEN) { "Inntekten må være minst 0 kroner!" }}
     }
     data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>): Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
