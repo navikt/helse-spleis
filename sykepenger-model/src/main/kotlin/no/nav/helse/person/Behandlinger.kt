@@ -89,7 +89,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -142,18 +141,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
-    internal fun lagUtbetalingstidslinje(
-        faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt,
-        subsumsjonslogg: Subsumsjonslogg,
-        refusjonstidslinje: Beløpstidslinje
-    ) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter, subsumsjonslogg, refusjonstidslinje)
+    internal fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter)
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
     internal fun skjæringstidspunkter() = behandlinger.last().skjæringstidspunkter
-    internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
-    internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje()
+    internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje
+    internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje
     internal fun harVærtBeregnet() = behandlinger.any { behandling -> behandling.harVærtBeregnet() }
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
@@ -317,11 +312,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
         refusjonstidslinje: Beløpstidslinje
     ): Boolean {
-        val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje()
+        val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje
         behandlinger.last().håndterRefusjonsopplysninger(arbeidsgiver, hendelse, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
             leggTilNyBehandling(it)
         }
-        val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje()
+        val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje
         val endret = refusjonstidslinjeFør != refusjonstidslinjeEtter
         return endret
     }
@@ -397,6 +392,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val skjæringstidspunkt get() = gjeldende.skjæringstidspunkt
         val skjæringstidspunkter get() = gjeldende.skjæringstidspunkter
         val maksdato get() = gjeldende.maksdatoresultat
+        val sykdomstidslinje get() = endringer.last().sykdomstidslinje
+        val refusjonstidslinje get() = endringer.last().refusjonstidslinje
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {
@@ -447,18 +444,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(
-            faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt,
-            subsumsjonslogg: Subsumsjonslogg,
-            refusjonstidslinje: Beløpstidslinje
-        ): Utbetalingstidslinje {
+        fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt): Utbetalingstidslinje {
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
                 faktaavklarteInntekter = faktaavklarteInntekter,
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 refusjonstidslinje = refusjonstidslinje
             )
-            return builder.result(sykdomstidslinje())
+            return builder.result(sykdomstidslinje)
         }
 
         internal fun håndterRefusjonsopplysninger(
@@ -630,15 +623,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                     skjæringstidspunkt = dto.skjæringstidspunkt,
                                     `6G` = Grunnbeløp.`6G`.beløp(dto.skjæringstidspunkt),
                                     fastsattÅrsinntekt = Inntekt.INGEN,
-                                    gjelder = dto.skjæringstidspunkt til LocalDate.MAX,
-                                    refusjonsopplysninger = Refusjonsopplysninger()
+                                    gjelder = dto.skjæringstidspunkt til LocalDate.MAX
                                 ),
                                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                                 arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
                                 refusjonstidslinje = Beløpstidslinje()
                             )
                             return builder.result(Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje))
-                        } catch (err: Exception) {
+                        } catch (_: Exception) {
                             // svelger denne
                         }
                     }
@@ -816,8 +808,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
         }
 
-        internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
-        internal fun refusjonstidslinje() = endringer.last().refusjonstidslinje
         override fun equals(other: Any?): Boolean {
             if (other === this) return true
             if (other !is Behandling) return false
@@ -1163,7 +1153,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ?: return false
 
             // sjekker om det finnes en dagtype som gir rett på utbetaling mellom agp og det ekstra skjæringstidspunktet
-            val harSykdomMellomAGPOgSkjæringstidspunktet = sykdomstidslinje()
+            val harSykdomMellomAGPOgSkjæringstidspunktet = sykdomstidslinje
                 .subset(mellomliggendePeriode)
                 .any { dag -> dag is Sykedag || dag is SykedagNav }
 

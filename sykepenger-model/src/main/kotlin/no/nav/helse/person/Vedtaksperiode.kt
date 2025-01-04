@@ -1624,8 +1624,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
             fastsattÅrsinntekt = Inntekt.INGEN,
-            gjelder = skjæringstidspunkt til LocalDate.MAX,
-            refusjonsopplysninger = Refusjonsopplysninger()
+            gjelder = skjæringstidspunkt til LocalDate.MAX
         )
         error(
             "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
@@ -1640,11 +1639,7 @@ internal class Vedtaksperiode private constructor(
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning.mapValues { (arbeidsgiver, vedtaksperioder) ->
             val inntektForArbeidsgiver = faktaavklarteInntekter.faktaavklartInntekt(arbeidsgiver, vedtaksperioder)
             vedtaksperioder.map {
-                it.behandlinger.lagUtbetalingstidslinje(
-                    inntektForArbeidsgiver,
-                    it.jurist,
-                    it.refusjonstidslinje
-                )
+                it.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
             }
         }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
@@ -3368,11 +3363,7 @@ internal class Vedtaksperiode private constructor(
             val inntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
             return try {
                 val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
-                vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                    inntektForArbeidsgiver,
-                    vedtaksperiode.jurist,
-                    vedtaksperiode.refusjonstidslinje
-                )
+                vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
             } catch (err: Exception) {
                 sikkerLogg.warn(
                     "klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}",
@@ -3398,8 +3389,7 @@ internal class Vedtaksperiode private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
                 fastsattÅrsinntekt = Inntekt.INGEN,
-                gjelder = skjæringstidspunkt til LocalDate.MAX,
-                refusjonsopplysninger = Refusjonsopplysninger()
+                gjelder = skjæringstidspunkt til LocalDate.MAX
             )
         }
 

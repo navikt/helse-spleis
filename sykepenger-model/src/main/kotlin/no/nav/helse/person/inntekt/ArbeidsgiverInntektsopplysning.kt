@@ -118,8 +118,7 @@ data class ArbeidsgiverInntektsopplysning(
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
                     organisasjonsnummer = it.orgnummer,
                     fastsattÅrsinntekt = it.inntektsopplysning.fastsattÅrsinntekt(),
-                    gjelder = it.gjelder,
-                    refusjonsopplysninger = it.refusjonsopplysninger
+                    gjelder = it.gjelder
                 )
             }
 
