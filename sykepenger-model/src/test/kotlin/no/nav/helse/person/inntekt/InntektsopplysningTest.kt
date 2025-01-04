@@ -38,7 +38,8 @@ internal class InntektsopplysningTest {
         assertEquals(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
         assertEquals(saksbehandler3, saksbehandler1.overstyresAv(saksbehandler3))
         assertEquals(im1, im1.overstyresAv(im2))
-        assertEquals(saksbehandler4, ikkeRapportert.overstyresAv(saksbehandler4))
+        assertEquals(ikkeRapportert, ikkeRapportert.overstyresAv(saksbehandler4))
+        assertEquals(saksbehandler1, ikkeRapportert.overstyresAv(saksbehandler1))
         assertEquals(im1, ikkeRapportert.overstyresAv(im1))
     }
 

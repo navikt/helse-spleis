@@ -15,11 +15,6 @@ internal class Infotrygd(
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning) = false
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        throw IllegalStateException("Infotrygd kan ikke bli overstyrt")
-    }
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         if (other !is Infotrygd) return false
         return this.dato == other.dato && this.beløp == other.beløp

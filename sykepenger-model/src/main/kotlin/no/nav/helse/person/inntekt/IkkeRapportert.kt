@@ -15,12 +15,6 @@ internal class IkkeRapportert(
 ) : SkatteopplysningSykepengegrunnlag(id, hendelseId, dato, Inntekt.INGEN, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), hendelseId, dato, tidsstempel)
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning) = true
-
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this)
-    }
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is IkkeRapportert && this.dato == other.dato
     }

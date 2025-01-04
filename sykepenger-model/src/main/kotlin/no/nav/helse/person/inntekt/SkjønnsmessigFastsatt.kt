@@ -23,17 +23,7 @@ class SkjønnsmessigFastsatt internal constructor(
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this)
-    }
-
-    override fun overstyrer(gammel: Saksbehandler) = kopierMed(gammel)
-    override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
-    override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
-    override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
-    override fun overstyrer(gammel: Inntektsmeldinginntekt) = kopierMed(gammel)
-
-    private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
+    fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         SkjønnsmessigFastsatt(id, dato, hendelseId, beløp, overstyrtInntekt, tidsstempel)
 
     override fun erSamme(other: Inntektsopplysning) =

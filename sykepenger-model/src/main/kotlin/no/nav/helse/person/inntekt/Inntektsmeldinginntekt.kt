@@ -47,15 +47,6 @@ class Inntektsmeldinginntekt internal constructor(
         tidsstempel = tidsstempel
     )
 
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this)
-    }
-
-    override fun overstyrer(gammel: Saksbehandler) = this
-    override fun overstyrer(gammel: SkjønnsmessigFastsatt) =
-        if (erOmregnetÅrsinntektEndret(this, gammel)) this
-        else gammel.overstyrer(this)
-
     internal fun avklarSykepengegrunnlag(skatt: SkatteopplysningSykepengegrunnlag): Inntektsopplysning {
         if (skatt.dato.yearMonth < this.dato.yearMonth) return skatt
         return this

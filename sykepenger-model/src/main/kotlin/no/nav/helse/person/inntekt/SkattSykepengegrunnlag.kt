@@ -45,15 +45,6 @@ internal class SkattSykepengegrunnlag private constructor(
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), inntektsopplysninger, ansattPerioder, tidsstempel)
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        if (ny !is Inntektsmeldinginntekt) return true
-        return super.kanOverstyresAv(ny)
-    }
-
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this)
-    }
-
     override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         subsumsjonslogg.logg(
             `§ 8-28 ledd 3 bokstav a`(

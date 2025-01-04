@@ -8,11 +8,11 @@ import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 
 sealed class Inntektsopplysning(
@@ -24,40 +24,43 @@ sealed class Inntektsopplysning(
 ) {
     internal fun fastsattÅrsinntekt() = beløp
     internal open fun omregnetÅrsinntekt() = this
+
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
-        if (!kanOverstyresAv(ny)) return this
-        return blirOverstyrtAv(ny)
-    }
+        return when (this) {
+            // infotrygd kan ikke overstyres
+            is Infotrygd -> this
 
-    protected abstract fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning
+            is Inntektsmeldinginntekt,
+            is Saksbehandler,
+            is SkjønnsmessigFastsatt,
+            is IkkeRapportert,
+            is SkattSykepengegrunnlag -> when (ny) {
+                is Inntektsmeldinginntekt -> when (this) {
+                    // erstatter skjønnsmessig inntekt hvis inntektsmeldingen har annet beløp enn den inntekten
+                    // som ligger bak den skjønnsmessige. i praksis medfører det at det skjønnsmessige sykepengegrunnlaget "rulles tilbake"
+                    is SkjønnsmessigFastsatt -> when (erOmregnetÅrsinntektEndret(ny, this)) {
+                        true -> ny
+                        else -> this.kopierMed(ny)
+                    }
+                    // inntektsmelding tillates bare hvis inntekten er i samme måned.
+                    // hvis det er flere AG med ulik fom, så kan f.eks. skjæringstidspunktet være i en måned og inntektmåneden være i en annen mnd
+                    else -> when (ny.dato.yearMonth == this.dato.yearMonth) {
+                        true -> ny
+                        else -> this
+                    }
+                }
+                // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
+                is Saksbehandler -> when (ny.fastsattÅrsinntekt() != this.omregnetÅrsinntekt().fastsattÅrsinntekt()) {
+                    true -> ny.kopierMed(this)
+                    false -> this
+                }
+                is SkjønnsmessigFastsatt -> ny.kopierMed(this)
 
-    protected open fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
-        if (ny is SkjønnsmessigFastsatt) return true
-        if (ny is Saksbehandler) {
-            return when {
-                // hvis inntekten er skjønnsmessig fastsatt og det overstyres til samme omregnede årsinntekt, så beholdes den skjønnsmessig fastsatte inntekten
-                this is SkjønnsmessigFastsatt && this.omregnetÅrsinntekt()
-                    .fastsattÅrsinntekt() == ny.fastsattÅrsinntekt() -> false
-
-                this is SkjønnsmessigFastsatt -> true
-                else -> ny.fastsattÅrsinntekt() != this.beløp
+                is Infotrygd,
+                is IkkeRapportert,
+                is SkattSykepengegrunnlag -> error("${ny::class.simpleName} kan ikke erstatte annen inntekt")
             }
         }
-        if (ny !is Inntektsmeldinginntekt) return false
-        val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
-        return ny.dato in måned
-    }
-
-    internal open fun overstyrer(gammel: IkkeRapportert) = this
-    internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
-    internal open fun overstyrer(gammel: Inntektsmeldinginntekt) = this
-    internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
-        throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
-    }
-
-    internal open fun overstyrer(gammel: SkjønnsmessigFastsatt): Inntektsopplysning {
-        throw IllegalStateException("Kan ikke overstyre skjønnsmessig fastsatt-inntekt")
     }
 
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)

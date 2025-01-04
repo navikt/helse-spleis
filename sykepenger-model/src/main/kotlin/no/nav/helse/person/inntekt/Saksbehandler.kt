@@ -29,17 +29,7 @@ class Saksbehandler internal constructor(
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = overstyrtInntekt?.gjenbrukbarInntekt(beløp ?: this.beløp)
 
-    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this)
-    }
-
-    override fun overstyrer(gammel: Saksbehandler) = kopierMed(gammel)
-    override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
-    override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
-    override fun overstyrer(gammel: Inntektsmeldinginntekt) = kopierMed(gammel)
-    override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
-
-    private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
+    fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrtInntekt, tidsstempel)
 
     override fun erSamme(other: Inntektsopplysning) =
