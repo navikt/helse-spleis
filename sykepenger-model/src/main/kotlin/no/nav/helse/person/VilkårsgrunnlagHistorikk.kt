@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
@@ -16,7 +16,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -29,9 +28,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.EndretInntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -250,19 +251,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
-            person: Person,
-            korrigertInntektsmelding: KorrigertInntektOgRefusjon,
+            organisasjonsnummer: String,
+            inntekt: Inntektsmeldinginntekt,
             aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
-        ): Pair<VilkårsgrunnlagElement, Revurderingseventyr>? {
-            val sykepengegrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(
-                person,
-                korrigertInntektsmelding,
-                subsumsjonslogg
-            )
-            val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag) ?: return null
-            val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(korrigertInntektsmelding.hendelse, skjæringstidspunkt, endringsdato)
-            return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, EmptyLog) to eventyr
+        ): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
+            val endretInntektsgrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, subsumsjonslogg) ?: return null
+            val grunnlag = kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, EmptyLog)
+            return grunnlag to endretInntektsgrunnlag
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String

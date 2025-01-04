@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
-import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -22,8 +21,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -33,12 +30,11 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beri
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattInntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
@@ -305,42 +301,25 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
     internal fun nyeArbeidsgiverInntektsopplysninger(
-        person: Person,
-        korrigertInntektsmelding: KorrigertInntektOgRefusjon,
+        organisasjonsnummer: String,
+        inntekt: Inntektsmeldinginntekt,
         subsumsjonslogg: Subsumsjonslogg
-    ): Inntektsgrunnlag {
-        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonslogg)
-        builder.leggTilInntekt(
-            korrigertInntektsmelding.arbeidsgiverInntektsopplysning(
-                skjæringstidspunkt = skjæringstidspunkt,
-                strekkTilSkjæringstidspunkt = builder.ingenRefusjonsopplysninger(korrigertInntektsmelding.organisasjonsnummer)
-            )
+    ): EndretInntektsgrunnlag? {
+        val nyInntektsopplysning = ArbeidsgiverInntektsopplysning(
+            orgnummer = organisasjonsnummer,
+            gjelder = skjæringstidspunkt til LocalDate.MAX,
+            inntektsopplysning = inntekt,
+            refusjonsopplysninger = Refusjonsopplysninger()
         )
-        val resultat = builder.resultat()
-        when (val inntektFraFør = arbeidsgiverInntektsopplysninger.finn(korrigertInntektsmelding.organisasjonsnummer)?.inntektsopplysning) {
-            is Inntektsmeldinginntekt -> {
-                person.arbeidsgiveropplysningerKorrigert(
-                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigertInntektsmeldingId = inntektFraFør.hendelseId,
-                        korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
-                        korrigerendeInntektsopplysningId = korrigertInntektsmelding.hendelse.metadata.meldingsreferanseId
-                    )
-                )
-            }
-
-            is Infotrygd,
-            is Saksbehandler,
-            is IkkeRapportert,
-            is SkattSykepengegrunnlag,
-            is SkjønnsmessigFastsatt,
-            null -> { /* gjør ingenting */
-            }
-        }
-        return kopierSykepengegrunnlagOgValiderMinsteinntekt(
-            resultat,
-            deaktiverteArbeidsforhold,
-            tilkommendeInntekter,
-            subsumsjonslogg
+        val resultat = arbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, null, listOf(nyInntektsopplysning), subsumsjonslogg)
+        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, tilkommendeInntekter, subsumsjonslogg)
+        val endringFom = nyttInntektsgrunnlag.finnEndringsdato(this) ?: return null
+        return EndretInntektsgrunnlag(
+            inntektFør = arbeidsgiverInntektsopplysninger.finn(organisasjonsnummer),
+            inntektEtter = resultat.finn(organisasjonsnummer),
+            endringFom = endringFom,
+            inntektsgrunnlagFør = this,
+            inntektsgrunnlagEtter = nyttInntektsgrunnlag
         )
     }
 
@@ -445,7 +424,6 @@ internal class Inntektsgrunnlag private constructor(
             nyeInntektsopplysninger.add(arbeidsgiverInntektsopplysning)
         }
 
-        internal fun ingenRefusjonsopplysninger(organisasjonsnummer: String) = opprinneligArbeidsgiverInntektsopplysninger.ingenRefusjonsopplysninger(organisasjonsnummer)
         internal fun resultat(): List<ArbeidsgiverInntektsopplysning> {
             return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, opptjening, nyeInntektsopplysninger, subsumsjonslogg)
         }
@@ -477,6 +455,14 @@ internal class Inntektsgrunnlag private constructor(
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 }
+
+internal data class EndretInntektsgrunnlag(
+    val inntektFør: ArbeidsgiverInntektsopplysning?,
+    val inntektEtter: ArbeidsgiverInntektsopplysning?,
+    val endringFom: LocalDate,
+    val inntektsgrunnlagFør: Inntektsgrunnlag,
+    val inntektsgrunnlagEtter: Inntektsgrunnlag
+)
 
 internal data class InntektsgrunnlagView(
     val sykepengegrunnlag: Inntekt,

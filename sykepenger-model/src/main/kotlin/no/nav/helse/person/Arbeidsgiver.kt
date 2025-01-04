@@ -22,7 +22,6 @@ import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -1010,6 +1009,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         korrigerVilkårsgrunnlagOgIgangsettOverstyring(
+            inntektsmelding,
             skjæringstidspunkt,
             inntektsmelding.korrigertInntekt(),
             aktivitetslogg,
@@ -1024,16 +1024,19 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
+        hendelse: Hendelse,
         skjæringstidspunkt: LocalDate?,
-        korrigertInntektsmelding: KorrigertInntektOgRefusjon,
+        inntekt: Inntektsmeldinginntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
         overstyring: Revurderingseventyr?
     ) {
         val inntektoverstyring = skjæringstidspunkt?.let {
             person.nyeArbeidsgiverInntektsopplysninger(
+                hendelse,
                 it,
-                korrigertInntektsmelding,
+                this.organisasjonsnummer,
+                inntekt,
                 aktivitetslogg,
                 subsumsjonsloggMedInntektsmeldingkontekst
             )

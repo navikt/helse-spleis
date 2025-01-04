@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
@@ -464,13 +463,10 @@ internal class Vedtaksperiode private constructor(
 
         // Hvis overgang fra Ghost
         val sykFraGhost = person.nyeArbeidsgiverInntektsopplysninger(
+            hendelse = arbeidsgiveropplysninger,
             skjæringstidspunkt = skjæringstidspunkt,
-            korrigertInntektsmelding = KorrigertInntektOgRefusjon(
-                hendelse = arbeidsgiveropplysninger,
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                inntekt = inntektsmeldingInntekt,
-                refusjonsopplysninger = Refusjonsopplysninger()
-            ),
+            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            inntekt = inntektsmeldingInntekt,
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
         ) != null

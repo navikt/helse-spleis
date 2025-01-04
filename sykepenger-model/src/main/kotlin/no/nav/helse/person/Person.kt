@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -24,7 +24,6 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
-import no.nav.helse.hendelser.KorrigertInntektOgRefusjon
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -67,6 +66,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
+import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -77,6 +77,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -685,8 +686,10 @@ class Person private constructor(
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
+        hendelse: Hendelse,
         skjæringstidspunkt: LocalDate,
-        korrigertInntektsmelding: KorrigertInntektOgRefusjon,
+        organisasjonsnummer: String,
+        inntekt: Inntektsmeldinginntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
     ): Revurderingseventyr? {
@@ -695,7 +698,22 @@ class Person private constructor(
             aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
             return null
         }
-        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, korrigertInntektsmelding, aktivitetslogg, subsumsjonslogg) ?: return null
+        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, aktivitetslogg, subsumsjonslogg) ?: return null
+
+        when (val inntektFraFør = endretInntektsgrunnlag.inntektFør?.inntektsopplysning) {
+            is Inntektsmeldinginntekt -> {
+                arbeidsgiveropplysningerKorrigert(
+                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                        korrigertInntektsmeldingId = inntektFraFør.hendelseId,
+                        korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
+                        korrigerendeInntektsopplysningId = inntekt.hendelseId
+                    )
+                )
+            }
+            else -> { /* gjør ingenting */ }
+        }
+
+        val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         return eventyr
     }
