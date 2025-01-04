@@ -23,6 +23,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.over
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -99,11 +100,11 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val inntektsmeldinginntektA1Ny = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
         val overstyrtA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, inntektsmeldinginntektA1Ny, LocalDateTime.now()), Refusjonsopplysninger())
+        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, inntektsmeldinginntektA1Ny), Refusjonsopplysninger())
 
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, inntektsmeldinginntektA1, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 950.månedlig, inntektsmeldinginntektA2, LocalDateTime.now()), Refusjonsopplysninger())
-        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 975.månedlig, inntektsmeldinginntektA3, LocalDateTime.now()), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, inntektsmeldinginntektA1), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 950.månedlig, inntektsmeldinginntektA2), Refusjonsopplysninger())
+        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 975.månedlig, inntektsmeldinginntektA3), Refusjonsopplysninger())
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
@@ -134,11 +135,11 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val inntektsmeldinginntektA1Ny = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
         val overstyrtA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, inntektsmeldinginntektA1Ny, LocalDateTime.now()), Refusjonsopplysninger())
+        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, inntektsmeldinginntektA1Ny), Refusjonsopplysninger())
 
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, skattA1, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 950.månedlig, inntektsmeldinginntektA2, LocalDateTime.now()), Refusjonsopplysninger())
-        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 975.månedlig, inntektsmeldinginntektA3, LocalDateTime.now()), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, skattA1), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 950.månedlig, inntektsmeldinginntektA2), Refusjonsopplysninger())
+        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 975.månedlig, inntektsmeldinginntektA3), Refusjonsopplysninger())
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
@@ -339,4 +340,18 @@ internal class ArbeidsgiverInntektsopplysningTest {
             )
         )
     }
+
+    private fun skjønnsmessigFastsatt(
+        dato: LocalDate,
+        beløp: Inntekt,
+        overstyrtInntekt: Inntektsopplysning
+    ) = SkjønnsmessigFastsatt(
+        id = UUID.randomUUID(),
+        dato = dato,
+        hendelseId = UUID.randomUUID(),
+        beløp = beløp,
+        overstyrtInntekt = overstyrtInntekt,
+        omregnetÅrsinntekt = overstyrtInntekt.omregnetÅrsinntekt(),
+        tidsstempel = LocalDateTime.now()
+    )
 }

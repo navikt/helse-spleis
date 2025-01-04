@@ -23,7 +23,14 @@ sealed class Inntektsopplysning(
     val tidsstempel: LocalDateTime
 ) {
     internal fun fastsattÅrsinntekt() = beløp
-    internal open fun omregnetÅrsinntekt() = this
+    internal fun omregnetÅrsinntekt() = when (this) {
+        is Infotrygd,
+        is Inntektsmeldinginntekt,
+        is Saksbehandler,
+        is IkkeRapportert,
+        is SkattSykepengegrunnlag -> this
+        is SkjønnsmessigFastsatt -> this.omregnetÅrsinntekt!!
+    }
 
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
         return when (this) {

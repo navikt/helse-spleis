@@ -13,18 +13,15 @@ class SkjønnsmessigFastsatt internal constructor(
     hendelseId: UUID,
     beløp: Inntekt,
     val overstyrtInntekt: Inntektsopplysning?,
+    val omregnetÅrsinntekt: Inntektsopplysning?,
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, null, tidsstempel)
-
-    override fun omregnetÅrsinntekt(): Inntektsopplysning {
-        return checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.omregnetÅrsinntekt()
-    }
+    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, null, null, tidsstempel)
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
     fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
-        SkjønnsmessigFastsatt(id, dato, hendelseId, beløp, overstyrtInntekt, tidsstempel)
+        SkjønnsmessigFastsatt(id, dato, hendelseId, beløp, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt(), tidsstempel)
 
     override fun erSamme(other: Inntektsopplysning) =
         other is SkjønnsmessigFastsatt && this.dato == other.dato && this.beløp == other.beløp
@@ -40,14 +37,17 @@ class SkjønnsmessigFastsatt internal constructor(
         )
 
     internal companion object {
-        fun gjenopprett(dto: InntektsopplysningInnDto.SkjønnsmessigFastsattDto, inntekter: Map<UUID, Inntektsopplysning>) =
-            SkjønnsmessigFastsatt(
+        fun gjenopprett(dto: InntektsopplysningInnDto.SkjønnsmessigFastsattDto, inntekter: Map<UUID, Inntektsopplysning>): SkjønnsmessigFastsatt {
+            val overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt)
+            return SkjønnsmessigFastsatt(
                 id = dto.id,
                 hendelseId = dto.hendelseId,
                 dato = dto.dato,
                 beløp = Inntekt.gjenopprett(dto.beløp),
                 tidsstempel = dto.tidsstempel,
-                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt)
+                overstyrtInntekt = overstyrtInntekt,
+                omregnetÅrsinntekt = overstyrtInntekt.omregnetÅrsinntekt()
             )
+        }
     }
 }
