@@ -17,8 +17,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -57,9 +56,8 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                 val fom = arbeidsgiveropplysning.path("fom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: skjæringstidspunkt
                 val tom = arbeidsgiveropplysning.path("tom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: LocalDate.MAX
                 val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
-                val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger(id, opprettet)
 
-                ArbeidsgiverInntektsopplysning(orgnummer, fom til tom, saksbehandlerinntekt, refusjonsopplysninger)
+                ArbeidsgiverInntektsopplysning(orgnummer, fom til tom, saksbehandlerinntekt, Refusjonsopplysninger())
             }
         }
 
@@ -70,21 +68,6 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                 bokstav = it.path("bokstav").takeUnless(JsonNode::isMissingOrNull)?.asText()
             )
         }
-
-        private fun JsonNode.asRefusjonsopplysninger(meldingsreferanseId: UUID, opprettet: LocalDateTime) = RefusjonsopplysningerBuilder().also { builder ->
-            this.map { refusjonsopplysning ->
-                builder.leggTil(
-                    Refusjonsopplysning(
-                        meldingsreferanseId = meldingsreferanseId,
-                        fom = refusjonsopplysning.path("fom").asLocalDate(),
-                        tom = refusjonsopplysning.path("tom").asOptionalLocalDate(),
-                        beløp = refusjonsopplysning.path("beløp").asDouble().månedlig,
-                        avsender = SAKSBEHANDLER,
-                        tidsstempel = opprettet
-                    ), opprettet
-                )
-            }
-        }.build()
 
         private fun JsonMessage.refusjonstidslinjer(): Map<String, Pair<Beløpstidslinje, Boolean>> {
             val id = UUID.fromString(get("@id").asText())

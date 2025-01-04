@@ -31,7 +31,7 @@ data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
     val gjelder: Periode,
     val inntektsopplysning: Inntektsopplysning,
-    val refusjonsopplysninger: Refusjonsopplysninger
+    private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkt == gjelder.start
@@ -241,9 +241,6 @@ data class ArbeidsgiverInntektsopplysning(
             return map { it.inntektsopplysning }.markerFlereArbeidsgivere(aktivitetslogg)
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
-            singleOrNull { it.gjelder(organisasjonsnummer) }?.refusjonsopplysninger ?: Refusjonsopplysninger()
-
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattInntekt(
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String
@@ -290,12 +287,6 @@ data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.ingenRefusjonsopplysninger(organisasjonsnummer: String): Boolean {
-            val refusjonsopplysninger =
-                singleOrNull { it.orgnummer == organisasjonsnummer }?.refusjonsopplysninger ?: Refusjonsopplysninger()
-            return refusjonsopplysninger.erTom
-        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt(skjæringstidspunkt: LocalDate) =
             fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc, skjæringstidspunkt) }

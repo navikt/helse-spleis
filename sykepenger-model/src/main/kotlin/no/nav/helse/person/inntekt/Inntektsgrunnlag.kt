@@ -39,7 +39,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagr
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
@@ -290,9 +289,6 @@ internal class Inntektsgrunnlag private constructor(
             subsumsjonslogg
         )
     }
-
-    internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
-        arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
     internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
         if (this.tilkommendeInntekter.isEmpty() && nyeInntekter.isEmpty()) return null

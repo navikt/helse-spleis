@@ -993,7 +993,7 @@ internal class Vedtaksperiode private constructor(
             orgnummer = arbeidsgiver.organisasjonsnummer,
             gjelder = skjæringstidspunkt til LocalDate.MAX,
             inntektsopplysning = faktaavklartInntekt,
-            refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger(skjæringstidspunkt)
+            refusjonsopplysninger = Refusjonsopplysninger()
         )
     }
 
