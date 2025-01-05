@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.reflect.KClass
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -32,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -66,6 +68,40 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `syk fra ghost samme måned som skjæringstidspunktet`() {
+        håndterSøknad(28.januar til 28.februar)
+        håndterInntektsmelding(listOf(28.januar til 12.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
+
+        håndterSøknad(28.januar til 28.februar, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Spør ikke om inntekt selv om vi burde",
+            ønsket = { assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class) },
+            nå = { assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.FastsattInntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class) },
+        )
+    }
+
+    @Test
+    fun `syk fra ghost annen måned som skjæringstidspunktet`() {
+        håndterSøknad(28.januar til 28.februar)
+        håndterInntektsmelding(listOf(28.januar til 12.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
+
+        håndterSøknad(1.februar til 28.februar, orgnummer = a2)
+        assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.FastsattInntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
+    }
 
     @Test
     fun `Skal sende med et flagg for å innhente inntekter fra a-ordningen etter å ha ventet på inntektsmelding lengre enn 3 måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
@@ -161,7 +197,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -521,7 +557,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertVarsler(listOf(Varselkode.RV_VV_2, RV_IM_4), AktivitetsloggFilter.arbeidsgiver(a1))
+        assertVarsler(listOf(RV_VV_2, RV_IM_4), AktivitetsloggFilter.arbeidsgiver(a1))
         assertVarsler(emptyList(), AktivitetsloggFilter.arbeidsgiver(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -1046,5 +1082,10 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
+    }
+
+    private fun assertEtterspurt(vedtaksperiode: UUID, vararg forventet: KClass<out PersonObserver.ForespurtOpplysning>) {
+        val forespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.lastOrNull { it.vedtaksperiodeId == vedtaksperiode }?.forespurteOpplysninger ?: emptyList()
+        assertEquals(forventet.toSet(), forespurteOpplysninger.map { it::class }.toSet())
     }
 }
