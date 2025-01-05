@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -105,7 +104,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
-import no.nav.helse.økonomi.Inntekt
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
     internal constructor() : this(emptyList())
@@ -536,7 +534,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             companion object {
                 val IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT = LocalDate.MIN
                 val List<Endring>.dokumentsporing get() = map { it.dokumentsporing }.toSet()
-                fun gjenopprett(dto: BehandlingendringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>, erAvsluttetUtenVedtak: Boolean): Endring {
+                fun gjenopprett(dto: BehandlingendringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
                     val periode = Periode.gjenopprett(dto.periode)
                     val utbetaling = dto.utbetalingId?.let { utbetalinger.getValue(it) }
                     return Endring(
@@ -548,7 +546,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         utbetaling = utbetaling,
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
                         sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
-                        utbetalingstidslinje = migrerUtbetalingstidslinje(dto, utbetaling, erAvsluttetUtenVedtak),
+                        utbetalingstidslinje = Utbetalingstidslinje.gjenopprett(dto.utbetalingstidslinje),
                         refusjonstidslinje = Beløpstidslinje.gjenopprett(dto.refusjonstidslinje),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         skjæringstidspunkter = dto.skjæringstidspunkter,
@@ -611,30 +609,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 internal fun Hendelse.dokumentsporing(): Dokumentsporing = checkNotNull(dokumentsporingOrNull()) {
                     "Mangler dokumentsporing for ${this::class.simpleName}"
-                }
-
-                private fun migrerUtbetalingstidslinje(dto: BehandlingendringInnDto, utbetaling: Utbetaling?, erAvsluttetUtenVedtak: Boolean): Utbetalingstidslinje {
-                    if (dto.utbetalingstidslinje != null) return Utbetalingstidslinje.gjenopprett(dto.utbetalingstidslinje!!)
-                    if (utbetaling != null) return utbetaling.utbetalingstidslinje.subset(Periode.gjenopprett(dto.periode))
-                    if (erAvsluttetUtenVedtak) {
-                        try {
-                            val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
-                                faktaavklarteInntekter = ArbeidsgiverFaktaavklartInntekt(
-                                    skjæringstidspunkt = dto.skjæringstidspunkt,
-                                    `6G` = Grunnbeløp.`6G`.beløp(dto.skjæringstidspunkt),
-                                    fastsattÅrsinntekt = Inntekt.INGEN,
-                                    gjelder = dto.skjæringstidspunkt til LocalDate.MAX
-                                ),
-                                regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                                arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
-                                refusjonstidslinje = Beløpstidslinje()
-                            )
-                            return builder.result(Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje))
-                        } catch (_: Exception) {
-                            // svelger denne
-                        }
-                    }
-                    return Utbetalingstidslinje()
                 }
             }
 
@@ -1326,7 +1300,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_FATTET -> Tilstand.VedtakFattet
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                     },
-                    endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger, dto.tilstand == BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK) }.toMutableList(),
+                    endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger) }.toMutableList(),
                     vedtakFattet = dto.vedtakFattet,
                     avsluttet = dto.avsluttet,
                     kilde = Behandlingkilde.gjenopprett(dto.kilde),

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
 import java.util.*
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -3325,33 +3324,20 @@ internal class Vedtaksperiode private constructor(
 
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            val arbeidsgiverperiode =
-                vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
+            val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
             if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
             }
-            val utbetalingstidslinje = forsøkÅLageUtbetalingstidslinje(vedtaksperiode)
-            vedtaksperiode.behandlinger.avsluttUtenVedtak(
-                vedtaksperiode.arbeidsgiver,
-                aktivitetslogg, utbetalingstidslinje
-            )
+            val utbetalingstidslinje = lagUtbetalingstidslinje(vedtaksperiode)
+            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
-        private fun forsøkÅLageUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
+        private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
             val inntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
-            return try {
-                val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
-                vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
-            } catch (err: Exception) {
-                sikkerLogg.warn(
-                    "klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}",
-                    kv("vedtaksperiodeId", vedtaksperiode.id),
-                    err
-                )
-                Utbetalingstidslinje()
-            }
+            val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
         }
 
         private fun inntektForAUU(vedtaksperiode: Vedtaksperiode, inntekter: VilkårsprøvdSkjæringstidspunkt?): ArbeidsgiverFaktaavklartInntekt {
@@ -3445,16 +3431,9 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.håndterDager(dager, aktivitetslogg)
             if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
-                if (vedtaksperiode.arbeidsgiver.kanForkastes(
-                        vedtaksperiode,
-                        aktivitetslogg
-                    )
-                ) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
-                return vedtaksperiode.behandlinger.avsluttUtenVedtak(
-                    vedtaksperiode.arbeidsgiver, aktivitetslogg, forsøkÅLageUtbetalingstidslinje(
-                    vedtaksperiode
-                )
-                )
+                if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg))
+                    return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
+                return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, lagUtbetalingstidslinje(vedtaksperiode))
             }
         }
 
@@ -3501,8 +3480,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            forsøkÅLageUtbetalingstidslinje(vedtaksperiode)
-
             if (!skalOmgjøres(vedtaksperiode) && vedtaksperiode.behandlinger.erAvsluttet()) return aktivitetslogg.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
