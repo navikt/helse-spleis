@@ -51,6 +51,7 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO
+import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
 import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -459,9 +460,9 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
-    arbeidsgiverperioder: List<Periode>,
+    arbeidsgiverperioder: List<Periode>?,
     førsteFraværsdag: LocalDate? = null,
-    beregnetInntekt: Inntekt = INNTEKT,
+    beregnetInntekt: Inntekt? = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = a1,
     id: UUID = UUID.randomUUID(),
@@ -492,18 +493,24 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         val endringerIRefusjon = refusjon.endringerIRefusjon.map { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.endringsdato, it.beløp) }
         val opphørAvRefusjon = listOfNotNull(refusjon.opphørsdato?.let { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
         val oppgittRefusjon = Arbeidsgiveropplysning.OppgittRefusjon(refusjon.beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
+        val oppgittInntekt = beregnetInntekt?.takeUnless { it < INGEN }?.let { Arbeidsgiveropplysning.OppgittInntekt(it) }
+        val oppgittArbeidsgiverperiode = arbeidsgiverperioder?.takeUnless { it.isEmpty() }?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) }
+        val alleOpplysninger = listOfNotNull(oppgittArbeidsgiverperiode, oppgittInntekt, oppgittRefusjon).toTypedArray()
+
         val arbeidsgiveropplysninger = ArbeidsgiverHendelsefabrikk(orgnummer).lagArbeidsgiveropplysninger(
             meldingsreferanseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
-            inntekt = beregnetInntekt,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            opplysninger = arrayOf(oppgittRefusjon)
+            opplysninger = alleOpplysninger
         )
 
+        if (erForespurtNavPortal(utledetAvsendersystem)) {
+            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *alleOpplysninger)
+        }
+
         val portalInnteksmelding = portalInntektsmelding(
-            id,
-            arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
+            id = id,
+            arbeidsgiverperioder = arbeidsgiverperioder ?: emptyList(),
+            beregnetInntekt = beregnetInntekt ?: (-1).månedlig,
             vedtaksperiodeId = vedtaksperiodeId,
             refusjon = refusjon,
             orgnummer = orgnummer,
@@ -518,10 +525,12 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         //return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
     }
     check(vedtaksperiodeIdInnhenter == null) { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
+    check(arbeidsgiverperioder != null) { "Klassisk inntektsmelding må ha agp satt"}
+    check(beregnetInntekt != null) { "Klassisk inntektsmelding må ha beregnet inntekt satt"}
     return håndterInntektsmelding(
         klassiskInntektsmelding(
-            id,
-            arbeidsgiverperioder,
+            id = id,
+            arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,

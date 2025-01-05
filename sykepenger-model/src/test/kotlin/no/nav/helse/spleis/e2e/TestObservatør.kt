@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
@@ -12,6 +13,7 @@ import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
 
 internal typealias InntektsmeldingId = UUID
@@ -143,14 +145,23 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
     }
 
-    private val trengerArbeidsgiveroppysninger = mutableSetOf<UUID>()
-    internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID) {
-        check(trengerArbeidsgiveroppysninger.contains(vedtaksperiodeId)) { "Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId" }
+    private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, List<PersonObserver.ForespurtOpplysning>>()
+    internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
+        if (oppgitt.isEmpty()) return check(trengerArbeidsgiveroppysninger.contains(vedtaksperiodeId)) { "Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId" }
+        val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: emptyList()
+        //assertEquals(forespurt.mapNotNull { it.somArbeidsgiveropplysning }.toSet(), oppgitt.map { it::class.simpleName }.toSet())
+    }
+
+    private val PersonObserver.ForespurtOpplysning.somArbeidsgiveropplysning get() = when (this) {
+        PersonObserver.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class.simpleName
+        is PersonObserver.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class.simpleName
+        PersonObserver.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class.simpleName
+        is PersonObserver.FastsattInntekt -> null
     }
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
-        trengerArbeidsgiveroppysninger.add(event.vedtaksperiodeId)
+        trengerArbeidsgiveroppysninger[event.vedtaksperiodeId] = event.forespurteOpplysninger
     }
 
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
