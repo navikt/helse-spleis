@@ -1,0 +1,111 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "vedtaksperioder": [
+        {
+          "skjæringstidspunkt": "2018-01-01"
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01"
+        },
+        {
+          "skjæringstidspunkt": "2018-10-01"
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "a2",
+      "vedtaksperioder": [
+        {
+          "skjæringstidspunkt": "2018-01-01"
+        },
+        {
+          "skjæringstidspunkt": "2018-01-01"
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01"
+        },
+        {
+          "skjæringstidspunkt": "2018-06-01"
+        },
+        {
+          "skjæringstidspunkt": "2018-06-01"
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "a3",
+      "vedtaksperioder": [
+        {
+          "skjæringstidspunkt": "2018-01-01"
+        }
+      ]
+    }
+
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "vilkårsgrunnlagId": "d25f59d9-50e1-4383-884e-78ca3eaac9fc",
+          "inntektsgrunnlag": {
+            "deaktiverteArbeidsforhold": [],
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1"
+              }
+            ]
+          }
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01",
+          "vilkårsgrunnlagId": "f04c0773-6d10-44b6-a108-6aa564bd2c6c",
+          "inntektsgrunnlag": {
+            "deaktiverteArbeidsforhold": [
+              {
+                "orgnummer": "a2"
+              }
+            ],
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1"
+              }
+            ]
+          }
+        }
+
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "vilkårsgrunnlagId": "d25f59d9-50e1-4383-884e-78ca3eaac9fc",
+          "inntektsgrunnlag": {
+            "deaktiverteArbeidsforhold": [],
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1"
+              }
+            ]
+          }
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01",
+          "vilkårsgrunnlagId": "c460d5d6-71e7-4e94-952b-a47bc086648e",
+          "inntektsgrunnlag": {
+            "deaktiverteArbeidsforhold": [],
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1"
+              }
+            ]
+          }
+        }
+
+      ]
+    }
+  ]
+}
