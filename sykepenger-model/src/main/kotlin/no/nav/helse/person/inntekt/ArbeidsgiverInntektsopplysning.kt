@@ -24,7 +24,6 @@ import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.erRelevantForOve
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
-import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -244,13 +243,10 @@ data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattInntekt(
             skjæringstidspunkt: LocalDate,
-            organisasjonsnummer: String,
-            førsteFraværsdag: LocalDate
+            organisasjonsnummer: String
         ): PersonObserver.FastsattInntekt? {
-            val arbeidsgiverInntektsopplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
-            val fastsattInntekt = PersonObserver.FastsattInntekt(arbeidsgiverInntektsopplysning.fastsattÅrsinntekt(skjæringstidspunkt))
-            if (arbeidsgiverInntektsopplysning.inntektsopplysning !is SkattSykepengegrunnlag) return fastsattInntekt
-            return fastsattInntekt.takeUnless { skjæringstidspunkt.yearMonth == førsteFraværsdag.yearMonth }
+            val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
+            return PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {

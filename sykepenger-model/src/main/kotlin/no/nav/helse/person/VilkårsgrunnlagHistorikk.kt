@@ -187,8 +187,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun inntektskilde() = inntektsgrunnlag.inntektskilde()
 
-        internal fun fastsattInntekt(organisasjonsnummer: String, førsteFraværsdag: LocalDate) =
-            inntektsgrunnlag.fastsattInntekt(organisasjonsnummer, førsteFraværsdag)
+        internal fun fastsattInntekt(organisasjonsnummer: String) =
+            inntektsgrunnlag.fastsattInntekt(organisasjonsnummer)
 
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
             return tidslinjer

@@ -1114,7 +1114,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode(), skalInnhenteInntektFraAOrdningen: Boolean = false) {
         checkNotNull(arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        val forespurtInntekt = vilkårsgrunnlag?.fastsattInntekt(arbeidsgiver.organisasjonsnummer, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt) ?: skjæringstidspunkt)
+        val forespurtInntekt = vilkårsgrunnlag?.fastsattInntekt(arbeidsgiver.organisasjonsnummer)
             ?: PersonObserver.Inntekt
 
         val forespurteOpplysninger =

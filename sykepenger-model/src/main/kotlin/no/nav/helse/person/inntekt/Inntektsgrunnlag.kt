@@ -425,8 +425,8 @@ internal class Inntektsgrunnlag private constructor(
         }
     }
 
-    internal fun fastsattInntekt(organisasjonsnummer: String, førsteFraværsdag: LocalDate) =
-        arbeidsgiverInntektsopplysninger.fastsattInntekt(skjæringstidspunkt, organisasjonsnummer, førsteFraværsdag)
+    internal fun fastsattInntekt(organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.fastsattInntekt(skjæringstidspunkt, organisasjonsnummer)
 
     internal fun dto() = InntektsgrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },

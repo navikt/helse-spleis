@@ -81,7 +81,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
 
         håndterSøknad(28.januar til 28.februar, orgnummer = a2)
-        assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
+        assertForventetFeil(
+            forklaring = "Spør ikke om inntekt selv om vi burde",
+            ønsket = { assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class) },
+            nå = { assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.FastsattInntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class) },
+        )
     }
 
     @Test
