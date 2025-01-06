@@ -12,6 +12,7 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -165,6 +166,11 @@ internal class TestPerson(
         internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) = arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndter)
 
         internal fun håndterSøknad(periode: Periode) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
+
+        internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning) {
+            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId)
+            arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger).håndter(Person::håndter)
+        }
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,

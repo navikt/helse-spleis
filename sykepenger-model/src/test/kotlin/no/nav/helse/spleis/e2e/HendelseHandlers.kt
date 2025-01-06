@@ -494,8 +494,14 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         val opphørAvRefusjon = listOfNotNull(refusjon.opphørsdato?.let { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
         val oppgittRefusjon = Arbeidsgiveropplysning.OppgittRefusjon(refusjon.beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
         val oppgittInntekt = beregnetInntekt?.takeUnless { it < INGEN }?.let { Arbeidsgiveropplysning.OppgittInntekt(it) }
-        val oppgittArbeidsgiverperiode = arbeidsgiverperioder?.takeUnless { it.isEmpty() }?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) }
-        val alleOpplysninger = listOfNotNull(oppgittArbeidsgiverperiode, oppgittInntekt, oppgittRefusjon).toTypedArray()
+        val oppgittArbeidsgiverperiode = arbeidsgiverperioder
+            ?.takeUnless { it.isEmpty() }
+            ?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) }
+            ?.takeIf { begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() }
+        val ikkeNyArbeidgiverperiode = Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode.takeIf { begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering" }
+        val ikkeUtbetaltArbeidsgiverperiode = begrunnelseForReduksjonEllerIkkeUtbetalt?.takeUnless { it.isBlank() || it == "FerieEllerAvspasering" }?.let { Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode(it) }
+
+        val alleOpplysninger = listOfNotNull(oppgittArbeidsgiverperiode, oppgittInntekt, oppgittRefusjon, ikkeNyArbeidgiverperiode, ikkeUtbetaltArbeidsgiverperiode).toTypedArray()
 
         val arbeidsgiveropplysninger = ArbeidsgiverHendelsefabrikk(orgnummer).lagArbeidsgiveropplysninger(
             meldingsreferanseId = id,
