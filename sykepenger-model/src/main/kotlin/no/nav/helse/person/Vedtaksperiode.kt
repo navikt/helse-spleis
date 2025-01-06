@@ -56,6 +56,7 @@ import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
@@ -159,6 +160,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -366,8 +368,11 @@ internal class Vedtaksperiode private constructor(
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg),
             håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg),
-            håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg)
+            håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
+            håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg)
         ).flatten().tidligsteEventyr()
+
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return true.also { forkast(arbeidsgiveropplysninger, aktivitetslogg) }
 
         person.emitInntektsmeldingHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
 
@@ -479,6 +484,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode>().isEmpty()) return emptyList()
+        aktivitetslogg.info("Arbeidsgiver mener at det ikke er noen ny arbeidsgiverperiode")
+
         if (tilstand is AvventerInntektsmelding) {
             aktivitetslogg.varsel(RV_IM_25)
             return emptyList()
@@ -486,17 +493,38 @@ internal class Vedtaksperiode private constructor(
         check(tilstand in setOf(AvsluttetUtenUtbetaling, AvventerBlokkerendePeriode)) {
             "Vi skal bare legge på SykNav for å tvinge frem en behandling på AUU hvor saksbehandler mest sannsynlig skal strekke periode med AIG-dager"
         }
-        val grad = when (val dag = sykdomstidslinje[periode.start]) {
-            is Dag.Sykedag -> dag.økonomi
-            is Dag.ForeldetSykedag -> dag.økonomi
-            is Dag.SykHelgedag -> dag.økonomi
-            else -> Økonomi.sykdomsgrad(100.prosent)
-        }.grad
-        val bit = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, Sykdomstidslinje.sykedagerNav(periode.start, periode.start, grad, Hendelseskilde("Inntektsmelding", arbeidsgiveropplysninger.metadata.meldingsreferanseId, arbeidsgiveropplysninger.metadata.innsendt)))
+        val bit = sykNavBit(arbeidsgiveropplysninger, periode.start.somPeriode())
         håndterDager(bit, aktivitetslogg) {
             aktivitetslogg.varsel(RV_IM_25)
         }
         return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode))
+    }
+
+    private fun håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
+        val ikkeUbetaltArbeidsgiverperiode = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode>().singleOrNull() ?: return emptyList()
+        val sisteDelAvBeregnetArbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.last()
+        if (!this.periode.overlapperMed(sisteDelAvBeregnetArbeidsgiverperiode)) {
+            ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
+        } else {
+            val bit = sykNavBit(arbeidsgiveropplysninger, sisteDelAvBeregnetArbeidsgiverperiode)
+            håndterDager(bit, aktivitetslogg) {
+                ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
+            }
+        }
+        return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode))
+    }
+
+    private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, periode: Periode): BitAvArbeidsgiverperiode {
+        val sykdomstidslinje = periode.subset(this.periode).map { dato ->
+            val grad = when (val dag = sykdomstidslinje[periode.start]) {
+                is Dag.Sykedag -> dag.økonomi
+                is Dag.ForeldetSykedag -> dag.økonomi
+                is Dag.SykHelgedag -> dag.økonomi
+                else -> Økonomi.sykdomsgrad(100.prosent)
+            }.grad
+            Sykdomstidslinje.sykedagerNav(dato, dato, grad, Hendelseskilde("Inntektsmelding", arbeidsgiveropplysninger.metadata.meldingsreferanseId, arbeidsgiveropplysninger.metadata.innsendt))
+        }.merge()
+        return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, sykdomstidslinje)
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
@@ -806,11 +834,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        if (!arbeidsgiver.kanForkastes(
-                this,
-                aktivitetslogg
-            )
-        ) return aktivitetslogg.info("Kan ikke etterkomme forkasting")
+        if (!arbeidsgiver.kanForkastes(this, aktivitetslogg)) return aktivitetslogg.info("Kan ikke etterkomme forkasting")
         person.søppelbøtte(hendelse, aktivitetslogg, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 

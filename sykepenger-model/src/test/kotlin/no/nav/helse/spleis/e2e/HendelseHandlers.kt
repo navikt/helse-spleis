@@ -16,6 +16,7 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode.Begrunnelse
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -499,7 +500,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             ?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) }
             ?.takeIf { begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() }
         val ikkeNyArbeidgiverperiode = Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode.takeIf { begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering" }
-        val ikkeUtbetaltArbeidsgiverperiode = begrunnelseForReduksjonEllerIkkeUtbetalt?.takeUnless { it.isBlank() || it == "FerieEllerAvspasering" }?.let { Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode(it) }
+        val ikkeUtbetaltArbeidsgiverperiode = begrunnelseForReduksjonEllerIkkeUtbetalt?.takeUnless { it.isBlank() || it == "FerieEllerAvspasering" }?.let { Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode(Begrunnelse.valueOf(it)) }
 
         val alleOpplysninger = listOfNotNull(oppgittArbeidsgiverperiode, oppgittInntekt, oppgittRefusjon, ikkeNyArbeidgiverperiode, ikkeUtbetaltArbeidsgiverperiode).toTypedArray()
 
