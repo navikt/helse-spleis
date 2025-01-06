@@ -12,7 +12,7 @@ class ForespurtOpplysningTest {
     fun `serialiserer ForespurtOpplysning med Inntekt riktig`() {
 
         val forespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Inntekt,
             PersonObserver.Arbeidsgiverperiode,
             PersonObserver.Refusjon
         )

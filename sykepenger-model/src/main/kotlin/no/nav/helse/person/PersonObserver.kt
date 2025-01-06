@@ -206,13 +206,7 @@ interface PersonObserver {
                     is Inntekt -> mapOf(
                         "opplysningstype" to "Inntekt",
                         "forslag" to mapOf(
-                            "forrigeInntekt" to forespurtOpplysning.forslag?.let {
-                                mapOf(
-                                    "skjæringstidspunkt" to it.skjæringstidspunkt,
-                                    "kilde" to it.kilde.name,
-                                    "beløp" to it.beløp
-                                )
-                            }
+                            "forrigeInntekt" to null
                         )
                     )
 
@@ -230,13 +224,12 @@ interface PersonObserver {
         }
     }
 
-    data class Inntektsdata(val skjæringstidspunkt: LocalDate, val kilde: Inntektsopplysningstype, val beløp: Double)
     enum class Inntektsopplysningstype {
         INNTEKTSMELDING,
         SAKSBEHANDLER
     }
 
-    data class Inntekt(val forslag: Inntektsdata?) : ForespurtOpplysning()
+    data object Inntekt : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     data object Arbeidsgiverperiode : ForespurtOpplysning()
     data object Refusjon : ForespurtOpplysning()

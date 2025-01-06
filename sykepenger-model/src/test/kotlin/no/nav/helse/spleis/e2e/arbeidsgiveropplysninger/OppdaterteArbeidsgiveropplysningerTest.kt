@@ -55,7 +55,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.FørsteFraværsdag(a1, 2.januar)
             ),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(forslag = null),
+                PersonObserver.Inntekt,
                 PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
             ),
@@ -89,7 +89,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.FørsteFraværsdag(a1, 5.januar)
             ),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(forslag = null),
+                PersonObserver.Inntekt,
                 PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
             ),
@@ -126,7 +126,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.FørsteFraværsdag(a1, 2.januar)
             ),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(forslag = null),
+                PersonObserver.Inntekt,
                 PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
             ),
@@ -222,7 +222,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 10.februar)),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(forslag = null),
+                PersonObserver.Inntekt,
                 PersonObserver.Refusjon
             ),
             innhentInntektFraAOrdningen = false
@@ -257,7 +257,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(4.vedtaksperiode.id(a1), oppdatertForespørsel.vedtaksperiodeId)
         assertEquals(
-            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Inntekt,
             oppdatertForespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
 
@@ -277,7 +277,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Inntekt,
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
@@ -293,7 +293,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Inntekt,
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
@@ -313,7 +313,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Inntekt,
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
@@ -342,7 +342,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(5, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
-            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Inntekt,
             forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
         )
     }
