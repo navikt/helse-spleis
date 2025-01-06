@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -13,7 +12,7 @@ class ForespurtOpplysningTest {
     fun `serialiserer ForespurtOpplysning med Inntekt riktig`() {
 
         val forespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+            PersonObserver.Inntekt(forslag = null),
             PersonObserver.Arbeidsgiverperiode,
             PersonObserver.Refusjon
         )
@@ -53,11 +52,7 @@ class ForespurtOpplysningTest {
         mapOf(
             "opplysningstype" to "Inntekt",
             "forslag" to mapOf(
-                "forrigeInntekt" to mapOf(
-                    "skjæringstidspunkt" to 1.januar,
-                    "kilde" to PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING.name,
-                    "beløp" to 31000.0
-                )
+                "forrigeInntekt" to null
             ),
         ),
         mapOf(
