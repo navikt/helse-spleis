@@ -455,8 +455,8 @@ internal class SkjæringstidspunktTest {
         im: BitAvArbeidsgiverperiode
     ) {
         val a = Sykdomshistorikk().apply {
-            håndter(søknad.metadata.meldingsreferanseId, søknad.sykdomstidslinje, Aktivitetslogg())
-            håndter(im.metadata.meldingsreferanseId, im.sykdomstidslinje, Aktivitetslogg())
+            håndter(søknad.metadata.meldingsreferanseId, søknad.sykdomstidslinje)
+            håndter(im.metadata.meldingsreferanseId, im.sykdomstidslinje)
         }
 
         val tidslinje = a.sykdomstidslinje()

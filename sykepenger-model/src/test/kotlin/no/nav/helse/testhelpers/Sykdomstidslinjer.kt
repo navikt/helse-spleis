@@ -66,11 +66,11 @@ internal val Int.U
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.U(meldingsreferanseId: UUID = UUID.randomUUID()) = Sykdomstidslinje.arbeidsgiverdager(
+internal fun Int.U(hendelsekilde: Hendelseskilde = INGEN.copy(meldingsreferanseId = UUID.randomUUID())) = Sykdomstidslinje.arbeidsgiverdager(
     dagensDato,
     dagensDato.plusDays(this.toLong() - 1),
     100.prosent,
-    INGEN.copy(meldingsreferanseId = meldingsreferanseId, tidsstempel = LocalDateTime.now())
+    hendelsekilde
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.K
