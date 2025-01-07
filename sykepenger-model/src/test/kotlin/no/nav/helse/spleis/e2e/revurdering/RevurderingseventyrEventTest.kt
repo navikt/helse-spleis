@@ -17,13 +17,11 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -213,8 +211,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     fun `tidligere skjæringstidspunkt -- revurderer inntekt`() {
         nyttVedtak(januar)
         forlengVedtak(1.februar til 15.februar)
-        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
+        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode, arbeidsgiverperiode = emptyList())
         forlengVedtak(april)
 
         val januar = observatør.utbetalteVedtaksperioder[0]
@@ -244,8 +241,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     fun `tidligere skjæringstidspunkt -- revurderer tidslinje`() {
         nyttVedtak(januar)
         forlengVedtak(1.februar til 15.februar)
-        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
+        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode, arbeidsgiverperiode = emptyList())
         forlengVedtak(april)
 
         val februar = observatør.utbetalteVedtaksperioder[1]

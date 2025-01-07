@@ -27,7 +27,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -581,12 +580,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(25.januar til 9.februar),
+            arbeidsgiverperioder = emptyList(),
             orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
         )
-
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter(orgnummer = a1))
 
         håndterInntektsmelding(
             listOf(25.januar til 9.februar),

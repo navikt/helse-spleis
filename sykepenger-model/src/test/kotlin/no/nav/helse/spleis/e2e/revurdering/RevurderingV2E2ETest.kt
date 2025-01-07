@@ -257,7 +257,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere periode med nyere førstegangsbehandling innenfor samme agp`() {
         nyttVedtak(januar)
-        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
@@ -331,7 +331,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere nyere skjæringstidspunkt så revurdere eldste`() {
         nyttVedtak(januar)
-        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
         assertDag<Sykedag, NavDag>(15.februar, 1431.0)
@@ -388,7 +388,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `revurdere eldre skjæringstidspunkt mens nyere revurdert skjæringstidspunkt utbetales`() {
         nyttVedtak(1.januar til 20.januar)
         forlengVedtak(21.januar til 31.januar)
-        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
 
@@ -535,7 +535,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere eldste skjæringstidspunkt så revurdere nyeste`() {
         nyttVedtak(januar)
-        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
 

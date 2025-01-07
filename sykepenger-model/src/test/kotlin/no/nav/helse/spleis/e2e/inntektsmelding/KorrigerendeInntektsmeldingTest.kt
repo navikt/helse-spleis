@@ -190,7 +190,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `her er det et gap mellom første og andre vedtaksperiode og mindre enn 10 dager mellom agps`() {
         nyttVedtak(10.januar til 29.januar)
-        nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         håndterInntektsmelding(
@@ -206,7 +206,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `her er det et gap mellom første og andre vedtaksperiode og mer enn 10 dager mellom agps, men mindre enn 16 dager mellom periodene`() {
         nyttVedtak(10.januar til 29.januar)
-        nyttVedtak(10.februar til 26.februar, arbeidsgiverperiode = listOf(10.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(10.februar til 26.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -217,7 +217,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsler(listOf(RV_IM_3, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 

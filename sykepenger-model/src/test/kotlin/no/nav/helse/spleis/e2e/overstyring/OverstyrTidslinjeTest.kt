@@ -663,7 +663,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
         håndterInntektsmelding(
-            listOf(10.februar til 26.februar),
+            arbeidsgiverperioder = listOf(10.februar til 26.februar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())

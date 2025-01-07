@@ -137,9 +137,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out of order med utbetaling i arbeidsgiverperioden og overlapp med andre ytelser`() {
         nyttVedtak(1.januar til 25.januar)
-        nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
 
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
         håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(26.januar til 31.januar, 100)))

@@ -30,10 +30,9 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `vi sender vedtaksperiode annullert-hendelser når saksbehandler annullerer en vedtaksperiode i et lengre sykdomsforløp`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        nyttVedtak(5.mars til 31.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        nyttVedtak(5.mars til 31.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode, arbeidsgiverperiode = emptyList())
         håndterAnnullerUtbetaling()
 
-        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         assertEquals(3, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(
             1.januar til 31.januar,
@@ -53,10 +52,9 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        tilGodkjenning(5.mars til 31.mars, a1, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        tilGodkjenning(5.mars til 31.mars, a1, vedtaksperiodeIdInnhenter = 3.vedtaksperiode, arbeidsgiverperiode = emptyList())
         håndterAnnullerUtbetaling()
 
-        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         assertEquals(2, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(
             1.januar til 31.januar,

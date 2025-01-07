@@ -45,7 +45,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `infotrygd flytter skjæringstidspunkt`() {
         nyttVedtak(januar)
-        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
     }
@@ -109,5 +109,4 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).beløp)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
-
 }

@@ -13,7 +13,6 @@ import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
 
 internal typealias InntektsmeldingId = UUID
@@ -147,17 +146,26 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, List<PersonObserver.ForespurtOpplysning>>()
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
-        if (oppgitt.isEmpty()) return check(trengerArbeidsgiveroppysninger.contains(vedtaksperiodeId)) { "Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId" }
-        val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: emptyList()
-        //assertEquals(forespurt.mapNotNull { it.somArbeidsgiveropplysning }.toSet(), oppgitt.map { it::class.simpleName }.toSet())
+        val relevante = oppgitt.filter { it is Arbeidsgiveropplysning.OppgittInntekt || it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode || it is Arbeidsgiveropplysning.OppgittRefusjon }
+        if (relevante.isEmpty()) return check(trengerArbeidsgiveroppysninger.contains(vedtaksperiodeId)) { "Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId" }
+
+        val forespurteOpplysninger = (trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: emptyList()).mapNotNull { it.somArbeidsgiveropplysning }.toSet()
+        val oppgittOpplysninger = relevante.map { it::class }.toSet()
+
+        val ikkeForespurt = (oppgittOpplysninger - forespurteOpplysninger).takeUnless { it.isEmpty() } ?: return
+
+        // Denne kan du endre fra println til error om du vil kose deg.
+        // Som oftest er det feil i test-setup om man sender inn noe vi ikke har spurt om, men ettersom det er enkelte tester som eksplisitt tester at man sender inn mer enn man spør om kan det ikke være error til vanlig
+        println("Spurte ikke om ${ikkeForespurt.joinToString { it.simpleName!! }}, men fikk det læll")
     }
 
-    private val PersonObserver.ForespurtOpplysning.somArbeidsgiveropplysning get() = when (this) {
-        PersonObserver.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class.simpleName
-        is PersonObserver.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class.simpleName
-        PersonObserver.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class.simpleName
-        is PersonObserver.FastsattInntekt -> null
-    }
+    private val PersonObserver.ForespurtOpplysning.somArbeidsgiveropplysning
+        get() = when (this) {
+            PersonObserver.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class
+            is PersonObserver.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class
+            PersonObserver.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class
+            is PersonObserver.FastsattInntekt -> null
+        }
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)

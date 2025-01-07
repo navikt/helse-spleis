@@ -402,10 +402,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `samme fagsystemId og forskjellig skjæringstidspunkt - revurder første periode i siste skjæringstidspunkt`() {
         nyttVedtak(3.januar til 26.januar)
-        nyttVedtak(1.februar til 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(1.februar til 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
         forlengVedtak(21.februar til 10.mars)
 
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((5.februar til 15.februar).map { manuellFeriedag(it) })
@@ -426,10 +425,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `samme fagsystemId og forskjellig skjæringstidspunkt - revurder siste periode i siste skjæringstidspunkt`() {
         nyttVedtak(3.januar til 26.januar)
-        nyttVedtak(1.februar til 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(1.februar til 20.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
         forlengVedtak(21.februar til 10.mars)
-
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
 
         håndterOverstyrTidslinje((22.februar til 25.februar).map { manuellFeriedag(it) })
         håndterYtelser(3.vedtaksperiode)
@@ -1248,9 +1245,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `Kun periode berørt av endringene skal ha hendelseIden`() {
         nyttVedtak(januar)
-        nyttVedtak(2.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        nyttVedtak(2.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
 
         val hendelseId = UUID.randomUUID()
         håndterOverstyrTidslinje(
