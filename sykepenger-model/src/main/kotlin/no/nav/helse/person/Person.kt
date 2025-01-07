@@ -205,7 +205,7 @@ class Person private constructor(
     }
 
     fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler arbeidsgiveropplysninger")
+        registrer(aktivitetslogg, "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.map { it::class.simpleName }.joinToString()}")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(arbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(arbeidsgiveropplysninger, aktivitetslogg)
         håndterGjenoppta(arbeidsgiveropplysninger, aktivitetslogg)

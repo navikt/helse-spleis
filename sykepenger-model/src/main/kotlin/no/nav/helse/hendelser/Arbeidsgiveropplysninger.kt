@@ -68,6 +68,8 @@ class Arbeidsgiveropplysninger(
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
 
     init {
+        check(opplysninger.isNotEmpty()) { "Ingen opplysninger? Hva skal det bety?" }
+
         val opplysningerFraBegrunnelse =
             opplysninger.filterIsInstance<Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden>() +
             opplysninger.filterIsInstance<Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden>() +

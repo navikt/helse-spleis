@@ -124,9 +124,10 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening)
             )
             assertEquals("NNNNNHR AANNNHH NAAAAHH NNSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
             assertEquals(20.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(listOf(20.januar, 10.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         }
     }
 
@@ -142,6 +143,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
                 UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 15.januar)
             )
             assertEquals("SSSSSHR AASSSHH SNNNNHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         }
     }
@@ -155,8 +157,25 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OpphørAvNaturalytelser
             )
-            assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `oppgir at de har utbetalt redusert beløp med arbeidsgiverperiode flyttet litt frem`() {
+        a1 {
+            håndterSøknad(januar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList()),
+                OppgittArbeidgiverperiode(listOf(5.januar til 20.januar)),
+                RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening)
+            )
+            assertEquals("AAAANHH NNNNNHH NNNNNHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         }
     }
 }
