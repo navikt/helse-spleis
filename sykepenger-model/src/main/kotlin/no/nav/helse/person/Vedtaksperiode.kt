@@ -367,7 +367,9 @@ internal class Vedtaksperiode private constructor(
             håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg),
             håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
-            håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg)
+            håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
+            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg),
+            håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg)
         ).flatten().tidligsteEventyr()
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return true.also { forkast(arbeidsgiveropplysninger, aktivitetslogg) }
@@ -491,37 +493,63 @@ internal class Vedtaksperiode private constructor(
         check(tilstand in setOf(AvsluttetUtenUtbetaling, AvventerBlokkerendePeriode)) {
             "Vi skal bare legge på SykNav for å tvinge frem en behandling på AUU hvor saksbehandler mest sannsynlig skal strekke periode med AIG-dager"
         }
-        val bit = sykNavBit(arbeidsgiveropplysninger, periode.start.somPeriode())
-        håndterDager(arbeidsgiveropplysninger, bit, aktivitetslogg) {
-            aktivitetslogg.varsel(RV_IM_25)
-        }
-        return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode))
+
+        return håndterNavUtbetalerArbeidsgiverperiode(
+            perioderNavUtbetaler = listOf(periode.start.somPeriode()), // Foreslår bare første dag for å tvinge frem en behandling
+            aktivitetslogg = aktivitetslogg,
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger) {
+                aktivitetslogg.varsel(RV_IM_25)
+            }
     }
 
     private fun håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         val ikkeUbetaltArbeidsgiverperiode = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode>().singleOrNull() ?: return emptyList()
-        val sisteDelAvBeregnetArbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.last()
-        if (!this.periode.overlapperMed(sisteDelAvBeregnetArbeidsgiverperiode)) {
+        return håndterNavUtbetalerArbeidsgiverperiode(aktivitetslogg, arbeidsgiveropplysninger) {
             ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
-        } else {
-            val bit = sykNavBit(arbeidsgiveropplysninger, sisteDelAvBeregnetArbeidsgiverperiode)
-            håndterDager(arbeidsgiveropplysninger, bit, aktivitetslogg) {
-                ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
-            }
         }
-        return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode))
     }
 
-    private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, periode: Periode): BitAvArbeidsgiverperiode {
-        val sykdomstidslinje = periode.subset(this.periode).map { dato ->
-            val grad = when (val dag = sykdomstidslinje[periode.start]) {
-                is Dag.Sykedag -> dag.økonomi
-                is Dag.ForeldetSykedag -> dag.økonomi
-                is Dag.SykHelgedag -> dag.økonomi
-                else -> Økonomi.sykdomsgrad(100.prosent)
-            }.grad
-            Sykdomstidslinje.sykedagerNav(dato, dato, grad, Hendelseskilde("Inntektsmelding", arbeidsgiveropplysninger.metadata.meldingsreferanseId, arbeidsgiveropplysninger.metadata.innsendt))
+    private fun håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
+        val redusertUtbetaltBeløpIArbeidsgiverperioden = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden>().singleOrNull() ?: return emptyList()
+        return håndterNavUtbetalerArbeidsgiverperiode(aktivitetslogg, arbeidsgiveropplysninger) {
+            redusertUtbetaltBeløpIArbeidsgiverperioden.valider(aktivitetslogg)
+        }
+    }
+
+    private fun håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
+        val utbetaltDelerAvArbeidsgiverperioden = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden>().singleOrNull() ?: return emptyList()
+        val perioderNavUtbetaler = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.flatMap { it.trim(LocalDate.MIN til utbetaltDelerAvArbeidsgiverperioden.utbetaltTilOgMed) }
+        return håndterNavUtbetalerArbeidsgiverperiode(aktivitetslogg, arbeidsgiveropplysninger, perioderNavUtbetaler = perioderNavUtbetaler) {
+            utbetaltDelerAvArbeidsgiverperioden.valider(aktivitetslogg)
+        }
+    }
+
+    private fun håndterNavUtbetalerArbeidsgiverperiode(
+        aktivitetslogg: IAktivitetslogg,
+        arbeidsgiveropplysninger: Arbeidsgiveropplysninger,
+        perioderNavUtbetaler: List<Periode> = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder,
+        valider: () -> Unit
+    ): List<Revurderingseventyr> {
+        val bit = sykNavBit(arbeidsgiveropplysninger, perioderNavUtbetaler)
+        if (bit == null) valider()
+        else håndterDager(arbeidsgiveropplysninger, bit, aktivitetslogg, valider)
+        return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, this.periode))
+    }
+
+    private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, perioderNavUtbetaler: List<Periode>): BitAvArbeidsgiverperiode? {
+        val sykdomstidslinje = perioderNavUtbetaler.flatMap { periodeNavUtbetaler ->
+            if (!periodeNavUtbetaler.overlapperMed(this.periode)) emptyList()
+            else periodeNavUtbetaler.subset(this.periode).map { dato ->
+                val grad = when (val dag = sykdomstidslinje[dato]) {
+                    is Dag.Sykedag -> dag.økonomi
+                    is Dag.ForeldetSykedag -> dag.økonomi
+                    is Dag.SykHelgedag -> dag.økonomi
+                    else -> Økonomi.sykdomsgrad(100.prosent)
+                }.grad
+                Sykdomstidslinje.sykedagerNav(dato, dato, grad, Hendelseskilde("Inntektsmelding", arbeidsgiveropplysninger.metadata.meldingsreferanseId, arbeidsgiveropplysninger.metadata.innsendt))
+            }
         }.merge()
+        if (sykdomstidslinje.periode() == null) return null
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, sykdomstidslinje)
     }
 

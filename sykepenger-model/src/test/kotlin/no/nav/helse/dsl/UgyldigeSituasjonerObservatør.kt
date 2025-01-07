@@ -5,7 +5,6 @@ import java.util.UUID
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
-import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
@@ -215,9 +214,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
     private fun validerSykdomshistorikk() {
         arbeidsgivere.forEach { arbeidsgiver ->
             val perioderPerHendelse = arbeidsgiver.view().sykdomshistorikk.inspektør.perioderPerHendelse()
-            perioderPerHendelse.forEach { (hendelseId, perioder) ->
-                check(!perioder.overlapper()) {
-                    "Sykdomshistorikk inneholder overlappende perioder fra hendelse $hendelseId"
+            perioderPerHendelse.forEach { (_, sykdomstidslinjer) ->
+                check(sykdomstidslinjer.none { sykdomstidslinje ->
+                    sykdomstidslinjer.filterNot { it === sykdomstidslinje }.any { it == sykdomstidslinje }
+                }) {
+                    "Samme hendelse er blitt lagt til flere ganger med lik sykdomstidslinje"
                 }
             }
         }

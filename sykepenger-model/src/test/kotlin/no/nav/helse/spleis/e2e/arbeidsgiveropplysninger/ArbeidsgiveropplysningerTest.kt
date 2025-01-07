@@ -120,8 +120,10 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar)),
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening)
             )
-            // TODO: Her skal det flettes inn noe SykNav siste del av agp
-            assertEquals("SSSSSHR AASSSHH SAAAAHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals("NNNNNHR AANNNHH NAAAAHH NNSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
+            assertEquals(20.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(listOf(20.januar, 10.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
         }
     }
 
@@ -136,8 +138,8 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar)),
                 UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 15.januar)
             )
-            // TODO: Her skal det flettes inn noe SykNav fra og med 16.januar
-            assertEquals("SSSSSHR AASSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals("SSSSSHR AASSSHH SNNNNHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         }
     }
 }

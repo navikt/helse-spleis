@@ -1,7 +1,6 @@
 package no.nav.helse.inspectors
 
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkElementView
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkView
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -10,14 +9,14 @@ internal val SykdomshistorikkView.inspektør get() = SykdomshistorikkInspektør(
 
 internal class SykdomshistorikkInspektør(historikk: Collection<SykdomshistorikkElementView>) {
     private val tidslinjer = mutableListOf<Sykdomstidslinje>()
-    private val perioderPerHendelse = mutableMapOf<UUID, MutableList<Periode>>()
+    private val perioderPerHendelse = mutableMapOf<UUID, MutableList<Sykdomstidslinje>>()
 
     val size get() = tidslinjer.size
 
     init {
         historikk.forEach { innslag ->
             innslag.hendelseId?.let {
-                perioderPerHendelse.getOrPut(it) { mutableListOf() }.add(innslag.hendelseSykdomstidslinje.periode()!!)
+                perioderPerHendelse.getOrPut(it) { mutableListOf() }.add(innslag.hendelseSykdomstidslinje)
             }
             tidslinjer.add(innslag.beregnetSykdomstidslinje)
         }
@@ -25,6 +24,6 @@ internal class SykdomshistorikkInspektør(historikk: Collection<Sykdomshistorikk
 
     fun sykdomstidslinje() = tidslinjer.first()
     fun elementer() = tidslinjer.size
-    fun perioderPerHendelse() = perioderPerHendelse.toMap()
+    fun perioderPerHendelse() = perioderPerHendelse.toMap().mapValues { (_, sykdomstidslinjer) -> sykdomstidslinjer.toList() }
     fun tidslinje(elementIndeks: Int) = tidslinjer[elementIndeks]
 }
