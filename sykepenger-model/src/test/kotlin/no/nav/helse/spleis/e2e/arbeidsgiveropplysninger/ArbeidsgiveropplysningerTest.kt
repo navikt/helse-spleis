@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
@@ -152,11 +153,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
     fun `oppgir at det er opphør av naturalytelser`() {
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
-                OppgittInntekt(INNTEKT),
-                OppgittRefusjon(INNTEKT, emptyList()),
-                OpphørAvNaturalytelser
-            )
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OpphørAvNaturalytelser)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
         }
@@ -176,6 +173,16 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
             assertEquals("AAAANHH NNNNNHH NNNNNHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `oppgir en begrunnelse vi ikke støtter`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, IkkeUtbetaltArbeidsgiverperiode(StreikEllerLockout))
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
         }
     }
 }
