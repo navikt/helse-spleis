@@ -74,23 +74,30 @@ class Arbeidsgiveropplysninger(
             opplysninger.filterIsInstance<Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode>()
 
         check(opplysningerFraBegrunnelse.size <= 1) {
-            "Disse arbeidsgiveropplysningene kan ikke kombineres så lenge vi får svar på forsespørsler forkledd som en inntektsmelding."
+            "Det kan maks oppgis én opplysning relatert til begrunnelse. Fant ${opplysningerFraBegrunnelse.size}: ${opplysninger.map { it::class.simpleName }.joinToString()}"
         }
 
-        val antallDager = (opplysninger
+        val arbeidsgiverperiode = opplysninger
             .filterIsInstance<Arbeidsgiveropplysning.OppgittArbeidgiverperiode>()
-            .singleOrNull()?.perioder?.flatten() ?: emptyList())
-            .size
+            .singleOrNull()?.perioder ?: emptyList()
 
-        when (opplysningerFraBegrunnelse.singleOrNull()) {
+        val antallDager = arbeidsgiverperiode.flatten().size
+
+        when (val opplysning = opplysningerFraBegrunnelse.singleOrNull()) {
             is Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode -> check(antallDager == 0) {
-                "Disse arbeidsgiveropplysningene kan ikke kombineres så lenge vi får svar på forsespørsler forkledd som en inntektsmelding."
+                "IkkeUtbetaltArbeidsgiverperiode kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Kan ikke være oppgitt noen arbeidsgiverperiode med denne opplysningstypen."
             }
-            is Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden -> check(antallDager in 1 .. 15) {
-                "Disse arbeidsgiveropplysningene kan ikke kombineres så lenge vi får svar på forsespørsler forkledd som en inntektsmelding."
+            is Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden -> {
+                check(antallDager in 1 .. 15 ) {
+                    "UtbetaltDelerAvArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt mellom 1 og 15 dager med arbeidsgiverperiode med denne opplysningstypen."
+                }
+                val sisteDagIOppgittArbeidsgiverperiode = arbeidsgiverperiode.last().endInclusive
+                check(opplysning.utbetaltTilOgMed == sisteDagIOppgittArbeidsgiverperiode) {
+                    "UtbetaltDelerAvArbeidsgiverperioden må ha utbetaltTilOgMed satt til siste dag i arbeidsgiverperioden ($sisteDagIOppgittArbeidsgiverperiode), men var ${opplysning.utbetaltTilOgMed}"
+                }
             }
             is Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden -> check(antallDager == 16) {
-                "Disse arbeidsgiveropplysningene kan ikke kombineres så lenge vi får svar på forsespørsler forkledd som en inntektsmelding."
+                "RedusertUtbetaltBeløpIArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt en full arbeidsigverperiode på 16 dager med denne opplysningstypen."
             }
             else -> {}
         }

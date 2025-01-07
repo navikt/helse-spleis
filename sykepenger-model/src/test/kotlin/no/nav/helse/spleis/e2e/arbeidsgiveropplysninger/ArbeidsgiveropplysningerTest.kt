@@ -8,6 +8,9 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -103,6 +106,38 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `oppgir at de har utbetalt redusert beløp i hullete arbeidsgiverperiode`() {
+        a1 {
+            håndterSøknad(januar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList()),
+                OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar)),
+                RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening)
+            )
+            // TODO: Her skal det flettes inn noe SykNav siste del av agp
+            assertEquals("SSSSSHR AASSSHH SAAAAHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+        }
+    }
+
+    @Test
+    fun `oppgir at de kun har utbetalt deler av hullete arbeidsgiverperiode`() {
+        a1 {
+            håndterSøknad(januar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList()),
+                OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar)),
+                UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 15.januar)
+            )
+            // TODO: Her skal det flettes inn noe SykNav fra og med 16.januar
+            assertEquals("SSSSSHR AASSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
         }
     }
 }
