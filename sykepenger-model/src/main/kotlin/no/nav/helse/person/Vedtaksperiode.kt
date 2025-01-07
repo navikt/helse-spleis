@@ -112,6 +112,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
@@ -369,7 +370,8 @@ internal class Vedtaksperiode private constructor(
             håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
             håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
             håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg),
-            håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg)
+            håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg),
+            håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetslogg)
         ).flatten().tidligsteEventyr()
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return true.also { forkast(arbeidsgiveropplysninger, aktivitetslogg) }
@@ -534,6 +536,12 @@ internal class Vedtaksperiode private constructor(
         if (bit == null) valider()
         else håndterDager(arbeidsgiveropplysninger, bit, aktivitetslogg, valider)
         return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, this.periode))
+    }
+
+    private fun håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
+        if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
+        aktivitetslogg.funksjonellFeil(RV_IM_7)
+        return emptyList()
     }
 
     private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, perioderNavUtbetaler: List<Periode>): BitAvArbeidsgiverperiode? {

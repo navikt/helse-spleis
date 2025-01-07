@@ -495,7 +495,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             beregnetInntekt = beregnetInntekt,
             refusjon = refusjon,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
         )
 
         if (erForespurtNavPortal(utledetAvsendersystem)) {

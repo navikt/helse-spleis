@@ -17,6 +17,7 @@ sealed interface Arbeidsgiveropplysning {
     data class OppgittInntekt(val inntekt: Inntekt): Arbeidsgiveropplysning {
         init { check(inntekt >= INGEN) { "Inntekten må være minst 0 kroner!" }}
     }
+    data object OpphørAvNaturalytelser: Arbeidsgiveropplysning
     data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>): Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
     }
@@ -145,6 +146,7 @@ class Arbeidsgiveropplysninger(
             refusjon: Inntektsmelding.Refusjon?,
             arbeidsgiverperioder: List<Periode>?,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+            harOpphørAvNaturalytelser: Boolean
         ): Arbeidsgiveropplysninger {
             val oppgittInntekt = beregnetInntekt
                 ?.takeUnless { it < INGEN }
@@ -158,7 +160,8 @@ class Arbeidsgiveropplysninger(
                 oppgittInntekt,
                 oppgittArbeidsgiverperiode,
                 refusjon?.somOppgittRefusjon(),
-                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList())
+                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
+                Arbeidsgiveropplysning.OpphørAvNaturalytelser.takeIf { harOpphørAvNaturalytelser }
             )
 
             return Arbeidsgiveropplysninger(
