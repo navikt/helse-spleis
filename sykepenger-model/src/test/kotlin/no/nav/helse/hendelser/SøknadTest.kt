@@ -68,27 +68,27 @@ internal class SøknadTest {
     fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent))
         assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harFunksjonelleFeilEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
     @Test
     fun `søknad med ferie`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harVarslerEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
     @Test
     fun `søknad med utlandsopphold`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utlandsopphold(2.januar, 4.januar))
         assertTrue(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harVarslerEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
     @Test
     fun `søknad med overlappende ferie og permisjon`() {
         søknad(Sykdom(1.januar, 1.januar, 100.prosent), Ferie(1.januar, 1.januar), Permisjon(1.januar, 1.januar))
-        assertEquals(Dag.Feriedag::class, søknad.sykdomstidslinje()[1.januar]::class)
+        assertEquals(Dag.Feriedag::class, søknad.sykdomstidslinje[1.januar]::class)
     }
 
     @Test
@@ -106,7 +106,7 @@ internal class SøknadTest {
     private fun `utlandsopphold og ferie`(ferie: Ferie, utlandsopphold: Utlandsopphold, skalHaWarning: Boolean) {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), ferie, utlandsopphold)
         assertEquals(skalHaWarning, søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harVarslerEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
     @Test
@@ -127,15 +127,15 @@ internal class SøknadTest {
     fun `søknad med permisjon`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
         assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harFunksjonelleFeilEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
     @Test
     fun `søknad med permisjon før perioden`() {
         søknad(Sykdom(5.januar, 10.januar, 100.prosent), Permisjon(1.januar, 10.januar))
         assertTrue(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harVarslerEllerVerre())
-        assertEquals(5.januar til 10.januar, søknad.periode())
-        assertEquals(6, søknad.sykdomstidslinje().count())
+        assertEquals(5.januar til 10.januar, søknad.sykdomstidslinje.periode())
+        assertEquals(6, søknad.sykdomstidslinje.count())
     }
 
     @Test
@@ -147,8 +147,8 @@ internal class SøknadTest {
     fun `søknad med papirsykmelding`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(1.januar, 10.januar))
         assertTrue(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harFunksjonelleFeilEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
-        assertEquals(10, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
+        assertEquals(10, søknad.sykdomstidslinje.count())
+        assertEquals(10, søknad.sykdomstidslinje.filterIsInstance<ProblemDag>().size)
     }
 
     @Test
@@ -167,7 +167,7 @@ internal class SøknadTest {
     fun `ferie foran sykdomsvindu`() {
         søknad(Sykdom(1.februar, 10.februar, 100.prosent), Ferie(20.januar, 31.januar))
         assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), jurist).harVarslerEllerVerre())
-        assertEquals(1.februar, søknad.sykdomstidslinje().førsteDag())
+        assertEquals(1.februar, søknad.sykdomstidslinje.førsteDag())
     }
 
     @Test
@@ -254,10 +254,10 @@ internal class SøknadTest {
     fun `søknadsturnering for nye dagtyper`() {
         søknad(Arbeid(15.januar, 31.januar), Sykdom(1.januar, 31.januar, 100.prosent))
 
-        assertEquals(10, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
-        assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
-        assertEquals(13, søknad.sykdomstidslinje().filterIsInstance<Arbeidsdag>().size)
-        assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<FriskHelgedag>().size)
+        assertEquals(10, søknad.sykdomstidslinje.filterIsInstance<Sykedag>().size)
+        assertEquals(4, søknad.sykdomstidslinje.filterIsInstance<SykHelgedag>().size)
+        assertEquals(13, søknad.sykdomstidslinje.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(4, søknad.sykdomstidslinje.filterIsInstance<FriskHelgedag>().size)
     }
 
     @Test

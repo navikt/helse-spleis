@@ -432,7 +432,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
                 ManuellOverskrivingDag(10.januar, Dagtype.Feriedag)
             ), orgnummer = a1
         )
-        assertEquals(5, inspektør.sykdomshistorikk.elementer())
+        assertEquals(6, inspektør.sykdomshistorikk.elementer())
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)

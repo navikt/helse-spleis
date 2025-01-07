@@ -3,10 +3,8 @@ package no.nav.helse.tournament
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -17,7 +15,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsdag_IM
 import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsdag_SØ
 import no.nav.helse.tournament.Turneringsnøkkel.ArbeidsgiverHelgedag_IM
@@ -63,7 +60,7 @@ internal class TurneringsnøkkelTest {
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
     }
 
-    private sealed class TestHendelse : SykdomshistorikkHendelse {
+    private sealed class TestHendelse {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde
@@ -74,13 +71,5 @@ internal class TurneringsnøkkelTest {
         // Objects impersonating real-life sources of sickness timeline days
         object Inntektsmelding : TestHendelse()
         object Søknad : TestHendelse()
-
-        override fun oppdaterFom(other: Periode): Periode {
-            error("ikke i bruk")
-        }
-
-        override fun sykdomstidslinje(): Sykdomstidslinje {
-            error("ikke i bruk")
-        }
     }
 }

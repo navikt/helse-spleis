@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Test
 internal class ForeldetSykedagTest {
 
     companion object {
-        private const val UNG_PERSON_FNR_2018 = "12029240045"
-        private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private val hendelefabrikk = ArbeidsgiverHendelsefabrikk(
             organisasjonsnummer = ORGNUMMER
@@ -75,5 +73,5 @@ internal class ForeldetSykedagTest {
         sendtTilNAVEllerArbeidsgiver = sendtTilNAV
     )
 
-    private fun undersøke(søknad: SykdomstidslinjeHendelse) = søknad.sykdomstidslinje().inspektør
+    private fun undersøke(søknad: Søknad) = søknad.sykdomstidslinje.inspektør
 }

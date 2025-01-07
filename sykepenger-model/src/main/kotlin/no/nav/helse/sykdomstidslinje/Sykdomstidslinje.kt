@@ -10,9 +10,9 @@ import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.Hendelseskilde.Companion.INGEN
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -78,7 +78,7 @@ class Sykdomstidslinje private constructor(
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
     internal fun subset(periode: Periode) =
         if (this.periode == null || !periode.overlapperMed(this.periode)) Sykdomstidslinje()
-        else Sykdomstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag), this.periode.subset(periode))
+        else Sykdomstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag).toSortedMap(), this.periode.subset(periode))
 
     /**
      * Uten å utvide tidslinjen

@@ -41,7 +41,7 @@ class Foreldrepenger(
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
         if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
         require(foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder().size == 1) { "Ikke trygt å kalle sykdomstidslinjen til ${this.javaClass.simpleName} når det er huller i ytelser" }
-        val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
+        val hendelseskilde = Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
         val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
         val sykdomstidslinje = Sykdomstidslinje.andreYtelsedager(førsteDag, sisteDag, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)

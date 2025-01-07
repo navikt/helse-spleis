@@ -1,8 +1,8 @@
 package no.nav.helse.testhelpers
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.BesteStrategy
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge

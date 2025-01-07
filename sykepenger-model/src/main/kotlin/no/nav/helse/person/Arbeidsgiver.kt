@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -32,7 +33,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
@@ -892,8 +892,8 @@ internal class Arbeidsgiver private constructor(
         return revurderingseventyr
     }
 
-    internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
-        return sykdomshistorikk.håndter(hendelse, aktivitetslogg)
+    internal fun oppdaterSykdom(meldingsreferanseId: UUID, sykdomstidslinje: Sykdomstidslinje, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
+        return sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje, aktivitetslogg)
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
@@ -943,8 +943,7 @@ internal class Arbeidsgiver private constructor(
         val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
         if (egenmeldingsperioder.isEmpty()) return arbeidsgiverperiode(periode)
 
-        val tøyseteKilde =
-            SykdomshistorikkHendelse.Hendelseskilde(Søknad::class, UUID.randomUUID(), LocalDateTime.now())
+        val tøyseteKilde = Hendelseskilde(Søknad::class, UUID.randomUUID(), LocalDateTime.now())
         val egenmeldingstidslinje = egenmeldingsperioder
             .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, 100.prosent, tøyseteKilde) }
             .merge()

@@ -1,8 +1,8 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg

@@ -23,7 +23,7 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger
-) : Hendelse, SykdomshistorikkHendelse {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = organisasjonsnummer
     )
@@ -40,7 +40,8 @@ class Ytelser(
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
         foreldrepenger
     )
-    private lateinit var sykdomstidslinje: Sykdomstidslinje
+    lateinit var sykdomstidslinje: Sykdomstidslinje
+        private set
 
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
@@ -78,14 +79,6 @@ class Ytelser(
         if (sykdomstidslinjer.isEmpty()) return
         this.sykdomstidslinje = sykdomstidslinjer.merge(beste = default)
         oppdaterHistorikk()
-    }
-
-    override fun oppdaterFom(other: Periode): Periode {
-        return other
-    }
-
-    override fun sykdomstidslinje(): Sykdomstidslinje {
-        return sykdomstidslinje
     }
 
     internal fun avgrensTil(periode: Periode): Ytelser {

@@ -245,7 +245,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
-        return bitAvInntektsmelding(Aktivitetslogg(), periode)?.sykdomstidslinje()?.periode()
+        return bitAvInntektsmelding(Aktivitetslogg(), periode)?.sykdomstidslinje?.periode()
     }
 
     private companion object {

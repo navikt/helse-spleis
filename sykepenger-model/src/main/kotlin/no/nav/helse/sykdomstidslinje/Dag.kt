@@ -5,8 +5,8 @@ import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Melding
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserAap
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserDagpenger

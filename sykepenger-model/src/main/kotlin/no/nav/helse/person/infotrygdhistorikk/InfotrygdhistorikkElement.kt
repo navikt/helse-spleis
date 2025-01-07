@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
@@ -30,7 +30,7 @@ class InfotrygdhistorikkElement private constructor(
         private set
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     val perioder = Infotrygdperiode.sorter(perioder)
-    private val kilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
+    private val kilde = Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {
         if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }

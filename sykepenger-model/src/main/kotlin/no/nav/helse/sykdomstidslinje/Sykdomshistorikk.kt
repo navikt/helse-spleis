@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
@@ -25,14 +24,10 @@ internal class Sykdomshistorikk private constructor(
 
     fun view() = SykdomshistorikkView(elementer = elementer.map { it.view() })
 
-    internal fun håndter(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
-        val s = hendelse.sykdomstidslinje()
-        if (s.count() == 0) return sykdomstidslinje()
-
-        val m = s.first().kilde.meldingsreferanseId()
-
-        val nyttElement = Element.opprett(m, s)
-        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse, aktivitetslogg) ?: return sykdomstidslinje()
+    internal fun håndter(meldingsreferanseId: UUID, hendelseSykdomstidslinje: Sykdomstidslinje, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje {
+        if (hendelseSykdomstidslinje.count() == 0) return sykdomstidslinje()
+        val nyttElement = Element.opprett(meldingsreferanseId, hendelseSykdomstidslinje)
+        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(meldingsreferanseId, hendelseSykdomstidslinje, aktivitetslogg) ?: return sykdomstidslinje()
         elementer.add(0, nyttElement.merge(this, uhåndtertSykdomstidslinje))
         return sykdomstidslinje()
     }
@@ -71,18 +66,18 @@ internal class Sykdomshistorikk private constructor(
 
         override fun toString() = beregnetSykdomstidslinje.toString()
 
-        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) = hendelseId == hendelse.sykdomstidslinje().first().kilde.meldingsreferanseId()
+        internal fun harHåndtert(meldingsreferanseId: UUID) = hendelseId == meldingsreferanseId
 
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
         companion object {
-            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje? {
-                if (hendelse.sykdomstidslinje().periode() == null) return null // tom sykdomstidslinje
-                val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
+            internal fun List<Element>.uhåndtertSykdomstidslinje(meldingsreferanseId: UUID, sykdomstidslinje: Sykdomstidslinje, aktivitetslogg: IAktivitetslogg): Sykdomstidslinje? {
+                if (sykdomstidslinje.periode() == null) return null // tom sykdomstidslinje
+                val tidligere = filter { it.harHåndtert(meldingsreferanseId) }.takeUnless { it.isEmpty() } ?: return sykdomstidslinje // Første gang vi ser hendelsen
                 val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
                     tidligereHåndtert + element.hendelseSykdomstidslinje
                 }
-                val uhåndtertSykdomstidslinje = hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
+                val uhåndtertSykdomstidslinje = sykdomstidslinje - alleredeHåndtertSykdomstidslinje
                 if (uhåndtertSykdomstidslinje.periode() == null) return null // Tom sykdomstidslinje, ikke noe nytt
                 return uhåndtertSykdomstidslinje.also {
                     aktivitetslogg.info("Legger til bit nummer ${tidligere.size + 1} for ${it.periode()} i sykdomshistorikken")

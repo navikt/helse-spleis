@@ -197,7 +197,7 @@ class Person private constructor(
 
     fun håndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler søknad")
-        tidligereBehandlinger(søknad.behandlingsporing, aktivitetslogg, søknad.periode())
+        tidligereBehandlinger(søknad.behandlingsporing, aktivitetslogg, søknad.sykdomstidslinje.periode()!!)
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetslogg)
         søknad.forUng(aktivitetslogg, alder)
         arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)

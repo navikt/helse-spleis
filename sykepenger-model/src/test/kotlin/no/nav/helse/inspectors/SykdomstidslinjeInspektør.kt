@@ -2,7 +2,7 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import kotlin.reflect.KClass
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag

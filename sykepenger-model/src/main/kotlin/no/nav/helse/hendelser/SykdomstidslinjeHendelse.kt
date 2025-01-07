@@ -5,15 +5,9 @@ import java.util.UUID
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 
-sealed class SykdomstidslinjeHendelse : Hendelse, SykdomshistorikkHendelse {
+sealed class SykdomstidslinjeHendelse : Hendelse {
     private val håndtertAv = mutableSetOf<UUID>()
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
-
-    override fun oppdaterFom(other: Periode): Periode {
-        // strekker vedtaksperioden tilbake til å måte første dag
-        val førsteDag = sykdomstidslinje().førsteDag()
-        return other.oppdaterFom(førsteDag)
-    }
 
     internal fun noenHarHåndtert() = håndtertAv.isNotEmpty()
 
@@ -25,10 +19,6 @@ sealed class SykdomstidslinjeHendelse : Hendelse, SykdomshistorikkHendelse {
     }
 
     protected open fun trimSykdomstidslinje(fom: LocalDate) {}
-
-    internal fun periode(): Periode {
-        return sykdomstidslinje().periode() ?: LocalDate.MIN.somPeriode()
-    }
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
         && this.metadata.meldingsreferanseId == other.metadata.meldingsreferanseId

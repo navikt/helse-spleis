@@ -28,7 +28,7 @@ internal class SykdomshistorikkTest {
     @Test
     fun `fjerner ingenting`() {
         val tidslinje = 10.S
-        historikk.håndter(TestHendelse(tidslinje), Aktivitetslogg())
+        historikk.håndter(UUID.randomUUID(), tidslinje, Aktivitetslogg())
         historikk.fjernDager(emptyList())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals(tidslinje, historikk.sykdomstidslinje())
@@ -37,7 +37,7 @@ internal class SykdomshistorikkTest {
     @Test
     fun `fjerner hel periode`() {
         val tidslinje = 10.S
-        historikk.håndter(TestHendelse(tidslinje), Aktivitetslogg())
+        historikk.håndter(UUID.randomUUID(), tidslinje, Aktivitetslogg())
         historikk.fjernDager(listOf(tidslinje.periode()!!))
         assertEquals(2, historikk.inspektør.elementer())
         assertFalse(historikk.inspektør.tidslinje(0).iterator().hasNext())
@@ -47,7 +47,7 @@ internal class SykdomshistorikkTest {
     @Test
     fun `fjerner del av periode`() {
         val tidslinje = 10.S
-        historikk.håndter(TestHendelse(tidslinje), Aktivitetslogg())
+        historikk.håndter(UUID.randomUUID(), tidslinje, Aktivitetslogg())
         historikk.fjernDager(listOf(tidslinje.førsteDag() til tidslinje.sisteDag().minusDays(1)))
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals(1, historikk.inspektør.tidslinje(0).count())
@@ -56,7 +56,7 @@ internal class SykdomshistorikkTest {
     @Test
     fun `fjerner flere perioder`() {
         val tidslinje = 10.S
-        historikk.håndter(TestHendelse(tidslinje), Aktivitetslogg())
+        historikk.håndter(UUID.randomUUID(), tidslinje, Aktivitetslogg())
         historikk.fjernDager(listOf(1.januar til 2.januar, 5.januar til 10.januar))
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals(3.januar til 4.januar, historikk.sykdomstidslinje().periode())
@@ -65,10 +65,10 @@ internal class SykdomshistorikkTest {
     @Test
     fun `håndterer kun hendelser èn gang`() {
         val tidslinje = 10.S
-        val hendelse = TestHendelse(tidslinje)
-        historikk.håndter(hendelse, Aktivitetslogg())
+        val id = UUID.randomUUID()
+        historikk.håndter(id, tidslinje, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
-        historikk.håndter(hendelse, Aktivitetslogg())
+        historikk.håndter(id, tidslinje, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
     }
 
@@ -76,10 +76,11 @@ internal class SykdomshistorikkTest {
     fun `hendelser skal kunne håndteres i biter`() {
         val bit1 = TestHendelse(8.U)
         val bit2 = TestHendelse(8.U)
-        historikk.håndter(bit1, Aktivitetslogg())
+        val id = UUID.randomUUID()
+        historikk.håndter(id, bit1.sykdomstidslinje, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUUUUGG U", historikk.sykdomstidslinje().toShortString())
-        historikk.håndter(bit2, Aktivitetslogg())
+        historikk.håndter(id, bit2.sykdomstidslinje, Aktivitetslogg())
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals("UUUUUGG UUUUUGG UU", historikk.sykdomstidslinje().toShortString())
     }
@@ -90,41 +91,43 @@ internal class SykdomshistorikkTest {
         val bit1 = TestHendelse(8.U(meldingsreferanseId = meldingsreferanseId))
         resetSeed()
         val bit2 = TestHendelse(16.U(meldingsreferanseId = meldingsreferanseId))
-        historikk.håndter(bit1, Aktivitetslogg())
+        historikk.håndter(meldingsreferanseId, bit1.sykdomstidslinje, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUUUUGG U", historikk.sykdomstidslinje().toShortString())
-        historikk.håndter(bit2, Aktivitetslogg())
+        historikk.håndter(meldingsreferanseId, bit2.sykdomstidslinje, Aktivitetslogg())
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals("UUUUUGG UUUUUGG UU", historikk.sykdomstidslinje().toShortString())
     }
 
     @Test
     fun `Hele hendelsen er håndtert for en hendelse siden`() {
+        val id = UUID.randomUUID()
         val søknad = TestHendelse(10.S)
         val heleBiten = TestHendelse(16.U)
-        historikk.håndter(heleBiten, Aktivitetslogg())
+        historikk.håndter(id, heleBiten.sykdomstidslinje, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUGG UUUUUGG UUUUU", historikk.sykdomstidslinje().toShortString())
-        historikk.håndter(søknad, Aktivitetslogg())
+        historikk.håndter(UUID.randomUUID(), søknad.sykdomstidslinje, Aktivitetslogg())
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals("SSSSSHH SSSUUGG UUUUUGG UUUUU", historikk.sykdomstidslinje().toShortString())
-        historikk.håndter(heleBiten, Aktivitetslogg())
+        historikk.håndter(id, heleBiten.sykdomstidslinje, Aktivitetslogg())
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals("SSSSSHH SSSUUGG UUUUUGG UUUUU", historikk.sykdomstidslinje().toShortString())
     }
 
     @Test
     fun `En bit av inntektsmeldingen håndteres før annen hendelse, og den andre biten etterpå`() {
+        val id = UUID.randomUUID()
         val søknad = TestHendelse(10.S)
         val bit1 = TestHendelse(8.U)
         val bit2 = TestHendelse(8.U)
-        historikk.håndter(bit1, Aktivitetslogg())
+        historikk.håndter(id, bit1.sykdomstidslinje, Aktivitetslogg())
         assertEquals(1, historikk.inspektør.elementer())
         assertEquals("UUGG UUUU", historikk.sykdomstidslinje().toShortString())
-        historikk.håndter(søknad, Aktivitetslogg())
+        historikk.håndter(UUID.randomUUID(), søknad.sykdomstidslinje, Aktivitetslogg())
         assertEquals(2, historikk.inspektør.elementer())
         assertEquals("SSSSSHH SSSUUGG UUUU", historikk.sykdomstidslinje().toShortString())
-        historikk.håndter(bit2, Aktivitetslogg())
+        historikk.håndter(id, bit2.sykdomstidslinje, Aktivitetslogg())
         assertEquals(3, historikk.inspektør.elementer())
         assertEquals("SSSSSHH SSSUUGG UUUUUGG UUUUU", historikk.sykdomstidslinje().toShortString())
     }

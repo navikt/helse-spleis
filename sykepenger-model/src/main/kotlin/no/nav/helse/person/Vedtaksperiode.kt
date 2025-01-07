@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -45,8 +46,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
@@ -392,7 +391,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerBlokkerendePeriode -> {
                     vedtaksperiode.registrerKontekst(aktivitetslogg)
                     acc.sykdomstidslinje(vedtaksperiode.periode)?.let {
-                        vedtaksperiode.håndterDager(BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, it), aktivitetslogg) {}
+                        vedtaksperiode.håndterDager(arbeidsgiveropplysninger, BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, it), aktivitetslogg) {}
                         eventyr.add(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                     }
                 }
@@ -494,7 +493,7 @@ internal class Vedtaksperiode private constructor(
             "Vi skal bare legge på SykNav for å tvinge frem en behandling på AUU hvor saksbehandler mest sannsynlig skal strekke periode med AIG-dager"
         }
         val bit = sykNavBit(arbeidsgiveropplysninger, periode.start.somPeriode())
-        håndterDager(bit, aktivitetslogg) {
+        håndterDager(arbeidsgiveropplysninger, bit, aktivitetslogg) {
             aktivitetslogg.varsel(RV_IM_25)
         }
         return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode))
@@ -507,7 +506,7 @@ internal class Vedtaksperiode private constructor(
             ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
         } else {
             val bit = sykNavBit(arbeidsgiveropplysninger, sisteDelAvBeregnetArbeidsgiverperiode)
-            håndterDager(bit, aktivitetslogg) {
+            håndterDager(arbeidsgiveropplysninger, bit, aktivitetslogg) {
                 ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
             }
         }
@@ -564,11 +563,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        val hendelse = dager.bitAvInntektsmelding(aktivitetslogg, periode) ?: dager.tomBitAvInntektsmelding(
+        val bit = dager.bitAvInntektsmelding(aktivitetslogg, periode) ?: dager.tomBitAvInntektsmelding(
             aktivitetslogg,
             periode
         )
-        håndterDager(hendelse, aktivitetslogg) {
+        håndterDager(dager.hendelse, bit, aktivitetslogg) {
             dager.valider(aktivitetslogg, periode)
             dager.validerArbeidsgiverperiode(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
         }
@@ -576,13 +575,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val hendelse = dager.tomBitAvInntektsmelding(aktivitetslogg, periode)
-        håndterDager(hendelse, aktivitetslogg) {
+        håndterDager(dager.hendelse, hendelse, aktivitetslogg) {
             dager.valider(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
         }
     }
 
     private fun håndterDager(
-        hendelse: BitAvArbeidsgiverperiode,
+        hendelse: Hendelse,
+        bit: BitAvArbeidsgiverperiode,
         aktivitetslogg: IAktivitetslogg,
         validering: () -> Unit
     ) {
@@ -590,7 +590,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: $egenmeldingsperioder")
             egenmeldingsperioder = emptyList()
         }
-        oppdaterHistorikk(hendelse, aktivitetslogg, validering)
+        oppdaterHistorikk(hendelse, bit.sykdomstidslinje, aktivitetslogg, validering)
     }
 
     internal fun håndterHistorikkFraInfotrygd(
@@ -839,7 +839,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        oppdaterHistorikk(hendelse, aktivitetslogg) {
+        oppdaterHistorikk(hendelse, hendelse.sykdomstidslinje, aktivitetslogg) {
             // ingen validering å gjøre :(
         }
         igangsettOverstyringAvTidslinje(hendelse, aktivitetslogg)
@@ -895,7 +895,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(
-        hendelse: SykdomshistorikkHendelse,
+        hendelse: Hendelse,
+        hendelseSykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
         validering: () -> Unit
     ) {
@@ -904,6 +905,7 @@ internal class Vedtaksperiode private constructor(
             person,
             arbeidsgiver,
             hendelse,
+            hendelseSykdomstidslinje,
             aktivitetslogg,
             person.beregnSkjæringstidspunkt(),
             arbeidsgiver.beregnArbeidsgiverperiode(),
@@ -931,7 +933,7 @@ internal class Vedtaksperiode private constructor(
         nesteTilstand: () -> Vedtaksperiodetilstand? = { null }
     ) {
         videreførEksisterendeRefusjonsopplysninger(søknad, aktivitetslogg)
-        oppdaterHistorikk(søknad, aktivitetslogg) {
+        oppdaterHistorikk(søknad, søknad.sykdomstidslinje, aktivitetslogg) {
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
@@ -979,7 +981,7 @@ internal class Vedtaksperiode private constructor(
                 søknad.nyeInntekterUnderveis(aktivitetslogg),
                 jurist
             )
-            oppdaterHistorikk(søknad, aktivitetslogg) {
+            oppdaterHistorikk(søknad, søknad.sykdomstidslinje, aktivitetslogg) {
                 søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
             }
         }
@@ -1523,8 +1525,10 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt,
             person.nåværendeVedtaksperioder(OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT(this)).minOrNull()?.periode
         ) {
+            ytelser.avgrensTil(periode)
             oppdaterHistorikk(
-                ytelser.avgrensTil(periode),
+                ytelser,
+                ytelser.sykdomstidslinje,
                 aktivitetslogg,
                 validering = {}
             )

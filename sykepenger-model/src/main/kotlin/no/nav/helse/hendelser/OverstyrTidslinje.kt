@@ -52,10 +52,11 @@ class OverstyrTidslinje(
         registrert = LocalDateTime.now(),
         automatiskBehandling = false
     )
-    private val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class, metadata.meldingsreferanseId, metadata.innsendt)
+    private val kilde = Hendelseskilde(this::class, metadata.meldingsreferanseId, metadata.innsendt)
 
     private val periode: Periode
-    private var sykdomstidslinje: Sykdomstidslinje
+    var sykdomstidslinje: Sykdomstidslinje
+        private set
 
     init {
         sykdomstidslinje = dager.map {
@@ -160,9 +161,8 @@ class OverstyrTidslinje(
         }
     }
 
-    override fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
+    override fun erRelevant(other: Periode) = sykdomstidslinje.periode()?.let { other.oppdaterFom(other.start.forrigeDag).overlapperMed(it) } == true
 
-    override fun sykdomstidslinje() = sykdomstidslinje
     override fun trimSykdomstidslinje(fom: LocalDate) {
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }

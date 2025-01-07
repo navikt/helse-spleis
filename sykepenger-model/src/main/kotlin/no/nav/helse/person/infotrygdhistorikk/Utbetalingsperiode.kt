@@ -6,8 +6,8 @@ import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -27,7 +27,7 @@ sealed class Utbetalingsperiode(
         fun inntekt(inntekt: Inntekt, grad: Prosentdel) = Inntekt.fraGradert(inntekt, grad)
     }
 
-    override fun sykdomstidslinje(kilde: SykdomshistorikkHendelse.Hendelseskilde): Sykdomstidslinje {
+    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)
     }
 

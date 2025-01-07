@@ -4,11 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
+import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.Hendelseskilde.Companion.INGEN
 import no.nav.helse.hendelser.Melding
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -72,7 +70,7 @@ internal fun Int.U(meldingsreferanseId: UUID = UUID.randomUUID()) = Sykdomstidsl
     dagensDato,
     dagensDato.plusDays(this.toLong() - 1),
     100.prosent,
-    Hendelseskilde(SykdomshistorikkHendelse::class, meldingsreferanseId, LocalDateTime.now())
+    INGEN.copy(meldingsreferanseId = meldingsreferanseId, tidsstempel = LocalDateTime.now())
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.K
@@ -118,8 +116,6 @@ internal fun Int.YF(ytelse: Dag.AndreYtelser.AnnenYtelse, kilde: Hendelseskilde 
     kilde,
     ytelse
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
-
-internal fun unikKilde() = UUID.randomUUID().let { Hendelseskilde(it.toString(), it, LocalDateTime.now()) }
 
 internal val Int.YD
     get() = Sykdomstidslinje.andreYtelsedager(
@@ -206,7 +202,4 @@ internal val Int.FORELDET
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 
-internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) : SykdomshistorikkHendelse {
-    override fun oppdaterFom(other: Periode) = other
-    override fun sykdomstidslinje() = tidslinje
-}
+internal data class TestHendelse(val sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje())

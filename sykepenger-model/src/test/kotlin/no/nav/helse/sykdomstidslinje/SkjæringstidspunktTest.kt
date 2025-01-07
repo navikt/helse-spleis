@@ -6,11 +6,9 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.erRettFør
 import no.nav.helse.februar
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.SykdomshistorikkHendelse
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.inntektsmelding.validert
@@ -453,10 +451,13 @@ internal class SkjæringstidspunktTest {
 
     private fun assertSkjæringstidspunkt(
         forventetSkjæringstidspunkt: LocalDate,
-        vararg hendelse: SykdomshistorikkHendelse
+        søknad: Søknad,
+        im: BitAvArbeidsgiverperiode
     ) {
-        val a = Sykdomshistorikk()
-        hendelse.forEach { a.håndter(it, Aktivitetslogg()) }
+        val a = Sykdomshistorikk().apply {
+            håndter(søknad.metadata.meldingsreferanseId, søknad.sykdomstidslinje, Aktivitetslogg())
+            håndter(im.metadata.meldingsreferanseId, im.sykdomstidslinje, Aktivitetslogg())
+        }
 
         val tidslinje = a.sykdomstidslinje()
 

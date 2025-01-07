@@ -10,7 +10,6 @@ import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.nesteDag
@@ -71,7 +70,8 @@ class Søknad(
 
     private val kilde: Hendelseskilde = Hendelseskilde(this::class, metadata.meldingsreferanseId, sykmeldingSkrevet)
     private val sykdomsperiode: Periode
-    private var sykdomstidslinje: Sykdomstidslinje
+    var sykdomstidslinje: Sykdomstidslinje
+        private set
 
     internal companion object {
         internal const val tidslinjegrense = 40L
@@ -90,10 +90,6 @@ class Søknad(
     }
 
     override fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
-
-    override fun sykdomstidslinje(): Sykdomstidslinje {
-        return sykdomstidslinje
-    }
 
     internal fun egenmeldingsperioder(): List<Periode> {
         return egenmeldinger
