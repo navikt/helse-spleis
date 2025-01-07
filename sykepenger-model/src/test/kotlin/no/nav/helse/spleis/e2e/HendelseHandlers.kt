@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
-import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
@@ -15,8 +14,6 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode.Begrunnelse
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -58,7 +55,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.nesteDag
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.IdInnhenter
@@ -84,7 +80,6 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -491,27 +486,20 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         }
         val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" })
 
-        val endringerIRefusjon = refusjon.endringerIRefusjon.map { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.endringsdato, it.beløp) }
-        val opphørAvRefusjon = listOfNotNull(refusjon.opphørsdato?.let { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
-        val oppgittRefusjon = Arbeidsgiveropplysning.OppgittRefusjon(refusjon.beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
-        val oppgittInntekt = beregnetInntekt?.takeUnless { it < INGEN }?.let { Arbeidsgiveropplysning.OppgittInntekt(it) }
-        val oppgittArbeidsgiverperiode = arbeidsgiverperioder
-            ?.takeUnless { it.isEmpty() }
-            ?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) }
-            ?.takeIf { begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() }
-        val ikkeNyArbeidgiverperiode = Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode.takeIf { begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering" }
-        val ikkeUtbetaltArbeidsgiverperiode = begrunnelseForReduksjonEllerIkkeUtbetalt?.takeUnless { it.isBlank() || it == "FerieEllerAvspasering" }?.let { Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode(Begrunnelse.valueOf(it)) }
-
-        val alleOpplysninger = listOfNotNull(oppgittArbeidsgiverperiode, oppgittInntekt, oppgittRefusjon, ikkeNyArbeidgiverperiode, ikkeUtbetaltArbeidsgiverperiode).toTypedArray()
-
-        val arbeidsgiveropplysninger = ArbeidsgiverHendelsefabrikk(orgnummer).lagArbeidsgiveropplysninger(
+        val arbeidsgiveropplysninger = Arbeidsgiveropplysninger.fraInntektsmelding(
             meldingsreferanseId = id,
+            innsendt = LocalDateTime.now(),
+            registrert = LocalDateTime.now().plusSeconds(1),
+            organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            opplysninger = alleOpplysninger
+            beregnetInntekt = beregnetInntekt,
+            refusjon = refusjon,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
 
         if (erForespurtNavPortal(utledetAvsendersystem)) {
-            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *alleOpplysninger)
+            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.opplysninger.toTypedArray())
         }
 
         val portalInnteksmelding = portalInntektsmelding(
