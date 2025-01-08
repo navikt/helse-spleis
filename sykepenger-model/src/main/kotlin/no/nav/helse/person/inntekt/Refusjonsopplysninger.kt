@@ -7,19 +7,13 @@ import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningerUtDto
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt
 
-data class Refusjonsopplysning(
+data class Refusjonsopplysning private constructor(
     val meldingsreferanseId: UUID,
     val fom: LocalDate,
     val tom: LocalDate?,
@@ -31,7 +25,7 @@ data class Refusjonsopplysning(
         check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) " }
     }
 
-    val periode = fom til (tom ?: LocalDate.MAX)
+    private val periode = fom til (tom ?: LocalDate.MAX)
 
     private fun trim(periodeSomSkalFjernes: Periode): List<Refusjonsopplysning> {
         return this.periode
@@ -48,23 +42,11 @@ data class Refusjonsopplysning(
             }
     }
 
-    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp, avsender, tidsstempel)
-
-    private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
-        return if (dekker(dato)) oppdatertTom(dato.forrigeDag)
-        else this
-    }
-
     private fun begrensetFra(dato: LocalDate): Refusjonsopplysning? {
         if (periode.endInclusive < dato) return null
         if (periode.start >= dato) return this
         return Refusjonsopplysning(meldingsreferanseId, dato, tom, beløp, avsender, tidsstempel)
     }
-
-    private fun dekker(dag: LocalDate) = dag in periode
-
-    private fun aksepterer(skjæringstidspunkt: LocalDate, dag: LocalDate) =
-        dag >= skjæringstidspunkt && dag < fom
 
     private fun funksjoneltLik(other: Refusjonsopplysning) =
         this.periode == other.periode && this.beløp == other.beløp
@@ -103,9 +85,7 @@ data class Refusjonsopplysning(
     class Refusjonsopplysninger private constructor(
         refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
-        val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
-
-        internal val erTom = validerteRefusjonsopplysninger.isEmpty()
+        private val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
 
         constructor() : this(emptyList())
 
@@ -117,96 +97,22 @@ data class Refusjonsopplysning(
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.mergeInnNyeOpplysninger(other.validerteRefusjonsopplysninger))
         }
 
-        internal fun beløpstidslinje() = validerteRefusjonsopplysninger.fold(Beløpstidslinje()) { samletBeløpstidslinje, refusjonsopplysning ->
-            samletBeløpstidslinje + Beløpstidslinje.fra(
-                periode = refusjonsopplysning.fom til (refusjonsopplysning.tom ?: refusjonsopplysning.fom),
-                beløp = refusjonsopplysning.beløp,
-                kilde = Kilde(refusjonsopplysning.meldingsreferanseId, refusjonsopplysning.avsender, refusjonsopplysning.tidsstempel)
-            )
-        }
-
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false
             return validerteRefusjonsopplysninger == other.validerteRefusjonsopplysninger
         }
 
-
         override fun hashCode() = validerteRefusjonsopplysninger.hashCode()
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
 
-        private fun hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden: LocalDate?) = when (sisteOppholdsdagFørPerioden) {
-            null -> this
-            else -> Refusjonsopplysninger(validerteRefusjonsopplysninger.mapNotNull { it.begrensTil(sisteOppholdsdagFørPerioden) })
-        }
-
-        private fun harNødvendigRefusjonsopplysninger(
-            skjæringstidspunkt: LocalDate,
-            utbetalingsdager: List<LocalDate>,
-            aktivitetslogg: IAktivitetslogg,
-            organisasjonsnummer: String
-        ): Boolean {
-            val førsteRefusjonsopplysning = førsteRefusjonsopplysning() ?: return false.also {
-                aktivitetslogg.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for hele perioden (${utbetalingsdager.omsluttendePeriode})")
-            }
-            val dekkes = utbetalingsdager.filter { utbetalingsdag -> dekker(utbetalingsdag) }
-            val aksepteres = utbetalingsdager.filter { utbetalingsdag -> førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, utbetalingsdag) }
-            val mangler = (utbetalingsdager - dekkes - aksepteres).takeUnless { it.isEmpty() } ?: return true
-            aktivitetslogg.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${mangler.grupperSammenhengendePerioder()}")
-            return false
-        }
-
-        internal fun harNødvendigRefusjonsopplysninger(
-            skjæringstidspunkt: LocalDate,
-            utbetalingsdager: List<LocalDate>,
-            sisteOppholdsdagFørPerioden: LocalDate?,
-            aktivitetslogg: IAktivitetslogg,
-            organisasjonsnummer: String
-        ) = hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, aktivitetslogg, organisasjonsnummer)
-
-        internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
-
-        private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
-
-        private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
-
-        // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon
-        internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
-            // finner alle nye
-            val nye = this.validerteRefusjonsopplysninger.filter { opplysning ->
-                other.validerteRefusjonsopplysninger.none { it.meldingsreferanseId == opplysning.meldingsreferanseId }
-            }
-            // fjerner de hvor perioden og beløpet dekkes av forrige
-            val nyeUlik = nye.filterNot { opplysning ->
-                other.validerteRefusjonsopplysninger.any {
-                    opplysning.periode in it.periode && opplysning.beløp == it.beløp
-                }
-            }
-            // første nye ulike opplysning eller bare første nye opplysning
-            return nyeUlik.firstOrNull()?.fom ?: nye.firstOrNull()?.fom
-        }
-        
         internal companion object {
             private fun List<Refusjonsopplysning>.overlapper() = map { it.periode }.overlapper()
-            internal fun List<Refusjonsopplysning>.gjennopprett() = Refusjonsopplysninger(this)
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
 
             internal fun gjenopprett(dto: RefusjonsopplysningerInnDto) = Refusjonsopplysninger(
                 refusjonsopplysninger = dto.opplysninger.map { gjenopprett(it) }
             )
-        }
-
-        class RefusjonsopplysningerBuilder {
-            private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
-            fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply {
-                refusjonsopplysninger.add(tidsstempel to refusjonsopplysning)
-            }
-
-            private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger
-                .sortedWith(compareBy({ (tidsstempel, _) -> tidsstempel }, { (_, refusjonsopplysning) -> refusjonsopplysning.fom }))
-                .map { (_, refusjonsopplysning) -> refusjonsopplysning }
-
-            fun build() = Refusjonsopplysninger(emptyList<Refusjonsopplysning>().mergeInnNyeOpplysninger(sorterteRefusjonsopplysninger()))
         }
 
         internal fun dto() = RefusjonsopplysningerUtDto(

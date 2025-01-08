@@ -39,7 +39,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
@@ -50,7 +49,6 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.yearMonth
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -363,12 +361,8 @@ internal class InntektsgrunnlagTest {
         val a1Inntekt = 25000.månedlig
         val a2Inntekt = 5000.månedlig
         val inntekter = listOf(
-            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmeldinginntekt(a1Fom, UUID.randomUUID(), a1Inntekt), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), a1Fom, null, a1Inntekt), LocalDateTime.now())
-            }.build()),
-            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmeldinginntekt(a2Fom, UUID.randomUUID(), a2Inntekt), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), a2Fom, null, INGEN), LocalDateTime.now())
-            }.build()),
+            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmeldinginntekt(a1Fom, UUID.randomUUID(), a1Inntekt)),
+            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmeldinginntekt(a2Fom, UUID.randomUUID(), a2Inntekt)),
         )
 
         val inntektsgrunnlag = Inntektsgrunnlag(
@@ -385,17 +379,11 @@ internal class InntektsgrunnlagTest {
     fun `overstyre inntekt og refusjon - endre til samme`() {
         val skjæringstidsounkt = 1.januar
         val opprinnelig = listOf(
-            ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
-            }.build()),
-            ArbeidsgiverInntektsopplysning("a2", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig), RefusjonsopplysningerBuilder().apply {
-                leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, INGEN), LocalDateTime.now())
-            }.build()),
+            ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig)),
+            ArbeidsgiverInntektsopplysning("a2", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig)),
         )
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, EmptyLog)
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build())
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()))
         overstyring.leggTilInntekt(endretOpplysning)
 
         assertNotNull(overstyring.resultat())
@@ -406,24 +394,15 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
         val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 2000.månedlig), LocalDateTime.now())
-        }.build()
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), a1EndretRefusjonsopplysninger)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()))
         overstyring.leggTilInntekt(endretOpplysning)
 
-        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
+        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
 
@@ -432,27 +411,18 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
         val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
 
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning)
         overstyring.leggTilInntekt(endretOpplysning)
 
-        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1Refusjonsopplysninger)
+        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
 
@@ -461,24 +431,15 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
 
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning)
         overstyring.leggTilInntekt(endretOpplysning)
 
         assertNotNull(overstyring.resultat())
@@ -489,32 +450,20 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar
         val a1Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig)
         val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
-        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, INGEN), LocalDateTime.now())
-        }.build()
-        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a3EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
-        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
-            leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 25000.månedlig), LocalDateTime.now())
-        }.build()
 
-        val endretOpplysningA3 = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
+        val endretOpplysningA3 = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, a3EndretInntektsopplysning)
         overstyring.leggTilInntekt(endretOpplysningA3)
 
-        val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning)
         overstyring.leggTilInntekt(endretOpplysningA1)
 
         val resultat = overstyring.resultat()
