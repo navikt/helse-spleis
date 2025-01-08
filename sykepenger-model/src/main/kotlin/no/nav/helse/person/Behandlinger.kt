@@ -17,11 +17,9 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.avvist
@@ -80,9 +78,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val observatører = mutableListOf<BehandlingObserver>()
 
     val sisteBehandlingId get() = behandlinger.last().id
-    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) {
+    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, behandlingkilde: Behandlingkilde) {
         check(behandlinger.isEmpty())
-        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)
+        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, behandlingkilde)
         leggTilNyBehandling(behandling)
     }
 
@@ -142,10 +140,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().godkjenning(aktivitetslogg, builder)
     }
 
-    internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandlinger>): Utbetaling? {
+    internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandlinger>): Utbetaling? {
         val annullering = behandlinger.last().annuller(arbeidsgiver, hendelse, aktivitetslogg, this.behandlinger.toList()) ?: return null
         andreBehandlinger.forEach {
-            it.kobleAnnulleringTilAndre(arbeidsgiver, Behandlingkilde(hendelse.metadata), aktivitetslogg, annullering)
+            it.kobleAnnulleringTilAndre(arbeidsgiver, behandlingkilde, aktivitetslogg, annullering)
         }
         return annullering
     }
@@ -300,8 +298,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val registert: LocalDateTime,
         val avsender: Avsender
     ) {
-        constructor(metadata: HendelseMetadata) : this(metadata.meldingsreferanseId, metadata.innsendt, metadata.registrert, metadata.avsender)
-
         fun view() = BehandlingkildeView(meldingsreferanseId, innsendt, registert, avsender)
         internal fun dto() = BehandlingkildeDto(
             meldingsreferanseId = this.meldingsreferanseId,
@@ -1120,7 +1116,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
-            fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
+            fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, behandlingkilde: Behandlingkilde) =
                 Behandling(
                     observatører = observatører,
                     tilstand = Tilstand.Uberegnet,
@@ -1143,7 +1139,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         )
                     ),
                     avsluttet = null,
-                    kilde = Behandlingkilde(søknad.metadata)
+                    kilde = behandlingkilde
                 )
 
             fun List<Behandling>.jurist(jurist: BehandlingSubsumsjonslogg, vedtaksperiodeId: UUID) =

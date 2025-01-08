@@ -218,7 +218,7 @@ internal class Vedtaksperiode private constructor(
         registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.organisasjonsnummer, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad.metadata.behandlingkilde)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
@@ -635,7 +635,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: $egenmeldingsperioder")
             egenmeldingsperioder = emptyList()
         }
-        oppdaterHistorikk(Behandlingkilde(hendelse.metadata), inntektsmeldingDager(hendelse.metadata.meldingsreferanseId), bit.sykdomstidslinje, aktivitetslogg, validering = validering)
+        oppdaterHistorikk(hendelse.metadata.behandlingkilde, inntektsmeldingDager(hendelse.metadata.meldingsreferanseId), bit.sykdomstidslinje, aktivitetslogg, validering = validering)
     }
 
     internal fun håndterHistorikkFraInfotrygd(
@@ -700,6 +700,7 @@ internal class Vedtaksperiode private constructor(
         val annullering = behandlinger.håndterAnnullering(
             arbeidsgiver,
             hendelse,
+            hendelse.metadata.behandlingkilde,
             aktivitetslogg,
             vedtaksperioder.map { it.behandlinger }) ?: return
         aktivitetslogg.info("Forkaster denne, og senere perioder, som følge av annullering.")
@@ -770,7 +771,7 @@ internal class Vedtaksperiode private constructor(
         if (refusjonstidslinje.isEmpty()) return false
         return behandlinger.håndterRefusjonstidslinje(
             arbeidsgiver,
-            Behandlingkilde(hendelse.metadata),
+            hendelse.metadata.behandlingkilde,
             dokumentsporing,
             aktivitetslogg,
             person.beregnSkjæringstidspunkt(),
@@ -831,7 +832,7 @@ internal class Vedtaksperiode private constructor(
         registrerKontekst(aktivitetslogg)
         if (!kanForkastes(utbetalinger, aktivitetslogg)) return null
         aktivitetslogg.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        this.behandlinger.forkast(arbeidsgiver, Behandlingkilde(hendelse.metadata), hendelse.metadata.automatiskBehandling, aktivitetslogg)
+        this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetslogg)
         val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
         val trengerArbeidsgiveropplysninger =
             arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) == true
@@ -885,7 +886,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        oppdaterHistorikk(Behandlingkilde(hendelse.metadata), overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg) {
+        oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg) {
             // ingen validering å gjøre :(
         }
         igangsettOverstyringAvTidslinje(hendelse, aktivitetslogg)
@@ -980,8 +981,8 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         nesteTilstand: () -> Vedtaksperiodetilstand? = { null }
     ) {
-        videreførEksisterendeRefusjonsopplysninger(Behandlingkilde(søknad.metadata), søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
-        oppdaterHistorikk(Behandlingkilde(søknad.metadata), søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
+        videreførEksisterendeRefusjonsopplysninger(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
+        oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
@@ -1029,7 +1030,7 @@ internal class Vedtaksperiode private constructor(
                 søknad.nyeInntekterUnderveis(aktivitetslogg),
                 jurist
             )
-            oppdaterHistorikk(Behandlingkilde(søknad.metadata), søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
+            oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
                 søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
             }
         }
@@ -1492,7 +1493,7 @@ internal class Vedtaksperiode private constructor(
         if (revurdering.ikkeRelevant(periode)) return
         registrerKontekst(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
-        videreførEksisterendeOpplysninger(Behandlingkilde(revurdering.hendelse.metadata), aktivitetslogg)
+        videreførEksisterendeOpplysninger(revurdering.hendelse.metadata.behandlingkilde, aktivitetslogg)
     }
 
     internal fun inngåIRevurderingseventyret(
@@ -1573,7 +1574,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             ytelser.avgrensTil(periode)
             oppdaterHistorikk(
-                Behandlingkilde(ytelser.metadata),
+                ytelser.metadata.behandlingkilde,
                 andreYtelser(ytelser.metadata.meldingsreferanseId),
                 ytelser.sykdomstidslinje,
                 aktivitetslogg,
@@ -1779,7 +1780,7 @@ internal class Vedtaksperiode private constructor(
         revurdering.inngåSomRevurdering(this, aktivitetslogg, periode)
         behandlinger.sikreNyBehandling(
             arbeidsgiver,
-            Behandlingkilde(revurdering.hendelse.metadata),
+            revurdering.hendelse.metadata.behandlingkilde,
             person.beregnSkjæringstidspunkt(),
             arbeidsgiver.beregnArbeidsgiverperiode()
         )
@@ -2234,7 +2235,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-                vedtaksperiode.videreførEksisterendeOpplysninger(Behandlingkilde(påminnelse.metadata), aktivitetslogg)
+                vedtaksperiode.videreførEksisterendeOpplysninger(påminnelse.metadata.behandlingkilde, aktivitetslogg)
                 if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
                 aktivitetslogg.info("Ordnet opp i manglende inntekt/refusjon i AvventerRevurdering ved videreføring av eksisterende opplysninger.")
             }
@@ -2575,7 +2576,7 @@ internal class Vedtaksperiode private constructor(
             )
             vedtaksperiode.behandlinger.håndterRefusjonstidslinje(
                 arbeidsgiver = vedtaksperiode.arbeidsgiver,
-                behandlingkilde = Behandlingkilde(sykepengegrunnlagForArbeidsgiver.metadata),
+                behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
                 dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
                 aktivitetslogg = aktivitetslogg,
                 beregnSkjæringstidspunkt = vedtaksperiode.person.beregnSkjæringstidspunkt(),
@@ -2663,7 +2664,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.forkast(hendelse, aktivitetslogg)
                 return true
             }
-            vedtaksperiode.videreførEksisterendeOpplysninger(Behandlingkilde(hendelse.metadata), aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeOpplysninger(hendelse.metadata.behandlingkilde, aktivitetslogg)
             if (!vedtaksperiode.skalBehandlesISpeil()) {
                 vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
                 return true
@@ -3435,7 +3436,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.behandlinger.sikreNyBehandling(
                 vedtaksperiode.arbeidsgiver,
-                Behandlingkilde(revurdering.hendelse.metadata),
+                revurdering.hendelse.metadata.behandlingkilde,
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
@@ -3446,7 +3447,7 @@ internal class Vedtaksperiode private constructor(
                     "Startet omgjøring grunnet korrigerende søknad"
                 )
                 vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(
-                    behandlingkilde = Behandlingkilde(revurdering.hendelse.metadata),
+                    behandlingkilde = revurdering.hendelse.metadata.behandlingkilde,
                     dokumentsporing = null,
                     aktivitetslogg = aktivitetslogg
                 )
@@ -3494,7 +3495,7 @@ internal class Vedtaksperiode private constructor(
             if (!skalOmgjøres(vedtaksperiode)) return
             vedtaksperiode.behandlinger.sikreNyBehandling(
                 vedtaksperiode.arbeidsgiver,
-                Behandlingkilde(hendelse.metadata),
+                hendelse.metadata.behandlingkilde,
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
@@ -3574,7 +3575,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.behandlinger.sikreNyBehandling(
                 vedtaksperiode.arbeidsgiver,
-                Behandlingkilde(revurdering.hendelse.metadata),
+                revurdering.hendelse.metadata.behandlingkilde,
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
@@ -4027,3 +4028,6 @@ internal data class VedtaksperiodeView(
     val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
     val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje
 }
+
+private val HendelseMetadata.behandlingkilde get() =
+    Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
