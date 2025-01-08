@@ -4,6 +4,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
@@ -29,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -40,7 +42,7 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
-    fun `oppgir inntekt når vi allerede har skatt i inntektsgrunnlaget`() {
+    fun `oppgir inntekt når vi allerede har skatt i inntektsgrunnlaget - syk fra ghost samme måned`() {
         listOf(a1).nyeVedtak(januar, inntekt = 20_000.månedlig, ghosts = listOf(a2))
         a1 {
             assertVarsler(1.vedtaksperiode, listOf(RV_VV_2))
@@ -62,6 +64,33 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertEquals(25_000.månedlig, it.beløp)
             }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+        }
+    }
+
+    @Test
+    fun `oppgir inntekt når vi allerede har skatt i inntektsgrunnlaget - syk fra ghost annen måned`() {
+        listOf(a1).nyeVedtak(januar, inntekt = 20_000.månedlig, ghosts = listOf(a2))
+        a1 {
+            assertVarsler(1.vedtaksperiode, listOf(RV_VV_2))
+        }
+        a2 {
+            håndterSøknad(februar)
+            assertTrue(inspektør.inntekt(1.januar) is SkattSykepengegrunnlag)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList()))
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            inspektør.inntekt(1.vedtaksperiode).let {
+                assertTrue(it is Inntektsmeldinginntekt)
+                assertEquals(25_000.månedlig, it.beløp)
+            }
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
     }
 

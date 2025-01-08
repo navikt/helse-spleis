@@ -487,7 +487,7 @@ internal class Vedtaksperiode private constructor(
     private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val oppgittInntekt = hendelse.filterIsInstance<Arbeidsgiveropplysning.OppgittInntekt>().singleOrNull() ?: return emptyList()
         val inntektsmeldingInntekt = Inntektsmeldinginntekt(
-            dato = skjæringstidspunkt,
+            dato = skjæringstidspunkt, // Her skulle du kanskje tro at det riktige var å lagre på første fraværsdag, MEN siden dette er arbeidsgiveropplysninger fra HAG har de hensyntatt at man er syk i annen måned enn skjæringstidspunktet, så vi skal bare sluke det de opplyser om og lagre på skjæringstidspunktet.
             hendelseId = hendelse.metadata.meldingsreferanseId,
             beløp = oppgittInntekt.inntekt
         )

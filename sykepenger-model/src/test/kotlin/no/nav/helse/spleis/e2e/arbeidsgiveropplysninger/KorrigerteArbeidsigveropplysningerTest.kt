@@ -66,4 +66,18 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `opplyser om korrigerert inntekt OG refusjon på en allerede utbetalt periode - men beløpene er uendret`() {
+        a1 {
+            nyttVedtak(januar)
+            val inntektFørKorrigering = inspektør.inntekt(1.vedtaksperiode).beløp
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT), Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertEquals(inntektFørKorrigering, inspektør.inntekt(1.vedtaksperiode).beløp)
+            // Burde vi unngått en overstyring her?
+            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+        }
+    }
 }
