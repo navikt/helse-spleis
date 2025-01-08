@@ -42,7 +42,7 @@ internal class DagerFraInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     avsendersystem: Inntektsmelding.Avsendersystem,
     private val harFlereInntektsmeldinger: Boolean,
-    private val harOpphørAvNaturalytelser: Boolean,
+    private val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
     val hendelse: Hendelse
 ) {
     private companion object {
@@ -224,7 +224,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: List<Periode>? = null) {
         if (!skalValideresAv(periode)) return
-        if (harOpphørAvNaturalytelser) aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
+        if (opphørAvNaturalytelser.isNotEmpty()) aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
         validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg)
         validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg, gammelAgp)

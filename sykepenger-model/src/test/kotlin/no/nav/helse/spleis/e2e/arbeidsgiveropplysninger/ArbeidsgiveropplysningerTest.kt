@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -218,7 +219,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at det er opphør av naturalytelser`() {
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OpphørAvNaturalytelser)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OpphørAvNaturalytelser(listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))))
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
         }

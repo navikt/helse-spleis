@@ -693,7 +693,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding -- selv om håndteringen feiler`() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            harOpphørAvNaturalytelser = true
+            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))
         )
         nyPeriode(januar)
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)

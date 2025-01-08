@@ -120,7 +120,7 @@ internal abstract class AbstractObservableTest {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         orgnummer: String = ORGNUMMER,
-        harOpphørAvNaturalytelser: Boolean = false,
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         harFlereInntektsmeldinger: Boolean = false,
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
@@ -129,7 +129,7 @@ internal abstract class AbstractObservableTest {
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
         mottatt = LocalDateTime.now()

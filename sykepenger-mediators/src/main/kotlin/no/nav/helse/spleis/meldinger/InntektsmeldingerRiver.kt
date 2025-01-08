@@ -25,7 +25,7 @@ internal open class InntektsmeldingerRiver(
             "inntektsmeldingId", "arbeidstakerFnr",
             "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
-            "status", "arkivreferanse"
+            "status", "arkivreferanse", "opphoerAvNaturalytelser"
         )
         message.requireArray("arbeidsgiverperioder") {
             require("fom", JsonNode::asLocalDate)
@@ -47,7 +47,6 @@ internal open class InntektsmeldingerRiver(
         message.interestedIn(
             "refusjon.beloepPrMnd",
             "begrunnelseForReduksjonEllerIkkeUtbetalt",
-            "opphoerAvNaturalytelser",
             "harFlereInntektsmeldinger",
             "historiskeFolkeregisteridenter",
             "avsenderSystem",

@@ -40,7 +40,7 @@ internal open class InntektsmeldingMessage(
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
-    private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
+    private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
     private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
     private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem(vedtaksperiodeId, inntektsdato, førsteFraværsdag)
@@ -53,7 +53,7 @@ internal open class InntektsmeldingMessage(
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
             mottatt = mottatt
@@ -64,6 +64,15 @@ internal open class InntektsmeldingMessage(
     }
 
     internal companion object {
+        internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> {
+            return map { naturalytelse ->
+                Inntektsmelding.OpphørAvNaturalytelse(
+                    beløp = naturalytelse["beloepPrMnd"].takeIf(JsonNode::isDouble)?.asDouble()?.månedlig,
+                    fom = naturalytelse["fom"].asOptionalLocalDate(),
+                    naturalytelse = naturalytelse["naturalytelse"].takeIf(JsonNode::isTextual)?.asText(),
+                )
+            }
+        }
         internal fun JsonNode.tilAvsendersystem(vedtaksperiodeId: UUID?, inntektsdato: LocalDate?, førsteFraværsdag: LocalDate?): Inntektsmelding.Avsendersystem {
             val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
             return when (navn) {

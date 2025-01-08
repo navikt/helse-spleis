@@ -225,7 +225,7 @@ internal class SykmeldingsperioderTest {
         beregnetInntekt = Inntekt.INGEN,
         førsteFraværsdag = førsteFraværsdag,
         refusjon = Inntektsmelding.Refusjon(null, null),
-        harOpphørAvNaturalytelser = false,
+        opphørAvNaturalytelser = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
     ).validert()
 

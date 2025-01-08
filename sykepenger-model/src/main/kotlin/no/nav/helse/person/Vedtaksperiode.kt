@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -561,7 +561,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
-        if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
+        if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().all { it.opphørAvNaturalytelser.isEmpty() }) return emptyList()
         aktivitetslogg.funksjonellFeil(RV_IM_7)
         return emptyList()
     }

@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
@@ -150,7 +150,7 @@ internal fun AbstractEndToEndTest.klassiskInntektsmelding(
     førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = a1,
-    harOpphørAvNaturalytelser: Boolean = false,
+    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder = LPS
@@ -161,7 +161,7 @@ internal fun AbstractEndToEndTest.klassiskInntektsmelding(
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             id = id,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
@@ -209,7 +209,7 @@ internal fun AbstractEndToEndTest.portalInntektsmelding(
     vedtaksperiodeId: UUID,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = a1,
-    harOpphørAvNaturalytelser: Boolean = false,
+    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     inntektsdato: LocalDate? = null,
@@ -223,7 +223,7 @@ internal fun AbstractEndToEndTest.portalInntektsmelding(
         beregnetInntekt = beregnetInntekt,
         vedtaksperiodeId = vedtaksperiodeId,
         refusjon = refusjon,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         id = id,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,

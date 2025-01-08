@@ -39,7 +39,7 @@ class Inntektsmelding(
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-    private val harOpphørAvNaturalytelser: Boolean,
+    private val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
     private val harFlereInntektsmeldinger: Boolean,
     private val avsendersystem: Avsendersystem,
     mottatt: LocalDateTime
@@ -65,7 +65,7 @@ class Inntektsmelding(
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             avsendersystem = avsendersystem,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
             hendelse = this
         )
     }
@@ -110,6 +110,12 @@ class Inntektsmelding(
     internal fun inntektHåndtert() {
         håndtertInntekt = true
     }
+
+    data class OpphørAvNaturalytelse(
+        val beløp: Inntekt?,
+        val fom: LocalDate?,
+        val naturalytelse: String?
+    )
 
     sealed interface Avsendersystem {
         data class Altinn(internal val førsteFraværsdag: LocalDate?) : Avsendersystem

@@ -14,6 +14,7 @@ import no.nav.helse.fredag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -463,7 +464,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Håndterer ikke inntektsmelding fra portal`() {
         nyttVedtak(1.januar(2016) til 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), harOpphørAvNaturalytelser = true, vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL")), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
@@ -1329,7 +1330,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             ),
             beregnetInntekt = INNTEKT,
             refusjon = Refusjon(INNTEKT, null, emptyList()),
-            harOpphørAvNaturalytelser = true
+            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 18.april, "BIL"))
         )
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
@@ -1347,7 +1348,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(29.mars(2021) til 31.mars(2021), 1.april(2021) til 12.april(2021)),
             beregnetInntekt = INGEN,
             refusjon = Refusjon(INNTEKT, null, emptyList()),
-            harOpphørAvNaturalytelser = true
+            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 18.april, "BIL"))
         )
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
@@ -1733,7 +1734,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            harOpphørAvNaturalytelser = true
+            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))
         )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }

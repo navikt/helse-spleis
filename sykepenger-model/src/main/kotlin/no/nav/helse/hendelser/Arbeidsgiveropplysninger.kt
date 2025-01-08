@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.valider
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.nesteDag
@@ -24,7 +24,7 @@ sealed interface Arbeidsgiveropplysning {
         }
     }
 
-    data object OpphørAvNaturalytelser : Arbeidsgiveropplysning
+    data class OpphørAvNaturalytelser(val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>) : Arbeidsgiveropplysning
     data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>) : Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
     }
@@ -117,7 +117,7 @@ sealed interface Arbeidsgiveropplysning {
             refusjon: Inntektsmelding.Refusjon?,
             arbeidsgiverperioder: List<Periode>?,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-            harOpphørAvNaturalytelser: Boolean
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>
         ): List<Arbeidsgiveropplysning> {
             val oppgittInntekt = beregnetInntekt
                 ?.takeUnless { it < INGEN }
@@ -132,7 +132,7 @@ sealed interface Arbeidsgiveropplysning {
                 oppgittArbeidsgiverperiode,
                 refusjon?.somOppgittRefusjon(),
                 begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
-                OpphørAvNaturalytelser.takeIf { harOpphørAvNaturalytelser }
+                OpphørAvNaturalytelser(opphørAvNaturalytelser)
             )
         }
 

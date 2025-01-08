@@ -461,7 +461,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = a1,
     id: UUID = UUID.randomUUID(),
-    harOpphørAvNaturalytelser: Boolean = false,
+    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder? = null,
@@ -496,7 +496,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
                 refusjon = refusjon,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+                opphørAvNaturalytelser = opphørAvNaturalytelser
             )
         )
 
@@ -511,7 +511,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             vedtaksperiodeId = vedtaksperiodeId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             inntektsdato = inntektsdato,
@@ -532,7 +532,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = utledetAvsendersystem
@@ -552,7 +552,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
     orgnummer: String = a1,
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     id: UUID = UUID.randomUUID(),
-    harOpphørAvNaturalytelser: Boolean = false,
+    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder = NAV_NO
@@ -564,7 +564,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
         vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
         refusjon = refusjon,
         orgnummer = orgnummer,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         avsendersystem = avsendersystem,

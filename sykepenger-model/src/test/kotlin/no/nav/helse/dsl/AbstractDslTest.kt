@@ -2,7 +2,7 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
@@ -295,7 +295,7 @@ internal abstract class AbstractDslTest {
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        harOpphørAvNaturalytelser: Boolean = false,
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now()
@@ -306,7 +306,7 @@ internal abstract class AbstractDslTest {
                 beregnetInntekt,
                 førsteFraværsdag,
                 refusjon,
-                harOpphørAvNaturalytelser,
+                opphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
                 mottatt = mottatt
@@ -319,7 +319,7 @@ internal abstract class AbstractDslTest {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        harOpphørAvNaturalytelser: Boolean = false,
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID()
     ) =
@@ -329,7 +329,7 @@ internal abstract class AbstractDslTest {
                 beregnetInntekt,
                 vedtaksperiodeId,
                 refusjon,
-                harOpphørAvNaturalytelser,
+                opphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id
             )
@@ -460,7 +460,7 @@ internal abstract class AbstractDslTest {
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        harOpphørAvNaturalytelser: Boolean = false,
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1,
@@ -471,7 +471,7 @@ internal abstract class AbstractDslTest {
             beregnetInntekt,
             førsteFraværsdag,
             refusjon,
-            harOpphørAvNaturalytelser,
+            opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
             id,
             mottatt = mottatt
