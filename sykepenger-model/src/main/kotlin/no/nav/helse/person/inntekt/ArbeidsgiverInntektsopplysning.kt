@@ -85,15 +85,15 @@ data class ArbeidsgiverInntektsopplysning(
             orgnummer = this.orgnummer,
             gjelder = nyGjelder,
             inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning),
-            refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger)
+            refusjonsopplysninger = gammel.refusjonsopplysninger
         )
     }
 
     private fun rullTilbake() = ArbeidsgiverInntektsopplysning(
-        this.orgnummer,
+        orgnummer = this.orgnummer,
         gjelder = this.gjelder,
-        this.inntektsopplysning.omregnetÅrsinntekt(),
-        refusjonsopplysninger
+        inntektsopplysning = this.inntektsopplysning.omregnetÅrsinntekt(),
+        refusjonsopplysninger = refusjonsopplysninger
     )
 
     private fun subsummer(subsumsjonslogg: Subsumsjonslogg, opptjening: Opptjening?) {

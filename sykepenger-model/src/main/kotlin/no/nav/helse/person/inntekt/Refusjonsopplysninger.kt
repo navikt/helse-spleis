@@ -8,7 +8,6 @@ import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningerUtDto
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
@@ -27,49 +26,9 @@ data class Refusjonsopplysning private constructor(
 
     private val periode = fom til (tom ?: LocalDate.MAX)
 
-    private fun trim(periodeSomSkalFjernes: Periode): List<Refusjonsopplysning> {
-        return this.periode
-            .trim(periodeSomSkalFjernes)
-            .map {
-                Refusjonsopplysning(
-                    fom = it.start,
-                    tom = it.endInclusive.takeUnless { tom -> tom == LocalDate.MAX },
-                    beløp = this.beløp,
-                    meldingsreferanseId = this.meldingsreferanseId,
-                    avsender = this.avsender,
-                    tidsstempel = this.tidsstempel
-                )
-            }
-    }
-
-    private fun begrensetFra(dato: LocalDate): Refusjonsopplysning? {
-        if (periode.endInclusive < dato) return null
-        if (periode.start >= dato) return this
-        return Refusjonsopplysning(meldingsreferanseId, dato, tom, beløp, avsender, tidsstempel)
-    }
-
-    private fun funksjoneltLik(other: Refusjonsopplysning) =
-        this.periode == other.periode && this.beløp == other.beløp
-
-    override fun toString() = "$periode, ${beløp.daglig} ($meldingsreferanseId), ($avsender), ($tidsstempel)"
+    override fun toString() = "$periode ${beløp.daglig} fra $avsender mottatt $tidsstempel ($$meldingsreferanseId)"
 
     internal companion object {
-        private fun List<Refusjonsopplysning>.mergeInnNyeOpplysninger(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-            val begrensetFra = minOfOrNull { it.fom } ?: LocalDate.MIN
-            return nyeOpplysninger
-                .fold(this) { resultat, nyOpplysning -> resultat.mergeInnNyOpplysning(nyOpplysning, begrensetFra) }
-                .sortedBy { it.fom }
-        }
-
-        private fun List<Refusjonsopplysning>.mergeInnNyOpplysning(nyOpplysning: Refusjonsopplysning, begrensetFra: LocalDate): List<Refusjonsopplysning> {
-            // begrenser refusjonsopplysningen slik at den ikke kan strekke tilbake i tid
-            val nyOpplysningBegrensetStart = nyOpplysning.begrensetFra(begrensetFra) ?: return this
-            // bevarer eksisterende opplysning hvis ny opplysning finnes fra før (dvs. vi bevarer meldingsreferanseId på forrige)
-            if (any { it.funksjoneltLik(nyOpplysningBegrensetStart) }) return this
-            // Beholder de delene som ikke dekkes av den nye opplysningen og legger til den nye opplysningen
-            return flatMap { eksisterendeOpplysning -> eksisterendeOpplysning.trim(nyOpplysningBegrensetStart.periode) }.plus(nyOpplysningBegrensetStart)
-        }
-
         internal fun gjenopprett(dto: RefusjonsopplysningInnDto): Refusjonsopplysning {
             return Refusjonsopplysning(
                 meldingsreferanseId = dto.meldingsreferanseId,
@@ -82,6 +41,10 @@ data class Refusjonsopplysning private constructor(
         }
     }
 
+    @Deprecated(
+        message = "Denne klassen brukes nå kun for gjenoppretting av refusjonsopplysninger som allerede ligger i inntektsgrunnlag, men det legges ikke til nytt. Denne 'gamle' informasjonen brukes ikke, så hele klassen kan slettes når vi føler oss trygge.",
+        replaceWith = ReplaceWith("Refusjonsopplysninger på behandlinger i form av en beløpstidslinje")
+    )
     class Refusjonsopplysninger private constructor(
         refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
@@ -91,10 +54,6 @@ data class Refusjonsopplysning private constructor(
 
         init {
             check(!validerteRefusjonsopplysninger.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon: $refusjonsopplysninger" }
-        }
-
-        internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
-            return Refusjonsopplysninger(validerteRefusjonsopplysninger.mergeInnNyeOpplysninger(other.validerteRefusjonsopplysninger))
         }
 
         override fun equals(other: Any?): Boolean {
