@@ -172,6 +172,10 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger).håndter(Person::håndter)
         }
 
+        internal fun håndterKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning) {
+            arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger).håndter(Person::håndter)
+        }
+
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
             egenmeldinger: List<Periode> = emptyList(),

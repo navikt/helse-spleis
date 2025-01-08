@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -209,6 +210,11 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(arbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(arbeidsgiveropplysninger, aktivitetslogg)
         håndterGjenoppta(arbeidsgiveropplysninger, aktivitetslogg)
+    }
+
+    fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
+        registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.map { it::class.simpleName }.joinToString()}")
+        håndterGjenoppta(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
     }
 
     fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
@@ -710,7 +716,9 @@ class Person private constructor(
                     )
                 )
             }
-            else -> { /* gjør ingenting */ }
+
+            else -> { /* gjør ingenting */
+            }
         }
 
         val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)

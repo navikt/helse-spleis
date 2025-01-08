@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
@@ -61,7 +62,6 @@ import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
-
 
 internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
 
@@ -234,6 +234,21 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         registrert: LocalDateTime = innsendt.plusSeconds(1),
         vararg opplysninger: Arbeidsgiveropplysning
     ) = Arbeidsgiveropplysninger(
+        meldingsreferanseId = meldingsreferanseId,
+        innsendt = innsendt,
+        registrert = registrert,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = opplysninger.toList()
+    )
+
+    internal fun lagKorrigerteArbeidsgiveropplysninger(
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID,
+        innsendt: LocalDateTime = LocalDateTime.now(),
+        registrert: LocalDateTime = innsendt.plusSeconds(1),
+        vararg opplysninger: Arbeidsgiveropplysning
+    ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = meldingsreferanseId,
         innsendt = innsendt,
         registrert = registrert,
@@ -520,5 +535,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
-        ), meldingsreferanseId = hendelseId, tidsstempel)
+        ), meldingsreferanseId = hendelseId, tidsstempel
+        )
 }

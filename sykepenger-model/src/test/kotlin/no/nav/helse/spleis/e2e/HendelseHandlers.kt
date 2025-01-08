@@ -14,6 +14,7 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -484,17 +485,19 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         }
         val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" })
 
-        val arbeidsgiveropplysninger = Arbeidsgiveropplysninger.fraInntektsmelding(
+        val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
             meldingsreferanseId = id,
             innsendt = LocalDateTime.now(),
             registrert = LocalDateTime.now().plusSeconds(1),
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            beregnetInntekt = beregnetInntekt,
-            refusjon = refusjon,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+            opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                beregnetInntekt = beregnetInntekt,
+                refusjon = refusjon,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+            )
         )
 
         if (erForespurtNavPortal(utledetAvsendersystem)) {

@@ -181,26 +181,28 @@ class Arbeidsgiveropplysninger(
         registrert = registrert,
         automatiskBehandling = false
     )
+}
 
-    companion object {
-        fun fraInntektsmelding(
-            meldingsreferanseId: UUID,
-            innsendt: LocalDateTime,
-            registrert: LocalDateTime,
-            organisasjonsnummer: String,
-            vedtaksperiodeId: UUID,
-            beregnetInntekt: Inntekt?,
-            refusjon: Inntektsmelding.Refusjon?,
-            arbeidsgiverperioder: List<Periode>?,
-            begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-            harOpphørAvNaturalytelser: Boolean
-        ) = Arbeidsgiveropplysninger(
-            meldingsreferanseId = meldingsreferanseId,
-            innsendt = innsendt,
-            registrert = registrert,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(beregnetInntekt, refusjon, arbeidsgiverperioder, begrunnelseForReduksjonEllerIkkeUtbetalt, harOpphørAvNaturalytelser)
-        )
+class KorrigerteArbeidsgiveropplysninger(
+    meldingsreferanseId: UUID,
+    innsendt: LocalDateTime,
+    registrert: LocalDateTime,
+    organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val opplysninger: List<Arbeidsgiveropplysning>
+) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
+
+    init {
+        opplysninger.valider()
     }
+
+    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(organisasjonsnummer)
+
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = ARBEIDSGIVER,
+        innsendt = innsendt,
+        registrert = registrert,
+        automatiskBehandling = false
+    )
 }
