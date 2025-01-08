@@ -3,13 +3,10 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -160,19 +157,5 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
                 add(dagen.somPeriode())
             }
         }
-
-        private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, sisteOppholdsdagFørUtbetalingsdager: () -> LocalDate?): Boolean {
-            val utbetalingsdager = arbeidsgiverperiode.utbetalingsdagerI(periode)
-            if (utbetalingsdager.isEmpty()) return true
-            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager(), aktivitetslogg, organisasjonsnummer)
-        }
-
-        internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) {
-                arbeidsgiverperiode.oppholdsdager.flatten().lastOrNull { oppholdsdag -> oppholdsdag < periode.start } ?: arbeidsgiverperiode.firstOrNull()?.forrigeDag
-            }
-
-        internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, aktivitetslogg, organisasjonsnummer) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
     }
 }

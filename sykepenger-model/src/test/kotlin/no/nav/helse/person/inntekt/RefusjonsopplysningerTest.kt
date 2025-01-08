@@ -23,8 +23,6 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.harNødvendigeRefusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -365,38 +363,6 @@ internal class RefusjonsopplysningerTest {
     }
 
     @Test
-    fun `Har ikke nødvendig refusjonsopplysninger etter oppholdsdager`() {
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply {
-            (17.januar til 25.januar).forEach { utbetalingsdag(it) }
-            (26.januar til 31.januar).forEach { oppholdsdag(it) }
-            (februar).forEach { utbetalingsdag(it) }
-        }
-        val refusjonsopplysninger = Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 20000.månedlig).refusjonsopplysninger
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, refusjonsopplysninger, arbeidsgiverperiode))
-        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, februar, refusjonsopplysninger, arbeidsgiverperiode))
-    }
-
-    @Test
-    fun `Har nødvendige refusjonsopplysninger når vi får nye refusjonsopplysninger for perioden etter oppholdet`() {
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply {
-            (17.januar til 25.januar).forEach { utbetalingsdag(it) }
-            (26.januar til 31.januar).forEach { oppholdsdag(it) }
-            (februar).forEach { utbetalingsdag(it) }
-        }
-        // IM: FF = 1.januar, AGP = 1.januar - 16.januar
-        val refusjonsopplysningerJanuar = Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 20000.månedlig).refusjonsopplysninger
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
-        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, februar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
-
-        // IM: FF = 1.februar, AGP = 1.januar - 16.januar
-        val refusjonsopplysningerFebruar = Refusjonsopplysning(meldingsreferanseId2, 1.februar, null, 25000.månedlig).refusjonsopplysninger
-
-        val oppdaterteRefusjonsopplysninger = refusjonsopplysningerJanuar.merge(refusjonsopplysningerFebruar)
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, februar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
-    }
-
-    @Test
     fun `finner riktige beløp`() {
         val skjæringstidspunkt = 1.januar
 
@@ -614,9 +580,6 @@ internal class RefusjonsopplysningerTest {
         private val meldingsreferanseId4 = UUID.fromString("00000000-0000-0000-0000-000000000004")
         private val meldingsreferanseId5 = UUID.fromString("00000000-0000-0000-0000-000000000005")
         private val meldingsreferanseId6 = UUID.fromString("00000000-0000-0000-0000-000000000006")
-
-        private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
-            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
 
         private fun assertGjenopprettetRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>) {
             assertEquals(refusjonsopplysninger, refusjonsopplysninger.gjennopprett().inspektør.refusjonsopplysninger)
