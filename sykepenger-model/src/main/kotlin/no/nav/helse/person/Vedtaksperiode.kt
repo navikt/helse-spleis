@@ -282,7 +282,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         if (!tilstand.erFerdigBehandlet) return
-        behandlinger.validerFerdigBehandlet(hendelse, aktivitetslogg)
+        behandlinger.validerFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
     }
 
     internal fun håndter(
@@ -831,7 +831,7 @@ internal class Vedtaksperiode private constructor(
         registrerKontekst(aktivitetslogg)
         if (!kanForkastes(utbetalinger, aktivitetslogg)) return null
         aktivitetslogg.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        this.behandlinger.forkast(arbeidsgiver, hendelse, aktivitetslogg)
+        this.behandlinger.forkast(arbeidsgiver, Behandlingkilde(hendelse.metadata), hendelse.metadata.automatiskBehandling, aktivitetslogg)
         val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
         val trengerArbeidsgiveropplysninger =
             arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) == true
@@ -1378,13 +1378,13 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    override fun behandlingForkastet(behandlingId: UUID, hendelse: Hendelse) {
+    override fun behandlingForkastet(behandlingId: UUID, automatiskBehandling: Boolean) {
         person.behandlingForkastet(
             PersonObserver.BehandlingForkastetEvent(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId,
-                automatiskBehandling = hendelse.metadata.automatiskBehandling
+                automatiskBehandling = automatiskBehandling
             )
         )
     }
@@ -1779,7 +1779,7 @@ internal class Vedtaksperiode private constructor(
         revurdering.inngåSomRevurdering(this, aktivitetslogg, periode)
         behandlinger.sikreNyBehandling(
             arbeidsgiver,
-            revurdering.hendelse,
+            Behandlingkilde(revurdering.hendelse.metadata),
             person.beregnSkjæringstidspunkt(),
             arbeidsgiver.beregnArbeidsgiverperiode()
         )
@@ -3435,7 +3435,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.behandlinger.sikreNyBehandling(
                 vedtaksperiode.arbeidsgiver,
-                revurdering.hendelse,
+                Behandlingkilde(revurdering.hendelse.metadata),
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
@@ -3494,7 +3494,7 @@ internal class Vedtaksperiode private constructor(
             if (!skalOmgjøres(vedtaksperiode)) return
             vedtaksperiode.behandlinger.sikreNyBehandling(
                 vedtaksperiode.arbeidsgiver,
-                hendelse,
+                Behandlingkilde(hendelse.metadata),
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
@@ -3574,7 +3574,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.behandlinger.sikreNyBehandling(
                 vedtaksperiode.arbeidsgiver,
-                revurdering.hendelse,
+                Behandlingkilde(revurdering.hendelse.metadata),
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )

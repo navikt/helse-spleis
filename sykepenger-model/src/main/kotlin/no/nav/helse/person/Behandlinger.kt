@@ -17,7 +17,6 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -122,7 +121,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().behandlingVenter(builder)
     }
 
-    internal fun validerFerdigBehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(hendelse, aktivitetslogg)
+    internal fun validerFerdigBehandlet(meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun gjelderIkkeFor(hendelse: UtbetalingsavgjørelseHendelse) = siste?.gjelderFor(hendelse) != true
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
@@ -146,13 +145,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandlinger>): Utbetaling? {
         val annullering = behandlinger.last().annuller(arbeidsgiver, hendelse, aktivitetslogg, this.behandlinger.toList()) ?: return null
         andreBehandlinger.forEach {
-            it.kobleAnnulleringTilAndre(arbeidsgiver, hendelse, aktivitetslogg, annullering)
+            it.kobleAnnulleringTilAndre(arbeidsgiver, Behandlingkilde(hendelse.metadata), aktivitetslogg, annullering)
         }
         return annullering
     }
 
-    private fun kobleAnnulleringTilAndre(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling) {
-        leggTilNyBehandling(behandlinger.last().annuller(arbeidsgiver, hendelse, aktivitetslogg, annullering, behandlinger.toList()))
+    private fun kobleAnnulleringTilAndre(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling) {
+        leggTilNyBehandling(behandlinger.last().annuller(arbeidsgiver, behandlingkilde, aktivitetslogg, annullering, behandlinger.toList()))
     }
 
     internal fun nyUtbetaling(
@@ -166,9 +165,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, grunnlagsdata, aktivitetslogg, maksdatoresultat, utbetalingstidslinje)
     }
 
-    internal fun forkast(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        leggTilNyBehandling(behandlinger.last().forkastVedtaksperiode(arbeidsgiver, hendelse, aktivitetslogg))
-        behandlinger.last().forkastetBehandling(hendelse)
+    internal fun forkast(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, automatiskBehandling: Boolean, aktivitetslogg: IAktivitetslogg) {
+        leggTilNyBehandling(behandlinger.last().forkastVedtaksperiode(arbeidsgiver, behandlingkilde, aktivitetslogg))
+        behandlinger.last().forkastetBehandling(automatiskBehandling)
     }
 
     internal fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {
@@ -209,8 +208,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     // sørger for ny behandling når vedtaksperioden går ut av Avsluttet/AUU,
     // men bare hvis det ikke er laget en ny allerede fra før
-    fun sikreNyBehandling(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
-        leggTilNyBehandling(behandlinger.last().sikreNyBehandling(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode))
+    fun sikreNyBehandling(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
+        leggTilNyBehandling(behandlinger.last().sikreNyBehandling(arbeidsgiver, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode))
     }
 
     private fun leggTilNyBehandling(behandling: Behandling?) {
@@ -721,8 +720,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             tilstand.avsluttUtenVedtak(this, arbeidsgiver, aktivitetslogg, utbetalingstidslinje)
         }
 
-        internal fun forkastVedtaksperiode(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
-            return tilstand.forkastVedtaksperiode(this, arbeidsgiver, hendelse, aktivitetslogg)
+        internal fun forkastVedtaksperiode(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
+            return tilstand.forkastVedtaksperiode(this, arbeidsgiver, behandlingkilde, aktivitetslogg)
         }
 
         private fun tilstand(nyTilstand: Tilstand, aktivitetslogg: IAktivitetslogg) {
@@ -965,7 +964,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private fun sikreNyBehandling(
             arbeidsgiver: Arbeidsgiver,
             starttilstand: Tilstand,
-            hendelse: Hendelse,
+            behandlingkilde: Behandlingkilde,
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>
         ): Behandling {
@@ -975,28 +974,28 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
                 avsluttet = null,
-                kilde = Behandlingkilde(hendelse.metadata)
+                kilde = behandlingkilde
             )
         }
 
-        private fun nyAnnullertBehandling(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling {
+        private fun nyAnnullertBehandling(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling {
             arbeidsgiver.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
                 tilstand = Tilstand.AnnullertPeriode,
                 endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata)),
                 avsluttet = LocalDateTime.now(),
-                kilde = Behandlingkilde(hendelse.metadata)
+                kilde = behandlingkilde
             )
         }
 
         fun sikreNyBehandling(
             arbeidsgiver: Arbeidsgiver,
-            hendelse: Hendelse,
+            behandlingkilde: Behandlingkilde,
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>
         ): Behandling? {
-            return tilstand.sikreNyBehandling(this, arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+            return tilstand.sikreNyBehandling(this, arbeidsgiver, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
         }
 
         fun tillaterNyBehandling(other: Behandling): Boolean {
@@ -1065,10 +1064,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.nyBehandling(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, endringer.dokumentsporing.søknadIder()) }
         }
 
-        internal fun forkastetBehandling(hendelse: Hendelse) {
+        internal fun forkastetBehandling(automatiskBehandling: Boolean) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
             check(this.tilstand in setOf(Tilstand.TilInfotrygd, Tilstand.AnnullertPeriode))
-            observatører.forEach { it.behandlingForkastet(id, hendelse) }
+            observatører.forEach { it.behandlingForkastet(id, automatiskBehandling) }
         }
 
         internal fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg) {
@@ -1092,10 +1091,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return sisteVedtak.håndterAnnullering(arbeidsgiver, hendelse, aktivitetslogg)
         }
 
-        fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, andreBehandlinger: List<Behandling>): Behandling? {
+        fun annuller(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, andreBehandlinger: List<Behandling>): Behandling? {
             val sisteVedtak = andreBehandlinger.lastOrNull { behandlingen -> behandlingen.erFattetVedtak() } ?: return null
             if (true != sisteVedtak.utbetaling()?.hørerSammen(annullering)) return null
-            return tilstand.annuller(this, arbeidsgiver, hendelse, aktivitetslogg, annullering, checkNotNull(sisteVedtak.gjeldende.grunnlagsdata))
+            return tilstand.annuller(this, arbeidsgiver, behandlingkilde, aktivitetslogg, annullering, checkNotNull(sisteVedtak.gjeldende.grunnlagsdata))
         }
 
         private fun tillaterOverlappendeUtbetalingerForkasting(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
@@ -1110,10 +1109,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tillaterOverlappendeUtbetalingerForkasting(aktivitetslogg, arbeidsgiverUtbetalinger)
         }
 
-        internal fun validerFerdigBehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) = tilstand.validerFerdigBehandlet(this, hendelse, aktivitetslogg)
-        private fun valideringFeilet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, feil: String) {
+        internal fun validerFerdigBehandlet(meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) = tilstand.validerFerdigBehandlet(this, meldingsreferanseId, aktivitetslogg)
+        private fun valideringFeilet(meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
-            if (kilde.meldingsreferanseId == hendelse.metadata.meldingsreferanseId) error(feil)
+            if (kilde.meldingsreferanseId == meldingsreferanseId) error(feil)
             // Om det er krøll fra tidligere logger vi bare
             else aktivitetslogg.info("Eksisterende ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
         }
@@ -1229,7 +1228,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun annuller(
                 behandling: Behandling,
                 arbeidsgiver: Arbeidsgiver,
-                hendelse: AnnullerUtbetaling,
+                behandlingkilde: Behandlingkilde,
                 aktivitetslogg: IAktivitetslogg,
                 annullering: Utbetaling,
                 grunnlagsdata: VilkårsgrunnlagElement
@@ -1237,7 +1236,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 return null
             }
 
-            fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
+            fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
                 behandling.tilstand(TilInfotrygd, aktivitetslogg)
                 return null
             }
@@ -1311,14 +1310,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean
-            fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
+            fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
                 return null
             }
 
             fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean = false
             fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = false
-            fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-                behandling.valideringFeilet(hendelse, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
+            fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
+                behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
             }
 
             data object Uberegnet : Tilstand {
@@ -1402,7 +1401,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun annuller(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
-                    hendelse: AnnullerUtbetaling,
+                    behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg,
                     annullering: Utbetaling,
                     grunnlagsdata: VilkårsgrunnlagElement
@@ -1432,9 +1431,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
 
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
-                    return super.forkastVedtaksperiode(behandling, arbeidsgiver, hendelse, aktivitetslogg)
+                    return super.forkastVedtaksperiode(behandling, arbeidsgiver, behandlingkilde, aktivitetslogg)
                 }
 
                 override fun beregnSkjæringstidspunkt(
@@ -1521,13 +1520,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object BeregnetRevurdering : Tilstand by (Beregnet) {
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
-                    return super.forkastVedtaksperiode(behandling, arbeidsgiver, hendelse, aktivitetslogg)
+                    return super.forkastVedtaksperiode(behandling, arbeidsgiver, behandlingkilde, aktivitetslogg)
                 }
 
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
-                override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling? {
+                override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling? {
                     behandling.gjeldende.utbetaling!!.forkast(aktivitetslogg)
                     behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata))
                     behandling.tilstand(AnnullertPeriode, aktivitetslogg)
@@ -1579,16 +1578,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object RevurdertVedtakAvvist : Tilstand {
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {
                     error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
-                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetRevurdering, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
+                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetRevurdering, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
                 }
 
-                override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling {
-                    return behandling.nyAnnullertBehandling(arbeidsgiver, hendelse, annullering, grunnlagsdata)
+                override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling {
+                    return behandling.nyAnnullertBehandling(arbeidsgiver, behandlingkilde, annullering, grunnlagsdata)
                 }
 
                 override fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean {
@@ -1603,7 +1602,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
 
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
                     error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
                 }
 
@@ -1611,8 +1610,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return true
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
-                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetRevurdering, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
+                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetRevurdering, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Boolean {
@@ -1658,14 +1657,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.avsluttetUtenVedtak(aktivitetslogg)
                 }
 
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {
                     arbeidsgiver.låsOpp(behandling.periode)
                     return Behandling(
                         observatører = behandling.observatører,
                         tilstand = TilInfotrygd,
                         endringer = listOf(behandling.gjeldende.kopierUtenUtbetaling()),
                         avsluttet = LocalDateTime.now(),
-                        kilde = Behandlingkilde(hendelse.metadata)
+                        kilde = behandlingkilde
                     )
                 }
 
@@ -1689,8 +1688,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return true
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
-                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetOmgjøring, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
+                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetOmgjøring, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterEndring(
@@ -1706,9 +1705,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return behandling.nyBehandlingMedEndring(arbeidsgiver, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetOmgjøring)
                 }
 
-                override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
-                    behandling.valideringFeilet(hendelse, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand AvsluttetUtenVedtak, men med uventede tidsstempler.")
+                    behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand AvsluttetUtenVedtak, men med uventede tidsstempler.")
                 }
             }
 
@@ -1721,16 +1720,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun annuller(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
-                    hendelse: AnnullerUtbetaling,
+                    behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg,
                     annullering: Utbetaling,
                     grunnlagsdata: VilkårsgrunnlagElement
                 ): Behandling {
-                    return behandling.nyAnnullertBehandling(arbeidsgiver, hendelse, annullering, grunnlagsdata)
+                    return behandling.nyAnnullertBehandling(arbeidsgiver, behandlingkilde, annullering, grunnlagsdata)
                 }
 
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {
                     error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
                 }
 
@@ -1738,8 +1737,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return true
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
-                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetRevurdering, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling {
+                    return behandling.sikreNyBehandling(arbeidsgiver, UberegnetRevurdering, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterRefusjonsopplysninger(
@@ -1764,9 +1763,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>
                 ) = behandling.nyBehandlingMedEndring(arbeidsgiver, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
 
-                override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet != null) return
-                    behandling.valideringFeilet(hendelse, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand VedtakIverksatt, men med uventede tidsstempler.")
+                    behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand VedtakIverksatt, men med uventede tidsstempler.")
                 }
             }
 
@@ -1777,7 +1776,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
                 override fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
-                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
+                override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
                     behandling.vedtakAnnullert(aktivitetslogg)
                     return null
                 }
@@ -1785,7 +1784,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun annuller(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
-                    hendelse: AnnullerUtbetaling,
+                    behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg,
                     annullering: Utbetaling,
                     grunnlagsdata: VilkårsgrunnlagElement
@@ -1803,7 +1802,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun annuller(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
-                    hendelse: AnnullerUtbetaling,
+                    behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg,
                     annullering: Utbetaling,
                     grunnlagsdata: VilkårsgrunnlagElement
@@ -1815,9 +1814,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     error("forventer ikke å forkaste en periode som allerde er i $this")
                 }
 
-                override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
-                    behandling.valideringFeilet(hendelse, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tiltand TilInfotrygd, men med uventede tidsstempler.")
+                    behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tiltand TilInfotrygd, men med uventede tidsstempler.")
                 }
             }
         }

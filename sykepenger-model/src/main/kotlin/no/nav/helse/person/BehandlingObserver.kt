@@ -25,7 +25,7 @@ internal interface BehandlingObserver {
 
     fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
     fun behandlingLukket(behandlingId: UUID)
-    fun behandlingForkastet(behandlingId: UUID, hendelse: Hendelse)
+    fun behandlingForkastet(behandlingId: UUID, automatiskBehandling: Boolean)
 
     fun nyBehandling(
         id: UUID,
