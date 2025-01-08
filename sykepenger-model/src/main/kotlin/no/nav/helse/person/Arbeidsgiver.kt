@@ -42,6 +42,8 @@ import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
+import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -218,7 +220,7 @@ internal class Arbeidsgiver private constructor(
                 val refusjonstidslinje = vedtaksperioderPåSkjæringstidspunkt.refusjonstidslinje()
                 val startdatoer = vedtaksperioderPåSkjæringstidspunkt.startdatoerPåSammenhengendeVedtaksperioder()
                 val servitør = hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, refusjonstidslinje) ?: return@mapNotNull null
-                arbeidsgiver.håndter(hendelse, aktivitetslogg, servitør)
+                arbeidsgiver.håndter(hendelse, overstyrArbeidsgiveropplysninger(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
             }
             return revurderingseventyr.tidligsteEventyr()
         }
@@ -573,6 +575,7 @@ internal class Arbeidsgiver private constructor(
 
         val refusjonsoverstyring = if (vedtaksperiodeIdForReplay == null) håndter(
             inntektsmelding,
+            inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId),
             aktivitetslogg,
             inntektsmelding.refusjonsservitør
         ) else null
@@ -880,10 +883,10 @@ internal class Arbeidsgiver private constructor(
         return revurderingseventyr
     }
 
-    internal fun håndter(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
+    internal fun håndter(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
         var revurderingseventyr: Revurderingseventyr? = null
         håndter(hendelse) {
-            håndter(hendelse, aktivitetslogg, servitør).also { håndtert ->
+            håndter(hendelse, dokumentsporing, aktivitetslogg, servitør).also { håndtert ->
                 if (revurderingseventyr == null && håndtert) {
                     revurderingseventyr = Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
                 }
