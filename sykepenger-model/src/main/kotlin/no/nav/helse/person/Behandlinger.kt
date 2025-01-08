@@ -418,7 +418,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(arbeidsgiver, this, behandlingkilde, dokumentsporing, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, benyttetRefusjonsopplysninger)
         }
 
-        // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett
         data class Endring(
             val id: UUID,
             val tidsstempel: LocalDateTime,
@@ -946,6 +945,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyRefusjonstidslinje: Beløpstidslinje,
             starttilstand: Tilstand = Tilstand.Uberegnet
         ): Behandling {
+            error("what did you say")
             arbeidsgiver.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
