@@ -366,7 +366,8 @@ internal class Vedtaksperiode private constructor(
         if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return false
         registrerKontekst(aktivitetslogg)
         // Vi må støtte AUU & AVBL på grunn av at det sendes forespørsel på entering i AUU om det er oppgitt egenmeldingsdager som gjør at perioden skal utbetaltes
-        if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) return true.also { aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}") }
+        if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) return false.also { aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}") }
+        person.emitInntektsmeldingHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
 
         val eventyr = listOf(
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg),
@@ -380,9 +381,6 @@ internal class Vedtaksperiode private constructor(
         ).flatten().tidligsteEventyr()
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return true.also { forkast(arbeidsgiveropplysninger, aktivitetslogg) }
-
-        person.emitInntektsmeldingHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
-
         if (eventyr != null) person.igangsettOverstyring(eventyr, aktivitetslogg)
         return true
     }
@@ -462,7 +460,7 @@ internal class Vedtaksperiode private constructor(
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
         val eventyr = vedtaksperioder.mapNotNull { vedtaksperiode ->
-            if (vedtaksperiode.håndter(arbeidsgiveropplysninger,  Dokumentsporing.inntektsmeldingRefusjon(arbeidsgiveropplysninger.metadata.meldingsreferanseId), aktivitetslogg, servitør))
+            if (vedtaksperiode.håndter(arbeidsgiveropplysninger, Dokumentsporing.inntektsmeldingRefusjon(arbeidsgiveropplysninger.metadata.meldingsreferanseId), aktivitetslogg, servitør))
                 Revurderingseventyr.refusjonsopplysninger(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             else
                 null
@@ -480,17 +478,16 @@ internal class Vedtaksperiode private constructor(
         )
         inntektshistorikk.leggTil(inntektsmeldingInntekt)
 
-        // Hvis overgang fra Ghost
-        val sykFraGhost = person.nyeArbeidsgiverInntektsopplysninger(
+        person.nyeArbeidsgiverInntektsopplysninger(
             hendelse = arbeidsgiveropplysninger,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
             inntekt = inntektsmeldingInntekt,
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
-        ) != null
-        return if (!sykFraGhost) emptyList()
-        else listOf(Revurderingseventyr.inntekt(arbeidsgiveropplysninger, skjæringstidspunkt))
+        )
+
+        return listOf(Revurderingseventyr.inntekt(arbeidsgiveropplysninger, skjæringstidspunkt))
     }
 
     private fun håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
@@ -4033,5 +4030,6 @@ internal data class VedtaksperiodeView(
     val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje
 }
 
-private val HendelseMetadata.behandlingkilde get() =
-    Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
+private val HendelseMetadata.behandlingkilde
+    get() =
+        Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)

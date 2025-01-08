@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
@@ -13,23 +14,56 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
+internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `oppgir inntekt når vi allerede har skatt i inntektsgrunnlaget`() {
+        listOf(a1).nyeVedtak(januar, inntekt = 20_000.månedlig, ghosts = listOf(a2))
+        a1 {
+            assertVarsler(1.vedtaksperiode, listOf(RV_VV_2))
+        }
+        a2 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList()))
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            inspektør.inntekt(1.vedtaksperiode).let {
+                assertTrue(it is Inntektsmeldinginntekt)
+                assertEquals(25_000.månedlig, it.beløp)
+            }
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+        }
+    }
 
     @Test
     fun `oppgir at det ikke er noen ny arbeidsgiverperiode på lang periode`() {
@@ -118,7 +152,8 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar)),
@@ -137,7 +172,8 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar)),
@@ -164,7 +200,8 @@ internal class ArbeidsgiveropplysningerTest: AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OppgittArbeidgiverperiode(listOf(5.januar til 20.januar)),
