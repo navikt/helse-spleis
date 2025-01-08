@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
@@ -224,7 +225,13 @@ internal class DagerFraInntektsmelding(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: List<Periode>? = null) {
         if (!skalValideresAv(periode)) return
-        if (opphørAvNaturalytelser.isNotEmpty()) aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
+        if (opphørAvNaturalytelser.isNotEmpty()) {
+            if (Toggle.OpphørAvNaturalytelser.enabled) {
+                aktivitetslogg.varsel(Varselkode.RV_IM_7)
+            } else {
+                aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
+            }
+        }
         if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
         validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg)
         validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg, gammelAgp)

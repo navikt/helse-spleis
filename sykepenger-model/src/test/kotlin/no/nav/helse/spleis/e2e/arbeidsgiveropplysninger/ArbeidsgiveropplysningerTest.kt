@@ -1,17 +1,18 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
@@ -216,12 +217,23 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `oppgir at det er opphør av naturalytelser`() {
+    fun `oppgir at det er opphør av naturalytelser`() = Toggle.OpphørAvNaturalytelser.enable {
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OpphørAvNaturalytelser(listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))))
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList()),
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OpphørAvNaturalytelser(listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))),
+            )
+            if (Toggle.OpphørAvNaturalytelser.enabled) {
+                assertVarsel(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            } else {
+                assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -123,6 +124,20 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `oppgir at det er opphør av naturalytelser`() = Toggle.OpphørAvNaturalytelser.enable {
+        nyPeriode(januar)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(null, null, null))
+        )
+        if (Toggle.OpphørAvNaturalytelser.enabled) {
+            assertVarsel(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+        } else {
+            assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+        }
+    }
 
     @Test
     fun `En portalinntektsmelding uten inntekt (-1) bevarer inntekten som var`() {
