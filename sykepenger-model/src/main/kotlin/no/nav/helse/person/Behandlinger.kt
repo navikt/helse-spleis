@@ -945,7 +945,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyRefusjonstidslinje: Beløpstidslinje,
             starttilstand: Tilstand = Tilstand.Uberegnet
         ): Behandling {
-            error("what did you say")
             arbeidsgiver.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
