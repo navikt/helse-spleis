@@ -8,7 +8,6 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -37,7 +36,7 @@ internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage, override v
         val skjønnsmessigFastsattInntekt =
             SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsporing.id, årlig, opprettet)
 
-        ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsattInntekt, Refusjonsopplysninger())
+        ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsattInntekt)
     }
 }
 

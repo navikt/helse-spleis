@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -57,7 +56,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                 val tom = arbeidsgiveropplysning.path("tom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: LocalDate.MAX
                 val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
 
-                ArbeidsgiverInntektsopplysning(orgnummer, fom til tom, saksbehandlerinntekt, Refusjonsopplysninger())
+                ArbeidsgiverInntektsopplysning(orgnummer, fom til tom, saksbehandlerinntekt)
             }
         }
 

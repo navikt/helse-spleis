@@ -156,7 +156,6 @@ import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkatteopplysningSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
@@ -432,13 +431,15 @@ internal class Vedtaksperiode private constructor(
                 return OppgittArbeidsgiverperiodehåndtering(arbeidsgiverperiode, sykdomstidslinje)
             }
         }
+
         private val omsluttendePeriode = sykdomstidslinje.periode()
 
         private fun skalHåndtere(vedtaksperiode: Periode): Boolean {
             if (omsluttendePeriode == null) return false
             return vedtaksperiode.endInclusive >= omsluttendePeriode.start || vedtaksperiode.endInclusive.erRettFør(omsluttendePeriode.start)
         }
-        fun sykdomstidslinje(vedtaksperiode: Periode) : Sykdomstidslinje? {
+
+        fun sykdomstidslinje(vedtaksperiode: Periode): Sykdomstidslinje? {
             if (!skalHåndtere(vedtaksperiode)) return null
             val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(vedtaksperiode.endInclusive)
             val snute = if (vedtaksperiode.start < omsluttendePeriode!!.start) Sykdomstidslinje.arbeidsdager(vedtaksperiode.start, omsluttendePeriode.start.forrigeDag, this.sykdomstidslinje.first().kilde) else Sykdomstidslinje()
@@ -507,9 +508,10 @@ internal class Vedtaksperiode private constructor(
         return håndterNavUtbetalerArbeidsgiverperiode(
             perioderNavUtbetaler = listOf(periode.start.somPeriode()), // Foreslår bare første dag for å tvinge frem en behandling
             aktivitetslogg = aktivitetslogg,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger) {
-                aktivitetslogg.varsel(RV_IM_25)
-            }
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger
+        ) {
+            aktivitetslogg.varsel(RV_IM_25)
+        }
     }
 
     private fun håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
@@ -1089,8 +1091,7 @@ internal class Vedtaksperiode private constructor(
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
             gjelder = skjæringstidspunkt til LocalDate.MAX,
-            inntektsopplysning = faktaavklartInntekt,
-            refusjonsopplysninger = Refusjonsopplysninger()
+            inntektsopplysning = faktaavklartInntekt
         )
     }
 
@@ -1129,8 +1130,7 @@ internal class Vedtaksperiode private constructor(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = skatteopplysning.arbeidsgiver,
                         gjelder = skjæringstidspunkt til LocalDate.MAX,
-                        inntektsopplysning = ghostopplysning,
-                        refusjonsopplysninger = Refusjonsopplysninger()
+                        inntektsopplysning = ghostopplysning
                     )
                 }
             }

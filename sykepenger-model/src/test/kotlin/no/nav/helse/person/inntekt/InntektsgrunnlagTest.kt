@@ -39,7 +39,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -542,8 +541,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -563,8 +561,7 @@ internal class InntektsgrunnlagTest {
                             )
                         ),
                         ansattPerioder = emptyList()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -621,8 +618,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -642,8 +638,7 @@ internal class InntektsgrunnlagTest {
                             )
                         ),
                         ansattPerioder = emptyList()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -674,8 +669,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -685,8 +679,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -715,8 +708,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -726,8 +718,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -798,8 +789,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -809,8 +799,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
                         tidsstempel = LocalDateTime.now()
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -842,8 +831,7 @@ internal class InntektsgrunnlagTest {
                         hendelseId = hendelseId,
                         beløp = 25000.månedlig,
                         tidsstempel = tidsstempel
-                    ),
-                    refusjonsopplysninger = Refusjonsopplysninger()
+                    )
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -866,8 +854,7 @@ internal class InntektsgrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     )
                 ),
                 deaktiverteArbeidsforhold = listOf(
@@ -880,8 +867,7 @@ internal class InntektsgrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
+                        )
                     )
                 ),
                 vurdertInfotrygd = false

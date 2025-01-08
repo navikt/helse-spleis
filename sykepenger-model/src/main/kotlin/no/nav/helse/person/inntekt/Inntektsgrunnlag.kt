@@ -49,7 +49,6 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTR
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.overstyr
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
@@ -304,8 +303,7 @@ internal class Inntektsgrunnlag private constructor(
         val nyInntektsopplysning = ArbeidsgiverInntektsopplysning(
             orgnummer = organisasjonsnummer,
             gjelder = skjæringstidspunkt til LocalDate.MAX,
-            inntektsopplysning = inntekt,
-            refusjonsopplysninger = Refusjonsopplysninger()
+            inntektsopplysning = inntekt
         )
         val resultat = arbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, null, listOf(nyInntektsopplysning), subsumsjonslogg)
         val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, tilkommendeInntekter, subsumsjonslogg)

@@ -33,6 +33,10 @@ data class ArbeidsgiverInntektsopplysning(
     val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
+    constructor(orgnummer: String, gjelder: Periode, inntektsopplysning: Inntektsopplysning) : this(
+        orgnummer, gjelder, inntektsopplysning, Refusjonsopplysninger()
+    )
+
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkt == gjelder.start
 
