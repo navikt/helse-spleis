@@ -31,6 +31,7 @@ import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
@@ -385,6 +386,21 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    internal fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Boolean {
+        if (korrigerteArbeidsgiveropplysninger.vedtaksperiodeId != id) return false
+        check(tilstand !is AvventerInntektsmelding) { "Mottok Korrigerende arbeidsgiveropplysninger i AvventerInntektsmelding " }
+        registrerKontekst(aktivitetslogg)
+        person.emitInntektsmeldingHåndtert(korrigerteArbeidsgiveropplysninger.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
+
+        val eventyr = listOf(
+            håndterOppgittRefusjon(korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
+            håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg)
+        ).flatten().tidligsteEventyr()
+
+        if (eventyr != null) person.igangsettOverstyring(eventyr, aktivitetslogg)
+        return true
+    }
+
     private fun håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         val oppgittArbeidgiverperiode = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittArbeidgiverperiode>().singleOrNull() ?: return emptyList()
         val eventyr = mutableListOf<Revurderingseventyr>()
@@ -449,37 +465,36 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun håndterOppgittRefusjon(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, ubrukteRefusjonsopplysninger: Refusjonsservitør): List<Revurderingseventyr> {
-        val oppgittRefusjon = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittRefusjon>().singleOrNull() ?: return emptyList()
+    private fun <T> håndterOppgittRefusjon(hendelse: T, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, ubrukteRefusjonsopplysninger: Refusjonsservitør): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        val oppgittRefusjon = hendelse.filterIsInstance<Arbeidsgiveropplysning.OppgittRefusjon>().singleOrNull() ?: return emptyList()
         val hovedopplysning = Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(startdatoPåSammenhengendeVedtaksperioder, oppgittRefusjon.beløp)
         val endringer = oppgittRefusjon.endringer.filter { it.fom > startdatoPåSammenhengendeVedtaksperioder }
         val alle = (endringer + hovedopplysning).distinctBy { it.fom }
         val refusjonstidslinje = alle.sortedBy { it.fom }.mapWithNext { nåværende, neste ->
-            Beløpstidslinje.fra(periode = nåværende.fom til (neste?.fom?.forrigeDag ?: nåværende.fom), beløp = nåværende.beløp, kilde = Kilde(arbeidsgiveropplysninger.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, arbeidsgiveropplysninger.metadata.innsendt))
+            Beløpstidslinje.fra(periode = nåværende.fom til (neste?.fom?.forrigeDag ?: nåværende.fom), beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
         }.reduce(Beløpstidslinje::plus)
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
         val eventyr = vedtaksperioder.mapNotNull { vedtaksperiode ->
-            if (vedtaksperiode.håndter(arbeidsgiveropplysninger, Dokumentsporing.inntektsmeldingRefusjon(arbeidsgiveropplysninger.metadata.meldingsreferanseId), aktivitetslogg, servitør))
-                Revurderingseventyr.refusjonsopplysninger(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-            else
-                null
+            if (vedtaksperiode.håndter(hendelse, Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør))
+                Revurderingseventyr.refusjonsopplysninger(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            else null
         }
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return eventyr
     }
 
-    private fun håndterOppgittInntekt(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
-        val oppgittInntekt = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittInntekt>().singleOrNull() ?: return emptyList()
+    private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        val oppgittInntekt = hendelse.filterIsInstance<Arbeidsgiveropplysning.OppgittInntekt>().singleOrNull() ?: return emptyList()
         val inntektsmeldingInntekt = Inntektsmeldinginntekt(
             dato = skjæringstidspunkt,
-            hendelseId = arbeidsgiveropplysninger.metadata.meldingsreferanseId,
+            hendelseId = hendelse.metadata.meldingsreferanseId,
             beløp = oppgittInntekt.inntekt
         )
         inntektshistorikk.leggTil(inntektsmeldingInntekt)
 
         person.nyeArbeidsgiverInntektsopplysninger(
-            hendelse = arbeidsgiveropplysninger,
+            hendelse = hendelse,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
             inntekt = inntektsmeldingInntekt,
@@ -487,7 +502,7 @@ internal class Vedtaksperiode private constructor(
             subsumsjonslogg = this.jurist
         )
 
-        return listOf(Revurderingseventyr.inntekt(arbeidsgiveropplysninger, skjæringstidspunkt))
+        return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }
 
     private fun håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {

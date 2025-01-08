@@ -214,6 +214,8 @@ class Person private constructor(
 
     fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.map { it::class.simpleName }.joinToString()}")
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(korrigerteArbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
+        arbeidsgiver.håndter(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
         håndterGjenoppta(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
     }
 

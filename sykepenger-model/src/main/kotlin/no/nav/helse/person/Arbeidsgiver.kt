@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -558,6 +559,12 @@ internal class Arbeidsgiver private constructor(
         if (énHarHåndtert(arbeidsgiveropplysninger) { håndter(arbeidsgiveropplysninger, aktivitetslogg, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }) return
         person.emitInntektsmeldingIkkeHåndtert(arbeidsgiveropplysninger, organisasjonsnummer, true)
         aktivitetslogg.funksjonellFeil(RV_IM_26)
+    }
+
+    internal fun håndter(arbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.kontekst(this)
+        if (énHarHåndtert(arbeidsgiveropplysninger) { håndter(arbeidsgiveropplysninger, aktivitetslogg, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }) return
+        person.emitInntektsmeldingIkkeHåndtert(arbeidsgiveropplysninger, organisasjonsnummer, true)
     }
 
     internal fun håndter(
