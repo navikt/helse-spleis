@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.valider
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -11,26 +12,36 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 sealed interface Arbeidsgiveropplysning {
-    data class OppgittArbeidgiverperiode(val perioder: List<Periode>): Arbeidsgiveropplysning {
-        init { check(perioder.isNotEmpty()) { "Må være minst en periode med agp!" }}
+    data class OppgittArbeidgiverperiode(val perioder: List<Periode>) : Arbeidsgiveropplysning {
+        init {
+            check(perioder.isNotEmpty()) { "Må være minst en periode med agp!" }
+        }
     }
-    data class OppgittInntekt(val inntekt: Inntekt): Arbeidsgiveropplysning {
-        init { check(inntekt >= INGEN) { "Inntekten må være minst 0 kroner!" }}
+
+    data class OppgittInntekt(val inntekt: Inntekt) : Arbeidsgiveropplysning {
+        init {
+            check(inntekt >= INGEN) { "Inntekten må være minst 0 kroner!" }
+        }
     }
-    data object OpphørAvNaturalytelser: Arbeidsgiveropplysning
-    data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>): Arbeidsgiveropplysning {
+
+    data object OpphørAvNaturalytelser : Arbeidsgiveropplysning
+    data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>) : Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
     }
-    data class IkkeUtbetaltArbeidsgiverperiode(private val begrunnelse: Begrunnelse): Arbeidsgiveropplysning {
+
+    data class IkkeUtbetaltArbeidsgiverperiode(private val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
-    data class RedusertUtbetaltBeløpIArbeidsgiverperioden(private val begrunnelse: Begrunnelse): Arbeidsgiveropplysning {
+
+    data class RedusertUtbetaltBeløpIArbeidsgiverperioden(private val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
-    data class UtbetaltDelerAvArbeidsgiverperioden(private val begrunnelse: Begrunnelse, val utbetaltTilOgMed: LocalDate): Arbeidsgiveropplysning {
+
+    data class UtbetaltDelerAvArbeidsgiverperioden(private val begrunnelse: Begrunnelse, val utbetaltTilOgMed: LocalDate) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
-    data object IkkeNyArbeidsgiverperiode: Arbeidsgiveropplysning
+
+    data object IkkeNyArbeidsgiverperiode : Arbeidsgiveropplysning
 
     enum class Begrunnelse(private val støttes: Boolean) {
         LovligFravaer(støttes = true),
@@ -41,6 +52,7 @@ sealed interface Arbeidsgiveropplysning {
         Saerregler(støttes = true),
         IkkeFullStillingsandel(støttes = true),
         TidligereVirksomhet(støttes = true),
+
         // Dette er potensielt andre opplysningstyper om det faktisk skal støttes
         // Men så lenge det ikke støttes legger vi inn et ørlite hack her for å gi dem error
         BetvilerArbeidsufoerhet(støttes = false),
@@ -56,6 +68,95 @@ sealed interface Arbeidsgiveropplysning {
             aktivitetslogg.funksjonellFeil(RV_IM_8)
         }
     }
+
+    companion object {
+        fun List<Arbeidsgiveropplysning>.valider() {
+            check(isNotEmpty()) { "Ingen opplysninger? Hva skal det bety?" }
+
+            val opplysningerFraBegrunnelse =
+                filterIsInstance<RedusertUtbetaltBeløpIArbeidsgiverperioden>() +
+                    filterIsInstance<UtbetaltDelerAvArbeidsgiverperioden>() +
+                    filterIsInstance<IkkeUtbetaltArbeidsgiverperiode>() +
+                    filterIsInstance<IkkeNyArbeidsgiverperiode>()
+
+            check(opplysningerFraBegrunnelse.size <= 1) {
+                "Det kan maks oppgis én opplysning relatert til begrunnelse. Fant ${opplysningerFraBegrunnelse.size}: ${map { it::class.simpleName }.joinToString()}"
+            }
+
+            val arbeidsgiverperiode = this
+                .filterIsInstance<OppgittArbeidgiverperiode>()
+                .singleOrNull()?.perioder ?: emptyList()
+
+            val antallDager = arbeidsgiverperiode.flatten().size
+
+            when (val opplysning = opplysningerFraBegrunnelse.singleOrNull()) {
+                is IkkeUtbetaltArbeidsgiverperiode -> check(antallDager == 0) {
+                    "IkkeUtbetaltArbeidsgiverperiode kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Kan ikke være oppgitt noen arbeidsgiverperiode med denne opplysningstypen."
+                }
+
+                is UtbetaltDelerAvArbeidsgiverperioden -> {
+                    check(antallDager in 1..15) {
+                        "UtbetaltDelerAvArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt mellom 1 og 15 dager med arbeidsgiverperiode med denne opplysningstypen."
+                    }
+                    val sisteDagIOppgittArbeidsgiverperiode = arbeidsgiverperiode.last().endInclusive
+                    check(opplysning.utbetaltTilOgMed == sisteDagIOppgittArbeidsgiverperiode) {
+                        "UtbetaltDelerAvArbeidsgiverperioden må ha utbetaltTilOgMed satt til siste dag i arbeidsgiverperioden ($sisteDagIOppgittArbeidsgiverperiode), men var ${opplysning.utbetaltTilOgMed}"
+                    }
+                }
+
+                is RedusertUtbetaltBeløpIArbeidsgiverperioden -> check(antallDager == 16) {
+                    "RedusertUtbetaltBeløpIArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt en full arbeidsigverperiode på 16 dager med denne opplysningstypen."
+                }
+
+                else -> {}
+            }
+        }
+
+        fun fraInntektsmelding(
+            beregnetInntekt: Inntekt?,
+            refusjon: Inntektsmelding.Refusjon?,
+            arbeidsgiverperioder: List<Periode>?,
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+            harOpphørAvNaturalytelser: Boolean
+        ): List<Arbeidsgiveropplysning> {
+            val oppgittInntekt = beregnetInntekt
+                ?.takeUnless { it < INGEN }
+                ?.let { OppgittInntekt(it) }
+
+            val oppgittArbeidsgiverperiode = arbeidsgiverperioder
+                ?.takeUnless { it.isEmpty() }
+                ?.let { OppgittArbeidgiverperiode(it) }
+
+            return listOfNotNull(
+                oppgittInntekt,
+                oppgittArbeidsgiverperiode,
+                refusjon?.somOppgittRefusjon(),
+                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
+                OpphørAvNaturalytelser.takeIf { harOpphørAvNaturalytelser }
+            )
+        }
+
+        private fun Inntektsmelding.Refusjon.somOppgittRefusjon(): OppgittRefusjon {
+            val endringerIRefusjon = endringerIRefusjon.map { OppgittRefusjon.Refusjonsendring(it.endringsdato, it.beløp) }
+            val opphørAvRefusjon = listOfNotNull(opphørsdato?.let { OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
+            return OppgittRefusjon(beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
+        }
+
+        private fun String.somArbeidsgiveropplysning(arbeidsgiverperioder: List<Periode>): Arbeidsgiveropplysning? {
+            if (this.isBlank()) return null
+            if (this == "FerieEllerAvspasering") {
+                return IkkeNyArbeidsgiverperiode
+            }
+            val begrunnelse = Arbeidsgiveropplysning.Begrunnelse.valueOf(this)
+            val antallDager = arbeidsgiverperioder.flatten().size
+            return when (antallDager) {
+                0 -> IkkeUtbetaltArbeidsgiverperiode(begrunnelse)
+                in 1..15 -> UtbetaltDelerAvArbeidsgiverperioden(begrunnelse, utbetaltTilOgMed = arbeidsgiverperioder.last().endInclusive)
+                16 -> RedusertUtbetaltBeløpIArbeidsgiverperioden(begrunnelse)
+                else -> error("Forventer ikke arbeidsgierperioder på $antallDager dager: $arbeidsgiverperioder")
+            }
+        }
+    }
 }
 
 class Arbeidsgiveropplysninger(
@@ -68,42 +169,7 @@ class Arbeidsgiveropplysninger(
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
 
     init {
-        check(opplysninger.isNotEmpty()) { "Ingen opplysninger? Hva skal det bety?" }
-
-        val opplysningerFraBegrunnelse =
-            opplysninger.filterIsInstance<Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden>() +
-            opplysninger.filterIsInstance<Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden>() +
-            opplysninger.filterIsInstance<Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode>() +
-            opplysninger.filterIsInstance<Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode>()
-
-        check(opplysningerFraBegrunnelse.size <= 1) {
-            "Det kan maks oppgis én opplysning relatert til begrunnelse. Fant ${opplysningerFraBegrunnelse.size}: ${opplysninger.map { it::class.simpleName }.joinToString()}"
-        }
-
-        val arbeidsgiverperiode = opplysninger
-            .filterIsInstance<Arbeidsgiveropplysning.OppgittArbeidgiverperiode>()
-            .singleOrNull()?.perioder ?: emptyList()
-
-        val antallDager = arbeidsgiverperiode.flatten().size
-
-        when (val opplysning = opplysningerFraBegrunnelse.singleOrNull()) {
-            is Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode -> check(antallDager == 0) {
-                "IkkeUtbetaltArbeidsgiverperiode kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Kan ikke være oppgitt noen arbeidsgiverperiode med denne opplysningstypen."
-            }
-            is Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden -> {
-                check(antallDager in 1 .. 15 ) {
-                    "UtbetaltDelerAvArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt mellom 1 og 15 dager med arbeidsgiverperiode med denne opplysningstypen."
-                }
-                val sisteDagIOppgittArbeidsgiverperiode = arbeidsgiverperiode.last().endInclusive
-                check(opplysning.utbetaltTilOgMed == sisteDagIOppgittArbeidsgiverperiode) {
-                    "UtbetaltDelerAvArbeidsgiverperioden må ha utbetaltTilOgMed satt til siste dag i arbeidsgiverperioden ($sisteDagIOppgittArbeidsgiverperiode), men var ${opplysning.utbetaltTilOgMed}"
-                }
-            }
-            is Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden -> check(antallDager == 16) {
-                "RedusertUtbetaltBeløpIArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt en full arbeidsigverperiode på 16 dager med denne opplysningstypen."
-            }
-            else -> {}
-        }
+        opplysninger.valider()
     }
 
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(organisasjonsnummer)
@@ -117,27 +183,6 @@ class Arbeidsgiveropplysninger(
     )
 
     companion object {
-        private fun Inntektsmelding.Refusjon.somOppgittRefusjon(): Arbeidsgiveropplysning.OppgittRefusjon {
-            val endringerIRefusjon = endringerIRefusjon.map { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.endringsdato, it.beløp) }
-            val opphørAvRefusjon = listOfNotNull(opphørsdato?.let { Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
-            return Arbeidsgiveropplysning.OppgittRefusjon(beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
-        }
-
-        private fun String.somArbeidsgiveropplysning(arbeidsgiverperioder: List<Periode>): Arbeidsgiveropplysning? {
-            if (this.isBlank()) return null
-            if (this == "FerieEllerAvspasering") {
-                return Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
-            }
-            val begrunnelse = Arbeidsgiveropplysning.Begrunnelse.valueOf(this)
-            val antallDager = arbeidsgiverperioder.flatten().size
-            return when (antallDager) {
-                0 -> Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode(begrunnelse)
-                in 1 .. 15 -> Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden(begrunnelse, utbetaltTilOgMed = arbeidsgiverperioder.last().endInclusive)
-                16 -> Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden(begrunnelse)
-                else -> error("Forventer ikke arbeidsgierperioder på $antallDager dager: $arbeidsgiverperioder")
-            }
-        }
-
         fun fraInntektsmelding(
             meldingsreferanseId: UUID,
             innsendt: LocalDateTime,
@@ -149,31 +194,13 @@ class Arbeidsgiveropplysninger(
             arbeidsgiverperioder: List<Periode>?,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
             harOpphørAvNaturalytelser: Boolean
-        ): Arbeidsgiveropplysninger {
-            val oppgittInntekt = beregnetInntekt
-                ?.takeUnless { it < INGEN }
-                ?.let { Arbeidsgiveropplysning.OppgittInntekt(it) }
-
-            val oppgittArbeidsgiverperiode = arbeidsgiverperioder
-                ?.takeUnless { it.isEmpty() }
-                ?.let { Arbeidsgiveropplysning.OppgittArbeidgiverperiode(it) }
-
-            val opplysninger = listOfNotNull(
-                oppgittInntekt,
-                oppgittArbeidsgiverperiode,
-                refusjon?.somOppgittRefusjon(),
-                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
-                Arbeidsgiveropplysning.OpphørAvNaturalytelser.takeIf { harOpphørAvNaturalytelser }
-            )
-
-            return Arbeidsgiveropplysninger(
-                meldingsreferanseId = meldingsreferanseId,
-                innsendt = innsendt,
-                registrert = registrert,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                opplysninger = opplysninger
-            )
-        }
+        ) = Arbeidsgiveropplysninger(
+            meldingsreferanseId = meldingsreferanseId,
+            innsendt = innsendt,
+            registrert = registrert,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(beregnetInntekt, refusjon, arbeidsgiverperioder, begrunnelseForReduksjonEllerIkkeUtbetalt, harOpphørAvNaturalytelser)
+        )
     }
 }
