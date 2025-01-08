@@ -9,6 +9,7 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
+import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
@@ -418,6 +419,29 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
+        }
+    }
+
+    @Test
+    fun `deaktiverer en auu`() {
+        a1 {
+            nyPeriode(januar)
+        }
+        a2 {
+            nyPeriode(1.januar til 16.januar)
+        }
+        a1 {
+            håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "arbeidsforholdet er inaktivt"))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            assertEquals(100, inspektør.utbetalinger(1.vedtaksperiode).last().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
+            assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
     }
 

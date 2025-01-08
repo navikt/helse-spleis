@@ -1713,15 +1713,19 @@ internal class Vedtaksperiode private constructor(
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
-        val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning.mapValues { (arbeidsgiver, vedtaksperioder) ->
-            val inntektForArbeidsgiver = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver) ?: error(
-                "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
-                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-            )
-            vedtaksperioder.map {
-                it.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
+        val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
+            .filterKeys { arbeidsgiver ->
+                arbeidsgiver !in faktaavklarteInntekter.deaktiverteArbeidsforhold
             }
-        }
+            .mapValues { (arbeidsgiver, vedtaksperioder) ->
+                val inntektForArbeidsgiver = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver) ?: error(
+                    "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
+                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                )
+                vedtaksperioder.map {
+                    it.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
+                }
+            }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
         // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
         // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
