@@ -119,12 +119,14 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
@@ -400,6 +402,7 @@ internal class Vedtaksperiode private constructor(
         val eventyr = listOf(
             håndterOppgittRefusjon(korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg),
+            håndterKorrigertArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
         )
 
         return håndterArbeidsgiveropplysninger(eventyr, korrigerteArbeidsgiveropplysninger, aktivitetslogg)
@@ -566,12 +569,30 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
-        if (Toggle.OpphørAvNaturalytelser.enabled) {
-            aktivitetslogg.varsel(RV_IM_7)
-        } else {
-            aktivitetslogg.funksjonellFeil(RV_IM_7)
-        }
+        if (Toggle.OpphørAvNaturalytelser.enabled) aktivitetslogg.varsel(RV_IM_7)
+        else aktivitetslogg.funksjonellFeil(RV_IM_7)
         return emptyList()
+    }
+
+    private fun håndterKorrigertArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
+        val oppgittArbeidgiverperiode = korrigerteArbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OppgittArbeidgiverperiode>().singleOrNull()
+
+        if (oppgittArbeidgiverperiode != null && !behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.flatten().containsAll(oppgittArbeidgiverperiode.perioder.flatten())) {
+            varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+        }
+
+        val korrigertUtbetalingIArbeidsgiverperiode =
+            (korrigerteArbeidsgiveropplysninger.filterIsInstance<RedusertUtbetaltBeløpIArbeidsgiverperioden>() +
+                korrigerteArbeidsgiveropplysninger.filterIsInstance<UtbetaltDelerAvArbeidsgiverperioden>() +
+                korrigerteArbeidsgiveropplysninger.filterIsInstance<IkkeUtbetaltArbeidsgiverperiode>() +
+                korrigerteArbeidsgiveropplysninger.filterIsInstance<IkkeNyArbeidsgiverperiode>())
+                .singleOrNull()
+
+        if (korrigertUtbetalingIArbeidsgiverperiode != null) {
+            varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_8)
+        }
+
+        return listOf(Revurderingseventyr.arbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, skjæringstidspunkt, periode))
     }
 
     private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, perioderNavUtbetaler: List<Periode>): BitAvArbeidsgiverperiode? {
@@ -589,6 +610,17 @@ internal class Vedtaksperiode private constructor(
         }.merge()
         if (sykdomstidslinje.periode() == null) return null
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, sykdomstidslinje)
+    }
+
+    private fun <T> varselFraArbeidsgiveropplysning(hendelse: T, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        behandlinger.sikreNyBehandling(
+            arbeidsgiver = arbeidsgiver,
+            behandlingkilde = hendelse.metadata.behandlingkilde,
+            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode()
+        )
+        behandlinger.oppdaterDokumentsporing(inntektsmeldingDager(hendelse.metadata.meldingsreferanseId))
+        aktivitetslogg.varsel(varselkode)
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
