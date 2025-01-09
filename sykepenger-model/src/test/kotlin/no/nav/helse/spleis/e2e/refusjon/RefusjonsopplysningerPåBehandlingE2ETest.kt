@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -14,6 +15,10 @@ import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dagtype
@@ -42,8 +47,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -58,6 +65,56 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `arbeidsgiver opplyser om refusjonsopplysnigner frem i tid, så skal saksbehandler overstyre dem før søknaden kommer - ingen ubrukte etter overstyring`() {
+        a1 {
+            håndterSøknad(januar)
+            val arbeidsgiverId = håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, listOf(Refusjonsendring(1.februar, INNTEKT * 0.8), Refusjonsendring(1.mars, INNTEKT * 0.6)))
+            )
+            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, arbeidsgiverId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            val fremITid = Beløpstidslinje.fra(februar, INNTEKT * 0.8, arbeidsgiverId.arbeidsgiver) + Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT * 0.6, arbeidsgiverId.arbeidsgiver)
+            assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))))
+            )
+
+            assertForventetFeil(
+                forklaring = "Ubrukte refusjonsopplysninger blir hengende",
+                nå = { assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single()) },
+                ønsket = { assertTrue(inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.isEmpty()) }
+            )
+        }
+    }
+
+    @Test
+    fun `arbeidsgiver opplyser om refusjonsopplysnigner frem i tid, så skal saksbehandler overstyre dem før søknaden kommer - nye ubrukte etter overstyring`() {
+        a1 {
+            håndterSøknad(januar)
+            val id = håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, listOf(Refusjonsendring(1.februar, INNTEKT * 0.8), Refusjonsendring(1.mars, INNTEKT * 0.6)))
+            )
+            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, id.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            val fremITid = Beløpstidslinje.fra(februar, INNTEKT * 0.8, id.arbeidsgiver) + Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT * 0.6, id.arbeidsgiver)
+            assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+
+            val saksbehandlerId = håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))))
+            ).metadata.meldingsreferanseId
+
+            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, saksbehandlerId.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+        }
+    }
 
     @Test
     fun `og noen ganger sendes det endringer i refusjon på samme dato`() {
