@@ -69,6 +69,10 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     internal fun fyll(periode: Periode) = fyll().strekk(periode).subset(periode)
     internal fun fyll(til: LocalDate) = fyll().strekkFrem(til).tilOgMed(til)
+
+    // Det motsatte av fyll, begrenser den til så liten som mulig, men bevarer nok til at den senere kan fylles tilbake
+    internal fun forkort() = Beløpstidslinje(dager.values.distinctBy { it.beløp to it.kilde })
+
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
     private fun strekkFrem(til: LocalDate) = this + hale(til)
     internal fun førsteDagMedUliktBeløp(other: Beløpstidslinje): LocalDate? {

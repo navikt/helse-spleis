@@ -39,6 +39,35 @@ import org.junit.jupiter.api.assertThrows
 internal class BeløpstidslinjeTest {
 
     @Test
+    fun `fyll og forkort kant i kant`() {
+        val beløpstidslinje =
+            (Arbeidsgiver oppgir 1000.daglig hele januar) og (Arbeidsgiver oppgir 2000.daglig hele februar)
+
+        val forventetForkortet =
+            (Arbeidsgiver oppgir 1000.daglig kun 1.januar) og (Arbeidsgiver oppgir 2000.daglig kun 1.februar)
+
+        assertEquals(forventetForkortet, beløpstidslinje.forkort())
+        assertEquals(beløpstidslinje, forventetForkortet.fyll(28.februar))
+    }
+
+    @Test
+    fun `fyll og forkort med gap`() {
+        val beløpstidslinje =
+            (Arbeidsgiver oppgir 1000.daglig hele januar) og (Saksbehandler oppgir 2000.daglig hele mars)
+
+        val forventetForkortet =
+            (Arbeidsgiver oppgir 1000.daglig kun 1.januar) og (Saksbehandler oppgir 2000.daglig kun 1.mars)
+
+        assertEquals(forventetForkortet, beløpstidslinje.forkort())
+
+        // Nå fylles også gapet med opplysningene i forkant
+        val forventetFylt =
+            (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig hele mars)
+
+        assertEquals(forventetFylt, forventetForkortet.fyll(31.mars))
+    }
+
+    @Test
     fun `trekke fra en beløpstidslinje`() {
         val fraInntektsmelding =
             (Arbeidsgiver oppgir 1000.daglig fra 2.januar til 30.januar)
