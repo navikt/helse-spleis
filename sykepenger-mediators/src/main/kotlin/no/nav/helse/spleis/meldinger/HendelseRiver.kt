@@ -25,6 +25,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
         RiverImpl(river)
     }
 
+    protected open fun precondition(packet: JsonMessage) {}
     protected abstract fun createMessage(packet: JsonMessage): HendelseMessage
 
     private inner class RiverImpl(river: River) : River.PacketListener {
@@ -34,6 +35,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                 packet.require("@opprettet", JsonNode::asLocalDateTime)
                 packet.require("@id") { UUID.fromString(it.asText()) }
             }
+            river.precondition(this@HendelseRiver::precondition)
             river.validate(this@HendelseRiver)
             river.register(this)
         }

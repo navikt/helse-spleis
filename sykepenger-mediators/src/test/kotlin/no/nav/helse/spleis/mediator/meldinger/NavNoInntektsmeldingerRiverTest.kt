@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mai
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
+import no.nav.helse.spleis.meldinger.NavNoInntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
@@ -24,7 +24,7 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import org.junit.jupiter.api.Test
 
-internal class InntektsmeldingerRiverTest : RiverTest() {
+internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
 
     private val fødselsdato = 17.mai(1995)
     private val InvalidJson = "foo"
@@ -50,10 +50,11 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now(),
         naerRelasjon = null,
-        avsenderSystem = AvsenderSystem("LPS", "1.0"),
+        avsenderSystem = AvsenderSystem("NAV_NO", "1.0"),
         innsenderFulltNavn = "SPLEIS MEDIATOR",
         innsenderTelefon = "tlfnr",
-        inntektsdato = null
+        inntektsdato = null,
+        vedtaksperiodeId = UUID.randomUUID()
     ).asObjectNode()
     private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
         inntektsmeldingId = UUID.randomUUID().toString(),
@@ -72,13 +73,15 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         status = Status.GYLDIG,
         arkivreferanse = "",
+        avsenderSystem = AvsenderSystem("NAV_NO", "1.0"),
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now(),
         naerRelasjon = null,
         innsenderTelefon = "tlfnr",
         innsenderFulltNavn = "SPLEIS MEDIATOR",
-        inntektsdato = null
+        inntektsdato = null,
+        vedtaksperiodeId = UUID.randomUUID()
     ).asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
@@ -90,16 +93,17 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
     ).toJson()
 
-    private val ValidInntektsmeldingMedVedtaksperiodeId = ValidInntektsmelding.put("vedtaksperiodeId", UUID.randomUUID().toString()).toJson()
+    private val ValidInntektsmeldingUtenVedtaksperiodeId = ValidInntektsmelding.apply { this.remove("vedtaksperiodeId") }.toJson()
 
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
-        InntektsmeldingerRiver(rapidsConnection, mediator)
+        NavNoInntektsmeldingerRiver(rapidsConnection, mediator)
     }
 
     @Test
     fun `invalid messages`() {
         assertIgnored(InvalidJson)
         assertIgnored(UnknownJson)
+        assertIgnored(ValidInntektsmeldingUtenVedtaksperiodeId)
     }
 
     @Test
@@ -108,10 +112,9 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingJson)
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
-        assertNoErrors(ValidInntektsmeldingMedVedtaksperiodeId)
     }
 
-    private fun ObjectNode.toJson(): String = put("fødselsdato", "$fødselsdato").toString()
+    private fun JsonNode.toJson(): String = (this as ObjectNode).put("fødselsdato", "$fødselsdato").toString()
 }
 
 private val objectMapper = jacksonObjectMapper()

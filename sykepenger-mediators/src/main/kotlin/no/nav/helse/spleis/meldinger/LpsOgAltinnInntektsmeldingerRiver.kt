@@ -13,12 +13,15 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 
-internal open class InntektsmeldingerRiver(
+internal class LpsOgAltinnInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventName = "inntektsmelding"
-    override val riverName = "Inntektsmelding"
+    override val riverName = "Lps- og Altinn-inntektsmeldinger"
+    override fun precondition(packet: JsonMessage) {
+        packet.forbidValues("avsenderSystem.navn", listOf("NAV_NO", "NAV_NO_SELVBESTEMT"))
+    }
 
     override fun validate(message: JsonMessage) {
         message.requireKey(
@@ -31,16 +34,15 @@ internal open class InntektsmeldingerRiver(
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        message.requireArray("ferieperioder") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
-        }
         message.requireArray("endringIRefusjoner") {
             require("endringsdato", JsonNode::asLocalDate)
             requireKey("beloep")
         }
         message.require("mottattDato", JsonNode::asLocalDateTime)
         message.require("fødselsdato", JsonNode::asLocalDate)
+
+        message.forbid("vedtaksperiodeId")
+
         message.interestedIn("dødsdato", JsonNode::asLocalDate)
         message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
         message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
@@ -51,7 +53,6 @@ internal open class InntektsmeldingerRiver(
             "historiskeFolkeregisteridenter",
             "avsenderSystem",
             "inntektsdato",
-            "vedtaksperiodeId"
         )
     }
 
