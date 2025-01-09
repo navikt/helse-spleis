@@ -112,9 +112,9 @@ class Inntektsmelding(
     }
 
     data class OpphørAvNaturalytelse(
-        val beløp: Inntekt?,
-        val fom: LocalDate?,
-        val naturalytelse: String?
+        val beløp: Inntekt,
+        val fom: LocalDate,
+        val naturalytelse: String
     )
 
     sealed interface Avsendersystem {

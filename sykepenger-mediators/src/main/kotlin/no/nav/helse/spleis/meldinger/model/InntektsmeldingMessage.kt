@@ -67,9 +67,9 @@ internal open class InntektsmeldingMessage(
         internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> {
             return map { naturalytelse ->
                 Inntektsmelding.OpphørAvNaturalytelse(
-                    beløp = naturalytelse["beloepPrMnd"]?.takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
-                    fom = naturalytelse["fom"]?.takeUnless(JsonNode::isMissingOrNull)?.asLocalDate(),
-                    naturalytelse = naturalytelse["naturalytelse"]?.takeIf(JsonNode::isTextual)?.asText(),
+                    beløp = naturalytelse["beloepPrMnd"].asDouble().månedlig,
+                    fom = naturalytelse["fom"].asLocalDate(),
+                    naturalytelse = naturalytelse["naturalytelse"].asText(),
                 )
             }
         }

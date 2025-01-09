@@ -13,6 +13,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilO
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingMessageTest {
 
@@ -33,9 +34,8 @@ internal class InntektsmeldingMessageTest {
     @Test
     fun `mapper naturalytelser fra json`() {
         assertEquals(emptyList<Inntektsmelding.OpphørAvNaturalytelse>(), objectMapper.readTree(naturalytelseTom).tilOpphørAvNaturalytelser())
-        assertEquals(listOf(Inntektsmelding.OpphørAvNaturalytelse(naturalytelse = "ANNET", beløp = null, fom = null)), objectMapper.readTree(naturalytelse1).tilOpphørAvNaturalytelser())
-        assertEquals(listOf(Inntektsmelding.OpphørAvNaturalytelse(naturalytelse = null, beløp = 1200.månedlig, fom = null)), objectMapper.readTree(naturalytelse2).tilOpphørAvNaturalytelser())
-        assertEquals(listOf(Inntektsmelding.OpphørAvNaturalytelse(naturalytelse = null, beløp = null, fom = 1.januar)), objectMapper.readTree(naturalytelse3).tilOpphørAvNaturalytelser())
+        assertEquals(listOf(Inntektsmelding.OpphørAvNaturalytelse(naturalytelse = "ANNET", beløp = 1200.månedlig, fom = 1.januar)), objectMapper.readTree(naturalytelse).tilOpphørAvNaturalytelser())
+        assertThrows<NullPointerException> { objectMapper.readTree(naturalytelseUgyldig).tilOpphørAvNaturalytelser() }
     }
 
     private companion object {
@@ -47,8 +47,7 @@ internal class InntektsmeldingMessageTest {
         val altinn = """{ "navn": "AltinnPortal" }"""
         val hvaSomHelst = """{ "navn": "HvaSomHelst" }"""
         val naturalytelseTom = """[]"""
-        val naturalytelse1 = """[{"naturalytelse":"ANNET"}]"""
-        val naturalytelse2 = """[{"beloepPrMnd":"1200.0"}]"""
-        val naturalytelse3 = """[{"fom":"2018-01-01"}]"""
+        val naturalytelse = """[{"naturalytelse":"ANNET", "beloepPrMnd":"1200.0", "fom":"2018-01-01"}]"""
+        val naturalytelseUgyldig = """[{"beloepPrMnd":"1200.0"}]"""
     }
 }

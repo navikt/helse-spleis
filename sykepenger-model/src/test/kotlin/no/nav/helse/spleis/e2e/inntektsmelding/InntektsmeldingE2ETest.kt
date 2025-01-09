@@ -130,7 +130,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(null, null, null))
+            opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "TELEFON"))
         )
         if (Toggle.OpphørAvNaturalytelser.enabled) {
             assertVarsel(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
