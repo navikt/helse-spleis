@@ -34,6 +34,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.ukedager
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel
 
@@ -156,7 +157,6 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-
     internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         return Vedtaksperiode(
@@ -234,6 +234,12 @@ class Søknad(
             }
             aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
         }
+
+        private fun Beløpstidslinje.kunIngenRefusjon() =
+            filterIsInstance<Beløpsdag>().let { beløpsdager ->
+                if (beløpsdager.isEmpty()) false
+                else beløpsdager.all { it.beløp == INGEN }
+            }
 
         override fun equals(other: Any?): Boolean {
             if (other !is Søknadstype) return false
