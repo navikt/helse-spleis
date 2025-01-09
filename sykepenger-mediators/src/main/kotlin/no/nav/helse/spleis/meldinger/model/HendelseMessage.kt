@@ -94,6 +94,8 @@ private val HendelseMessage.kontekstnavn
         is IdentOpphørtMessage -> "IdentOpphørt"
         is InfotrygdendringMessage -> "Infotrygdendring"
         is InntektsmeldingMessage -> "Inntektsmelding"
+        is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
+        is NavNoSelvbestemtInntektsmeldingMessage -> "NavNoSelvstemtInntektsmelding"
         is InntektsmeldingerReplayMessage -> "InntektsmeldingerReplay"
         is MigrateMessage -> "Migrate"
         is MinimumSykdomsgradVurdertMessage -> "MinimumSykdomsgradsvurderingMelding"
@@ -115,4 +117,5 @@ private val HendelseMessage.kontekstnavn
         is SendtSøknadSelvstendigMessage -> "Søknad"
 
         is UtbetalingpåminnelseMessage -> "Utbetalingpåminnelse"
+
     }

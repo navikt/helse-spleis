@@ -69,7 +69,6 @@ import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -370,12 +369,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = ORGNUMMER,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsendersystem: AvsenderSystem = AvsenderSystem("LPS", "V1.0.0"),
-        inntektsdato: LocalDate? = null,
-        vedtaksperiodeIndeks: Int? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ): Pair<UUID, String> {
-        return meldingsfabrikk.lagInntektsmelding(
+        return meldingsfabrikk.lagLpsInntektsmelding(
             arbeidsgiverperiode,
             førsteFraværsdag,
             opphørAvNaturalytelser,
@@ -383,9 +379,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             opphørsdatoForRefusjon,
             orgnummer,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
-            avsendersystem,
-            inntektsdato,
-            vedtaksperiodeIndeks?.let { testRapid.inspektør.vedtaksperiodeId(it) }
         ).let { (id, message) ->
             testRapid.sendTestMessage(message)
             id.toUUID() to message

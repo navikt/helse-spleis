@@ -36,14 +36,36 @@ internal class MessageMediatorTest {
     }
 
     @Test
-    fun inntektsmeldinger() {
+    fun LPSinntektsmeldinger() {
         testRapid.sendTestMessage(
-            meldingsfabrikk.lagInntektsmelding(
+            meldingsfabrikk.lagLpsInntektsmelding(
                 listOf(Periode(LocalDate.now(), LocalDate.now())),
                 LocalDate.now()
             )
         )
         assertTrue(hendelseMediator.lestInntektsmelding)
+    }
+
+    @Test
+    fun `NavNo inntektsmeldinger`() {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagNavNoInntektsmelding(
+                arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
+                vedtaksperiodeId = UUID.randomUUID()
+            )
+        )
+        assertTrue(hendelseMediator.lestNavNoInntektsmelding)
+    }
+
+    @Test
+    fun `NavNo selvbestemt inntektsmeldinger`() {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagNavNoSelvbestemtInntektsmelding(
+                arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
+                vedtaksperiodeId = UUID.randomUUID()
+            )
+        )
+        assertTrue(hendelseMediator.lestNavNoSelvbestemtInntektsmelding)
     }
 
     @Test

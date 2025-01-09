@@ -79,7 +79,12 @@ internal class InntektsmeldingReplayTest : AbstractEndToEndMediatorTest() {
         assertTilstand(0, "AVSLUTTET")
 
         sykmelding(1.mars til 31.mars, ORGNUMMER)
-        sendInntektsmelding(emptyList(), førsteFraværsdag = 1.mars, orgnummer = ORGNUMMER, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        sendInntektsmelding(
+            emptyList(),
+            førsteFraværsdag = 1.mars,
+            orgnummer = ORGNUMMER,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+        )
         søknad(1.mars til 31.mars, ORGNUMMER)
         assertTilstand(1, "AVVENTER_VILKÅRSPRØVING")
         assertVarsel(1, RV_IM_8)

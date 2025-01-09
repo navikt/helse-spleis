@@ -16,13 +16,21 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndMediatorTest()
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         )
-        val korrigertInntektsmelding = sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 31.januar)), førsteFraværsdag = 1.januar, beregnetInntekt = 30000.0)
+        val korrigertInntektsmelding = sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 31.januar)),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 30000.0
+        )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        val korrigerendeInntektsmelding = sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 31.januar)), førsteFraværsdag = 1.januar, beregnetInntekt = 30500.0)
+        val korrigerendeInntektsmelding = sendInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 31.januar)),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 30500.0
+        )
         val event = testRapid.inspektør.siste("arbeidsgiveropplysninger_korrigert")
 
         assertEquals(korrigertInntektsmelding.first, UUID.fromString(event["korrigertInntektsmeldingId"].asText()))

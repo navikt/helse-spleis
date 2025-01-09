@@ -442,14 +442,13 @@ internal class TestMessageFactory(
 
     private fun lagInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate,
+        førsteFraværsdag: LocalDate?,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = inntekt,
         orgnummer: String,
         opphørsdatoForRefusjon: LocalDate? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         avsenderSystem: AvsenderSystem?,
-        inntektsdato: LocalDate? = null,
         vedtaksperiodeId: UUID? = null
     ) = Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
@@ -476,11 +475,11 @@ internal class TestMessageFactory(
         avsenderSystem = avsenderSystem,
         innsenderTelefon = "12345678",
         innsenderFulltNavn = "SPLEIS MEDIATOR",
-        inntektsdato = inntektsdato,
+        inntektsdato = null,
         vedtaksperiodeId = vedtaksperiodeId
     )
 
-    fun lagInntektsmelding(
+    fun lagLpsInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
@@ -488,9 +487,6 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: AvsenderSystem = AvsenderSystem("LPS", "V1.0"),
-        inntektsdato: LocalDate? = null,
-        vedtaksperiodeId: UUID? = null
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
         arbeidsgiverperiode,
@@ -500,8 +496,51 @@ internal class TestMessageFactory(
         orgnummer,
         opphørsdatoForRefusjon,
         begrunnelseForReduksjonEllerIkkeUtbetalt,
-        avsenderSystem,
-        inntektsdato,
+        AvsenderSystem("LPS", "V1.0"),
+        null
+    ).toMapMedFelterFraSpedisjon(fødselsdato)
+    )
+
+    fun lagNavNoInntektsmelding(
+        arbeidsgiverperiode: List<Periode>,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = inntekt,
+        opphørsdatoForRefusjon: LocalDate? = null,
+        orgnummer: String = organisasjonsnummer,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        vedtaksperiodeId: UUID
+    ) = nyHendelse(
+        "inntektsmelding", lagInntektsmelding(
+        arbeidsgiverperiode,
+        null,
+        opphørAvNaturalytelser,
+        beregnetInntekt,
+        orgnummer,
+        opphørsdatoForRefusjon,
+        begrunnelseForReduksjonEllerIkkeUtbetalt,
+        AvsenderSystem("NAV_NO", "V1.0"),
+        vedtaksperiodeId
+    ).toMapMedFelterFraSpedisjon(fødselsdato)
+    )
+
+    fun lagNavNoSelvbestemtInntektsmelding(
+        arbeidsgiverperiode: List<Periode>,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = inntekt,
+        opphørsdatoForRefusjon: LocalDate? = null,
+        orgnummer: String = organisasjonsnummer,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        vedtaksperiodeId: UUID
+    ) = nyHendelse(
+        "inntektsmelding", lagInntektsmelding(
+        arbeidsgiverperiode,
+        null,
+        opphørAvNaturalytelser,
+        beregnetInntekt,
+        orgnummer,
+        opphørsdatoForRefusjon,
+        begrunnelseForReduksjonEllerIkkeUtbetalt,
+        AvsenderSystem("NAV_NO_SELVBESTEMT", "V1.0"),
         vedtaksperiodeId
     ).toMapMedFelterFraSpedisjon(fødselsdato)
     )

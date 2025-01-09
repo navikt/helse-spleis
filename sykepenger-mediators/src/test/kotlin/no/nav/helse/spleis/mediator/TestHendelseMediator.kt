@@ -49,6 +49,8 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
+import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
@@ -86,6 +88,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestSendtSøknadSelvstendig get() = lestSendtSøknadSelvstendigVerdi.get()
     val lestSendtSøknadArbeidsledig get() = lestSendtSøknadArbeidsledigVerdi.get()
     val lestInntektsmelding get() = lestInntektsmeldingVerdi.get()
+    val lestNavNoInntektsmelding get() = lestNavNoInntektsmeldingVerdi.get()
+    val lestNavNoSelvbestemtInntektsmelding get() = lestNavNoSelvbestemtInntektsmeldingVerdi.get()
     val lestDødsmelding get() = lestDødsmeldingVerdi.get()
     val lestPåminnelse get() = lestPåminnelseVerdi.get()
     val lestPersonpåminnelse get() = lestPersonpåminnelseVerdi.get()
@@ -122,6 +126,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestSendtSøknadSelvstendigVerdi = ThreadLocal.withInitial { false }
     private val lestSendtSøknadArbeidsledigVerdi = ThreadLocal.withInitial { false }
     private val lestInntektsmeldingVerdi = ThreadLocal.withInitial { false }
+    private val lestNavNoInntektsmeldingVerdi = ThreadLocal.withInitial { false }
+    private val lestNavNoSelvbestemtInntektsmeldingVerdi = ThreadLocal.withInitial { false }
     private val lestInntektsmeldingReplayVerdi = ThreadLocal.withInitial { false }
     private val lestDødsmeldingVerdi = ThreadLocal.withInitial { false }
     private val lestPåminnelseVerdi = ThreadLocal.withInitial { false }
@@ -160,6 +166,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestSendtSøknadSelvstendigVerdi.remove()
         lestSendtSøknadArbeidsledigVerdi.remove()
         lestInntektsmeldingVerdi.remove()
+        lestNavNoInntektsmeldingVerdi.remove()
+        lestNavNoSelvbestemtInntektsmeldingVerdi.remove()
         lestPåminnelseVerdi.remove()
         lestPersonpåminnelseVerdi.remove()
         lestutbetalingpåminnelseVerdi.remove()
@@ -228,7 +236,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
         context: MessageContext
     ) {
-
     }
 
     override fun behandle(
@@ -283,6 +290,14 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
         lestInntektsmeldingVerdi.set(true)
+    }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+        lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
+    }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+        lestNavNoInntektsmeldingVerdi.set(true)
     }
 
     override fun behandle(

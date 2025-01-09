@@ -6,8 +6,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -15,7 +15,7 @@ import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
-internal class InntektsmeldingMessage(
+internal class NavNoSelvbestemtInntektsmeldingMessage(
     packet: JsonMessage,
     val personopplysninger: Personopplysninger,
     override val meldingsporing: Meldingsporing
@@ -30,17 +30,15 @@ internal class InntektsmeldingMessage(
             )
         }
     )
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val orgnummer = packet["virksomhetsnummer"].asText()
 
     private val mottatt = packet["mottattDato"].asLocalDateTime()
-    private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
-    private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-    private val avsendersystem = avsendersystem(avsendersystem = packet["avsenderSystem"].path("navn").asText(), førsteFraværsdag = førsteFraværsdag)
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -51,28 +49,13 @@ internal class InntektsmeldingMessage(
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem,
+            harFlereInntektsmeldinger = false,
+            avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId = vedtaksperiodeId, inntektsdato = null, forespurt = false),
             mottatt = mottatt
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(personopplysninger, this, inntektsmelding, context)
     }
-}
-
-internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> {
-    return map { naturalytelse ->
-        Inntektsmelding.OpphørAvNaturalytelse(
-            beløp = naturalytelse["beloepPrMnd"].asDouble().månedlig,
-            fom = naturalytelse["fom"].asLocalDate(),
-            naturalytelse = naturalytelse["naturalytelse"].asText(),
-        )
-    }
-}
-
-internal fun avsendersystem(avsendersystem: String, førsteFraværsdag: LocalDate?): Inntektsmelding.Avsendersystem {
-    return if (avsendersystem == "AltinnPortal") Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag)
-    else Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
 }
 

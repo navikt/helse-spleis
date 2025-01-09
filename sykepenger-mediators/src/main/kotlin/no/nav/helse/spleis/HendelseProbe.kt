@@ -46,6 +46,13 @@ object HendelseProbe {
         tell("Inntektsmelding")
     }
 
+    fun onNavNoInntektsmelding() {
+        tell("NavNoInntektsmelding")
+    }
+
+    fun onNavNoSelvbestemtInntektsmelding() {
+        tell("NavNoSelvbestemtInntektsmelding")
+    }
     fun onInntektsmeldingReplay() {
         tell("InntektsmeldingReplay")
     }

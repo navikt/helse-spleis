@@ -18,6 +18,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDINGER_REPLAY
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.MINIMUM_SYKDOMSGRAD_VURDERT
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_SELVBESTEMT_INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_ARBEIDSLEDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_FRILANS
@@ -55,6 +56,8 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
+import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
@@ -129,6 +132,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
         is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
         is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
+        is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
+        is NavNoInntektsmeldingMessage, //TODO(Lage egne meldingstyper for ny og endret nav.no-inntektsmelding)
         is InntektsmeldingMessage -> INNTEKTSMELDING
         is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
         is YtelserMessage -> YTELSER
@@ -159,6 +164,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
         is AvbruttArbeidsledigSøknadMessage -> null // Disse trenger vi ikke å lagre
+
     }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
@@ -189,6 +195,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSLEDIG,
         INNTEKTSMELDING,
+        NAV_NO_SELVBESTEMT_INNTEKTSMELDING,
         PÅMINNELSE,
         PERSONPÅMINNELSE,
         OVERSTYRTIDSLINJE,

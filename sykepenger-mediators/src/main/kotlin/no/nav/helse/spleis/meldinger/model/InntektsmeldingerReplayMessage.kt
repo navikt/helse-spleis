@@ -13,8 +13,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilAvsendersystem
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilOpphørAvNaturalytelser
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding replay
@@ -66,7 +64,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
         val opphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").tilOpphørAvNaturalytelser()
         val harFlereInntektsmeldinger = packet.path("harFlereInntektsmeldinger").asBoolean(false)
-        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem(null, null, førsteFraværsdag) // Vi skal ikke replaye portalIM så om det feiler her er noe gæli
+        val avsendersystem = avsendersystem(packet.path("avsenderSystem").asText(), førsteFraværsdag)
 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,

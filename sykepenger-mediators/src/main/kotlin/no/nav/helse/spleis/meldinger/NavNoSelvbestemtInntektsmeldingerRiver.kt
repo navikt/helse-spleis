@@ -11,7 +11,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 
 internal class NavNoSelvbestemtInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
@@ -53,14 +53,14 @@ internal class NavNoSelvbestemtInntektsmeldingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage): InntektsmeldingMessage {
+    override fun createMessage(packet: JsonMessage): NavNoSelvbestemtInntektsmeldingMessage {
         val fødselsdato = packet["fødselsdato"].asLocalDate()
         val dødsdato = packet["dødsdato"].asOptionalLocalDate()
         val meldingsporing = Meldingsporing(
             id = packet["@id"].asText().toUUID(),
             fødselsnummer = packet["arbeidstakerFnr"].asText()
         )
-        return InntektsmeldingMessage(
+        return NavNoSelvbestemtInntektsmeldingMessage(
             packet = packet,
             personopplysninger = Personopplysninger(
                 Personidentifikator(meldingsporing.fødselsnummer),
