@@ -1,11 +1,23 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -20,7 +32,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val refusjonFørKorrigering = inspektør.refusjon(1.vedtaksperiode)
-            håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 1.25))
+            håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -35,7 +47,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val inntektFørKorrigering = inspektør.inntekt(1.vedtaksperiode).beløp
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT * 1.25, emptyList()))
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT * 1.25, emptyList()))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertEquals(inntektFørKorrigering, inspektør.inntekt(1.vedtaksperiode).beløp)
@@ -47,7 +59,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om korrigerert inntekt OG refusjon på en allerede utbetalt periode`() {
         a1 {
             nyttVedtak(januar)
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 1.25), Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT * 1.25, emptyList()))
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25), OppgittRefusjon(INNTEKT * 1.25, emptyList()))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -62,7 +74,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertThrows<IllegalStateException> {
-                håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 1.25))
+                håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25))
             }
         }
     }
@@ -72,12 +84,51 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val inntektFørKorrigering = inspektør.inntekt(1.vedtaksperiode).beløp
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT), Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertEquals(inntektFørKorrigering, inspektør.inntekt(1.vedtaksperiode).beløp)
             // Burde vi unngått en overstyring her?
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
         }
+    }
+
+    @Test
+    fun `opplyser om korrigerert arbeidsgiverperiode`() {
+        a1 {
+            nyttVedtak(januar)
+            val id = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(2.januar til 17.januar)))
+            assertForventetFeil(
+                forklaring = "Ikke implementert",
+                nå = { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                    assertVarsler(1.vedtaksperiode, RV_IM_24)
+                    assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(id))
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `opplyser om at de kun UtbetaltDelerAvArbeidsgiverperioden læl`() {
+        a1 {
+            nyttVedtak(januar)
+            val id = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 10.januar)), UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 10.januar))
+            assertForventetFeil(
+                forklaring = "Ikke implementert",
+                nå = { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                    assertVarsler(1.vedtaksperiode, RV_IM_8)
+                    assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(id))
+                }
+            )
+        }
+    }
+
+    private fun assertDokumentsporingPåSisteEndring(vedtaksperiode: UUID, forventet: Dokumentsporing) {
+        val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger.last().endringer.last().dokumentsporing
+        assertEquals(forventet, faktisk)
     }
 }

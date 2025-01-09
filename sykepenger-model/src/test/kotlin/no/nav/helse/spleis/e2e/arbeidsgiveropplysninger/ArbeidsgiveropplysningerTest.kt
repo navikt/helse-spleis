@@ -47,7 +47,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir inntekt når vi allerede har skatt i inntektsgrunnlaget - syk fra ghost samme måned`() {
         listOf(a1).nyeVedtak(januar, inntekt = 20_000.månedlig, ghosts = listOf(a2))
         a1 {
-            assertVarsler(1.vedtaksperiode, listOf(RV_VV_2))
+            assertVarsler(1.vedtaksperiode, RV_VV_2)
         }
         a2 {
             håndterSøknad(januar)
@@ -73,7 +73,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir inntekt når vi allerede har skatt i inntektsgrunnlaget - syk fra ghost annen måned`() {
         listOf(a1).nyeVedtak(januar, inntekt = 20_000.månedlig, ghosts = listOf(a2))
         a1 {
-            assertVarsler(1.vedtaksperiode, listOf(RV_VV_2))
+            assertVarsler(1.vedtaksperiode, RV_VV_2)
         }
         a2 {
             håndterSøknad(februar)

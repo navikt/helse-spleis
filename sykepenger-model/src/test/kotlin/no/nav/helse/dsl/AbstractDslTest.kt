@@ -247,8 +247,8 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsler(varsler, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsler(vedtaksperiodeId: UUID, varsler: Collection<Varselkode>) =
-        testArbeidsgiverAsserter.assertVarsler(varsler, vedtaksperiodeId.filter())
+    protected fun TestPerson.TestArbeidsgiver.assertVarsler(vedtaksperiodeId: UUID, vararg varsler: Varselkode) =
+        testArbeidsgiverAsserter.assertVarsler(varsler.toSet(), vedtaksperiodeId.filter())
 
     protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsel(warning, filter)
