@@ -187,7 +187,7 @@ internal fun AbstractEndToEndTest.nyeVedtak(
 
 internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
     periode: Periode,
-    vararg arbeidsgivere: Pair<String, IdInnhenter?>,
+    vararg arbeidsgivere: Pair<String, IdInnhenter>,
 ) {
     require(arbeidsgivere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     arbeidsgivere.forEach {
@@ -200,7 +200,6 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
     arbeidsgivere.forEach {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-            førsteFraværsdag = if (it.second == null) periode.start else null,
             beregnetInntekt = INNTEKT,
             orgnummer = it.first,
             vedtaksperiodeIdInnhenter = it.second
@@ -319,7 +318,6 @@ internal fun AbstractEndToEndTest.tilYtelser(
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), orgnummer = orgnummer)
     håndterInntektsmelding(
         arbeidsgiverperiode ?: listOf(Periode(periode.start, periode.start.plusDays(15))),
-        førsteFraværsdag = null,
         beregnetInntekt = beregnetInntekt,
         refusjon = refusjon,
         orgnummer = orgnummer,
@@ -456,6 +454,67 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsgiverperioder: List<Periode>?,
+    beregnetInntekt: Inntekt? = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    orgnummer: String = a1,
+    id: UUID = UUID.randomUUID(),
+    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+    harFlereInntektsmeldinger: Boolean = false,
+    avsendersystem: Avsenderutleder? = null,
+    vedtaksperiodeIdInnhenter: IdInnhenter,
+    inntektsdato: LocalDate? = null
+): UUID {
+    val utledetAvsendersystem = when {
+        avsendersystem != null -> avsendersystem
+        else -> NAV_NO
+    }
+
+    check (erNavPortal(utledetAvsendersystem)) {
+        "må være NAV_NO eller selvbestemt"
+    }
+
+    val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" })
+
+    val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
+        meldingsreferanseId = id,
+        innsendt = LocalDateTime.now(),
+        registrert = LocalDateTime.now().plusSeconds(1),
+        organisasjonsnummer = orgnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+            beregnetInntekt = beregnetInntekt,
+            refusjon = refusjon,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            opphørAvNaturalytelser = opphørAvNaturalytelser
+        )
+    )
+
+    if (erForespurtNavPortal(utledetAvsendersystem)) {
+        observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.opplysninger.toTypedArray())
+    }
+
+    val portalInnteksmelding = portalInntektsmelding(
+        id = id,
+        arbeidsgiverperioder = arbeidsgiverperioder ?: emptyList(),
+        beregnetInntekt = beregnetInntekt ?: (-1).månedlig,
+        vedtaksperiodeId = vedtaksperiodeId,
+        refusjon = refusjon,
+        orgnummer = orgnummer,
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        inntektsdato = inntektsdato,
+        avsendersystem = utledetAvsendersystem
+    )
+
+    //return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
+    return håndterInntektsmelding(portalInnteksmelding)
+}
+
+internal fun AbstractEndToEndTest.håndterInntektsmelding(
+    arbeidsgiverperioder: List<Periode>?,
     førsteFraværsdag: LocalDate? = null,
     beregnetInntekt: Inntekt? = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
@@ -465,63 +524,17 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder? = null,
-    vedtaksperiodeIdInnhenter: IdInnhenter? = null,
-    inntektsdato: LocalDate? = null,
     førReplay: () -> Unit = {}
 ): UUID {
     val utledetAvsendersystem = when {
         avsendersystem != null -> avsendersystem
-        vedtaksperiodeIdInnhenter != null -> NAV_NO
         else -> LPS
     }
 
-    if (erNavPortal(utledetAvsendersystem)) {
-        check(førsteFraværsdag == null) {
-            """
-            Du har satt første fraværsdag $førsteFraværsdag på en portalinntektsmelding!
-            Denne brukes ikke til noe i portalinntektsmeldinger, så du må sette avsendersystem
-            til LPS/ALTINN om det er en viktig detalj i testen din at første fraværsdag er satt.
-            """
-        }
-        val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" })
-
-        val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
-            meldingsreferanseId = id,
-            innsendt = LocalDateTime.now(),
-            registrert = LocalDateTime.now().plusSeconds(1),
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-                beregnetInntekt = beregnetInntekt,
-                refusjon = refusjon,
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                opphørAvNaturalytelser = opphørAvNaturalytelser
-            )
-        )
-
-        if (erForespurtNavPortal(utledetAvsendersystem)) {
-            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.opplysninger.toTypedArray())
-        }
-
-        val portalInnteksmelding = portalInntektsmelding(
-            id = id,
-            arbeidsgiverperioder = arbeidsgiverperioder ?: emptyList(),
-            beregnetInntekt = beregnetInntekt ?: (-1).månedlig,
-            vedtaksperiodeId = vedtaksperiodeId,
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            inntektsdato = inntektsdato,
-            avsendersystem = utledetAvsendersystem
-        )
-
-        return håndterInntektsmelding(portalInnteksmelding)
-        //return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
+    check(!erNavPortal(utledetAvsendersystem)) {
+        "Skal ikke bruke NAV_NO her"
     }
-    check(vedtaksperiodeIdInnhenter == null) { "Du kan ikke sette vedtaksperiodeId for LPS/ALTINN. De vet ikke hva det er!" }
+
     check(arbeidsgiverperioder != null) { "Klassisk inntektsmelding må ha agp satt" }
     check(beregnetInntekt != null) { "Klassisk inntektsmelding må ha beregnet inntekt satt" }
     return håndterInntektsmelding(
