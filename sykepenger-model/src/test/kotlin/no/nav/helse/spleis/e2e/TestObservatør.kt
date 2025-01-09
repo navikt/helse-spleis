@@ -74,7 +74,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun sisteVedtaksperiode() = IdInnhenter { orgnummer -> vedtaksperioder.getValue(orgnummer).last() }
 
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
-    fun sisteVedtaksperiodeIdOrNull(orgnummer: String) = vedtaksperioder[orgnummer]?.last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
@@ -146,10 +145,11 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, List<PersonObserver.ForespurtOpplysning>>()
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
+        val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
+        if (oppgitt.isEmpty()) return
         val relevante = oppgitt.filter { it is Arbeidsgiveropplysning.OppgittInntekt || it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode || it is Arbeidsgiveropplysning.OppgittRefusjon }
-        if (relevante.isEmpty()) return check(trengerArbeidsgiveroppysninger.contains(vedtaksperiodeId)) { "Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId" }
 
-        val forespurteOpplysninger = (trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: emptyList()).mapNotNull { it.somArbeidsgiveropplysning }.toSet()
+        val forespurteOpplysninger = forespurt.mapNotNull { it.somArbeidsgiveropplysning }.toSet()
         val oppgittOpplysninger = relevante.map { it::class }.toSet()
 
         val ikkeForespurt = (oppgittOpplysninger - forespurteOpplysninger).takeUnless { it.isEmpty() } ?: return
@@ -235,6 +235,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         inntektsmeldingHåndtert.add(inntektsmeldingId to vedtaksperiodeId)
+        trengerArbeidsgiveroppysninger.remove(vedtaksperiodeId)
     }
 
     override fun skatteinntekterLagtTilGrunn(event: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {

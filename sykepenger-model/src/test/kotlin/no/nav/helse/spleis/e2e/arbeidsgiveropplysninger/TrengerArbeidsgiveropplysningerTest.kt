@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -135,7 +136,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(6.januar til 17.januar, 22.januar til 25.januar),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            avsendersystem = NAV_NO_SELVBESTEMT
         )
         assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
