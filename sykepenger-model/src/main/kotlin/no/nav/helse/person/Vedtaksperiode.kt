@@ -3578,7 +3578,8 @@ internal class Vedtaksperiode private constructor(
             dager: DagerFraInntektsmelding,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
+            val wrapper = aktivitetsloggForRevurdering(aktivitetslogg)
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, wrapper)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
