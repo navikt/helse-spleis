@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
@@ -225,7 +226,7 @@ internal class InntektsmeldingTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
         val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje
-        dager.valider(aktivitetslogg, januar)
+        dager.valider(aktivitetslogg, januar, vedtaksperiodeId = UUID.randomUUID())
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
         assertNull(nyTidslinje)
@@ -309,7 +310,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        dager.valider(aktivitetslogg, 1.januar til 12.januar)
+        dager.valider(aktivitetslogg, 1.januar til 12.januar, vedtaksperiodeId = UUID.randomUUID())
         aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }

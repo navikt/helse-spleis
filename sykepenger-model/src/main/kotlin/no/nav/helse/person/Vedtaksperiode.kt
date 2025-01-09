@@ -665,7 +665,7 @@ internal class Vedtaksperiode private constructor(
             periode
         )
         håndterDager(dager.hendelse, bit, aktivitetslogg) {
-            dager.valider(aktivitetslogg, periode)
+            dager.valider(aktivitetslogg, periode, vedtaksperiodeId = id)
             dager.validerArbeidsgiverperiode(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
         }
     }
@@ -673,7 +673,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val hendelse = dager.tomBitAvInntektsmelding(aktivitetslogg, periode)
         håndterDager(dager.hendelse, hendelse, aktivitetslogg) {
-            dager.valider(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
+            dager.valider(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder, vedtaksperiodeId = id)
         }
     }
 

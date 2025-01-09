@@ -3,6 +3,8 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
@@ -35,6 +37,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.ukedager
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.slf4j.LoggerFactory
 
 internal class DagerFraInntektsmelding(
     private val arbeidsgiverperioder: List<Periode>,
@@ -49,6 +52,7 @@ internal class DagerFraInntektsmelding(
     private companion object {
         private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
@@ -223,9 +227,16 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverperiode.overlapperMed(periode)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: List<Periode>? = null) {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: List<Periode>? = null, vedtaksperiodeId: UUID) {
         if (!skalValideresAv(periode)) return
         if (opphørAvNaturalytelser.isNotEmpty()) {
+            if (opphørAvNaturalytelser.any { it.fom != førsteFraværsdag }) {
+                sikkerLogg.info(
+                    "Vi har mottatt en inntektsmelding med naturalytelser som opphører fra en annen dato enn første fraværsdag:  {}, {}",
+                    keyValue("vedtaksperiode", vedtaksperiodeId),
+                    keyValue("naturalytelser", opphørAvNaturalytelser)
+                )
+            }
             if (Toggle.OpphørAvNaturalytelser.enabled) {
                 aktivitetslogg.varsel(Varselkode.RV_IM_7)
             } else {
