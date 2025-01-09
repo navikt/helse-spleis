@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -225,7 +224,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
-                OpphørAvNaturalytelser(listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))),
+                OpphørAvNaturalytelser,
             )
             if (Toggle.OpphørAvNaturalytelser.enabled) {
                 assertVarsel(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())

@@ -119,7 +119,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
@@ -566,11 +565,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
-        if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().all { it.opphørAvNaturalytelser.isEmpty() }) return emptyList()
+        if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
         if (Toggle.OpphørAvNaturalytelser.enabled) {
             aktivitetslogg.varsel(RV_IM_7)
         } else {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
+            aktivitetslogg.funksjonellFeil(RV_IM_7)
         }
         return emptyList()
     }

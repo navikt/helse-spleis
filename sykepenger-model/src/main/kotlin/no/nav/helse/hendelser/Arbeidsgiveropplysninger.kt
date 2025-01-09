@@ -24,7 +24,7 @@ sealed interface Arbeidsgiveropplysning {
         }
     }
 
-    data class OpphørAvNaturalytelser(val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>) : Arbeidsgiveropplysning
+    data object OpphørAvNaturalytelser : Arbeidsgiveropplysning
     data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>) : Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
     }
@@ -127,12 +127,15 @@ sealed interface Arbeidsgiveropplysning {
                 ?.takeUnless { it.isEmpty() }
                 ?.let { OppgittArbeidgiverperiode(it) }
 
+            val oppgittOpphørAvNaturalytelser = OpphørAvNaturalytelser
+                .takeIf { opphørAvNaturalytelser.isNotEmpty() }
+
             return listOfNotNull(
                 oppgittInntekt,
                 oppgittArbeidsgiverperiode,
                 refusjon?.somOppgittRefusjon(),
                 begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
-                OpphørAvNaturalytelser(opphørAvNaturalytelser)
+                oppgittOpphørAvNaturalytelser
             )
         }
 
