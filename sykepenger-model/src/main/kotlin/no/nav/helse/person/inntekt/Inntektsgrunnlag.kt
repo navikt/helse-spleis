@@ -294,7 +294,8 @@ internal class Inntektsgrunnlag private constructor(
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = this.tilkommendeInntekter.merge(periode, nyeInntekter))
     }
 
-    internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
+    internal fun harTilkommendeInntekter(periode: Periode) = tilkommendeInntekter.any { it.beløpstidslinje.subset(periode).isNotEmpty() }
+
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
         inntekt: Inntektsmeldinginntekt,

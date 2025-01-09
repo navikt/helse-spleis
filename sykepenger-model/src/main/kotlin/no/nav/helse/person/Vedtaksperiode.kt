@@ -874,7 +874,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harTilkomneInntekter(): Boolean {
-        return vilkårsgrunnlag?.harTilkommendeInntekter() == true
+        return vilkårsgrunnlag?.harTilkommendeInntekter(periode) == true
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg): Boolean {
