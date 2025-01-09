@@ -459,14 +459,18 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
-        internal fun håndterSimulering(vedtaksperiodeId: UUID, simuleringOK: Boolean = true) {
+        internal fun håndterSimulering(
+            vedtaksperiodeId: UUID,
+            simuleringOK: Boolean = true,
+            simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
+        ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Simulering)
             behovsamler.detaljerFor(vedtaksperiodeId, Simulering).forEach { (detaljer, kontekst) ->
                 val fagsystemId = detaljer.getValue("fagsystemId") as String
                 val fagområde = detaljer.getValue("fagområde") as String
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
 
-                arbeidsgiverHendelsefabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, standardSimuleringsresultat(orgnummer)).håndter(Person::håndter)
+                arbeidsgiverHendelsefabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, simuleringsresultat).håndter(Person::håndter)
             }
         }
 
