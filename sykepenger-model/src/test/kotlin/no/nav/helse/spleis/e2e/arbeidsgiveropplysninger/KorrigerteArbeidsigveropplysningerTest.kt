@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLock
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.til
@@ -17,6 +18,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -119,7 +121,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `opplyser om at de kun UtbetaltDelerAvArbeidsgiverperioden læl`() {
+    fun `opplyser om at de kun UtbetaltDelerAvArbeidsgiverperioden læll`() {
         a1 {
             nyttVedtak(januar)
             val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 10.januar)), UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 10.januar))
@@ -131,12 +133,24 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `opplyser om at de kun RedusertUtbetaltBeløpIArbeidsgiverperioden læl`() {
+    fun `opplyser om at de kun RedusertUtbetaltBeløpIArbeidsgiverperioden læll`() {
         a1 {
             nyttVedtak(januar)
             val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(2.januar til 17.januar)), RedusertUtbetaltBeløpIArbeidsgiverperioden(StreikEllerLockout))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_24, RV_IM_8)
+            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(korrigeringId))
+            assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `opplyser om at det vær opphør i naturalytelser læll`() {
+        a1 {
+            nyttVedtak(januar)
+            val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OpphørAvNaturalytelser)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsler(1.vedtaksperiode, RV_IM_7)
             assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(korrigeringId))
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
         }
