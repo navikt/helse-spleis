@@ -11,9 +11,9 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
-import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 
-internal class NavNoInntektsmeldingerRiver(
+internal class NavNoKorrigerteInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
@@ -21,10 +21,7 @@ internal class NavNoInntektsmeldingerRiver(
     override val riverName = "Nav.no-inntektsmelding (førstegangs)"
     override fun precondition(packet: JsonMessage) {
         packet.requireValue("avsenderSystem.navn", "NAV_NO")
-        // todo: endre fra interestedId til requireValue når Hag har rullet ut i prod
-        packet.interestedIn("arsakTilInnsending") {
-            check(it.asText() == "Ny")
-        }
+        packet.requireValue("arsakTilInnsending", "Endring")
     }
 
     override fun validate(message: JsonMessage) {
@@ -57,14 +54,14 @@ internal class NavNoInntektsmeldingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage): NavNoInntektsmeldingMessage {
+    override fun createMessage(packet: JsonMessage): NavNoKorrigertInntektsmeldingMessage {
         val fødselsdato = packet["fødselsdato"].asLocalDate()
         val dødsdato = packet["dødsdato"].asOptionalLocalDate()
         val meldingsporing = Meldingsporing(
             id = packet["@id"].asText().toUUID(),
             fødselsnummer = packet["arbeidstakerFnr"].asText()
         )
-        return NavNoInntektsmeldingMessage(
+        return NavNoKorrigertInntektsmeldingMessage(
             packet = packet,
             personopplysninger = Personopplysninger(
                 Personidentifikator(meldingsporing.fødselsnummer),

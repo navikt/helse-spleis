@@ -18,7 +18,7 @@ import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
-internal class NavNoSelvbestemtInntektsmeldingMessage(
+internal class NavNoKorrigertInntektsmeldingMessage(
     packet: JsonMessage,
     val personopplysninger: Personopplysninger,
     override val meldingsporing: Meldingsporing
@@ -43,20 +43,21 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
 
-    private val korrigerteArbeidsgiveropplysninger get() = KorrigerteArbeidsgiveropplysninger(
-        meldingsreferanseId = meldingsporing.id,
-        innsendt = mottatt,
-        registrert = LocalDateTime.now(),
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-            beregnetInntekt = beregnetInntekt.månedlig,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            refusjon = refusjon,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser
+    private val korrigerteArbeidsgiveropplysninger
+        get() = KorrigerteArbeidsgiveropplysninger(
+            meldingsreferanseId = meldingsporing.id,
+            innsendt = mottatt,
+            registrert = LocalDateTime.now(),
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                beregnetInntekt = beregnetInntekt.månedlig,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                refusjon = refusjon,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser
+            )
         )
-    )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(personopplysninger, this, korrigerteArbeidsgiveropplysninger, context)

@@ -24,6 +24,7 @@ import no.nav.helse.spleis.meldinger.LpsOgAltinnInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
 import no.nav.helse.spleis.meldinger.MinimumSykdomsgradVurdertRiver
 import no.nav.helse.spleis.meldinger.NavNoInntektsmeldingerRiver
+import no.nav.helse.spleis.meldinger.NavNoKorrigerteInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.NavNoSelvbestemtInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.NyeArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeFrilansSøknaderRiver
@@ -77,6 +78,7 @@ internal class MessageMediator(
             SendtArbeidsledigSøknaderRiver(it, this)
             LpsOgAltinnInntektsmeldingerRiver(it, this)
             NavNoInntektsmeldingerRiver(it, this)
+            NavNoKorrigerteInntektsmeldingerRiver(it, this)
             NavNoSelvbestemtInntektsmeldingerRiver(it, this)
             InntektsmeldingerReplayRiver(it, this)
             UtbetalingshistorikkRiver(it, this)

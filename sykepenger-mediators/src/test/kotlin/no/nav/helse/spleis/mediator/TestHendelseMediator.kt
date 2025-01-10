@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -47,6 +49,7 @@ import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
@@ -89,6 +92,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestSendtSøknadArbeidsledig get() = lestSendtSøknadArbeidsledigVerdi.get()
     val lestInntektsmelding get() = lestInntektsmeldingVerdi.get()
     val lestNavNoInntektsmelding get() = lestNavNoInntektsmeldingVerdi.get()
+    val lestKorrigertNavNoInntektsmelding get() = lestKorrigertNavNoInntektsmeldingVerdi.get()
     val lestNavNoSelvbestemtInntektsmelding get() = lestNavNoSelvbestemtInntektsmeldingVerdi.get()
     val lestDødsmelding get() = lestDødsmeldingVerdi.get()
     val lestPåminnelse get() = lestPåminnelseVerdi.get()
@@ -127,6 +131,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestSendtSøknadArbeidsledigVerdi = ThreadLocal.withInitial { false }
     private val lestInntektsmeldingVerdi = ThreadLocal.withInitial { false }
     private val lestNavNoInntektsmeldingVerdi = ThreadLocal.withInitial { false }
+    private val lestKorrigertNavNoInntektsmeldingVerdi = ThreadLocal.withInitial { false }
     private val lestNavNoSelvbestemtInntektsmeldingVerdi = ThreadLocal.withInitial { false }
     private val lestInntektsmeldingReplayVerdi = ThreadLocal.withInitial { false }
     private val lestDødsmeldingVerdi = ThreadLocal.withInitial { false }
@@ -292,12 +297,20 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
     }
 
     override fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
         lestNavNoInntektsmeldingVerdi.set(true)
+    }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
+        lestNavNoInntektsmeldingVerdi.set(true)
+    }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
+        lestKorrigertNavNoInntektsmeldingVerdi.set(true)
     }
 
     override fun behandle(

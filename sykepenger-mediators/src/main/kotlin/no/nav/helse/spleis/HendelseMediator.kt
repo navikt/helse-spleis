@@ -7,6 +7,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -15,6 +16,7 @@ import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -53,6 +55,7 @@ import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
@@ -238,10 +241,24 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
+        opprettPersonOgHåndter(personopplysninger, message, context, emptySet()) { person, aktivitetslogg ->
+            HendelseProbe.onNavNoInntektsmelding()
+            person.håndter(arbeidsgiveropplysninger, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
+        opprettPersonOgHåndter(personopplysninger, message, context, emptySet()) { person, aktivitetslogg ->
+            HendelseProbe.onNavNoInntektsmelding()
+            person.håndter(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
         opprettPersonOgHåndter(personopplysninger, message, context, emptySet()) { person, aktivitetslogg ->
             HendelseProbe.onNavNoSelvbestemtInntektsmelding()
-            person.håndter(inntektsmelding, aktivitetslogg)
+            person.håndter(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
         }
     }
 
@@ -640,8 +657,10 @@ internal interface IHendelseMediator {
     )
 
     fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
-    fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
+    fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
+    fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext)
+    fun behandle(personopplysninger: Personopplysninger, message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: MessageContext)
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext)

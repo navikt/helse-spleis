@@ -18,6 +18,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDINGER_REPLAY
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.MINIMUM_SYKDOMSGRAD_VURDERT
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_KORRIGERT_INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_SELVBESTEMT_INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_ARBEIDSLEDIG
@@ -54,6 +55,7 @@ import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
@@ -133,6 +135,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
         is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
         is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
+        is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
         is NavNoInntektsmeldingMessage, //TODO(Lage egne meldingstyper for ny og endret nav.no-inntektsmelding)
         is InntektsmeldingMessage -> INNTEKTSMELDING
         is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
@@ -196,6 +199,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_ARBEIDSLEDIG,
         INNTEKTSMELDING,
         NAV_NO_SELVBESTEMT_INNTEKTSMELDING,
+        NAV_NO_KORRIGERT_INNTEKTSMELDING,
+        NAV_NO_INNTEKTSMELDING,
         PÅMINNELSE,
         PERSONPÅMINNELSE,
         OVERSTYRTIDSLINJE,
