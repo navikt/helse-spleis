@@ -31,7 +31,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -313,16 +312,12 @@ internal class BeløpstidslinjeTest {
         internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
         internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
         internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(UUID.randomUUID(), this, LocalDateTime.now()))
-        internal fun Inntekt.beløpstidslinje(periode: Periode) = Beløpstidslinje.fra(periode, this, Kilde(UUID.randomUUID(), SYSTEM, LocalDateTime.now()))
 
-        internal fun assertBeløpstidslinje(beløpstidslinje: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
-            // TODO Endre til å bruke den under.
-            assertTrue(beløpstidslinje.isNotEmpty())
-            assertEquals(periode, beløpstidslinje.first().dato til beløpstidslinje.last().dato)
-            assertTrue(beløpstidslinje.all { it.beløp == beløp })
-            meldingsreferanseId?.let { kildeId ->
-                assertTrue(beløpstidslinje.all { it.kilde.meldingsreferanseId == kildeId })
-            }
+        internal fun assertBeløpstidslinje(actual: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
+            val ignoreMeldingsreferanseId = meldingsreferanseId == null
+            val kilde = Kilde(meldingsreferanseId ?: UUID.randomUUID(), SYSTEM, LocalDate.EPOCH.atStartOfDay())
+            val expected = Beløpstidslinje.fra(periode, beløp, kilde)
+            assertBeløpstidslinje(expected, actual, ignoreMeldingsreferanseId = ignoreMeldingsreferanseId, ignoreAvsender = true)
         }
 
         internal fun assertBeløpstidslinje(expected: Beløpstidslinje, actual: Beløpstidslinje, ignoreMeldingsreferanseId: Boolean = false, ignoreAvsender: Boolean = false) {
