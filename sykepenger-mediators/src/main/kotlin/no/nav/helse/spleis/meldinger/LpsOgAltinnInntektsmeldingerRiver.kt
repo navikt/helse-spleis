@@ -48,19 +48,20 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
     }
 }
 
-internal fun standardInntektsmeldingvalidering(message: JsonMessage) {
-    message.requireKey("arbeidstakerFnr", "virksomhetsnummer", "beregnetInntekt", "opphoerAvNaturalytelser")
-    message.requireArray("arbeidsgiverperioder") {
+internal fun standardInntektsmeldingvalidering(message: JsonMessage, pathPrefix: String? = null) {
+    fun p(key: String) = pathPrefix?.let { "$pathPrefix.$key" } ?: key
+    message.requireKey(p("arbeidstakerFnr"), p("virksomhetsnummer"), p("beregnetInntekt"), p("opphoerAvNaturalytelser"))
+    message.requireArray(p("arbeidsgiverperioder")) {
         require("fom", JsonNode::asLocalDate)
         require("tom", JsonNode::asLocalDate)
     }
-    message.requireArray("endringIRefusjoner") {
+    message.requireArray(p("endringIRefusjoner")) {
         require("endringsdato", JsonNode::asLocalDate)
         requireKey("beloep")
     }
-    message.require("mottattDato", JsonNode::asLocalDateTime)
-    message.require("fødselsdato", JsonNode::asLocalDate)
-    message.interestedIn("dødsdato", JsonNode::asLocalDate)
-    message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
-    message.interestedIn("refusjon.beloepPrMnd", "begrunnelseForReduksjonEllerIkkeUtbetalt")
+    message.require(p("mottattDato"), JsonNode::asLocalDateTime)
+    message.require(p("fødselsdato"), JsonNode::asLocalDate)
+    message.interestedIn(p("dødsdato"), JsonNode::asLocalDate)
+    message.interestedIn(p("refusjon.opphoersdato"), JsonNode::asLocalDate)
+    message.interestedIn(p("refusjon.beloepPrMnd"), p("begrunnelseForReduksjonEllerIkkeUtbetalt"))
 }
